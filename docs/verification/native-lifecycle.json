@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "disposable PE scoped comments",
+  "ghidra": "12.1.2",
+  "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "targets": 2,
+  "readers": 4,
+  "independentBridges": 4,
+  "findings": 4,
+  "concurrentCallers": 3,
+  "publishedBatches": 2,
+  "serverRestartVerified": true,
+  "sentinelPreserved": true,
+  "nativeKeyring": true,
+  "readerLifecycleVerified": true,
+  "nativeFaultPhases": [],
+  "limitations": [
+    "tiny fixtures only",
+    "no native DB merge",
+    "recoverable staged calls, no atomic remote batch",
+    "native fault injection not requested"
+  ],
+  "retainedOwnedProcessesStopped": 0,
+  "bridgeCleanupVerified": true,
+  "date": "2026-10-14",
+  "sourceRevision": "d8f700adc1ac312687c279eb21d4b0dd5fe77c40",
+  "node": "24.21.0",
+  "packageArtifact": "58e7c2b327f543706ae7bd3ab426096559452948a2fcf51098c25e8e9def32bc"
+}
