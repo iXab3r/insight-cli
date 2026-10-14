@@ -4,6 +4,7 @@ import {type Parameter,key,flag,parsed,option,selectedOptions} from './arguments
 import {Research,scope} from './research.js';
 import {id,fail} from './model.js';
 import {verifyMutation} from './mutation-effects.js';
+import {mutationInputs} from './mutation-inputs.js';
 
 interface Mutation {path:string;command:string;access:'WRITE'|'DESTRUCTIVE';params:Parameter[]}
 const catalog=JSON.parse(readFileSync(new URL('../../references/mutations.json',import.meta.url),'utf8')) as {source:string;tools:Mutation[]};
@@ -13,7 +14,7 @@ export function mutationCommands(research:(context:CommandContext)=>Research):Co
   const groups=new Map<string,CommandDefinition[]>();
   for(const m of catalog.tools) {
     const [group,leaf,...rest]=m.command.split(' ');if(!group||!leaf||rest.length)throw Error('Invalid installed mutation contract.');
-    const parameters=m.params.map(p=>({...p,publicName:p.name==='target'?'symbol':p.name==='no_return'?'non_returning':p.name}));
+    const parameters=m.params.map(p=>({...p,publicName:p.name==='target'?'symbol':p.name==='no_return'?'non_returning':p.name==='json_body'?'document':p.name}));
     const options=parameters.map(p=>option({...p,name:p.publicName}));
     const children=groups.get(group)??[];groups.set(group,children);
     children.push(command(leaf,leaf.replaceAll('-',' '),({options:o},c)=>{
@@ -26,11 +27,12 @@ export function mutationCommands(research:(context:CommandContext)=>Research):Co
           parsed({name:'address',type:'string',required:true,semantic:'address'},item.address);}
       }
       const selected=scope(o),request=o.requestId===undefined?undefined:id(o.requestId);
+      mutationInputs(m.path,values);
       if(['/set_program_option','/remove_program_option'].includes(m.path)&&values.group==='Program Information'&&values.name==='Executable SHA256')
         fail('binding','The immutable consumed input identity cannot be rewritten as a program option.');
       return research(c).mutate(selected,m.path,values,async(_backend,response)=>response,request,
         (backend,snapshot,response)=>verifyMutation(backend,snapshot,m.path,values,response));
-    },{permission:m.access==='DESTRUCTIVE'||['/recreate_struct','/resize_struct','/clone_data_type'].includes(m.path)?'Destructive':Permission.Update,
+    },{permission:m.access==='DESTRUCTIVE'||['/recreate_struct','/resize_struct','/clone_data_type','/set_global'].includes(m.path)?'Destructive':Permission.Update,
       options:[...selectedOptions,...options,{flags:'--request-id <id>',description:'Retrieve this changing intent after a lost response'}]}));
   }
   return [...groups].map(([name,children])=>command(name,`${name} changes`,children));

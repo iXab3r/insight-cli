@@ -100,6 +100,11 @@ export class Research {
       if(request.state==='applied')return request.result;
       if(reserved.replay&&request.state!=='accepted')return {session:reserved.context.session,target,state:request.state,
         ...(request.callerId?{requestId:request.callerId}:{})};
+      if(this.workspace.unresolved(reserved.context).some(other=>other.id!==request.id)) {
+        const result={session:reserved.context.session,target,state:'blocked'};
+        this.workspace.recordRequest(request.id,'failed',result);
+        fail('blocked','This context retains an unproved effect; continuation did not start a second operation.',result);
+      }
       this.workspace.startRequest(request.id);
       try {
         await backend.open(reserved.context,request.id);

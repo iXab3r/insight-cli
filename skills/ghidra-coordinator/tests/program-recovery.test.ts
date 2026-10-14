@@ -9,7 +9,7 @@ import type {ResearchBackend} from '../src/research.js';
 import {Research} from '../src/research.js';
 test('lost structural acknowledgment retains an immutable candidate and continuation verifies without replay',async t=>{
   const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
-  let backend:SessionBackend&Pick<ResearchBackend,'inspect'>;
+  let backend:SessionBackend&Pick<ResearchBackend,'inspect'>,canVerify=false;
   const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
     backend=new SessionBackend(workspace);const call=backend.call.bind(backend);
     backend.call=async(scope,path,p)=>{
@@ -19,7 +19,7 @@ test('lost structural acknowledgment retains an immutable candidate and continua
     };
     backend.inspect=async(snapshot,p)=>{
       assert.equal(p.kind,'property');const view=JSON.parse(await readFile(await workspace.artifacts.verify(snapshot),'utf8'));
-      return {exists:view.opaque==='property:'+p.name};
+      return {exists:canVerify&&view.opaque==='property:'+p.name};
     };return backend;
   }}));
   const exe=join(f.root,'fixture.exe');await writeFile(exe,'owned synthetic input');
@@ -30,6 +30,11 @@ test('lost structural acknowledgment retains an immutable candidate and continua
   const request=backend!.workspace.unresolved(selected)[0]!;
   const candidate=(request.result as {savedSnapshot?:unknown}).savedSnapshot;assert.ok(candidate);
   assert.notEqual((await f.run(app,[...intent,'--json'])).exitCode,0);assert.equal(backend!.edits,1);
+  for(let attempt=0;attempt<3;attempt++) {
+    assert.notEqual((await f.run(app,['ghidra','open',...selectors,'--json'])).exitCode,0);
+    assert.equal(backend!.workspace.unresolved(selected).length,1,'A blocked continuation must not add mutually blocking open intents');
+  }
+  canVerify=true;
   await backend!.dispose();
   const continuation=await f.json(app,['ghidra','open',...selectors]) as {state:string};assert.equal(continuation.state,'ready');
   assert.equal((await f.json(app,intent) as {state:string}).state,'applied');assert.equal(backend!.edits,1);

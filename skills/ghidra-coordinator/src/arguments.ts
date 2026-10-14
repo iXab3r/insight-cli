@@ -36,7 +36,7 @@ export const selectedOptions:OptionDefinition[]=[{flags:'--session <id>',descrip
   {flags:'--target <id>',description:'Select the immutable input target',required:true}];
 export function option(p:Parameter):OptionDefinition {
   const value=p.default;
-  const defaultValue=value===undefined||value===''?undefined:parsed(p,value);
+  const defaultValue=value===undefined||value===''&&!p.allowEmpty?undefined:parsed(p,value);
   return {flags:`--${flag(p.name)} <${p.type==='json'?'json':p.type}>`,
     description:p.semantic==='function_ref'?'Function name or explicit address':p.semantic==='address'?'Explicit hexadecimal address':
       `${flag(p.name)} (${p.type}${p.name==='limit'?', 1–1000':p.name==='length'?', 1–65536 bytes':''})`,

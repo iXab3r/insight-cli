@@ -130,3 +130,11 @@ retrieves its result; full publication and refresh expose the final function to 
 The runner also exercises the two data-inspection queries. Run `scripts/proof-functions.mjs`
 with the structural runner's flags. It checks source hashes at the start and end. GUI navigation,
 remaining editing variants and the final installed acceptance remain outside this checkpoint.
+
+[Data/member/documentation checkpoint](data-edits.json) records the six remaining ordinary
+program editing operations on an owned PE. Independent C parsing verifies saved imported types;
+classification/global data, implicit `this`, quoted/newline documentation and instruction-seed
+repair checks precede acknowledgment. The final snapshot publishes and refreshes into another
+session. Run `scripts/proof-data.mjs` with the same disposable/runtime/compiler flags. The
+source hashes remain stable across that run. Cross-target transfers, editing variants, server/
+GUI/debugger/archive and the combined installed delivery gate still require their own evidence.

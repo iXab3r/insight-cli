@@ -4,12 +4,17 @@ import type {Artifact} from './artifacts.js';
 import {object,fail} from './model.js';
 import {verifyFunctionMutation} from './function-effects.js';
 import {verifyComments} from './comment-effects.js';
+import {verifyDataMutation} from './data-effects.js';
+import {verifyDocumentation} from './documentation-effects.js';
 
 const equal=(actual:unknown,expected:unknown,label:string)=>{if(actual!==expected)fail('partial',`Saved ${label} does not match the requested effect.`);};
 const normalized=(value:unknown)=>address(String(value));
 const category=(value:unknown)=>'/'+String(value).replace(/^\/+|\/+$/g,'');
 /** Effect assertions run against an immutable saved program, not the response's success flag. */
-export async function verifyMutation(backend:ResearchBackend,snapshot:Artifact,path:string,p:Record<string,unknown>,response:Record<string,unknown>) {
+export async function verifyMutation(backend:ResearchBackend,snapshot:Artifact,path:string,p:Record<string,unknown>,response:Record<string,unknown>):Promise<Record<string,unknown>> {
+  if(['/import_data_types','/apply_data_classification','/set_global','/set_function_this_type','/clear_flow_and_repair'].includes(path))
+    return verifyDataMutation(backend,snapshot,path,p,response);
+  if(path==='/apply_function_documentation')return verifyDocumentation(backend,snapshot,p);
   if(['/batch_set_comments','/clear_function_comments'].includes(path))return verifyComments(backend,snapshot,path,p);
   if(path==='/batch_apply_documentation') {
     if(!Array.isArray(response.errors)||response.errors.length)fail('partial','Documentation batch has incomplete steps.');

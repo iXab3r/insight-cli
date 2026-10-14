@@ -32,6 +32,9 @@ class InsightSnapshotInspect {
       out.put("returnType",function.getReturnType().getName());
       out.put("arguments",Arrays.stream(function.getArguments()).map(arg->arg.getDataType().getName()).toList());
     }
+    if(value instanceof Array array){out.put("elementType",array.getDataType().getName());out.put("elementCount",array.getNumElements());}
+    if(value instanceof Pointer pointer)out.put("pointerBase",pointer.getDataType()==null?"void":pointer.getDataType().getName());
+    if(value instanceof TypeDef alias)out.put("typedefBase",alias.getBaseDataType().getName());
     return out;
   }
   static Object inspect(ProgramDB program,JsonObject request) throws Exception {
@@ -45,7 +48,20 @@ class InsightSnapshotInspect {
     }
     if(kind.equals("data")) {
       if(at==null)throw new IllegalArgumentException();var data=program.getListing().getDefinedDataAt(at);
-      return data==null?Map.of("exists",false):Map.of("exists",true,"type",data.getDataType().getName(),"size",data.getLength());
+      return data==null?Map.of("exists",false):Map.of("exists",true,"type",data.getDataType().getName(),"size",data.getLength(),"details",type(data.getDataType()),"isString",data.hasStringValue());
+    }
+    if(kind.equals("import_check")) {
+      try(var expected=new StandAloneDataTypeManager("ExpectedImport",program.getDataTypeManager().getDataOrganization())) {
+        int transaction=expected.startTransaction("Parse expected types");
+        var parser=new ghidra.app.util.cparser.C.CParser(expected,true,new DataTypeManager[]{program.getDataTypeManager()});
+        try{parser.parse(string(request,"source"));}finally{expected.endTransaction(transaction,true);}
+        if(!parser.didParseSucceed())throw new IllegalArgumentException("Expected import did not parse");
+        List<Object> types=new ArrayList<>();var iter=expected.getAllDataTypes();
+        while(iter.hasNext()){if(types.size()>10000)throw new IllegalArgumentException("Import too large");var wanted=iter.next();
+          var actual=program.getDataTypeManager().getDataType(wanted.getPathName());
+          types.add(Map.of("name",wanted.getName(),"path",wanted.getPathName(),"matches",actual!=null&&wanted.isEquivalent(actual),"expected",type(wanted),"actual",actual==null?Map.of():type(actual)));}
+        return Map.of("types",types,"count",types.size());
+      }
     }
     if(kind.equals("category"))return Map.of("exists",program.getDataTypeManager().getCategory(new CategoryPath(name))!=null);
     if(kind.equals("memory")) {
@@ -71,17 +87,24 @@ class InsightSnapshotInspect {
       out.put("returnType",function.getReturnType().getName());out.put("signature",function.getSignature().getPrototypeString());
       out.put("namespace",function.getParentNamespace().getName(true));out.put("noReturn",function.hasNoReturn());out.put("callingConvention",function.getCallingConventionName());
       List<Object> variables=new ArrayList<>();for(var variable:function.getAllVariables())variables.add(Map.of("name",variable.getName(),"type",variable.getDataType().getName(),"storage",variable.getVariableStorage().toString(),"parameter",variable instanceof ghidra.program.model.listing.Parameter));
-      out.put("variables",variables);out.put("parameters",Arrays.stream(function.getParameters()).map(param->Map.of("name",param.getName(),"type",param.getDataType().getName(),"storage",param.getVariableStorage().toString())).toList());
+      out.put("variables",variables);out.put("parameters",Arrays.stream(function.getParameters()).map(param->Map.of("name",param.getName(),"type",param.getDataType().getName(),"storage",param.getVariableStorage().toString(),"auto",param.isAutoParameter())).toList());
       out.put("tags",function.getTags().stream().map(tag->Map.of("name",tag.getName(),"comment",Objects.toString(tag.getComment(),""))).toList());
       String prototype=string(request,"prototype");if(!prototype.isEmpty()){
         var expected=new ghidra.app.util.parser.FunctionSignatureParser(program.getDataTypeManager(),null).parse(function.getSignature(),prototype);
         out.put("expectedPrototype",Map.of("name",expected.getName(),"returnType",expected.getReturnType().getName(),
-          "parameters",Arrays.stream(expected.getArguments()).map(param->Map.of("name",param.getName(),"type",param.getDataType().getName())).toList()));}
+          "parameters",Arrays.stream(expected.getArguments()).map(param->Map.of("name",Objects.toString(param.getName(),""),"type",param.getDataType().getName())).toList()));}
       return out;
     }
     if(kind.equals("instructions")) {
       if(at==null)throw new IllegalArgumentException();var instruction=program.getListing().getInstructionAt(at);
       return instruction==null?Map.of("exists",false):Map.of("exists",true,"flowOverride",instruction.getFlowOverride().toString(),"length",instruction.getLength(),"mnemonic",instruction.getMnemonicString());
+    }
+    if(kind.equals("instruction_range")) {
+      if(at==null)throw new IllegalArgumentException();var end=program.getAddressFactory().getAddress(string(request,"end_address"));
+      if(end==null||!at.getAddressSpace().equals(end.getAddressSpace())||end.compareTo(at)<=0)throw new IllegalArgumentException("Invalid instruction seed");
+      long count=0;var iter=program.getListing().getInstructions(new ghidra.program.model.address.AddressSet(at,end.subtract(1)),true);
+      while(iter.hasNext()){iter.next();if(++count>1000000)throw new IllegalArgumentException("Instruction seed too large");}
+      return Map.of("count",count);
     }
     if(kind.equals("symbols")) {
       List<Object> symbols=new ArrayList<>();

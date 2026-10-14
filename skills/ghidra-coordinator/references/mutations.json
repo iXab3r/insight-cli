@@ -639,7 +639,7 @@
           "name": "target",
           "type": "string",
           "required": true,
-          "semantic": "address"
+          "semantic": "function_ref"
         },
         {
           "name": "new_name",
@@ -1264,6 +1264,159 @@
           "type": "boolean",
           "required": false,
           "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/apply_data_classification",
+      "command": "types apply-data-classification",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "classification",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "type_definition",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/import_data_types",
+      "command": "types import-data-types",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "default": "c"
+        }
+      ]
+    },
+    {
+      "path": "/set_global",
+      "command": "types set-global",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "allowEmpty": true
+        },
+        {
+          "name": "array_length",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "plate_comment",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "allowEmpty": true
+        },
+        {
+          "name": "strict_mode",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "allow_evict",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/apply_function_documentation",
+      "command": "documentation apply",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "json_body",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/clear_flow_and_repair",
+      "command": "functions clear-flow-and-repair",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "start_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "end_address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_this_type",
+      "command": "functions set-function-this-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "this_type",
+          "type": "string",
+          "required": true
         }
       ]
     }

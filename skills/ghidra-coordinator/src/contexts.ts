@@ -259,6 +259,13 @@ export class GhidraContexts {
     if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};
     if(operation==='/create_function_signature'&&typeof parameters.parameters!=='string')parameters={...parameters,parameters:JSON.stringify(parameters.parameters)};
     const record=await this.selected(scope);
+    if(operation==='/apply_function_documentation') {
+      const name='InsightApplyDocumentation_'+randomUUID().replaceAll('-','');
+      const source=await readFile(new URL('../../references/native/InsightApplyDocumentation.java',import.meta.url),'utf8');
+      return record.http.call('/run_script_inline',{program:record.binding.program,
+        code:source.replace('class InsightApplyDocumentation ',`class ${name} `),
+        args:Buffer.from(JSON.stringify(parameters.json_body),'utf8').toString('base64')});
+    }
     if(operation==='/run_ghidra_script') {
       const script=String(parameters.script_name),path=await scriptPath(this.inputs.ghidraHome,record.binding.root,script);
       const value=object(await record.http.call(operation,{...parameters,script_name:path,program:record.binding.program}));
