@@ -98,7 +98,9 @@ export function createDefinition(options: Options = {}): CliDefinition {
         command('start <target> <worker>','Start a reader and dedicated bridge',async({args},c)=>{
           const selected=owner.selected(c), target=selected.store.target(id(args.target)), worker=id(args.worker);
           if (selected.store.workers().some(w=>w.id===worker)) fail('workerExists','Worker ID is already registered.');
-          const binding=await selected.ghidra.startReader(target,worker); selected.store.putWorker(worker,target.id,binding);
+          const binding=await selected.ghidra.startReader(target,worker);
+          try { selected.store.putWorker(worker,target.id,binding); }
+          catch (error) { await selected.ghidra.stop(target,binding); throw error; }
           return {id:worker,targetId:target.id,...binding};
         },{permission:Permission.Update}),
         command('list','List registered reader bindings',(_i,c)=>owner.selected(c).store.workers(),{permission:Permission.ReadOnly}),

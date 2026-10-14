@@ -2,7 +2,7 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { spawn, execFile, type ChildProcess } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, open, readFile, readdir, cp, realpath } from 'node:fs/promises';
+import { mkdir, open, readFile, readdir, cp, realpath, stat } from 'node:fs/promises';
 import { join, delimiter, resolve, isAbsolute, sep } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -64,6 +64,7 @@ export class GhidraRuntime implements Publisher {
     await durable(receipt, binding);
     const http = new HttpBridge(binding.endpoint, this.context.fetch, this.context.signal, bridgeToken);
     this.processes.set(root, { binding, http, child });
+    try {
     const deadline = Date.now() + 60000;
     let ready = false;
     while (Date.now() < deadline && alive(child.pid) && !this.context.signal.aborted) {
@@ -86,15 +87,24 @@ export class GhidraRuntime implements Publisher {
       binding.version = version(opening.version); binding.openingVersion = binding.version;
     }
     return binding;
+    } catch (error) {
+      if (role === 'reader') await this.abortReader(t, binding);
+      throw error;
+    }
   }
   async open(t: Target, batchId: string) { return this.launch(t, batchId, 'publisher'); }
-  private async record(t: Target, b: Binding): Promise<ProcessRecord> {
+  private async receipt(t: Target, b: Binding): Promise<string> {
     assertIdentity(b.identity, t);
     const root = resolve(b.projectDirectory);
+    if (!root.startsWith(resolve(this.directory, 'processes') + sep)) fail('binding', 'Process stage is outside the selected profile.');
     const saved = object(JSON.parse(await readFile(join(root, 'process.json'), 'utf8'))) as unknown as Binding;
     if (saved.pid !== b.pid || saved.endpoint !== b.endpoint || saved.role !== b.role || saved.bridgeSecret !== b.bridgeSecret || await realpath(root) !== root)
       fail('binding', 'Owned process receipt does not match the requested binding.');
     assertIdentity(saved.identity, t);
+    return root;
+  }
+  private async record(t: Target, b: Binding): Promise<ProcessRecord> {
+    const root = await this.receipt(t, b);
     if (b.role === 'publisher' && !b.bridgeSecret) fail('authorization', 'Publisher endpoint lacks a scoped authentication secret.');
     const bridgeToken = b.bridgeSecret ? await this.context.secrets.require(b.bridgeSecret) : undefined;
     const rec: ProcessRecord = { ...(this.processes.get(root) ?? { binding: b }), http: new HttpBridge(b.endpoint, this.context.fetch, this.context.signal, bridgeToken) };
@@ -232,21 +242,41 @@ export class GhidraRuntime implements Publisher {
     if (!await this.released(t)) fail('checkout', 'A server checkout remains; the stage and backup are retained for explicit cleanup.');
   }
   async startReader(t: Target, label: string) {
-    const b = await this.launch(t, 'reader-' + label + '-' + randomUUID(), 'reader');
-    const rec = await this.record(t, b); await this.boundIdentity(t, rec); b.version = await this.localVersion(t, rec);
     const python = text(this.context.profile.values.python), bridgeDirectory = text(this.context.profile.values.bridgeDirectory);
+    if (!isAbsolute(python) || !isAbsolute(bridgeDirectory) || !(await stat(python)).isFile() || !(await stat(bridgeDirectory)).isDirectory())
+      fail('configuration', 'Reader requires an absolute Python executable and bridge directory.');
+    const b = await this.launch(t, 'reader-' + label + '-' + randomUUID(), 'reader');
+    try {
+    const rec = await this.record(t, b); await this.boundIdentity(t, rec); b.version = await this.localVersion(t, rec);
     const transport = new StdioClientTransport({ command: python, args: ['-m', 'bridge_mcp_ghidra', '--no-lazy'], cwd: b.projectDirectory, stderr: 'pipe',
       env: { PATH: this.context.environment.PATH ?? process.env.PATH ?? '', HOME: b.projectDirectory, XDG_RUNTIME_DIR: this.directory, PYTHONPATH: bridgeDirectory, GHIDRA_MCP_URL: b.endpoint, GHIDRA_MCP_REQUIRE_PROGRAM_SELECTORS: '1' } });
     transport.stderr?.on('data', () => {});
     const client = new Client({ name: 'insight-ghidra-reader', version: '0.1.0' });
+    rec.client = client; rec.transport = transport;
     await client.connect(transport);
     const result = object(decodeMcp(await client.callTool({ name: 'connect_instance', arguments: { project: 'endpoint-only-' + randomUUID() } })));
     if (result.connected !== true || result.url !== b.endpoint) { await client.close(); fail('binding', 'MCP bridge connected to a different endpoint.'); }
     if (!transport.pid) fail('binding', 'MCP bridge did not report its process identity.');
     b.bridgePid = transport.pid;
     await durable(join(b.projectDirectory, 'bridge.json'), { pid: transport.pid, endpoint: b.endpoint, workerPid: b.pid });
-    rec.client = client; rec.transport = transport;
     return b;
+    } catch (error) {
+      await this.abortReader(t, b);
+      throw error;
+    }
+  }
+  private async abortReader(t: Target, b: Binding) {
+    const root = await this.receipt(t, b), rec = this.processes.get(root);
+    await rec?.client?.close().catch(() => {});
+    await rec?.transport?.close().catch(() => {});
+    // Only a child handle created by this owner may be cleaned before its endpoint is ready.
+    // Recovered bindings continue through stop(), which verifies a live endpoint before signaling.
+    if (rec?.child && rec.child.pid === b.pid) {
+      if (rec.child.exitCode === null && rec.child.signalCode === null) rec.child.kill('SIGTERM');
+      for (let i=0;i<100 && rec.child.exitCode===null && rec.child.signalCode===null;i++) await delay(50);
+      if (rec.child.exitCode===null && rec.child.signalCode===null) fail('busy', 'Failed reader did not stop; its owned stage is retained.');
+      this.processes.delete(root);
+    } else await this.stop(t, b);
   }
   async inspect(t: Target, b: Binding, functions: string) {
     if (b.role !== 'reader') fail('authorization', 'Inspection requires a reader worker.');
@@ -269,6 +299,13 @@ export class GhidraRuntime implements Publisher {
     return { binding: b, functions: returned };
   }
   async stop(t: Target, b: Binding) {
+    const root = await this.receipt(t, b);
+    if (!alive(b.pid)) {
+      await this.processes.get(root)?.client?.close();
+      this.processes.delete(root);
+      if (b.bridgeSecret) await this.context.secrets.delete(b.bridgeSecret);
+      return;
+    }
     const rec = await this.record(t, b);
     await rec.client?.close();
     // Verify the actual receipt/PID/endpoint before signaling; never kill by port/name.

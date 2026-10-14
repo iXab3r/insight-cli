@@ -93,6 +93,26 @@ async function runFaults(){
   console.log('Native owner SIGKILL/restart verified:',phase);
  }
 }
+async function runLifecycle(){
+ const target=targets[0],missingBridge=join(root,'empty-bridge');await mkdir(missingBridge);
+ await store.set('default',{...values,bridgeDirectory:missingBridge});
+ try{await assert.rejects(invoke(['workers','start',target.id,'failed-setup']));}
+ finally{await store.set('default',values);}
+ assert.ok(!(await invoke(['workers','list'])).some(w=>w.id==='failed-setup'));
+ const entries=await readdir(join(root,'ghidra','processes'));assert.equal(entries.length,1);
+ const failed=JSON.parse(await readFile(join(root,'ghidra','processes',entries[0],'process.json'),'utf8'));
+ assert.throws(()=>process.kill(failed.pid,0),e=>e.code==='ESRCH','Failed bridge setup must stop its reader JVM');
+ const reader=await invoke(['workers','start',target.id,'restart-reader']);
+ const http=new HttpBridge(reader.endpoint);
+ await assert.rejects(http.call('/set_comment',{program:target.programPath,address:sentinels[target.repository],type:'eol',comment:'Denied synthetic reader write'}));
+ assert.equal((await http.call('/get_comment',{program:target.programPath,address:sentinels[target.repository]})).eol,'Untouched synthetic sentinel');
+ await invoke(['ipc-server','stop']);
+ assert.throws(()=>process.kill(reader.pid,0),e=>e.code==='ESRCH');
+ await invoke(['workers','stop','restart-reader']);
+ const replacement=await invoke(['workers','start',target.id,'restart-reader']);assert.notEqual(replacement.pid,reader.pid);
+ await invoke(['workers','stop','restart-reader']);
+ console.log('Native failed bridge cleanup, reader write denial and owner-stop/restart reuse verified');
+}
 async function cleanupOwnedProcesses(){
  let count=0;const directory=join(root,'ghidra','processes');let entries=[];try{entries=await readdir(directory);}catch{return count;}
  for(const entry of entries){
@@ -102,6 +122,10 @@ async function cleanupOwnedProcesses(){
   const actual=await http.instance();assert.equal(actual.pid,b.pid);assert.ok(actual.project_path.startsWith(b.projectDirectory+'/'));
   process.kill(b.pid,'SIGTERM');
   for(let i=0;i<100;i++){try{process.kill(b.pid,0);}catch(e){if(e.code==='ESRCH'){count++;break;}throw e;}await delay(100);if(i===99)throw Error('Owned fixture Ghidra process did not stop');}
+ }
+ for(const entry of entries){
+  let bridge;try{bridge=JSON.parse(await readFile(join(directory,entry,'bridge.json'),'utf8'));}catch(e){if(e.code==='ENOENT')continue;throw e;}
+  for(let i=0;i<50;i++){try{process.kill(bridge.pid,0);}catch(e){if(e.code==='ESRCH')break;throw e;}await delay(100);if(i===49)throw Error('Owned fixture MCP bridge remains alive');}
  }
  return count;
 }
@@ -131,6 +155,7 @@ try{
  }
  await stop(boot.child);
  console.log('Imported two independent PE EXEs with equal basenames');
+ await runLifecycle();
  const matrixTargets=targets.slice(0,2);
  const workers=await Promise.all(matrixTargets.flatMap(t=>[1,2].map(n=>invoke(['workers','start',t.id,t.repository+'-'+n]))));assert.equal(new Set(workers.map(w=>w.pid)).size,4);assert.equal(new Set(workers.map(w=>w.endpoint)).size,4);assert.equal(new Set(workers.map(w=>w.bridgePid)).size,4);
  const inspected=await Promise.all(workers.map(w=>invoke(['inspect',w.id,'--functions',w.id.endsWith('1')?'first':'second'])));
@@ -143,10 +168,10 @@ try{
  server=await startJava('server-restart',['-Xmx512m','ghidra.server.remote.GhidraServer','-i','127.0.0.1','-ip','127.0.0.1','-p'+basePort,'-a0','-u',serverData]);await waitServer(server,'server-restart');
  for(const target of matrixTargets){const reader=await invoke(['workers','start',target.id,target.repository+'-fresh']);const http=new HttpBridge(reader.endpoint);for(const f of findings.filter(f=>f.targetId===target.id)){const r=await http.call('/get_comment',{program:target.programPath,address:f.address});assert.equal(r.eol,f.after);}assert.equal((await http.call('/get_comment',{program:target.programPath,address:sentinels[target.repository]})).eol,'Untouched synthetic sentinel');const h=await http.call('/server/version_history',{path:target.programPath});assert.equal(h.count,2);await invoke(['workers','stop',reader.id]);}
  await runFaults();
- receipt={schema:1,scope:'disposable PE scoped comments',ghidra:'12.1.2',mcpJarSha256:values.mcpJarSha256,targets:2,readers:4,independentBridges:4,findings:4,concurrentCallers:3,publishedBatches:2,serverRestartVerified:true,sentinelPreserved:true,nativeKeyring:true,nativeFaultPhases:faultPhases,limitations:['tiny fixtures only','no native DB merge','recoverable staged calls, no atomic remote batch',...(options.faults?['pre-intent checkouts retained for explicit operator cleanup']:['native fault injection not requested'])]};
+ receipt={schema:1,scope:'disposable PE scoped comments',ghidra:'12.1.2',mcpJarSha256:values.mcpJarSha256,targets:2,readers:4,independentBridges:4,findings:4,concurrentCallers:3,publishedBatches:2,serverRestartVerified:true,sentinelPreserved:true,nativeKeyring:true,readerLifecycleVerified:true,nativeFaultPhases:faultPhases,limitations:['tiny fixtures only','no native DB merge','recoverable staged calls, no atomic remote batch',...(options.faults?['pre-intent checkouts retained for explicit operator cleanup']:['native fault injection not requested'])]};
 }finally{
  if(ownerBin){try{await invoke(['ipc-server','stop']);}catch{}}
- const cleaned=await cleanupOwnedProcesses();if(receipt)receipt.retainedOwnedProcessesStopped=cleaned;
+ const cleaned=await cleanupOwnedProcesses();if(receipt){receipt.retainedOwnedProcessesStopped=cleaned;receipt.bridgeCleanupVerified=true;}
  for(const child of [...children].reverse())await stop(child);
  const keys=[{service:'ai-cli-factory:'+applicationId,account:'default:readerPassword'},{service:'ai-cli-factory:'+applicationId,account:'default:publisherPassword'}];
  try{keys.push(...(await readFile(join(root,'secret-keys.jsonl'),'utf8')).trim().split('\n').filter(Boolean).map(x=>JSON.parse(x)));}catch{}
