@@ -17,6 +17,9 @@ returns only a secret-key reference. Reader processes receive no publisher crede
 Readers and publisher use distinct server accounts. Investigator CLI operations expose inspection
 and proposal submission only. Ghidra Server ACLs must restrict readers; advisory locks do not
 prevent direct writes made with a separate privileged account under the same OS identity.
+Native read-only proxies may accept transient in-memory comments. The canonical boundary is
+server-enforced checkout/check-in denial, plus private authentication on publisher endpoints.
+Investigator CLI leaves expose inspection/proposals; reader memory never becomes the publication base.
 
 ## Commands and permissions
 

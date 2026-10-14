@@ -15,6 +15,11 @@ The publisher account/secret must not be supplied to investigator processes or t
 Publisher endpoints require a fresh private bridge token held in the Factory secret store, so
 knowing a PID/port from status does not admit direct write calls. Per-process program scope is
 set to the exact registered path; no publisher token is passed to investigator bridges.
+Ghidra's read-only proxy may accept transient in-memory comment edits through native MCP.
+Those edits are private to that reader snapshot: its server account cannot obtain a writable
+checkout or check in. They are not proposals or published findings. This CLI exposes only
+inspection and journal submission to investigators; fresh publisher preconditions and independent
+readback use the canonical server version, never the reader's modified memory.
 
 Example setup (substitute your local runtime paths):
 

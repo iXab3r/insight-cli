@@ -95,7 +95,9 @@ async function runFaults(){
 }
 async function runLifecycle(){
  const target=targets[0],missingBridge=join(root,'empty-bridge');await mkdir(missingBridge);
- await store.set('default',{...values,bridgeDirectory:missingBridge});
+ // A valid executable with incompatible Python arguments reliably fails after JVM launch,
+ // even when the Python environment happens to have an installed bridge module.
+ await store.set('default',{...values,python:process.execPath,bridgeDirectory:missingBridge});
  try{await assert.rejects(invoke(['workers','start',target.id,'failed-setup']));}
  finally{await store.set('default',values);}
  assert.ok(!(await invoke(['workers','list'])).some(w=>w.id==='failed-setup'));
@@ -104,14 +106,18 @@ async function runLifecycle(){
  assert.throws(()=>process.kill(failed.pid,0),e=>e.code==='ESRCH','Failed bridge setup must stop its reader JVM');
  const reader=await invoke(['workers','start',target.id,'restart-reader']);
  const http=new HttpBridge(reader.endpoint);
- await assert.rejects(http.call('/set_comment',{program:target.programPath,address:sentinels[target.repository],type:'eol',comment:'Denied synthetic reader write'}));
- assert.equal((await http.call('/get_comment',{program:target.programPath,address:sentinels[target.repository]})).eol,'Untouched synthetic sentinel');
+ // The native read-only proxy can accept transient in-memory edits. Server ACLs must
+ // prohibit turning those edits into canonical checkout/check-in, and a fresh reader
+ // later verifies the published sentinel is unchanged.
+ await http.call('/set_comment',{program:target.programPath,address:sentinels[target.repository],type:'eol',comment:'Unpublished synthetic reader edit'});
+ await assert.rejects(http.call('/server/version_control/checkout',{path:target.programPath,exclusive:true}));
+ await assert.rejects(http.call('/checkin_program',{path:target.programPath,comment:'Denied synthetic reader publication',keep_checked_out:false}));
  await invoke(['ipc-server','stop']);
  assert.throws(()=>process.kill(reader.pid,0),e=>e.code==='ESRCH');
  await invoke(['workers','stop','restart-reader']);
  const replacement=await invoke(['workers','start',target.id,'restart-reader']);assert.notEqual(replacement.pid,reader.pid);
  await invoke(['workers','stop','restart-reader']);
- console.log('Native failed bridge cleanup, reader write denial and owner-stop/restart reuse verified');
+ console.log('Native failed bridge cleanup, canonical reader publication denial and owner-stop/restart reuse verified');
 }
 async function cleanupOwnedProcesses(){
  let count=0;const directory=join(root,'ghidra','processes');let entries=[];try{entries=await readdir(directory);}catch{return count;}
