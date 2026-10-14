@@ -12,7 +12,18 @@ Reference results include a containing function address when available. Pass tha
 Use `ghidra functions rename` and `ghidra comments set` for private edits. `--clear` (or empty
 text) represents a null/absent comment. Successful edits are checked by readback and saved before
 `applied`. A later read sees the local result; another session remains independent. These edits
-do not publish themselves. This checkpoint has not yet delivered merge/refresh.
+do not publish themselves. Use `ghidra merge` to publish the selected context explicitly.
+
+Another session retains its view until `ghidra refresh`. Refresh receives safe shared changes and
+preserves local work. An overlapping field retains original/local/shared values; merge publishes
+nothing while any conflict remains. Resolve that field with its ordinary setter,
+`--resolve-conflict --expect-shared <observed value>` (or `--expect-shared-null` for an absent
+comment). A later shared change invalidates the decision and preserves your work.
+
+Types, signatures and memory edits are saved as complete private program state. They publish
+when the shared base is unchanged. After divergence, unproved structural categories remain a
+conflict: retain the old session, open a new session on the current target, and transfer the desired
+work through ordinary operations. A script is not replayed as a merge algorithm.
 
 Opening a second input in the same session preserves the first context. Different processes using
 the same session/target share one ordered context. Independent agents choose separate sessions.

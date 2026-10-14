@@ -50,7 +50,7 @@ export class GhidraServer {
     private readonly state: {initializing?: Promise<ServerBinding>; child?: ChildProcess} = {}) {}
   fork(c: CommandContext) {return new GhidraServer(this.directory,this.inputs,c,this.state);}
   private root() { return join(this.directory, 'server'); }
-  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string): Promise<Record<string,unknown>> {
+  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0]): Promise<Record<string,unknown>> {
     const root = join(this.root(), 'calls', label + '-' + randomUUID()); await mkdir(root, {recursive:true,mode:0o700});
     const classes = await nativeHelpers(this.directory, this.inputs);
     const log = await open(join(root, 'diagnostic.log'), 'a', 0o600);
@@ -69,7 +69,7 @@ export class GhidraServer {
       child.stdin!.on('error',()=>{}); child.stdin!.end(input);
       if (this.c.signal.aborted) abort();
       const code = await exited;
-      if (code !== 0 || overflow) fail('authorization', 'Native server operation could not be verified; its owned diagnostic stage is retained.');
+      if (code===null||!acceptedCodes.includes(code)||overflow) fail('authorization', 'Native server operation could not be verified; its owned diagnostic stage is retained.');
       let result;
       try { result = object(JSON.parse(output)); } catch { fail('malformed', 'Native server operation returned malformed content.'); }
       if (result.error || result.state === 'failed') fail('authorization', 'Native server operation did not establish its outcome.');
@@ -81,6 +81,21 @@ export class GhidraServer {
     return {GHIDRA_SERVER_HOST:url.hostname,GHIDRA_SERVER_PORT:url.port || '13100',
       GHIDRA_SERVER_USER:role === 'reader' ? binding.readerUser : binding.publisherUser,
       GHIDRA_SERVER_PASSWORD:await this.c.secrets.require(role === 'reader' ? binding.readerSecret : binding.publisherSecret)};
+  }
+  async fields(snapshot:string,selectors:string) {
+    return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
+  }
+  async programStatus(binding:ServerBinding,path:string) {
+    return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
+  }
+  async publish(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
+    return this.run('publish','db.InsightSnapshotPublisher',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],
+      await this.credentials(binding,'publisher'),undefined,[0,2]);
+  }
+  async recoverPublication(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
+    return this.run('recover-publication','db.InsightPublicationRecovery',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],
+      {...await this.credentials(binding,'reader'),INSIGHT_PUBLISHER_USER:binding.publisherUser,
+        INSIGHT_PUBLISHER_PASSWORD:await this.c.secrets.require(binding.publisherSecret)});
   }
   private async authority(binding: ServerBinding) {
     for (const role of ['reader','publisher'] as const) {

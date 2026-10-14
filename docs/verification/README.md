@@ -84,3 +84,13 @@ Factory IPC a2094fb separately passed 1306 tests, external package consumption a
 review; its [PR #51](https://github.com/iXab3r/EyeAuras.CliFactory/pull/51) CI is green.
 Public evidence contains counts, hashes and assertions only; runtime paths, credentials and raw
 logs remain outside this repository. No npm registry publication was performed.
+
+[Native session merge proof](session-merge.json) exercises seven actual shared revisions through
+the public Factory command tree: A/B private views, safe refresh, mixed/overlapping conflict gates,
+stale and explicit resolution, committed response loss and independent complete-buffer recovery.
+Structures, a function signature, memory and a scalar edit after the local signature change publish
+at an unchanged base; a diverged structural result retains its private version as a conflict.
+Run `scripts/proof-merge.mjs` with the research proof's runtime/compiler flags and
+`--ack-disposable`. The exact source hashes and tested limits are in the receipt. This uses a
+source-package Factory fixture and synthetic credentials; final installed IPC/OS secrets, the full
+crash matrix and full catalog/debugger/archive gates remain separate acceptance work.

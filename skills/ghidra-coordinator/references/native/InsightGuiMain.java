@@ -24,6 +24,7 @@ class InsightGuiMain {
         var options=frontend.getOptions("GhidraMCP HTTP Server");
         options.setInt("Server Port",Integer.parseInt(args[2]));
         options.setBoolean("Enable UDS Transport",false); options.setBoolean("Enable TCP Transport",true);
+        options.setBoolean("Strict Naming Enforcement",false);
         frontend.addPlugin("com.xebyte.GhidraMCPPlugin"); frontend.setVisible(true);
       } catch(Exception failure) { throw new RuntimeException(failure); }
     });

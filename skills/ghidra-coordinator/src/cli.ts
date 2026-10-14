@@ -7,7 +7,7 @@ import { Workspace } from './workspace.js';
 import { GhidraContexts, type ToolMode } from './contexts.js';
 import { nativeInputs } from './native-inputs.js';
 import { Research, type ResearchBackend, scope, address, commentKind, scalarText, number } from './research.js';
-import { fail, id, text, digest } from './model.js';
+import { fail, id, text, digest, object } from './model.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -60,6 +60,24 @@ const scoped=[
 ];
 const at={flags:'--address <address>',description:'Explicit hexadecimal address or space:address',required:true};
 const request={flags:'--request-id <id>',description:'Retrieve the same changing intent after a lost response'};
+const resolveOptions=[{flags:'--resolve-conflict',description:'Resolve the existing field against an explicitly observed shared value'},
+  {flags:'--expect-shared <value>',description:'Shared value used for this resolution'},
+  {flags:'--expect-shared-null',description:'Expect the shared comment to be absent'}];
+function resolution(options:Record<string,unknown>) {
+  const expected=options.expectShared!==undefined,absent=Boolean(options.expectSharedNull);
+  if(!options.resolveConflict) {
+    if(expected||absent)fail('invalid','Shared expectation requires --resolve-conflict.');return;
+  }
+  if(expected===absent)fail('invalid','Resolution needs exactly one --expect-shared or --expect-shared-null.');
+  return {expectedShared:absent?null:scalarText(options.expectShared)};
+}
+function structureFields(value:unknown) {
+  const source=text(value,65536);let parsed;
+  try{parsed=JSON.parse(source);}catch{fail('invalid','Fields must be a JSON array of name/type objects.');}
+  if(!Array.isArray(parsed)||!parsed.length||parsed.length>256)fail('invalid','Structure requires 1–256 field objects.');
+  return parsed.map(value=>{const field=object(value);if(Object.keys(field).some(key=>!['name','type','offset'].includes(key)))fail('invalid','Unknown structure field property.');
+    return {name:text(field.name,512),type:text(field.type,512),...(field.offset===undefined?{}:{offset:number(field.offset,2147483647)})};});
+}
 const paged=[
   {flags:'--limit <count>',description:'Maximum items in this page (1–100)',defaultValue:50,parse:(value:string)=>number(value,100,1)},
   {flags:'--offset <count>',description:'Skip items before this page',defaultValue:0,parse:(value:string)=>number(value,2147483647)},
@@ -133,6 +151,10 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'}]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
+        command('refresh','Receive safe shared changes while retaining local conflicts',({options:o},c)=>owner.selected(c).research.refresh(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
+          {permission:Permission.Update,options:[...scoped,request]}),
+        command('merge','Publish the complete selected context or retain every conflict',({options:o},c)=>owner.selected(c).research.merge(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
+          {permission:Permission.Update,options:[...scoped,request]}),
         command('open [input]','Start independent work or continue a context',async({args,options:o},c)=>{
           if(Boolean(args.input)===Boolean(o.target))fail('invalid','Supply exactly one input path or --target.');
           const selected=owner.selected(c),target=args.input?(await selected.workspace.importTarget(resolve(c.cwd,text(args.input,4096)))).id:id(o.target);
@@ -157,13 +179,51 @@ export function createDefinition(options: Options = {}): CliDefinition {
           command('to','Find incoming references and their functions',({options:o},c)=>owner.selected(c).research.xrefs(scope(o),address(o.address),number(o.limit,100,1),number(o.offset,2147483647)),
             {permission:Permission.ReadOnly,options:[...scoped,at,...paged]}),
         ]),
+        command('types','Read and edit data types',[
+          command('struct-layout','Read a structure layout',({options:o},c)=>owner.selected(c).research.read(scope(o),'/get_struct_layout',{struct_name:text(o.name,512)})
+            .then(value=>({...scope(o),value})),{permission:Permission.ReadOnly,options:[...scoped,{flags:'--name <name>',description:'Structure name',required:true}]}),
+          command('create-struct','Create and save a private structure',({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),name=text(o.name,512),fields=structureFields(o.fields);
+            return selected.research.mutate(who,'/create_struct',{name,fields},async(backend)=>{
+              const result=object(await backend.call(who,'/get_struct_layout',{struct_name:name}));
+              if(result.name!==name||!Array.isArray(result.fields)||result.fields.length!==fields.length)fail('partial','Structure readback omitted fields or changed its name.');
+              for(let i=0;i<fields.length;i++)if(object(result.fields[i]).name!==fields[i]!.name)fail('partial','Structure readback changed a field name.');
+              return result;
+            },o.requestId===undefined?undefined:id(o.requestId));
+          },{permission:Permission.Update,options:[...scoped,{flags:'--name <name>',description:'New structure name',required:true},
+            {flags:'--fields <json>',description:'Array of {name,type,offset?}',required:true},request]}),
+        ]),
+        command('memory','Read or edit memory blocks',[
+          command('list','Read bounded memory blocks',({options:o},c)=>owner.selected(c).research.read(scope(o),'/list_program_items',{kind:'segments',limit:number(o.limit,100,1),offset:number(o.offset,2147483647)})
+            .then(value=>({...scope(o),value})),{permission:Permission.ReadOnly,options:[...scoped,...paged]}),
+          command('create-block','Create and save a private memory block',({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),name=text(o.name,512),at=address(o.address),size=number(o.size,16*1024*1024,1);
+            const parameters={name,address:at,size,read:o.read!==false,write:o.write!==false,execute:Boolean(o.execute)};
+            return selected.research.mutate(who,'/create_memory_block',parameters,async(backend,result)=>{
+              if(result.name!==name||result.size!==size||address(result.start)!==at)fail('partial','Created memory block changed its selector or size.');
+              const read=object(await backend.call(who,'/list_program_items',{kind:'segments',limit:100,offset:0}));
+              if(!JSON.stringify(read).includes(name))fail('partial','Saved memory block was absent from independent listing.');return result;
+            },o.requestId===undefined?undefined:id(o.requestId));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--name <name>',description:'Memory block name',required:true},
+            {flags:'--size <bytes>',description:'Positive block size up to 16 MiB',required:true},
+            {flags:'--no-read',description:'Disable read permission'},{flags:'--no-write',description:'Disable write permission'},
+            {flags:'--execute',description:'Enable execution permission'},request]}),
+        ]),
         command('functions','Read or name functions',[
+          command('set-function-prototype','Set and save a private C function signature',({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),at=address(o.address),prototype=text(o.prototype,16000);
+            return selected.research.mutate(who,'/set_function_prototype',{function_address:at,prototype},async(backend)=>{
+              const result=object(await backend.call(who,'/get_functions',{functions:at,fields:'entry_point,signature,parameters,return_type',include_call_context:false}));
+              const found=object(object(result.functions)[at]);if(typeof found.signature!=='string'||address(found.entry_point)!==at||!Array.isArray(found.parameters))
+                fail('partial','Function signature readback omitted its selector or parameters.');return found;
+            },o.requestId===undefined?undefined:id(o.requestId));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--prototype <signature>',description:'Complete C prototype',required:true},request]}),
           command('get','Read a function and entry comments',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address)),{permission:Permission.ReadOnly,options:[...scoped,at]}),
           command('decompile','Read decompiled function text',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true),{permission:Permission.ReadOnly,options:[...scoped,at]}),
           command('rename','Record a saved private name',({options:o},c)=>{
             const name=text(o.name,512);if(name!==name.trim())fail('invalid','Function name may not have leading or trailing whitespace.');
-            return owner.selected(c).research.edit(scope(o),address(o.address),'function.name',name,o.requestId===undefined?undefined:id(o.requestId));
-          },{permission:Permission.Update,options:[...scoped,at,{flags:'--name <name>',description:'Desired function name',required:true},request]}),
+            return owner.selected(c).research.edit(scope(o),address(o.address),'function.name',name,o.requestId===undefined?undefined:id(o.requestId),resolution(o));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--name <name>',description:'Desired function name',required:true},request,...resolveOptions]}),
         ]),
         command('comments','Read or edit listing comments',[
           command('get','Read one kind or all five fields',({options:o},c)=>owner.selected(c).research.comment(scope(o),address(o.address),o.kind===undefined?undefined:commentKind(o.kind)),
@@ -171,9 +231,9 @@ export function createDefinition(options: Options = {}): CliDefinition {
           command('set','Record a saved private comment or clear it',({options:o},c)=>{
             if(Boolean(o.clear)===(o.text!==undefined))fail('invalid','Supply exactly one --text or --clear.');
             return owner.selected(c).research.edit(scope(o),address(o.address),'comment.'+commentKind(o.kind) as 'comment.eol',
-              o.clear?null:scalarText(o.text),o.requestId===undefined?undefined:id(o.requestId));
+              o.clear?null:scalarText(o.text),o.requestId===undefined?undefined:id(o.requestId),resolution(o));
           },{permission:Permission.Update,options:[...scoped,at,{flags:'--kind <kind>',description:'eol, pre, post, plate or repeatable',required:true},
-            {flags:'--text <text>',description:'Desired text; empty text clears to null'},{flags:'--clear',description:'Clear this comment to null'},request]}),
+            {flags:'--text <text>',description:'Desired text; empty text clears to null'},{flags:'--clear',description:'Clear this comment to null'},request,...resolveOptions]}),
         ]),
       ]),
     ],

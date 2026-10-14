@@ -7,7 +7,7 @@ import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeHelpers, nativeInputs, type NativeInputs } from './native-inputs.js';
 import { GhidraServer, type ServerBinding } from './server.js';
-import { Workspace, type ResearchTarget, type Scope, type GhidraContext } from './workspace.js';
+import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication } from './workspace.js';
 import { type Artifact } from './artifacts.js';
 import { object, fail, text, version, stable } from './model.js';
 import { HttpBridge } from './transport.js';
@@ -16,7 +16,7 @@ export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
   pid: number; endpoint: string; root: string; target: string; context?: string;
   mode: ToolMode; program: string; tokenSecret: string; runtimeFingerprint: string;
-  kind: 'context' | 'shared' | 'bootstrap';
+  kind: 'context' | 'shared' | 'bootstrap' | 'candidate'; baseRevision?:number;viewEpoch?:number;
 }
 interface Running {binding: ProcessBinding; http: HttpBridge; child?: ChildProcess}
 const alive = (pid: number) => {
@@ -55,7 +55,7 @@ export class GhidraContexts {
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs);
-    const main=mode==='gui'?'InsightGuiMain':'com.xebyte.headless.GhidraMCPHeadlessServer';
+    const main=mode==='gui'?'InsightGuiMain':'InsightHeadlessMain';
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
     const child=spawn(this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
@@ -205,6 +205,9 @@ export class GhidraContexts {
       const opened=object(await record.http.call('/open_program',{path:record.binding.program}));
       if(opened.path!==record.binding.program||opened.read_only===true)fail('binding','Private context did not open its writable saved view.');
       await this.verified(record.binding,target);
+      record.binding.baseRevision=context.baseRevision??this.workspace.model(context.target).sharedRevision;
+      record.binding.viewEpoch=context.viewEpoch??0;
+      await durable(join(root,'process.json'),record.binding);
       await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);return record;
     } catch(error){if(record)await this.stopRecord(record,false);else this.capacity.slots.delete(context.id);throw error;}
   }
@@ -222,11 +225,21 @@ export class GhidraContexts {
         stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
       } catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     }
+    if(binding&&!stopped&&alive(binding.pid)&&((binding.viewEpoch??0)!==(context.viewEpoch??0)||
+        binding.baseRevision!==context.baseRevision&&context.baseRevision!==undefined)) {
+      await this.stopRecord(await this.verified(binding,target),true,false);stopped=true;
+    }
     if(binding&&!stopped&&alive(binding.pid)) {
       if(binding.context!==context.id)fail('binding','Native process belongs to a different working context.');
       await this.verified(binding,target);return context;
     }
-    const model=await this.model(target);
+    let model=context.workingSnapshot?this.workspace.model(target.id):await this.model(target);
+    if(!context.workingSnapshot) {
+      // A new session begins at the actual server revision, including external publications.
+      // Existing contexts keep their saved private view until an explicit refresh.
+      const shared=await this.latest(target.id);
+      model=this.workspace.observeShared(target.id,shared.revision,shared.snapshot);
+    }
     const snapshot=context.workingSnapshot??model.sharedSnapshot;
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
     await this.privateCopy(context,snapshot);
@@ -253,12 +266,109 @@ export class GhidraContexts {
     await this.stopRecord(record,true,false);
     if(mode==='headless'){await this.privateCopy(this.workspace.context(scope),snapshot);return;}
     const gui=await this.launch(record.binding.root,this.workspace.target(scope.target),'context',record.binding.program,'gui',context.id);
+    gui.binding.baseRevision=record.binding.baseRevision;gui.binding.viewEpoch=record.binding.viewEpoch;
+    await durable(join(gui.binding.root,'process.json'),gui.binding);
     await gui.http.call('/open_program',{path:gui.binding.program});await this.verified(gui.binding,this.workspace.target(scope.target));
     await durable(join(this.directory(),'context',context.id,'current.json'),gui.binding);
   }
   async close(scope: Scope) {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
     this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot});await this.stopRecord(record);
+  }
+  async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {
+    const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();
+    const before=await server.programStatus(binding,programPath(targetId));
+    if(before.checkinActive!==false)fail('blocked','Shared model has an active check-in.');
+    const expected=version(before.version),record=await this.shared(target,binding);
+    try {
+      const opened=await server.programStatus(binding,programPath(targetId));
+      if(opened.version!==expected)fail('binding','Shared model changed while opening its saved view.');
+      const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
+      const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:output,output_name:'shared.gzf'}));
+      if(exported.success!==true)fail('save','Shared snapshot export was not acknowledged.');
+      const snapshot=await this.workspace.captureSnapshot(join(output,'shared.gzf'));
+      const after=await server.programStatus(binding,programPath(targetId));
+      if(after.version!==expected)fail('binding','Shared model changed before its snapshot was verified.');
+      return {revision:expected,snapshot};
+    } finally {await this.stopRecord(record);}
+  }
+  async fields(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>> {
+    const directory=join(this.directory(),'inspection',randomUUID());await mkdir(directory,{recursive:true,mode:0o700});
+    const selectors=join(directory,'fields.json');await durable(selectors,changes.map(change=>({address:change.address,field:change.field})));
+    const result=await this.server().fields(await this.workspace.artifacts.verify(snapshot),selectors),values=object(result.fields);
+    for(const change of changes) {
+      const item=object(values[change.address+'@'+change.field]);
+      if(item.value!==null&&typeof item.value!=='string'||typeof item.exists!=='boolean'||typeof item.dependency!=='string'||!/^[a-f0-9]{64}$/.test(item.dependency))
+        fail('partial','Saved field inspection returned an incomplete value or dependency.');
+    }
+    return values as Record<string,{value:string|null;dependency:string;exists:boolean}>;
+  }
+  private async applyField(record:Running,change:ScalarChange) {
+    const result=object(await record.http.call(change.field==='function.name'?'/rename_function':'/set_comment',change.field==='function.name'?
+      {program:record.binding.program,old_name:change.address,new_name:change.local,strict_mode:'off'}:
+      {program:record.binding.program,address:change.address,type:change.field.slice(8),comment:change.local??''}));
+    if(result.status!=='success'&&result.success!==true)fail('partial','Candidate edit was not acknowledged.');
+    if(change.field==='function.name') {
+      const read=object(await record.http.call('/get_functions',{program:record.binding.program,functions:change.address,fields:'entry_point',include_call_context:false}));
+      if(object(object(read.functions)[change.address]).name!==change.local)fail('partial','Candidate name readback differs.');
+    } else {
+      const read=object(await record.http.call('/get_comment',{program:record.binding.program,address:change.address}));
+      if((read[change.field.slice(8)]||null)!==change.local)fail('partial','Candidate comment readback differs.');
+    }
+  }
+  async candidate(targetId:string,snapshot:Artifact,changes:ScalarChange[]):Promise<Artifact> {
+    const target=this.workspace.target(targetId),root=await this.prepareRoot('candidate',targetId);
+    await link(await this.workspace.artifacts.verify(snapshot),join(root,'saved.gzf'));
+    const record=await this.launch(root,target,'candidate','/program','headless');
+    try {
+      await record.http.call('/create_project',{parentDir:root,name:'view'});
+      await record.http.call('/import_program',{gzf_path:join(root,'saved.gzf'),target_folder:'/',target_name:'program',overwrite:false});
+      await record.http.call('/open_program',{path:record.binding.program});await this.verified(record.binding,target);
+      for(const change of changes)await this.applyField(record,change);
+      return await this.capture(record);
+    } finally {await this.stopRecord(record,false);}
+  }
+  async publish(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}> {
+    const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
+    const directory=join(this.directory(),'publications',publication.id);await mkdir(directory,{recursive:true,mode:0o700});
+    const result=await server.publish(binding,programPath(target.id),await this.workspace.artifacts.verify(publication.snapshot),
+      publication.expectedRevision,publication.id,join(directory,'native-intent.json'),target.binarySha256);
+    if(result.state==='conflict'&&result.applied===0)return {state:'conflict',applied:0};
+    if(result.state!=='published'||result.version!==publication.expectedRevision+1||result.snapshotBuffersVerified!==true||result.ownedCheckoutReleased!==true)
+      fail('unknown','Native publication did not establish its version and complete saved buffers.');
+    const verified=await this.recover(publication);
+    if(verified.state!=='verified')fail('unknown','Independent exact-version publication verification remains unresolved.');
+    return {state:'published',revision:verified.revision};
+  }
+  async recover(publication:Publication):Promise<{state:'verified';revision:number}|{state:'unknown'}> {
+    const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
+    const journal=join(this.directory(),'publications',publication.id,'native-intent.json');
+    const result=await server.recoverPublication(binding,programPath(target.id),await this.workspace.artifacts.verify(publication.snapshot),
+      publication.expectedRevision,publication.id,journal,target.binarySha256);
+    if(result.state==='verified'&&result.version===publication.expectedRevision+1&&result.snapshotBuffersVerified===true&&result.ownedCheckoutReleased===true)
+      return {state:'verified',revision:version(result.version)};
+    return {state:'unknown'};
+  }
+  async recoverModel(targetId:string):Promise<boolean> {
+    if(this.workspace.activePublication(targetId))return false;
+    const model=this.workspace.model(targetId);if(model.state==='ready')return true;if(model.state==='opening')return true;
+    const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();
+    let status;
+    try{status=await server.programStatus(binding,programPath(targetId));}catch{return false;}
+    if(status.version!==1||status.checkinActive!==false||!Array.isArray(status.versions)||status.versions.length!==1||
+        object(status.versions[0]).comment!=='insight target '+targetId)return false;
+    const record=await this.shared(target,binding);
+    try {
+      const metadata=await this.source(record,target);
+      if(model.settings.language&&metadata.language!==model.settings.language||model.settings.compilerSpec&&metadata.compiler!==model.settings.compilerSpec||
+          model.settings.imageBase&&String(metadata.base_address).replace(/^0+(?=.)/,'')!==model.settings.imageBase)return false;
+      const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
+      const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:output,output_name:'recovered.gzf'}));
+      if(exported.success!==true)return false;
+      const snapshot=await this.workspace.captureSnapshot(join(output,'recovered.gzf'));
+      const after=await server.programStatus(binding,programPath(targetId));if(after.version!==1||after.checkinActive!==false)return false;
+      this.workspace.establishModel(targetId,1,snapshot);return true;
+    }finally{await this.stopRecord(record);}
   }
   async dispose() {
     let failures=0;

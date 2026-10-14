@@ -27,7 +27,16 @@ An owned native Factory CLI/API fixture passed open retry, strings→xrefs→fun
 rename/comment save/readback, A/B isolation and clear/null. Native installed IPC/credentials and
 broader schema/failure acceptance remain M4/M5 gates.
 
-M3-01 is in progress. M3–M5 are not complete. No combined facade acceptance has passed yet.
+M3-01 through M3-04 now have their implementation checkpoints: scalar three-way comparison,
+explicit resolution, safe incoming refresh, complete unchanged-base saved-state publication,
+independent exact-version buffer verification and committed-response reconciliation without a
+second check-in. The [native receipt](verification/session-merge.json) records seven published
+revisions, complex types/signature/memory effects, retained divergence and the tested source hashes.
+The offline suite passes 49 tests, including per-context setter/merge ordering and a later shared
+change invalidating an explicit resolution. Isolated package installation/relocation still passes.
+The complete owner/backend crash matrix and installed native IPC/credentials remain M4 gates;
+these checkpoints do not establish general native changeset coverage. M4/M5 and combined facade
+acceptance are not complete.
 
 ## Engineering defaults
 

@@ -10,11 +10,16 @@ If a response was lost, inspect `sessions status <session> --target <target>`. N
 intent inside the profile. Repeating the same ID/input retrieves its recorded outcome or
 unresolved state; changing input under that ID fails. Without an ID, calls are new intentions.
 
-An unknown or partial effect retains its request intent, snapshots and native stage. This
-checkpoint reports those unresolved states and blocks conflicting work; complete automatic
-reconciliation and merge/refresh remain under implementation. Preserve the profile storage and
-credential store. Do not delete another session's project, stop a process by guessed PID/port,
-or blindly repeat a script/external action to turn uncertainty into success.
+An unknown or partial effect retains its request intent, snapshots and native stage. Open the
+same tuple to reconcile supported outcomes. A committed merge is verified against its recorded
+server version and complete saved buffers through independent read authority; it is never
+checked in again merely because its response was lost. Until verification succeeds, publication
+for this shared target is blocked across sessions. Saved private work remains retained.
+
+Scalar reconciliation observes and saves an already present effect; it does not execute the
+setter again. An unproved program/script/external outcome remains unresolved. Preserve the profile
+storage and credential store. Do not delete another session's project, stop a process by guessed
+PID/port, or blindly repeat a script/external action to turn uncertainty into success.
 
 The older prototype's `workers`, `findings`, `integrate` and batch `recover` commands are not the
 public facade API. Its coordinator journals remain separate and are never silently migrated.

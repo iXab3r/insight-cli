@@ -16,13 +16,16 @@ these installed resources. Use generated `--help` for syntax; read the reference
    function addresses, then inspect/decompile. See [research](references/research.md).
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished.
-5. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
+5. Publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.
+   Resolve overlapping names/comments against an explicitly observed shared value. A conflict
+   prevents the whole selected merge and retains local work.
+6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
 
 The facade is under active implementation: this revision exposes opening, scoped research and
-ordinary scalar edits. Merge/refresh, full catalog completion and installed/native final acceptance
-remain in progress; do not describe this checkpoint as a complete delivery. Preserve private work
+ordinary edits, merge/refresh and supported recovery. Full catalog completion and installed/native
+final acceptance remain in progress; do not describe this checkpoint as a complete delivery. Preserve private work
 and journals while an outcome is unresolved. The CLI supplies the investigation tools; agents
 choose research goals and interpret findings.
 Installing this package does not register this skill in an agent's configuration.

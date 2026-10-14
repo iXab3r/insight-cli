@@ -20,24 +20,32 @@ export interface Scope { session: string; target: string }
 export interface ScalarChange {
   address: string; field: 'function.name' | 'comment.eol' | 'comment.pre' | 'comment.post' | 'comment.plate' | 'comment.repeatable';
   original: string | null; local: string | null;
+  dependency?:string;
   conflict?: {shared: string | null};
 }
 export interface GhidraContext extends Scope {
   /** Internal storage key, never a caller's backend selector. */
   id: string; tool: 'ghidra'; state: 'opening' | 'ready' | 'stopped' | 'needs_recovery'; generation: number;
   baseRevision?: number; baseSnapshot?: Artifact; workingSnapshot?: Artifact;
+  viewEpoch?:number;
   scalars: ScalarChange[]; complexChanges: string[];
 }
 export type RequestState = 'accepted' | 'running' | 'applied' | 'failed' | 'unknown';
 export interface ResearchRequest {
   id: string; callerId?: string; operation: string; intent: unknown; context: string;
-  state: RequestState; result?: unknown; createdAt: string; updatedAt: string;
+  state: RequestState; result?: unknown; execution?:unknown; createdAt: string; updatedAt: string;
+}
+export interface Publication extends Scope {
+  id:string;request:string;state:'preparing'|'commit_intent'|'unknown'|'verified'|'conflict';
+  expectedRevision:number;snapshot:Artifact;generation:number;scalars:ScalarChange[];complex:boolean;
+  complexChanges?:string[];
+  publishedRevision?:number;detail?:unknown;
 }
 export interface OpenReservation {
   context: GhidraContext; request: ResearchRequest; replay: boolean;
 }
 type ContextPatch = Partial<Pick<GhidraContext,
-  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'scalars' | 'complexChanges'>>;
+  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'viewEpoch' | 'scalars' | 'complexChanges'>>;
 const now = () => new Date().toISOString();
 function loadSettings(value: GhidraLoadSettings): GhidraLoadSettings {
   if (typeof value.autoAnalyze !== 'boolean' || Object.keys(value).some(key =>
@@ -92,6 +100,8 @@ export class Workspace {
           UNIQUE(session,target));
         CREATE TABLE IF NOT EXISTS requests(id TEXT PRIMARY KEY, caller_id TEXT UNIQUE, hash TEXT NOT NULL,
           context TEXT NOT NULL REFERENCES contexts(id), state TEXT NOT NULL, data TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS publications(id TEXT PRIMARY KEY, target TEXT NOT NULL REFERENCES ghidra_models(target), state TEXT NOT NULL, data TEXT NOT NULL);
+        CREATE UNIQUE INDEX IF NOT EXISTS active_publication ON publications(target) WHERE state IN ('preparing','commit_intent','unknown');
         PRAGMA user_version=1;`);
       this.transaction(() => {
         const binding = this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
@@ -239,11 +249,11 @@ export class Workspace {
     return this.db.prepare("SELECT data FROM requests WHERE context=? AND state IN ('running','unknown') ORDER BY rowid LIMIT 100")
       .all(context.id).map(row => JSON.parse(String(row.data)));
   }
-  startRequest(request: string): ResearchRequest {
+  startRequest(request: string, execution?:unknown): ResearchRequest {
     return this.transaction(() => {
       const previous = this.request(request);
       if (previous.state !== 'accepted') fail('blocked', 'Request already started; reconcile its recorded outcome before continuing.');
-      const next = {...previous, state: 'running' as const, updatedAt: now()};
+      const next = {...previous, state: 'running' as const, ...(execution===undefined?{}:{execution}), updatedAt: now()};
       this.db.prepare('UPDATE requests SET state=?,data=? WHERE id=?').run(next.state, bounded(next), next.id);
       return next;
     });
@@ -281,6 +291,88 @@ export class Workspace {
       return next;
     });
   }
+  observeShared(target:string,revision:number,snapshot:Artifact):GhidraModel {
+    version(revision);this.knownSnapshot(snapshot);
+    return this.transaction(()=>{
+      const model=this.model(target);
+      if(model.state!=='ready')fail('blocked','Shared model outcome requires reconciliation before accepting another baseline.');
+      if(revision<(model.sharedRevision??1))fail('binding','Shared version history regressed.');
+      const next={...model,sharedRevision:revision,sharedSnapshot:snapshot};
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable(next),target);return next;
+    });
+  }
+  publication(publication:string):Publication {
+    const row=this.db.prepare('SELECT data FROM publications WHERE id=?').get(id(publication));
+    if(!row)fail('notFound','Publication was not found in this profile.');return JSON.parse(String(row.data));
+  }
+  activePublication(target:string):Publication|undefined {
+    this.target(target);
+    const row=this.db.prepare("SELECT data FROM publications WHERE target=? AND state IN ('preparing','commit_intent','unknown')").get(target);
+    return row?JSON.parse(String(row.data)):undefined;
+  }
+  beginPublication(scope:Scope,request:string,expectedRevision:number,snapshot:Artifact):Publication {
+    version(expectedRevision);this.knownSnapshot(snapshot);
+    return this.transaction(()=>{
+      const context=this.context(scope),intent=this.request(request),model=this.model(scope.target);
+      if(intent.context!==context.id||intent.state!=='running')fail('binding','Publication does not match its running context request.');
+      const active=this.activePublication(scope.target);
+      if(active||model.state!=='ready')fail('blocked','Shared model has an unresolved publication; reconcile it before another merge.');
+      const publication:Publication={...scope,id:request,request,state:'preparing',expectedRevision,snapshot,
+        generation:context.generation,scalars:context.scalars,complex:context.complexChanges.length>0,complexChanges:context.complexChanges};
+      this.db.prepare('INSERT INTO publications VALUES(?,?,?,?)').run(publication.id,scope.target,publication.state,bounded(publication));
+      return publication;
+    });
+  }
+  publicationIntent(publication:string):Publication {
+    return this.transaction(()=>{
+      const previous=this.publication(publication);
+      if(previous.state!=='preparing')fail('blocked','Publication intent was already issued; verify its history instead of retrying.');
+      const next={...previous,state:'commit_intent' as const};
+      const model=this.model(previous.target);
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'unknown'}),previous.target);
+      this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);return next;
+    });
+  }
+  unknownPublication(publication:string,detail:unknown) {
+    return this.transaction(()=>{
+      const previous=this.publication(publication);
+      if(!['commit_intent','unknown'].includes(previous.state))fail('binding','Uncertainty must retain an actual publication intent.');
+      const next={...previous,state:'unknown' as const,detail};
+      this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);
+      return next;
+    });
+  }
+  finishPublication(publication:string,publishedRevision:number,result:unknown):Publication {
+    version(publishedRevision);
+    return this.transaction(()=>{
+      const previous=this.publication(publication);
+      if(!['commit_intent','unknown'].includes(previous.state)||publishedRevision!==previous.expectedRevision+1)
+        fail('binding','Verified publication has an unexpected state or version.');
+      const context=this.context(previous),model=this.model(previous.target);
+      if(context.generation!==previous.generation)fail('binding','Private context changed during publication; preserve both saved versions.');
+      this.writeContext(previous,previous.generation,{state:'ready',baseRevision:publishedRevision,baseSnapshot:previous.snapshot,
+        workingSnapshot:previous.snapshot,viewEpoch:(context.viewEpoch??0)+1,scalars:[],complexChanges:[]});
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'ready',sharedRevision:publishedRevision,sharedSnapshot:previous.snapshot}),previous.target);
+      this.writeRequest(previous.request,'applied',result);
+      const next={...previous,state:'verified' as const,publishedRevision};
+      this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);return next;
+    });
+  }
+  rejectPublication(publication:string,result:unknown):Publication {
+    return this.transaction(()=>{
+      const previous=this.publication(publication);
+      if(!['preparing','commit_intent'].includes(previous.state))fail('blocked','An uncertain publication cannot be abandoned without proof.');
+      const model=this.model(previous.target),next={...previous,state:'conflict' as const,detail:result};
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'ready'}),previous.target);
+      this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);
+      this.writeRequest(previous.request,'failed',result);return next;
+    });
+  }
+  publishedSince(target:string,revision:number):Publication[] {
+    this.target(target);version(revision);
+    return this.db.prepare("SELECT data FROM publications WHERE target=? AND state='verified' ORDER BY rowid").all(target)
+      .map(row=>JSON.parse(String(row.data)) as Publication).filter(item=>item.publishedRevision!>revision);
+  }
   saveContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     return this.transaction(() => this.writeContext(scope, expectedGeneration, patch));
   }
@@ -297,10 +389,11 @@ export class Workspace {
   }
   private writeContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     if (!Number.isSafeInteger(expectedGeneration) || expectedGeneration < 0) fail('invalid', 'Invalid context generation.');
-    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'scalars', 'complexChanges'].includes(key)) ||
+    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'viewEpoch', 'scalars', 'complexChanges'].includes(key)) ||
         patch.state !== undefined && !['opening', 'ready', 'stopped', 'needs_recovery'].includes(patch.state))
       fail('invalid', 'Invalid context state update.');
     if (patch.baseRevision !== undefined) version(patch.baseRevision);
+    if(patch.viewEpoch!==undefined&&(!Number.isSafeInteger(patch.viewEpoch)||patch.viewEpoch<0))fail('invalid','View epoch must be a nonnegative integer.');
     if (patch.baseSnapshot) this.knownSnapshot(patch.baseSnapshot);
     if (patch.workingSnapshot) this.knownSnapshot(patch.workingSnapshot);
     const previous = this.context(scope);
@@ -323,6 +416,7 @@ export class Workspace {
       if (change.field === 'function.name' && (change.local === null || !change.local.length || change.local.length > 512))
         fail('invalid', 'Function name must be a nonempty bounded string.');
       const field = change.address + ':' + change.field;
+      if(change.dependency!==undefined&&!/^[a-f0-9]{64}$/.test(change.dependency))fail('invalid','Scalar dependency fingerprint is malformed.');
       if (fields.has(field)) fail('invalid', 'Scalar field must have one original/local comparison.');
       fields.add(field);
     }
