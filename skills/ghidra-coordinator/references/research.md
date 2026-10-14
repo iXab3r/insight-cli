@@ -25,6 +25,14 @@ when the shared base is unchanged. After divergence, unproved structural categor
 conflict: retain the old session, open a new session on the current target, and transfer the desired
 work through ordinary operations. A script is not replayed as a merge algorithm.
 
+Additional read groups expose analysis, listings, types, documentation, memory, symbols and
+emulation through typed flags. `functions inspect`, `comments inspect`, `strings list` and
+`strings search-regex` cover broader selection than the convenient walkthrough commands.
+Boolean options take explicit `true`/`false`; complex inputs take bounded JSON. Result variants
+are under `value` with the same session/target identifiers. Generated help lists domain arguments;
+the caller supplies no program/instance routing. For P-code dataflow choose an actual operation
+address from `analysis get-function-pcode`; a function prologue may have no high P-code operation.
+
 Opening a second input in the same session preserves the first context. Different processes using
 the same session/target share one ordered context. Independent agents choose separate sessions.
 Calls return explicit scope so parallel outputs can be associated with the intended input.

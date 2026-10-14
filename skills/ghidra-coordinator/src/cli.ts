@@ -1,4 +1,4 @@
-import { command, createCli, Permission, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
+import { command, createCli, Permission, CliError, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
 import { join, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -8,6 +8,7 @@ import { GhidraContexts, type ToolMode } from './contexts.js';
 import { nativeInputs } from './native-inputs.js';
 import { Research, type ResearchBackend, scope, address, commentKind, scalarText, number } from './research.js';
 import { fail, id, text, digest, object } from './model.js';
+import {queryCommands,extendQueries} from './queries.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -98,10 +99,21 @@ const mode=(value:unknown):ToolMode|undefined=>{
   if(value!=='headless'&&value!=='gui')fail('invalid','Mode must be headless or gui.');return value;
 };
 const targetView=(target:ReturnType<Workspace['target']>)=>({target:target.id,name:target.name,binarySha256:target.binarySha256,size:target.size,createdAt:target.createdAt});
+function scopedFailures(entry:CommandDefinition):CommandDefinition {
+  const run=entry.run;
+  return {...entry,...(entry.children?{children:entry.children.map(scopedFailures)}:{}),...(run?{run:async(input,c)=>{
+    try{return await run(input,c);}catch(error){
+      let selected;try{selected=scope(input.options);}catch{throw error;}
+      if(!(error instanceof CliError))throw error;
+      const result=error.result&&typeof error.result==='object'&&!Array.isArray(error.result)?error.result:{};
+      throw new CliError(error.message,{code:error.code,exitCode:error.exitCode,next:error.next,result:{...result,...selected}});
+    }
+  }}:{})};
+}
 
 export function createDefinition(options: Options = {}): CliDefinition {
   const owner=new Owner(options);
-  return {
+  const definition:CliDefinition={
     name:'insight-cli',applicationId:'insight-cli',version:'0.1.0',description:'Isolated research contexts and coordinated Ghidra analysis',
     resources:[owner],permissions:{},...(options.runtime?{runtime:options.runtime}:{}),
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
@@ -238,5 +250,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ]),
     ],
   };
+  return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
+    scopedFailures({...entry,children:extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research))}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

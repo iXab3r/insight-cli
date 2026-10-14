@@ -94,3 +94,24 @@ Run `scripts/proof-merge.mjs` with the research proof's runtime/compiler flags a
 `--ack-disposable`. The exact source hashes and tested limits are in the receipt. This uses a
 source-package Factory fixture and synthetic credentials; final installed IPC/OS secrets, the full
 crash matrix and full catalog/debugger/archive gates remain separate acceptance work.
+
+[Installed session checkpoint](installed-sessions.json) exercises the packed facade through its
+real Factory IPC owner with unique OS credential accounts. It records four contexts on two inputs,
+parallel CLI callers, conflict retention across owner restart, managed server restart and owner
+SIGKILL at accepted, local effect, local save, local acknowledgment, published, verified and
+publication-intent stages. A genuinely unproved publication stays blocked. Counted backend
+dispatches verify that reconciliation does not repeat setters/publication. Run
+`scripts/acceptance-facade.mjs --ack-disposable --faults` with the same native runtime/compiler flags.
+Its barrier wrapper and isolated application identity are fixture-only; the installed runtime and
+resources were compared byte-for-byte with the source build. The receipt retains the exact
+artifact hash and tested source hashes. Later query input/error refinements are outside that
+artifact; all reliability cases must repeat on the completed full facade.
+
+[Native query checkpoint](query-contracts.json) records 72 scoped public query calls and typed
+result checks against an owned PE/import DLL. Known input assertions cover function/P-code data,
+structure layout, enum members, data type size, imports, properties/bookmarks, strings/xrefs and
+controlled emulation (integer result 19 and a known candidate hash match). Run
+`scripts/proof-queries.mjs --ack-disposable` with the same runtime/compiler flags; `--group` narrows
+an exploratory diagnostic run and does not produce the full known-value assertion claim. The
+receipt retains source/runtime hashes and limits. Program setup through the fixture seam does not
+establish public editing coverage; script inventory and other result variants remain open.

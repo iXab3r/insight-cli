@@ -38,6 +38,26 @@ The complete owner/backend crash matrix and installed native IPC/credentials rem
 these checkpoints do not establish general native changeset coverage. M4/M5 and combined facade
 acceptance are not complete.
 
+M4-01 now has an installed owner/IPC checkpoint. The [receipt](verification/installed-sessions.json)
+records two inputs with equal filenames/addresses, four independent contexts, parallel CLI calls,
+conflicts retained after owner replacement, a managed server restart and seven owner SIGKILL
+phases. Repeated effects are counted in the fixture; committed publication reconciles to R2 without
+a second dispatch. The native artifact uses real Factory IPC and unique OS-keyring accounts.
+It exposed a lifecycle defect: a replacement owner previously counted unread surviving contexts
+without releasing them during shutdown. Cleanup now authenticates those receipts with a signal
+independent of cancelled commands. The offline regression includes a real unread owned child.
+The expanded offline suite passes 51 tests. The receipt identifies the exact tested artifact and
+source hashes; subsequent query input/error refinements are not that installed artifact.
+
+The read expansion now exposes 72 pinned scoped query contracts, with typed flags, operation
+result checks, bounded JSON, explicit session/target scope and Factory ReadOnly gates. All 72
+native calls passed; [query evidence](verification/query-contracts.json) additionally asserts known
+types/enums, imported functions, properties/bookmarks, P-code, strings/xrefs and exact controlled
+emulation outputs. The offline suite passes 53 tests. Variant/nested-output completion and the
+actual script inventory remain open; the pinned script-list endpoint returns guidance rather than
+an inventory. This receipt does not complete those rows or editing coverage. The final M4 matrix
+will repeat on the full M5 artifact, including remaining backend/setup failures and all groups.
+
 ## Engineering defaults
 
 These are implementation choices within the agreed contract, rather than additional owner gates:

@@ -26,14 +26,17 @@ export class HttpBridge {
     const text = Buffer.concat(chunks).toString('utf8');
     let result: unknown;
     try { result = JSON.parse(text); } catch { result = text; }
-    if (result && typeof result === 'object') {
+    if (result && typeof result === 'object' && !Array.isArray(result)) {
       const o = object(result);
-      if (o.error || o.success === false || o.status === 'error') fail('remote', 'Ghidra bridge reported an operation failure.');
+      if (o.error || o.success === false || o.status === 'error') {
+        const reason=typeof o.error==='string'&&o.error.length<=1024&&!o.error.includes('\0')?o.error:undefined;
+        fail('remote',reason?'Ghidra: '+reason:'Ghidra operation failed.');
+      }
     }
     return result;
   }
   async instance() { return object(await this.request('/mcp/instance_info', 'GET', {}, {})); }
-  async call(path: string, params: Record<string, unknown> = {}): Promise<unknown> {
+  async descriptor(path:string):Promise<Descriptor> {
     if (!this.schema) {
       const schema = object(await this.request('/mcp/schema', 'GET', {}, {}));
       if (!Array.isArray(schema.tools)) fail('malformed', 'Ghidra schema omitted its tool descriptors.');
@@ -41,6 +44,10 @@ export class HttpBridge {
     }
     const tool = this.schema.get(path);
     if (!tool || !['GET', 'POST'].includes(tool.method) || !Array.isArray(tool.params)) fail('schema', 'Required Ghidra operation is missing from the observed schema.');
+    return tool;
+  }
+  async call(path: string, params: Record<string, unknown> = {}): Promise<unknown> {
+    const tool=await this.descriptor(path);
     const query: Record<string, unknown> = {}, body: Record<string, unknown> = {};
     for (const [name, value] of Object.entries(params)) {
       const param = tool.params.find(p => p.name === name);
@@ -59,7 +66,7 @@ export function decodeMcp(result: unknown): unknown {
     fail('malformed', 'Expected one bounded MCP text result.');
   let value: unknown;
   try { value = JSON.parse(content[0].text); } catch { value = content[0].text; }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
     const o = object(value);
     if (o.error || o.success === false) fail('remote', 'MCP result content reports failure.');
   }

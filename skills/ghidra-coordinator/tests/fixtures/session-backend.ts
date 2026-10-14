@@ -29,7 +29,7 @@ export class SessionBackend implements ResearchBackend {
       baseSnapshot:model.sharedSnapshot!,workingSnapshot:snapshot});return context;
   }
   private view(scope:Scope){return this.views.get(this.workspace.context(scope).id)!.view;}
-  async call(scope:Scope,operation:string,p:Record<string,unknown>={}) {
+  async call(scope:Scope,operation:string,p:Record<string,unknown>={}):Promise<unknown> {
     const view=this.view(scope),at=String(p.address??p.functions);
     if(operation==='/get_comment')return {address:at,eol:null,pre:null,post:null,plate:null,repeatable:null,...view.comments[at]};
     if(operation==='/get_functions')return {functions:{[at]:{name:view.names[at],entry_point:at,signature:'int '+view.names[at]+'(void)'}}};

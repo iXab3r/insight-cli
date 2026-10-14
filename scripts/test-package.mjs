@@ -7,7 +7,7 @@ assert.equal(createHash('sha256').update(await readFile(join(root,'vendor',prove
 try{
  const artifacts=join(install,'artifacts');await mkdir(artifacts);
  const pack=JSON.parse((await exec('npm',['pack','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli','--pack-destination',artifacts],{cwd:root})).stdout)[0];
- const files=new Set(pack.files.map(f=>f.path));for(const path of ['SKILL.md','references/setup.md','references/research.md','references/recovery.md','references/InsightRepositoryProbe.java','references/native/InsightGuiMain.java','references/native/InsightServerMain.java','LICENSE','dist/src/bin.js','.cli-package-build.json'])assert.ok(files.has(path),path);
+ const files=new Set(pack.files.map(f=>f.path));for(const path of ['SKILL.md','references/setup.md','references/research.md','references/recovery.md','references/queries.json','references/InsightRepositoryProbe.java','references/native/InsightGuiMain.java','references/native/InsightHeadlessMain.java','references/native/InsightServerMain.java','references/native/InsightSnapshotPublisher.java','references/native/InsightSnapshotFields.java','references/native/InsightPublicationRecovery.java','references/native/InsightBlockTransfer.java','LICENSE','dist/src/bin.js','dist/src/queries.js','.cli-package-build.json'])assert.ok(files.has(path),path);
  assert.ok([...files].every(f=>!f.includes('/tests/')&&(!f.endsWith('.ts')||f.endsWith('.d.ts'))));
  const sourcePackage=JSON.parse(await readFile(join(root,'package.json'),'utf8'));const lock=JSON.parse(await readFile(join(root,'package-lock.json'),'utf8'));
  const packageFile='file:artifacts/'+pack.filename;

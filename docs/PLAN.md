@@ -66,11 +66,11 @@ can change only with the real product transition; this plan adds no second imple
 | ID | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
 | M0 | Documented contract, pinned coverage audit and acceptance plan | — | Contract and source catalog audited; typed adapter schemas belong to implementation |
-| M1 | Open and continue isolated contexts for several inputs and agents | M0; relevant M1 decisions | Planned |
-| M2 | Agent reads and makes recoverable ordinary edits | M1; relevant M2 decisions | Planned |
-| M3 | Publish, refresh and resolve supported conflicts | M2; relevant M3 decisions | Planned |
-| M4 | Installed research workflow passes concurrent/crash checks | M3 | Planned internal checkpoint |
-| M5 | Full inventoried facade and combined delivery acceptance | M4; operation-specific engineering | Planned final gate |
+| M1 | Open and continue isolated contexts for several inputs and agents | M0; relevant M1 decisions | Native and public implementation checkpoints verified |
+| M2 | Agent reads and makes recoverable ordinary edits | M1; relevant M2 decisions | Public research/save checkpoint verified |
+| M3 | Publish, refresh and resolve supported conflicts | M2; relevant M3 decisions | Scalar/complex publication, refresh and recovery checkpoint verified |
+| M4 | Installed research workflow passes concurrent/crash checks | M3 | Installed owner/IPC matrix verified; remaining failure cases and final repeat pending |
+| M5 | Full inventoried facade and combined delivery acceptance | M4; operation-specific engineering | In progress; full functional coverage and final gate remain open |
 
 M1–M4 are internal implementation/verification checkpoints in one pass. Delivery is complete only
 after M5 covers the whole agreed inventory and the combined artifact repeats the reliability and

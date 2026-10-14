@@ -256,7 +256,8 @@ export class GhidraContexts {
   async call(scope: Scope, operation: string, parameters: Record<string,unknown> = {}): Promise<unknown> {
     const record=await this.selected(scope);
     if(Object.hasOwn(parameters,'program'))fail('invalid','Program routing is owned by the session and target selectors.');
-    return record.http.call(operation,{...parameters,program:record.binding.program});
+    const descriptor=await record.http.descriptor(operation);
+    return record.http.call(operation,{...parameters,...(descriptor.params.some(p=>p.name==='program')?{program:record.binding.program}:{})});
   }
   async saved(scope: Scope): Promise<Artifact> {return this.capture(await this.selected(scope));}
   async mode(scope: Scope, mode: ToolMode): Promise<void> {
@@ -371,11 +372,15 @@ export class GhidraContexts {
     }finally{await this.stopRecord(record);}
   }
   async dispose() {
+    // Factory has cancelled invocation signals before resource drain. Cleanup still needs
+    // bounded authenticated reads to establish ownership of previously orphaned children.
+    const cleanup=this.fork({...this.c,signal:new AbortController().signal});
     let failures=0;
+    try {await cleanup.inventory();}catch {failures++;}
     for(const record of [...this.running.values()]) {
       try {
         // Original child handles also permit cleanup of a failed, unready owned stage.
-        await this.stopRecord(record,!record.child);
+        await cleanup.stopRecord(record,!record.child);
       } catch {failures++;}
     }
     if(failures)fail('busy','Some owned native stages could not be stopped; their receipts and saved work are retained.');
@@ -396,7 +401,12 @@ export class GhidraContexts {
         const receipt=object(JSON.parse(await readFile(join(binding.root,'stopped.json'),'utf8')));
         stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-      if(!stopped&&alive(binding.pid))this.capacity.slots.add(entry.name);
+      if(!stopped&&alive(binding.pid)) {
+        // A replacement owner must also release contexts it has not read yet.
+        // PID existence alone grants no authority: authenticate the complete receipt.
+        await this.verified(binding,this.workspace.target(binding.target),false);
+        this.capacity.slots.add(entry.name);
+      }
     }
   }
 }
