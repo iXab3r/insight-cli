@@ -1,9 +1,16 @@
 # Full facade implementation work items
 
 The owner selected one combined M0–M5 delivery and closed the product decisions in
-[the plan](PLAN.md#closed-owner-decisions). This backlog is implementation planning, not executed
-work. All items are planned. Items produce code, fixtures or exact-revision evidence inside the
+[the plan](PLAN.md#closed-owner-decisions), then authorized autonomous implementation on 2026-10-14.
+Items produce code, fixtures or exact-revision evidence inside the
 existing product; they do not add separate CLIs, a generic plugin framework or agent-visible jobs.
+
+## Current progress
+
+M1-01 passed on an owned native fixture: private save/reopen, headless/GUI interchange,
+full-state publication, independent readback and stale-base refusal. The
+[receipt](verification/native-snapshots.json) records exact source/runtime hashes and its limits.
+M1-02 is in progress. All subsequent items remain planned. No combined facade acceptance has passed yet.
 
 ## Engineering defaults
 
@@ -73,4 +80,4 @@ HTTP success assertion.
 
 M4 passing is an internal checkpoint. M5-06 is the single final gate for the owner's complete
 delivery request. Documentation/count audits are complete planning inputs; none of the code work
-in this backlog has been implemented by this planning update.
+in this backlog is complete merely because it is documented here.

@@ -6,7 +6,8 @@ and sessions are shared above tool namespaces such as `ghidra`. Read
 from the existing publication prototype. [CLI scenarios](docs/CLI-SCENARIOS.md) describe the
 agent-facing contract; [milestones](docs/PLAN.md) define the agreed full delivery plan.
 The owner chose one full M0–M5 delivery; [coverage](docs/GHIDRA-COVERAGE.md) accounts for the pinned
-functionality. This documentation update does not start facade implementation. Do not mark a
+functionality. The owner authorized autonomous implementation of the entire facade on 2026-10-14.
+Do not mark a
 milestone complete using prototype evidence alone or reopen confirmed owner choices.
 [Work items](docs/WORK-ITEMS.md) order implementation; final acceptance requires the combined full facade.
 

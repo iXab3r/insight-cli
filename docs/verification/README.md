@@ -32,6 +32,19 @@ batch or native database merge. CI never runs native acceptance.
 
 ## Recorded runs
 
+[Native snapshot proof](native-snapshots.json) establishes the M1-01 prerequisite on an owned
+tiny PE fixture: private edits survive save/reopen and headless/GUI interchange, a complete saved
+database publishes at an unchanged base, independent readers verify its comments/name/type/
+signature/memory and original input identity, and a stale base creates no new version. It uses
+the native buffer-stream and change-set protocols rather than replaying a script. Source hashes
+identify the exact proof scripts. This does not establish automatic native database merging,
+general change-set completeness or the final facade's recovery/acceptance.
+
+Run `scripts/proof-native-snapshots.mjs --ack-disposable` with `--ghidra-home`, `--java`,
+`--mcp-jar`, `--clang` and `--lld` for this prerequisite. It refuses CI and owns its temporary
+server, projects and GUI processes. Its test-only credentials are synthetic; no user project
+or existing server is selected.
+
 | Evidence | Revision | Result |
 | --- | --- | --- |
 | [Native crashes](native-crashes.json) | 31eb08d | Two-program matrix and all six native owner crash phases passed |

@@ -11,8 +11,8 @@ This section records the intended contract. The existing `insight-ghidra` implem
 scoped-comment prototype of publication mechanisms, not an implementation of this facade.
 The prototype's behavior and tested limits are recorded below. The agreed walkthroughs are
 collected in [CLI scenarios](CLI-SCENARIOS.md); the agreed implementation sequence and exit
-criteria are in [the milestone plan](PLAN.md). This update records the design and plan only;
-implementation of the facade has not started.
+criteria are in [the milestone plan](PLAN.md). Autonomous implementation is underway;
+[work items](WORK-ITEMS.md) distinguish verified checkpoints from remaining delivery work.
 
 ### Full delivery scope agreed on 2026-10-14
 
