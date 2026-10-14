@@ -10,9 +10,38 @@ change capture and merge orchestration. Callers provide research intelligence an
 This section records the intended contract. The existing `insight-ghidra` implementation is a
 scoped-comment prototype of publication mechanisms, not an implementation of this facade.
 The prototype's behavior and tested limits are recorded below. The agreed walkthroughs are
-collected in [CLI scenarios](CLI-SCENARIOS.md); the proposed implementation sequence and exit
+collected in [CLI scenarios](CLI-SCENARIOS.md); the agreed implementation sequence and exit
 criteria are in [the milestone plan](PLAN.md). This update records the design and plan only;
 implementation of the facade has not started.
+
+### Full delivery scope agreed on 2026-10-14
+
+The owner chose one implementation pass covering the whole M0–M5 plan, with acceptance of the
+combined result. Milestones are internal checkpoints; completing the research slice alone does
+not complete delivery. The baseline is the pinned GhidraMCP 7.0.0 functionality, including server
+management and GUI/debugger operations. [Coverage](GHIDRA-COVERAGE.md) inventories the actual source
+catalog and bridge controls. Logical equivalents can replace underlying routing, checkout/check-in,
+save/close and discovery operations; callers need not receive a literal backend passthrough.
+
+Ordinary work uses owned headless instances. GUI-only operations use managed isolated GUI instances
+for the appropriate contexts when needed. Native acceptance in this pass targets macOS; portable
+CLI/CI remains required, while native Windows/Linux acceptance is deferred. Static PE research and
+native macOS debugger fixtures are distinct acceptance cases; this does not claim macOS can execute
+every imported EXE format. Saved analysis/trace state is recoverable; a crashed live debuggee is not
+silently resumed from a prior CPU execution state.
+
+On a machine with the configured Ghidra/Java dependencies, the facade starts its owned local server
+and creates its own repository/storage for the ordinary open workflow. An externally configured
+Ghidra Server is also supported through a profile. Factory continues to own profiles, permission
+gates, credentials and host lifecycle. Managed resources live in profile AppData; starting local
+infrastructure does not grant administrative control over unrelated external repositories.
+
+Two catalog operations exchange documentation with an independently configured archive service.
+The owner confirmed inclusion of their facade/configuration/contract verification while keeping
+that service an external dependency; developing/provisioning a new archive product is excluded.
+Server administration,
+debugger actions, exports and archive exchange have immediate operation-specific effects rather
+than being ordinary program-DB edits awaiting merge.
 
 ### Shared targets and sessions
 
@@ -137,10 +166,21 @@ is visible to subsequent reads in that context. An acknowledged `state: applied`
 edit is recorded for recovery; `sharedState: pending` means it has not yet been published.
 This is a required facade behavior, not a durability claim about the existing prototype.
 
-Merge timing remains undecided. Background/per-operation publication, checkpoints and explicit
-integration are possible policies; the walkthrough does not choose a default. Automatic incoming
-refresh, refresh application granularity, session lifecycle details and operation-specific merge
-coverage also require agreement. No universal native database merge is implied here.
+The owner selected explicit `merge` and `refresh` for this pass. Automatic publication and incoming
+refresh strategies are deferred. If any selected local change conflicts, merge publishes nothing
+and preserves all local work. This is a publication gate, not a claim that separate backend calls
+are atomic: incomplete stages remain recoverable and never receive a successful publication result.
+
+Refresh applies incoming changes that can be safely combined and preserves conflicting local values
+alongside the shared version. Dependencies between edits must be checked; sharing an address or
+being an unchanged scalar value does not establish that applying it to a changed structure is safe.
+
+Complex local program changes can be published when the relevant shared model is unchanged and
+their saved result can be verified. Once that model diverges, only categories with defined and
+verified merge semantics are automatically combined. Other changes retain the local and shared
+versions as an explicit conflict. The caller transfers the desired work onto a current shared
+base before publication; whole-version force replacement is outside the selected contract.
+No universal native database merge or replay of arbitrary scripts is implied here.
 
 ### Agreed scalar conflict resolution
 
@@ -195,9 +235,26 @@ insight-cli ghidra merge --session s_b --target t_client --json
 }
 ```
 
-These examples cover one non-null scalar comment. Null/absent values, non-scalar edits,
-partial publication of multiple changes and refresh granularity need their own contracts.
-They are not silently defined by this example.
+These examples cover one non-null scalar comment. The typed implementation must define null/absent
+values and operation-specific conflicts consistently. The full-delivery choices above now settle
+multi-change publication and incoming refresh; they do not make non-scalar changes independently
+mergeable fields.
+
+### Request identity and lost responses
+
+Changing commands accept an optional `--request-id`; API callers use the same command option
+through Factory. The service records a request's identity and intent before acknowledging effects.
+Within the selected profile, the same ID and same effective input identify the same request,
+including initial `open --session new` before the session ID is known. Reuse with different input
+fails. A retry retrieves the prior result or its current unresolved state rather than repeating
+the operation. Without a caller-provided ID, each invocation is a new intent; ordinary workflows
+remain unchanged.
+
+An unknown or partially completed request must not be reported as successful or executed again
+merely because its caller retries. Reconciliation can establish a terminal result; otherwise the
+affected mutation/publication remains blocked as appropriate. Readback or remote-specific evidence
+is required for effects outside the program DB. This is not a blanket exactly-once guarantee for
+arbitrary scripts, debugger execution or external services.
 
 ### Continuation after failure
 
@@ -207,7 +264,8 @@ If a publication response is lost, continuation must establish the actual outcom
 evidence. A known completed publication is reported without repeating it; an unestablished
 outcome stays unknown and blocks further publication that could duplicate or overwrite it.
 Session pause/finish commands and additional lifecycle states are deferred until actual usage
-demonstrates a need. This requirement does not introduce a new agent-visible operation identifier.
+demonstrates a need. Optional caller request identity does not require a separate job/operation
+object in the ordinary research workflow.
 
 ## Current prototype implementation
 

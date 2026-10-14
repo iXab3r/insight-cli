@@ -2,8 +2,32 @@
 
 The owner requested documentation and milestone planning on 2026-10-14. The product contract is
 in [DESIGN](DESIGN.md#agreed-product-model), with concrete [CLI scenarios](CLI-SCENARIOS.md).
-This plan proposes implementation order and acceptance gates; it does not implement the facade,
-approve npm publication, or declare the existing prototype ready for the agreed product.
+The owner subsequently selected one full M0–M5 implementation pass and answered the product
+decisions below. This plan records the full delivery contract and internal checkpoints; this
+documentation update does not implement the facade or approve npm publication.
+
+## Closed owner decisions
+
+| Topic | Selected behavior |
+| --- | --- |
+| Delivery | Entire M0–M5, accepted as one combined result |
+| Publication mode | Explicit merge/refresh; automatic strategies deferred |
+| Complex program edits | Publish a verified saved result if shared base is unchanged; after divergence automatically combine only verified categories |
+| Complex conflicts | Preserve local/shared versions; caller transfers desired work onto the current base; no force replacement |
+| Mixed merge | Any conflict prevents publication of the whole selected merge; preserve all local work |
+| Mixed refresh | Apply safe incoming changes; retain conflicting local values with the shared version |
+| Runtime modes | Headless for ordinary work; owned GUI instances on demand, including debugger |
+| Ordinary startup | Managed local server/repository/storage; external Ghidra Server also configurable by profile |
+| API parity | Functional equivalents may replace backend routing, checkout/check-in, save/close and discovery controls |
+| Retry identity | Optional request-id on changing commands/API; same intent retrieves the previous result/state, different content is rejected |
+| Native acceptance | macOS in this pass; portable CLI/CI; native Windows/Linux deferred |
+| Archive exchange | Facade/configuration and contract verification included; developing/provisioning the external service excluded |
+
+These answers replace the corresponding open policy questions in the earlier plan. Remaining
+schema, storage and adapter choices are engineering work, not requests to reopen these decisions.
+The owner also confirmed the archive-service boundary: it is an explicitly configured external
+dependency. All owner questions raised for this full pass are answered. The concrete implementation
+backlog is in [work items](WORK-ITEMS.md).
 
 ## Current baseline
 
@@ -41,17 +65,17 @@ can change only with the real product transition; this plan adds no second imple
 
 | ID | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
-| M0 | Documented contract, walkthroughs, coverage audit and acceptance plan | — | Contract/plan recorded; full operation audit and exact schemas still planned |
+| M0 | Documented contract, pinned coverage audit and acceptance plan | — | Contract and source catalog audited; typed adapter schemas belong to implementation |
 | M1 | Open and continue isolated contexts for several inputs and agents | M0; relevant M1 decisions | Planned |
 | M2 | Agent reads and makes recoverable ordinary edits | M1; relevant M2 decisions | Planned |
 | M3 | Publish, refresh and resolve supported conflicts | M2; relevant M3 decisions | Planned |
-| M4 | Installed first slice passes the complete concurrent/crash scenario | M3 | Planned |
-| M5 | Broaden the facade to the inventoried Ghidra/MCP/server functionality | M4; operation-specific decisions | Planned |
+| M4 | Installed research workflow passes concurrent/crash checks | M3 | Planned internal checkpoint |
+| M5 | Full inventoried facade and combined delivery acceptance | M4; operation-specific engineering | Planned final gate |
 
-M1–M3 are implementation checkpoints. M4 is acceptance of the first usable research slice.
-M5 remains part of the intended product; the first slice is not a permanent comments-only ceiling.
-Dates and effort estimates are not assigned before the M0 coverage audit and M1 storage/isolation
-work establish the actual gaps.
+M1–M4 are internal implementation/verification checkpoints in one pass. Delivery is complete only
+after M5 covers the whole agreed inventory and the combined artifact repeats the reliability and
+package checks. The first research slice does not reduce the final scope. Dates/effort are not
+promised from endpoint counts: GUI lifecycle and whole-program persistence require native proofs.
 
 ### M0 — Contract and scope
 
@@ -59,9 +83,10 @@ work establish the actual gaps.
   mutation ordering, conflict resolution and continuation semantics.
 - Keep example leaf names/results distinguishable from executable prototype commands. Define the
   first-slice command/output/permission map using Factory, including scoped errors and bounded reads.
-- Inventory the pinned Ghidra/MCP/server operations. For each real operation record the intended
-  facade command, scope, permissions, local effect, persistence requirement and merge support.
-  This is a planning table, not a new runtime registry or plugin framework.
+- Use [the audited coverage baseline](GHIDRA-COVERAGE.md): 210 unique source-catalog operations
+  and eight static bridge controls. Each operation has a planned facade mapping, runtime mode,
+  access annotation, scope and effect/publication class. Verify typed arguments/results against
+  actual handlers during adapter implementation; annotations are not semantic merge evidence.
 - Classify actual modules as reusable, needing adaptation or prototype-only. Review uncertain
   journals and stored identities before proposing the transition.
 
@@ -86,6 +111,11 @@ Exit:
   competing working contexts.
 - Scoped JSON results echo session/target. Factory profiles, permissions, secrets and AppData
   boundaries remain in force. The runtime does not require a Factory source checkout.
+- Ordinary startup owns its local server/repository/storage. External server profiles also work
+  without adopting unrelated existing processes. GUI contexts are isolated and started only when
+  required; a mode transition preserves the saved working state and verifies the binding.
+- Optional request identity reconciles concurrent/retried initial open without creating duplicate
+  sessions or contexts; reusing an ID with a changed input fails.
 
 ### M2 — Ordinary research and local changes
 
@@ -112,8 +142,8 @@ Local persistence and mutation ordering are required now, not deferred to final 
 ### M3 — Merge, refresh and conflicts
 
 Deliver explicit `ghidra merge` and `ghidra refresh` for the selected context, initially for
-comments and function names once their exact field contracts are settled. The manual path must
-reproduce the agreed scenarios; this does not choose a global default or automatic policy.
+comments and function names once their exact field contracts are settled. The owner selected this
+explicit mode for the entire pass; automatic modes are deferred.
 
 Exit:
 
@@ -126,16 +156,20 @@ Exit:
   A stale expectation fails without losing work; later shared changes are checked again at merge.
 - Merge/refresh participate in the same per-context mutation order. A setter executed before a
   successful merge is included; one executed after it remains pending for a later publication.
-- Mixed conflicting and non-conflicting changes follow the explicitly selected partial-publication
-  rule. Counters and failure status describe what actually happened. Multiple backend calls are
-  not advertised as one atomic transaction without proof.
+- Any conflicting selected change prevents publication of the whole merge. Refresh can receive
+  changes proven safe to combine while retaining local/shared conflict values. Counters and
+  failure status describe actual effects; multiple calls are not advertised as atomic transactions.
 - Publication is serialized per shared target/tool model across sessions. A fresh verified
   publication base, readback and durable outcome checks prevent stale native check-in and duplicate
   publication. Unknown outcomes block publication affecting that model, including other sessions.
 - Unsupported merge scopes return a clear limitation while preserving exploratory local work.
   Functional operation coverage and automatic merge coverage remain separately documented.
+- Verified complex saved program changes publish when the relevant shared base is unchanged.
+  Once it diverges, unproved merge categories remain explicit conflicts with both versions
+  preserved. The caller can open a new session on the current target and transfer desired work;
+  the old context remains available. Arbitrary operation/script replay is not a merge algorithm.
 
-### M4 — Recovery, installed delivery and first-slice acceptance
+### M4 — Recovery and installed workflow checkpoint
 
 Run the complete [A/B, conflict and failure walkthrough](CLI-SCENARIOS.md) through an installed
 package. Reuse existing test infrastructure where valid, adding checks for the changed contract.
@@ -155,17 +189,27 @@ Exit:
   The package includes runtime/proto/license inputs required by the agreed Factory contract.
 - Native acceptance uses the declared runtime versions and disposable fixtures. Public evidence
   records the exact source/artifact revision, sanitized assertions and exercised limits. Required
-  review and CI complete before the source PR becomes ready for this slice.
+  checks establish this internal checkpoint; the source PR stays draft until the full M5 gate.
 
 Packing and source delivery do not authorize npm publication, production migration or replacement
 of an existing RE workflow. Report resource/capacity limits from the exercised cases.
 
-### M5 — Broader Ghidra facade
+### M5 — Full facade and combined acceptance
 
 Use the M0 inventory to expand actual operation groups in reviewable increments: analysis and
 listing, symbols and types, program/project/server management, and other available capabilities.
 Order increments by real research needs. Every group needs public help/examples, permissions,
 scope validation, failure/continuation semantics and operation-specific acceptance.
+
+GUI/debugger and program/project/server operations are included, not an optional follow-up. Native
+acceptance uses macOS fixtures: PE for static analysis and an owned native executable for debugger
+launch, mappings, reads, breakpoints, interruption, stepping and trace persistence. A live process
+lost to a crash is reported as disconnected; no transparent CPU-state resurrection is promised.
+External effects have operation-specific outcomes and are not rolled back by a program transaction.
+For archive exchange, include profile configuration, payload/response validation,
+bounded bulk results and retry/partial-outcome behavior for both archive operations. Adapter tests
+use an owned contract fixture; claims about a separately deployed service require declared matching
+service evidence. Building/provisioning that external service is outside the agreed scope.
 
 Exit: each operation in the agreed inventory is exposed through the facade or has an agreed
 equivalent replacement. Unsupported/unimplemented functional entries remain open; documenting a
@@ -173,20 +217,26 @@ limitation does not count as delivering that operation. Automatic merging is cla
 scopes with defined and verified semantics. Agents continue using logical session/target scope
 rather than backend details.
 
-## Decisions at the point they matter
+The final artifact must also repeat the M4 A/B/crash suite after all operation groups are present,
+pass installed CLI/skill/Factory transport checks and satisfy the coverage ledger at the exact
+source/artifact revision. Broad functional availability does not widen automatic merge claims.
 
-| Before | Decision needed | Constraint already agreed |
+## Engineering work owned by implementation
+
+| Before | Engineering task | Constraint already agreed |
 | --- | --- | --- |
-| M1 storage/open | Prototype-state transition; profile-scoped identity; backend binding and load-setting compatibility; lost creation response | Immutable input targets, root sessions, no silent reset or loss of pending work |
-| M2 public leaves | Exact schemas, bounded traversal, scoped errors, interrupted/lost local-write responses, reads overlapping mutation | Factory owns transports/output; explicit selectors; acknowledged edits recoverable |
+| M1 storage/open | Preserve prototype state separately; implement input identity, binding/load compatibility and request-id handling | Immutable targets, root sessions, no loss of pending work or duplicate creation on retry |
+| M1 runtime ownership | Local bootstrap, external profiles, GUI lifecycle, resource limits and dependency checks | Isolated owned instances; macOS native acceptance; no adoption of unrelated resources |
+| M2 public leaves | Typed schemas, bounded traversal, scoped errors, interrupted writes and reads overlapping mutation | Factory owns transports/output; explicit selectors; acknowledged edits recoverable |
 | M3 supported fields | Null/absent comments, rename identity/collisions, resolution syntax for each supported field | Preserve local work; explicit original/local/shared conflict; stale resolution rejected |
-| M3 multi-change operations | Refresh granularity; whether a conflict prevents the whole merge or allows supported non-conflicting changes | Accurate results; no silent overwrites or unproved atomicity |
-| Automatic strategies, if requested | Publication timing and automatic incoming refresh | Existing walkthrough uses explicit commands; no automatic default selected |
-| M5 operation groups | Scripts, batch analysis, structural/type changes and other non-scalar effects | Full functional facade remains the goal; no universal database auto-merge promise |
+| M3 multi-change operations | Capture verified saved state; test dependencies, partial failures, refresh and publication gates | Merge publishes nothing on conflict; refresh receives safe changes; no unproved atomicity |
+| M5 operation groups | Scripts/batches, structural changes, GUI/debugger and external effects | Full functionality; unchanged-base publication; divergence conflicts outside verified categories |
 
 Pause/finish/reopen workflow expansion, a hypothetical second tool, cross-tool transactions and a
 general plugin framework remain deferred. Add them only when a concrete consumer scenario needs them.
 
-The next implementation-planning task is the M0 operation/gap audit and the M1-specific decisions,
-not another session lifecycle design. Track delivery under [Factory #49](https://github.com/iXab3r/EyeAuras.CliFactory/issues/49)
-and keep the existing consumer PR in draft until the relevant acceptance gates pass.
+No further owner choice is required for the decisions closed above. The next implementation task
+is the M1 native private-state/publication proof, followed by the storage/runtime work in
+[the backlog](WORK-ITEMS.md). Typed operation work proceeds within the closed plan. Track delivery
+under [Factory #49](https://github.com/iXab3r/EyeAuras.CliFactory/issues/49)
+and keep the consumer PR draft until combined full-delivery acceptance passes.

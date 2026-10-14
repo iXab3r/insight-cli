@@ -4,9 +4,11 @@ This repository develops the game-agnostic `insight-cli` facade and matching ski
 and sessions are shared above tool namespaces such as `ghidra`. Read
 [design](docs/DESIGN.md) before changing a public contract; distinguish its agreed target model
 from the existing publication prototype. [CLI scenarios](docs/CLI-SCENARIOS.md) describe the
-agent-facing contract; [milestones](docs/PLAN.md) define the proposed implementation sequence.
-This documentation update does not start facade implementation. Do not mark a milestone complete
-using prototype evidence alone or silently choose a policy listed as unresolved in the plan.
+agent-facing contract; [milestones](docs/PLAN.md) define the agreed full delivery plan.
+The owner chose one full M0–M5 delivery; [coverage](docs/GHIDRA-COVERAGE.md) accounts for the pinned
+functionality. This documentation update does not start facade implementation. Do not mark a
+milestone complete using prototype evidence alone or reopen confirmed owner choices.
+[Work items](docs/WORK-ITEMS.md) order implementation; final acceptance requires the combined full facade.
 
 | Surface | Read next |
 | --- | --- |

@@ -26,7 +26,7 @@ one input. Input-opening calls may derive target identity from the supplied path
 results echo both identifiers. Counts describe the selected context. Missing selectors fail
 with a nonzero exit status rather than guessing an active input.
 
-The manual publication path in these examples does not select a default automatic strategy.
+The owner selected explicit merge/refresh for the complete delivery; automatic strategies are deferred.
 Target source bytes are immutable; publishing analysis does not patch the EXE.
 
 ## Research one input
@@ -228,7 +228,9 @@ This records a local decision against the observed shared base. B then uses ordi
 If the shared value has already changed, resolution fails with `state: conflict` and
 `reason: shared_changed`, retaining the local work and returning expected/shared/local values.
 If it changes later, merge compares against that acknowledged base and checks for another conflict.
-The exact null/absent-value representation and multi-change partial-publication policy remain open.
+The typed implementation defines null/absent values consistently. The owner selected no partial
+publication: any conflict prevents publication of the whole selected merge, preserving all work.
+Refresh still applies incoming changes proven safe to combine and retains local/shared conflicts.
 
 ## Failure and continuation
 
@@ -296,3 +298,65 @@ For a concurrent setter and merge: if the setter executes first, its change is i
 merge executes first, the later edit remains pending. A caller requiring inclusion waits for
 the setter's `applied` response and then invokes merge. No process selector or manual lock is
 added to the research API. The ordering rule does not claim atomic multi-call database updates.
+
+## Optional request identity
+
+An agent that needs to retry initial open after losing its response can supply a stable request ID:
+
+```sh
+insight-cli ghidra open ./client.exe --session new --request-id open-A-001 --json
+```
+
+```json
+{"session":"s_a","target":"t_client","state":"ready"}
+```
+
+Repeating the same intent with `open-A-001` retrieves the same session/result or the request's
+unresolved state; it does not create another session. Reusing it with changed effective input
+fails. Without a supplied ID, each invocation is a new intent.
+
+The same option is available for setters, merge, scripts, batches and other changing commands:
+
+```sh
+insight-cli ghidra merge --session s_a --target t_client --request-id merge-A-001 --json
+```
+
+If the response is lost, retrying with that ID observes/reconciles the original publication,
+without submitting another check-in. Unknown/partial outcomes are not transformed into success.
+Script/debugger/external actions are never blindly repeated under an unresolved request ID.
+
+API execution uses the existing Factory method and command arguments, for example:
+
+```json
+{
+  "method":"cli.execute",
+  "params":{
+    "argv":["ghidra","merge","--session","s_a","--target","t_client","--request-id","merge-A-001","--json"]
+  }
+}
+```
+
+This shows method/params only, not the full transport envelope. No separate product RPC method
+or required agent-visible job entity is introduced.
+
+## Complex changes and a diverged base
+
+An agent can edit types, signatures, structures or analysis through the facade. If the shared
+model is unchanged, a verified saved private result can be published. If another session advances
+the model, changes outside verified merge categories remain explicit conflicts. Both versions
+remain available; the service does not force-replace the shared version or replay the agent's script.
+
+To transfer desired work onto the latest model, the agent can open the existing target in a new
+session while retaining its previous context:
+
+```sh
+insight-cli ghidra open --session new --target t_client --json
+```
+
+```json
+{"session":"s_b_current","target":"t_client","state":"ready"}
+```
+
+The agent reads its old work through `s_b`, applies the desired changes through `s_b_current`
+against that current base, then merges normally. This uses the existing session/target model;
+no automatic whole-version overwrite or new rebase entity is required.

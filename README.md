@@ -7,6 +7,10 @@ below is the earlier `insight-ghidra` publication prototype; the new facade is n
 The [agent walkthroughs](docs/CLI-SCENARIOS.md) record the intended commands and responses;
 the [milestone plan](docs/PLAN.md) separates that contract from the existing implementation and
 defines observable completion criteria. Those examples are not commands available in the prototype.
+The owner selected one full M0–M5 pass, explicit merge/refresh, managed local startup plus external
+server profiles, and GUI/debugger support on demand. The [pinned coverage ledger](docs/GHIDRA-COVERAGE.md)
+accounts for 210 GhidraMCP operations and eight bridge controls. Native acceptance targets macOS;
+CLI/CI portability remains required. The new facade is accepted only after combined full delivery.
 
 Agent-oriented TypeScript CLIs and matching skills built on AI CLI Factory. The first executable,
 `insight-ghidra`, coordinates independent Ghidra readers and durable scoped-comment proposals.
