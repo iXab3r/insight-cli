@@ -71,6 +71,41 @@ covers Ghidra/server functionality, with logical lifecycle and management operat
 through the facade. Functional editing support and automatic merge support are separately
 specified for each operation. The prototype's comment-only scope is not the facade's API ceiling.
 
+### Explicit scope across multiple inputs
+
+The owner agreed the two-input walkthrough: a session may open another input without replacing
+its existing context. Opening `helper.exe` in A's session creates or continues the context for
+that target, while A's work on `client.exe` remains independently available:
+
+```text
+insight-cli ghidra open ./helper.exe --session s_a --json
+```
+
+```json
+{
+  "session": "s_a",
+  "target": "t_helper",
+  "state": "ready"
+}
+```
+
+Research commands require explicit `--session` and `--target`. There is no active input that
+opening another EXE silently switches. Omitting `--target` is an error with a nonzero exit status,
+even if the session currently has only one target. Input-opening calls can establish target
+identity from their supplied path and return it to the agent.
+
+Every scoped research JSON result includes `session` and `target` alongside the operation's
+data, so agents can associate responses from parallel calls with the intended input. An address
+alone never identifies an object across targets; two EXEs can contain unrelated functions at
+the same address.
+
+`ghidra merge` and `ghidra refresh` affect only the selected session, target and tool context.
+Result counts such as `pendingChanges`, `receivedChanges` and `preservedLocalChanges` refer to
+that context, not all targets in the session. Publishing A's changes to `t_client` leaves A's
+unpublished `t_helper` changes intact. B may open and refresh `t_client` without opening `t_helper`.
+Reopening `(s_a, t_helper, ghidra)` after a failure preserves its local work under the continuation
+rules below.
+
 ### Publication and incoming updates
 
 If A and B open a shared Ghidra model at R1, each context starts from R1 and accumulates its own
@@ -114,6 +149,8 @@ insight-cli ghidra comments set \
 
 ```json
 {
+  "session": "s_b",
+  "target": "t_client",
   "state": "applied",
   "conflict": "resolved",
   "sharedState": "pending"
@@ -134,6 +171,8 @@ insight-cli ghidra merge --session s_b --target t_client --json
 
 ```json
 {
+  "session": "s_b",
+  "target": "t_client",
   "state": "merged",
   "applied": 1,
   "pendingChanges": 0
