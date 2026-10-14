@@ -45,15 +45,24 @@ No hypothetical second tool or general plugin framework is required to implement
 | s_a | t_helper | ghidra | A's private work on helper |
 | s_b | t_client | ghidra | B's independent work on client |
 
-The discussion's CLI shape is:
+The routine entry point opens an input and creates an independent session in one call:
 
 ```text
-insight-cli targets add ./client.exe --name client --json
-insight-cli sessions create --name agent-A-work --json
-insight-cli ghidra programs open --session s_a --target t_client
-insight-cli ghidra functions get --session s_a --target t_client --address 0x140001000 --json
-insight-cli sessions status s_a --json
+insight-cli ghidra open ./client.exe --session new --json
 ```
+
+The result supplies `session` and `target`, for example `s_a` and `t_client`. B independently
+opening the same input receives a different session, such as `s_b`, and the same target identity.
+The agent uses those identifiers on subsequent calls:
+
+```text
+insight-cli ghidra functions get --session s_a --target t_client --address 0x140001000 --json
+insight-cli ghidra open --session s_a --target t_client --json
+```
+
+The second form continues an existing context after reconnecting or process replacement.
+Separate target/session management can remain available, but is not required setup for each
+research task. These commands describe the intended facade, not currently executable commands.
 
 Program-scoped research calls identify the session and target rather than changing a global
 active program. The facade resolves backend bindings and captures changes automatically;
@@ -71,10 +80,79 @@ For supported scopes the service compares the original, local and shared states,
 changes and retains incompatible values as explicit conflicts. Context refresh and publication
 are distinct operations; refresh does not itself approve replacing shared data with local values.
 
+The manual A/B walkthrough uses `ghidra refresh` to receive shared changes and `ghidra merge`
+to publish local changes, both scoped by `--session` and `--target`. A successful ordinary edit
+is visible to subsequent reads in that context. An acknowledged `state: applied` means the local
+edit is recorded for recovery; `sharedState: pending` means it has not yet been published.
+This is a required facade behavior, not a durability claim about the existing prototype.
+
 Merge timing remains undecided. Background/per-operation publication, checkpoints and explicit
-integration are possible policies. Automatic incoming refresh, exact conflict-resolution commands,
-refresh application granularity, session lifecycle details and operation-specific merge coverage
-also require agreement. No default policy or universal native database merge is implied here.
+integration are possible policies; the walkthrough does not choose a default. Automatic incoming
+refresh, refresh application granularity, session lifecycle details and operation-specific merge
+coverage also require agreement. No universal native database merge is implied here.
+
+### Agreed scalar conflict resolution
+
+For supported scalar fields, conflict detection compares original, local and shared values.
+A change on only one side can be preserved; equal resulting values do not conflict. Different
+changes on both sides retain all three values as an explicit conflict. The service does not
+choose a semantic winner. A failed merge returns a conflict result and a nonzero CLI exit status;
+the conflicting local value remains available in the session.
+
+The agent resolves a comment conflict through the ordinary setter, explicitly identifying the
+shared value it considered. It can choose the existing shared text, its own text, or a new text:
+
+```text
+insight-cli ghidra comments set \
+  --session s_b --target t_client \
+  --address 0x140001000 --kind eol \
+  --text "Loads settings from a file; falls back to embedded defaults" \
+  --resolve-conflict \
+  --expect-shared "Loads settings from a file" \
+  --json
+```
+
+```json
+{
+  "state": "applied",
+  "conflict": "resolved",
+  "sharedState": "pending"
+}
+```
+
+This acknowledges the observed shared value as the new comparison base for that field and
+records the selected local value; it does not publish the choice. `--resolve-conflict` is an
+explicit decision, not a side effect of ordinary editing. `--expect-shared` is required for this
+form. If the shared value differs at resolution time, the command fails with `state: conflict`,
+`reason: shared_changed`, and the expected, current shared and retained local values. It preserves
+the local work and unresolved conflict. If the shared value changes after resolution, the next
+merge compares it with the acknowledged base and checks for a new conflict.
+
+```text
+insight-cli ghidra merge --session s_b --target t_client --json
+```
+
+```json
+{
+  "state": "merged",
+  "applied": 1,
+  "pendingChanges": 0
+}
+```
+
+These examples cover one non-null scalar comment. Null/absent values, non-scalar edits,
+partial publication of multiple changes and refresh granularity need their own contracts.
+They are not silently defined by this example.
+
+### Continuation after failure
+
+The same session and target reopen the saved private context, including unpublished changes
+and unresolved conflicts. Reopening does not silently replace it with the latest shared model.
+If a publication response is lost, continuation must establish the actual outcome from durable
+evidence. A known completed publication is reported without repeating it; an unestablished
+outcome stays unknown and blocks further publication that could duplicate or overwrite it.
+Session pause/finish commands and additional lifecycle states are deferred until actual usage
+demonstrates a need. This requirement does not introduce a new agent-visible operation identifier.
 
 ## Current prototype implementation
 
