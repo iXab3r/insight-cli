@@ -1,0 +1,7 @@
+node_modules/
+**/dist/
+artifacts/*
+.workspace/
+*.tgz
+**/.cli-package-build.json
+!vendor/*.tgz

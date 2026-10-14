@@ -1,0 +1,26 @@
+{
+  "name": "insight-agent-repository",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "skills/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run build && node --test skills/ghidra-coordinator/dist/tests/*.test.js",
+    "pack:cli": "node scripts/pack-cli.mjs",
+    "test:package": "node scripts/test-package.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@eyeauras/cli-factory-ipc": "file:vendor/factory-ipc-a2094fb.tgz"
+  }
+}
