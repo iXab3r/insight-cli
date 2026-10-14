@@ -1,7 +1,9 @@
 # insight-cli agent router
 
-This repository ships independent, game-agnostic CLIs and their matching skills. Read
-[design](docs/DESIGN.md) before changing a public contract.
+This repository develops the game-agnostic `insight-cli` facade and matching skills. Targets
+and sessions are shared above tool namespaces such as `ghidra`. Read
+[design](docs/DESIGN.md) before changing a public contract; distinguish its agreed target model
+from the existing publication prototype. Implementation is currently deferred during API design.
 
 | Surface | Read next |
 | --- | --- |
@@ -12,8 +14,8 @@ This repository ships independent, game-agnostic CLIs and their matching skills.
 Factory owns commands, output, profiles, secrets, permissions and IPC lifecycle. Do not copy
 its core or build helper. Helpers live canonically under the skill npm workspace. Add another
 CLI only for a real consumer. All mutable data derives from profile AppData; no checkout-local
-runtime state. Updates are disabled by default. Investigators may read and propose; only the
-coordinator publishes. A local lock cannot enforce server authorization.
+runtime state. Updates are disabled by default. Agents edit isolated working contexts;
+the service coordinates shared publication. A local lock cannot enforce server authorization.
 
 Unknown check-in outcomes freeze the lane until history and independent readback establish the
 result. Preserve journals and local copies; never retry a check-in blindly or expire a live owner.

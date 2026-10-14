@@ -1,5 +1,10 @@
 # insight-cli
 
+**Design stage:** the agreed public CLI is `insight-cli`, with shared `targets` and `sessions`
+and tool branches such as `ghidra`. Each tool owns its working contexts and shared analysis
+models. See the [agreed model](docs/DESIGN.md#agreed-product-model). The draft implementation
+below is the earlier `insight-ghidra` publication prototype; the new facade is not implemented.
+
 Agent-oriented TypeScript CLIs and matching skills built on AI CLI Factory. The first executable,
 `insight-ghidra`, coordinates independent Ghidra readers and durable scoped-comment proposals.
 Its canonical source and installed skill live together under `skills/ghidra-coordinator`.
