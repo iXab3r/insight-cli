@@ -9,8 +9,10 @@ change capture and merge orchestration. Callers provide research intelligence an
 
 This section records the intended contract. The existing `insight-ghidra` implementation is a
 scoped-comment prototype of publication mechanisms, not an implementation of this facade.
-The prototype's behavior and tested limits are recorded below. Implementation remains deferred
-while the public API and outstanding policies are discussed.
+The prototype's behavior and tested limits are recorded below. The agreed walkthroughs are
+collected in [CLI scenarios](CLI-SCENARIOS.md); the proposed implementation sequence and exit
+criteria are in [the milestone plan](PLAN.md). This update records the design and plan only;
+implementation of the facade has not started.
 
 ### Shared targets and sessions
 
@@ -105,6 +107,20 @@ that context, not all targets in the session. Publishing A's changes to `t_clien
 unpublished `t_helper` changes intact. B may open and refresh `t_client` without opening `t_helper`.
 Reopening `(s_a, t_helper, ghidra)` after a failure preserves its local work under the continuation
 rules below.
+
+### Concurrent callers
+
+Different CLI processes using the same `(session, target, tool)` operate on the same working
+context, not independent copies. Independent agents use different sessions. Changing operations
+on one context, including setters, merge and refresh, execute in sequence. Simultaneously submitted
+calls have no promised order. If a setter executes before merge, its change is included; if it
+executes after merge, its change remains pending. A caller requiring inclusion waits for the edit's
+`state: applied` response before invoking merge. A failed or unknown publication never produces a
+successful merge acknowledgment merely to allow the next call to proceed.
+
+This does not define all calls as atomic database transactions, nor promise unlimited parallelism
+across contexts. Tool resource limits and consistency for reads overlapping long mutations must be
+specified for the supported operations. No agent-visible process ID or lock command is required.
 
 ### Publication and incoming updates
 

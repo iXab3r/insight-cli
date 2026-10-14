@@ -3,7 +3,10 @@
 This repository develops the game-agnostic `insight-cli` facade and matching skills. Targets
 and sessions are shared above tool namespaces such as `ghidra`. Read
 [design](docs/DESIGN.md) before changing a public contract; distinguish its agreed target model
-from the existing publication prototype. Implementation is currently deferred during API design.
+from the existing publication prototype. [CLI scenarios](docs/CLI-SCENARIOS.md) describe the
+agent-facing contract; [milestones](docs/PLAN.md) define the proposed implementation sequence.
+This documentation update does not start facade implementation. Do not mark a milestone complete
+using prototype evidence alone or silently choose a policy listed as unresolved in the plan.
 
 | Surface | Read next |
 | --- | --- |
