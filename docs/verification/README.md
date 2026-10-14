@@ -138,3 +138,13 @@ repair checks precede acknowledgment. The final snapshot publishes and refreshes
 session. Run `scripts/proof-data.mjs` with the same disposable/runtime/compiler flags. The
 source hashes remain stable across that run. Cross-target transfers, editing variants, server/
 GUI/debugger/archive and the combined installed delivery gate still require their own evidence.
+
+[Cross-context reads](cross-reads.json) prove four comparisons using declared private contexts,
+two inputs with equal filenames and opposing callers. [Documentation transfer](documentation-transfer.json)
+proves preview, saved destination checks, request retry, no-op counts, unchanged source and
+complete publication. [Temporary cleanup recovery](cross-recovery.json) injects a failed owned
+temporary-program close, then proves the next call releases that retained stage and returns only
+the declared contexts. Run `scripts/proof-cross.mjs`, `scripts/proof-transfer.mjs` and
+`scripts/proof-cross-faults.mjs` with the same disposable/runtime/compiler flags. Each checks stable
+source hashes. Later scalar-projection/recovery refinements have offline coverage; native all-category
+variants, cancellation/owner faults and final installed repetition remain separate gates.

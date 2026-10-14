@@ -68,7 +68,7 @@ Script discovery now returns installation/context inventory IDs rather than back
 The facade also exposes function/variable/tag edits, scripts, batch comments/documentation and
 analysis commands with immutable saved-state verification. Two upstream WRITE annotations
 (`analyze_data_region`, `detect_array_bounds`) are implemented as ReadOnly queries because their
-pinned implementations do not modify the program. The offline suite currently passes 63 tests,
+pinned implementations do not modify the program. The offline suite currently passes 66 tests,
 including lost structural-response recovery from a retained immutable candidate without replay.
 The [function/batch receipt](verification/function-edits.json) additionally passed 22 saved effects
 (functions/variables/tags, scripts, comments/documentation and analysis), request retries,
@@ -82,7 +82,20 @@ text and flow repair. It includes retry, publication, isolation and refresh asse
 stable source hashes. `set-global` uses the Destructive gate because its eviction variant can
 remove named neighbouring data. The original documentation endpoint's regex parser is replaced
 by an equivalent transactional typed-JSON action, followed by saved effect verification.
-Blocked continuation attempts now terminate before starting a new open intent, so repeated attempts cannot accumulate mutually blocking unknown opens. The offline regression retries three times, then establishes the retained effect without replay. The whole M5 gate and the final installed crash matrix remain open.
+Blocked continuation attempts terminate before starting a new open intent, so repeated attempts
+cannot accumulate mutually blocking unknown opens. The offline regression retries three times,
+then establishes the retained effect without replay.
+
+Cross-context work has native checkpoints: [four reads](verification/cross-reads.json),
+[private documentation transfer](verification/documentation-transfer.json) and
+[failed cleanup recovery](verification/cross-recovery.json). Explicit second/source selectors
+choose private snapshots, including two inputs with equal filenames. Opposing callers complete
+without a context-lock deadlock. Transfer preview leaves the receiver unchanged; saved destination
+verification precedes acknowledgment, and explicit merge publishes it. An offline lost-response
+case changes the source afterward and proves recovery uses the retained earlier source once.
+The cleanup test retains a failed temporary close and releases only that verified owned stage on
+the next call. Full category variants, native cancellation/owner faults and final artifact repetition
+remain open. The whole M5 gate and final installed crash matrix are not complete.
 
 ## Engineering defaults
 

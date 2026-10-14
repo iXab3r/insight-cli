@@ -47,6 +47,19 @@ are under `value` with the same session/target identifiers. Generated help lists
 the caller supplies no program/instance routing. For P-code dataflow choose an actual operation
 address from `analysis get-function-pcode`; a function prologue may have no high P-code operation.
 
+For comparisons, keep `--session`/`--target` as the first side and provide `--other-target`.
+`--other-session` defaults to the first session; specify it to compare another agent's private
+context. `documentation compare`, `functions diff` and the fuzzy matching commands use these
+selectors. Fuzzy matching excludes candidates shorter than eight instructions. Results return
+both logical scopes and preserve the selected private views.
+
+`documentation transfer` instead selects the private receiver with `--session`/`--target` and the
+source with `--source-target` and optional `--source-session`. It copies documentation at matching
+addresses; it does not publish. Use `--dry-run` to preview counts. The operation requires
+Destructive because transferred definitions/annotations can replace existing receiver data.
+After an applied result, publish through ordinary `ghidra merge`. Retried request IDs retrieve
+their recorded outcome; recovery retains the source revision actually used by that request.
+
 Opening a second input in the same session preserves the first context. Different processes using
 the same session/target share one ordered context. Independent agents choose separate sessions.
 Calls return explicit scope so parallel outputs can be associated with the intended input.

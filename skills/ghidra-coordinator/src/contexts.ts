@@ -12,6 +12,7 @@ import { type Artifact } from './artifacts.js';
 import { object, fail, text, version, stable } from './model.js';
 import { HttpBridge } from './transport.js';
 import {scriptInventory,scriptPath} from './scripts.js';
+import {logicalPrograms} from './cross-results.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -307,6 +308,71 @@ public class ${name} extends GhidraScript {
     const root=join(this.directory(),'inspection',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
     const request=join(root,'request.json');await durable(request,parameters);
     const result=await this.server().inspect(await this.workspace.artifacts.verify(snapshot),request);return object(result.value);
+  }
+  private async removePeer(record:Running,path:string) {
+    // A cancelled invocation must still release its verified owned temporary program.
+    const cleanup=this.fork({...this.c,signal:new AbortController().signal});
+    const checked=await cleanup.verified(record.binding,this.workspace.target(record.binding.target));
+    const closed=object(await checked.http.call('/close_program',{name:path,save:false}));
+    if(closed.success!==true)fail('binding','Owned cross-target snapshot could not be closed.');
+    const removed=object(await checked.http.call('/delete_file',{filePath:path}));
+    if(removed.success!==true)fail('binding','Owned cross-target snapshot could not be removed.');
+  }
+  private async reconcilePeers(record:Running) {
+    const parent=join(record.binding.root,'cross-peer');let entries;
+    try{entries=await readdir(parent,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
+    for(const entry of entries) {
+      if(!entry.isDirectory()||!/^__insight_peer_[a-f0-9]{32}$/.test(entry.name))fail('binding','Owned cross-target stage inventory changed.');
+      const folder=join(parent,entry.name);if(await realpath(folder)!==folder)fail('binding','Cross-target stage left its owned directory.');
+      const receipt=object(JSON.parse(await readFile(join(folder,'receipt.json'),'utf8'))),path='/'+entry.name;
+      if(receipt.path!==path||receipt.target!==record.binding.target||receipt.context!==record.binding.context)fail('binding','Cross-target cleanup receipt belongs to another context.');
+      if(receipt.state==='closed')continue;if(receipt.state!=='preparing')fail('binding','Unknown cross-target cleanup stage.');
+      await this.removePeer(record,path);await durable(join(folder,'receipt.json'),{...receipt,state:'closed'});
+    }
+  }
+  private async withPeer<T>(record:Running,snapshot:Artifact,action:(path:string)=>Promise<T>,reconcile=true):Promise<T> {
+    if(reconcile)await this.reconcilePeers(record);
+    const name='__insight_peer_'+randomUUID().replaceAll('-',''),path='/'+name,
+      folder=join(record.binding.root,'cross-peer',name);await mkdir(folder,{recursive:true,mode:0o700});
+    const file=join(folder,'input.gzf');await link(await this.workspace.artifacts.verify(snapshot),file);
+    await durable(join(folder,'receipt.json'),{path,target:record.binding.target,context:record.binding.context,state:'preparing'});
+    try {
+      const imported=object(await record.http.call('/import_program',{gzf_path:file,target_folder:'/',target_name:name,overwrite:false}));
+      if(imported.success!==true)fail('binding','Cross-target snapshot import was not acknowledged.');
+      const opened=object(await record.http.call('/open_program',{path}));if(opened.path!==path)fail('binding','Cross-target snapshot opened another program.');
+      return await action(path);
+    }finally {
+      await this.removePeer(record,path);
+      await durable(join(folder,'receipt.json'),{path,target:record.binding.target,context:record.binding.context,state:'closed'});
+    }
+  }
+  async pair(selected:Scope,other:Scope,snapshot:Artifact,operation:string,parameters:Record<string,unknown>) {
+    const record=await this.selected(selected);
+    return this.withPeer(record,snapshot,async peer=>{
+      let routing:Record<string,string>;
+      if(operation==='/diff_functions')routing={program_a:record.binding.program,program_b:peer};
+      else if(operation==='/compare_programs_documentation')routing={program:record.binding.program};
+      else if(['/bulk_fuzzy_match','/find_similar_functions_fuzzy'].includes(operation))routing={source_program:record.binding.program,target_program:peer};
+      else fail('invalid','Unsupported cross-target comparison.');
+      const value=object(await record.http.call(operation,{...parameters,...routing}));
+      if(operation==='/compare_programs_documentation') {
+        if(!Array.isArray(value.programs))fail('partial','Comparison omitted its programs.');
+        value.programs=value.programs.map(raw=>{const row=object(raw),who=row.path===record.binding.program?selected:row.path===peer?other:undefined;
+          if(!who)fail('binding','Comparison included an undeclared context.');const {name,path,is_current,...counts}=row;
+          return {...who,label:this.workspace.target(who.target).name,...counts};});
+      }
+      return logicalPrograms(value,new Map([[record.binding.program,selected],['program',selected],[peer,other],[peer.slice(1),other]]));
+    });
+  }
+  async transfer(selected:Scope,source:Artifact,dryRun:boolean) {
+    const record=await this.selected(selected);
+    return this.withPeer(record,source,peer=>record.http.call('/merge_program_documentation',
+      {source:peer,target:record.binding.program,dry_run:dryRun}));
+  }
+  async transferCheck(selected:Scope,source:Artifact,candidate:Artifact) {
+    const record=await this.selected(selected);
+    return this.withPeer(record,source,from=>this.withPeer(record,candidate,to=>record.http.call('/merge_program_documentation',
+      {source:from,target:to,dry_run:true}),false));
   }
   async mode(scope: Scope, mode: ToolMode): Promise<void> {
     const record=await this.selected(scope);if(record.binding.mode===mode)return;

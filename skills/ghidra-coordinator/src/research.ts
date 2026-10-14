@@ -6,6 +6,7 @@ import type { ToolMode } from './contexts.js';
 import {fieldKey,scalarMerge,scalarRefresh} from './merge.js';
 import type {ScriptPage} from './scripts.js';
 import {verifyMutation} from './mutation-effects.js';
+import {transferResult} from './cross-results.js';
 
 export interface ResearchBackend {
   open(scope: Scope, request?: string): Promise<GhidraContext>;
@@ -22,6 +23,9 @@ export interface ResearchBackend {
   recoverModel?(target:string):Promise<boolean>;
   scripts?(scope:Scope,filter:string,limit:number,offset:number):Promise<ScriptPage>;
   inspect?(snapshot:Artifact,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
+  pair?(selected:Scope,other:Scope,snapshot:Artifact,operation:string,parameters:Record<string,unknown>):Promise<unknown>;
+  transfer?(selected:Scope,source:Artifact,dryRun:boolean):Promise<unknown>;
+  transferCheck?(selected:Scope,source:Artifact,candidate:Artifact):Promise<unknown>;
 }
 export function address(value: unknown): string {
   const input=text(value,128);
@@ -128,6 +132,54 @@ export class Research {
       const backend=await this.backend();await backend.open(selected);
       if(!backend.scripts)fail('configuration','Selected backend does not provide the configured script inventory.');
       return backend.scripts(selected,filter,limit,offset);
+    });
+  }
+  async paired<T>(selected:Scope,other:Scope,action:()=>Promise<T>):Promise<T> {
+    const scopes=[selected,other].sort((a,b)=>this.workspace.context(a).id.localeCompare(this.workspace.context(b).id));
+    if(this.workspace.context(selected).id===this.workspace.context(other).id)return this.ordered(selected,action);
+    return this.ordered(scopes[0]!,()=>this.ordered(scopes[1]!,action));
+  }
+  async crossRead(selected:Scope,other:Scope,operation:string,parameters:Record<string,unknown>) {
+    return this.paired(selected,other,async()=>{
+      const backend=await this.backend();await backend.open(selected);await backend.open(other);
+      if(!backend.pair)fail('configuration','Selected backend does not support explicit cross-target comparisons.');
+      return backend.pair(selected,other,await backend.saved(other),operation,parameters);
+    });
+  }
+  private async transferredScalars(context:GhidraContext,backend:ResearchBackend,snapshot:Artifact) {
+    if(!context.scalars.length)return context.scalars;
+    if(!backend.fields)fail('configuration','Transferred scalar fields require saved-state inspection.');
+    const fields=await backend.fields(snapshot,context.scalars);
+    return context.scalars.map(change=>{
+      const observed=fields[fieldKey(change)];if(!observed?.exists)fail('partial','Transfer removed a tracked scalar field; its result remains retained for review.');
+      return {...change,local:observed.value};
+    });
+  }
+  async transfer(selected:Scope,source:Scope,dryRun:boolean,callerId?:string) {
+    if(this.workspace.context(selected).id===this.workspace.context(source).id)fail('invalid','Documentation source and destination contexts must differ.');
+    const reserved=this.workspace.reserveRequest(selected,'/merge_program_documentation',{source,dryRun},callerId);
+    return this.paired(selected,source,async()=>{
+      const request=this.workspace.request(reserved.request.id);
+      if(reserved.replay&&request.state!=='accepted') {
+        if(request.state==='applied')return request.result;
+        fail('unknown','This documentation transfer retains an unproved outcome and is not repeated.',request.result);
+      }
+      const backend=await this.backend();await backend.open(source);const sourceSnapshot=await backend.saved(source);
+      await backend.open(selected);if(!backend.transfer||!backend.transferCheck)fail('configuration','Selected backend cannot verify documentation transfer.');
+      const context=this.workspace.context(selected);
+      this.workspace.startRequest(request.id,{kind:'transfer',generation:context.generation,workingSnapshot:context.workingSnapshot,source,sourceSnapshot,dryRun});
+      try {
+        const value=transferResult(await backend.transfer(selected,sourceSnapshot,dryRun),dryRun);
+        const snapshot=await backend.saved(selected);
+        if(!dryRun&&transferResult(await backend.transferCheck(selected,sourceSnapshot,snapshot),true).total!==0)
+          fail('partial','Saved destination retains untransferred documentation.');
+        const scalars=dryRun?context.scalars:await this.transferredScalars(context,backend,snapshot);
+        const complexChanges=dryRun||value.total===0?context.complexChanges:[...context.complexChanges,request.id];
+        const result={...selected,source,state:dryRun?'preview':'applied',sharedState:'pending',
+          pendingChanges:scalars.length+complexChanges.length,value};
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges,scalars},result);return result;
+      }catch(error){let savedSnapshot:Artifact|undefined;try{savedSnapshot=await backend.saved(selected);}catch{}
+        this.workspace.recordRequest(request.id,'unknown',{...selected,source,state:'unknown',sourceSnapshot,...(savedSnapshot?{savedSnapshot}:{})});throw error;}
     });
   }
   async strings(selected: Scope, contains: string, limit: number, offset: number) {
@@ -274,6 +326,21 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='transfer'&&execution.dryRun===false&&backend.transferCheck) {
+        try {
+          const sourceSnapshot=execution.sourceSnapshot as Artifact,retained=request.result&&object(request.result).savedSnapshot;
+          await this.workspace.artifacts.verify(sourceSnapshot);await backend.open(selected,request.id);
+          const snapshot=retained?retained as Artifact:await backend.saved(selected);await this.workspace.artifacts.verify(snapshot);
+          if(transferResult(await backend.transferCheck(selected,sourceSnapshot,snapshot),true).total!==0)continue;
+          const current=this.workspace.context(selected);
+          if(current.generation!==execution.generation&&current.workingSnapshot?.id!==object(execution.workingSnapshot).id)continue;
+          const scalars=await this.transferredScalars(current,backend,snapshot);
+          const complexChanges=[...current.complexChanges,request.id];
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges,scalars,viewEpoch:(current.viewEpoch??0)+1},
+            {...selected,source:execution.source,state:'applied',reconciled:true,sharedState:'pending',pendingChanges:scalars.length+complexChanges.length});
+        }catch{/* Saved source/candidate remain retained; never execute transfer again as recovery. */}
+        continue;
+      }
       if(execution?.kind==='program'&&execution.savedVerification===true) {
         try {
           const retained=request.result&&object(request.result).savedSnapshot;
@@ -285,7 +352,7 @@ export class Research {
           const current=this.workspace.context(selected);
           if(current.generation!==execution.generation)continue;
           const complexChanges=[...current.complexChanges,request.id];
-          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges},
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges,viewEpoch:(current.viewEpoch??0)+1},
             {...selected,state:'applied',sharedState:'pending',pendingChanges:current.scalars.length+complexChanges.length,value});
         }catch{/* Retain both snapshots and the unresolved intent when complete effects cannot be proven. */}
         continue;

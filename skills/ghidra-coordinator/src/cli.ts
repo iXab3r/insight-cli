@@ -10,6 +10,7 @@ import { Research, type ResearchBackend, scope, address, commentKind, scalarText
 import { fail, id, text, digest, object } from './model.js';
 import {queryCommands,extendQueries} from './queries.js';
 import {mutationCommands} from './mutations.js';
+import {crossCommands} from './cross.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -252,7 +253,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     ],
   };
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
-    scopedFailures({...entry,children:extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research))}):entry)};
+    scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
+      mutationCommands(c=>owner.selected(c).research)),crossCommands(c=>owner.selected(c).research))}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));
