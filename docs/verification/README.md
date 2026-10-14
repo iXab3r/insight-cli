@@ -62,6 +62,14 @@ Factory facade. Their source hashes identify the exact exercised code. M2–M5 a
 required. The default offline suite currently passes 33 tests, including content identity,
 four-process open reservation, request outcomes and stale-write/atomic-acknowledgment checks.
 
+[Native Factory research proof](research-cli.json) exercises the public command tree against an
+owned PE/server: initial open retry, literal strings→xrefs→containing function→decompile, verified
+rename/comment saves, independent A/B views, clear/null and the same scoped JSON-RPC commands.
+Run `scripts/proof-research-cli.mjs` with `--ack-disposable` and the context proof's runtime/compiler
+flags. Its Factory fixture provides synthetic credentials; it does not replace final installed IPC,
+OS-credential, crash, merge/refresh or full-catalog acceptance. The installed offline package proof
+has been updated for `@ixab3r/insight-cli` and the matching public skill/resources.
+
 | Evidence | Revision | Result |
 | --- | --- | --- |
 | [Native crashes](native-crashes.json) | 31eb08d | Two-program matrix and all six native owner crash phases passed |

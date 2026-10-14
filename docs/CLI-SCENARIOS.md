@@ -1,7 +1,8 @@
 # Agent CLI scenarios
 
 These are the intended `insight-cli` commands and illustrative responses agreed during product
-design. They are not executable in the existing `insight-ghidra` prototype. The scenarios specify
+design. The public research/edit subset is implemented; merge/refresh and complete acceptance
+remain in progress in [work items](WORK-ITEMS.md). The scenarios specify
 observable behavior; exact schemas and remaining edge cases are tracked in [the plan](PLAN.md).
 The [design](DESIGN.md#agreed-product-model) owns the model. Factory supplies the same command
 tree for CLI help, human/JSON output and API execution; no separate product RPC methods are invented.

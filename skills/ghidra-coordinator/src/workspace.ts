@@ -187,10 +187,11 @@ export class Workspace {
     this.db.prepare('INSERT INTO requests VALUES(?,?,?,?,?,?)').run(request.id, callerId ?? null, hash, context, request.state, bounded(request));
     return request;
   }
-  reserveOpen(target: string, session: string | 'new', settings: GhidraLoadSettings, callerId?: string): OpenReservation {
+  reserveOpen(target: string, session: string | 'new', settings: GhidraLoadSettings, callerId?: string, mode?: 'headless'|'gui'): OpenReservation {
     this.target(target); const normalized = loadSettings(settings);
     if (session !== 'new') this.session(session);
-    const intent = {operation: 'ghidra.open', target, session, settings: normalized};
+    if(mode!==undefined&&!['headless','gui'].includes(mode))fail('invalid','Requested tool mode is invalid.');
+    const intent = {operation: 'ghidra.open', target, session, settings: normalized, ...(mode?{mode}:{})};
     const hash = digest(intent);
     return this.transaction(() => {
       const previous = this.existingRequest(callerId, hash);
@@ -312,7 +313,7 @@ export class Workspace {
     if (new Set(next.complexChanges).size !== next.complexChanges.length) fail('invalid', 'Complex change identities must be distinct.');
     const fields = new Set<string>();
     for (const change of next.scalars) {
-      if (!/^(?:[a-z0-9_]+:)?[a-f0-9]+$/.test(text(change.address, 128)) ||
+      if (!/^(?:[A-Za-z0-9_]+:)?[a-f0-9]+$/.test(text(change.address, 128)) ||
           !['function.name', 'comment.eol', 'comment.pre', 'comment.post', 'comment.plate', 'comment.repeatable'].includes(change.field))
         fail('invalid', 'Scalar changes require a canonical address and a supported field.');
       for (const value of [change.original, change.local, ...(change.conflict ? [change.conflict.shared] : [])]) {

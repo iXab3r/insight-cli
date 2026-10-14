@@ -1,44 +1,32 @@
 # Setup
 
-Use Node 24+, Ghidra 12.1.2 / Java 21 and a matching GhidraMCP build. The transport contract is
-based on GhidraMCP source 57e37a8bf388b1279cff46378f85be1554548f61 / artifact 7.0.0. Rebuild it
-against your Ghidra installation; configure and verify its jar SHA256. Ghidra and Python bridge
-are external dependencies, not bundled binaries. Configure `java`, `ghidraHome`, `mcpJar`,
-`mcpJarSha256`, `python` and `bridgeDirectory` (the directory containing bridge_mcp_ghidra).
-Runtime scripts are disabled. The official MCP TypeScript SDK drives one stdio bridge per reader.
+Use Node 24+, Ghidra 12.1.2 and a Java 21 JDK. Configure the runtime with Factory's profile
+commands and generated help: `java`, `ghidraHome` and `mcpJar` select installed dependencies.
+The verified GhidraMCP 7.0.0 artifact comes from source
+`57e37a8bf388b1279cff46378f85be1554548f61`, with SHA256
+`7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd`.
+This checkpoint requires that explicit jar artifact; it does not require its source checkout or
+a Python bridge. Packaged native helper sources compile against the installed Ghidra/JDK.
 
-A profile names a connection realm, with `server` as ghidra://host:port, `readerUser` and
-`publisherUser`. They must be distinct server accounts. Provision read-only access for readers
-and write access for the publisher in each repository. The CLI's Update gate is disabled by
- default; it does not grant server rights and cannot isolate hostile code under the same OS user.
-The publisher account/secret must not be supplied to investigator processes or tool sessions.
-Publisher endpoints require a fresh private bridge token held in the Factory secret store, so
-knowing a PID/port from status does not admit direct write calls. Per-process program scope is
-set to the exact registered path; no publisher token is passed to investigator bridges.
-Ghidra's read-only proxy may accept transient in-memory comment edits through native MCP.
-Those edits are private to that reader snapshot: its server account cannot obtain a writable
-checkout or check in. They are not proposals or published findings. This CLI exposes only
-inspection and journal submission to investigators; fresh publisher preconditions and independent
-readback use the canonical server version, never the reader's modified memory.
+Omitting `server` enables owned local startup. The facade creates profile storage, a private
+repository and distinct read-only/publisher accounts with random credentials in Factory's secret
+store. It manages isolated headless contexts and introduces GUI mode on demand.
 
-Example setup (substitute your local runtime paths):
+For an external server profile, configure `server` (`ghidra://host:port`), `repository`,
+`readerUser` and `publisherUser`. They are distinct accounts with actual read-only and write
+permissions respectively. Store each password using `auth login --role reader|publisher
+--password-stdin`. Passwords are stdin/secret-store values, never profile JSON or argv values.
+Connecting does not transfer ownership of that external server or allow the facade to stop it.
 
-```text
-insight-ghidra profile configure lab --server ghidra://127.0.0.1:14100 --reader-user investigator --publisher-user coordinator
-insight-ghidra auth login --role reader --password-stdin --profile lab
-insight-ghidra auth login --role publisher --password-stdin --profile lab
-insight-ghidra permissions grant Update --profile lab
-```
+Factory's Update permission is initially disabled. Enable it through `permissions grant Update`
+in the selected profile before creating contexts or editing. Research scope is explicit; local
+skill discovery and help require no authentication or native process startup.
 
-The corresponding password is stdin input, never an argv/profile field. Credentials reside in
-Factory's secret store. Queries/local discovery do not require credentials; launch/remote reads
-require reader credentials, publication also requires publisher credentials.
+All target bytes, snapshots, journals, projects and process receipts derive from the selected
+profile's AppData. Stop the owner through `ipc-server stop` before changing its code/runtime
+configuration. Restoring a saved context preserves its private view. Server settings and initial
+loader settings remain bound to the target/workspace, so changing those cannot silently replace
+retained work. This revision conservatively protects retained profile research state from deletion.
 
-SQLite, process registry, per-worker projects, logs and retained stage backups all derive from
-that profile's Factory AppDataDirectory. Unix permissions protect local state; no portable data
-flag exists. The pinned Ghidra project locator rejects hidden path components. On Linux configure
-the OS XDG_DATA_HOME to a non-hidden path if its default .local path is rejected. IPC AppData
-must also fit the platform Unix-socket path limit. No existing Ghidra config is rewritten.
-
-A changed packaged CLI requires `ipc-server stop` before using the new build. Keep unresolved
-journals and stage directories; ordinary installation and build preparation contain no user state.
+The current native acceptance is macOS. Portable CLI/CI remains required; native Windows/Linux
+acceptance is deferred. The complete delivery and merge/refresh surface are still in progress.

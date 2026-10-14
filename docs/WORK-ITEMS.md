@@ -20,8 +20,14 @@ private views across two research sessions/two inputs, GUI interchange, backend 
 capacity refusal and wrong-source startup cleanup. Fixture credentials use a synthetic adapter;
 installed Factory credential/profile/command integration remains part of M2/M4 acceptance.
 
-M2-01 is in progress. Public executable/commands still expose the earlier prototype until that
-transition is delivered. M2–M5 are not complete. No combined facade acceptance has passed yet.
+M2-01 through M2-03 now expose `insight-cli` with root targets/sessions, scoped research and
+ordinary private edits. The offline suite passes 39 tests; isolated offline package installation,
+JSON/RPC, skill/resources, missing selectors, permission denial and spaces/Unicode relocation pass.
+An owned native Factory CLI/API fixture passed open retry, strings→xrefs→function/decompile,
+rename/comment save/readback, A/B isolation and clear/null. Native installed IPC/credentials and
+broader schema/failure acceptance remain M4/M5 gates.
+
+M3-01 is in progress. M3–M5 are not complete. No combined facade acceptance has passed yet.
 
 ## Engineering defaults
 

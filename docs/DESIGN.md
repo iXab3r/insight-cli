@@ -7,8 +7,9 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
-This section records the intended contract. The existing `insight-ghidra` implementation is a
-scoped-comment prototype of publication mechanisms, not an implementation of this facade.
+This section records the intended contract. The `insight-cli` research subset and native context
+foundations are under implementation. The earlier `insight-ghidra` implementation remains a
+scoped-comment regression fixture for publication mechanisms.
 The prototype's behavior and tested limits are recorded below. The agreed walkthroughs are
 collected in [CLI scenarios](CLI-SCENARIOS.md); the agreed implementation sequence and exit
 criteria are in [the milestone plan](PLAN.md). Autonomous implementation is underway;
@@ -93,7 +94,8 @@ insight-cli ghidra open --session s_a --target t_client --json
 
 The second form continues an existing context after reconnecting or process replacement.
 Separate target/session management can remain available, but is not required setup for each
-research task. These commands describe the intended facade, not currently executable commands.
+research task. Opening and ordinary research/edit commands are available; the full delivery gate
+remains open.
 
 Program-scoped research calls identify the session and target rather than changing a global
 active program. The facade resolves backend bindings and captures changes automatically;

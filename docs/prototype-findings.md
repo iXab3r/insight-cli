@@ -1,4 +1,6 @@
-# Findings and bindings
+# Historical prototype findings and bindings
+
+This is the earlier publication fixture's contract. It is not the public `insight-cli` API.
 
 Register an identity JSON object with exactly the active `profile` and `server`, `repository`,
 absolute `programPath`, 64-character `binarySha256`, `language`, `compilerSpec` and hexadecimal

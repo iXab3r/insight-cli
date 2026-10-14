@@ -1,12 +1,12 @@
 {
-  "name": "@ixab3r/insight-ghidra",
+  "name": "@ixab3r/insight-cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "Durable scoped-comment publication coordinator for independent Ghidra investigators",
+  "description": "Agent-facing durable sessions and isolated Ghidra research contexts",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {
-    "insight-ghidra": "./dist/src/bin.js"
+    "insight-cli": "./dist/src/bin.js"
   },
   "files": [
     "dist/src",

@@ -1,129 +1,182 @@
-import { command, createCli, Permission, CliError, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
-import { readFile, stat } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { command, createCli, Permission, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
+import { join, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Store } from './store.js';
-import { Coordinator, type Publisher } from './coordinator.js';
-import { GhidraRuntime } from './ghidra.js';
-import { id, text, fail, type Batch } from './model.js';
+import { Workspace } from './workspace.js';
+import { GhidraContexts, type ToolMode } from './contexts.js';
+import { nativeInputs } from './native-inputs.js';
+import { Research, type ResearchBackend, scope, address, commentKind, scalarText, number } from './research.js';
+import { fail, id, text, digest } from './model.js';
 
-interface ProfileOwner {
-  store: Store; runtime: GhidraRuntime;
-  tasks: Map<string, Promise<Batch | {state:'empty';targetId:string}>>;
+export interface Options {
+  runtime?: CliRuntime;
+  /** Offline fixture seam; production uses owned native Ghidra contexts. */
+  backend?: (workspace: Workspace, context: CommandContext)=>ResearchBackend|Promise<ResearchBackend>;
 }
-export interface Options { runtime?: CliRuntime; publisher?: (context: CommandContext) => Publisher }
+interface ProfileOwner {
+  workspace: Workspace; tasks: Map<string,Promise<unknown>>; backend?: Promise<ResearchBackend>; configuration: string;
+}
+const bindingFields=['java','ghidraHome','mcpJar','mcpJarSha256','server','repository','readerUser','publisherUser','maxContexts'];
 class Owner {
-  profiles = new Map<string, ProfileOwner>();
-  constructor(private options: Options) {}
+  private readonly profiles=new Map<string,ProfileOwner>();
+  constructor(private readonly options: Options) {}
   selected(c: CommandContext) {
-    const path = c.appArguments.AppDataDirectory;
-    let profile = this.profiles.get(path);
-    if (!profile) {
-      const root = join(path, 'ghidra');
-      profile = { store: new Store(root, c.profile.name, text(c.profile.values.server)), runtime: new GhidraRuntime(root, c), tasks: new Map() };
-      this.profiles.set(path, profile);
+    const directory=c.appArguments.AppDataDirectory;
+    const configuration=digest(Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])));
+    let profile=this.profiles.get(directory);
+    if(!profile) {
+      profile={workspace:new Workspace(join(directory,'workspace'),c.profile.name),tasks:new Map(),configuration};
+      this.profiles.set(directory,profile);
     }
-    if (profile.store.server !== c.profile.values.server) fail('binding', 'Profile server changed while durable work remains; restore its original binding before recovery.');
-    const runtime = profile.runtime.fork(c);
-    return { ...profile, ghidra: runtime, coordinator: new Coordinator(profile.store, this.options.publisher?.(c) ?? runtime, undefined, profile.tasks) };
+    if(profile.configuration!==configuration)fail('binding','Runtime profile changed; stop the IPC owner before reopening its saved workspace.');
+    const selected=profile;
+    const backend=async()=>{
+      if(!selected.backend)selected.backend=Promise.resolve(this.options.backend?
+        this.options.backend(selected.workspace,c):nativeInputs(c.profile.values).then(inputs=>new GhidraContexts(selected.workspace,inputs,c)))
+        .catch(error=>{selected.backend=undefined;throw error;});
+      const result=await selected.backend;
+      return result instanceof GhidraContexts?result.fork(c):result;
+    };
+    return {workspace:profile.workspace,research:new Research(profile.workspace,backend,profile.tasks),backend};
   }
   async invalidateProfile(app: IAppArguments) {
-    const profile = this.profiles.get(app.AppDataDirectory);
-    if (Store.pending(join(app.AppDataDirectory,'ghidra'))) fail('blocked', 'Profile contains unverified findings; its journal must be preserved.');
-    if (!profile) return;
-    if (profile.tasks.size || profile.store.batches().some(b => !['published_verified', 'conflict_pending'].includes(b.state)))
-      fail('blocked', 'Profile has unresolved publication work; its AppData must be preserved.');
-    await profile.runtime.dispose(); profile.store.close(); this.profiles.delete(app.AppDataDirectory);
+    const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
+    if(existsSync(join(directory,'workspace','workspace.sqlite')))
+      fail('blocked','Profile has retained research state; preserve its workspace before deleting the profile.');
+    if(profile) {await (await profile.backend)?.dispose();profile.workspace.close();this.profiles.delete(directory);}
   }
   async dispose() {
-    for (const profile of this.profiles.values()) {
+    for(const profile of this.profiles.values()) {
       await Promise.allSettled([...profile.tasks.values()]);
-      await profile.runtime.dispose(); profile.store.close();
+      try {await (await profile.backend)?.dispose();}finally{profile.workspace.close();}
     }
     this.profiles.clear();
   }
 }
-async function jsonFile(c: CommandContext, path: unknown) {
-  const absolute = resolve(c.cwd, text(path, 4096));
-  const info = await stat(absolute);
-  if (!info.isFile() || info.size > 65536) fail('limit', 'Proposal must be a regular file of at most 64 KiB.');
-  try {
-    const content = await readFile(absolute);
-    if (content.length > 65536) fail('limit', 'Proposal file exceeds 64 KiB.');
-    return JSON.parse(content.toString('utf8'));
-  }
-  catch { fail('invalid', 'File must contain valid JSON.'); }
-}
-const fileOption = [{ flags: '--file <path>', description: 'Read the JSON proposal file', required: true }];
-const fields = [
-  ['server','--server <origin>','Select the Ghidra Server origin'],
-  ['readerUser','--reader-user <user>','Select the read-only server account'],
-  ['publisherUser','--publisher-user <user>','Select the publisher server account'],
-  ['java','--java <path>','Locate Java 21'],
-  ['ghidraHome','--ghidra-home <path>','Locate the matching Ghidra installation'],
-  ['mcpJar','--mcp-jar <path>','Locate the GhidraMCP jar'],
-  ['mcpJarSha256','--mcp-jar-sha256 <sha>','Verify the GhidraMCP artifact hash'],
-  ['python','--python <path>','Locate the bridge Python executable'],
-  ['bridgeDirectory','--bridge-directory <path>','Locate the pinned Python bridge module'],
+const scoped=[
+  {flags:'--session <id>',description:'Select the durable research session',required:true},
+  {flags:'--target <id>',description:'Select the immutable input target',required:true},
 ];
+const at={flags:'--address <address>',description:'Explicit hexadecimal address or space:address',required:true};
+const request={flags:'--request-id <id>',description:'Retrieve the same changing intent after a lost response'};
+const paged=[
+  {flags:'--limit <count>',description:'Maximum items in this page (1–100)',defaultValue:50,parse:(value:string)=>number(value,100,1)},
+  {flags:'--offset <count>',description:'Skip items before this page',defaultValue:0,parse:(value:string)=>number(value,2147483647)},
+];
+const fields=[
+  ['java','--java <path>','Java 21 JDK executable'],
+  ['ghidraHome','--ghidra-home <path>','Ghidra 12.1.2 installation'],
+  ['mcpJar','--mcp-jar <path>','Verified pinned GhidraMCP runtime jar'],
+  ['mcpJarSha256','--mcp-jar-sha256 <sha>','Expected runtime artifact digest'],
+  ['server','--server <origin>','External Ghidra Server origin (omit for local startup)'],
+  ['repository','--repository <name>','Repository on the external server'],
+  ['readerUser','--reader-user <name>','Read-only external account'],
+  ['publisherUser','--publisher-user <name>','External publication account'],
+  ['maxContexts','--max-contexts <count>','Concurrent contexts (default 4, maximum 16)'],
+];
+const mode=(value:unknown):ToolMode|undefined=>{
+  if(value===undefined)return;
+  if(value!=='headless'&&value!=='gui')fail('invalid','Mode must be headless or gui.');return value;
+};
+const targetView=(target:ReturnType<Workspace['target']>)=>({target:target.id,name:target.name,binarySha256:target.binarySha256,size:target.size,createdAt:target.createdAt});
 
 export function createDefinition(options: Options = {}): CliDefinition {
-  const owner = new Owner(options);
+  const owner=new Owner(options);
   return {
-    name: 'insight-ghidra', applicationId: 'insight-ghidra', version: '0.1.0',
-    description: 'Coordinate Ghidra readers and scoped comment publication',
-    permissions: {}, resources: [owner], ...(options.runtime ? {runtime:options.runtime} : {}),
-    profile: { fields: fields.map(([name,flags,description]) => ({name:name!,flags:flags!,description:description!,...(name==='server'?{required:true,normalize:(value:unknown)=>{const server=text(value);if(!/^ghidra:\/\/[^/?#@]+$/.test(server))fail('invalid','Server must be a ghidra://host:port origin.');return server;}}:{} )})) },
-    auth: {
-      loginOptions: [{flags:'--role <role>',description:'Select reader or publisher credentials',defaultValue:'reader'}, {flags:'--password-stdin',description:'Read the password from stdin'}],
-      async login(c, o) {
-        const role = text(o.role); if (!['reader','publisher'].includes(role)) fail('invalid','Role must be reader or publisher.');
-        if (!o.passwordStdin || !c.stdinAvailable) fail('credentials','Supply --password-stdin for the selected role.');
-        let candidate = ''; for await (const chunk of c.io.input) { candidate += chunk.toString(); if (candidate.length > 4096) fail('limit','Password input exceeds 4096 characters.'); }
-        candidate = candidate.replace(/\r?\n$/, ''); if (!candidate || /[\r\n\0]/.test(candidate)) fail('credentials','Password must be one non-empty line.');
+    name:'insight-cli',applicationId:'insight-cli',version:'0.1.0',description:'Isolated research contexts and coordinated Ghidra analysis',
+    resources:[owner],permissions:{},...(options.runtime?{runtime:options.runtime}:{}),
+    profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
+      ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
+    auth:{
+      loginOptions:[{flags:'--role <role>',description:'External reader or publisher role',defaultValue:'reader'},
+        {flags:'--password-stdin',description:'Read the password from stdin'}],
+      async login(c,o) {
+        if(!c.profile.values.server)fail('configuration','Local credentials are managed automatically; login configures an external server profile.');
+        const role=text(o.role);if(!['reader','publisher'].includes(role))fail('invalid','Role must be reader or publisher.');
+        if(!o.passwordStdin||!c.stdinAvailable)fail('credentials','Supply --password-stdin for this role.');
+        let candidate='';for await(const chunk of c.io.input){candidate+=chunk.toString();if(candidate.length>4096)fail('limit','Password input exceeds 4096 characters.');}
+        candidate=candidate.replace(/\r?\n$/,'');if(!candidate||/[\r\n\0]/.test(candidate))fail('credentials','Password must be one nonempty line.');
         await c.secrets.set(role+'Password',candidate);
-        return {authenticated:true,identity:{role,user:c.profile.values[role+'User'],validation:'stored; server checked at worker startup'}};
+        return {authenticated:true,identity:{role,user:c.profile.values[role+'User'],validation:'stored; authority verified at connection'}};
       },
-      async status(c) { const reader=Boolean(await c.secrets.get('readerPassword')), publisher=Boolean(await c.secrets.get('publisherPassword')); return {authenticated:reader,identity:{readerStored:reader,publisherStored:publisher}}; },
-      async logout(c) { await c.secrets.delete('readerPassword'); await c.secrets.delete('publisherPassword'); },
+      async status(c) {
+        let reader='readerPassword',publisher='publisherPassword';const external=Boolean(c.profile.values.server);
+        if(!external) {
+          try {const local=JSON.parse(await readFile(join(c.appArguments.AppDataDirectory,'workspace/server/local.json'),'utf8'));reader=local.readerSecret;publisher=local.publisherSecret;}
+          catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;return {authenticated:false,identity:{mode:'local',validation:'managed on first open'}};}
+        }
+        const readerStored=Boolean(await c.secrets.get(reader)),publisherStored=Boolean(await c.secrets.get(publisher));
+        return {authenticated:readerStored&&publisherStored,identity:{mode:external?'external':'local',readerStored,publisherStored}};
+      },
+      async logout(c) {
+        if(!c.profile.values.server)fail('configuration','Local credentials remain bound to retained owned storage.');
+        await c.secrets.delete('readerPassword');await c.secrets.delete('publisherPassword');
+      },
     },
-    builtins: [command('skill','Locate the installed workflow skill',()=>({version:'0.1.0',path:fileURLToPath(new URL('../../SKILL.md',import.meta.url))}))],
-    commands: [
-      command('targets','Select versioned programs',[
-        command('register','Register a complete program identity',async ({options:o},c)=>owner.selected(c).store.register(await jsonFile(c,o.file)),{permission:Permission.Update,options:fileOption}),
-        command('list','List registered program identities',(_i,c)=>owner.selected(c).store.targets(),{permission:Permission.ReadOnly}),
-        command('show <target>','Show a registered program identity',({args},c)=>owner.selected(c).store.target(id(args.target)),{permission:Permission.ReadOnly}),
+    builtins:[command('skill','Locate the installed workflow skill',()=>({version:'0.1.0',path:fileURLToPath(new URL('../../SKILL.md',import.meta.url))}))],
+    commands:[
+      command('targets','Inspect immutable inputs',[
+        command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
+        command('list','List known inputs',({options:o},c)=>{
+          const items=owner.selected(c).workspace.targets(number(o.limit,100,1),number(o.offset,2147483647));
+          return {items:items.map(targetView),offset:o.offset,limit:o.limit,truncated:items.length===o.limit};
+        },{permission:Permission.ReadOnly,options:paged}),
+        command('show <target>','Show an input identity',({args},c)=>targetView(owner.selected(c).workspace.target(id(args.target))),{permission:Permission.ReadOnly}),
       ]),
-      command('workers','Manage independent reader processes',[
-        command('start <target> <worker>','Start a reader and dedicated bridge',async({args},c)=>{
-          const selected=owner.selected(c), target=selected.store.target(id(args.target)), worker=id(args.worker);
-          if (selected.store.workers().some(w=>w.id===worker)) fail('workerExists','Worker ID is already registered.');
-          const binding=await selected.ghidra.startReader(target,worker);
-          try { selected.store.putWorker(worker,target.id,binding); }
-          catch (error) { await selected.ghidra.stop(target,binding); throw error; }
-          return {id:worker,targetId:target.id,...binding};
-        },{permission:Permission.Update}),
-        command('list','List registered reader bindings',(_i,c)=>owner.selected(c).store.workers(),{permission:Permission.ReadOnly}),
-        command('stop <worker>','Stop an owned reader process',async({args},c)=>{
-          const selected=owner.selected(c), worker=id(args.worker), binding=selected.store.worker(worker);
-          await selected.ghidra.stop(binding.identity as never,binding);selected.store.removeWorker(worker);return {id:worker,state:'stopped'};
-        },{permission:Permission.Update}),
+      command('sessions','Inspect durable sessions',[
+        command('list','List independent sessions',({options:o},c)=>({items:owner.selected(c).workspace.sessions(number(o.limit,100,1),number(o.offset,2147483647)),offset:o.offset,limit:o.limit}),{permission:Permission.ReadOnly,options:paged}),
+        command('status <session>','Inspect saved work and unresolved outcomes',({args,options:o},c)=>{
+          const selected=owner.selected(c),session=id(args.session);selected.workspace.session(session);
+          if(o.target)return selected.research.status({session,target:id(o.target)});
+          return {session,contexts:selected.workspace.contexts(session).map(context=>selected.research.status(context))};
+        },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'}]}),
       ]),
-      command('inspect <worker>','Read selected functions from a worker',async({args,options:o},c)=>{
-        const selected=owner.selected(c), binding=selected.store.worker(id(args.worker));
-        const result = await selected.ghidra.inspect(binding.identity as never,binding,text(o.functions));
-        selected.store.updateReader(id(args.worker),result.binding);
-        return result;
-      },{permission:Permission.ReadOnly,options:[{flags:'--functions <selectors>',description:'Select up to eight function references',required:true}]}),
-      command('findings','Journal scoped comment proposals',[
-        command('submit','Persist an idempotent finding proposal',async({options:o},c)=>owner.selected(c).store.submit(await jsonFile(c,o.file)),{permission:Permission.Update,options:fileOption}),
-        command('list','List durable findings',({options:o},c)=>owner.selected(c).store.findings(o.target? id(o.target):undefined),{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Filter by registered target'}]}),
-        command('show <finding>','Show a finding and its outcome',({args},c)=>owner.selected(c).store.getFinding(id(args.finding)),{permission:Permission.ReadOnly}),
+      command('ghidra','Research through an isolated saved context',[
+        command('open [input]','Start independent work or continue a context',async({args,options:o},c)=>{
+          if(Boolean(args.input)===Boolean(o.target))fail('invalid','Supply exactly one input path or --target.');
+          const selected=owner.selected(c),target=args.input?(await selected.workspace.importTarget(resolve(c.cwd,text(args.input,4096)))).id:id(o.target);
+          let previous;
+          try{previous=selected.workspace.model(target).settings;}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
+          const settings={...previous,autoAnalyze:o.analysis===false?false:previous?.autoAnalyze??true,
+            ...(o.language?{language:text(o.language)}:{}),...(o.compilerSpec?{compilerSpec:text(o.compilerSpec)}:{}),
+            ...(o.imageBase?{imageBase:text(o.imageBase)}:{})};
+          return selected.research.open(target,text(o.session),settings,o.requestId===undefined?undefined:id(o.requestId),mode(o.mode));
+        },{permission:Permission.Update,options:[{flags:'--session <id>',description:'Use new for independent work, or an existing session',required:true},
+          {flags:'--target <id>',description:'Continue existing input instead of supplying a file'},request,
+          {flags:'--mode <mode>',description:'Request headless or gui; continuation preserves current mode'},
+          {flags:'--no-analysis',description:'Skip initial automatic analysis'},
+          {flags:'--language <id>',description:'Explicit initial loader language'},
+          {flags:'--compiler-spec <id>',description:'Explicit initial compiler specification'},
+          {flags:'--image-base <address>',description:'Initial image base'}]}),
+        command('strings','Read defined strings',[
+          command('search','Find literal text and usable addresses',({options:o},c)=>owner.selected(c).research.strings(scope(o),text(o.contains,4096),number(o.limit,100,1),number(o.offset,2147483647)),
+            {permission:Permission.ReadOnly,options:[...scoped,{flags:'--contains <text>',description:'Literal case-insensitive substring',required:true},...paged]}),
+        ]),
+        command('xrefs','Follow cross references',[
+          command('to','Find incoming references and their functions',({options:o},c)=>owner.selected(c).research.xrefs(scope(o),address(o.address),number(o.limit,100,1),number(o.offset,2147483647)),
+            {permission:Permission.ReadOnly,options:[...scoped,at,...paged]}),
+        ]),
+        command('functions','Read or name functions',[
+          command('get','Read a function and entry comments',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address)),{permission:Permission.ReadOnly,options:[...scoped,at]}),
+          command('decompile','Read decompiled function text',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true),{permission:Permission.ReadOnly,options:[...scoped,at]}),
+          command('rename','Record a saved private name',({options:o},c)=>{
+            const name=text(o.name,512);if(name!==name.trim())fail('invalid','Function name may not have leading or trailing whitespace.');
+            return owner.selected(c).research.edit(scope(o),address(o.address),'function.name',name,o.requestId===undefined?undefined:id(o.requestId));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--name <name>',description:'Desired function name',required:true},request]}),
+        ]),
+        command('comments','Read or edit listing comments',[
+          command('get','Read one kind or all five fields',({options:o},c)=>owner.selected(c).research.comment(scope(o),address(o.address),o.kind===undefined?undefined:commentKind(o.kind)),
+            {permission:Permission.ReadOnly,options:[...scoped,at,{flags:'--kind <kind>',description:'eol, pre, post, plate or repeatable'}]}),
+          command('set','Record a saved private comment or clear it',({options:o},c)=>{
+            if(Boolean(o.clear)===(o.text!==undefined))fail('invalid','Supply exactly one --text or --clear.');
+            return owner.selected(c).research.edit(scope(o),address(o.address),'comment.'+commentKind(o.kind) as 'comment.eol',
+              o.clear?null:scalarText(o.text),o.requestId===undefined?undefined:id(o.requestId));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--kind <kind>',description:'eol, pre, post, plate or repeatable',required:true},
+            {flags:'--text <text>',description:'Desired text; empty text clears to null'},{flags:'--clear',description:'Clear this comment to null'},request]}),
+        ]),
       ]),
-      command('integrate <target>','Publish queued comments for one program',({args},c)=>owner.selected(c).coordinator.integrate(id(args.target)),{permission:Permission.Update}),
-      command('status','Show durable publication state',(_i,c)=>{const selected=owner.selected(c);return {ownerPid:process.pid,profile:c.profile.name,targets:selected.store.targets(),workers:selected.store.workers(),batches:selected.store.batches()};},{permission:Permission.ReadOnly}),
-      command('recover <batch>','Reconcile an interrupted publication batch',({args,options:o},c)=>owner.selected(c).coordinator.recover(id(args.batch),Boolean(o.abandonStaged)),{permission:Permission.Update,options:[{flags:'--abandon-staged',description:'Abandon a stopped pre-publication stage'}]}),
     ],
   };
 }
-export const createInsightCli = (options: Options = {}) => createCli(createDefinition(options));
+export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));
