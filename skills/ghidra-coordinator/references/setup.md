@@ -1,12 +1,14 @@
 # Setup
 
 Use Node 24+, Ghidra 12.1.2 and a Java 21 JDK. Configure the runtime with Factory's profile
-commands and generated help: `java`, `ghidraHome` and `mcpJar` select installed dependencies.
-The verified GhidraMCP 7.0.0 artifact comes from source
+commands and generated help: `java` and `ghidraHome` select installed dependencies.
+The package contains the verified GhidraMCP 7.0.0 bridge, its Apache-2.0 license/notice and
+artifact provenance. Its pinned functionality catalog is from source
 `57e37a8bf388b1279cff46378f85be1554548f61`, with SHA256
 `7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd`.
-This checkpoint requires that explicit jar artifact; it does not require its source checkout or
-a Python bridge. Packaged native helper sources compile against the installed Ghidra/JDK.
+`mcpJar` optionally selects another copy of those exact verified bytes. Runtime startup needs no
+bridge/Factory source checkout or Python MCP bridge. Packaged native helper sources compile
+against the installed Ghidra/JDK.
 
 Omitting `server` enables owned local startup. The facade creates profile storage, a private
 repository and distinct read-only/publisher accounts with random credentials in Factory's secret
@@ -21,6 +23,7 @@ Connecting does not transfer ownership of that external server or allow the faca
 Factory's Update permission is initially disabled. Enable it through `permissions grant Update`
 in the selected profile before creating contexts or editing. Research scope is explicit; local
 skill discovery and help require no authentication or native process startup.
+Deletion and replacement commands also require `permissions grant Destructive`.
 
 All target bytes, snapshots, journals, projects and process receipts derive from the selected
 profile's AppData. Stop the owner through `ipc-server stop` before changing its code/runtime

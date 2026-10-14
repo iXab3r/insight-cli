@@ -17,7 +17,10 @@ checked in again merely because its response was lost. Until verification succee
 for this shared target is blocked across sessions. Saved private work remains retained.
 
 Scalar reconciliation observes and saves an already present effect; it does not execute the
-setter again. An unproved program/script/external outcome remains unresolved. Preserve the profile
+setter again. Supported structural/function edits retain a candidate snapshot after an incomplete
+response; continuation can verify every requested effect in that immutable snapshot and adopt it
+without replay. If the complete result cannot be established, the candidate and previous saved
+private view remain retained. An unproved program/script/external outcome remains unresolved. Preserve the profile
 storage and credential store. Do not delete another session's project, stop a process by guessed
 PID/port, or blindly repeat a script/external action to turn uncertainty into success.
 

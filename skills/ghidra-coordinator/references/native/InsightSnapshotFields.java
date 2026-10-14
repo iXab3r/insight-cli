@@ -33,7 +33,7 @@ class InsightSnapshotFields {
           if(!field.equals("function.name")&&!kinds.containsKey(field))throw new IllegalArgumentException();
           var at=program.getAddressFactory().getAddress(address);
           var block=at==null?null:program.getMemory().getBlock(at);
-          var function=at==null?null:program.getFunctionManager().getFunctionAt(at);
+          var function=at==null?null:field.equals("function.name")?program.getFunctionManager().getFunctionAt(at):program.getFunctionManager().getFunctionContaining(at);
           boolean exists=block!=null&&(!field.equals("function.name")||function!=null);
           String value=field.equals("function.name")?(function==null?null:function.getName()):
             (at==null?null:program.getListing().getComment(kinds.get(field),at));

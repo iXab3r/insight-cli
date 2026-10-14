@@ -11,6 +11,7 @@ export interface NativeInputs {
   ghidraVersion: string; fingerprint: string;
 }
 export const pinnedMcpJar = '7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd';
+export const packagedMcpJar=fileURLToPath(new URL('../../runtime/GhidraMCP-7.0.0.jar',import.meta.url));
 const run = promisify(execFile);
 export async function moduleJars(home: string): Promise<string[]> {
   const jars: string[] = [];
@@ -34,7 +35,7 @@ async function sha(path: string): Promise<string> {
   } finally { await handle.close(); }
 }
 export async function nativeInputs(values: Record<string, unknown>): Promise<NativeInputs> {
-  const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar, 4096)];
+  const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
   if (!requested.every(isAbsolute)) fail('configuration', 'Configure absolute Java, Ghidra home and GhidraMCP jar paths.');
   const [java, ghidraHome, mcpJar] = await Promise.all(requested.map(path => realpath(path))) as [string,string,string];
   const jarHash = await sha(mcpJar);

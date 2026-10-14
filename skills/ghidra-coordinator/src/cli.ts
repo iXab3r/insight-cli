@@ -9,6 +9,7 @@ import { nativeInputs } from './native-inputs.js';
 import { Research, type ResearchBackend, scope, address, commentKind, scalarText, number } from './research.js';
 import { fail, id, text, digest, object } from './model.js';
 import {queryCommands,extendQueries} from './queries.js';
+import {mutationCommands} from './mutations.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -86,7 +87,7 @@ const paged=[
 const fields=[
   ['java','--java <path>','Java 21 JDK executable'],
   ['ghidraHome','--ghidra-home <path>','Ghidra 12.1.2 installation'],
-  ['mcpJar','--mcp-jar <path>','Verified pinned GhidraMCP runtime jar'],
+  ['mcpJar','--mcp-jar <path>','Optional override of the packaged verified GhidraMCP runtime'],
   ['mcpJarSha256','--mcp-jar-sha256 <sha>','Expected runtime artifact digest'],
   ['server','--server <origin>','External Ghidra Server origin (omit for local startup)'],
   ['repository','--repository <name>','Repository on the external server'],
@@ -115,7 +116,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   const owner=new Owner(options);
   const definition:CliDefinition={
     name:'insight-cli',applicationId:'insight-cli',version:'0.1.0',description:'Isolated research contexts and coordinated Ghidra analysis',
-    resources:[owner],permissions:{},...(options.runtime?{runtime:options.runtime}:{}),
+    resources:[owner],permissions:{categories:[{name:'Destructive',description:'Explicit deletion or replacement of retained research data',enabledByDefault:false}]},...(options.runtime?{runtime:options.runtime}:{}),
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
       ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
     auth:{
@@ -251,6 +252,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     ],
   };
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
-    scopedFailures({...entry,children:extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research))}):entry)};
+    scopedFailures({...entry,children:extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
+      mutationCommands(c=>owner.selected(c).research))}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

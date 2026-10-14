@@ -85,6 +85,7 @@ export class GhidraServer {
   async fields(snapshot:string,selectors:string) {
     return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
   }
+  async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','InsightSnapshotInspect',[snapshot,request]);}
   async programStatus(binding:ServerBinding,path:string) {
     return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
   }

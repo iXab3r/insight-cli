@@ -1,4 +1,5 @@
 import { fail, object } from './model.js';
+import {parseDomainJson} from './json.js';
 
 export interface Descriptor { path: string; method: string; params: { name: string; source: string }[] }
 /** The pinned GhidraMCP HTTP side of a dedicated bridge. No discovery by project name. */
@@ -25,7 +26,7 @@ export class HttpBridge {
     finally { await reader.cancel().catch(() => {}); }
     const text = Buffer.concat(chunks).toString('utf8');
     let result: unknown;
-    try { result = JSON.parse(text); } catch { result = text; }
+    try { result = parseDomainJson(text); } catch { result = text; }
     if (result && typeof result === 'object' && !Array.isArray(result)) {
       const o = object(result);
       if (o.error || o.success === false || o.status === 'error') {
@@ -65,7 +66,7 @@ export function decodeMcp(result: unknown): unknown {
   if (content.length !== 1 || typeof content[0]?.text !== 'string' || content[0].text.length > 1024 * 1024)
     fail('malformed', 'Expected one bounded MCP text result.');
   let value: unknown;
-  try { value = JSON.parse(content[0].text); } catch { value = content[0].text; }
+  try { value = parseDomainJson(content[0].text); } catch { value = content[0].text; }
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const o = object(value);
     if (o.error || o.success === false) fail('remote', 'MCP result content reports failure.');

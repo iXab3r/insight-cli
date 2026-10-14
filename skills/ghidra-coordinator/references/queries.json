@@ -1457,6 +1457,54 @@
           "default": "100"
         }
       ]
+    },
+    {
+      "path": "/analyze_data_region",
+      "command": "analysis analyze-data-region",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "max_scan_bytes",
+          "type": "integer",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "include_xref_map",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_boundary_detection",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/detect_array_bounds",
+      "command": "analysis detect-array-bounds",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "max_scan_range",
+          "type": "integer",
+          "required": false,
+          "default": "2048"
+        }
+      ]
     }
   ]
 }

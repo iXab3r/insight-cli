@@ -28,7 +28,7 @@ package is `@ixab3r/insight-cli`, with executable `insight-cli`. Factory supplie
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared
 IPC ownership. Update permission starts disabled. All mutable state derives from profile AppData.
 
-Configure Java 21, Ghidra 12.1.2 and the verified GhidraMCP runtime artifact as described in
+Configure Java 21 and Ghidra 12.1.2 as described in
 [setup](skills/ghidra-coordinator/references/setup.md). Omit `server` for managed local startup;
 an external server profile uses explicit repository and distinct reader/publisher accounts.
 

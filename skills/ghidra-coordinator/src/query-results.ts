@@ -2,6 +2,8 @@ import {fail} from './model.js';
 
 type Shape=Record<string,'string'|'number'|'boolean'|'array'|'object'>;
 const shapes:Record<string,Shape>={
+ '/analyze_data_region':{start_address:'string',end_address:'string',byte_span:'number',xref_count:'number',classification_hint:'string'},
+ '/detect_array_bounds':{address:'string',estimated_size:'number',stride:'number',element_count:'number',confidence:'string'},
  '/analyze_control_flow':{function_name:'string',entry_point:'string',metrics:'object',basic_block_details:'array'},
  '/analyze_dataflow':{function:'object',anchor:'object',direction:'string',chain:'array',truncated:'boolean'},
  '/analyze_for_documentation':{name:'string',address:'string',parameters:'array',locals:'array'},
@@ -94,10 +96,14 @@ export function queryResult(path:string,parameters:Record<string,unknown>,result
   const addresses=Array.isArray(input)?input:typeof input==='string'?input.split(',').map(v=>v.trim()).filter(Boolean):[];
   for(const at of addresses)if(!Object.hasOwn(value,String(at)))fail('partial','Assembly context omitted a requested address.');return result;
  }
- if(path==='/list_scripts')shape={note:'string'};
+ if(path==='/list_scripts')shape={items:'array',count:'number',total:'number',offset:'number',limit:'number',truncated:'boolean'};
  if(!shape)fail('schema','Pinned query has no result contract.');
  const value=checkShape(result,shape);
  if(path==='/get_struct_layout')for(const field of value.fields as unknown[])checkShape(field,{offset:'number',size:'number',type:'string',name:'string'});
- if(path==='/get_enum_values')for(const member of value.values as unknown[])checkShape(member,{name:'string',value:'number'});
+ if(path==='/get_enum_values')for(const member of value.values as unknown[]) {
+  const observed=checkShape(member,{name:'string'}),number=observed.value;
+  if(!(typeof number==='number'&&Number.isSafeInteger(number)||typeof number==='string'&&/^-?\d+$/.test(number)))
+    fail('partial','Enum result omitted its exact integer value.');
+ }
  return result;
 }

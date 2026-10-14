@@ -58,6 +58,25 @@ actual script inventory remain open; the pinned script-list endpoint returns gui
 an inventory. This receipt does not complete those rows or editing coverage. The final M4 matrix
 will repeat on the full M5 artifact, including remaining backend/setup failures and all groups.
 
+The package now contains the pinned bridge runtime and its Apache-2.0 license/notice; ordinary
+configuration needs Java/Ghidra, without a bridge source checkout or Python bridge. The
+[structural receipt](verification/structural-mutations.json) passed 31 saved editing effects with
+that bundled runtime, including retaining the original while cloning a type, exact 64-bit enum
+and property values, complete publication and another agent's refresh. Its source hashes identify
+the tested checkpoint; later function/batch/analysis additions require their own evidence.
+Script discovery now returns installation/context inventory IDs rather than backend guidance.
+The facade also exposes function/variable/tag edits, scripts, batch comments/documentation and
+analysis commands with immutable saved-state verification. Two upstream WRITE annotations
+(`analyze_data_region`, `detect_array_bounds`) are implemented as ReadOnly queries because their
+pinned implementations do not modify the program. The offline suite currently passes 60 tests,
+including lost structural-response recovery from a retained immutable candidate without replay.
+The [function/batch receipt](verification/function-edits.json) additionally passed 22 saved effects
+(functions/variables/tags, scripts, comments/documentation and analysis), request retries,
+publication and a second session's refresh. The runner checks source hashes at both ends so its
+receipt identifies a stable tested checkpoint. Subsequent GUI preparation ordering has a separate
+offline regression; the receipt's headless batch does not establish GUI navigation acceptance.
+The whole M5 gate and the final installed crash matrix remain open.
+
 ## Engineering defaults
 
 These are implementation choices within the agreed contract, rather than additional owner gates:

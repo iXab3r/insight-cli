@@ -115,3 +115,18 @@ controlled emulation (integer result 19 and a known candidate hash match). Run
 an exploratory diagnostic run and does not produce the full known-value assertion claim. The
 receipt retains source/runtime hashes and limits. Program setup through the fixture seam does not
 establish public editing coverage; script inventory and other result variants remain open.
+
+[Structural editing checkpoint](structural-mutations.json) records 31 actual saved effects,
+including type cloning without altering the source, layouts/categories, exact 64-bit enum/property
+values, labels/references, bookmarks/options, memory flags and rebasing. The default bundled bridge
+runtime passed complete private-state publication and another session's refresh. Run
+`scripts/proof-mutations.mjs --ack-disposable` with `--java`, `--ghidra-home`, `--clang` and `--lld`;
+`--mcp-jar` is an optional exact-hash override. The receipt's hashes identify its original tested
+checkpoint; later edits need separate evidence and the combined installed delivery gate.
+
+[Function/batch editing checkpoint](function-edits.json) records 22 saved function/variable/tag,
+script, comment/documentation and analysis effects with the bundled bridge. Every request retry
+retrieves its result; full publication and refresh expose the final function to another session.
+The runner also exercises the two data-inspection queries. Run `scripts/proof-functions.mjs`
+with the structural runner's flags. It checks source hashes at the start and end. GUI navigation,
+remaining editing variants and the final installed acceptance remain outside this checkpoint.

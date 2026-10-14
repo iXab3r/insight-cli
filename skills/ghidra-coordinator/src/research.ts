@@ -4,6 +4,8 @@ import { Workspace } from './workspace.js';
 import { fail, id, object, text } from './model.js';
 import type { ToolMode } from './contexts.js';
 import {fieldKey,scalarMerge,scalarRefresh} from './merge.js';
+import type {ScriptPage} from './scripts.js';
+import {verifyMutation} from './mutation-effects.js';
 
 export interface ResearchBackend {
   open(scope: Scope, request?: string): Promise<GhidraContext>;
@@ -18,6 +20,8 @@ export interface ResearchBackend {
   publish?(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}>;
   recover?(publication:Publication):Promise<{state:'verified';revision:number}|{state:'unknown'}>;
   recoverModel?(target:string):Promise<boolean>;
+  scripts?(scope:Scope,filter:string,limit:number,offset:number):Promise<ScriptPage>;
+  inspect?(snapshot:Artifact,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
 }
 export function address(value: unknown): string {
   const input=text(value,128);
@@ -112,6 +116,13 @@ export class Research {
   async read(selected: Scope, operation: string, parameters: Record<string,unknown>) {
     return this.ordered(selected,async()=>{
       const backend=await this.backend();await backend.open(selected);return backend.call(selected,operation,parameters);
+    });
+  }
+  async scripts(selected:Scope,filter:string,limit:number,offset:number) {
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      if(!backend.scripts)fail('configuration','Selected backend does not provide the configured script inventory.');
+      return backend.scripts(selected,filter,limit,offset);
     });
   }
   async strings(selected: Scope, contains: string, limit: number, offset: number) {
@@ -258,6 +269,22 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='program'&&execution.savedVerification===true) {
+        try {
+          const retained=request.result&&object(request.result).savedSnapshot;
+          let snapshot:Artifact;
+          if(retained){snapshot=retained as Artifact;await this.workspace.artifacts.verify(snapshot);}
+          else {await backend.open(selected,request.id);snapshot=await backend.saved(selected);}
+          const intent=object(request.intent),parameters=object(intent.parameters);
+          const value=await verifyMutation(backend,snapshot,request.operation,parameters,{});
+          const current=this.workspace.context(selected);
+          if(current.generation!==execution.generation)continue;
+          const complexChanges=[...current.complexChanges,request.id];
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges},
+            {...selected,state:'applied',sharedState:'pending',pendingChanges:current.scalars.length+complexChanges.length,value});
+        }catch{/* Retain both snapshots and the unresolved intent when complete effects cannot be proven. */}
+        continue;
+      }
       if(execution?.kind==='scalar') {
         try {
           await backend.open(selected,request.id);
@@ -402,7 +429,8 @@ export class Research {
     }));
   }
   async mutate(selected:Scope,operation:string,parameters:Record<string,unknown>,
-    verify:(backend:ResearchBackend,result:Record<string,unknown>)=>Promise<unknown>,callerId?:string) {
+    verify:(backend:ResearchBackend,result:Record<string,unknown>)=>Promise<unknown>,callerId?:string,
+    verifySaved?:(backend:ResearchBackend,snapshot:Artifact,result:Record<string,unknown>)=>Promise<unknown>) {
     const reserved=this.workspace.reserveRequest(selected,operation,parameters,callerId);
     return this.ordered(selected,async()=>{
       const request=this.workspace.request(reserved.request.id);
@@ -410,16 +438,26 @@ export class Research {
         if(request.state==='applied')return request.result;
         fail('unknown','This saved-state operation retains an unresolved outcome; it is not re-executed.',request.result);
       }
-      const backend=await this.backend();await backend.open(selected);const context=this.workspace.context(selected);
-      this.workspace.startRequest(request.id,{kind:'program',operation,generation:context.generation,workingSnapshot:context.workingSnapshot});
+      const backend=await this.backend();await backend.open(selected);
+      if(operation==='/batch_apply_documentation'&&parameters.goto===true)await backend.mode(selected,'gui');
+      const context=this.workspace.context(selected);
+      this.workspace.startRequest(request.id,{kind:'program',operation,generation:context.generation,workingSnapshot:context.workingSnapshot,
+        savedVerification:!!verifySaved});
       try {
-        const response=object(await backend.call(selected,operation,parameters));
-        if(response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
-        const value=await verify(backend,response),snapshot=await backend.saved(selected);
+        const raw=await backend.call(selected,operation,parameters),response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
+        if(['rejected','partial','failed','error'].includes(String(response.status))||response.success===false)
+          fail('partial','Program operation reported a rejected or incomplete effect.');
+        if(!verifySaved&&response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
+        let value=await verify(backend,response);const snapshot=await backend.saved(selected);
+        if(verifySaved)value=await verifySaved(backend,snapshot,response);
         const complexChanges=[...context.complexChanges,request.id],result={...selected,state:'applied',sharedState:'pending',
           pendingChanges:context.scalars.length+complexChanges.length,value};
         this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges},result);return result;
-      }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown'});throw error;}
+      }catch(error){
+        let savedSnapshot:Artifact|undefined;
+        try{savedSnapshot=await backend.saved(selected);}catch{/* A failed/dead backend retains its native stage and the last acknowledged snapshot. */}
+        this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;
+      }
     });
   }
 }

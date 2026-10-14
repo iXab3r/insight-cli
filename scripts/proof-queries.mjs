@@ -97,7 +97,7 @@ try {
   await writeFile(join(f.root,'query-failures.json'),JSON.stringify(failures,null,2),{mode:0o600});
   assert.equal(failures.length,0,'Owned query contracts still failed: '+failures.map(f=>f.path).join(', '));
   if(!options.group) {
-    assert.equal(completed.length,72);
+    assert.equal(completed.length,74);
     assert.equal(results['/analyze_control_flow'].function_name,'first');
     assert.equal(results['/analyze_dataflow'].function.name,'first');
     assert.equal(results['/analyze_for_documentation'].name,'first');
@@ -123,10 +123,11 @@ try {
     assert.ok(results['/get_address_spaces'].address_spaces.length>0);
     assert.equal(results['/get_functions'].functions.first.entry_point,at);
     assert.ok(results['/force_decompile'].decompiled.includes('first'));
+    assert.ok(results['/list_scripts'].total>0);assert.ok(results['/list_scripts'].items.every(s=>s.script&&s.name&&s.origin));
   }
   receipt={schema:1,scope:'owned native scoped query contracts',queries:completed,ghidra:'12.1.2',java:'21',node:process.versions.node,
     mcpJarSha256:pinnedMcpJar,knownInputValuesAsserted:!options.group,
-    limitations:['source Factory fixture and synthetic credentials','fixture setup does not establish editing coverage','variant/nested-output and script-inventory completion remain part of full coverage acceptance']};
+    limitations:['source Factory fixture and synthetic credentials','fixture setup does not establish editing coverage','variant/nested-output completion remains part of full coverage acceptance']};
 } catch(error){console.error('Owned query fixture diagnostics:',f.root);console.error('Completed query cases:',completed.length);throw error;}
 finally {await app.dispose();if(context)await new GhidraServer(join(f.appArguments.AppDataDirectory,'workspace'),await nativeInputs(values),context).stop();}
 if(receipt){await writeFile(join(f.root,'sanitized-receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));}

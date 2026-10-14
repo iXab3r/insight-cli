@@ -25,6 +25,20 @@ when the shared base is unchanged. After divergence, unproved structural categor
 conflict: retain the old session, open a new session on the current target, and transfer the desired
 work through ordinary operations. A script is not replayed as a merge algorithm.
 
+The editing groups include types/categories/layouts, labels/references, properties/bookmarks,
+memory flags, functions/variables/tags and batch comments/documentation. Factory's `Destructive`
+gate covers deletion and replacement operations separately from ordinary Update. These broader
+edits currently use complete saved-state publication; their grouping does not grant scalar merge
+semantics. Boolean fields use explicit values; the no-return setter calls its flag `--non-returning`
+to keep it distinct from CLI negation syntax.
+
+`ghidra scripts list` returns stable `installation:` and `context:` script IDs. Pass an exact ID to
+`ghidra scripts run --script-name <id>`, or source to `ghidra scripts run-inline --code <source>`.
+Script arguments follow the pinned whitespace-splitting convention. Execution output is returned
+with the saved private state. Script file/network/process effects are immediate and are not undone
+by program rollback or replayed by merge. An uncertain script remains unresolved even when some
+program changes can be observed.
+
 Additional read groups expose analysis, listings, types, documentation, memory, symbols and
 emulation through typed flags. `functions inspect`, `comments inspect`, `strings list` and
 `strings search-regex` cover broader selection than the convenient walkthrough commands.

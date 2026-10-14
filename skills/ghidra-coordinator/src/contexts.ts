@@ -11,6 +11,7 @@ import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type Sc
 import { type Artifact } from './artifacts.js';
 import { object, fail, text, version, stable } from './model.js';
 import { HttpBridge } from './transport.js';
+import {scriptInventory,scriptPath} from './scripts.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -254,12 +255,52 @@ export class GhidraContexts {
     return this.verified(binding,this.workspace.target(scope.target));
   }
   async call(scope: Scope, operation: string, parameters: Record<string,unknown> = {}): Promise<unknown> {
-    const record=await this.selected(scope);
     if(Object.hasOwn(parameters,'program'))fail('invalid','Program routing is owned by the session and target selectors.');
+    if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};
+    if(operation==='/create_function_signature'&&typeof parameters.parameters!=='string')parameters={...parameters,parameters:JSON.stringify(parameters.parameters)};
+    const record=await this.selected(scope);
+    if(operation==='/run_ghidra_script') {
+      const script=String(parameters.script_name),path=await scriptPath(this.inputs.ghidraHome,record.binding.root,script);
+      const value=object(await record.http.call(operation,{...parameters,script_name:path,program:record.binding.program}));
+      delete value.script_path;value.script_name=script;return value;
+    }
+    if(operation==='/clone_data_type') {
+      // The pinned handler calls clone(manager), which can return the source itself.
+      // copy(manager) preserves that source while creating an independent type.
+      const name='InsightCopyType_'+randomUUID().replaceAll('-','');
+      const code=`import ghidra.app.script.GhidraScript;
+import ghidra.program.model.data.*;
+public class ${name} extends GhidraScript {
+ public void run() throws Exception {
+  String[] args=getScriptArgs();
+  String original=new String(java.util.Base64.getDecoder().decode(args[0]),java.nio.charset.StandardCharsets.UTF_8);
+  String desired=new String(java.util.Base64.getDecoder().decode(args[1]),java.nio.charset.StandardCharsets.UTF_8);
+  DataTypeManager manager=currentProgram.getDataTypeManager();DataType source=null;
+  var types=manager.getAllDataTypes();while(types.hasNext()){DataType value=types.next();if(value.getName().equals(original)||value.getPathName().equals(original)){if(source!=null)throw new IllegalArgumentException("Ambiguous source type");source=value;}}
+  if(source==null)throw new IllegalArgumentException("Source type not found");
+  int transaction=currentProgram.startTransaction("Copy data type");boolean committed=false;
+  try {DataType copied=source.copy(manager);if(copied==source)throw new IllegalStateException("Copy reused its source");copied.setName(desired);
+    manager.addDataType(copied,DataTypeConflictHandler.REPLACE_HANDLER);committed=true;}
+  finally {currentProgram.endTransaction(transaction,committed);}
+  println("insight-copy-type:completed");
+ }
+}`;
+      return record.http.call('/run_script_inline',{program:record.binding.program,code,
+        args:[parameters.source_type,parameters.new_name].map(value=>Buffer.from(text(value,512),'utf8').toString('base64')).join(' ')});
+    }
     const descriptor=await record.http.descriptor(operation);
     return record.http.call(operation,{...parameters,...(descriptor.params.some(p=>p.name==='program')?{program:record.binding.program}:{})});
   }
   async saved(scope: Scope): Promise<Artifact> {return this.capture(await this.selected(scope));}
+  async scripts(scope:Scope,filter:string,limit:number,offset:number) {
+    const record=await this.selected(scope);
+    return scriptInventory(this.inputs.ghidraHome,record.binding.root,filter,limit,offset);
+  }
+  async inspect(snapshot:Artifact,parameters:Record<string,unknown>) {
+    const root=join(this.directory(),'inspection',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const request=join(root,'request.json');await durable(request,parameters);
+    const result=await this.server().inspect(await this.workspace.artifacts.verify(snapshot),request);return object(result.value);
+  }
   async mode(scope: Scope, mode: ToolMode): Promise<void> {
     const record=await this.selected(scope);if(record.binding.mode===mode)return;
     const context=this.workspace.context(scope),snapshot=await this.capture(record);

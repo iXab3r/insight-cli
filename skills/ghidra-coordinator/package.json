@@ -12,6 +12,7 @@
     "dist/src",
     "SKILL.md",
     "references",
+    "runtime",
     "LICENSE",
     ".cli-package-build.json"
   ],
