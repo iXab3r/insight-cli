@@ -45,6 +45,23 @@ Run `scripts/proof-native-snapshots.mjs --ack-disposable` with `--ghidra-home`, 
 server, projects and GUI processes. Its test-only credentials are synthetic; no user project
 or existing server is selected.
 
+[Managed server proof](managed-server.json) verifies a locally owned server/repository, random
+credentials initialized before listeners, read-only reader versus publisher authority, authenticated
+process identity, refusal of wrong authority/token/profile, external connection without process
+ownership and repository retention after restart. Run `scripts/proof-managed-server.mjs` with
+`--ack-disposable`, `--ghidra-home`, `--java` and `--mcp-jar`.
+
+[Durable context proof](durable-contexts.json) verifies four private views across two EXEs and two
+research sessions. Equal filenames/function addresses do not alias targets; A's comment stays
+private from B and the other input; headless/GUI switching, close/reopen, backend SIGKILL and a
+replacement runtime retain saved unpublished work. A fifth reservation exercises the capacity
+refusal, and a wrong source identity aborts startup without replacing another context. Run
+`scripts/proof-contexts.mjs` with the snapshot proof's runtime/compiler flags. Both runners refuse
+CI and use synthetic credential adapters; they prove native mechanisms rather than the installed
+Factory facade. Their source hashes identify the exact exercised code. M2–M5 acceptance remains
+required. The default offline suite currently passes 33 tests, including content identity,
+four-process open reservation, request outcomes and stale-write/atomic-acknowledgment checks.
+
 | Evidence | Revision | Result |
 | --- | --- | --- |
 | [Native crashes](native-crashes.json) | 31eb08d | Two-program matrix and all six native owner crash phases passed |

@@ -10,7 +10,18 @@ existing product; they do not add separate CLIs, a generic plugin framework or a
 M1-01 passed on an owned native fixture: private save/reopen, headless/GUI interchange,
 full-state publication, independent readback and stale-base refusal. The
 [receipt](verification/native-snapshots.json) records exact source/runtime hashes and its limits.
-M1-02 is in progress. All subsequent items remain planned. No combined facade acceptance has passed yet.
+M1-02 through M1-04 have their substrate checkpoints: immutable input artifacts, root sessions,
+tuple bindings, saved private/base snapshots, durable request reservations and atomic saved-state
+acknowledgments; managed local/external server authority; owned headless/GUI context lifecycle.
+The offline suite has 33 passing tests, including four real processes racing the same open ID.
+[Server evidence](verification/managed-server.json) and
+[context evidence](verification/durable-contexts.json) record native runtime/source hashes, four
+private views across two research sessions/two inputs, GUI interchange, backend SIGKILL continuation,
+capacity refusal and wrong-source startup cleanup. Fixture credentials use a synthetic adapter;
+installed Factory credential/profile/command integration remains part of M2/M4 acceptance.
+
+M2-01 is in progress. Public executable/commands still expose the earlier prototype until that
+transition is delivered. M2–M5 are not complete. No combined facade acceptance has passed yet.
 
 ## Engineering defaults
 
