@@ -22,8 +22,8 @@ test('Update denied before files/state, JSON and RPC share command declaration a
  const otherDenied=await f.run(app,['targets','register','--file',path,'--profile','other','--json']);assert.notEqual(otherDenied.exitCode,0);assert.match(otherDenied.stderr,/permission/i);
 });
 test('registered worker binding and durable idempotency remain after worker cleanup',async t=>{
- const f=await createCliFixture(t,{applicationId:'insight-ghidra',profiles:[{name:'default',values:{server},permissions:['ReadOnly','Update']}]});const app=f.createApplication(runtime=>createInsightCli({runtime}));
- const store=new Store(join(f.appArguments.AppDataDirectory,'ghidra'),'default',server);t.after(()=>store.close());const target=store.register(identity);
+ let store:Store;const f=await createCliFixture({after:action=>t.after(async()=>{store?.close();await (action as ()=>Promise<void>)();})},{applicationId:'insight-ghidra',profiles:[{name:'default',values:{server},permissions:['ReadOnly','Update']}]});const app=f.createApplication(runtime=>createInsightCli({runtime}));
+ store=new Store(join(f.appArguments.AppDataDirectory,'ghidra'),'default',server);const target=store.register(identity);
  store.putWorker('reader',target.id,{pid:process.pid,endpoint:'http://127.0.0.1:19000',projectDirectory:'/synthetic/project',identity,version:1,role:'reader'});
  const proposal={requestId:'r-1',findingId:'f-1',workerId:'reader',targetId:target.id,identity,baselineVersion:1,address:'140001000',kind:'eol',before:null,after:'Synthetic finding',evidence:'Synthetic code evidence'};
  const path=join(f.root,'proposal.json');await writeFile(path,JSON.stringify(proposal));const accepted=await f.json(app,['findings','submit','--file',path]);store.removeWorker('reader');assert.deepEqual(await f.json(app,['findings','submit','--file',path]),accepted);

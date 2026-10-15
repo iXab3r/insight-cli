@@ -1,6 +1,6 @@
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {constants} from 'node:fs';
-import {mkdir,lstat,realpath,readFile,open,rename,readdir,copyFile} from 'node:fs/promises';
+import {mkdir,lstat,realpath,readFile,open,rename,readdir,copyFile,chmod} from 'node:fs/promises';
 import {join,resolve,dirname} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {Workspace,type AdministrationRequest} from './workspace.js';
@@ -97,8 +97,8 @@ export class Projects {
   private async newOutput(output:string){try{await lstat(output);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}fail('exists','Output already exists; choose a new file.');}
   private async exportArtifact(artifact:Artifact,output:string,recover=false){const source=await this.workspace.artifacts.verify(artifact);
     try{await copyFile(source,output,constants.COPYFILE_EXCL);}catch(error){if(!recover||(error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
-    const handle=await open(output,'r');try{await handle.sync();}finally{await handle.close();}
-    const readback=await this.workspace.artifacts.capture(output,artifact.kind);if(readback.id!==artifact.id)fail('partial','Exported bytes differ from the retained snapshot.');}
+    const readback=await this.workspace.artifacts.capture(output,artifact.kind);if(readback.id!==artifact.id)fail('partial','Exported bytes differ from the retained snapshot.');
+    await chmod(output,0o600);const handle=await open(output,'r+');try{await handle.sync();}finally{await handle.close();}}
   async export(selected:{session:string;target:string},output:string,callerId?:string){
     const reserved=this.workspace.reserveRequest(selected,'ghidra.program.export',{output},callerId);
     return this.research.ordered(selected,async()=>{const request=this.workspace.request(reserved.request.id);

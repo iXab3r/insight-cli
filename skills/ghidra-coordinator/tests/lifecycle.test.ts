@@ -35,7 +35,7 @@ test('post-launch binding failure stops the owned child and retains diagnostic s
   const binding:Binding={pid:child.pid!,endpoint:'http://127.0.0.1:19000',projectDirectory:directory,identity:target,version:1,role:'reader'};
   await writeFile(join(directory,'process.json'),JSON.stringify(binding));
   const fetch=async(input:URL|string|Request)=>{
-    if(String(input).endsWith('/mcp/instance_info'))return new Response(JSON.stringify({pid:child.pid,tcp_port:19000,project_path:directory+'/fixture.gpr'}));
+    if(String(input).endsWith('/mcp/instance_info'))return new Response(JSON.stringify({pid:child.pid,tcp_port:19000,project_path:join(directory,'fixture.gpr')}));
     if(String(input).endsWith('/mcp/schema'))return new Response(JSON.stringify({tools:[{path:'/get_project_info',method:'GET',params:[]}]}));
     return new Response(JSON.stringify({project_server_bound:false}));
   };
@@ -45,5 +45,5 @@ test('post-launch binding failure stops the owned child and retains diagnostic s
   // Substitute the external launch boundary; cleanup and receipt/process handling remain real.
   (runtime as unknown as {launch:()=>Promise<Binding>}).launch=async()=>binding;
   await assert.rejects(runtime.startReader(target,'synthetic'),/Actual server\/repository/);
-  await exit;assert.equal(child.signalCode,'SIGTERM');assert.equal(processes.size,0);
+  await exit;if(process.platform==='win32')assert.equal(child.exitCode,1);else assert.equal(child.signalCode,'SIGTERM');assert.equal(processes.size,0);
 });

@@ -10,8 +10,8 @@ import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
 
 test('a replacement context owner authenticates and releases an unread owned child during disposal',async t=>{
-  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
-  const workspace=new Workspace(directory,'default');t.after(()=>workspace.close());
+  let workspace:Workspace;const f=await createCliFixture({after:action=>t.after(async()=>{workspace?.close();await (action as ()=>Promise<void>)();})},{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
+  workspace=new Workspace(directory,'default');
   const input=join(f.root,'fixture.exe');await writeFile(input,'synthetic owner receipt input');
   const target=await workspace.importTarget(input),scope=workspace.reserveOpen(target.id,'new',{autoAnalyze:false}).context;
   const root=join(directory,'ghidra-native/context',scope.id,'owned');await mkdir(root,{recursive:true});
@@ -38,7 +38,7 @@ test('a replacement context owner authenticates and releases an unread owned chi
 });
 
 test('a GUI replacement ignores an earlier stop as proof and independently verifies the current owned process',async t=>{
-  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace'),workspace=new Workspace(directory,'default');t.after(()=>workspace.close());
+  let workspace:Workspace;const f=await createCliFixture({after:action=>t.after(async()=>{workspace?.close();await (action as ()=>Promise<void>)();})},{applicationId:'insight-cli'}),directory=join(f.root,'workspace');workspace=new Workspace(directory,'default');
   const input=join(f.root,'fixture.exe');await writeFile(input,'synthetic mode transition input');const target=await workspace.importTarget(input),scope=workspace.reserveOpen(target.id,'new',{autoAnalyze:false}).context;
   const root=join(directory,'ghidra-native/context',scope.id,'owned');await mkdir(root,{recursive:true});
   const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});assert.ok(child.pid);

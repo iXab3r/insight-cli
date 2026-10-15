@@ -95,7 +95,7 @@ export class Workspace {
   constructor(directory: string, readonly profile: string) {
     text(profile);
     mkdirSync(directory, {recursive: true, mode: 0o700});
-    this.directory = realpathSync(directory);
+    this.directory = realpathSync.native(directory);
     this.artifacts = new Artifacts(this.directory);
     const path = join(this.directory, 'workspace.sqlite');
     this.db = new DatabaseSync(path);
