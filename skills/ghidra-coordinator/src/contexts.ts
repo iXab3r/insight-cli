@@ -13,6 +13,7 @@ import { object, fail, text, version, stable } from './model.js';
 import { HttpBridge } from './transport.js';
 import {scriptInventory,scriptPath} from './scripts.js';
 import {logicalPrograms} from './cross-results.js';
+import {uiResult} from './ui-results.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -388,6 +389,14 @@ public class ${name} extends GhidraScript {
     await durable(join(this.directory(),'context',context.id,'current.json'),gui.binding);
   }
   async project(operation:string,parameters:Record<string,unknown>) {return this.server().project(operation,parameters);}
+  async ui(scope:Scope,operation:string,p:Record<string,unknown>){
+    const record=await this.selected(scope);await this.reconcilePeers(record);
+    const paths:Record<string,string>={cursor:'/get_ui_cursor',tools:'/tool/running_tools',goto:'/tool/goto_address',prompt_policy:'/prompt_policy'},path=paths[operation];
+    if(!path)fail('invalid','Unsupported UI operation.');
+    const target=this.workspace.target(scope.target),metadata=await this.source(record,target),name=text(metadata.program_name);
+    const value=await record.http.call(path,operation==='cursor'?{type:'all'}:p);
+    return uiResult(operation,p,value,scope,record.binding.program,target.name,name);
+  }
   async projectOutcome(requestId:string,expected:Record<string,unknown>) {return this.server().projectOutcome(requestId,expected);}
   async close(scope: Scope) {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
@@ -399,7 +408,10 @@ public class ${name} extends GhidraScript {
     if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
-      if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;fail('binding','Stopped receipt belongs to another process.');}
+      if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;
+      // A GUI transition reuses the saved project root. Its earlier headless stop is not
+      // evidence about this process; verify the current PID/binding independently below.
+    }
     catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     if(!alive(binding.pid))return true;
     await this.verified(binding,this.workspace.target(scope.target));return false;

@@ -99,6 +99,14 @@ remain open. The whole M5 gate and final installed crash matrix are not complete
 
 ## Engineering defaults
 
+The [GUI control checkpoint](verification/ui-controls.json) verifies the four public UI leaves:
+cursor facets, owned tool discovery, goto/readback and temporary prompt policy. Backend program
+names are resolved against verified metadata and replaced with logical session/target scope.
+Both headless unavailability reasons and actual GUI functionality are checked. Private edits
+survive mode changes; another agent's view stays unchanged. The offline suite now has 81 passing
+tests, including navigation response loss without replay and disconnected UI continuation.
+Debugger execution and the full combined acceptance gate remain open.
+
 The administrative checkpoint adds fourteen configured-server leaves with actual repository,
 ACL/history/checkout readback and protected publication authority. The
 [server receipt](verification/server-administration.json) identifies the tested native checkpoint.

@@ -170,3 +170,17 @@ own evidence. Projects and file exports do not publish or replace a selected res
 completion journals. A deliberately lost creation response is recovered from its exact saved
 request/result pair without another creation. Run `scripts/proof-project-recovery.mjs`; absent
 completion proof still blocks effects. Its hashes identify this later checkpoint.
+
+[Owned GUI controls](ui-controls.json) verifies headless cursor unavailability, real owned tool
+inventory, browser navigation with cursor readback, prompt-policy enable/status/disable, request
+retry, logical program scope and private work across GUI/headless transitions. Another session
+retains its independent view. Run `scripts/proof-ui.mjs` with the same disposable/runtime/compiler
+flags. The source hashes identify this checkpoint; debugger and final installed acceptance remain
+separate. Offline tests cover lost navigation response observation and disconnected UI actions.
+
+[GUI response recovery](ui-recovery.json) repeats those controls with a lost successful goto
+response and counts actual navigation dispatches. Continuation observes the live cursor without
+another goto. It also exercises the correction for a headless stop receipt retained when the same
+project root becomes GUI: that earlier receipt cannot prove whether the replacement process ended.
+Current PID/binding verification remains required. Run `scripts/proof-ui-recovery.mjs` with the
+same flags. Native debugger execution and final installed fault repetition remain separate gates.

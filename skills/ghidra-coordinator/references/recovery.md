@@ -26,3 +26,9 @@ PID/port, or blindly repeat a script/external action to turn uncertainty into su
 
 The older prototype's `workers`, `findings`, `integrate` and batch `recover` commands are not the
 public facade API. Its coordinator journals remain separate and are never silently migrated.
+
+A lost UI navigation response can be verified from the live authenticated cursor without another
+goto. If its original owned GUI process has exited, continuation reports the uncertain UI action
+as disconnected and retains saved program work. It does not recreate the old cursor or re-enable
+a previous prompt policy. Other unproved live UI effects remain retained until their outcome is
+established or the original process is known to have ended.

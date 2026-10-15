@@ -67,3 +67,11 @@ Calls return explicit scope so parallel outputs can be associated with the inten
 `ghidra status` verifies the selected tool and reports saved pending work. `ghidra save` retains
 private changes without publishing. `ghidra close` saves and releases the owned process; continue
 with the same open selectors to retain local work. Save/close accept the optional request ID.
+
+The `ghidra ui` commands use the same explicit scope. `cursor --type all` reads address, function,
+selection and focused program; headless facets return null with an explicit reason. `tools` starts
+the owned GUI when needed and lists its tools using logical program scope. `goto --address <at>`
+navigates the owned browser and verifies the cursor. `prompt-policy --action enable --seconds <n>`
+temporarily handles the backend's known prompts in that owned GUI for 1–300 seconds; status and
+disable inspect or end the policy. Changing UI commands accept request IDs. These actions do not
+publish program work. Switching modes retains private edits and other sessions keep their views.

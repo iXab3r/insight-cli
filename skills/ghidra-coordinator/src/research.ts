@@ -9,6 +9,7 @@ import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 
 export interface ResearchBackend {
+  ui?(scope:Scope,operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
   project?(operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
   projectOutcome?(requestId:string,expected:Record<string,unknown>):Promise<Record<string,unknown>|undefined>;
   administration?(operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
@@ -330,6 +331,20 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='ui') {
+        try{
+          if(backend.closed&&await backend.closed(selected)){
+            this.workspace.recordRequest(request.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});continue;
+          }
+          if(execution.operation==='goto'&&backend.ui){
+            const p=object(object(request.intent).parameters),cursor=await backend.ui(selected,'cursor',{}),location=object(cursor.address),current=this.workspace.context(selected);
+            if(location.session!==selected.session||location.target!==selected.target||address(location.address)!==address(p.address)||current.generation!==execution.generation)continue;
+            const containing=cursor.function?object(cursor.function):undefined,value={address:publicAddress(location.address),...(containing&&typeof containing.function_name==='string'?{function:containing.function_name}:{})};
+            this.workspace.completeSavedRequest(selected,request.id,current.generation,{}, {...selected,state:'applied',value});
+          }
+        }catch{/* Only the live verified cursor or a verified lost process establishes continuation. */}
+        continue;
+      }
       if(execution?.kind==='export') {
         try{const snapshot=execution.snapshot as Artifact;await this.workspace.artifacts.verify(snapshot);
           const observed=await this.workspace.artifacts.capture(text(execution.output,4096),'snapshot'),current=this.workspace.context(selected);

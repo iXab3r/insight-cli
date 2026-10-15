@@ -15,6 +15,7 @@ import {Administration,administrationCommands} from './administration.js';
 import {Lifecycle,lifecycleCommands} from './lifecycle.js';
 import {utilityCommands} from './utility.js';
 import {Projects,projectCommands} from './projects.js';
+import {UserInterface,uiCommands} from './ui.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -46,7 +47,7 @@ class Owner {
       return result instanceof GhidraContexts?result.fork(c):result;
     };
     const research=new Research(profile.workspace,backend,profile.tasks);
-    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),backend};
+    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),backend};
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
@@ -260,6 +261,6 @@ export function createDefinition(options: Options = {}): CliDefinition {
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
       mutationCommands(c=>owner.selected(c).research)),[...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
-        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects)])}):entry)};
+        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui)])}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));
