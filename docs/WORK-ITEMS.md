@@ -271,3 +271,14 @@ complex-edit/conflict contract and reconcile lost native replies without replay.
 cases, affected query/edit/cross regressions and packaged CLI/IPC acceptance. The earlier M0–M5
 report remains evidence at its own source revision. P2/P3 do not become part of this follow-up;
 no npm publication or change to shared publication policies is included.
+
+
+## API-gap selected P2 follow-up (2026-10-15)
+
+The owner authorized autonomous closure of the P2 findings, native verification, documentation,
+commit and push. The selected N01–N09 workflows and G07 direct placeholder convenience are
+implemented; [P2 evidence](verification/api-gaps-p2.json) identifies the independently tested
+source, native groups, package and OS boundaries. New program edits retain complex-change
+publication/conflict rules. Native VT is a tool object inside the existing research scope;
+FID and BSim use their actual SDK databases. Live writes remain separate uncertain effects.
+No automatic publication, universal DB merge or generic plugin manager was added.

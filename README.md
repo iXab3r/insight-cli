@@ -6,7 +6,7 @@ and target identifiers. The service owns processes, routing, saved views and pub
 Agents choose the investigation and interpret results.
 
 The agreed **M0–M5 delivery is implemented and verified**: all 210 pinned operations and eight
-bridge-control equivalents map to 215 public leaves. The [combined acceptance report](docs/verification/full-facade.json)
+bridge-control equivalents remain accounted for. The current command tree has 261 public leaves. The [combined acceptance report](docs/verification/full-facade.json)
 records 93 passing offline tests, 23 passing native groups, the installed CLI/IPC/OS-keyring crash
 matrix and the exact tested source/artifact hashes. [Coverage evidence](docs/verification/coverage-evidence.json)
 joins each inventoried operation to its command/equivalent and verification group.
@@ -15,11 +15,18 @@ closure**: real bounded replacements for the two upstream analysis stubs, actual
 validation, supported emulation ABIs, structured/bounded reads, qualified heuristics, entry
 provenance and complete audited memory/prototype inputs. [Current closure evidence](docs/verification/api-gaps.json)
 binds the newer implementation and affected regressions separately from the historical full M0–M5
-report. Native SDK breadth beyond the pinned catalog remains selected P2/P3 work.
+report. The [selected P2 report](docs/verification/api-gaps-p2.json) separately covers native Version
+Tracking, categorized program differences, guarded byte/assembly/context edits, loader/exporter
+selection, FID/BSim, GDT layouts/settings, namespace/external CRUD and bounded typed IR. It also
+covers guarded live debugger writes and selected retained-trace queries. All 104 offline tests,
+eight local native groups, extra SDK response-loss verification and selected Windows/Linux native
+CI pass. See the installed
+[native workflow reference](skills/ghidra-coordinator/references/native-workflows.md).
 
 Native acceptance targets macOS/Ghidra 12.1.2/Java 21. It includes two simultaneous GUI/LLDB
 contexts, retained trace/mapping recovery, explicit merge/refresh and seven owner SIGKILL phases.
-Native Windows/Linux acceptance, automatic strategies, universal native DB merging, external
+The P2 report adds selected headless native Windows/Linux workflows and a larger saved DB;
+GUI/LLDB acceptance remains macOS. Automatic strategies, universal native DB merging, external
 archive-service deployment and npm publication remain outside this pass. See
 [design](docs/DESIGN.md), [scenarios](docs/CLI-SCENARIOS.md) and [milestones](docs/PLAN.md).
 

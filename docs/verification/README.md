@@ -1,5 +1,37 @@
 # Verification scope
 
+## Selected P2 workflows
+
+[Separate P2 evidence](api-gaps-p2.json) records candidate `98983d3972c9f09807fd9b03ce99ce46e86a45ff`,
+104 passing offline tests, all eight passing local native groups and an additional real SDK
+response-loss case (one actual mutation, independent saved readback, no replay). The 25 focused
+SDK/VT/FID/BSim/live-trace cases pass, as do P0/P1, existing mutations, debugger and installed IPC.
+[Windows/Linux CI](https://github.com/iXab3r/insight-cli/actions/runs/38797117575) passes all three
+headless native groups on each OS, including 104 offline tests and isolated package installation.
+That run identifies commit `0c9b140d85d81fa828b1033b0f11cb2a1b914ec1`; its runtime source, schemas,
+individual OS runners and workflow are identical to the local candidate. The later candidate
+changes only the local matrix identity checks and setup prose. The report keeps these identities
+separate and includes the actual compiled JS/native runtime source hashes for the local matrix.
+
+The final tarball has SHA256 `53dca48af1de500aa7b477520bbf8b531e21245fff1e36030ff1201076b7e87f`;
+it is the exact artifact accepted by the installed native CLI/IPC scenario. The locked offline
+package/relocation check and source/archive privacy scans also pass.
+
+The native SDK/matching/database
+fixtures use newly built synthetic inputs and owned repositories/processes only. The larger saved
+fixture contains 32 MiB initialized memory, 20000 symbols and 1000 types, and verifies visited-input
+budgets and incomplete responses. This is a selected scale case, not an arbitrary production-capacity
+benchmark or an entire-SDK coverage denominator.
+
+`scripts/proof-p2-matrix.mjs` runs SDK, VT, FID/BSim, live/trace, P0/P1, mutation, debugger and
+installed-package regressions sequentially, checking source identity between groups. The separate
+`disposable-native-p2` workflow requires an explicit manual dispatch or an opt-in commit marker
+on the development branch; ordinary CI stays offline. The selected headless OS lane uses the
+official Ghidra 12.1.2 archive with its published SHA-256. GUI/LLDB native acceptance remains macOS.
+Runtime resources, source hashes and receipts establish each evidence scope; old reports retain
+their original identity. See [agent contracts](../../skills/ghidra-coordinator/references/native-workflows.md)
+for budgets, effects and deliberate restrictions.
+
 ## Current G01–G07 P0/P1 closure
 
 [API-gap closure evidence](api-gaps.json) records implementation `3c6450d8a05745227caae0ad983388e563eaf551`,
@@ -15,7 +47,7 @@ executes the packaged native query kernels and saved-memory digest verification 
 The source/receipt/artifact hashes identify the tested candidate; private paths/logs remain outside
 this directory. Run with `--ack-disposable` and explicit runtime/compiler paths as below.
 
-The final prepared tarball matches the artifact exercised by installed native acceptance:
+That P0/P1 candidate tarball matched its installed native acceptance artifact:
 SHA256 `507a357e913b865a10c71b51d206e5597ace7adac2c69677da5c02dea3b94a6c`.
 The separate locked offline package/relocation check also passes.
 

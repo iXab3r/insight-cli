@@ -11,7 +11,7 @@ It does not claim every native overload or parameter combination is covered.
 **G01–G07 P0/P1 are implemented in the facade.** The pinned upstream source/JAR is unchanged.
 Its two analysis stubs are replaced with facade-owned native algorithms, and nested unavailable
 responses are rejected. The facade also closes the audited memory/prototype input gaps.
-The 210 operation mappings and eight bridge equivalents still resolve to 215 public leaves.
+The 210 operation mappings and eight bridge equivalents remain accounted for; the current tree has 261 public leaves, including selected native SDK extensions.
 This remains a selected native API facade, not complete Ghidra SDK coverage.
 
 [Current closure evidence](verification/api-gaps.json) binds the implementation source hashes,
@@ -30,8 +30,20 @@ that upstream distinction and identify what now differs in our implementation.
 | G06 | Closed: external-entry metadata separated from name/image-base candidates | [native research](../skills/ghidra-coordinator/references/native/InsightResearchQueries.java) |
 | G07 | Closed: bytes/fill/base64/overlay/uninitialized/volatile/comment block creation; explicit/default compiler convention; independent saved-state verification and lost-response recovery | [commands](../skills/ghidra-coordinator/src/cli.ts), [memory verification](../skills/ghidra-coordinator/src/memory-inputs.ts), [saved inspector](../skills/ghidra-coordinator/references/native/InsightSnapshotInspect.java) |
 
-P2/P3 remain follow-up recommendations; neither the native SDK's entire breadth nor universally
-bounded execution of every upstream algorithm is claimed by this closure.
+## Selected P2 closure
+
+**N01–N09 and G07's direct placeholder convenience are implemented.** The selected native workflows
+are described below and in the installed [agent reference](../skills/ghidra-coordinator/references/native-workflows.md).
+[Separate P2 evidence](verification/api-gaps-p2.json) binds source hashes, actual native fixtures,
+package acceptance and OS results. It supplements the older P0/P1 and M0–M5 reports.
+The pinned MCP source/JAR remains unchanged. Native helpers call actual Ghidra facilities; custom
+MCP function hashes are not presented as Version Tracking, FID or BSim.
+
+Program edits remain independently verified complex private changes. A diverged base retains an
+explicit conflict; no universal native DB merger or automatic publication strategy was introduced.
+Live target writes have separate durable intents and never replay an uncertain effect. Schedules
+are parsed/validated without execution. Whole-SDK parity and calibrated similarity probabilities
+are outside these selected workflow contracts.
 
 ## Baseline, sources and scope
 
@@ -39,14 +51,15 @@ bounded execution of every upstream algorithm is claimed by this closure.
 | --- | --- | --- |
 | A — native Ghidra | Ghidra **12.1.2**, Java 21; installed source archives, linked to the [matching release source](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.2_build/Ghidra) | Java SDK, service APIs and extension points. No invented “total SDK endpoints” denominator. |
 | B — GhidraMCP | **7.0.0**, commit `57e37a8bf388b1279cff46378f85be1554548f61` | [210 REST catalog entries](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/tests/endpoints.json), plus eight Python bridge controls accounted separately. |
-| C — insight-cli | Current P0/P1 implementation identified by [closure source hashes](verification/api-gaps.json); historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 215 public leaves across the facade command tree; not 215 distinct native Ghidra capabilities. |
+| C — insight-cli | Current P2 implementation identified by [closure source hashes](verification/api-gaps-p2.json); historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 261 public leaves across the facade command tree; not 261 distinct native Ghidra capabilities. |
 
 Evidence: [coverage ledger](GHIDRA-COVERAGE.md), [210 operation joins](verification/coverage-evidence.json),
 [combined acceptance](verification/full-facade.json), [query contracts](../skills/ghidra-coordinator/references/queries.json),
 [mutation contracts](../skills/ghidra-coordinator/references/mutations.json). The historical full M0–M5 report records
 93 offline tests and 23 native groups at its own source revision. The current P0/P1 report records
 the new native acceptance/regressions and package identity separately; it does not rebind that old
-report to new code. Native acceptance remains macOS, not an exhaustive parameter/OS matrix.
+report to new code. Historical native acceptance targets macOS. The separate P2 report adds selected headless
+Windows/Linux workflows; it does not claim an exhaustive parameter/OS matrix.
 
 The REST catalog digest is `ebdaa9195ec2ea55fb706107bba1ee3732abd2eda783ed67a6ccc7359fdc5c66`.
 The eight bridge tools include an import operation overlapping REST import. They must not be
@@ -82,19 +95,19 @@ of that class is exposed.
 | A — native family | B — exposed MCP subset | C — facade and remaining difference |
 | --- | --- | --- |
 | [Program][sdk-Program], [FunctionManager][sdk-FunctionManager], [Listing][sdk-Listing] | Functions, instructions, comments, tags, disassembly and selected edits | Scoped reads/edits and saved-state verification; not arbitrary iteration/editing of every SDK property. |
-| [DecompInterface][sdk-DecompInterface], [HighFunction][sdk-HighFunction] | Decompilation, selected P-code/dataflow and variable operations | Typed command inputs and checked output variants; no complete decompiler/SSA object graph or all configuration knobs. |
-| [DataTypeManager][sdk-DataTypeManager], [Structure][sdk-Structure], [CParser][sdk-CParser] | Structures/unions/enums/derived types, C declaration import, validation | Saved complex edits; corrected top-level copy; parser-backed validation and actual resolvable inventory (G02). |
-| [SymbolTable][sdk-SymbolTable], [ReferenceManager][sdk-ReferenceManager], [ExternalManager][sdk-ExternalManager] | Labels, symbol rename, xrefs and external-location reads | Explicit scope and guarded mutations; not all external-library, namespace and reference CRUD. |
-| [Memory][sdk-Memory], [MemoryBlock][sdk-MemoryBlock], [ProgramContext][sdk-ProgramContext] | Byte reads/search, block create/permissions, image base, metadata | No dedicated patch-bytes/assembler, block split/join/move or processor-context editor (N03). |
+| [DecompInterface][sdk-DecompInterface], [HighFunction][sdk-HighFunction] | Decompilation, selected P-code/dataflow and variable operations | Typed command inputs and checked output variants; bounded typed SSA IR and selected native options/simplification; no entire object graph (N09). |
+| [DataTypeManager][sdk-DataTypeManager], [Structure][sdk-Structure], [CParser][sdk-CParser] | Structures/unions/enums/derived types, C declaration import, validation | Saved complex edits; corrected top-level copy, parser-backed validation/inventory (G02), GDT source identity, packing, bitfields and settings (N07). |
+| [SymbolTable][sdk-SymbolTable], [ReferenceManager][sdk-ReferenceManager], [ExternalManager][sdk-ExternalManager] | Labels, symbol rename, xrefs and external-location reads | Explicit scope and guarded mutations; dedicated namespace/class and external library/location CRUD (N08); not every reference-manager property. |
+| [Memory][sdk-Memory], [MemoryBlock][sdk-MemoryBlock], [ProgramContext][sdk-ProgramContext] | Byte reads/search, block create/permissions, image base, metadata | Guarded patch/assembly, verified block split/join/move and bounded processor-context editing (N03). |
 | [BasicBlockModel][sdk-BasicBlockModel], [AutoAnalysisManager][sdk-AutoAnalysisManager] | CFG, analyzer options/reanalysis and custom research summaries | Native mechanisms plus MCP algorithms; the two upstream stubs are replaced by bounded native facade analyses (G01). |
 | [EmulatorHelper][sdk-EmulatorHelper], [PcodeEmulator][sdk-PcodeEmulator] | Two bounded function/hash helpers via EmulatorHelper | Supported x86/x64 integer-slot ABI policies, isolated results and explicit termination (G03); no persistent general emulation API. |
 | [DomainFile][sdk-DomainFile], [DomainFolder][sdk-DomainFolder], [RepositoryAdapter][sdk-RepositoryAdapter] | Project/file lifecycle, repository/ACL/history/checkouts/check-in | Local managed startup or external profile; research lifecycle replaced by owned contexts and explicit merge/refresh. |
 | [ProgramDiff][sdk-ProgramDiff], [ProgramMergeManager][sdk-ProgramMergeManager], [ProgramMultiUserMergeManager][sdk-ProgramMultiUserMergeManager] | Custom function/documentation comparison/transfer; no generic native program diff/merge endpoint | Scalar three-way merge and unchanged-base complex publication; no universal DB merge (N02). |
-| [Trace][sdk-Trace], [Target][sdk-Target], [DebuggerStaticMappingService][sdk-DebuggerStaticMappingService] | 16 GUI debugger operations | Managed GUI/LLDB contexts and retained trace recovery; no dedicated target register/memory writes or full trace timeline/object API (N06). |
+| [Trace][sdk-Trace], [Target][sdk-Target], [DebuggerStaticMappingService][sdk-DebuggerStaticMappingService] | 16 GUI debugger operations | Managed GUI/LLDB contexts and retained trace recovery; guarded live memory/register writes and selected bounded trace timeline/object/value/schedule queries (N06). |
 | [GhidraScript][sdk-GhidraScript], [GhidraScriptUtil][sdk-GhidraScriptUtil] | Script execution, inline code; listing handler only gives GUI instructions | Actual logical script inventory; scripts are an extension route, not typed parity for every SDK feature. |
 | [GoToService][sdk-GoToService], [ProgramManager][sdk-ProgramManager] | GUI cursor, tools, navigation; MCP prompt policy | Scoped GUI actions; GUI required. There is no promise to expose every plugin window/service. |
-| [AutoImporter][sdk-AutoImporter], [Exporter][sdk-Exporter] | General file import and GZF program export/import, GAR project archive/restore | Managed inputs and verified snapshots/files; no public full loader/exporter selection contract (N04). |
-| [VTSession][sdk-VTSession], [FunctionDatabase][sdk-FunctionDatabase], [FidService][sdk-FidService] | No dedicated Version Tracking / BSim / Function ID API in the 210 catalog | Custom fuzzy matching/documentation transfer is available; it is not those native facilities (N01/N05). |
+| [AutoImporter][sdk-AutoImporter], [Exporter][sdk-Exporter] | General file import and GZF program export/import, GAR project archive/restore | Managed inputs and verified snapshots/files; native loader/exporter inventory, explicit selection/options and restricted-range output (N04). |
+| [VTSession][sdk-VTSession], [FunctionDatabase][sdk-FunctionDatabase], [FidService][sdk-FidService] | No dedicated Version Tracking / BSim / Function ID API in the 210 catalog | Dedicated native VT match sets/decisions and genuine FID/BSim database workflows supplement custom fuzzy matching (N01/N05). |
 
 ## Audited gaps and implemented P0/P1 behavior
 
@@ -164,7 +177,7 @@ branching/nested repetition; supported syntax and limits are in the agent refere
 Unreplaced upstream algorithms can still scan globally before paging. Their results explicitly
 state `scanPolicy.workBound: not-guaranteed`, the output ceiling and cancellation limitation.
 This is reported cost, not a claim that every MCP algorithm became interruptible or bounded.
-Expanding those kernels is a concrete P2 performance follow-up if real usage requires it.
+P2 adds a 32 MiB / 20000-symbol / 1000-type saved fixture and bounded new IR/trace interfaces. Further replacement of a specific upstream kernel remains conditional on a measured workload; the current cost qualification still applies.
 
 ### G05 — qualified heuristic results
 
@@ -172,7 +185,7 @@ Completeness scores, fuzzy similarity, array bounds, field names, malware/API pa
 matches now carry `semantics` with kind, algorithm and limits. Field-name confidence becomes
 `null` / `uncalibrated` rather than presenting a fixed `medium` label as evidence. Cross-context
 fuzzy commands carry the same qualification. These remain inputs to the agent's decision;
-algorithm improvements and calibrated confidence are P2 work, not implied by this change.
+P2 adds native VT/FID/BSim algorithms with positive, negative and ambiguity fixtures (N01/N05). Their native scores remain uncalibrated; statistical calibration needs a separate labeled corpus and acceptance criterion.
 
 ### G06 — entry metadata separated from candidates
 
@@ -188,10 +201,10 @@ Even confirmed external-entry designation is metadata, not proof of OS startup b
 | --- | --- | --- |
 | `create_memory_block`: bytes, fill, initialization, overlay, comment, volatility and permissions | `memory create-block` accepts hex/base64 bytes, optional/inferred positive size, fill byte, `--initialized false`, overlay, volatile and comment inputs; ≤16 MiB | **P1 closed.** Saved metadata, overlay identity and entire initialized-content digest are verified independently. Lost-response acceptance confirms one actual creation and reconciliation from saved bytes. |
 | `set_function_prototype`: separate convention | `--calling-convention` accepts explicit compiler-supported names and resolves `default` through CompilerSpec | **P1 closed.** Saved types and effective convention are checked; the default alias is covered natively. |
-| `create_struct`: direct `replace_placeholder` convenience | Existing `recreate-struct` provides replacement controls; create-struct still takes name/fields | **P2 remains:** assess whether the additional direct convenience is needed. |
+| `create_struct`: direct `replace_placeholder` convenience | `create-struct --replace-placeholder` directly uses verified native layout editing | **P2 closed:** only an explicitly selected empty structure can be replaced; native saved readback is required. |
 | `rename_function`: name/address and `strict_mode` | Explicit address/name scalar rename; upstream naming strictness is off | Intentional exact-name/address contract, not MCP naming-policy parity. |
 | Comments/documentation input names | Typed `--kind` / `--text` / `--clear`; `--document` | Equivalent renamed inputs. |
-| Debugger executable/program and runtime paths | Target/context ownership; debugger Python/WinDbg profile settings | Rehomed inputs; native Windows acceptance remains deferred. |
+| Debugger executable/program and runtime paths | Target/context ownership; debugger Python/WinDbg profile settings | Rehomed inputs; native Windows debugger acceptance remains deferred. |
 | Program import overwrite, arbitrary project paths, raw check-in/checkout/undo options | New managed destinations, owned projects and explicit open/merge/discard contracts | Intentional lifecycle/publication equivalents; do not restore raw bypass controls mechanically. |
 
 Memory and prototype variants remain complex private edits. Publication requires the unchanged
@@ -220,15 +233,15 @@ The following is a selected workflow inventory, not an exhaustive census of the 
 
 | ID / priority | A — native Ghidra capability | B — pinned MCP | C — insight-cli gap and useful acceptance |
 | --- | --- | --- | --- |
-| N01 / P2 | [VTSession][sdk-VTSession]: match sets, associations, source/destination programs and markup workflow | Custom fuzzy/hash comparison and documentation transfer; no Version Tracking session/match-set API | No dedicated VT workflow. Add only for repeated EXE-version porting; retain match provenance/acceptance and test moved/ambiguous/unmatched functions. A native VT session would be a tool object inside our root research session. |
-| N02 / P2 | [ProgramDiff.getDifferences][sdk-ProgramDiff], [ProgramMergeManager.merge][sdk-ProgramMergeManager] and [ProgramMultiUserMergeManager][sdk-ProgramMultiUserMergeManager]: selected diffs and native multi-user three-way conflict resolvers | Function/documentation diffs are not generic program DB diff/merge; check-in uses native version-control primitives, without a dedicated structured merge-resolution API | Add read-only categorized change inspection before considering more automatic merging. Native merge utilities alone do not establish safe distributed three-way merge, dependency handling or publication recovery. |
-| N03 / P2 | [Memory.setBytes/split/join/moveBlock][sdk-Memory], [Assembler][sdk-Assembler] / [GenericAssembler][sdk-GenericAssembler], [ProgramContext][sdk-ProgramContext] | Reads/search, new blocks and permissions, disassemble/repair, image base; no dedicated existing-byte patch or assembler/context editor | Typed patch/editor operations absent. If needed, require byte preconditions, context-aware assembly, exact saved diff and unchanged-base complex publication; do not classify byte patches as scalar metadata merges. |
-| N04 / P2 | [AutoImporter][sdk-AutoImporter] explicit loader/language/compiler options, [Exporter][sdk-Exporter] extension points | File import; GZF program and GAR project interchange | No full public loader/exporter inventory/selection/options. GZF is a Ghidra DB snapshot, not a rebuilt PE. Acceptance: non-default loader/options, selected ranges, export format and observed bytes/metadata. |
-| N05 / P2 | [FidService.processProgram][sdk-FidService], [FunctionDatabase.query][sdk-FunctionDatabase] / [BSimClientFactory][sdk-BSimClientFactory] | No dedicated FID/BSim query/database API; analyzer execution may use installed analyzers | No typed library-identity/similarity-database workflow. Need database identity/version, provenance, scores, no-match semantics and explicit dependency setup. Do not relabel MCP custom hashes as FID or BSim. |
-| N06 / P2 | [Target.writeMemoryAsync/writeRegisterAsync][sdk-Target]; [Trace][sdk-Trace] object/time managers; [TraceSchedule][sdk-TraceSchedule] | Launch/control/read/breakpoints/mapping subset | No dedicated target memory/register write, full trace object/timeline query or schedule API. Saved-trace recovery already exists. Add selected operations only with live-target effect/retry rules and genuine memory-state checks. |
-| N07 / P2 | [DataTypeManager][sdk-DataTypeManager] source archives, settings and richer [Structure][sdk-Structure] layout/bitfield APIs | Useful CRUD and C declaration import; does not provide the complete archive/packing/bitfield/settings API | No dedicated complete type-archive and layout workflow. Acceptance: round-trip bitfields/packing/source identity, saved readback and conflict preservation. Importing C text is not importing a `.gdt` archive. |
-| N08 / P2 | [ExternalManager][sdk-ExternalManager], [SymbolTable][sdk-SymbolTable] rich namespaces/libraries/locations | Read external locations, create labels, rename symbols; selected class edits occur through other commands | No complete dedicated external-library/location and namespace CRUD. Add only actual missing actions; existing `list_program_items` already enumerates namespaces/classes/imports/exports. |
-| N09 / P2 | [DecompInterface][sdk-DecompInterface] options, simplification, syntax tree; [HighFunction][sdk-HighFunction] rich IR | Selected decompile/P-code/dataflow output | No complete typed IR/options interface. Prefer bounded IR queries for concrete investigations; preserve decompiler failure/timeout and address-space semantics. Avoid returning the entire object graph. |
+| N01 / P2 | [VTSession][sdk-VTSession]: native match sets, associations, source/destination programs and markup | Custom fuzzy/hash comparison and documentation transfer; no native VT API | **Closed, selected workflow:** `ghidra version-tracking create/list/matches/markup/decide`. Persistent real VTSessionDB; exact-byte and duplicate-instruction correlators, native scores, explicit acceptance/reset/rejection and one-to-one constraints. Moved, duplicate/ambiguous and unmatched fixtures, owner replacement and snapshot provenance. Markup inventory precedes agent-directed ordinary edits; automatic native markup application is not exposed. |
+| N02 / P2 | [ProgramDiff][sdk-ProgramDiff] categorized differences; native merge managers/resolvers | Function/documentation diffs; no generic structured native DB comparison | **Closed for read-only inspection:** `ghidra changes compare` compares selected saved contexts across eight native diff categories, bounded ranges and timeout. Equal/changed A/B fixtures. Native automatic DB merging remains outside this contract. |
+| N03 / P2 | [Memory][sdk-Memory] setBytes/split/join/moveBlock, [Assembler][sdk-Assembler], [ProgramContext][sdk-ProgramContext] | Read/search/create/permissions/disassembly; no dedicated existing-byte patch/assembly/context editor | **Closed:** `memory patch-bytes/block-state/split-block/join-blocks/move-block`, `assembly preview/apply`, `processor-context read/set/clear`. Exact preconditions, complete bounded block digests, native rollback, immutable saved readback, lost-response reconciliation with one actual mutation, isolation and unchanged-base publication. Initialized block verification ≤16 MiB; byte edits ≤4096 bytes. |
+| N04 / P2 | Native [Loader/AutoImporter][sdk-AutoImporter] selection/options and [Exporter][sdk-Exporter] extension points | General file import; GZF/GAR interchange | **Closed, selected native format contract:** `formats loaders/exporters/export`; `ghidra open --loader --loader-options`. Actual installed inventories, validated typed options, explicit loader/language/compiler and native restricted address sets. Non-default raw-loader offsets/length/base and observed exported bytes; all output/companion files have durable hashed receipts. No PE-rebuild claim. |
+| N05 / P2 | [FidService][sdk-FidService], [FunctionDatabase][sdk-FunctionDatabase], [BSimClientFactory][sdk-BSimClientFactory] | No dedicated FID/BSim DB API | **Closed, local native workflows:** `libraries build-fid/fid-query/build-bsim/bsim-query`. Real native FID and embedded BSim/H2 signatures; database SHA, library/version, SDK/signature version, native scores, explicit no-match and immutable query inputs. Build/query/no-match/lost-completion fixtures. ≤1000 input functions, ≤256 MiB consumed DB; no external BSim-server provisioning or calibrated-probability claim. |
+| N06 / P2 | [Target][sdk-Target] live writes, [Trace][sdk-Trace] time/object managers, [TraceSchedule][sdk-TraceSchedule] | Launch/control/read/breakpoints/mapping subset | **Closed, selected operations:** `debugger write-memory/write-register/timeline/objects/object-values/schedule`. Stopped/current live target, fresh native read-before/write/read-after, width/byte checks; uncertain writes never repeat. Real LLDB writes/restoration, retained changed trace bytes/IDs and loss of reply. Schedule parsing/validation reports `executed: false`; arbitrary schedule execution is not exposed. Owned adapter copy fixes the pinned LLDB SBProcess memory-write call. |
+| N07 / P2 | [DataTypeManager][sdk-DataTypeManager] source archives/settings and [Structure][sdk-Structure] packing/bitfields | CRUD and C declaration import, no complete archive/layout API | **Closed, selected GDT/layout contract:** `types layout/define-layout/set-settings/archive-export/archive-import`. Real GDT round-trip with source archive ID, packing, bitfields and native default-setting definitions/clear. Conflicting layouts reject; divergent private archive work remains a complex conflict. ≤256 selected type paths/fields, consumed GDT ≤64 MiB. |
+| N08 / P2 | [ExternalManager][sdk-ExternalManager] and [SymbolTable][sdk-SymbolTable] namespace/class/library/location CRUD | Reads/labels/symbol rename; selected class operations | **Closed:** `namespaces list/create/update/delete` and external library/location create/update/delete/list. Real saved native CRUD; only ordinary namespaces/classes, empty-container deletion and retained-dependency refusal. Existing `list_program_items` remains useful inventory. |
+| N09 / P2 | [DecompInterface][sdk-DecompInterface] options/simplification and [HighFunction][sdk-HighFunction] typed SSA | Selected decompile/P-code/dataflow output | **Closed, bounded view:** `decompiler ir` returns actual SSA operations/typed varnodes, address-space/offset/size and block identity, selected native options/simplification, timeout/completion diagnostics and separate IR truncation. Positive and one-op partial fixtures; ≤10000 ops, ≤120-second native timeout. No entire Java object graph. |
 | N10 / P3 | [GhidraScript][sdk-GhidraScript], [SleighLanguage][sdk-SleighLanguage] and extension points for new analyzers/languages/plugins | Script entry points; no generic plugin installation/configuration SDK wrapper | Keep script escape hatch and pinned runtime checks. A general plugin/language-management API needs a real consumer; it is not required to finish catalog equivalence. |
 
 Ghidra already has multi-user merge machinery: `ProgramMultiUserMergeManager` takes original,
@@ -236,10 +249,10 @@ local, latest and result programs, and coordinates memory/type/listing/context a
 Its GUI-oriented workflow is not the same contract as our unattended session merge and recovery.
 The gap is exposing/adapting the needed native behavior, not the absence of native three-way merging.
 
-P2 items have no unconditional implementation order. For this product's current multi-EXE/multi-agent
-workflow, start with **N02 read-only change inspection**, then **N01 Version Tracking** if version-to-version
-porting dominates. Move N04/N07/N08 earlier when a concrete input/type/import workflow blocks work.
-The SDK's existence alone is not a reason to build an API.
+The selected P2 workflows are now shipped together. New domain workflows should be driven by
+measured agent tasks: first identify an actual format, analysis, trace or porting limitation,
+then add a bounded/effect-aware contract and a native fixture. Further statistical calibration,
+generic plugins and universal merging do not follow merely from the SDK containing those APIs.
 
 ## What our API adds above Ghidra/MCP
 
@@ -260,11 +273,11 @@ The SDK's existence alone is not a reason to build an API.
 | **P1** | **Closed — G02/G05/G06:** parser/type truth, qualified heuristics and entry provenance | Actual resolution/diagnostics, no persisted validation changes, metadata distinguished from candidates. |
 | **P1** | **Closed — G03:** supported ABI policies and honest termination | x86/Windows x64/SysV x64 native cases; unsupported architecture/lowering rejection. |
 | **P1** | **Closed — G04/G07:** structured common results, bounded/reported work and missing domain variants | Large fixture budget, saved bytes/metadata/convention checks, retained lost-response effects and A/B publication. |
-| **P2** | Selected N01–N09 workflows, wider native OS/large-DB matrices, direct create-struct placeholder convenience; more bounded kernels and algorithm quality where demanded | One real workflow per addition; preserve explicit root sessions/targets, effects and conflict rules. |
+| **P2** | **Closed for the selected N01–N09 workflows and G07 convenience**, with larger saved-DB and native OS evidence recorded separately | Real native domain effects, lost-reply rules, conflicts, bounded new reads and installed-package checks. Conditional extra kernels/calibration require a concrete measured workload, rather than an implied whole-SDK promise. |
 | **P3** | Generic extensions and automatic publication strategies | Defer until a separate consumer/contract. |
 
 The current evidence supplements the earlier M0–M5 acceptance at its own implementation identity.
-It does not claim a fresh full GUI/debugger/OS matrix for these headless query/edit changes.
+The P2 report identifies its own GUI/LLDB, selected headless OS and installed-package checks; it does not rebind historical matrices to new code or claim every GUI debugger on every OS.
 
 ## Appendix A — every pinned REST operation, 1:1:1
 
