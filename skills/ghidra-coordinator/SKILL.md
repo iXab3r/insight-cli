@@ -24,8 +24,7 @@ these installed resources. Use generated `--help` for syntax; read the reference
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
 
 The facade exposes the pinned static research/editing catalog, merge/refresh, project/server/GUI
-controls, debugger, archive exchange and supported recovery. Combined installed/native final
-acceptance remains in progress; do not describe this checkpoint as a complete delivery. Preserve private work
+controls, debugger, archive exchange and supported recovery. Preserve private work
 and journals while an outcome is unresolved. The CLI supplies the investigation tools; agents
 choose research goals and interpret findings.
 Installing this package does not register this skill in an agent's configuration.

@@ -36,7 +36,5 @@ prepares the Python wheels already supplied with Ghidra in owned storage; it doe
 packages into system Python. A launcher's optional Python executable and Windows debugger
 directory are Factory profile settings. Native Windows/Linux acceptance remains deferred.
 
-The sixteen operations and disconnected trace restoration have a macOS native checkpoint.
-The full installed crash matrix and combined delivery gate remain open. Use generated help for
-exact flags. A retained static breakpoint bookmark may remain after its live trace placement is
+Use generated help for exact flags. A retained static breakpoint bookmark may remain after its live trace placement is
 removed; `trace_location_count` distinguishes current placements from that static metadata.

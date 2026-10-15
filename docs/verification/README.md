@@ -235,3 +235,11 @@ lifespans while relocating only the recorded context-owned program URL. The cras
 now uses two simultaneous GUI/LLDB contexts: killing A terminates its inferior while B remains
 connected and reads exact memory. Both receipts identify the current runtime-input hardening.
 The offline suite passes 92 tests; final combined/installed acceptance remains separate.
+
+[Query output variants](query-variants.json) adds 21 native cases: bulk/filtered listing comments,
+category/hash inventories, a program option group, deprecated data-format values, five call-graph
+formats, six graph-analysis modes and multi-function/assembly selectors. It exposed and verifies
+three corrected contracts: bulk comments use `results`, the pinned data listing always returns
+JSON, and `json_edges` has address-based edges with its own counts. The offline suite passes
+93 tests. Run `scripts/proof-query-variants.mjs` with the same disposable/runtime/compiler flags.
+This checks representative result branches; it does not claim exhaustive input combinations.

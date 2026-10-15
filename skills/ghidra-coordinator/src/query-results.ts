@@ -80,16 +80,17 @@ export function queryResult(path:string,parameters:Record<string,unknown>,result
   if(!Array.isArray(result))fail('partial','Query expected a result array.');return result;
  }
  let shape=shapes[path];
- if(path==='/get_comment')shape=parameters.addresses?{comments:'object'}:{address:'string',has_comment:'boolean'};
+ const bulkComments=path==='/get_comment'&&Boolean(String(parameters.addresses??'').trim());
+ if(path==='/get_comment')shape=bulkComments?{results:'array',requested:'number',returned:'number',with_comments:'number'}:{address:'string',has_comment:'boolean'};
  if(path==='/find_data_types')shape={...(parameters.categories?{categories:'array' as const}:{data_types:'array' as const}),count:'number'};
  if(path==='/get_function_hash')shape=parameters.function?{hash:'string',function_name:'string',instruction_count:'number'}:{functions:'array'};
  if(path==='/get_program_options')shape=parameters.group?{options:'array'}:{groups:'array'};
- if(path==='/list_data_items_by_xrefs') {
-  if(parameters.format===undefined||parameters.format==='text'){if(typeof result!=='string')fail('partial','Query expected formatted data text.');return result;}
-  shape={data_items:'array',count:'number',total:'number'};
- }
+ // The pinned implementation retains format as a deprecated no-op and always returns JSON.
+ if(path==='/list_data_items_by_xrefs')shape={data_items:'array',count:'number',total:'number'};
  if(path==='/get_external_location')shape={address:'string'};
- if(path==='/get_full_call_graph')shape=parameters.format===undefined||parameters.format==='edges'?{edges:'array',count:'number'}:{format:'string'};
+ if(path==='/get_full_call_graph')shape=parameters.format==='json_edges'?{edges:'array',edge_count:'number',caller_count:'number'}:
+  parameters.format==='dot'||parameters.format==='mermaid'?{format:'string',diagram:'string',count:'number'}:
+  parameters.format==='adjacency'?{format:'string',adjacency:'object',count:'number'}:{edges:'array',count:'number'};
  if(path==='/analyze_call_graph')shape=parameters.analysis_type===undefined||parameters.analysis_type==='summary'?{total_functions:'number',total_call_edges:'number'}:{analysis_type:'string'};
  if(path==='/get_assembly_context') {
   const value=checkShape(result,{}),input=parameters.xref_sources;
@@ -99,6 +100,16 @@ export function queryResult(path:string,parameters:Record<string,unknown>,result
  if(path==='/list_scripts')shape={items:'array',count:'number',total:'number',offset:'number',limit:'number',truncated:'boolean'};
  if(!shape)fail('schema','Pinned query has no result contract.');
  const value=checkShape(result,shape);
+ if(path==='/get_comment'){
+  const rows=bulkComments?value.results as unknown[]:[value];
+  if(bulkComments&&(!['requested','returned','with_comments'].every(key=>Number.isSafeInteger(value[key])&&Number(value[key])>=0)||value.returned!==rows.length||Number(value.returned)>Number(value.requested)||Number(value.with_comments)>Number(value.requested)))fail('partial','Bulk comment counts are inconsistent.');
+  for(const row of rows){const comment=checkShape(row,{address:'string',has_comment:'boolean'});
+   for(const kind of ['plate','pre','eol','post','repeatable'])if(comment[kind]!==null&&typeof comment[kind]!=='string')fail('partial','Query omitted or malformed comment kind.');}
+ }
+ if(path==='/get_full_call_graph'&&parameters.format==='json_edges'){
+  const rows=value.edges as unknown[];if(value.edge_count!==rows.length||!Number.isSafeInteger(value.caller_count)||Number(value.caller_count)<0)fail('partial','Call graph counts are inconsistent.');
+  for(const row of rows)checkShape(row,{caller_addr:'string',callee_addr:'string',caller_name:'string',callee_name:'string'});
+ }
  if(path==='/get_struct_layout')for(const field of value.fields as unknown[])checkShape(field,{offset:'number',size:'number',type:'string',name:'string'});
  if(path==='/get_enum_values')for(const member of value.values as unknown[]) {
   const observed=checkShape(member,{name:'string'}),number=observed.value;
