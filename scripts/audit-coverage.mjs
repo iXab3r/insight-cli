@@ -11,7 +11,7 @@ function collect(rows,prefix=''){
 collect(definition.commands);assert.ok(definition.auth,'Factory authentication equivalent');
 const ledger=await readFile(new URL('../docs/GHIDRA-COVERAGE.md',import.meta.url),'utf8'),operations=[],bridge=[];
 let category='';
-for(const line of ledger.split('\n')){
+for(const line of ledger.split(/\r?\n/)){
   const title=/^### (\w+)/.exec(line);if(title)category=title[1];
   const row=/^\| `(\/[^`]+)` \| `([^`]+)` \| ([^|]+) \| ([^|]+) \| ([^|]+) \| ([^|]+) \|$/.exec(line);
   if(row){
