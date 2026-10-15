@@ -256,3 +256,18 @@ Runtime identity now covers relevant installed SDK code/data/native/Python input
 tools/modules/configuration. Session status pages contexts and exposes scoped uncertain external
 requests. All 92 offline tests and isolated installed-package checks pass. The combined final
 native matrix and installed owner-fault repetition are still required before M5-06 completion.
+
+
+## API-gap P0/P1 follow-up (2026-10-15)
+
+The owner authorized autonomous closure of every P0/P1 in [the API comparison](gaps_api_ghidra.md),
+real-Ghidra verification, documentation, commit and push. G01–G07 now include native analysis
+replacements, actual/parser-backed type and prototype validation, bounded integer-slot emulation,
+structured common results and work budgets, qualified heuristics, entry provenance, full audited
+memory creation inputs and explicit/default conventions. Saved effects retain the existing
+complex-edit/conflict contract and reconcile lost native replies without replay.
+
+[Current evidence](verification/api-gaps.json) binds source identity, 99 offline tests, focused native
+cases, affected query/edit/cross regressions and packaged CLI/IPC acceptance. The earlier M0–M5
+report remains evidence at its own source revision. P2/P3 do not become part of this follow-up;
+no npm publication or change to shared publication policies is included.

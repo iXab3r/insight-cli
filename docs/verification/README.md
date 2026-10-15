@@ -1,6 +1,30 @@
 # Verification scope
 
-## Combined full facade acceptance
+## Current G01–G07 P0/P1 closure
+
+[API-gap closure evidence](api-gaps.json) records implementation `3c6450d8a05745227caae0ad983388e563eaf551`,
+99 passing offline tests and eight passing native groups: 17 focused cases, affected query/edit/cross regressions and installed
+CLI/IPC/OS-keyring checks. `scripts/proof-api-gaps-matrix.mjs` runs the eight native groups
+sequentially with before/after source identity checks; `proof-api-gaps.mjs` can run the focused
+closure cases by itself. All data, local repositories, processes and accounts are owned fixtures.
+
+The new tests exercise real x86/x64 PE and SysV ELF computation, unsupported AArch64/floating-point
+rejection, partial scans, a 5000-symbol work-budget case, saved memory/signature effects, lost-answer
+reconciliation without duplicate creation and two-agent publication/refresh. Installed acceptance
+executes the packaged native query kernels and saved-memory digest verification through Factory IPC.
+The source/receipt/artifact hashes identify the tested candidate; private paths/logs remain outside
+this directory. Run with `--ack-disposable` and explicit runtime/compiler paths as below.
+
+The final prepared tarball matches the artifact exercised by installed native acceptance:
+SHA256 `507a357e913b865a10c71b51d206e5597ace7adac2c69677da5c02dea3b94a6c`.
+The separate locked offline package/relocation check also passes.
+
+This supplements the historical full matrix rather than claiming a new GUI/debugger/seven-fault
+matrix for unchanged surfaces. Native Windows/Linux, generic DB merging and npm publication remain
+outside this closure. Constant signatures and supported emulation/regex policies are bounded,
+explicit catalogs; remaining upstream scans report their unbounded work policy.
+
+## Historical combined full facade acceptance
 
 The [full report](full-facade.json) records the completed M0–M5 gate: 93 offline tests, 23 native
 groups and the exact installed artifact/source hashes. [Operation evidence](coverage-evidence.json)

@@ -10,9 +10,12 @@ bridge-control equivalents map to 215 public leaves. The [combined acceptance re
 records 93 passing offline tests, 23 passing native groups, the installed CLI/IPC/OS-keyring crash
 matrix and the exact tested source/artifact hashes. [Coverage evidence](docs/verification/coverage-evidence.json)
 joins each inventoried operation to its command/equivalent and verification group.
-The [native SDK → MCP → facade comparison](docs/gaps_api_ghidra.md) distinguishes catalog mapping
-from implemented analysis and parameter parity: two inherited analysis endpoints are placeholders,
-some domain-input variants are missing, and the native SDK has capabilities outside this catalog. It records these gaps and prioritized follow-up work.
+The [native SDK → MCP → facade comparison](docs/gaps_api_ghidra.md) now records **G01–G07 P0/P1
+closure**: real bounded replacements for the two upstream analysis stubs, actual type/prototype
+validation, supported emulation ABIs, structured/bounded reads, qualified heuristics, entry
+provenance and complete audited memory/prototype inputs. [Current closure evidence](docs/verification/api-gaps.json)
+binds the newer implementation and affected regressions separately from the historical full M0–M5
+report. Native SDK breadth beyond the pinned catalog remains selected P2/P3 work.
 
 Native acceptance targets macOS/Ghidra 12.1.2/Java 21. It includes two simultaneous GUI/LLDB
 contexts, retained trace/mapping recovery, explicit merge/refresh and seven owner SIGKILL phases.

@@ -6,20 +6,32 @@ there is no literal bijection between SDK methods, MCP endpoints and CLI command
 The appendix is a full operation inventory; G07 separately records parameter/variant gaps.
 It does not claim every native overload or parameter combination is covered.
 
-## Findings that change how to read our coverage
+## P0/P1 closure
 
-**All 210 pinned REST operations have a facade command/equivalent, but this is not complete
-Ghidra SDK coverage, and two of those upstream operations are placeholders.**
-`find_dead_code` and `detect_crypto_constants` return `Not yet implemented`; the facade currently
-accepts their arrays as successful query values. They do not perform their advertised analysis.
-The existing acceptance proves those calls are connected and their response contracts work;
-it does not supply the missing algorithms. Parameter-level gaps also exist: notably the facade
-exposes fewer memory-block creation inputs than the pinned endpoint (G07). See [G01](#g01--two-advertised-analyses-are-upstream-stubs).
+**G01–G07 P0/P1 are implemented in the facade.** The pinned upstream source/JAR is unchanged.
+Its two analysis stubs are replaced with facade-owned native algorithms, and nested unavailable
+responses are rejected. The facade also closes the audited memory/prototype input gaps.
+The 210 operation mappings and eight bridge equivalents still resolve to 215 public leaves.
+This remains a selected native API facade, not complete Ghidra SDK coverage.
 
-The next useful work is semantic honesty and agent-readable results, followed by selected native
-capabilities that real investigations need. A blanket “wrap the whole SDK” project has no bounded
-acceptance criterion. Native SDK features absent from the MCP catalog are listed separately below.
-These are recommendations, not additions already implemented or newly accepted milestones.
+[Current closure evidence](verification/api-gaps.json) binds the implementation source hashes,
+real Ghidra cases, regressions and package checks. [Agent query semantics](../skills/ghidra-coordinator/references/query-semantics.md)
+define supported ABIs, work budgets, completion flags and intentional limitations.
+The original audit compared runtime `300884e` with pinned MCP `57e37a8`; findings below retain
+that upstream distinction and identify what now differs in our implementation.
+
+| Finding | P0/P1 outcome | Relevant implementation |
+| --- | --- | --- |
+| G01 | Closed: real bounded static CFG reachability and exact constant-table scans; placeholder responses fail closed | [native research](../skills/ghidra-coordinator/references/native/InsightResearchQueries.java), [response policy](../skills/ghidra-coordinator/src/query-policy.ts) |
+| G02 | Closed: actual type inventory/resolution, parser-backed prototype diagnostics, isolated temporary types and stable program modification counter | [native research](../skills/ghidra-coordinator/references/native/InsightResearchQueries.java) |
+| G03 | Closed: explicit x86 cdecl / Windows x64 / SysV x64 integer-slot ABIs, correct stack/return setup, bounded stepping, unsupported architecture/lowering errors | [native emulator](../skills/ghidra-coordinator/references/native/InsightEmulation.java) |
+| G04 | Closed for the audited P1 contract: structured globals, bounded common scans/deeper response checks, explicit cost policy for remaining upstream operations | [query contracts](../skills/ghidra-coordinator/references/queries.json), [result checks](../skills/ghidra-coordinator/src/query-results.ts) |
+| G05 | Closed: observations/estimates/suggestions/similarity carry algorithm and limitations; fixed confidence is labeled uncalibrated | [query policy](../skills/ghidra-coordinator/src/query-policy.ts), [cross reads](../skills/ghidra-coordinator/src/cross.ts) |
+| G06 | Closed: external-entry metadata separated from name/image-base candidates | [native research](../skills/ghidra-coordinator/references/native/InsightResearchQueries.java) |
+| G07 | Closed: bytes/fill/base64/overlay/uninitialized/volatile/comment block creation; explicit/default compiler convention; independent saved-state verification and lost-response recovery | [commands](../skills/ghidra-coordinator/src/cli.ts), [memory verification](../skills/ghidra-coordinator/src/memory-inputs.ts), [saved inspector](../skills/ghidra-coordinator/references/native/InsightSnapshotInspect.java) |
+
+P2/P3 remain follow-up recommendations; neither the native SDK's entire breadth nor universally
+bounded execution of every upstream algorithm is claimed by this closure.
 
 ## Baseline, sources and scope
 
@@ -27,13 +39,14 @@ These are recommendations, not additions already implemented or newly accepted m
 | --- | --- | --- |
 | A — native Ghidra | Ghidra **12.1.2**, Java 21; installed source archives, linked to the [matching release source](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.2_build/Ghidra) | Java SDK, service APIs and extension points. No invented “total SDK endpoints” denominator. |
 | B — GhidraMCP | **7.0.0**, commit `57e37a8bf388b1279cff46378f85be1554548f61` | [210 REST catalog entries](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/tests/endpoints.json), plus eight Python bridge controls accounted separately. |
-| C — insight-cli | Runtime implementation `300884e3c9be0928a8e1659e088aa2144c2c70b4`; documentation/acceptance baseline `29ba84bfebe60a67495b232f34e43ed8d5f44ae1` | 215 public leaves across the facade command tree; not 215 distinct native Ghidra capabilities. |
+| C — insight-cli | Current P0/P1 implementation identified by [closure source hashes](verification/api-gaps.json); historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 215 public leaves across the facade command tree; not 215 distinct native Ghidra capabilities. |
 
 Evidence: [coverage ledger](GHIDRA-COVERAGE.md), [210 operation joins](verification/coverage-evidence.json),
 [combined acceptance](verification/full-facade.json), [query contracts](../skills/ghidra-coordinator/references/queries.json),
-[mutation contracts](../skills/ghidra-coordinator/references/mutations.json). Existing acceptance comprises
-93 offline tests and 23 native groups; native acceptance is macOS. This document adds source analysis,
-not a new native runtime execution or an exhaustive proof of all parameter variants.
+[mutation contracts](../skills/ghidra-coordinator/references/mutations.json). The historical full M0–M5 report records
+93 offline tests and 23 native groups at its own source revision. The current P0/P1 report records
+the new native acceptance/regressions and package identity separately; it does not rebind that old
+report to new code. Native acceptance remains macOS, not an exhaustive parameter/OS matrix.
 
 The REST catalog digest is `ebdaa9195ec2ea55fb706107bba1ee3732abd2eda783ed67a6ccc7359fdc5c66`.
 The eight bridge tools include an import operation overlapping REST import. They must not be
@@ -70,11 +83,11 @@ of that class is exposed.
 | --- | --- | --- |
 | [Program][sdk-Program], [FunctionManager][sdk-FunctionManager], [Listing][sdk-Listing] | Functions, instructions, comments, tags, disassembly and selected edits | Scoped reads/edits and saved-state verification; not arbitrary iteration/editing of every SDK property. |
 | [DecompInterface][sdk-DecompInterface], [HighFunction][sdk-HighFunction] | Decompilation, selected P-code/dataflow and variable operations | Typed command inputs and checked output variants; no complete decompiler/SSA object graph or all configuration knobs. |
-| [DataTypeManager][sdk-DataTypeManager], [Structure][sdk-Structure], [CParser][sdk-CParser] | Structures/unions/enums/derived types, C declaration import, validation | Saved complex edits; corrected top-level copy; limited validation and discovery semantics remain (G02). |
+| [DataTypeManager][sdk-DataTypeManager], [Structure][sdk-Structure], [CParser][sdk-CParser] | Structures/unions/enums/derived types, C declaration import, validation | Saved complex edits; corrected top-level copy; parser-backed validation and actual resolvable inventory (G02). |
 | [SymbolTable][sdk-SymbolTable], [ReferenceManager][sdk-ReferenceManager], [ExternalManager][sdk-ExternalManager] | Labels, symbol rename, xrefs and external-location reads | Explicit scope and guarded mutations; not all external-library, namespace and reference CRUD. |
 | [Memory][sdk-Memory], [MemoryBlock][sdk-MemoryBlock], [ProgramContext][sdk-ProgramContext] | Byte reads/search, block create/permissions, image base, metadata | No dedicated patch-bytes/assembler, block split/join/move or processor-context editor (N03). |
-| [BasicBlockModel][sdk-BasicBlockModel], [AutoAnalysisManager][sdk-AutoAnalysisManager] | CFG, analyzer options/reanalysis and custom research summaries | Native mechanisms plus MCP algorithms; dead-code and crypto endpoints are stubs, not SDK analyses (G01). |
-| [EmulatorHelper][sdk-EmulatorHelper], [PcodeEmulator][sdk-PcodeEmulator] | Two bounded function/hash helpers via EmulatorHelper | Isolated results; x86-oriented setup is inherited (G03); no persistent general emulation API. |
+| [BasicBlockModel][sdk-BasicBlockModel], [AutoAnalysisManager][sdk-AutoAnalysisManager] | CFG, analyzer options/reanalysis and custom research summaries | Native mechanisms plus MCP algorithms; the two upstream stubs are replaced by bounded native facade analyses (G01). |
+| [EmulatorHelper][sdk-EmulatorHelper], [PcodeEmulator][sdk-PcodeEmulator] | Two bounded function/hash helpers via EmulatorHelper | Supported x86/x64 integer-slot ABI policies, isolated results and explicit termination (G03); no persistent general emulation API. |
 | [DomainFile][sdk-DomainFile], [DomainFolder][sdk-DomainFolder], [RepositoryAdapter][sdk-RepositoryAdapter] | Project/file lifecycle, repository/ACL/history/checkouts/check-in | Local managed startup or external profile; research lifecycle replaced by owned contexts and explicit merge/refresh. |
 | [ProgramDiff][sdk-ProgramDiff], [ProgramMergeManager][sdk-ProgramMergeManager], [ProgramMultiUserMergeManager][sdk-ProgramMultiUserMergeManager] | Custom function/documentation comparison/transfer; no generic native program diff/merge endpoint | Scalar three-way merge and unchanged-base complex publication; no universal DB merge (N02). |
 | [Trace][sdk-Trace], [Target][sdk-Target], [DebuggerStaticMappingService][sdk-DebuggerStaticMappingService] | 16 GUI debugger operations | Managed GUI/LLDB contexts and retained trace recovery; no dedicated target register/memory writes or full trace timeline/object API (N06). |
@@ -83,111 +96,107 @@ of that class is exposed.
 | [AutoImporter][sdk-AutoImporter], [Exporter][sdk-Exporter] | General file import and GZF program export/import, GAR project archive/restore | Managed inputs and verified snapshots/files; no public full loader/exporter selection contract (N04). |
 | [VTSession][sdk-VTSession], [FunctionDatabase][sdk-FunctionDatabase], [FidService][sdk-FidService] | No dedicated Version Tracking / BSim / Function ID API in the 210 catalog | Custom fuzzy matching/documentation transfer is available; it is not those native facilities (N01/N05). |
 
-## Confirmed semantic gaps inside the exposed catalog
+## Audited gaps and implemented P0/P1 behavior
 
-### G01 — two advertised analyses are upstream stubs
+### G01 — upstream stubs replaced; unavailable payloads rejected
 
-- [findDeadCode](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L1318) returns an array containing `status: "Not yet implemented"`.
-- [detectCryptoConstants](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L807) does the same; neither handler performs the advertised scan.
-- [queryResult](../skills/ghidra-coordinator/src/query-results.ts) only checks that these results are arrays. [query execution](../skills/ghidra-coordinator/src/queries.ts) rejects top-level errors but does not interpret these nested statuses.
-- Agent consequence: CLI success means “received a placeholder,” not “analysis ran” and especially not “no findings.”
+Pinned [findDeadCode](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L1318)
+and [detectCryptoConstants](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L807)
+still return placeholders. Our context adapter runs its own native research implementation.
+CFG reachability is bounded by visited inputs and time. Unresolved indirect flow, a missing decoded
+entry or an incomplete traversal cannot produce unreachable findings. The result qualifies itself
+as a static CFG observation, not a proof of runtime behavior or coverage of undecoded bytes.
 
-**P0:** expose these as explicitly unavailable/unsupported, including generated help/capability discovery,
-and verify that placeholder responses cannot count as completed analysis. **P1:** implement the actual
-analyses only if they are needed, using bounded CFG reachability and a documented constants database
-respectively. Reachability and constant matches still need qualified semantics; neither proves runtime behavior.
+Constant scans use the versioned `insight-constant-tables-v1` catalog: AES S-box, SHA-256/SHA-1/MD5
+initial-state byte sequences in listed endian variants and the ChaCha sigma string. The complete
+signature names/lengths are returned; exact matches are candidates, not proof of execution.
+Byte budgets cover actual reads; continuation preserves unchecked boundary lookahead. Positive,
+negative, budget-limited and unresolved-flow native fixtures establish the declared semantics.
+Nested `Not yet implemented` / unsupported / unavailable statuses fail instead of becoming completed
+analyses. The AES table also has an independent finite-field integrity test.
 
-### G02 — advertised type/prototype helpers are weaker than SDK validation
+### G02 — actual inventory and parser-backed resolution
 
-[get_valid_data_types](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java)
-returns hard-coded common/builtin and Windows name lists. That is neither an inventory of types
-installed in this program nor proof those names resolve. `find_data_types` is the existing route to
-actual [DataTypeManager][sdk-DataTypeManager] content.
-`validate_function_prototype` uses string/shape checks and warnings; it does not run the signature
-parser used to apply a prototype. Its `valid: true` is insufficient assurance that application succeeds.
-The facade preserves these response semantics.
+Pinned `get_valid_data_types` lists hard-coded names; the facade now lists actual program types and
+successfully resolved builtins with path/category, size/alignment and source provenance. A filtered
+or budget-limited inventory says so. `validate_data_type` reports resolution and diagnostics, not
+an assurance that arbitrary memory can accept the type.
 
-**P1:** distinguish suggestions, resolution and parser-backed validation; expose resolved category,
-size/alignment and diagnostics. Acceptance: a listed-but-unresolvable name is never described as
-usable, and a malformed declaration rejected by the actual parser cannot pass the strong validator.
-Do not silently apply a prototype just to “validate” it.
+Prototype validation uses Ghidra's `FunctionSignatureParser` with the program's data organization
+and required type definitions copied into an isolated temporary manager. Parser errors and
+unsupported compiler conventions cannot pass as valid. Queries assert that the actual program's
+modification counter is unchanged. This avoids treating save-container byte identity as a semantic
+DB comparison. Validation does not apply a signature or persist newly resolved types.
 
-### G03 — emulation is not architecture/ABI-neutral
+`default` calling convention resolves to the active CompilerSpec's effective default. The adapter
+uses that name for application because the pinned MCP setter rejects the literal `default`.
+Inline conventions before the first parenthesis are normalized like the pinned setter; conventions
+inside callback parameters are preserved, and an explicit flag takes precedence. Saved prototype
+return/parameter types and effective convention are independently verified.
 
-Both [EmulationService helpers](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/EmulationService.java)
-initialize `ESP`/`EBP`, a four-byte little-endian return sentinel and fixed stack/scratch addresses.
-Caller-supplied registers do not turn that setup into general ABI support. Ghidra's emulator supports
-broader language models; these two wrappers do not express equivalent setup for every target.
-Current fixture success does not establish arbitrary x64 calling patterns, non-x86 or big-endian support.
+### G03 — explicit bounded emulation policies
 
-**P1:** declare and enforce supported architecture/ABI combinations, then derive stack/register/return
-setup from an explicit supported policy. Acceptance must include a stack-using/calling function,
-termination reason, expected output and a clearly rejected unsupported language; not only a leaf function.
+The pinned helper's fixed ESP/four-byte stack setup is replaced by facade-owned emulation policies:
+little-endian x86 cdecl, Windows x64 (including `clangwindows`) and SysV x64. Pointer-width return
+addresses, stack alignment, Windows shadow space and integer/pointer argument register/stack slots
+follow the selected policy. PC/SP are owned by that setup. Unsupported architectures, compiler
+policies and typed floating/aggregate/variadic lowering are explicit errors.
 
-### G04 — output shape and scan cost remain uneven
+Instruction and time budgets are enforced. `completed`, `hit_return`, `stop_reason` and batch
+`outcomes` distinguish a returned function from a stop/error/limit. Incomplete candidates cannot
+produce successful hash matches. Real x86 PE, x64 PE and SysV ELF cases exercise stack use and nested
+calls; a real AArch64 input is rejected. Isolated emulator state does not implement OS services,
+CPU/process restoration or general ABI lowering; raw unknown types still require agent interpretation.
 
-[list_globals](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L619)
-returns formatted strings in its `globals` array, while the SDK exposes structured symbols/data/references.
-The facade validates the array/count envelope; it does not convert each line to a stable global record.
-Several result contracts similarly check an object/array envelope with selected deeper checks, not
-every nested field. Large list handlers can collect/filter all matches before slicing a page.
-The facade's one-MiB generic-query limit bounds accepted output, not backend scan cost.
-See [result checks](../skills/ghidra-coordinator/src/query-results.ts) and
-[generic query limit](../skills/ghidra-coordinator/src/queries.ts).
+### G04 — structured records, real scan budgets and explicit upstream cost
 
-**P1:** stabilize the high-frequency result records (start with globals and common graph/search rows),
-then document limits/truncation and bound expensive scans. Acceptance: useful typed fields without
-parsing display text, tested empty/error/truncated variants and bounded work on a large fixture.
-This is incremental contract work, not a claim that all current reads are unusable.
+Globals now contain typed records (address/name/type/path/size/xrefs/naming/type flags/provenance),
+not formatted display strings. Facade-owned global/string/type/instruction/byte scans bound visited
+inputs, bytes and/or time. `scan`, `complete`, `truncated` and `total_known` expose incomplete work.
+A real 5000-symbol fixture with a 50-input budget verifies that a five-row page does not hide an
+unbounded backend scan. Returned pages retain bounded rows, and oversized string units stop a scan.
+Type/category pages and filters retain their domain semantics within the declared scan scope.
 
-### G05 — heuristic names can sound stronger than their implementation
+Result checking covers the common record shapes, counts, parser diagnostics, entry provenance,
+scan counters, byte limits and CFG/emulation completion consistency. Bounded regex search rejects
+branching/nested repetition; supported syntax and limits are in the agent reference.
 
-Completeness scores, fuzzy similarity, field-name suggestions, estimated array bounds and malware/API
-patterns are MCP algorithms over native data. They are not native ground truth or interchangeable
-with BSim, Version Tracking, formal reachability, or complete behavioral analysis.
-`suggest_field_names` even uses a fixed `medium` confidence label for its suggestions.
+Unreplaced upstream algorithms can still scan globally before paging. Their results explicitly
+state `scanPolicy.workBound: not-guaranteed`, the output ceiling and cancellation limitation.
+This is reported cost, not a claim that every MCP algorithm became interruptible or bounded.
+Expanding those kernels is a concrete P2 performance follow-up if real usage requires it.
 
-**P1:** describe algorithm/limits and distinguish observation, estimate and suggestion in results/help.
-**P2:** improve algorithms against representative fixtures when a workflow needs it. Preserve the
-agent's decision-making role; a score is input to the investigation, not an automatic acceptance decision.
+### G05 — qualified heuristic results
 
-### G06 — entry-point results mix confirmed metadata with guesses
+Completeness scores, fuzzy similarity, array bounds, field names, malware/API patterns and IOC
+matches now carry `semantics` with kind, algorithm and limits. Field-name confidence becomes
+`null` / `uncalibrated` rather than presenting a fixed `medium` label as evidence. Cross-context
+fuzzy commands carry the same qualification. These remain inputs to the agent's decision;
+algorithm improvements and calibrated confidence are P2 work, not implied by this change.
 
-[get_entry_points](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java)
-combines symbols marked as external entry points, conventional names such as `main`/`DllMain`,
-and `Program.getImageBase()` labeled `kind: program_entry`. An image base is not proof of the executable's
-entry address. The facade currently preserves these records; the other returned kinds do expose
-some of the heuristic origins, but `program_entry` can overstate this particular candidate.
+### G06 — entry metadata separated from candidates
 
-**P1:** separate loader-confirmed entry metadata from named/image-base candidates and preserve
-provenance. Acceptance: a PE with different image base and entry address must not label the
-image base as its confirmed entry point. Keep named `main` as a useful separately labeled candidate.
+Pinned `get_entry_points` mixes external-entry symbols, conventional names and an image base
+labeled `program_entry`. Our `entry_points` include explicit Ghidra external-entry provenance;
+`candidates` separately contain conventional names and image base with `confirmed: false`.
+The native PE fixture has different image-base and entry addresses and verifies this distinction.
+Even confirmed external-entry designation is metadata, not proof of OS startup behavior.
 
-### G07 — operation presence does not establish parameter/variant parity
+### G07 — missing domain inputs added; logical lifecycle equivalents preserved
 
-Comparing the actual Java `@Param` declarations (207 annotated catalog paths, three manual health/schema
-routes) with the installed Factory leaf options exposes differences hidden by the 210-row count.
-The 74 static query and 59 schema-driven mutation contracts carry explicit operation inputs; manual
-commands and logical lifecycle equivalents require their own review. Input aliases and parameter
-renames are not missing capabilities by themselves.
-
-| B — pinned operation/input | C — actual public contract | Assessment |
+| B — pinned operation/input | C — current facade contract | Outcome |
 | --- | --- | --- |
-| `create_memory_block`: `bytes_hex`, `bytes_base64`, `fill_byte`, `initialized`, `overlay`, `comment`, `volatile`, plus size/address/permissions | [Manual create-block leaf](../skills/ghidra-coordinator/src/cli.ts) only sends name/address/size/read/write/execute and requires positive size ≤16 MiB. | **Real partial coverage.** No dedicated initial-content, fill, overlay or uninitialized creation flags; `volatile` can be changed separately with `memory set-block`, but that does not restore creation semantics or a block comment. Inline scripts are not typed parity. |
-| `create_struct`: `replace_placeholder` | Public `types create-struct` accepts name/fields, not this flag. | Missing direct variant. Existing `recreate-struct` has its own replacement controls; callers must use an alternative workflow, not the same invocation. |
-| `set_function_prototype`: separate `calling_convention` | Public leaf sends address/prototype only. | Missing explicit convention input. Parser support for conventions embedded in C text is not proof that every separate convention variant is equivalent. |
-| `rename_function`: name/address resolution, `strict_mode` | Public scalar rename takes address/name; [research adapter](../skills/ghidra-coordinator/src/research.ts) forces `strict_mode: off`. | Intentional explicit addressing and exact requested name; MCP naming-policy enforcement is not a selectable facade option. Document that difference rather than imply identical validation. |
-| `set_comment`: `type` / `comment`; `apply_function_documentation`: `json_body` | `--kind` / `--text` / `--clear`; `--document` | Equivalent renamed/typed inputs, not missing options. |
-| `debugger/launch`: executable/program, Python and WinDbg paths | Executable/program derive from selected target/context; Python/WinDbg come from `debuggerPython` / `windbgDir` profile values in [context adapter](../skills/ghidra-coordinator/src/contexts.ts). | Rehomed ownership/configuration inputs, not lost launcher controls. Native Windows acceptance is still deferred. |
-| `import_program`: target folder/name and `overwrite` | `program import --project --input --path`; [project service](../skills/ghidra-coordinator/src/projects.ts) uses a new destination. | Folder/name consolidated into path; overwrite is intentionally unavailable in this managed import contract. |
-| Project search directories, arbitrary open/close/save paths; import `project_folder` | Owned project names and root target/session selectors; `--analysis` replaces the analysis toggle | Intentional managed lifecycle scope. Equivalence does not promise arbitrary filesystem-project discovery or adopting unrelated processes. |
-| `checkin_program`: raw path/comment/keep-checkout/dry-run; raw checkout/undo options | Explicit `merge`, `open`, `changes discard`, retained snapshots | Intentional publication contract. Raw VC option compatibility would bypass the agreed model; do not add those flags mechanically. |
+| `create_memory_block`: bytes, fill, initialization, overlay, comment, volatility and permissions | `memory create-block` accepts hex/base64 bytes, optional/inferred positive size, fill byte, `--initialized false`, overlay, volatile and comment inputs; ≤16 MiB | **P1 closed.** Saved metadata, overlay identity and entire initialized-content digest are verified independently. Lost-response acceptance confirms one actual creation and reconciliation from saved bytes. |
+| `set_function_prototype`: separate convention | `--calling-convention` accepts explicit compiler-supported names and resolves `default` through CompilerSpec | **P1 closed.** Saved types and effective convention are checked; the default alias is covered natively. |
+| `create_struct`: direct `replace_placeholder` convenience | Existing `recreate-struct` provides replacement controls; create-struct still takes name/fields | **P2 remains:** assess whether the additional direct convenience is needed. |
+| `rename_function`: name/address and `strict_mode` | Explicit address/name scalar rename; upstream naming strictness is off | Intentional exact-name/address contract, not MCP naming-policy parity. |
+| Comments/documentation input names | Typed `--kind` / `--text` / `--clear`; `--document` | Equivalent renamed inputs. |
+| Debugger executable/program and runtime paths | Target/context ownership; debugger Python/WinDbg profile settings | Rehomed inputs; native Windows acceptance remains deferred. |
+| Program import overwrite, arbitrary project paths, raw check-in/checkout/undo options | New managed destinations, owned projects and explicit open/merge/discard contracts | Intentional lifecycle/publication equivalents; do not restore raw bypass controls mechanically. |
 
-**P1:** close the actual memory-block creation gap and the explicit prototype-convention input gap,
-or mark those variants unsupported in help/capabilities. Add creation fixtures for supplied bytes,
-fill/size reconciliation, overlay identity, uninitialized memory and saved readback; retain complex
-edit conflict rules. **P2:** assess whether the direct placeholder-replacement convenience is needed.
-Keep the intentional equivalents; completing parameter parity must not reintroduce raw publication.
+Memory and prototype variants remain complex private edits. Publication requires the unchanged
+shared base; divergence still preserves conflicts. Initial bytes on uninitialized blocks,
+undersized content and inconsistent encodings are rejected before mutation dispatch.
 
 ## Facade differences that already close or intentionally change MCP behavior
 
@@ -243,21 +252,19 @@ The SDK's existence alone is not a reason to build an API.
 | Dependable local startup | Managed server/repository/accounts, isolated headless workers, GUI on demand; external profile supported | Caller does not operate MCP ports/processes/checkout ownership. Administrative project/server operations remain separately scoped and do not become program merge proposals. |
 | One public interface | `insight-cli ...` or Factory `cli.execute` against the same command tree | Stable logical API plus permissions/profiles/credentials; no separately complete REST/Java-object API promised. |
 
-## Prioritized follow-up plan
+## Priorities after closure
 
-| Order | Priority | Concrete work | Completion criterion |
-| --- | --- | --- | --- |
-| 1 | **P0** | G01: make inherited placeholders explicit unavailable capabilities | Both commands/help/results cannot imply analysis completed; regression covers nested placeholder payload and no false clean finding. |
-| 2 | **P1** | G02 + G05 + G06: trustworthy type/prototype discovery and qualified heuristic/entry-point semantics | Actual type resolution/parser diagnostics are distinct from suggestions; algorithm/limitations visible for scores/estimates; confirmed entry points distinguished from candidates. |
-| 3 | **P1** | G03: emulation architecture/ABI contract | Supported combinations explicit; stack/calls/return behavior proven; unsupported combinations rejected. |
-| 4 | **P1** | G04 + G07: structured results, bounded scans and missing domain-input variants | Globals require no display-text parser; nested variants/counts/limits tested; large-input cost bounded or reported; memory creation variants and explicit prototype convention covered or declared unavailable. |
-| 5 | **P1, on demand** | Replace the two G01 stubs with real bounded analyses | Nontrivial positive/negative/truncated fixtures; no unsupported completeness claim. Unavailability remains valid until then. |
-| 6 | **P2** | N02 read-only categorized program diff; selected N01/N04–N09 workflows | One concrete agent scenario per addition, explicit effect/conflict rules and native evidence; preserve existing public session/target model. |
-| 7 | **P2** | Broaden acceptance beyond present native macOS fixtures | Native Windows/Linux and larger real-world DB/resource/architecture matrices; portable offline CI alone does not establish these. |
-| 8 | **P3** | N10/generic extensions and automatic publication strategies | Defer until demand and a separate contract; neither is needed to state current coverage accurately. |
+| Priority | Status / work | Acceptance boundary |
+| --- | --- | --- |
+| **P0** | **Closed — G01:** unavailable payload rejection and real implementations for the two upstream stubs | No placeholder can count as completed analysis; bounded native positive/negative/partial cases. |
+| **P1** | **Closed — G02/G05/G06:** parser/type truth, qualified heuristics and entry provenance | Actual resolution/diagnostics, no persisted validation changes, metadata distinguished from candidates. |
+| **P1** | **Closed — G03:** supported ABI policies and honest termination | x86/Windows x64/SysV x64 native cases; unsupported architecture/lowering rejection. |
+| **P1** | **Closed — G04/G07:** structured common results, bounded/reported work and missing domain variants | Large fixture budget, saved bytes/metadata/convention checks, retained lost-response effects and A/B publication. |
+| **P2** | Selected N01–N09 workflows, wider native OS/large-DB matrices, direct create-struct placeholder convenience; more bounded kernels and algorithm quality where demanded | One real workflow per addition; preserve explicit root sessions/targets, effects and conflict rules. |
+| **P3** | Generic extensions and automatic publication strategies | Defer until a separate consumer/contract. |
 
-Priorities are recommendations from this audit. P0 is the already-exposed semantic ambiguity,
-not a demand to implement the whole SDK. The document itself does not change runtime behavior.
+The current evidence supplements the earlier M0–M5 acceptance at its own implementation identity.
+It does not claim a fresh full GUI/debugger/OS matrix for these headless query/edit changes.
 
 ## Appendix A — every pinned REST operation, 1:1:1
 
@@ -275,8 +282,8 @@ repository selectors. Use generated `--help` for syntax. Factory API uses these 
 
 Status: **D** = mapped domain operation (bounded catalog contract, not full SDK parity);
 **E** = intentional facade lifecycle/discovery equivalent; **F** = facade repairs/replaces upstream behavior;
-**H** = heuristic/static/limited semantic result, see G02/G05; **S** = unimplemented upstream stub,
-not an operational analysis. Multiple letters can apply. GUI/headless availability is in the
+**H** = heuristic/static/limited semantic result, see G02/G05; **S** = unimplemented upstream behavior (none remain unhandled in the facade);
+**F** can therefore include a native replacement for an upstream stub. Multiple letters can apply. GUI/headless availability is in the
 [coverage ledger](GHIDRA-COVERAGE.md); debugger and UI calls retain their GUI requirements.
 
 ### analysis — 20
@@ -293,7 +300,7 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | [Options][sdk-Options] `.setBoolean` | [`/configure_analyzer`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L230) | `ghidra analysis configure-analyzer` | **D** |
 | [ReferenceManager][sdk-ReferenceManager] `.getReferencesTo` + MCP estimator | [`/detect_array_bounds`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L503) | `ghidra analysis detect-array-bounds` | **F/H** — ReadOnly; estimated bounds. |
 | [FunctionManager][sdk-FunctionManager] `.getFunctions`; [AddressSet][sdk-AddressSet] `.subtract` | [`/find_code_gaps`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L4367) | `ghidra analysis find-code-gaps` | **D** |
-| No native reachability call: MCP stub. Available building block: [BasicBlockModel][sdk-BasicBlockModel] | [`/find_dead_code`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L1318) | `ghidra analysis find-dead-code` | **S** — G01: placeholder accepted as successful query. |
+| [BasicBlockModel][sdk-BasicBlockModel] `.getCodeBlocksContaining` | [`/find_dead_code`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L1318) | `ghidra analysis find-dead-code` | **F** — Native bounded static CFG; incomplete/indirect flow has no unreachable conclusions. |
 | [FunctionManager][sdk-FunctionManager] `.getFunctions` | [`/find_next_undefined_function`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L2139) | `ghidra analysis find-next-undefined-function` | **D** |
 | [BasicBlockModel][sdk-BasicBlockModel]; [FunctionManager][sdk-FunctionManager] `.getFunctions` | [`/find_similar_functions`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L1072) | `ghidra analysis find-similar-functions` | **D/H** |
 | [ReferenceManager][sdk-ReferenceManager] `.getReferencesTo`; [Listing][sdk-Listing] `.getInstructionAt` | [`/get_field_access_context`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L570) | `ghidra analysis get-field-access-context` | **D** |
@@ -301,8 +308,8 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | [Memory][sdk-Memory] `.getBytes` | [`/inspect_memory_content`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L677) | `ghidra analysis inspect-memory-content` | **D** |
 | [Program][sdk-Program] `.getOptions`; [Options][sdk-Options] `.getOptionNames` | [`/list_analyzers`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L198) | `ghidra analysis list-analyzers` | **D** |
 | [AutoAnalysisManager][sdk-AutoAnalysisManager] `.reAnalyzeAll` | [`/run_analysis`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L273) | `ghidra analysis run` | **D** |
-| [Memory][sdk-Memory] `.getBytes` | [`/search_byte_patterns`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L834) | `ghidra analysis search-byte-patterns` | **D** |
-| [Listing][sdk-Listing] `.getInstructions` | [`/search_instructions`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L935) | `ghidra analysis search-instructions` | **D** |
+| [Memory][sdk-Memory] `.getBytes` | [`/search_byte_patterns`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L834) | `ghidra analysis search-byte-patterns` | **F** — Bounded bytes and continuation; object result with matches. |
+| [Listing][sdk-Listing] `.getInstructions` | [`/search_instructions`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L935) | `ghidra analysis search-instructions` | **F** — Bounded scan and typed instruction records. |
 
 ### comment — 4
 
@@ -332,11 +339,11 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | [StructureDataType][sdk-StructureDataType] `.add` | [`/create_struct`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L393) | `ghidra types create-struct` | **D** — G07: no replace-placeholder flag. |
 | [UnionDataType][sdk-UnionDataType] `.add` | [`/create_union`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L655) | `ghidra types create-union` | **D** |
 | [DataTypeManager][sdk-DataTypeManager] `.remove` | [`/delete_data_type`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L1169) | `ghidra types delete-data-type` | **D** |
-| [DataTypeManager][sdk-DataTypeManager] `.getAllDataTypes` | [`/find_data_types`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L96) | `ghidra types find-data-types` | **D** |
+| [DataTypeManager][sdk-DataTypeManager] `.getAllDataTypes` | [`/find_data_types`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L96) | `ghidra types find-data-types` | **F** — Bounded inventory/category scan and typed records. |
 | [Enum][sdk-Enum] `.getNames` | [`/get_enum_values`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L287) | `ghidra types get-enum-values` | **D** |
 | [Structure][sdk-Structure] `.getDefinedComponents` | [`/get_struct_layout`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L240) | `ghidra types get-struct-layout` | **D** |
 | [DataType][sdk-DataType] `.getLength` | [`/get_type_size`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L208) | `ghidra types get-type-size` | **D** |
-| MCP hard-coded name lists; actual inventory: [DataTypeManager][sdk-DataTypeManager] `.getAllDataTypes` | [`/get_valid_data_types`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L332) | `ghidra types get-valid-data-types` | **D/H** — G02: static hints, not installed inventory. |
+| MCP hard-coded name lists; actual inventory: [DataTypeManager][sdk-DataTypeManager] `.getAllDataTypes` | [`/get_valid_data_types`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L332) | `ghidra types get-valid-data-types` | **F** — Actual resolvable inventory and provenance; G02 closed. |
 | [CParser][sdk-CParser] `.parse` | [`/import_data_types`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2359) | `ghidra types import-data-types` | **D** |
 | [Structure][sdk-Structure] `.replaceAtOffset` | [`/modify_struct_field`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L1246) | `ghidra types modify-struct-field` | **D** |
 | [DataType][sdk-DataType] `.setCategoryPath` | [`/move_data_type_to_category`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2006) | `ghidra types move-data-type-to-category` | **D** |
@@ -347,8 +354,8 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | [DataTypeManager][sdk-DataTypeManager]; [Structure][sdk-Structure] | [`/resolve_duplicate_type`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L1586) | `ghidra types resolve-duplicate-type` | **D** |
 | [Listing][sdk-Listing] `.createData`; [SymbolTable][sdk-SymbolTable] | [`/set_global`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L4394) | `ghidra types set-global` | **D** |
 | [Listing][sdk-Listing] `.getDataAt`; [Structure][sdk-Structure] `.getComponents` | [`/suggest_field_names`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2725) | `ghidra types suggest-field-names` | **D/H** |
-| [DataTypeManager][sdk-DataTypeManager]; [DataType][sdk-DataType] | [`/validate_data_type`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2156) | `ghidra types validate-data-type` | **D/H** |
-| [Function][sdk-Function] | [`/validate_function_prototype`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2251) | `ghidra types validate-function-prototype` | **D/H** — G02: shape checks, not parser parity. |
+| [DataTypeManager][sdk-DataTypeManager]; [DataType][sdk-DataType] | [`/validate_data_type`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2156) | `ghidra types validate-data-type` | **F** — Actual type resolution/layout diagnostics. |
+| [Function][sdk-Function] | [`/validate_function_prototype`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/DataTypeService.java#L2251) | `ghidra types validate-function-prototype` | **F** — Isolated SDK parser and compiler convention resolution. |
 
 ### debugger — 16
 
@@ -392,8 +399,8 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 
 | A — native API / mechanism | B — pinned MCP | C — insight-cli | Status / difference |
 | --- | --- | --- | --- |
-| [EmulatorHelper][sdk-EmulatorHelper] `.run` | [`/emulate_function`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/EmulationService.java#L78) | `ghidra emulation emulate-function` | **D** — G03: x86-oriented setup. |
-| [EmulatorHelper][sdk-EmulatorHelper] `.run` | [`/emulate_hash_batch`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/EmulationService.java#L329) | `ghidra emulation emulate-hash-batch` | **D** — G03: x86-oriented setup. |
+| [EmulatorHelper][sdk-EmulatorHelper] `.run` | [`/emulate_function`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/EmulationService.java#L78) | `ghidra emulation emulate-function` | **F** — Supported integer-slot ABIs, isolated state and explicit completion. |
+| [EmulatorHelper][sdk-EmulatorHelper] `.run` | [`/emulate_hash_batch`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/EmulationService.java#L329) | `ghidra emulation emulate-hash-batch` | **F** — Bounded candidates/instructions; incomplete runs cannot match. |
 
 ### function — 23
 
@@ -416,7 +423,7 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | [Function][sdk-Function] `.setName` | [`/rename_function`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L913) | `ghidra functions rename` | **D** — Address selector; naming strict_mode forced off. |
 | [Variable][sdk-Variable] `.setName`; [HighFunctionDBUtil][sdk-HighFunctionDBUtil] | [`/rename_variables`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L3811) | `ghidra functions rename-variables` | **D** |
 | [Function][sdk-Function] `.setNoReturn` | [`/set_function_no_return`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L2175) | `ghidra functions set-function-no-return` | **D** |
-| [FunctionSignatureParser][sdk-FunctionSignatureParser]; [ApplyFunctionSignatureCmd][sdk-ApplyFunctionSignatureCmd] | [`/set_function_prototype`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L1233) | `ghidra functions set-function-prototype` | **D** — G07: no separate calling-convention flag. |
+| [FunctionSignatureParser][sdk-FunctionSignatureParser]; [ApplyFunctionSignatureCmd][sdk-ApplyFunctionSignatureCmd] | [`/set_function_prototype`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L1233) | `ghidra functions set-function-prototype` | **F** — Explicit/default convention and immutable saved signature checks. |
 | [FunctionTag][sdk-FunctionTag] `.setComment` | [`/set_function_tag_comment`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L4692) | `ghidra functions set-function-tag-comment` | **D** |
 | [Function][sdk-Function]; [SymbolTable][sdk-SymbolTable] `.createClass` | [`/set_function_this_type`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L1747) | `ghidra functions set-function-this-type` | **D** |
 | [Variable][sdk-Variable] `.setDataType`; [VariableStorage][sdk-VariableStorage] | [`/set_variable_storage`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/FunctionService.java#L2367) | `ghidra functions set-variable-storage` | **D** |
@@ -443,23 +450,23 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | --- | --- | --- | --- |
 | Java numeric formatting; no Ghidra SDK dependency | [`/convert_number`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L1153) | `ghidra utility convert-number` | **D** |
 | [FunctionManager][sdk-FunctionManager] `.getFunctions` | [`/find_functions`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L334) | `ghidra functions search` | **D** |
-| [SymbolTable][sdk-SymbolTable] `.getAllSymbols`; [Symbol][sdk-Symbol] `.isExternalEntryPoint` | [`/get_entry_points`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L854) | `ghidra listing get-entry-points` | **D/H** — G06: includes image-base/named candidates. |
+| [SymbolTable][sdk-SymbolTable] `.getAllSymbols`; [Symbol][sdk-Symbol] `.isExternalEntryPoint` | [`/get_entry_points`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L854) | `ghidra listing get-entry-points` | **F** — Confirmed metadata separated from candidates. |
 | [ExternalManager][sdk-ExternalManager] | [`/get_external_location`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L1069) | `ghidra listing get-external-location` | **D** |
 | [FunctionManager][sdk-FunctionManager] `.getFunctionCount` | [`/get_function_count`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L546) | `ghidra listing get-function-count` | **D** |
 | [CompilerSpec][sdk-CompilerSpec] `.getCallingConventions` | [`/list_calling_conventions`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L481) | `ghidra listing list-calling-conventions` | **D** |
 | [Listing][sdk-Listing]; [ReferenceManager][sdk-ReferenceManager] | [`/list_data_items_by_xrefs`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L228) | `ghidra listing list-data-items-by-xrefs` | **D** |
-| [SymbolTable][sdk-SymbolTable]; [Listing][sdk-Listing]; [ReferenceManager][sdk-ReferenceManager] | [`/list_globals`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L619) | `ghidra listing list-globals` | **D** — G04: formatted string rows. |
+| [SymbolTable][sdk-SymbolTable]; [Listing][sdk-Listing]; [ReferenceManager][sdk-ReferenceManager] | [`/list_globals`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L619) | `ghidra listing list-globals` | **F** — Structured records and bounded input scan. |
 | [SymbolTable][sdk-SymbolTable]; [Memory][sdk-Memory]; [Listing][sdk-Listing] | [`/list_program_items`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L38) | `ghidra listing list-program-items` | **D** |
 | [SymbolTable][sdk-SymbolTable]; [Listing][sdk-Listing] | [`/list_shadowed_globals`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L753) | `ghidra listing list-shadowed-globals` | **D** |
-| [Listing][sdk-Listing] `.getDefinedData` | [`/list_strings`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L502) | `ghidra strings list` | **D** |
-| [Listing][sdk-Listing] `.getDefinedData` | [`/search_strings`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L560) | `ghidra strings search-regex` | **D** |
+| [Listing][sdk-Listing] `.getDefinedData` | [`/list_strings`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L502) | `ghidra strings list` | **F** — Bounded scan and typed records. |
+| [Listing][sdk-Listing] `.getDefinedData` | [`/search_strings`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ListingService.java#L560) | `ghidra strings search-regex` | **F** — Bounded scan, supported regex subset and typed records. |
 
 ### malware — 5
 
 | A — native API / mechanism | B — pinned MCP | C — insight-cli | Status / difference |
 | --- | --- | --- | --- |
 | [Listing][sdk-Listing] `.getInstructions`; [ReferenceManager][sdk-ReferenceManager] | [`/analyze_api_call_chains`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/MalwareSecurityService.java#L257) | `ghidra analysis analyze-api-call-chains` | **D/H** |
-| No native constant scan: MCP stub. Available building block: [Memory][sdk-Memory] `.findBytes` | [`/detect_crypto_constants`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L807) | `ghidra analysis detect-crypto-constants` | **S** — G01: placeholder accepted as successful query. |
+| [Memory][sdk-Memory] `.getBytes` | [`/detect_crypto_constants`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/AnalysisService.java#L807) | `ghidra analysis detect-crypto-constants` | **F** — Native versioned exact-table scan; candidate matches with byte/time limits. |
 | [FunctionManager][sdk-FunctionManager]; [SymbolTable][sdk-SymbolTable]; [Listing][sdk-Listing] | [`/detect_malware_behaviors`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/MalwareSecurityService.java#L541) | `ghidra analysis detect-malware-behaviors` | **D/H** |
 | [Listing][sdk-Listing] `.getDefinedData` | [`/extract_iocs_with_context`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/MalwareSecurityService.java#L444) | `ghidra analysis extract-iocs-with-context` | **D/H** |
 | [SymbolTable][sdk-SymbolTable]; [Listing][sdk-Listing] `.getInstructions` | [`/find_anti_analysis_techniques`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/MalwareSecurityService.java#L67) | `ghidra analysis find-anti-analysis-techniques` | **D/H** |
@@ -470,7 +477,7 @@ not an operational analysis. Multiple letters can apply. GUI/headless availabili
 | --- | --- | --- | --- |
 | [AutoAnalysisManager][sdk-AutoAnalysisManager] | [`/analysis_status`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L2150) | `ghidra analysis status` | **D** |
 | [ProgramManager][sdk-ProgramManager] `.closeProgram` | [`/close_program`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L1061) | `ghidra close` | **E** |
-| [Memory][sdk-Memory] `.createInitializedBlock` | [`/create_memory_block`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L3146) | `ghidra memory create-block` | **D** — G07: initial-content/overlay/other creation inputs absent. |
+| [Memory][sdk-Memory] `.createInitializedBlock` | [`/create_memory_block`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L3146) | `ghidra memory create-block` | **F** — Initial bytes/fill/overlay/uninitialized/comment/volatile; saved digest verification. |
 | [PropertyMapManager][sdk-PropertyMapManager] | [`/create_property_map`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L494) | `ghidra program create-property-map` | **D** |
 | [BookmarkManager][sdk-BookmarkManager] `.removeBookmark` | [`/delete_bookmark`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L3486) | `ghidra program delete-bookmark` | **D** |
 | [PropertyMapManager][sdk-PropertyMapManager] `.removePropertyMap` | [`/delete_property_map`](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/src/main/java/com/xebyte/core/ProgramScriptService.java#L544) | `ghidra program delete-property-map` | **D** |
@@ -591,7 +598,7 @@ Instance/group controls are bridge mechanisms, not missing native Ghidra analysi
 | No native analysis method; schema grouping | `list_tool_groups` | Factory generated group help/discovery. |
 | No native analysis method; lazy bridge registration | `load_tool_group` | Functionality discoverable in the installed command tree. |
 | No native analysis method; lazy bridge registration | `unload_tool_group` | Internal resource/discovery detail; public commands remain available. |
-| No native analysis method; bridge inventory | `check_tools` | Generated help and scoped status/prerequisite checks; G01 identifies the current semantic availability gap. |
+| No native analysis method; bridge inventory | `check_tools` | Generated help and scoped status/prerequisite checks; nested unavailable payloads fail and the two known stubs have native facade replacements. |
 | No native analysis method; bridge schema search | `search_tools` | Factory command help/discovery; no promise of an identically shaped bridge search endpoint. |
 | Importer/project APIs | `import_file` | `ghidra open` consumes an immutable input and establishes an isolated context; overlaps REST import. |
 

@@ -8,10 +8,11 @@ behavioral acceptance: exact-revision native/installed evidence is required befo
 No generic raw-MCP passthrough satisfies this ledger.
 
 See [native SDK → MCP → facade gaps](gaps_api_ghidra.md) for the per-operation native API mapping
-and prioritized semantic gaps. In particular, `/find_dead_code` and `/detect_crypto_constants` are
-upstream placeholders currently accepted by our query adapter; catalog/response coverage does not
-mean their advertised algorithms exist. Parameter-level gaps (including memory-block creation inputs)
-are recorded there too. Native SDK breadth and parameter parity are not established by this ledger.
+and **G01–G07 P0/P1 closure**. The upstream `/find_dead_code` and `/detect_crypto_constants` stubs now
+have bounded native facade replacements; nested placeholders fail. Audited memory/prototype input
+variants and stronger semantic/result contracts are implemented. [Current closure evidence](verification/api-gaps.json)
+identifies the newer implementation and affected native/installed regressions. The 210/8/215 count
+still does not imply complete SDK breadth or an exhaustive parameter matrix.
 
 ## Completed combined evidence
 
