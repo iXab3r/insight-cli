@@ -1,10 +1,11 @@
 # Pinned Ghidra functionality coverage
 
-This is a planning ledger, not a runtime registry or a claim that the facade exists. The owner
-selected the complete pinned functionality, with equivalent logical operations allowed. All
-entries below are planned; implementation must add exact-revision command and behavior evidence
-before marking them delivered. Candidate leaf spelling outside the agreed research examples is
-owned by typed adapter implementation. No generic raw-MCP passthrough satisfies this ledger.
+This ledger accounts for the pinned functionality and its current command/equivalence mapping.
+The owner selected the complete catalog, with equivalent logical operations allowed.
+`scripts/audit-coverage.mjs` checks that all 210 mappings resolve to the actual command tree and
+that the eight bridge controls remain accounted for. This structural check is separate from
+behavioral acceptance: exact-revision native/installed evidence is required before final delivery.
+No generic raw-MCP passthrough satisfies this ledger.
 
 ## Source baseline
 
@@ -78,7 +79,7 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### analysis
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/analyze_control_flow` | `ghidra analysis analyze-control-flow` | gui + headless | READ_ONLY | C | query |
 | `/analyze_data_region` | `ghidra analysis analyze-data-region` | gui + headless | WRITE | C | program state |
@@ -103,16 +104,16 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### comment
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/batch_set_comments` | `ghidra comments set-batch` | gui + headless | WRITE | C | scalar candidate |
 | `/clear_function_comments` | `ghidra comments clear-function` | gui + headless | DESTRUCTIVE | C | scalar candidate |
-| `/get_comment` | `ghidra comments get` | gui + headless | READ_ONLY | C | query |
+| `/get_comment` | `ghidra comments inspect` | gui + headless | READ_ONLY | C | query |
 | `/set_comment` | `ghidra comments set` | gui + headless | WRITE | C | scalar candidate |
 
 ### datatype
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/add_struct_field` | `ghidra types add-struct-field` | gui + headless | WRITE | C | program state |
 | `/analyze_global_completeness` | `ghidra types analyze-global-completeness` | gui + headless | READ_ONLY | C | query |
@@ -149,7 +150,7 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### debugger
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/debugger/dynamic_to_static` | `ghidra debugger dynamic-to-static` | gui | READ_ONLY | C | debugger/UI |
 | `/debugger/interrupt` | `ghidra debugger interrupt` | gui | WRITE | C | debugger/UI |
@@ -170,11 +171,11 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### documentation
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/apply_function_documentation` | `ghidra documentation apply` | gui + headless | WRITE | C | program state |
-| `/archive_ingest_function` | `ghidra documentation archive-function` | gui + headless | WRITE | C | archive |
-| `/archive_ingest_program` | `ghidra documentation archive-program` | gui + headless | WRITE | C | archive |
+| `/archive_ingest_function` | `ghidra archive ingest-function` | gui + headless | WRITE | C | archive |
+| `/archive_ingest_program` | `ghidra archive ingest-program` | gui + headless | WRITE | C | archive |
 | `/batch_string_anchor_report` | `ghidra documentation batch-string-anchor-report` | gui + headless | READ_ONLY | C | query |
 | `/bulk_fuzzy_match` | `ghidra documentation bulk-fuzzy-match` | gui + headless | READ_ONLY | X | query |
 | `/compare_programs_documentation` | `ghidra documentation compare` | gui + headless | READ_ONLY | X | query |
@@ -187,14 +188,14 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### emulation
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/emulate_function` | `ghidra emulation emulate-function` | gui + headless | READ_ONLY | C | query |
 | `/emulate_hash_batch` | `ghidra emulation emulate-hash-batch` | gui + headless | READ_ONLY | C | query |
 
 ### function
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/add_function_tag` | `ghidra functions add-function-tag` | gui + headless | WRITE | C | program state |
 | `/batch_rename_function_components` | `ghidra functions batch-rename-function-components` | gui + headless | WRITE | C | program state |
@@ -205,8 +206,8 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/delete_function_tag` | `ghidra functions delete-function-tag` | gui + headless | DESTRUCTIVE | C | program state |
 | `/disassemble_bytes` | `ghidra functions disassemble-bytes` | gui + headless | WRITE | C | program state |
 | `/disassemble_function` | `ghidra functions disassemble` | gui + headless | READ_ONLY | C | query |
-| `/force_decompile` | `ghidra functions decompile --force` | gui + headless | READ_ONLY | C | query |
-| `/get_functions` | `ghidra functions get` | gui + headless | READ_ONLY | C | query |
+| `/force_decompile` | `ghidra functions force-decompile` | gui + headless | READ_ONLY | C | query |
+| `/get_functions` | `ghidra functions inspect` | gui + headless | READ_ONLY | C | query |
 | `/list_class_members` | `ghidra functions list-class-members` | gui + headless | READ_ONLY | C | query |
 | `/list_function_tags` | `ghidra functions list-function-tags` | gui + headless | READ_ONLY | C | query |
 | `/remove_function_tag` | `ghidra functions remove-function-tag` | gui + headless | DESTRUCTIVE | C | program state |
@@ -222,13 +223,13 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### getter
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/get_ui_cursor` | `ghidra ui cursor` | gui + headless | READ_ONLY | C | debugger/UI |
 
 ### headless
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/close_project` | `ghidra projects close` | headless | DESTRUCTIVE | P | lifecycle |
 | `/create_project` | `ghidra projects create` | headless | WRITE | P | lifecycle |
@@ -236,7 +237,7 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### listing
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/convert_number` | `ghidra utility convert-number` | gui + headless | READ_ONLY | U | query |
 | `/find_functions` | `ghidra functions search` | gui + headless | READ_ONLY | C | query |
@@ -248,12 +249,12 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/list_globals` | `ghidra listing list-globals` | gui + headless | READ_ONLY | C | query |
 | `/list_program_items` | `ghidra listing list-program-items` | gui + headless | READ_ONLY | C | query |
 | `/list_shadowed_globals` | `ghidra listing list-shadowed-globals` | gui + headless | READ_ONLY | C | query |
-| `/list_strings` | `ghidra strings search (contains/list mode)` | gui + headless | READ_ONLY | C | query |
-| `/search_strings` | `ghidra strings search (regex mode)` | gui + headless | READ_ONLY | C | query |
+| `/list_strings` | `ghidra strings list` | gui + headless | READ_ONLY | C | query |
+| `/search_strings` | `ghidra strings search-regex` | gui + headless | READ_ONLY | C | query |
 
 ### malware
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/analyze_api_call_chains` | `ghidra analysis analyze-api-call-chains` | gui + headless | READ_ONLY | C | query |
 | `/detect_crypto_constants` | `ghidra analysis detect-crypto-constants` | gui + headless | READ_ONLY | C | query |
@@ -263,7 +264,7 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### program
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/analysis_status` | `ghidra analysis status` | gui + headless | READ_ONLY | C | query |
 | `/close_program` | `ghidra close` | gui + headless | DESTRUCTIVE | C | lifecycle |
@@ -279,7 +280,7 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/get_property` | `ghidra program get-property` | gui + headless | READ_ONLY | C | query |
 | `/import_file` | `ghidra open` | gui + headless | WRITE | C | lifecycle |
 | `/list_bookmarks` | `ghidra program list-bookmarks` | gui + headless | READ_ONLY | C | query |
-| `/list_open_programs` | `sessions status / targets list` | gui + headless | READ_ONLY | C | lifecycle |
+| `/list_open_programs` | `sessions status (explicit session; targets list inventories inputs)` | gui + headless | READ_ONLY | C | lifecycle |
 | `/list_project_files` | `ghidra projects files` | gui + headless | READ_ONLY | P | query |
 | `/list_properties` | `ghidra program list-properties` | gui + headless | READ_ONLY | C | query |
 | `/list_scripts` | `ghidra scripts list` | gui + headless | READ_ONLY | C | query |
@@ -290,18 +291,18 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/remove_property` | `ghidra program remove-property` | gui + headless | DESTRUCTIVE | C | program state |
 | `/run_ghidra_script` | `ghidra scripts run` | gui + headless | WRITE | C | script |
 | `/run_script_inline` | `ghidra scripts run-inline` | gui + headless | WRITE | C | script |
-| `/save_all_programs` | `ghidra save (explicit session-wide selection)` | gui + headless | WRITE | C | lifecycle |
+| `/save_all_programs` | `ghidra save-all (explicit session-wide selection)` | gui + headless | WRITE | C | lifecycle |
 | `/save_program` | `ghidra save` | gui + headless | WRITE | C | lifecycle |
 | `/set_bookmark` | `ghidra program set-bookmark` | gui + headless | WRITE | C | program state |
 | `/set_image_base` | `ghidra program set-image-base` | gui + headless | WRITE | C | program state |
 | `/set_memory_block` | `ghidra memory set-block` | gui + headless | WRITE | C | program state |
 | `/set_program_option` | `ghidra program set-program-option` | gui + headless | WRITE | C | program state |
 | `/set_property` | `ghidra program set-property` | gui + headless | WRITE | C | program state |
-| `/switch_program` | `explicit --session/--target on each research call` | gui + headless | WRITE | C | lifecycle |
+| `/switch_program` | `ghidra open (continuation; every research call carries explicit selectors)` | gui + headless | WRITE | C | lifecycle |
 
 ### project
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/archive_project` | `ghidra projects archive` | gui + headless | WRITE | P | project/files |
 | `/create_folder` | `ghidra projects create-folder` | gui + headless | WRITE | P | project/files |
@@ -317,14 +318,14 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### server
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/checkin_program` | `ghidra merge` | gui + headless | WRITE | C | lifecycle |
 | `/server/admin/set_permissions` | `ghidra server admin set-permissions` | gui + headless | WRITE | P | server |
 | `/server/admin/terminate_all_checkouts` | `ghidra server admin terminate-all-checkouts` | gui + headless | DESTRUCTIVE | P | server |
 | `/server/admin/terminate_checkout` | `ghidra server admin terminate-checkout` | gui + headless | DESTRUCTIVE | P | server |
 | `/server/admin/users` | `ghidra server admin users` | gui + headless | READ_ONLY | P | query |
-| `/server/authenticate` | `Factory profile/auth/secret configuration` | gui + headless | WRITE | P | lifecycle |
+| `/server/authenticate` | `auth login (Factory profile secrets)` | gui + headless | WRITE | P | lifecycle |
 | `/server/checkouts` | `ghidra server checkouts` | gui + headless | READ_ONLY | P | query |
 | `/server/connect` | `ghidra server connect` | gui + headless | WRITE | P | server |
 | `/server/disconnect` | `ghidra server disconnect` | gui + headless | WRITE | P | server |
@@ -333,14 +334,14 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/server/repository/file` | `ghidra server repositories file` | gui + headless | READ_ONLY | P | query |
 | `/server/repository/files` | `ghidra server repositories files` | gui + headless | READ_ONLY | P | query |
 | `/server/status` | `ghidra server status` | gui + headless | READ_ONLY | P | query |
-| `/server/version_control/add` | `ghidra server programs add` | gui + headless | WRITE | P | lifecycle |
+| `/server/version_control/add` | `ghidra open (automatic canonical registration)` | gui + headless | WRITE | P | lifecycle |
 | `/server/version_control/checkout` | `ghidra open (private context; shared writer is internal)` | gui + headless | WRITE | C | lifecycle |
 | `/server/version_control/undo_checkout` | `ghidra changes discard (explicit local intent)` | gui + headless | DESTRUCTIVE | C | lifecycle |
 | `/server/version_history` | `ghidra server history` | gui + headless | READ_ONLY | P | query |
 
 ### symbol
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/can_rename_at_address` | `ghidra symbols can-rename-at-address` | gui + headless | READ_ONLY | C | query |
 | `/create_label` | `ghidra symbols create-label` | gui + headless | WRITE | C | program state |
@@ -349,23 +350,23 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 
 ### system
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/prompt_policy` | `ghidra ui prompt-policy` | gui | WRITE | C | debugger/UI |
 
 ### utility
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/check_connection` | `ghidra status` | gui + headless | READ_ONLY | C | lifecycle |
 | `/mcp/health` | `ghidra status (tool health)` | gui + headless | READ_ONLY | C | lifecycle |
-| `/mcp/schema` | `Factory command help/schema` | gui + headless | READ_ONLY | U | lifecycle |
+| `/mcp/schema` | `--help (Factory command discovery)` | gui + headless | READ_ONLY | U | lifecycle |
 | `/tool/goto_address` | `ghidra ui goto` | gui | WRITE | C | debugger/UI |
 | `/tool/running_tools` | `ghidra ui tools` | gui | READ_ONLY | C | debugger/UI |
 
 ### xref
 
-| Source operation | Planned facade action | Mode | Access | Scope | Effect/outcome class |
+| Source operation | Facade action | Mode | Access | Scope | Effect/outcome class |
 | --- | --- | --- | --- | --- | --- |
 | `/add_memory_reference` | `ghidra xrefs add-memory-reference` | gui + headless | WRITE | C | program state |
 | `/analyze_call_graph` | `ghidra xrefs analyze-call-graph` | gui + headless | READ_ONLY | C | query |
@@ -373,12 +374,12 @@ explicit intent/permissions; automatic cleanup is confined to verified owned res
 | `/get_full_call_graph` | `ghidra xrefs get-full-call-graph` | gui + headless | READ_ONLY | C | query |
 | `/get_function_call_graph` | `ghidra xrefs get-function-call-graph` | gui + headless | READ_ONLY | C | query |
 | `/get_xrefs_from` | `ghidra xrefs from` | gui + headless | READ_ONLY | C | query |
-| `/get_xrefs_to` | `ghidra xrefs to` | gui + headless | READ_ONLY | C | query |
+| `/get_xrefs_to` | `ghidra xrefs inspect-to` | gui + headless | READ_ONLY | C | query |
 | `/remove_reference` | `ghidra xrefs remove-reference` | gui + headless | DESTRUCTIVE | C | program state |
 
 ## Static bridge equivalences
 
-| Bridge control | Planned equivalent |
+| Bridge control | Equivalent |
 | --- | --- |
 | `list_instances` | Root sessions/targets/status report logical owned contexts; backend roster is internal. |
 | `connect_instance` | Scoped open/continuation chooses and verifies the owned binding; no mutable caller routing. |

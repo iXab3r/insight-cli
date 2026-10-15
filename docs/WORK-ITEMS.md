@@ -99,6 +99,15 @@ remain open. The whole M5 gate and final installed crash matrix are not complete
 
 ## Engineering defaults
 
+[Session save and local discard](verification/lifecycle-selection.json) closes the two remaining
+explicit lifecycle equivalences. Session-wide saving visits only that session's contexts and
+retains per-input outcomes; local discard saves the former snapshot and restores the selected
+context's own base without publication. Native scalar/structure edits, two inputs, another
+agent's newer shared revision, same-ID retrieval and a lost local switch are checked. A later
+explicit refresh receives the newer revision. The offline suite now passes 87 tests.
+The catalog audit resolves all 210 current mappings plus eight bridge-control equivalents;
+that structural accounting remains separate from final behavioral/installed acceptance.
+
 The [debugger checkpoint](verification/debugger.json) exercises all sixteen public debugger
 leaves against an owned macOS Mach-O using LLDB: launch/offers, status, trace/module inventory,
 registers/stack, exact memory, both mapping directions, breakpoints, interrupt/resume and all

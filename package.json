@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "test": "npm run build && node --test skills/ghidra-coordinator/dist/tests/*.test.js",
+    "test": "npm run build && npm run test:coverage && node --test skills/ghidra-coordinator/dist/tests/*.test.js",
+    "test:coverage": "node scripts/audit-coverage.mjs --summary",
     "pack:cli": "node scripts/pack-cli.mjs",
     "test:package": "node scripts/test-package.mjs"
   },

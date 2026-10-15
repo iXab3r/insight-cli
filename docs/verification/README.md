@@ -201,3 +201,11 @@ names/comments/hash fields, created/updated/conflict counts, same-ID retrieval a
 lost external response without another POST. Another session is unchanged and private research
 remains usable. Run `scripts/proof-archive.mjs` with the same flags. This proves the integration
 contract; developing or deploying an independent archive service is excluded.
+
+[Session save and local discard](lifecycle-selection.json) verifies explicit session-wide saving
+and scalar/complex discard on two owned native inputs. The old private snapshot remains readable,
+discard restores the original base while another agent's newer shared state stays intact, and a
+lost local acknowledgment reconciles without another close. Run
+`scripts/proof-lifecycle-selection.mjs`. `scripts/audit-coverage.mjs` separately verifies current
+command/equivalence accounting for all 210 catalog paths and eight bridge controls; it does not
+claim behavioral acceptance from command presence.

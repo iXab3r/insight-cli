@@ -1,5 +1,15 @@
 # Research with a private context
 
+`ghidra save-all --session <id>` saves every Ghidra context in that session and reports a
+separate outcome for each input. It does not publish. A partial result preserves completed saves;
+repeating the same request ID retrieves those outcomes without another pass.
+
+`ghidra changes discard --session <id> --target <id>` explicitly removes that context's pending
+program edits, retains its former private snapshot and restores its own opening base. It requires
+Destructive permission. Other sessions and the shared revision remain unchanged; use explicit
+refresh to receive a newer shared base afterward. Close a live debugger before discarding static
+edits. The saved trace remains separate from the program's opening snapshot.
+
 Open input with `insight-cli ghidra open ./client.exe --session new --json`. Store the returned
 `session` and `target` as the explicit scope for every later research call. Names are display
 labels; equal filenames or addresses in different inputs do not select the same object.

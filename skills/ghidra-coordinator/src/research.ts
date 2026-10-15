@@ -338,6 +338,14 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='discard'){
+        try{const current=this.workspace.context(selected),base=execution.baseSnapshot as Artifact,discarded=execution.discardedSnapshot as Artifact;
+          if(!backend.closed||!await backend.closed(selected)||current.generation!==execution.generation||current.baseSnapshot?.id!==base.id||current.workingSnapshot?.id!==discarded.id)continue;
+          await this.workspace.artifacts.verify(base);await this.workspace.artifacts.verify(discarded);
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:base,state:'stopped',viewEpoch:(current.viewEpoch??0)+1,scalars:[],complexChanges:[]},execution.result);
+        }catch{/* A local switch is reconstructed only from its unchanged retained snapshots. */}
+        continue;
+      }
       if(execution?.kind==='debugger'){
         try{if(backend.closed&&await backend.closed(selected))this.workspace.recordRequest(request.id,'failed',
           {...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});}
