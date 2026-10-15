@@ -17,6 +17,28 @@ test('debugger readback rejects wrong addresses, inconsistent memory and malform
   assert.equal((debuggerResult('list_breakpoints',{},[{address:'1000',name:'',state:'ENABLED',kinds:['SW_EXECUTE'],trace_location_count:1}]) as {name:string}[])[0]!.name,'');
 });
 
+test('a dead debugger retains its verified uncertain trace candidate without overwriting a newer observation or recreating execution',async t=>{
+  for(const continuation of ['open','close','newer-observation']){
+    const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let backend:SessionBackend,ended=false,snap=0,steps=0,launches=0,closes=0;
+    const trace='trace_00000000-0000-4000-8000-000000000001';
+    const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+      backend=new SessionBackend(workspace);
+      return Object.assign(backend,{debuggerStart:async()=>{},closed:async()=>ended,close:async()=>{closes++;},
+        debuggerLaunch:async()=>{launches++;return {status:'launched',offer_title:'fixture',trace_name:'fixture'};},
+        debuggerCall:async(_scope:Scope,operation:string)=>{if(operation==='step'){steps++;snap++;throw Error('Synthetic lost completed step');}
+          return {debugger_active:true,trace_active:launches>0,open_traces:launches,...(launches?{target_connected:!ended,module_count:1,snap,execution_state:'STOPPED'}:{})};},
+        debuggerSaved:async(selected:Scope)=>({traces:launches?[{id:trace,name:'fixture',snapshot:workspace.context(selected).workingSnapshot!,snap:String(snap),modules:1,threads:1,connected:!ended}]:[],...(launches?{active:trace}:{}),connected:launches>0&&!ended}),
+      });
+    }}));
+    const input=join(f.root,'fixture.exe');await writeFile(input,'owned uncertain debugger fixture');const selected=await f.json(app,['ghidra','open',input,'--session','new']) as Scope,select=['--session',selected.session,'--target',selected.target];
+    await f.json(app,['ghidra','debugger','launch',...select]);const uncertain=['ghidra','debugger','step',...select,'--request-id','lost'];assert.notEqual((await f.run(app,uncertain)).exitCode,0);assert.equal(backend!.workspace.context(selected).debugger!.traces[0]!.snap,'0');
+    if(continuation==='newer-observation'){snap=2;await f.json(app,['ghidra','debugger','status',...select]);}
+    ended=true;backend!.views.clear();await f.json(app,['ghidra',continuation==='close'?'close':'open',...select]);
+    const saved=backend!.workspace.context(selected).debugger!;assert.equal(saved.traces[0]!.snap,continuation==='newer-observation'?'2':'1');assert.equal(saved.connected,false);assert.ok(saved.traces.every(row=>!row.connected));
+    assert.notEqual((await f.run(app,uncertain)).exitCode,0);assert.equal(steps,1);assert.equal(launches,1);assert.equal(closes,0);
+  }
+});
+
 test('debugger request identity preserves isolated targets and never repeats an uncertain CPU step',async t=>{
   const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});let backend:SessionBackend,launches=0,steps=0,lost=false;
   const states=new Map<string,{trace:string;connected:boolean;snap:number}>();

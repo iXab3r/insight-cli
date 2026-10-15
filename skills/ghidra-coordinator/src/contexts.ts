@@ -17,6 +17,7 @@ import {logicalPrograms} from './cross-results.js';
 import {uiResult} from './ui-results.js';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -70,7 +71,10 @@ export class GhidraContexts {
       debuggerEnvironment={PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1'};
       if(process.platform==='darwin'){
         const bin=join(root,'debug-bin-'+randomUUID());await mkdir(bin,{mode:0o700});
-        await writeFile(join(bin,'lldb'),'#!/bin/sh\nunset GHIDRA_MCP_AUTH_TOKEN GHIDRA_SERVER_PASSWORD\nexec /usr/bin/lldb --no-lldbinit "$@"\n',{mode:0o500});
+        const quote=(value:string)=>"'"+value.replaceAll("'","'\\''")+"'",launch=join(root,'debugger-run','current.json');
+        await writeFile(join(bin,'lldb'),'#!/bin/sh\n'+
+          'directory='+quote(root)+'\nif [ -f '+quote(launch)+' ]; then\n directory=$(/usr/bin/plutil -extract cwd raw -o - '+quote(launch)+') || exit 1\nfi\n'+
+          'cd "$directory" || exit 1\nexec '+quote(process.execPath)+' '+quote(fileURLToPath(new URL('./debugger-supervisor.js',import.meta.url)))+' '+quote(root)+' "$@"\n',{mode:0o500});
         debuggerEnvironment.PATH=bin+delimiter+(this.c.environment.PATH??process.env.PATH??'/usr/bin:/bin');
       }
     }
@@ -140,9 +144,26 @@ export class GhidraContexts {
       for(let i=0;i<100&&alive(binding.pid);i++)await delay(50);
       if(alive(binding.pid))fail('busy','Owned context did not stop; its stage is retained.');
     }
+    if(binding.mode==='gui')await this.debuggerReleased(binding);
     await durable(join(binding.root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret});
     if(releaseCapacity&&binding.context)this.capacity.slots.delete(binding.context);
     this.running.delete(binding.root);
+  }
+  private async debuggerReleased(binding:ProcessBinding){
+    const directory=join(binding.root,'debugger-supervisors'),deadline=Date.now()+15000;
+    for(;;){let names:string[];try{names=await readdir(directory);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
+      let pending=false;
+      for(const name of names.filter(name=>/^[a-f0-9-]{36}\.json$/.test(name))){
+        const path=join(directory,name);if(await realpath(path)!==resolve(path))fail('binding','Debugger lifetime receipt moved.');
+        const row=object(JSON.parse(await readFile(path,'utf8')));
+        if(row.schema!==1||row.id+'.json'!==name||row.root!==binding.root||row.context!==binding.context||row.target!==binding.target)fail('binding','Debugger lifetime receipt changed.');
+        if(row.guiPid!==binding.pid||row.ownerToken!==binding.tokenSecret)continue;
+        if(row.state==='closed'&&row.inferiorTerminated===true)continue;
+        if(row.state==='failed')fail('blocked','Owned debugger termination remains unverified; its receipt and trace are retained.');
+        pending=true;
+      }
+      if(!pending)return;if(Date.now()>=deadline)fail('busy','Owned debugger cleanup is still pending; its context is retained.');await delay(100);
+    }
   }
   private async capture(record: Running): Promise<Artifact> {
     const result=object(await record.http.call('/save_program',{program:record.binding.program}));
@@ -256,6 +277,7 @@ export class GhidraContexts {
       if(binding.context!==context.id)fail('binding','Native process belongs to a different working context.');
       await this.verified(binding,target);return context;
     }
+    if(binding?.mode==='gui')await this.debuggerReleased(binding);
     let model=context.workingSnapshot?this.workspace.model(target.id):await this.model(target);
     if(!context.workingSnapshot) {
       // A new session begins at the actual server revision, including external publications.
@@ -506,11 +528,13 @@ public class ${name} extends GhidraScript {
   async debuggerSelect(scope:Scope,trace:string){await this.traceHelper(scope,{operation:'select',id:trace});}
   async debuggerLaunch(scope:Scope,p:Record<string,unknown>,request:string){
     if(!/^q_[a-f0-9-]{36}$/.test(request))fail('binding','Invalid internal debugger launch identity.');
-    const record=await this.selected(scope),target=this.workspace.target(scope.target),root=join(record.binding.root,'debugger-run',request);await mkdir(root,{recursive:true,mode:0o700});
+    const record=await this.selected(scope);await this.debuggerReleased(record.binding);
+    const target=this.workspace.target(scope.target),root=join(record.binding.root,'debugger-run',request);await mkdir(root,{recursive:true,mode:0o700});
     const executable=join(root,process.platform==='win32'?'image.exe':'image');await copyFile(await this.workspace.artifacts.verify(target.input),executable,constants.COPYFILE_EXCL);await chmod(executable,0o500);
     const copied=await this.workspace.artifacts.capture(executable,'input');if(copied.id!==target.input.id)fail('binding','Staged debug executable differs from the immutable target.');
-    await durable(join(record.binding.root,'debugger-run','current.json'),{request,target:scope.target,context:record.binding.context,executable});
-    return this.debuggerCall(scope,'launch',{...p,executable_path:executable,cwd:p.cwd??root,
+    const cwd=p.cwd===undefined?root:text(p.cwd,4096);if(/[\r\n\0]/.test(cwd))fail('invalid','Debugger working directory must be a single filesystem path.');
+    await durable(join(record.binding.root,'debugger-run','current.json'),{request,target:scope.target,context:record.binding.context,executable,cwd});
+    return this.debuggerCall(scope,'launch',{...p,executable_path:executable,cwd,
       ...(this.c.profile.values.debuggerPython?{python_executable:text(this.c.profile.values.debuggerPython,4096)}:{}),
       ...(this.c.profile.values.windbgDir?{windbg_dir:text(this.c.profile.values.windbgDir,4096)}:{})});
   }
@@ -664,7 +688,7 @@ public class ${name} extends GhidraScript {
         // PID existence alone grants no authority: authenticate the complete receipt.
         await this.verified(binding,this.workspace.target(binding.target),false);
         this.capacity.slots.add(entry.name);
-      }
+      }else if(binding.mode==='gui')await this.debuggerReleased(binding);
     }
   }
 }

@@ -218,3 +218,12 @@ previously renamed function publishes as a complete saved result at an unchanged
 independent refresh does not recreate its stale name. Run `scripts/proof-scalar-projection.mjs`.
 The query runner also repeats all 74 read adapters, including the two read-only implementations
 whose upstream metadata says WRITE, with stable source hashes checked at both ends.
+
+[Debugger backend crash](debugger-crash.json) performs a real SIGKILL through the original GUI
+child handle. The owned LLDB child exits after verifying termination of the launched inferior;
+the exact fixture PID is observed to have ended. The retained uncertain trace candidate survives
+and reopens disconnected without another launch/action. Private A work and independent B remain
+intact. A working directory containing spaces and an apostrophe is checked through the actual
+inferior. Run `scripts/proof-debugger-crash.mjs`. The refreshed debugger recovery receipt repeats
+all sixteen operations and normal live close with the same child lifecycle implementation.
+The final installed owner/process matrix remains a separate gate.

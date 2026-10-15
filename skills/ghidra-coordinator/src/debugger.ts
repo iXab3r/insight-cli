@@ -80,7 +80,7 @@ export function debuggerCommands(service:(c:CommandContext)=>Debugger):CommandDe
       const p:Record<string,unknown>={};if(at)p.address=address(o.address);if(paged){p.limit=number(o.limit,100,1);p.offset=number(o.offset,2147483647);}
       if(operation==='read_memory')p.size=number(o.size,4096,1);if(operation==='stack_trace')p.depth=number(o.depth,1000,1);
       if(operation==='step'){p.kind=text(o.kind);if(!['into','over','out'].includes(String(p.kind)))fail('invalid','Step kind must be into, over or out.');}
-      if(operation==='launch'){if(typeof o.args!=='string'||o.args.length>8192||o.args.includes('\0'))fail('invalid','Arguments must be bounded text.');p.args=o.args;p.offer=text(o.offer,512);p.timeout_seconds=number(o.timeoutSeconds,300,1);if(o.cwd)p.cwd=resolve(c.cwd,text(o.cwd,4096));}
+      if(operation==='launch'){if(typeof o.args!=='string'||o.args.length>8192||o.args.includes('\0'))fail('invalid','Arguments must be bounded text.');p.args=o.args;p.offer=text(o.offer,512);p.timeout_seconds=number(o.timeoutSeconds,300,1);if(o.cwd){p.cwd=resolve(c.cwd,text(o.cwd,4096));if(/[\r\n\0]/.test(String(p.cwd)))fail('invalid','Debugger working directory must be a single filesystem path.');}}
       const selected=scope(o),selectedTrace=o.trace===undefined?undefined:id(o.trace);
       return changing?service(c).change(selected,operation,p,o.requestId===undefined?undefined:id(o.requestId),selectedTrace):service(c).read(selected,operation,p,selectedTrace);
     },{permission:operation==='remove_breakpoint'?'Destructive':changing?Permission.Update:Permission.ReadOnly,options}));

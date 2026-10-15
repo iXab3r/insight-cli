@@ -350,8 +350,15 @@ export class Research {
         continue;
       }
       if(execution?.kind==='debugger'){
-        try{if(backend.closed&&await backend.closed(selected))this.workspace.recordRequest(request.id,'failed',
-          {...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});}
+        try{if(backend.closed&&await backend.closed(selected)){
+          const current=this.workspace.context(selected),retained=object(request.result??{}).savedDebugger as DebuggerState|undefined;
+          const saved=retained&&current.generation===execution.generation?retained:current.debugger;
+          if(saved){
+            for(const trace of saved.traces)await this.workspace.artifacts.verify(trace.snapshot);
+            this.workspace.saveContext(selected,current.generation,{debugger:{...saved,connected:false,traces:saved.traces.map(trace=>({...trace,connected:false}))}});
+          }
+          this.workspace.recordRequest(request.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});
+        }}
         catch{/* A CPU action is not replayed or inferred from a later program counter. */}
         continue;
       }

@@ -1,6 +1,6 @@
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {Research,scope,type ResearchBackend} from './research.js';
-import {Workspace,type Scope} from './workspace.js';
+import {Workspace,type Scope,type DebuggerState} from './workspace.js';
 import {id,fail,object,digest} from './model.js';
 import {selectedOptions} from './arguments.js';
 import type {Artifact} from './artifacts.js';
@@ -32,9 +32,16 @@ export class Lifecycle {
         savedSnapshot=snapshot;
         const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:current.scalars.length+current.complexChanges.length};
         if(closingExternal&&backend.closed&&await backend.closed(selected))for(const intent of unresolved){
+          const before=this.workspace.context(selected),execution=object(intent.execution??{}),retained=object(intent.result??{}).savedDebugger as DebuggerState|undefined;
+          if(execution.kind==='debugger'&&retained&&before.generation===execution.generation){
+            for(const trace of retained.traces)await this.workspace.artifacts.verify(trace.snapshot);
+            this.workspace.saveContext(selected,before.generation,{debugger:{...retained,connected:false,traces:retained.traces.map(trace=>({...trace,connected:false}))}});
+          }
           this.workspace.recordRequest(intent.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:object(intent.execution??{}).operation});
         }
-        this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,...(operation==='close'?{state:'stopped' as const}:{} )},result);return result;
+        const retained=this.workspace.context(selected);
+        this.workspace.completeSavedRequest(selected,request.id,retained.generation,{workingSnapshot:snapshot,...(operation==='close'?{state:'stopped' as const,
+          ...(retained.debugger?{debugger:{...retained.debugger,connected:false,traces:retained.debugger.traces.map(trace=>({...trace,connected:false}))}}:{})}:{} )},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;}
     });
   }

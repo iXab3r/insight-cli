@@ -9,7 +9,7 @@ Agents choose the investigation and interpret results.
 eight bridge-control equivalents, including static reads/edits, merge/refresh, project/server/GUI
 controls, native LLDB debugging, archive exchange and explicit save/discard lifecycle. The
 [native checkpoints](docs/verification/README.md) identify their exact sources and limitations;
-89 offline tests pass. The final combined installed/crash acceptance remains in progress. The
+90 offline tests pass. The final combined installed/crash acceptance remains in progress. The
 owner requested the complete M0–M5 result; command accounting alone does not finish that gate.
 See [design](docs/DESIGN.md), [scenarios](docs/CLI-SCENARIOS.md), [work items](docs/WORK-ITEMS.md) and
 [coverage](docs/GHIDRA-COVERAGE.md). No npm publication is included.

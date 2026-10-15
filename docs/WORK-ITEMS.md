@@ -99,6 +99,16 @@ remain open. The whole M5 gate and final installed crash matrix are not complete
 
 ## Engineering defaults
 
+The [debugger backend crash checkpoint](verification/debugger-crash.json) kills the original
+owned GUI child during a lost interrupt response. An LLDB child owner in a separate OS session
+handles terminal loss, verifies inferior termination and records completion before replacement.
+The former process does not survive as a stopped orphan. The latest independently verified
+uncertain trace candidate is retained, continuation is disconnected, private work and another
+session survive, and the action/launch is not repeated. A quoted working directory is enforced
+instead of relying on the source launcher's optional hint. The repeated sixteen-operation
+[recovery scenario](verification/debugger-recovery.json) also verifies ordinary live close.
+The offline suite now passes 90 tests, including stale-candidate and already-ended close cases.
+
 [Scalar projection after complex edits](verification/scalar-projection.json) now verifies that
 batch/script/structural saved results supersede earlier tracked values before merge or refresh.
 A lost batch response reconciles its retained candidate once; incoming conflicts report and
