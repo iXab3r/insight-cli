@@ -80,6 +80,13 @@ class InsightSnapshotInspect {
       Map<String,Object> out=new LinkedHashMap<>();out.put("exists",true);out.put("name",block.getName());out.put("start",block.getStart().toString());
       out.put("size",block.getSize());out.put("read",block.isRead());out.put("write",block.isWrite());out.put("execute",block.isExecute());
       out.put("volatile",block.isVolatile());out.put("initialized",block.isInitialized());out.put("overlay",block.isOverlay());out.put("comment",block.getComment());
+      out.put("physicalStart",block.getStart().getPhysicalAddress().toString());
+      if(request.has("digest_bytes")&&request.get("digest_bytes").getAsBoolean()) {
+        if(block.getSize()>16777216L)throw new IllegalArgumentException("Memory digest exceeds 16 MiB verification bound");
+        String digest=null;if(block.isInitialized()) {var hash=java.security.MessageDigest.getInstance("SHA-256");long offset=0;
+          while(offset<block.getSize()){int count=(int)Math.min(65536,block.getSize()-offset);byte[] bytes=new byte[count];int read=memory.getBytes(block.getStart().add(offset),bytes);if(read!=count)throw new IllegalStateException("Incomplete saved memory read");hash.update(bytes);offset+=count;}
+          digest=java.util.HexFormat.of().formatHex(hash.digest());}out.put("sha256",digest);
+      }
       return out;
     }
     if(kind.equals("metadata"))return Map.of("imageBase",program.getImageBase().toString(),"sha256",program.getExecutableSHA256(),
@@ -95,14 +102,16 @@ class InsightSnapshotInspect {
       if(function==null)return Map.of("exists",false);
       Map<String,Object> out=new LinkedHashMap<>();out.put("exists",true);out.put("name",function.getName());out.put("address",function.getEntryPoint().toString());
       out.put("returnType",function.getReturnType().getName());out.put("signature",function.getSignature().getPrototypeString());
+      out.put("defaultCallingConvention",program.getCompilerSpec().getDefaultCallingConvention().getName());
       out.put("namespace",function.getParentNamespace().getName(true));out.put("noReturn",function.hasNoReturn());out.put("callingConvention",function.getCallingConventionName());
       List<Object> variables=new ArrayList<>();for(var variable:function.getAllVariables())variables.add(Map.of("name",variable.getName(),"type",variable.getDataType().getName(),"storage",variable.getVariableStorage().toString(),"parameter",variable instanceof ghidra.program.model.listing.Parameter));
       out.put("variables",variables);out.put("parameters",Arrays.stream(function.getParameters()).map(param->Map.of("name",param.getName(),"type",param.getDataType().getName(),"storage",param.getVariableStorage().toString(),"auto",param.isAutoParameter())).toList());
       out.put("tags",function.getTags().stream().map(tag->Map.of("name",tag.getName(),"comment",Objects.toString(tag.getComment(),""))).toList());
       String prototype=string(request,"prototype");if(!prototype.isEmpty()){
-        var expected=new ghidra.app.util.parser.FunctionSignatureParser(program.getDataTypeManager(),null).parse(function.getSignature(),prototype);
+        String[] normalized=com.xebyte.core.FunctionService.extractCallingConvention(prototype);
+        var expected=new ghidra.app.util.parser.FunctionSignatureParser(program.getDataTypeManager(),null).parse(function.getSignature(),normalized[1]);
         out.put("expectedPrototype",Map.of("name",expected.getName(),"returnType",expected.getReturnType().getName(),
-          "parameters",Arrays.stream(expected.getArguments()).map(param->Map.of("name",Objects.toString(param.getName(),""),"type",param.getDataType().getName())).toList()));}
+          "inlineCallingConvention",normalized[0],"parameters",Arrays.stream(expected.getArguments()).map(param->Map.of("name",Objects.toString(param.getName(),""),"type",param.getDataType().getName())).toList()));}
       return out;
     }
     if(kind.equals("instructions")) {

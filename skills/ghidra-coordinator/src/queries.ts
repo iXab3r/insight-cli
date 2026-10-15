@@ -4,6 +4,7 @@ import {Research,scope} from './research.js';
 import {fail} from './model.js';
 import {queryResult} from './query-results.js';
 import {type Parameter,key,flag,parsed,option,selectedOptions} from './arguments.js';
+import {nativeQueries,qualifyQuery,queryDescription} from './query-policy.js';
 
 
 interface Query {path:string;command:string;params:Parameter[]}
@@ -30,13 +31,19 @@ export function queryCommands(research:(context:CommandContext)=>Research):Comma
     const [group,leaf,...rest]=q.command.split(' ');
     if(!group||!leaf||rest.length||q.params.some(p=>['session','target','program'].includes(p.name)))throw Error('Invalid installed query contract.');
     const children=groups.get(group)??[];groups.set(group,children);
-    children.push(command(leaf,leaf.replaceAll('-',' '),async({options:o},c)=>{
+    children.push(command(leaf,queryDescription(q.path,leaf.replaceAll('-',' ')),async({options:o},c)=>{
       const parameters:Record<string,unknown>={};
       for(const p of q.params){const input=o[key(p.name)];if(input===undefined){if(p.required)fail('invalid',`Missing --${flag(p.name)}.`);continue;}parameters[p.name]=parsed(p,input);}
+      if(nativeQueries.has(q.path)) {
+        if(Number(parameters.timeout_seconds??5)>30)fail('invalid','Native query timeout must be at most 30 seconds.');
+        if(Number(parameters.max_steps??10000)>100000)fail('invalid','Native emulation supports at most 100000 steps per candidate.');
+        if(parameters.abi!==undefined&&!['auto','x86-cdecl','windows-x64','sysv-x64'].includes(String(parameters.abi)))
+          fail('invalid','ABI must be auto, x86-cdecl, windows-x64 or sysv-x64.');
+      }
       const who=scope(o),result=q.path==='/list_scripts'?
         await research(c).scripts(who,String(parameters.filter??''),Number(o.limit),Number(o.offset)):
         await research(c).read(who,q.path,parameters);
-      return {...who,value:queryResult(q.path,parameters,value(result))};
+      return {...who,value:value(qualifyQuery(q.path,queryResult(q.path,parameters,value(result))))};
     },{permission:Permission.ReadOnly,options:[...selectedOptions,...q.params.map(option),...(q.path==='/list_scripts'?
       [option({name:'limit',type:'integer',required:false,default:'50'}),option({name:'offset',type:'integer',required:false,default:'0'})]:[])]}));
   }

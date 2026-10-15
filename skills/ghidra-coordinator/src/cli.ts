@@ -18,6 +18,8 @@ import {Projects,projectCommands} from './projects.js';
 import {UserInterface,uiCommands} from './ui.js';
 import {Debugger,debuggerCommands} from './debugger.js';
 import {Archive,archiveCommands} from './archive.js';
+import {blockContent} from './memory-inputs.js';
+import {verifyMutation} from './mutation-effects.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -224,28 +226,33 @@ export function createDefinition(options: Options = {}): CliDefinition {
         command('memory','Read or edit memory blocks',[
           command('list','Read bounded memory blocks',({options:o},c)=>owner.selected(c).research.read(scope(o),'/list_program_items',{kind:'segments',limit:number(o.limit,100,1),offset:number(o.offset,2147483647)})
             .then(value=>({...scope(o),value})),{permission:Permission.ReadOnly,options:[...scoped,...paged]}),
-          command('create-block','Create and save a private memory block',({options:o},c)=>{
-            const selected=owner.selected(c),who=scope(o),name=text(o.name,512),at=address(o.address),size=number(o.size,16*1024*1024,1);
-            const parameters={name,address:at,size,read:o.read!==false,write:o.write!==false,execute:Boolean(o.execute)};
-            return selected.research.mutate(who,'/create_memory_block',parameters,async(backend,result)=>{
-              if(result.name!==name||result.size!==size||address(result.start)!==at)fail('partial','Created memory block changed its selector or size.');
-              const read=object(await backend.call(who,'/list_program_items',{kind:'segments',limit:100,offset:0}));
-              if(!JSON.stringify(read).includes(name))fail('partial','Saved memory block was absent from independent listing.');return result;
-            },o.requestId===undefined?undefined:id(o.requestId));
+          command('create-block','Create a saved initialized/uninitialized or overlay block with verified content',({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),parameters:Record<string,unknown>={name:text(o.name,512),address:address(o.address),
+              ...(o.size===undefined?{}:{size:number(o.size,16777216,1)}),read:o.read!==false,write:o.write!==false,execute:Boolean(o.execute),
+              initialized:o.initialized!==false,overlay:Boolean(o.overlay),volatile:Boolean(o.volatile),comment:o.comment===undefined?'':text(o.comment,16000),
+              fill_byte:o.fillByte===undefined?0:number(o.fillByte,255),...(o.bytesHex===undefined?{}:{bytes_hex:o.bytesHex}),...(o.bytesBase64===undefined?{}:{bytes_base64:o.bytesBase64})};
+            const expected=blockContent(parameters);parameters.size=expected.size;
+            return selected.research.mutate(who,'/create_memory_block',parameters,async()=>({}),o.requestId===undefined?undefined:id(o.requestId),
+              (backend,snapshot,response)=>verifyMutation(backend,snapshot,'/create_memory_block',parameters,response));
           },{permission:Permission.Update,options:[...scoped,at,{flags:'--name <name>',description:'Memory block name',required:true},
-            {flags:'--size <bytes>',description:'Positive block size up to 16 MiB',required:true},
+            {flags:'--size <bytes>',description:'Positive size up to 16 MiB; defaults to content length'},
+            {flags:'--bytes-hex <hex>',description:'Initial bytes in hexadecimal; remainder uses fill-byte'},
+            {flags:'--bytes-base64 <base64>',description:'Initial bytes as canonical padded base64'},
+            {flags:'--fill-byte <byte>',description:'Fill byte from 0 to 255',defaultValue:0},
+            {flags:'--initialized <boolean>',description:'false creates uninitialized memory',defaultValue:true,parse:(v:string)=>{if(v!=='true'&&v!=='false')fail('invalid','initialized must be true or false.');return v==='true';}},
+            {flags:'--overlay',description:'Create a distinct overlay address space'},
+            {flags:'--volatile',description:'Mark memory volatile'},{flags:'--comment <text>',description:'Block comment'},
             {flags:'--no-read',description:'Disable read permission'},{flags:'--no-write',description:'Disable write permission'},
             {flags:'--execute',description:'Enable execution permission'},request]}),
         ]),
         command('functions','Read or name functions',[
-          command('set-function-prototype','Set and save a private C function signature',({options:o},c)=>{
-            const selected=owner.selected(c),who=scope(o),at=address(o.address),prototype=text(o.prototype,16000);
-            return selected.research.mutate(who,'/set_function_prototype',{function_address:at,prototype},async(backend)=>{
-              const result=object(await backend.call(who,'/get_functions',{functions:at,fields:'entry_point,signature,parameters,return_type',include_call_context:false}));
-              const found=object(object(result.functions)[at]);if(typeof found.signature!=='string'||address(found.entry_point)!==at||!Array.isArray(found.parameters))
-                fail('partial','Function signature readback omitted its selector or parameters.');return found;
-            },o.requestId===undefined?undefined:id(o.requestId));
-          },{permission:Permission.Update,options:[...scoped,at,{flags:'--prototype <signature>',description:'Complete C prototype',required:true},request]}),
+          command('set-function-prototype','Set a C prototype and optional explicit compiler-supported calling convention',({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),parameters={function_address:address(o.address),prototype:text(o.prototype,16000),
+              ...(o.callingConvention===undefined?{}:{calling_convention:text(o.callingConvention,512)})};
+            return selected.research.mutate(who,'/set_function_prototype',parameters,async()=>({}),o.requestId===undefined?undefined:id(o.requestId),
+              (backend,snapshot,response)=>verifyMutation(backend,snapshot,'/set_function_prototype',parameters,response));
+          },{permission:Permission.Update,options:[...scoped,at,{flags:'--prototype <signature>',description:'Complete C prototype',required:true},
+            {flags:'--calling-convention <name>',description:'Explicit convention supported by the selected compiler specification'},request]}),
           command('get','Read a function and entry comments',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address)),{permission:Permission.ReadOnly,options:[...scoped,at]}),
           command('decompile','Read decompiled function text',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true),{permission:Permission.ReadOnly,options:[...scoped,at]}),
           command('rename','Record a saved private name',({options:o},c)=>{

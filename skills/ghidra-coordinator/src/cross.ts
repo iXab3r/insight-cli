@@ -3,6 +3,7 @@ import {Research,scope} from './research.js';
 import {id,fail} from './model.js';
 import {option,key,parsed,selectedOptions,type Parameter} from './arguments.js';
 import {crossResult} from './cross-results.js';
+import {qualifyQuery} from './query-policy.js';
 const leaves:{path:string;group:string;name:string;params:Parameter[]}[]=[
   {path:'/compare_programs_documentation',group:'documentation',name:'compare',params:[]},
   {path:'/diff_functions',group:'functions',name:'diff',params:[{name:'address_a',type:'string',required:true,semantic:'address'},{name:'address_b',type:'string',required:true,semantic:'address'}]},
@@ -20,7 +21,7 @@ export function crossCommands(research:(context:CommandContext)=>Research):Comma
       for(const p of leaf.params){const input=o[key(p.name)];if(input!==undefined)parameters[p.name]=parsed(p,input);}
       if(parameters.threshold!==undefined&&(Number(parameters.threshold)<0||Number(parameters.threshold)>1))fail('invalid','Threshold must be between 0 and 1.');
       const value=crossResult(leaf.path,parameters,await research(c).crossRead(selected,other,leaf.path,parameters));
-      return {...selected,other,value};
+      return {...selected,other,value:qualifyQuery(leaf.path,value)};
     },{permission:Permission.ReadOnly,options:[...selectedOptions,{flags:'--other-target <id>',description:'Second immutable target',required:true},
       {flags:'--other-session <id>',description:'Second context session (defaults to --session)'},...leaf.params.map(option)]}));
   }

@@ -71,6 +71,9 @@ try {
     bh=await invoke(['ghidra','open',helper,'--session',b.session]);
   assert.equal(a.target,b.target);assert.notEqual(a.session,b.session);assert.notEqual(a.target,ah.target);assert.equal(ah.target,bh.target);
   assert.deepEqual(await invoke(['ghidra','open',exe,'--session','new','--request-id','open-A']),a);
+  const inventory=await invoke(['ghidra','types','get-valid-data-types',...select(a),'--limit','5']);assert.ok(inventory.value.types.length);assert.equal(inventory.value.read_only.modification_unchanged,true);
+  const constants=await invoke(['ghidra','analysis','detect-crypto-constants',...select(a),'--max-bytes','1']);assert.equal(constants.value.complete,false);assert.ok(constants.value.next_address);
+  const partialGlobals=await invoke(['ghidra','listing','list-globals',...select(a),'--max-scan','1']);assert.equal(partialGlobals.value.truncated,true);
   await Promise.all([comment(a,'A client'),comment(ah,'A helper')]);
   assert.equal(await read(b),null);assert.equal(await read(bh),null);
   await Promise.all([invoke(['ghidra','merge',...select(a),'--request-id','merge-A']),invoke(['ghidra','merge',...select(ah)])]);
@@ -90,6 +93,9 @@ try {
   const context={profile:{name:'default',values},environment:{PATH:process.env.PATH},signal:new AbortController().signal,fetch,secrets};
   await new GhidraServer(join(directory,'workspace'),await nativeInputs(values),context).stop();
   await invoke(['ghidra','open',...select(b)]);assert.equal(await read(b),'B overlap');assert.equal(await read(ah),'A helper');
+  await invoke(['ipc-server','stop']);
+  const savedBlock=await invoke(['ghidra','memory','create-block',...select(a),'--name','InstalledOwnedBlock','--address','0x180000000','--bytes-hex','616263','--request-id','installed-block']);assert.equal(savedBlock.value.sha256,createHash('sha256').update('abc').digest('hex'));
+  assert.deepEqual(await invoke(['ghidra','memory','create-block',...select(a),'--name','InstalledOwnedBlock','--address','0x180000000','--bytes-hex','616263','--request-id','installed-block']),savedBlock);
   await invoke(['ipc-server','stop']);
   const phases=options.faults?['accepted','local_effect','local_save','local_ack','published','verified','publication_intent']:[];
   for(let i=0;i<phases.length;i++) {
@@ -120,6 +126,7 @@ try {
   }
   receipt={schema:1,scope:'installed native Factory facade IPC/OS secrets',sourceRevision:options['source-revision']??'working tree',
     artifactSha256:createHash('sha256').update(artifact).digest('hex'),sessions:2,targets:2,contexts:4,
+    packagedNativeQueryKernels:true,packagedSavedMemoryDigest:true,
     equalBasenames:true,equalAddresses:true,parallelCliProcesses:true,independentPrivateViews:true,explicitMergeRefresh:true,
     conflictRetainedAfterOwnerRestart:true,managedServerRestartRetainsWork:true,requestIdRetryRetainsSession:true,
     faultPhases:phases,ghidra:'12.1.2',java:'21',node:process.versions.node,

@@ -19,6 +19,8 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import {debuggerProgramMetadata} from './debugger-results.js';
+import {nativeQueries} from './query-policy.js';
+import {nativeQuery} from './native-queries.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -306,6 +308,13 @@ export class GhidraContexts {
     if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};
     if(operation==='/create_function_signature'&&typeof parameters.parameters!=='string')parameters={...parameters,parameters:JSON.stringify(parameters.parameters)};
     const record=await this.selected(scope);
+    if(nativeQueries.has(operation))return nativeQuery(record.http,record.binding.program,operation,parameters);
+    if(operation==='/set_function_prototype'&&parameters.calling_convention==='default') {
+      const validation=object(await nativeQuery(record.http,record.binding.program,'/validate_function_prototype',{
+        function:parameters.function_address,prototype:parameters.prototype,calling_convention:'default'}));
+      if(validation.valid!==true)fail('invalid','Prototype or default convention could not be resolved by Ghidra.');
+      parameters={...parameters,calling_convention:object(validation.signature).calling_convention};
+    }
     if(operation==='/apply_function_documentation') {
       const name='InsightApplyDocumentation_'+randomUUID().replaceAll('-','');
       const source=await readFile(new URL('../../references/native/InsightApplyDocumentation.java',import.meta.url),'utf8');

@@ -1,4 +1,5 @@
 import {fail} from './model.js';
+import {rejectPlaceholders} from './query-policy.js';
 
 type Shape=Record<string,'string'|'number'|'boolean'|'array'|'object'>;
 const shapes:Record<string,Shape>={
@@ -76,10 +77,12 @@ function checkShape(result:unknown,shape:Shape) {
 }
 /** Validate the pinned operation's result variant, independently of its HTTP acknowledgment. */
 export function queryResult(path:string,parameters:Record<string,unknown>,result:unknown) {
- if(['/find_dead_code','/search_byte_patterns','/detect_crypto_constants'].includes(path)) {
-  if(!Array.isArray(result))fail('partial','Query expected a result array.');return result;
- }
+ rejectPlaceholders(result);
  let shape=shapes[path];
+ if(path==='/find_dead_code')shape={findings:'array',complete:'boolean',unresolved_flow:'boolean',algorithm:'string',scan:'object',truncated:'boolean'};
+ if(path==='/detect_crypto_constants'||path==='/search_byte_patterns')shape={matches:'array',complete:'boolean',scanned_bytes:'number',maximum_bytes:'number',algorithm:'string',scan:'object',truncated:'boolean'};
+ if(path==='/get_valid_data_types')shape={types:'array',scope:'string',scan:'object',truncated:'boolean'};
+ if(path==='/validate_function_prototype')shape={valid:'boolean',diagnostics:'array',parser:'string',persisted_changes:'boolean'};
  const bulkComments=path==='/get_comment'&&Boolean(String(parameters.addresses??'').trim());
  if(path==='/get_comment')shape=bulkComments?{results:'array',requested:'number',returned:'number',with_comments:'number'}:{address:'string',has_comment:'boolean'};
  if(path==='/find_data_types')shape={...(parameters.categories?{categories:'array' as const}:{data_types:'array' as const}),count:'number'};
@@ -100,6 +103,48 @@ export function queryResult(path:string,parameters:Record<string,unknown>,result
  if(path==='/list_scripts')shape={items:'array',count:'number',total:'number',offset:'number',limit:'number',truncated:'boolean'};
  if(!shape)fail('schema','Pinned query has no result contract.');
  const value=checkShape(result,shape);
+ const rowShapes:Record<string,{key:string;shape:Shape}>={
+  '/list_globals':{key:'globals',shape:{address:'string',name:'string',type:'string',size:'number',xrefs:'number',named:'boolean',typed:'boolean'}},
+  '/list_strings':{key:'strings',shape:{address:'string',value:'string',encoding:'string'}},
+  '/search_strings':{key:'matches',shape:{address:'string',value:'string',encoding:'string'}},
+  '/search_instructions':{key:'matches',shape:{address:'string',mnemonic:'string',instruction:'string',length:'number'}},
+  '/get_valid_data_types':{key:'types',shape:{name:'string',path:'string',size:'number',alignment:'number',source:'string'}},
+  '/find_dead_code':{key:'findings',shape:{address:'string',end:'string',size:'number',kind:'string'}},
+  '/detect_crypto_constants':{key:'matches',shape:{address:'string',signature:'string',length:'number',kind:'string'}},
+  '/search_byte_patterns':{key:'matches',shape:{address:'string',signature:'string',length:'number',kind:'string'}},
+  '/get_function_call_graph':{key:'edges',shape:{caller:'string',callee:'string'}},
+ };
+ const checkedRows=rowShapes[path];
+ if(checkedRows)for(const row of value[checkedRows.key] as unknown[])checkShape(row,checkedRows.shape);
+ if(value.scan!==undefined){const scan=checkShape(value.scan,{visited:'number',maximum:'number',complete:'boolean',reason:'string'});
+  if(!Number.isSafeInteger(scan.visited)||!Number.isSafeInteger(scan.maximum)||Number(scan.visited)<0||Number(scan.visited)>Number(scan.maximum))fail('partial','Query scan counters are inconsistent.');
+  if(scan.complete===false&&value.truncated!==true)fail('partial','Incomplete query scan was reported as untruncated.');
+ }
+ for(const entry of [['globals','count'],['strings','count'],['matches','count'],['types','count']] as const)
+  if(Array.isArray(value[entry[0]])&&value[entry[1]]!==undefined&&value[entry[1]]!==(value[entry[0]] as unknown[]).length)fail('partial','Query row count is inconsistent.');
+ if(path==='/find_dead_code'&&(value.complete===false||value.unresolved_flow===true)&&(value.findings as unknown[]).length)fail('partial','Incomplete CFG analysis cannot classify unreachable blocks.');
+ if(path==='/detect_crypto_constants'||path==='/search_byte_patterns'){
+  if(Number(value.scanned_bytes)>Number(value.maximum_bytes)||Number(value.scanned_bytes)<0)fail('partial','Byte scan exceeded its declared budget.');
+  if(value.complete===false&&typeof value.next_address!=='string')fail('partial','Partial byte scan omitted its continuation.');
+  if(path==='/detect_crypto_constants'){const database=checkShape(value.database,{version:'string',signatures:'array'});
+   for(const row of database.signatures as unknown[])checkShape(row,{name:'string',length:'number'});}
+ }
+ if(path==='/get_entry_points'){
+  for(const raw of value.entry_points as unknown[]){const row=checkShape(raw,{address:'string',name:'string',kind:'string',confirmed:'boolean',provenance:'string'});
+   if(row.confirmed!==true||row.kind!=='external_entry'||row.provenance!=='ghidra.symbol.external-entry-point')fail('partial','Entry-point metadata was replaced by an unconfirmed candidate.');}
+  if(!Array.isArray(value.candidates))fail('partial','Entry-point result omitted its candidates.');
+  for(const raw of value.candidates as unknown[]){const row=checkShape(raw,{address:'string',name:'string',kind:'string',confirmed:'boolean',provenance:'string'});if(row.confirmed!==false)fail('partial','Entry candidate was labeled confirmed.');}
+ }
+ if(path==='/validate_function_prototype'||path==='/validate_data_type'){
+  if(!Array.isArray(value.diagnostics))fail('partial','Validation omitted parser/resolution diagnostics.');
+  for(const raw of value.diagnostics)checkShape(raw,{severity:'string',code:'string',message:'string'});
+  if(value.valid===true){if(path==='/validate_data_type')checkShape(value.resolved,{name:'string',path:'string',size:'number',alignment:'number'});
+   else checkShape(value.signature,{name:'string',return_type:'object',parameters:'array',calling_convention:'string'});}
+ }
+ if(path==='/emulate_function'&&value.completed!==undefined){
+  checkShape(value,{completed:'boolean',hit_return:'boolean',abi:'string',pointer_bytes:'number'});
+  if(value.completed!==value.hit_return||value.completed===true&&value.stop_reason!=='return')fail('partial','Emulation termination was reported inconsistently.');
+ }
  if(path==='/get_comment'){
   const rows=bulkComments?value.results as unknown[]:[value];
   if(bulkComments&&(!['requested','returned','with_comments'].every(key=>Number.isSafeInteger(value[key])&&Number(value[key])>=0)||value.returned!==rows.length||Number(value.returned)>Number(value.requested)||Number(value.with_comments)>Number(value.requested)))fail('partial','Bulk comment counts are inconsistent.');

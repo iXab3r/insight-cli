@@ -6,12 +6,28 @@ import {verifyFunctionMutation} from './function-effects.js';
 import {verifyComments} from './comment-effects.js';
 import {verifyDataMutation} from './data-effects.js';
 import {verifyDocumentation} from './documentation-effects.js';
+import {verifyMemoryCreation} from './memory-inputs.js';
 
 const equal=(actual:unknown,expected:unknown,label:string)=>{if(actual!==expected)fail('partial',`Saved ${label} does not match the requested effect.`);};
 const normalized=(value:unknown)=>address(String(value));
 const category=(value:unknown)=>'/'+String(value).replace(/^\/+|\/+$/g,'');
 /** Effect assertions run against an immutable saved program, not the response's success flag. */
 export async function verifyMutation(backend:ResearchBackend,snapshot:Artifact,path:string,p:Record<string,unknown>,response:Record<string,unknown>):Promise<Record<string,unknown>> {
+  if(path==='/create_memory_block')return verifyMemoryCreation(backend,snapshot,p);
+  if(path==='/set_function_prototype') {
+    if(!backend.inspect)fail('configuration','Prototype edits require saved-state inspection.');
+    const value=await backend.inspect(snapshot,{kind:'function',address:p.function_address,prototype:p.prototype});
+    equal(value.exists,true,'function presence');const expected=object(value.expectedPrototype);
+    equal(value.returnType,expected.returnType,'prototype return type');
+    if(!Array.isArray(value.parameters)||!Array.isArray(expected.parameters))fail('partial','Saved prototype parameters are absent.');
+    const actual=(value.parameters as Record<string,unknown>[]).filter(v=>!v.auto);
+    equal(actual.length,expected.parameters.length,'prototype parameter count');
+    for(let i=0;i<actual.length;i++)equal(actual[i]!.type,object(expected.parameters[i]).type,'prototype parameter type');
+    const convention=p.calling_convention||expected.inlineCallingConvention;
+    if(convention==='default'){if(!['default',value.defaultCallingConvention].includes(value.callingConvention))fail('partial','Saved prototype default convention differs from the compiler specification.');}
+    else if(convention)equal(value.callingConvention,convention,'prototype convention');
+    return value;
+  }
   if(['/import_data_types','/apply_data_classification','/set_global','/set_function_this_type','/clear_flow_and_repair'].includes(path))
     return verifyDataMutation(backend,snapshot,path,p,response);
   if(path==='/apply_function_documentation')return verifyDocumentation(backend,snapshot,p);

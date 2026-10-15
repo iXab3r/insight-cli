@@ -205,7 +205,8 @@ export class Research {
     const page=pageResult(value,'matches',limit,offset);
     const items=page.items.map(item=>{const row=object(item);if(typeof row.value!=='string')fail('malformed','String result lacks decoded text.');
       return {address:publicAddress(row.address),text:row.value};});
-    return {...selected,items,offset,limit,total:page.total,truncated:offset+items.length<page.total};
+    return {...selected,items,offset,limit,total:page.total,truncated:object(value).truncated===true||offset+items.length<page.total,
+      ...(object(value).scan?{scan:object(value).scan,totalKnown:object(value).total_known!==false}:{})};
   }
   async function(selected: Scope, at: string, decompile=false) {
     return this.ordered(selected,async()=>{

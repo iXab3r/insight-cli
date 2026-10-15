@@ -1,5 +1,8 @@
 # Research with a private context
 
+See [query semantics and work limits](query-semantics.md) for completion/truncation, actual type
+resolution, qualified heuristics, supported emulation ABIs and memory/signature input variants.
+
 `ghidra save-all --session <id>` saves every Ghidra context in that session and reports a
 separate outcome for each input. It does not publish. A partial result preserves completed saves;
 repeating the same request ID retrieves those outcomes without another pass.

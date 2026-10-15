@@ -25,7 +25,7 @@ test('static query leaves use typed domain flags, explicit scope, shared API def
   const query=['ghidra','types','find-data-types',...selected,'--pattern','Record','--categories','false','--limit','12'];
   const result=await f.json(app,query) as {session:string;target:string;value:unknown};
   assert.equal(result.session,opened.session);assert.equal(result.target,opened.target);assert.deepEqual(result.value,backendResult);
-  assert.deepEqual(calls.at(-1),{operation:'/find_data_types',parameters:{pattern:'Record',categories:false,offset:0,limit:12}});
+  assert.deepEqual(calls.at(-1),{operation:'/find_data_types',parameters:{pattern:'Record',categories:false,offset:0,limit:12,max_scan:100000,timeout_seconds:5}});
   const rpc=await f.rpc(app,[query]);assert.deepEqual((rpc[0] as {result:unknown}).result,result);
   await f.profileStore.setPermissions('default',['ReadOnly']);
   assert.deepEqual(await f.json(app,query),result,'Queries remain available with only ReadOnly authority');

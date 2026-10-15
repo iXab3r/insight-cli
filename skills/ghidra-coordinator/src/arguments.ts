@@ -20,6 +20,8 @@ export function parsed(p:Parameter,value:unknown):unknown {
       /^(max_steps|max_functions|num_examples|context_instructions|call_context_limit|call_context_lines|depth)$/.test(p.name)&&result<0)
       fail('invalid',`${flag(p.name)} is outside its supported query range.`);
     if(p.name==='timeout_seconds'&&(result<1||result>1800))fail('invalid','timeout-seconds must be between 1 and 1800.');
+    if(p.name==='max_scan'&&(result<1||result>200000)||p.name==='max_bytes'&&(result<1||result>16777216))
+      fail('invalid',`${flag(p.name)} is outside its supported work budget.`);
     return result;
   }
   if(['json','object','array','any'].includes(p.type)) {
