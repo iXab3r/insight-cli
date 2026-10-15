@@ -1,5 +1,6 @@
 // Positive native read cases on one owned synthetic PE; fixture setup is not editing coverage.
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
 import {createInsightCli} from '../skills/ghidra-coordinator/dist/src/cli.js';
 import {GhidraContexts} from '../skills/ghidra-coordinator/dist/src/contexts.js';
@@ -15,6 +16,8 @@ const options={};for(let i=2;i<process.argv.length;i++) {
 }
 assert.equal(options.ack,true);assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 for(const key of ['java','ghidra-home','mcp-jar','clang','lld'])assert.ok(options[key],`Missing --${key}`);
+const sourceFiles=['src/cli.ts','src/queries.ts','src/query-results.ts','src/json.ts','src/transport.ts','src/scripts.ts','src/research.ts','src/contexts.ts','src/server.ts','src/native-inputs.ts','src/workspace.ts','references/queries.json','references/native/InsightSnapshotInspect.java'];
+const sourceHashes=Object.fromEntries(await Promise.all(sourceFiles.map(async file=>[file,createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+file,import.meta.url))).digest('hex')])));
 const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar']},
   f=await createCliFixture({after(){}},{applicationId:'insight-cli',profiles:[{name:'default',values,permissions:['ReadOnly','Update']}]});
 let native,workspace,context;
@@ -125,7 +128,8 @@ try {
     assert.ok(results['/force_decompile'].decompiled.includes('first'));
     assert.ok(results['/list_scripts'].total>0);assert.ok(results['/list_scripts'].items.every(s=>s.script&&s.name&&s.origin));
   }
-  receipt={schema:1,scope:'owned native scoped query contracts',queries:completed,ghidra:'12.1.2',java:'21',node:process.versions.node,
+  for(const file of sourceFiles)assert.equal(createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+file,import.meta.url))).digest('hex'),sourceHashes[file],'Proof source changed during execution');
+  receipt={sourceHashes,schema:1,scope:'owned native scoped query contracts',queries:completed,ghidra:'12.1.2',java:'21',node:process.versions.node,
     mcpJarSha256:pinnedMcpJar,knownInputValuesAsserted:!options.group,
     limitations:['source Factory fixture and synthetic credentials','fixture setup does not establish editing coverage','variant/nested-output completion remains part of full coverage acceptance']};
 } catch(error){console.error('Owned query fixture diagnostics:',f.root);console.error('Completed query cases:',completed.length);throw error;}

@@ -49,8 +49,8 @@ independent of cancelled commands. The offline regression includes a real unread
 The expanded offline suite passes 51 tests. The receipt identifies the exact tested artifact and
 source hashes; subsequent query input/error refinements are not that installed artifact.
 
-The read expansion now exposes 72 pinned scoped query contracts, with typed flags, operation
-result checks, bounded JSON, explicit session/target scope and Factory ReadOnly gates. All 72
+The read expansion now exposes 74 pinned scoped query contracts, with typed flags, operation
+result checks, bounded JSON, explicit session/target scope and Factory ReadOnly gates. All 74
 native calls passed; [query evidence](verification/query-contracts.json) additionally asserts known
 types/enums, imported functions, properties/bookmarks, P-code, strings/xrefs and exact controlled
 emulation outputs. The offline suite passes 53 tests. Variant/nested-output completion and the
@@ -98,6 +98,14 @@ the next call. Full category variants, native cancellation/owner faults and fina
 remain open. The whole M5 gate and final installed crash matrix are not complete.
 
 ## Engineering defaults
+
+[Scalar projection after complex edits](verification/scalar-projection.json) now verifies that
+batch/script/structural saved results supersede earlier tracked values before merge or refresh.
+A lost batch response reconciles its retained candidate once; incoming conflicts report and
+preserve the actual later local value. Deleting a renamed function retains an explicit removed
+field with complex state, then publishes the complete unchanged-base snapshot without reviving
+its old name. The offline suite passes 89 tests. Workspace schema four retains earlier data and
+prevents an older build from treating a removed function name as a scalar rename.
 
 [Session save and local discard](verification/lifecycle-selection.json) closes the two remaining
 explicit lifecycle equivalences. Session-wide saving visits only that session's contexts and

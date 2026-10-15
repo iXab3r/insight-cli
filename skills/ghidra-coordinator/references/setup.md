@@ -32,7 +32,7 @@ loader settings remain bound to the target/workspace, so changing those cannot s
 retained work. This revision conservatively protects retained profile research state from deletion.
 
 The current native acceptance is macOS. Portable CLI/CI remains required; native Windows/Linux
-acceptance is deferred. The complete delivery and merge/refresh surface are still in progress.
+acceptance is deferred. The combined full-artifact delivery gate remains in progress.
 
 Debugger execution additionally needs a supported host debugger (local LLDB on macOS). Its
 Ghidra Python dependencies are prepared from the installed SDK wheels into owned GUI storage.

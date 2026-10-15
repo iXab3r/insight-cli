@@ -1,7 +1,7 @@
 import type { Artifact } from './artifacts.js';
 import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState } from './workspace.js';
 import { Workspace } from './workspace.js';
-import { fail, id, object, text } from './model.js';
+import { fail, id, object, text,digest } from './model.js';
 import type { ToolMode } from './contexts.js';
 import {fieldKey,scalarMerge,scalarRefresh} from './merge.js';
 import type {ScriptPage} from './scripts.js';
@@ -158,13 +158,16 @@ export class Research {
       return backend.pair(selected,other,await backend.saved(other),operation,parameters);
     });
   }
-  private async transferredScalars(context:GhidraContext,backend:ResearchBackend,snapshot:Artifact) {
+  private async savedScalars(context:GhidraContext,backend:ResearchBackend,snapshot:Artifact) {
     if(!context.scalars.length)return context.scalars;
-    if(!backend.fields)fail('configuration','Transferred scalar fields require saved-state inspection.');
+    if(!backend.fields)fail('configuration','Tracked scalar fields require saved-state inspection.');
     const fields=await backend.fields(snapshot,context.scalars);
-    return context.scalars.map(change=>{
-      const observed=fields[fieldKey(change)];if(!observed?.exists)fail('partial','Transfer removed a tracked scalar field; its result remains retained for review.');
-      return {...change,local:observed.value};
+    return context.scalars.flatMap(change=>{
+      const observed=fields[fieldKey(change)];if(!observed)fail('partial','Saved inspection omitted a tracked scalar field.');
+      if(!observed.exists)return [{...change,local:null,removed:true as const}];
+      const {removed,...previous}=change;
+      if(observed.value===previous.original&&!previous.conflict)return [];
+      return [{...previous,local:observed.value}];
     });
   }
   async transfer(selected:Scope,source:Scope,dryRun:boolean,callerId?:string) {
@@ -185,7 +188,7 @@ export class Research {
         const snapshot=await backend.saved(selected);
         if(!dryRun&&transferResult(await backend.transferCheck(selected,sourceSnapshot,snapshot),true).total!==0)
           fail('partial','Saved destination retains untransferred documentation.');
-        const scalars=dryRun?context.scalars:await this.transferredScalars(context,backend,snapshot);
+        const scalars=dryRun?context.scalars:await this.savedScalars(context,backend,snapshot);
         const complexChanges=dryRun||value.total===0?context.complexChanges:[...context.complexChanges,request.id];
         const result={...selected,source,state:dryRun?'preview':'applied',sharedState:'pending',
           pendingChanges:scalars.length+complexChanges.length,value};
@@ -399,7 +402,7 @@ export class Research {
           if(transferResult(await backend.transferCheck(selected,sourceSnapshot,snapshot),true).total!==0)continue;
           const current=this.workspace.context(selected);
           if(current.generation!==execution.generation&&current.workingSnapshot?.id!==object(execution.workingSnapshot).id)continue;
-          const scalars=await this.transferredScalars(current,backend,snapshot);
+          const scalars=await this.savedScalars(current,backend,snapshot);
           const complexChanges=[...current.complexChanges,request.id];
           this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges,scalars,viewEpoch:(current.viewEpoch??0)+1},
             {...selected,source:execution.source,state:'applied',reconciled:true,sharedState:'pending',pendingChanges:scalars.length+complexChanges.length});
@@ -416,9 +419,9 @@ export class Research {
           const value=await verifyMutation(backend,snapshot,request.operation,parameters,{});
           const current=this.workspace.context(selected);
           if(current.generation!==execution.generation)continue;
-          const complexChanges=[...current.complexChanges,request.id];
-          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges,viewEpoch:(current.viewEpoch??0)+1},
-            {...selected,state:'applied',sharedState:'pending',pendingChanges:current.scalars.length+complexChanges.length,value});
+          const scalars=await this.savedScalars(current,backend,snapshot),complexChanges=[...current.complexChanges,request.id];
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,complexChanges,scalars,viewEpoch:(current.viewEpoch??0)+1},
+            {...selected,state:'applied',sharedState:'pending',pendingChanges:scalars.length+complexChanges.length,value});
         }catch{/* Retain both snapshots and the unresolved intent when complete effects cannot be proven. */}
         continue;
       }
@@ -454,7 +457,8 @@ export class Research {
         fail('blocked','Shared model has an unresolved publication; preserve all private work until reconciliation.');
       backend??=await this.backend();await backend.open(selected);
       if(!backend.latest||!backend.fields||!backend.candidate||!backend.publish)fail('configuration','Selected backend lacks the verified publication contract.');
-      const context=this.workspace.context(selected);
+      let context=this.workspace.context(selected);
+      if(context.complexChanges.length&&context.workingSnapshot){const scalars=await this.savedScalars(context,backend,context.workingSnapshot);if(digest(scalars)!==digest(context.scalars))context=this.workspace.saveContext(selected,context.generation,{scalars});}
       if(!context.baseRevision||!context.baseSnapshot||!context.workingSnapshot)fail('binding','Private context has no saved comparison base.');
       this.workspace.startRequest(request.id);
       let publication:Publication|undefined;
@@ -528,12 +532,12 @@ export class Research {
         for(const publication of publications)for(const change of publication.scalars)fields.set(fieldKey(change),change);
         const selectors=[...fields.values()];
         const original=await backend.fields(context.baseSnapshot,selectors),working=await backend.fields(context.workingSnapshot,selectors),current=await backend.fields(shared.snapshot,selectors);
-        const local=context.scalars.map(change=>({...change}));
+        const local=context.complexChanges.length?await this.savedScalars(context,backend,context.workingSnapshot):context.scalars.map(change=>({...change}));
         // An opaque operation may have touched an incoming scalar too: retain that actual value.
         if(context.complexChanges.length)for(const change of selectors) {
           const key=fieldKey(change),before=original[key],privateValue=working[key];
           if(before&&privateValue&&before.value!==privateValue.value&&!local.some(item=>fieldKey(item)===key))
-            local.push({address:change.address,field:change.field,original:before.value,local:privateValue.value,dependency:before.dependency});
+            local.push({address:change.address,field:change.field,original:before.value,local:privateValue.value,dependency:before.dependency,...(!privateValue.exists?{removed:true as const}:{})});
         }
         const incoming:ScalarChange[]=[],comparisons:Record<string,{value:string|null;compatible:boolean}>={};
         for(const selector of selectors) {
@@ -587,9 +591,9 @@ export class Research {
         if(!verifySaved&&response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
         let value=await verify(backend,response);const snapshot=await backend.saved(selected);
         if(verifySaved)value=await verifySaved(backend,snapshot,response);
-        const complexChanges=[...context.complexChanges,request.id],result={...selected,state:'applied',sharedState:'pending',
-          pendingChanges:context.scalars.length+complexChanges.length,value};
-        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges},result);return result;
+        const scalars=await this.savedScalars(context,backend,snapshot),complexChanges=[...context.complexChanges,request.id],result={...selected,state:'applied',sharedState:'pending',
+          pendingChanges:scalars.length+complexChanges.length,value};
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges,scalars},result);return result;
       }catch(error){
         let savedSnapshot:Artifact|undefined;
         try{savedSnapshot=await backend.saved(selected);}catch{/* A failed/dead backend retains its native stage and the last acknowledged snapshot. */}

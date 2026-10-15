@@ -107,7 +107,7 @@ resources were compared byte-for-byte with the source build. The receipt retains
 artifact hash and tested source hashes. Later query input/error refinements are outside that
 artifact; all reliability cases must repeat on the completed full facade.
 
-[Native query checkpoint](query-contracts.json) records 72 scoped public query calls and typed
+[Native query checkpoint](query-contracts.json) records 74 scoped public query calls and typed
 result checks against an owned PE/import DLL. Known input assertions cover function/P-code data,
 structure layout, enum members, data type size, imports, properties/bookmarks, strings/xrefs and
 controlled emulation (integer result 19 and a known candidate hash match). Run
@@ -209,3 +209,12 @@ lost local acknowledgment reconciles without another close. Run
 `scripts/proof-lifecycle-selection.mjs`. `scripts/audit-coverage.mjs` separately verifies current
 command/equivalence accounting for all 210 catalog paths and eight bridge controls; it does not
 claim behavioral acceptance from command presence.
+
+[Scalar projection](scalar-projection.json) exercises an ordinary name/comment edit followed by
+complex batch/deletion effects. The actual saved local value replaces the earlier scalar
+projection, including lost-response recovery without another batch dispatch. Refresh preserves
+that value against a conflicting shared edit; complex divergence publishes nothing. Deleting a
+previously renamed function publishes as a complete saved result at an unchanged base, and an
+independent refresh does not recreate its stale name. Run `scripts/proof-scalar-projection.mjs`.
+The query runner also repeats all 74 read adapters, including the two read-only implementations
+whose upstream metadata says WRITE, with stable source hashes checked at both ends.

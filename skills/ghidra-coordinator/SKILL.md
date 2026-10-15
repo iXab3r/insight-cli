@@ -23,9 +23,9 @@ these installed resources. Use generated `--help` for syntax; read the reference
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
 
-The facade is under active implementation: this revision exposes opening, scoped research and
-ordinary edits, merge/refresh and supported recovery. Full catalog completion and installed/native
-final acceptance remain in progress; do not describe this checkpoint as a complete delivery. Preserve private work
+The facade exposes the pinned static research/editing catalog, merge/refresh, project/server/GUI
+controls, debugger, archive exchange and supported recovery. Combined installed/native final
+acceptance remains in progress; do not describe this checkpoint as a complete delivery. Preserve private work
 and journals while an outcome is unresolved. The CLI supplies the investigation tools; agents
 choose research goals and interpret findings.
 Installing this package does not register this skill in an agent's configuration.

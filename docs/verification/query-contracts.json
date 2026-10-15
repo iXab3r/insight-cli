@@ -1,4 +1,19 @@
 {
+  "sourceHashes": {
+    "src/cli.ts": "419703cb7377dbcc07166166c4ba54e6506b5daed7036aeaf1129b264dfea5dc",
+    "src/queries.ts": "a6e2670723a90ceabeef9a9ab2b8ba12afa629d2002d924eae7e3cc2237f0f76",
+    "src/query-results.ts": "4f8ee3bb74e6b63e9497e12aa9d18b32c7f9a707c0c0bac1741c28b7b48c8d56",
+    "src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
+    "src/transport.ts": "5c078269e49cf71932770e3dfee0ac5fd8351fa3a38aa5f002d745af496dca97",
+    "src/scripts.ts": "8e76f4370d242d9aaa1bda4cca01b2932c7c8908e6fd0816d2c48986ec757e01",
+    "src/research.ts": "96ba70574f7233d1f5e8ca6e69f352725b5fd53dceae7cc6811687511dca0eff",
+    "src/contexts.ts": "c05c2baa49e066dfeb16f1ad97bfc0419d81a367f2c2cfdf8fb42591a56b4730",
+    "src/server.ts": "648af95e8e5badd16c7c616f34fd96af0b6104687dcfc3ab66a5218ac73695c7",
+    "src/native-inputs.ts": "af18d6fa16899983199fdd4a348e0c9202da1f4cb11a6769a8c3cb567b5174ce",
+    "src/workspace.ts": "20ed6653029535b74dc480ae1467b529ca798d599f3dd8d0415c910c6640d314",
+    "references/queries.json": "744a31289f05b788f3030c9c769fd7a518d24536f6a023b88bd3f03a9ecb7bf2",
+    "references/native/InsightSnapshotInspect.java": "a86e9b05aa1376e537b3cbbdc60828dd694f8b6df4991c055e4f7bcd9cc51d6f"
+  },
   "schema": 1,
   "scope": "owned native scoped query contracts",
   "queries": [
@@ -73,7 +88,9 @@
     "/get_full_call_graph",
     "/get_function_call_graph",
     "/get_xrefs_from",
-    "/get_xrefs_to"
+    "/get_xrefs_to",
+    "/analyze_data_region",
+    "/detect_array_bounds"
   ],
   "ghidra": "12.1.2",
   "java": "21",
@@ -83,38 +100,6 @@
   "limitations": [
     "source Factory fixture and synthetic credentials",
     "fixture setup does not establish editing coverage",
-    "variant/nested-output and script-inventory completion remain part of full coverage acceptance"
-  ],
-  "sourceHashes": {
-    "scripts/proof-queries.mjs": "aa4506aa9dcb57c5692eacbb4633387849ae654ae180cd32f1448a0e583685c2",
-    "skills/ghidra-coordinator/src/artifacts.ts": "014c4bd019612d3110aa16e5e3a9ed87d9fda4f984efc06fb84c6a1fa89ae9c5",
-    "skills/ghidra-coordinator/src/bin.ts": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
-    "skills/ghidra-coordinator/src/cli.ts": "e4494274847373b996cf24bea829c530da0cc66a52c0edca5c851e1d8e4c5e34",
-    "skills/ghidra-coordinator/src/contexts.ts": "781028954f04ead6e87caa0b6b725a83e4ea3c6ef271ccae7144deb6734d352c",
-    "skills/ghidra-coordinator/src/coordinator.ts": "be67a13ff9139456d57671e3ebde4d18dc64f7bf06a3a2e5087f0d10b6a33f8c",
-    "skills/ghidra-coordinator/src/ghidra.ts": "8fa3787b769b40558cbb98943030006581ca2669aeab7f546ca3943abf02f962",
-    "skills/ghidra-coordinator/src/index.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
-    "skills/ghidra-coordinator/src/merge.ts": "08e1533ae1cc4c1d1a57748419f33187c1623afe0be6dab60f363aff8b6aff5c",
-    "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
-    "skills/ghidra-coordinator/src/native-inputs.ts": "2c379480de4a947245779a544584f2462db92571c6e0c8a3cf7df2362a8978b9",
-    "skills/ghidra-coordinator/src/prototype-cli.ts": "e82d6befb8a051461ee9cbba598ca34cfc9885dc37893d83694e08f84be7b0d2",
-    "skills/ghidra-coordinator/src/queries.ts": "bd46e338c836b94f9bae6d38005762508880328455b21ca1fae81d69376ec3d1",
-    "skills/ghidra-coordinator/src/query-results.ts": "7b21589b275da320d66aa2f0e746391405b44a53d729595c77b396f2c83ffccd",
-    "skills/ghidra-coordinator/src/research.ts": "bc0d57209d5e19e9f85102e0682b049b4fa692358c6cda754ddeaa7218a61c4d",
-    "skills/ghidra-coordinator/src/server.ts": "36e8bea7f5d8945b0c09458cd76e72e45a811985631331a34b683a2e8a751964",
-    "skills/ghidra-coordinator/src/store.ts": "8a2e866c45d0a5de304213f9495d897aeebf41cd4f08a91e60da91cf6470573d",
-    "skills/ghidra-coordinator/src/transport.ts": "073507aaefac8d738b942d7ec328b304cc96bf4954eb0bdb565854312f6fc3dc",
-    "skills/ghidra-coordinator/src/workspace.ts": "ce5ab7bd46a4200d16e92f5d7434731a9a6f7d8f8bc514d5aed9dc409381a6a0",
-    "skills/ghidra-coordinator/references/queries.json": "4ddab85413948e4557c17173aa9db1c531b72e9c7136385e1d6ac65119b6a6e4",
-    "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "cdf8769e1da82c9abe8a4f745bb34b1ee94a5c05ccad875f29452dd2e30d2edf",
-    "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "c2eb095f84356bef47c1526ba88ab6134499a5287d3dfc47ef538ebd04c5d371",
-    "skills/ghidra-coordinator/references/native/InsightHeadlessMain.java": "d401df336937d557792b2b07d8a624d5715c39899c35db7db26570254f8fb60e",
-    "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
-    "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "12288d388905dfdbb31afd03c8da174a931a3ad1966157c88c1259604b4a5ff0",
-    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
-    "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
-    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6",
-    "skills/ghidra-coordinator/references/native/InsightSnapshotFields.java": "5aa75cf5524ae3ad2e4acdd1d630cd0b557f38fec8998aa4db92a0c705e239a9",
-    "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "7860b40fcae7aafe9f1f3f3092a995fd307b3fd7d3b0dbf8b6bf0ec59ce6be00"
-  }
+    "variant/nested-output completion remains part of full coverage acceptance"
+  ]
 }

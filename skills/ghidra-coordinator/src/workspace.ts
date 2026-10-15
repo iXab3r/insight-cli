@@ -20,6 +20,8 @@ export interface Scope { session: string; target: string }
 export interface ScalarChange {
   address: string; field: 'function.name' | 'comment.eol' | 'comment.pre' | 'comment.post' | 'comment.plate' | 'comment.repeatable';
   original: string | null; local: string | null;
+  /** The field ceased to exist in a retained complex program result. Never a scalar setter. */
+  removed?:true;
   dependency?:string;
   conflict?: {shared: string | null};
 }
@@ -95,7 +97,7 @@ export class Workspace {
         const binding=this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
         if(binding&&binding.value!==profile)fail('binding','Workspace belongs to a different profile; restore its original profile.');
       }
-      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 3)
+      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 4)
         fail('binding', 'Workspace schema is newer than this build; preserve it and use the matching build.');
       this.db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;
         CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -111,7 +113,7 @@ export class Workspace {
         CREATE TABLE IF NOT EXISTS publications(id TEXT PRIMARY KEY, target TEXT NOT NULL REFERENCES ghidra_models(target), state TEXT NOT NULL, data TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS administration_requests(id TEXT PRIMARY KEY,caller_id TEXT UNIQUE,hash TEXT NOT NULL,state TEXT NOT NULL,data TEXT NOT NULL);
         CREATE UNIQUE INDEX IF NOT EXISTS active_publication ON publications(target) WHERE state IN ('preparing','commit_intent','unknown');
-        PRAGMA user_version=3;`);
+        PRAGMA user_version=4;`);
       this.transaction(() => {
         const binding = this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
         if (binding && binding.value !== profile) fail('binding', 'Workspace belongs to a different profile; restore its original profile.');
@@ -471,7 +473,8 @@ export class Workspace {
         if (value !== null && (typeof value !== 'string' || value.length > 16000 || value.includes('\0')))
           fail('invalid', 'Scalar values must be bounded strings or null.');
       }
-      if (change.field === 'function.name' && (change.local === null || !change.local.length || change.local.length > 512))
+      if(change.removed!==undefined&&(change.removed!==true||change.local!==null||!next.complexChanges.length))fail('invalid','Removed scalar fields require retained complex program state.');
+      if (change.field === 'function.name' && !change.removed && (change.local === null || !change.local.length || change.local.length > 512))
         fail('invalid', 'Function name must be a nonempty bounded string.');
       const field = change.address + ':' + change.field;
       if(change.dependency!==undefined&&!/^[a-f0-9]{64}$/.test(change.dependency))fail('invalid','Scalar dependency fingerprint is malformed.');
