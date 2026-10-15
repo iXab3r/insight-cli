@@ -44,8 +44,8 @@ try {
   const fixtureClasses=join(f.root,'fixture-classes');await mkdir(fixtureClasses);
   await exec(join((await import('node:path')).dirname(inputs.java),'javac'),['-cp',classes+(await import('node:path')).delimiter+inputs.classpath,'-d',fixtureClasses,new URL('./fixtures/InsightAdministrativeFixture.java',import.meta.url).pathname]);
   const server=new GhidraServer(fixtureWorkspace.directory,inputs,context),binding=await server.ensure(),environment={...process.env,...await server.credentials(binding,'publisher')};
-  const prepare=async(mode)=>{
-    const result=await exec(inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,'-Duser.home='+f.root,'-cp',fixtureClasses+(await import('node:path')).delimiter+classes+(await import('node:path')).delimiter+inputs.classpath,'db.InsightAdministrativeFixture',name,mode,'program',await fixtureWorkspace.artifacts.verify(snapshot)],{env:environment,timeout:60000,maxBuffer:262144});return JSON.parse(result.stdout);
+  const prepare=async(mode,repository=name,file='program',checkout)=>{
+    const result=await exec(inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,'-Duser.home='+f.root,'-cp',fixtureClasses+(await import('node:path')).delimiter+classes+(await import('node:path')).delimiter+inputs.classpath,'db.InsightAdministrativeFixture',repository,mode,file,await fixtureWorkspace.artifacts.verify(snapshot),...(checkout?[checkout]:[])],{env:environment,timeout:60000,maxBuffer:262144});return JSON.parse(result.stdout);
   };
   const first=await prepare('create');assert.ok(first.checkoutId);
   assert.equal((await invoke(['repositories','file','--repository',name,'--path','/program'])).file.version,1);
@@ -54,11 +54,17 @@ try {
   assert.equal((await invoke(['admin','terminate-checkout','--repository',name,'--path','/program','--checkout-id',first.checkoutId,'--request-id','terminate'])).terminated,1);
   await prepare('checkout');assert.equal((await invoke(['admin','terminate-all-checkouts','--repository',name,'--request-id','terminate-all'])).terminated,1);
   assert.equal((await invoke(['checkouts','--repository',name])).checkouts.length,0);
+  const canonicalFile=a.target+'.bin',protectedCheckout=await prepare('checkout',binding.repository,canonicalFile);
+  try{
+    const before=await invoke(['checkouts','--repository',binding.repository,'--path','/'+canonicalFile]);assert.ok(before.checkouts.some(row=>row.path==='/'+canonicalFile&&row.id===protectedCheckout.checkoutId));
+    assert.notEqual((await f.run(app,['ghidra','server','admin','terminate-all-checkouts','--repository',binding.repository,'--json'])).exitCode,0);
+    const after=await invoke(['checkouts','--repository',binding.repository,'--path','/'+canonicalFile]);assert.ok(after.checkouts.some(row=>row.id===protectedCheckout.checkoutId),'Canonical publication checkout must survive repository-wide administration');
+  }finally{assert.equal((await prepare('release',binding.repository,canonicalFile,protectedCheckout.checkoutId)).state,'released');}
   assert.equal((await invoke(['disconnect','--request-id','disconnect'])).connected,false);assert.equal((await invoke(['status'])).connected,false);
   assert.equal((await invoke(['connect','--request-id','reconnect'])).connected,true);
   assert.ok((await invoke(['repositories','list'])).repositories.includes(name));
   for(const file of sourceFiles)assert.equal(createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+file,import.meta.url))).digest('hex'),sourceHashes[file],'Proof source changed during execution');
-  receipt={schema:1,scope:'owned native configured-server administration',repositories:true,filesAndHistory:true,usersAndAclReadback:true,checkoutsAndVerifiedTermination:true,retryDoesNotCreateAgain:true,reconnectPreservesRepositories:true,
+  receipt={schema:1,scope:'owned native configured-server administration',repositories:true,filesAndHistory:true,usersAndAclReadback:true,checkoutsAndVerifiedTermination:true,canonicalRootAndNestedSdkPaths:true,publicationCheckoutProtected:true,retryDoesNotCreateAgain:true,reconnectPreservesRepositories:true,
    ghidra:'12.1.2',java:'21',node:process.versions.node,mcpJarSha256:pinnedMcpJar,sourceHashes,bundledRuntime:true,
    limitations:['source Factory fixture and synthetic credentials','unknown external outcomes, external profile and final installed matrix need further acceptance']};
 }catch(error){console.error('Owned administration diagnostics:',f.root);throw error;}

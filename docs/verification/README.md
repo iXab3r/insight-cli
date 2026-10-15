@@ -243,3 +243,10 @@ three corrected contracts: bulk comments use `results`, the pinned data listing 
 JSON, and `json_edges` has address-based edges with its own counts. The offline suite passes
 93 tests. Run `scripts/proof-query-variants.mjs` with the same disposable/runtime/compiler flags.
 This checks representative result branches; it does not claim exhaustive input combinations.
+
+The refreshed server-administration receipt verifies canonical root and nested SDK item paths.
+Ghidra's `RepositoryItem.getPathName()` duplicates the separator at root; the native adapter
+constructs the path from its parent/name before readback and protected-checkout checks. A real
+owned canonical-program checkout survives repository-wide termination, while an ordinary
+fixture checkout is terminated and verified absent. The fixture releases only its recorded
+checkout afterward. This checkpoint follows the query-variant corrections.

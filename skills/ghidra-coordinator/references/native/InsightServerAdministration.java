@@ -14,7 +14,9 @@ class InsightServerAdministration {
   static String string(JsonObject value,String name){return value.has(name)?value.get(name).getAsString():"";}
   static String parent(String path){int i=path.lastIndexOf('/');return i>0?path.substring(0,i):"/";}
   static String leaf(String path){return path.substring(path.lastIndexOf('/')+1);}
-  static Map<String,Object> file(RepositoryItem item){return Map.of("name",item.getName(),"path",item.getPathName(),"type",item.getContentType(),"version",item.getVersion());}
+  // RepositoryItem.getPathName() prepends another slash even when its parent is root.
+  static String canonicalPath(RepositoryItem item){return (item.getParentPath().equals("/")?"":item.getParentPath())+"/"+item.getName();}
+  static Map<String,Object> file(RepositoryItem item){return Map.of("name",item.getName(),"path",canonicalPath(item),"type",item.getContentType(),"version",item.getVersion());}
   static void admin(RepositoryAdapter repo)throws Exception{if(!repo.getUser().isAdmin())throw new SecurityException("Repository administration requires actual admin permission");}
   static List<RepositoryItem> files(RepositoryAdapter repo,String at)throws Exception{
     List<RepositoryItem> out=new ArrayList<>();RepositoryItem exact=at.equals("/")?null:repo.getItem(parent(at),leaf(at));
@@ -58,10 +60,10 @@ class InsightServerAdministration {
             else if(Set.of("checkouts","terminate_checkout","terminate_all_checkouts").contains(operation)){
               boolean changing=!operation.equals("checkouts");if(changing)admin(repo);List<Object> rows=new ArrayList<>();int terminated=0;
               var selected=files(repo,path);
-              if(changing)for(var item:selected){String itemPath=item.getPathName();
+              if(changing)for(var item:selected){String itemPath=canonicalPath(item);
                 if(request.has("protected_repository")&&name.equals(string(request,"protected_repository"))&&itemPath.matches("/t_[a-f0-9-]+\\.bin"))throw new SecurityException("Facade publication checkout is protected");
                 if(repo.isCheckinActive(parent(itemPath),leaf(itemPath)))throw new IllegalStateException("File has an active check-in");}
-              for(var item:selected){String itemPath=item.getPathName();
+              for(var item:selected){String itemPath=canonicalPath(item);
                 var statuses=repo.getCheckouts(parent(itemPath),leaf(itemPath));if(statuses==null)continue;
                 for(var checkout:statuses){String id=Long.toString(checkout.getCheckoutId());
                   if(changing){if(operation.equals("terminate_checkout")&&request.has("checkout_id")&&!id.equals(string(request,"checkout_id")))continue;
