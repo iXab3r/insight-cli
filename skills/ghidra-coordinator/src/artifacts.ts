@@ -42,6 +42,7 @@ export class Artifacts {
   async verify(value: Artifact): Promise<string> {
     await this.ownedDirectory();
     const path = this.path(value);
+    if ((await lstat(path)).isSymbolicLink()) fail('artifact', 'Saved artifact cannot be replaced by a symbolic link.');
     const handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
     try {
       const info = await handle.stat();

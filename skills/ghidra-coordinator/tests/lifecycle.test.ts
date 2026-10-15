@@ -45,5 +45,5 @@ test('post-launch binding failure stops the owned child and retains diagnostic s
   // Substitute the external launch boundary; cleanup and receipt/process handling remain real.
   (runtime as unknown as {launch:()=>Promise<Binding>}).launch=async()=>binding;
   await assert.rejects(runtime.startReader(target,'synthetic'),/Actual server\/repository/);
-  await exit;if(process.platform==='win32')assert.equal(child.exitCode,1);else assert.equal(child.signalCode,'SIGTERM');assert.equal(processes.size,0);
+  await exit;if(process.platform==='win32')assert.ok(child.signalCode==='SIGTERM'||child.exitCode===1);else assert.equal(child.signalCode,'SIGTERM');assert.throws(()=>process.kill(child.pid!,0),/ESRCH/);assert.equal(processes.size,0);
 });
