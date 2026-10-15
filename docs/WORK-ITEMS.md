@@ -234,3 +234,11 @@ HTTP success assertion.
 M4 passing is an internal checkpoint. M5-06 is the single final gate for the owner's complete
 delivery request. Documentation/count audits are complete planning inputs; none of the code work
 in this backlog is complete merely because it is documented here.
+
+The runtime/debugger hardening checkpoint passes all sixteen native debugger leaves, restored
+address mappings, static breakpoint change tracking and two simultaneous GUI/LLDB processes with
+one actual GUI SIGKILL. B stays connected; A restores a disconnected trace without replay.
+Runtime identity now covers relevant installed SDK code/data/native/Python inputs and JDK
+tools/modules/configuration. Session status pages contexts and exposes scoped uncertain external
+requests. All 92 offline tests and isolated installed-package checks pass. The combined final
+native matrix and installed owner-fault repetition are still required before M5-06 completion.

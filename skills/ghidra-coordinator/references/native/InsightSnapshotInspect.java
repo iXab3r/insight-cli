@@ -41,6 +41,16 @@ class InsightSnapshotInspect {
     String kind=string(request,"kind"),name=string(request,"name"),address=string(request,"address");
     var at=address.isEmpty()?null:program.getAddressFactory().getAddress(address);
     if(!address.isEmpty()&&at==null)throw new IllegalArgumentException("Invalid inspection address");
+    if(kind.equals("debugger_bookmarks")){
+      List<String> rows=new ArrayList<>();var gson=new Gson();
+      for(String type:List.of("BreakpointEnabled","BreakpointDisabled")){
+        var bookmarks=program.getBookmarkManager().getBookmarksIterator(type);
+        while(bookmarks.hasNext()){if(rows.size()>=100000)throw new IllegalArgumentException("Debugger bookmark inventory too large");var bookmark=bookmarks.next();
+          rows.add(gson.toJson(Arrays.asList(bookmark.getAddress().toString(),type,bookmark.getCategory(),bookmark.getComment())));}
+      }
+      Collections.sort(rows);byte[] hash=java.security.MessageDigest.getInstance("SHA-256").digest(gson.toJson(rows).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      return Map.of("count",rows.size(),"fingerprint",HexFormat.of().formatHex(hash));
+    }
     if(kind.equals("type")||kind.equals("resolve_type")) {
       DataType value=kind.equals("resolve_type")?ServiceUtils.resolveDataType(program.getDataTypeManager(),name):
         ServiceUtils.findDataTypeByNameInAllCategories(program.getDataTypeManager(),name);

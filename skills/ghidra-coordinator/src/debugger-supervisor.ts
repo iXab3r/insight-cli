@@ -3,14 +3,14 @@ import {spawn} from 'node:child_process';
 import {readFile,writeFile,mkdir,open,rename,realpath} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {HttpBridge} from './transport.js';
 
 async function main(){
   const root=await realpath(process.argv[2]!),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
   if(root!==resolve(root)||binding.root!==root||binding.mode!=='gui'||!Number.isSafeInteger(binding.pid))throw Error('Invalid GUI owner');
   const token=process.env.GHIDRA_MCP_AUTH_TOKEN;if(!token)throw Error('Missing GUI authority');
   const url=new URL(binding.endpoint);if(url.hostname!=='127.0.0.1'||url.protocol!=='http:'||!url.port)throw Error('Invalid GUI endpoint');
-  const response=await fetch(new URL('/mcp/instance_info',url),{headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(5000)});
-  if(!response.ok)throw Error('GUI identity unavailable');const info=await response.json() as Record<string,unknown>;
+  const info=await new HttpBridge(binding.endpoint,fetch,undefined,token,5000).instance();
   if(info.pid!==binding.pid||info.tcp_port!==Number(url.port)||!String(info.project_path??'').startsWith(root+'/'))throw Error('GUI identity changed');
   const launch=JSON.parse(await readFile(join(root,'debugger-run/current.json'),'utf8'));
   if(launch.context!==binding.context||launch.target!==binding.target||!String(launch.executable).startsWith(root+'/debugger-run/'+launch.request+'/'))throw Error('Launch identity changed');

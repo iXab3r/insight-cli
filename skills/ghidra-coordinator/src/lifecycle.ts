@@ -30,17 +30,19 @@ export class Lifecycle {
         const current=this.workspace.context(selected),snapshot=operation==='save'?await backend.saved(selected):current.workingSnapshot;
         if(!snapshot)fail('partial','Lifecycle operation did not retain its private snapshot.');
         savedSnapshot=snapshot;
-        const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:current.scalars.length+current.complexChanges.length};
         if(closingExternal&&backend.closed&&await backend.closed(selected))for(const intent of unresolved){
-          const before=this.workspace.context(selected),execution=object(intent.execution??{}),retained=object(intent.result??{}).savedDebugger as DebuggerState|undefined;
-          if(execution.kind==='debugger'&&retained&&before.generation===execution.generation){
-            for(const trace of retained.traces)await this.workspace.artifacts.verify(trace.snapshot);
-            this.workspace.saveContext(selected,before.generation,{debugger:{...retained,connected:false,traces:retained.traces.map(trace=>({...trace,connected:false}))}});
+          const before=this.workspace.context(selected),execution=object(intent.execution??{}),outcome=object(intent.result??{}),retained=outcome.savedDebugger as DebuggerState|undefined;
+          if(execution.kind==='debugger'&&before.generation===execution.generation){
+            const program=outcome.metadataChanged===true?outcome.savedSnapshot as Artifact|undefined:undefined;
+            if(program)await this.workspace.artifacts.verify(program);for(const trace of retained?.traces??[])await this.workspace.artifacts.verify(trace.snapshot);
+            if(retained||program)this.workspace.saveContext(selected,before.generation,{...(retained?{debugger:{...retained,connected:false,traces:retained.traces.map(trace=>({...trace,connected:false}))}}:{}),
+              ...(program?{workingSnapshot:program,complexChanges:before.complexChanges.includes(intent.id)?before.complexChanges:[...before.complexChanges,intent.id]}:{})});
           }
           this.workspace.recordRequest(intent.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:object(intent.execution??{}).operation});
         }
         const retained=this.workspace.context(selected);
-        this.workspace.completeSavedRequest(selected,request.id,retained.generation,{workingSnapshot:snapshot,...(operation==='close'?{state:'stopped' as const,
+        const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:retained.scalars.length+retained.complexChanges.length};
+        this.workspace.completeSavedRequest(selected,request.id,retained.generation,{workingSnapshot:operation==='close'?retained.workingSnapshot??snapshot:snapshot,...(operation==='close'?{state:'stopped' as const,
           ...(retained.debugger?{debugger:{...retained.debugger,connected:false,traces:retained.debugger.traces.map(trace=>({...trace,connected:false}))}}:{})}:{} )},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;}
     });

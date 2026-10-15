@@ -47,9 +47,13 @@ try {
   const reverse=await invoke('dynamic-to-static',['--address',dynamic]);assert.equal(reverse.value.module,'native-fixture');
   const memory=await invoke('read-memory',['--address',dynamic,'--size','8']);assert.equal(memory.value.hex,'8877665544332211');
   const dynamicStep=(await invoke('static-to-dynamic',['--address',step])).value.dynamic_address;
+  const beforeBreakpoint=fixtureWorkspace.context(a).complexChanges.length;
   await invoke('set-breakpoint',['--address',dynamicStep,'--request-id','set-bp']);assert.ok((await invoke('list-breakpoints')).value.items.some(bp=>bp.address===dynamicStep));
+  assert.ok(fixtureWorkspace.context(a).complexChanges.length>beforeBreakpoint,'Static breakpoint metadata must be pending');
+  const afterBreakpoint=fixtureWorkspace.context(a).complexChanges.length;
   await invoke('resume',['--request-id','to-breakpoint']);
   await invoke('step',['--kind','into','--request-id','into']);await invoke('step',['--kind','over','--request-id','over']);await invoke('step',['--kind','out','--request-id','out']);
+  assert.equal(fixtureWorkspace.context(a).complexChanges.length,afterBreakpoint,'CPU steps must not add static program changes');
   await invoke('remove-breakpoint',['--address',dynamicStep,'--request-id','remove-bp']);
   await invoke('resume',['--request-id','run']);await invoke('interrupt',['--request-id','stop']);
   const traces=await invoke('traces');assert.ok(traces.value.items.some(trace=>trace.trace===launch.trace&&trace.thread_count>0));
@@ -58,10 +62,12 @@ try {
   await f.json(app,['ghidra','close',...select(a)]);await f.json(app,['ghidra','open',...select(a)]);
   const restored=await invoke('status');assert.equal(restored.connectionState,'disconnected');assert.equal(restored.value.target_connected,false);assert.equal(restored.trace,launch.trace);
   const reread=await invoke('read-memory',['--address',dynamic,'--size','8']);assert.equal(reread.value.hex,'8877665544332211');
+  assert.equal((await invoke('static-to-dynamic',['--address',magic])).value.dynamic_address,dynamic);
+  assert.equal((await invoke('dynamic-to-static',['--address',dynamic])).value.module,'native-fixture');
   assert.equal((await f.json(app,['ghidra','comments','get',...select(a),'--address',main,'--kind','eol'])).text,'private debug fixture');
   assert.equal(checks.size,16);
   for(const file of sourceFiles)assert.equal(createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+file,import.meta.url))).digest('hex'),sourceHashes[file],'Proof source changed during execution');
-  receipt={schema:1,scope:'owned native public debugger',operations:[...checks].sort(),stepKinds:['into','over','out'],exactMemoryVerified:true,requestRetryRecorded:true,independentSessionPreserved:true,traceSnapshotIndependentlyVerified:true,traceRestoredDisconnected:true,privateProgramRetained:true,
+  receipt={schema:1,scope:'owned native public debugger',operations:[...checks].sort(),stepKinds:['into','over','out'],exactMemoryVerified:true,requestRetryRecorded:true,independentSessionPreserved:true,staticBreakpointMetadataPending:true,cpuStepsDoNotStageProgramEdits:true,restoredMappingVerified:true,traceSnapshotIndependentlyVerified:true,traceRestoredDisconnected:true,privateProgramRetained:true,
     ghidra:'12.1.2',java:'21',node:process.versions.node,mcpJarSha256:pinnedMcpJar,sourceHashes,bundledRuntime:true,
     limitations:['source Factory fixture and synthetic credentials','CPU crash/unknown-outcome and final installed matrix require acceptance']};
 }catch(error){console.error('Owned debugger diagnostics:',f.root);throw error;}

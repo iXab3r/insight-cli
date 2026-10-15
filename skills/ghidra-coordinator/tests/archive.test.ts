@@ -36,6 +36,9 @@ test('archive retries retain exact external outcomes while private research stay
   const preview=await f.json(app,['ghidra','archive','ingest-function',...select(a),'--address','1000','--dry-run']) as Record<string,unknown>;assert.equal(preview.state,'preview');assert.equal(calls,2);
   lost=true;const uncertain=['ghidra','archive','ingest-function',...select(a),'--address','1000','--request-id','lost'];
   assert.notEqual((await f.run(app,uncertain)).exitCode,0);assert.notEqual((await f.run(app,uncertain)).exitCode,0);assert.equal(calls,3);
+  const pending=await f.json(app,['sessions','status',a.session,'--target',a.target]) as {externalRequests:{requestId:string;state:string}[]};
+  assert.deepEqual(pending.externalRequests.map(row=>({requestId:row.requestId,state:row.state})),[{requestId:'lost',state:'unknown'}]);
+  assert.equal((await f.json(app,['sessions','status',b.session,'--target',b.target]) as {externalRequests:unknown[]}).externalRequests.length,0);
   assert.notEqual((await f.run(app,['ghidra','archive','ingest-function',...select(b),'--address','1000','--request-id','bulk'])).exitCode,0);assert.equal(calls,3);
   await f.json(app,['ghidra','comments','set',...select(a),'--address','1000','--kind','eol','--text','retained private work']);
   assert.equal((await f.json(app,['ghidra','comments','get',...select(b),'--address','1000','--kind','eol']) as {text:null}).text,null);

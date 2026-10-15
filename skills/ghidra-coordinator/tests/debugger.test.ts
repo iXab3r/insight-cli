@@ -1,12 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
-import {writeFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {createInsightCli} from '../src/cli.js';
 import {SessionBackend} from './fixtures/session-backend.js';
 import {debuggerResult} from '../src/debugger-results.js';
 import type {Scope} from '../src/workspace.js';
+import type {Artifact} from '../src/artifacts.js';
+
+test('debugger program metadata stays private and pending, while CPU steps add no program edit; lost responses retain metadata on close',async t=>{
+  for(const lost of [false,true]){
+    const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});let backend:SessionBackend,connected=false,placed=false,sets=0;
+    const trace='trace_00000000-0000-4000-8000-000000000001';
+    const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+      backend=new SessionBackend(workspace);const close=backend.close.bind(backend);
+      return Object.assign(backend,{inspect:async(snapshot:Artifact)=>{const view=JSON.parse(await readFile(await workspace.artifacts.verify(snapshot),'utf8'));return {fingerprint:createHash('sha256').update(view.opaque).digest('hex'),count:view.opaque==='base'?0:1};},
+        debuggerStart:async()=>{},closed:async()=>!connected,close:async(selected:Scope)=>{connected=false;await close(selected);},
+        debuggerLaunch:async()=>{connected=true;return {status:'launched',offer_title:'fixture',trace_name:'fixture'};},
+        debuggerSaved:async(selected:Scope)=>({connected,active:trace,traces:[{id:trace,name:'fixture',snapshot:workspace.context(selected).workingSnapshot!,snap:'0',modules:1,threads:1,connected}]}),
+        debuggerCall:async(selected:Scope,operation:string)=>{
+          if(operation==='status')return {debugger_active:true,trace_active:true,open_traces:1,target_connected:connected,module_count:1,snap:0,execution_state:'STOPPED'};
+          if(operation==='step')return {status:'stepped'};
+          if(operation==='list_breakpoints')return placed?[{address:'1000',name:'',state:'ENABLED',kinds:['SW_EXECUTE'],trace_location_count:1}]:[];
+          if(operation==='set_breakpoint'){sets++;placed=true;backend.views.get(workspace.context(selected).id)!.view.opaque='breakpoint';if(lost)throw Error('Synthetic lost breakpoint response');return {status:'set',address:'1000'};}
+          throw Error('Unexpected debugger fixture operation');
+        }});
+    }}));
+    const input=join(f.root,'fixture.exe');await writeFile(input,'owned metadata debugger fixture');
+    const a=await f.json(app,['ghidra','open',input,'--session','new']) as Scope,b=await f.json(app,['ghidra','open',input,'--session','new']) as Scope,select=['--session',a.session,'--target',a.target];
+    assert.equal((await f.json(app,['ghidra','debugger','launch',...select]) as {pendingChanges:number}).pendingChanges,0);
+    const args=['ghidra','debugger','set-breakpoint',...select,'--address','1000','--request-id','bp'];
+    if(lost){assert.notEqual((await f.run(app,args)).exitCode,0);await f.json(app,['ghidra','close',...select]);}
+    else{assert.equal((await f.json(app,args) as {pendingChanges:number}).pendingChanges,1);assert.equal((await f.json(app,['ghidra','debugger','step',...select]) as {pendingChanges:number}).pendingChanges,1);}
+    assert.equal(backend!.workspace.context(a).complexChanges.length,1);assert.equal(backend!.workspace.context(b).complexChanges.length,0);
+    const snapshot=backend!.workspace.context(a).workingSnapshot!;assert.equal(JSON.parse(await readFile(await backend!.workspace.artifacts.verify(snapshot),'utf8')).opaque,'breakpoint');
+    await f.run(app,args);assert.equal(sets,1);
+  }
+});
 
 test('debugger readback rejects wrong addresses, inconsistent memory and malformed CPU data',()=>{
   assert.throws(()=>debuggerResult('read_memory',{address:'1000',size:8},{address:'1000',size:8,hex:'00',dwords:[]}),/inconsistent/);

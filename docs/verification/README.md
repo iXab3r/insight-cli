@@ -227,3 +227,11 @@ intact. A working directory containing spaces and an apostrophe is checked throu
 inferior. Run `scripts/proof-debugger-crash.mjs`. The refreshed debugger recovery receipt repeats
 all sixteen operations and normal live close with the same child lifecycle implementation.
 The final installed owner/process matrix remains a separate gate.
+
+The refreshed debugger checkpoint additionally verifies static breakpoint metadata as pending
+private program state, CPU steps without extra program edits, and both mapping directions after
+trace restoration into a replacement project. Restored mappings retain their saved ranges and
+lifespans while relocating only the recorded context-owned program URL. The crash checkpoint
+now uses two simultaneous GUI/LLDB contexts: killing A terminates its inferior while B remains
+connected and reads exact memory. Both receipts identify the current runtime-input hardening.
+The offline suite passes 92 tests; final combined/installed acceptance remains separate.

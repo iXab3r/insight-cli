@@ -1,7 +1,13 @@
 import {object,fail,text} from './model.js';
 import {address,publicAddress} from './research.js';
+import type {ResearchBackend} from './research.js';
+import type {Artifact} from './artifacts.js';
 const array=(raw:unknown)=>{if(!Array.isArray(raw))fail('partial','Debugger inventory is absent.');return raw.map(object);};
 const count=(value:unknown)=>{if(!Number.isSafeInteger(value)||Number(value)<0)fail('partial','Debugger count is invalid.');};
+export async function debuggerProgramMetadata(backend:Pick<ResearchBackend,'inspect'>,snapshot:Artifact){
+  if(!backend.inspect)return undefined;const value=object(await backend.inspect(snapshot,{kind:'debugger_bookmarks'}));
+  if(typeof value.fingerprint!=='string'||! /^[a-f0-9]{64}$/.test(value.fingerprint))fail('partial','Debugger program metadata inspection is incomplete.');count(value.count);return value.fingerprint;
+}
 export function debuggerResult(operation:string,p:Record<string,unknown>,raw:unknown){
   if(['launch_offers','traces','modules','list_breakpoints','stack_trace'].includes(operation)){
     const rows=array(raw);for(const row of rows){

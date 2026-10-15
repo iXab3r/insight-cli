@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, readdir, mkdir, open, rename, rm, realpath, stat } from 'node:fs/promises';
-import { basename, delimiter, dirname, isAbsolute, join } from 'node:path';
+import { basename, delimiter, dirname, isAbsolute, join,relative,sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -17,7 +17,7 @@ const run = promisify(execFile);
 export async function moduleJars(home: string): Promise<string[]> {
   const jars: string[] = [];
   async function collect(folder: string): Promise<void> {
-    for (const entry of (await readdir(folder, {withFileTypes: true})).sort((a,b) => a.name.localeCompare(b.name))) {
+    for (const entry of (await readdir(folder, {withFileTypes: true})).sort((a,b) => a.name<b.name?-1:a.name>b.name?1:0)) {
       const path = join(folder, entry.name);
       if (entry.isDirectory() && entry.name !== 'data') await collect(path);
       else if (entry.isFile() && entry.name.endsWith('.jar') && basename(folder) === 'lib') jars.push(path);
@@ -34,6 +34,32 @@ async function sha(path: string): Promise<string> {
     for await (const chunk of handle.createReadStream({autoClose: false})) hash.update(chunk);
     return hash.digest('hex');
   } finally { await handle.close(); }
+}
+export interface NativeRuntimeFile {name:string;path:string}
+/** Installed native code/data, excluding documentation and isolated generated caches. */
+export async function nativeRuntimeFiles(ghidraHome:string,java:string):Promise<NativeRuntimeFile[]> {
+  const files:NativeRuntimeFile[]=[],jdkHome=dirname(dirname(java)),suffix=process.platform==='win32'?'.exe':'';
+  const named=(prefix:string,base:string,path:string)=>({name:prefix+'/'+relative(base,path).split(sep).join('/'),path});
+  for(const path of [java,...['javac','keytool'].map(name=>join(dirname(java),name+suffix))])if(!(await stat(path)).isFile())fail('configuration','The configured JDK tool is not a regular file.');
+  async function walk(path:string,base:string,prefix:string,selected:boolean,ancestors=new Set<string>()){
+    const real=await realpath(path);if(ancestors.has(real))fail('configuration','Native runtime directories contain a cycle.');
+    const parents=new Set(ancestors);parents.add(real);
+    for(const entry of (await readdir(path,{withFileTypes:true})).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)){
+      if(['__pycache__','.DS_Store'].includes(entry.name)||prefix==='jdk'&&entry.name==='src.zip')continue;
+      const item=join(path,entry.name),kind=entry.isSymbolicLink()?await stat(item):entry;
+      if(kind.isDirectory())await walk(item,base,prefix,selected||['data','os','pypkg','ghidra_scripts'].includes(entry.name),parents);
+      else if(kind.isFile()&&(selected||entry.name==='Module.manifest'||entry.name==='application.properties'||entry.name.endsWith('.jar')&&basename(path)==='lib'))files.push(named(prefix,base,item));
+    }
+  }
+  await walk(join(ghidraHome,'Ghidra'),ghidraHome,'ghidra',false);
+  for(const directory of ['bin','lib','conf'])await walk(join(jdkHome,directory),jdkHome,'jdk',true);
+  files.push(named('jdk',jdkHome,join(jdkHome,'release')));
+  if(!(await stat(join(jdkHome,'lib','modules'))).isFile())fail('configuration','The configured JDK omitted its runtime modules.');
+  return files.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0);
+}
+export async function nativeRuntimeFingerprint(ghidraVersion:string,files:NativeRuntimeFile[]):Promise<string>{
+  const hashes=[];for(const file of files)hashes.push({name:file.name,sha256:await sha(file.path)});
+  return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
 }
 export async function nativeInputs(values: Record<string, unknown>): Promise<NativeInputs> {
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
@@ -57,14 +83,10 @@ export async function nativeInputs(values: Record<string, unknown>): Promise<Nat
     join(debug,'Debugger-rmi-trace/pypkg/dist/protobuf-6.31.0-py3-none-any.whl'),
     join(debug,'Debugger-rmi-trace/pypkg/dist/ghidratrace-12.1-py3-none-any.whl'),
     join(debug,'Debugger-agent-lldb/pypkg/dist/ghidralldb-12.1-py3-none-any.whl')];
-  const debuggerFiles=[...debuggerWheels];
-  async function collectDebug(path:string){for(const entry of (await readdir(path,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
-    if(entry.isDirectory()&&entry.name!=='__pycache__')await collectDebug(join(path,entry.name));else if(entry.isFile()&&!entry.name.endsWith('.pyc'))debuggerFiles.push(join(path,entry.name));}}
-  for(const module of ['Debugger-rmi-trace','Debugger-agent-lldb'])for(const folder of ['pypkg/src','data'])await collectDebug(join(debug,module,folder));
-  const hashes: string[] = [];
-  // Sequential streaming keeps peak memory independent of the installation's total size.
-  for (const path of [java, ...jars,...debuggerFiles]) hashes.push(await sha(path));
-  const fingerprint = createHash('sha256').update(stable({ghidraVersion, hashes})).digest('hex');
+  const files=await nativeRuntimeFiles(ghidraHome,java);
+  // Logical names bind locations without embedding the author's installation path.
+  files.push({name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar});
+  const fingerprint=await nativeRuntimeFingerprint(ghidraVersion,files);
   return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels};
 }
 

@@ -18,6 +18,7 @@ import {uiResult} from './ui-results.js';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
+import {debuggerProgramMetadata} from './debugger-results.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -68,7 +69,7 @@ export class GhidraContexts {
       const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});
       const prepared=await promisify(execFile)(this.inputs.java,['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],{timeout:30000,maxBuffer:65536});
       if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
-      debuggerEnvironment={PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1'};
+      debuggerEnvironment={PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:join(python,'isolated-cache')};
       if(process.platform==='darwin'){
         const bin=join(root,'debug-bin-'+randomUUID());await mkdir(bin,{mode:0o700});
         const quote=(value:string)=>"'"+value.replaceAll("'","'\\''")+"'",launch=join(root,'debugger-run','current.json');
@@ -150,6 +151,8 @@ export class GhidraContexts {
     this.running.delete(binding.root);
   }
   private async debuggerReleased(binding:ProcessBinding){
+    const root=resolve(binding.root);if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||
+      stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Debugger lifetime binding moved outside its owned context.');
     const directory=join(binding.root,'debugger-supervisors'),deadline=Date.now()+15000;
     for(;;){let names:string[];try{names=await readdir(directory);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
       let pending=false;
@@ -421,7 +424,8 @@ public class ${name} extends GhidraScript {
     const record=await this.selected(scope);if(record.binding.mode===mode)return;
     const context=this.workspace.context(scope),snapshot=await this.capture(record);
     const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
-    this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});
+    const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
+    this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});
     await this.stopRecord(record,true,false);
     if(mode==='headless'){await this.privateCopy(this.workspace.context(scope),snapshot);return;}
     const gui=await this.launch(record.binding.root,this.workspace.target(scope.target),'context',record.binding.program,'gui',context.id);
@@ -539,10 +543,15 @@ public class ${name} extends GhidraScript {
       ...(this.c.profile.values.windbgDir?{windbg_dir:text(this.c.profile.values.windbgDir,4096)}:{})});
   }
   async projectOutcome(requestId:string,expected:Record<string,unknown>) {return this.server().projectOutcome(requestId,expected);}
+  private async debuggerMetadataChanges(context:GhidraContext,snapshot:Artifact){
+    if(!context.debugger?.traces.length||!context.workingSnapshot)return context.complexChanges;
+    return await debuggerProgramMetadata(this,context.workingSnapshot)!==await debuggerProgramMetadata(this,snapshot)?[...context.complexChanges,'debugger-metadata-'+randomUUID()]:context.complexChanges;
+  }
   async close(scope: Scope) {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
     const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
-    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record);
+    const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record);
   }
   async closed(scope:Scope) {
     const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');

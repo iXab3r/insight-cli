@@ -87,6 +87,11 @@ test('CLI/API walkthrough preserves isolated scopes, normal edits, clear/null an
   assert.equal(status.ghidra.pendingChanges,1,'Clear back to original must remove that pending field');
   const resumed=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>new Fake(workspace)}));
   const after=await f.json(resumed,['ghidra','functions','get',...selectors,'--address',at]) as {name:string};assert.equal(after.name,'LoadConfig');
+  const helper=join(f.root,'helper.exe');await writeFile(helper,'another owned input');
+  const ah=await f.json(app,['ghidra','open',helper,'--session',a.session]) as Opened;
+  const page=await f.json(app,['sessions','status',a.session,'--limit','1','--offset','1']) as {contexts:{target:string}[];offset:number;truncated:boolean};
+  assert.equal(page.contexts.length,1);assert.equal(page.contexts[0]!.target,ah.target);assert.equal(page.offset,1);assert.equal(page.truncated,true);
+  assert.equal((await f.json(app,['sessions','status',a.session,'--limit','1','--offset','2']) as {truncated:boolean}).truncated,false);
 });
 
 test('request ID distinguishes mode and normalized input; duplicate changing requests execute once',async t=>{

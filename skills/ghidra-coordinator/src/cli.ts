@@ -170,12 +170,13 @@ export function createDefinition(options: Options = {}): CliDefinition {
         command('show <target>','Show an input identity',({args},c)=>targetView(owner.selected(c).workspace.target(id(args.target))),{permission:Permission.ReadOnly}),
       ]),
       command('sessions','Inspect durable sessions',[
-        command('list','List independent sessions',({options:o},c)=>({items:owner.selected(c).workspace.sessions(number(o.limit,100,1),number(o.offset,2147483647)),offset:o.offset,limit:o.limit}),{permission:Permission.ReadOnly,options:paged}),
+        command('list','List independent sessions',({options:o},c)=>{const items=owner.selected(c).workspace.sessions(number(o.limit,100,1),number(o.offset,2147483647));return {items,offset:o.offset,limit:o.limit,truncated:items.length===Number(o.limit)};},{permission:Permission.ReadOnly,options:paged}),
         command('status <session>','Inspect saved work and unresolved outcomes',({args,options:o},c)=>{
           const selected=owner.selected(c),session=id(args.session);selected.workspace.session(session);
           if(o.target)return selected.research.status({session,target:id(o.target)});
-          return {session,contexts:selected.workspace.contexts(session).map(context=>selected.research.status(context))};
-        },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'}]}),
+          const limit=number(o.limit,100,1),offset=number(o.offset,2147483647),contexts=selected.workspace.contexts(session,limit,offset);
+          return {session,contexts:contexts.map(context=>selected.research.status(context)),limit,offset,truncated:contexts.length===limit};
+        },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
         command('refresh','Receive safe shared changes while retaining local conflicts',({options:o},c)=>owner.selected(c).research.refresh(scope(o),o.requestId===undefined?undefined:id(o.requestId)),

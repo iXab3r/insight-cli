@@ -30,6 +30,9 @@ profile's AppData. Stop the owner through `ipc-server stop` before changing its 
 configuration. Restoring a saved context preserves its private view. Server settings and initial
 loader settings remain bound to the target/workspace, so changing those cannot silently replace
 retained work. This revision conservatively protects retained profile research state from deletion.
+Runtime identity covers installed Ghidra code, language/compiler data, native modules and Python
+inputs together with JDK tools, modules and configuration. Generated Python caches are isolated.
+Changing those runtime inputs requires stopping the old owner before continuing with the new build.
 
 The current native acceptance is macOS. Portable CLI/CI remains required; native Windows/Linux
 acceptance is deferred. The combined full-artifact delivery gate remains in progress.

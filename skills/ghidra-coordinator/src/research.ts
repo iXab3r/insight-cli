@@ -99,7 +99,9 @@ export class Research {
   }
   status(selected: Scope) {
     const context=this.workspace.context(selected),model=this.workspace.model(selected.target),unresolved=this.workspace.unresolved(selected);
-    return {...selected,ghidra:{state:unresolved.length?'needs_recovery':context.state,baseRevision:revision(context.baseRevision),
+    const external=this.workspace.unresolvedSessionAdministration(selected.session,selected.target);
+    return {...selected,externalRequests:external.map(request=>({...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state})),externalRequestsTruncated:external.length===100,
+      ghidra:{state:unresolved.length?'needs_recovery':context.state,baseRevision:revision(context.baseRevision),
       sharedRevision:revision(model.sharedRevision),pendingChanges:count(context),
       mergeState:model.state==='unknown'?'unknown':'idle',
       conflicts:context.scalars.filter(change=>change.conflict).map(change=>({address:publicAddress(change.address),field:change.field,
@@ -351,11 +353,13 @@ export class Research {
       }
       if(execution?.kind==='debugger'){
         try{if(backend.closed&&await backend.closed(selected)){
-          const current=this.workspace.context(selected),retained=object(request.result??{}).savedDebugger as DebuggerState|undefined;
+          const current=this.workspace.context(selected),outcome=object(request.result??{}),retained=outcome.savedDebugger as DebuggerState|undefined;
           const saved=retained&&current.generation===execution.generation?retained:current.debugger;
-          if(saved){
-            for(const trace of saved.traces)await this.workspace.artifacts.verify(trace.snapshot);
-            this.workspace.saveContext(selected,current.generation,{debugger:{...saved,connected:false,traces:saved.traces.map(trace=>({...trace,connected:false}))}});
+          const program=outcome.metadataChanged===true&&current.generation===execution.generation?outcome.savedSnapshot as Artifact|undefined:undefined;
+          if(saved||program){
+            if(program)await this.workspace.artifacts.verify(program);for(const trace of saved?.traces??[])await this.workspace.artifacts.verify(trace.snapshot);
+            this.workspace.saveContext(selected,current.generation,{...(saved?{debugger:{...saved,connected:false,traces:saved.traces.map(trace=>({...trace,connected:false}))}}:{}),
+              ...(program?{workingSnapshot:program,complexChanges:current.complexChanges.includes(request.id)?current.complexChanges:[...current.complexChanges,request.id]}:{})});
           }
           this.workspace.recordRequest(request.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});
         }}

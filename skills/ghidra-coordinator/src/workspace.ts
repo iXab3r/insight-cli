@@ -278,6 +278,11 @@ export class Workspace {
     return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') ORDER BY rowid LIMIT 100")
       .all().map(row=>JSON.parse(String(row.data)));
   }
+  unresolvedSessionAdministration(session:string,target?:string):AdministrationRequest[]{
+    this.session(session);if(target)this.target(target);
+    return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') AND json_extract(data,'$.intent.parameters.session')=? AND (? IS NULL OR json_extract(data,'$.intent.parameters.target') IS NULL OR json_extract(data,'$.intent.parameters.target')=?) ORDER BY rowid LIMIT 100")
+      .all(session,target??null,target??null).map(row=>JSON.parse(String(row.data)));
+  }
   unresolvedServer():AdministrationRequest[]{
     return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') AND json_extract(data,'$.operation') LIKE 'server.%' ORDER BY rowid LIMIT 100")
       .all().map(row=>JSON.parse(String(row.data)));

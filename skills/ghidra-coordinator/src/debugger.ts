@@ -4,8 +4,10 @@ import {Workspace,type Scope,type DebuggerState} from './workspace.js';
 import {Research,scope,address,number,type ResearchBackend} from './research.js';
 import {id,text,object,fail} from './model.js';
 import {selectedOptions} from './arguments.js';
-import {debuggerResult} from './debugger-results.js';
+import {debuggerResult,debuggerProgramMetadata as metadata} from './debugger-results.js';
 import {setTimeout as delay} from 'node:timers/promises';
+import {randomUUID} from 'node:crypto';
+import type {Artifact} from './artifacts.js';
 const lists=['launch_offers','modules','list_breakpoints','stack_trace'];
 export class Debugger {
   constructor(private readonly workspace:Workspace,private readonly research:Research,private readonly backend:()=>Promise<ResearchBackend>){}
@@ -21,12 +23,15 @@ export class Debugger {
     const backend=await this.prepared(selected,trace,true);
     let value:unknown;
     if(operation!=='traces')value=debuggerResult(operation,p,await backend.debuggerCall(selected,operation,Object.fromEntries(Object.entries(p).filter(([key])=>!['limit','offset'].includes(key)))));
-    const saved=await backend.debuggerSaved(selected),current=this.workspace.context(selected);this.workspace.saveContext(selected,current.generation,{debugger:saved});
+    const saved=await backend.debuggerSaved(selected),current=this.workspace.context(selected),snapshot=await backend.saved(selected);
+    const changed=current.workingSnapshot&&await metadata(backend,current.workingSnapshot)!==await metadata(backend,snapshot);
+    const complexChanges=changed?[...current.complexChanges,'debugger-metadata-'+randomUUID()]:current.complexChanges;
+    this.workspace.saveContext(selected,current.generation,{debugger:saved,workingSnapshot:snapshot,complexChanges});
     if(operation==='traces')value=saved.traces.map(row=>({trace:row.id,name:this.workspace.target(selected.target).name,current:row.id===saved.active,snap:row.snap,module_count:row.modules,thread_count:row.threads,connected:row.connected}));
     if(operation==='traces'||lists.includes(operation)){
       const rows=value as unknown[],offset=Number(p.offset??0),limit=Number(p.limit??50);value={items:rows.slice(offset,offset+limit),total:rows.length,offset,limit,truncated:offset+limit<rows.length};
     }
-    return {...selected,...(saved.active?{trace:saved.active}:{}),connectionState:saved.connected?'connected':saved.traces.length?'disconnected':'idle',value};
+    return {...selected,...(saved.active?{trace:saved.active}:{}),connectionState:saved.connected?'connected':saved.traces.length?'disconnected':'idle',pendingChanges:current.scalars.length+complexChanges.length,value};
   });}
   async change(selected:Scope,operation:string,p:Record<string,unknown>,callerId?:string,trace?:string){
     const reserved=this.workspace.reserveRequest(selected,'ghidra.debugger.'+operation,{...p,...(trace?{trace}:{})},callerId);
@@ -39,7 +44,8 @@ export class Debugger {
       if(operation==='launch'&&(await backend.debuggerSaved(selected)).connected){const result={...selected,state:'not_started',reason:'busy'};this.workspace.recordRequest(request.id,'failed',result);fail('busy','This context already has a live debug target; use another session for another process.',result);}
       const before=debuggerResult('status',{},await backend.debuggerCall(selected,'status'));
       if(operation!=='launch'&&object(before).target_connected!==true){const result={...selected,state:'not_started',reason:'disconnected'};this.workspace.recordRequest(request.id,'failed',result);fail('disconnected','Selected trace has no live target.',result);}
-      this.workspace.startRequest(request.id,{kind:'debugger',operation,generation:context.generation,before});let saved:DebuggerState|undefined;
+      const beforeMetadata=context.workingSnapshot?await metadata(backend,context.workingSnapshot):undefined;
+      this.workspace.startRequest(request.id,{kind:'debugger',operation,generation:context.generation,before});let saved:DebuggerState|undefined,savedSnapshot:Artifact|undefined,metadataChanged=false;
       try{
         let raw:unknown;
         if(operation==='launch'){if(!backend.debuggerLaunch)fail('configuration','Owned target staging is unavailable.');raw=await backend.debuggerLaunch(selected,p,request.id);}
@@ -58,11 +64,14 @@ export class Debugger {
           }
           if(!observed)fail('partial','Breakpoint inventory did not verify the action.');
         }
-        saved=await backend.debuggerSaved(selected);const snapshot=await backend.saved(selected);
-        const result={...selected,state:'applied',...(saved.active?{trace:saved.active}:{}),value};
-        this.workspace.completeSavedRequest(selected,request.id,context.generation,{debugger:saved,workingSnapshot:snapshot},result);return result;
+        saved=await backend.debuggerSaved(selected);savedSnapshot=await backend.saved(selected);
+        metadataChanged=beforeMetadata!==undefined&&beforeMetadata!==await metadata(backend,savedSnapshot);
+        const complexChanges=metadataChanged?[...context.complexChanges,request.id]:context.complexChanges;
+        const result={...selected,state:'applied',...(saved.active?{trace:saved.active}:{}),pendingChanges:context.scalars.length+complexChanges.length,sharedState:context.scalars.length||complexChanges.length?'pending':'shared',value};
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,{debugger:saved,workingSnapshot:savedSnapshot,complexChanges},result);return result;
       }catch(error){try{saved??=await backend.debuggerSaved(selected);}catch{}
-        this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',operation,...(saved?{savedDebugger:saved}:{})});throw error;}
+        try{savedSnapshot??=await backend.saved(selected);metadataChanged=beforeMetadata!==undefined&&beforeMetadata!==await metadata(backend,savedSnapshot);}catch{}
+        this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',operation,...(saved?{savedDebugger:saved}:{}),...(savedSnapshot?{savedSnapshot,metadataChanged}:{})});throw error;}
     });
   }
 }

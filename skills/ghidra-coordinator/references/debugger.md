@@ -22,6 +22,9 @@ Trace databases are checkpointed separately from the private program and verifie
 packed-database readback before acknowledgment. Reopening after process replacement restores
 saved trace data as disconnected. It does not restart the debuggee or reconstruct CPU execution.
 Ordinary static program edits remain private and retain the usual merge/refresh behavior.
+Static breakpoint bookmarks created by debugger actions also count as pending program changes.
+They follow explicit merge/refresh and complex-change conflict rules; CPU execution does not
+wait for publication, and publishing a program never resumes another session's process.
 
 On macOS, launch enforces the selected working directory, including paths with spaces and
 quotes. A GUI backend crash ends the owned live debuggee through its debugger controller.

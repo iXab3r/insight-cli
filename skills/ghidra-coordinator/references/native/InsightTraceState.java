@@ -3,6 +3,8 @@ import ghidra.app.script.GhidraScript;
 import ghidra.app.services.DebuggerTraceManagerService;
 import ghidra.app.services.DebuggerTargetService;
 import ghidra.app.services.DebuggerLogicalBreakpointService;
+import ghidra.app.services.DebuggerStaticMappingService;
+import ghidra.app.plugin.core.debug.utils.ProgramURLUtils;
 import ghidra.trace.model.Trace;
 import ghidra.framework.plugintool.PluginTool;
 import java.nio.file.*;
@@ -21,6 +23,21 @@ public class InsightTraceState extends GhidraScript {
       options.setString("Target",string(p,"target"));options.setString("Context",string(p,"context"));options.setString("Trace ID","trace_"+UUID.randomUUID());
     }finally{trace.endTransaction(tx,true);}}
     else if(!string(p,"target").equals(target)||!string(p,"context").equals(context))throw new IllegalArgumentException("Trace belongs to another context");
+  }
+  void relocateMappings(Trace trace,PluginTool tool)throws Exception{
+    var url=ProgramURLUtils.getUrlFromProgram(currentProgram);if(url==null)throw new IllegalStateException("Selected static program has no project URL");
+    var options=trace.getOptions("Insight");String previous=options.getString("Static Program URL",null);
+    if(previous==null||previous.equals(url.toExternalForm()))return;
+    var mappings=trace.getStaticMappingManager();int tx=trace.startTransaction("Relocate owned static mappings");boolean commit=false;
+    try{
+      for(var mapping:List.copyOf(mappings.getAllEntries()))if(previous.equals(mapping.getStaticProgramURL().toExternalForm())){
+        var range=mapping.getTraceAddressRange();var lifespan=mapping.getLifespan();String address=mapping.getStaticAddress();
+        mapping.delete();mappings.add(range,lifespan,url,address);
+      }
+      options.setString("Static Program URL",url.toExternalForm());commit=true;
+    }finally{trace.endTransaction(tx,commit);}
+    var service=tool.getService(DebuggerStaticMappingService.class);if(service==null)throw new IllegalStateException("Static mapping service unavailable");
+    service.changesSettled().get(30,java.util.concurrent.TimeUnit.SECONDS);
   }
   @Override public void run()throws Exception{
     var p=JsonParser.parseString(new String(Base64.getDecoder().decode(getScriptArgs()[0]),StandardCharsets.UTF_8)).getAsJsonObject();
@@ -51,7 +68,9 @@ public class InsightTraceState extends GhidraScript {
     }
     if(operation.equals("bind_new")){
       var trace=manager.getCurrentTrace();if(trace==null||!trace.getName().equals(string(p,"name"))||trace.getOptions("Insight").getString("Trace ID",null)!=null)throw new IllegalStateException("New launch trace was not established");
-      bind(trace,p,true);println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","bound")));return;
+      bind(trace,p,true);var url=ProgramURLUtils.getUrlFromProgram(currentProgram);if(url==null)throw new IllegalStateException("Selected static program has no project URL");
+      int tx=trace.startTransaction("Bind owned static program");try{trace.getOptions("Insight").setString("Static Program URL",url.toExternalForm());}finally{trace.endTransaction(tx,true);}
+      println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","bound")));return;
     }
     if(operation.equals("focus")){
       var thread=manager.getCurrentThread();var object=thread==null?null:thread.getObject();
@@ -70,6 +89,7 @@ public class InsightTraceState extends GhidraScript {
         var file=folder.getFile(id);if(file==null)file=folder.createFile(id,Path.of(string(saved,"input")).toFile(),monitor);
         Trace trace=manager.openTrace(file,-1);bind(trace,p,false);
         if(!id.equals(trace.getOptions("Insight").getString("Trace ID",null)))throw new IllegalArgumentException("Restored trace identity changed");
+        relocateMappings(trace,selected);
         if(p.has("active")&&id.equals(string(p,"active"))){final var m=manager;Runnable activate=()->{
           m.activateTrace(trace);m.activateSnap(Long.parseLong(string(saved,"snap")));
           if(saved.has("thread")){var thread=trace.getThreadManager().getThread(Long.parseLong(string(saved,"thread")));if(thread!=null)m.activateThread(thread);}
