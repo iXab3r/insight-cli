@@ -31,6 +31,7 @@ export interface GhidraContext extends Scope {
   scalars: ScalarChange[]; complexChanges: string[];
 }
 export type RequestState = 'accepted' | 'running' | 'applied' | 'failed' | 'unknown';
+export interface AdministrationRequest {id:string;operation:string;intent:unknown;state:RequestState;callerId?:string;result?:unknown;createdAt:string;updatedAt:string}
 export interface ResearchRequest {
   id: string; callerId?: string; operation: string; intent: unknown; context: string;
   state: RequestState; result?: unknown; execution?:unknown; createdAt: string; updatedAt: string;
@@ -87,7 +88,11 @@ export class Workspace {
     this.db = new DatabaseSync(path);
     chmodSync(path, 0o600);
     try {
-      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 1)
+      if(this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").get()){
+        const binding=this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
+        if(binding&&binding.value!==profile)fail('binding','Workspace belongs to a different profile; restore its original profile.');
+      }
+      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 2)
         fail('binding', 'Workspace schema is newer than this build; preserve it and use the matching build.');
       this.db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;
         CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -101,8 +106,9 @@ export class Workspace {
         CREATE TABLE IF NOT EXISTS requests(id TEXT PRIMARY KEY, caller_id TEXT UNIQUE, hash TEXT NOT NULL,
           context TEXT NOT NULL REFERENCES contexts(id), state TEXT NOT NULL, data TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS publications(id TEXT PRIMARY KEY, target TEXT NOT NULL REFERENCES ghidra_models(target), state TEXT NOT NULL, data TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS administration_requests(id TEXT PRIMARY KEY,caller_id TEXT UNIQUE,hash TEXT NOT NULL,state TEXT NOT NULL,data TEXT NOT NULL);
         CREATE UNIQUE INDEX IF NOT EXISTS active_publication ON publications(target) WHERE state IN ('preparing','commit_intent','unknown');
-        PRAGMA user_version=1;`);
+        PRAGMA user_version=2;`);
       this.transaction(() => {
         const binding = this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
         if (binding && binding.value !== profile) fail('binding', 'Workspace belongs to a different profile; restore its original profile.');
@@ -186,6 +192,8 @@ export class Workspace {
   }
   private existingRequest(callerId: string | undefined, intentHash: string): ResearchRequest | undefined {
     if (callerId === undefined) return;
+    if(this.db.prepare('SELECT id FROM administration_requests WHERE caller_id=?').get(id(callerId)))
+      fail('idempotency','Request ID already identifies a profile administration operation.');
     const row = this.db.prepare('SELECT id,hash FROM requests WHERE caller_id=?').get(id(callerId));
     if (!row) return;
     if (row.hash !== intentHash) fail('idempotency', 'Request ID was already used with different effective input.');
@@ -243,6 +251,45 @@ export class Workspace {
     const row = this.db.prepare('SELECT data FROM requests WHERE id=?').get(id(request));
     if (!row) fail('notFound', 'Request was not found in the selected profile.');
     return JSON.parse(String(row.data));
+  }
+  reserveAdministration(operation:string,parameters:unknown,callerId?:string):{request:AdministrationRequest;replay:boolean} {
+    const intent={operation:text(operation,128),parameters},hash=digest(intent);bounded(intent);
+    return this.transaction(()=>{
+      if(callerId!==undefined) {
+        id(callerId);if(this.db.prepare('SELECT id FROM requests WHERE caller_id=?').get(callerId))fail('idempotency','Request ID already identifies scoped research.');
+        const row=this.db.prepare('SELECT id,hash FROM administration_requests WHERE caller_id=?').get(callerId);
+        if(row){if(row.hash!==hash)fail('idempotency','Request ID was already used with different effective input.');return {request:this.administration(String(row.id)),replay:true};}
+      }
+      const request:AdministrationRequest={id:'a_'+randomUUID(),operation,intent,state:'accepted',...(callerId?{callerId}:{}),createdAt:now(),updatedAt:now()};
+      this.db.prepare('INSERT INTO administration_requests VALUES(?,?,?,?,?)').run(request.id,callerId??null,hash,request.state,bounded(request));
+      return {request,replay:false};
+    });
+  }
+  administration(request:string):AdministrationRequest {
+    const row=this.db.prepare('SELECT data FROM administration_requests WHERE id=?').get(id(request));
+    if(!row)fail('notFound','Administration request was not found in this profile.');return JSON.parse(String(row.data));
+  }
+  unresolvedAdministration():AdministrationRequest[]{
+    return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') ORDER BY rowid LIMIT 100")
+      .all().map(row=>JSON.parse(String(row.data)));
+  }
+  unresolvedServer():AdministrationRequest[]{
+    return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') AND json_extract(data,'$.operation') LIKE 'server.%' ORDER BY rowid LIMIT 100")
+      .all().map(row=>JSON.parse(String(row.data)));
+  }
+  unresolvedProject(project:string):AdministrationRequest[]{
+    return this.db.prepare("SELECT data FROM administration_requests WHERE state IN ('running','unknown') AND json_extract(data,'$.intent.parameters.project')=? ORDER BY rowid LIMIT 100")
+      .all(project).map(row=>JSON.parse(String(row.data)));
+  }
+  administrationState(request:string,state:Exclude<RequestState,'accepted'>,result?:unknown) {
+    return this.transaction(()=>{
+      const previous=this.administration(request);
+      if(previous.state==='applied'||previous.state==='failed'){
+        if(previous.state!==state||stable(previous.result)!==stable(result))fail('idempotency','A completed administration outcome is immutable.');return previous;}
+      if(state==='running'&&previous.state!=='accepted')fail('blocked','Administration operation already started; do not replay it.');
+      const next={...previous,state,...(result===undefined?{}:{result}),updatedAt:now()};
+      this.db.prepare('UPDATE administration_requests SET state=?,data=? WHERE id=?').run(state,bounded(next),request);return next;
+    });
   }
   unresolved(scope: Scope): ResearchRequest[] {
     const context = this.context(scope);

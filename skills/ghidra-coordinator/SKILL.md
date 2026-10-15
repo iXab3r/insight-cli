@@ -29,3 +29,7 @@ final acceptance remain in progress; do not describe this checkpoint as a comple
 and journals while an outcome is unresolved. The CLI supplies the investigation tools; agents
 choose research goals and interpret findings.
 Installing this package does not register this skill in an agent's configuration.
+
+For project files, program export/import and configured-server administration, read
+[administration](references/administration.md). These operations preserve separate research views;
+their external effects do not participate in program merge.

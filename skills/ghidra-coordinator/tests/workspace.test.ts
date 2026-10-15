@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, readFile, writeFile, rm, chmod, symlink, unlink } from 
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
+import {DatabaseSync} from 'node:sqlite';
 import { Workspace, type Scope } from '../src/workspace.js';
 import { Store } from '../src/store.js';
 
@@ -38,6 +39,21 @@ test('consumed bytes determine identity, immutable copies survive source edits, 
   assert.notEqual((await store.importTarget(a)).id, target.id);
   assert.equal(store.targets().length, 3);
   await assert.rejects(store.importTarget(await file('empty.exe', '')), /nonempty regular file/);
+});
+
+test('schema upgrade preserves version-one research and prevents older readers from ignoring new request identities',async t=>{
+  const {store,directory,file,openWorkspace}=await fixture(t),target=await store.importTarget(await file('fixture.exe','fixture'));
+  const research=store.reserveOpen(target.id,'new',settings,'old-open');
+  const sql=new DatabaseSync(join(directory,'workspace.sqlite'));
+  try{
+    sql.exec('DROP TABLE administration_requests; PRAGMA user_version=1;');
+    assert.throws(()=>new Workspace(directory,'other'),/different profile/);assert.equal(sql.prepare('PRAGMA user_version').get()?.user_version,1);
+    const upgraded=openWorkspace();assert.equal(upgraded.request(research.request.id).callerId,'old-open');
+    assert.equal(sql.prepare('PRAGMA user_version').get()?.user_version,2);
+    upgraded.reserveAdministration('server.connect',{},'new-admin');
+    assert.throws(()=>upgraded.reserveOpen(target.id,research.context.session,settings,'new-admin'),/administration operation/);
+    sql.exec('PRAGMA user_version=3;');assert.throws(()=>new Workspace(directory,'default'),/newer than this build/);
+  }finally{sql.close();}
 });
 
 test('profile identity rejects foreign workspaces and selectors while old coordinator journals remain intact', async t => {

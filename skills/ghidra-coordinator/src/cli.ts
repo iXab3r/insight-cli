@@ -11,6 +11,10 @@ import { fail, id, text, digest, object } from './model.js';
 import {queryCommands,extendQueries} from './queries.js';
 import {mutationCommands} from './mutations.js';
 import {crossCommands} from './cross.js';
+import {Administration,administrationCommands} from './administration.js';
+import {Lifecycle,lifecycleCommands} from './lifecycle.js';
+import {utilityCommands} from './utility.js';
+import {Projects,projectCommands} from './projects.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -41,7 +45,8 @@ class Owner {
       const result=await selected.backend;
       return result instanceof GhidraContexts?result.fork(c):result;
     };
-    return {workspace:profile.workspace,research:new Research(profile.workspace,backend,profile.tasks),backend};
+    const research=new Research(profile.workspace,backend,profile.tasks);
+    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),backend};
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
@@ -254,6 +259,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   };
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research)),crossCommands(c=>owner.selected(c).research))}):entry)};
+      mutationCommands(c=>owner.selected(c).research)),[...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
+        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects)])}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

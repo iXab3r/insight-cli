@@ -148,3 +148,25 @@ the declared contexts. Run `scripts/proof-cross.mjs`, `scripts/proof-transfer.mj
 `scripts/proof-cross-faults.mjs` with the same disposable/runtime/compiler flags. Each checks stable
 source hashes. Later scalar-projection/recovery refinements have offline coverage; native all-category
 variants, cancellation/owner faults and final installed repetition remain separate gates.
+
+[Server administration](server-administration.json) records fourteen public leaves on an owned
+local server: repository creation/listing/files/history, ACL users/readback, checkout inspection
+and verified termination, disconnect/reconnect and request retries. Run
+`scripts/proof-administration.mjs` with the same disposable/runtime/compiler flags. Administrative
+unknown-outcome recovery and external-profile variants remain separate acceptance work.
+
+[Facade lifecycle](facade-lifecycle.json) verifies scoped health, save without publication, close
+retry, process release, reopening retained work and another agent's unchanged view, plus exact
+64-bit conversion. Run `scripts/proof-facade-lifecycle.mjs`. Offline tests additionally cover lost
+save/close acknowledgment. The receipt predates subsequent project integration.
+
+[Managed projects and files](project-files.json) verifies create/open/close/delete, folders and
+moves, private GZF export/import, project archive/restore, retries and independent restored files.
+Run `scripts/proof-projects.mjs`. This receipt identifies the initial project checkpoint; native
+completion-journal recovery, subsequent refinements and final installed repetition require their
+own evidence. Projects and file exports do not publish or replace a selected research context.
+
+[Project response recovery](project-recovery.json) repeats that whole scenario after adding native
+completion journals. A deliberately lost creation response is recovered from its exact saved
+request/result pair without another creation. Run `scripts/proof-project-recovery.mjs`; absent
+completion proof still blocks effects. Its hashes identify this later checkpoint.

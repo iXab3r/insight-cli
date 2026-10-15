@@ -99,6 +99,19 @@ remain open. The whole M5 gate and final installed crash matrix are not complete
 
 ## Engineering defaults
 
+The administrative checkpoint adds fourteen configured-server leaves with actual repository,
+ACL/history/checkout readback and protected publication authority. The
+[server receipt](verification/server-administration.json) identifies the tested native checkpoint.
+Scoped health/save/close and stateless exact number conversion passed a separate
+[native lifecycle scenario](verification/facade-lifecycle.json); offline fault checks reconcile lost
+save/close acknowledgments without repeating effects. Managed project lifecycle, folder/file moves,
+private GZF export/import and native project archive/restore passed the
+[project scenario](verification/project-files.json), preserving independent restored and research
+views. Native completion journals support project response recovery; missing journals remain
+blocked and readable. Later journal refinements require their own exact checkpoint. GUI controls,
+debugger, archive exchange, remaining variants and final combined artifact acceptance remain open.
+
+
 These are implementation choices within the agreed contract, rather than additional owner gates:
 
 - Keep the earlier prototype storage/journals separate and intact. Do not silently migrate them

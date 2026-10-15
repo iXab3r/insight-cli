@@ -1,12 +1,13 @@
 import type { CommandContext } from '@eyeauras/cli-factory';
-import { randomUUID, randomBytes } from 'node:crypto';
+import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { readFile, mkdir, open, rename, readdir, stat, chmod } from 'node:fs/promises';
-import { delimiter, dirname, join } from 'node:path';
+import { readFile, mkdir, open, rename, readdir, stat, chmod, realpath } from 'node:fs/promises';
+import { delimiter, dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fail, object, stable, text, digest } from './model.js';
 import { nativeHelpers, type NativeInputs } from './native-inputs.js';
+import {parseDomainJson} from './json.js';
 
 export interface ServerBinding {
   mode: 'local' | 'external'; origin: string; repository: string;
@@ -71,7 +72,7 @@ export class GhidraServer {
       const code = await exited;
       if (code===null||!acceptedCodes.includes(code)||overflow) fail('authorization', 'Native server operation could not be verified; its owned diagnostic stage is retained.');
       let result;
-      try { result = object(JSON.parse(output)); } catch { fail('malformed', 'Native server operation returned malformed content.'); }
+      try { result = object(parseDomainJson(output)); } catch { fail('malformed', 'Native server operation returned malformed content.'); }
       if (result.error || result.state === 'failed') fail('authorization', 'Native server operation did not establish its outcome.');
       return result;
     } finally { clearTimeout(timer); clearTimeout(force); this.c.signal.removeEventListener('abort',abort); }
@@ -86,6 +87,52 @@ export class GhidraServer {
     return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
   }
   async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','InsightSnapshotInspect',[snapshot,request]);}
+  async project(operation:string,parameters:Record<string,unknown>) {
+    const requestId=text(parameters.request_id,128);if(!/^(?:a|read)_[a-zA-Z0-9-]+$/.test(requestId))fail('binding','Invalid internal project request identity.');
+    const parent=join(this.directory,'project-calls');await mkdir(parent,{recursive:true,mode:0o700});
+    if(await realpath(parent)!==resolve(parent))fail('binding','Project call container moved outside owned storage.');
+    const root=join(parent,requestId);await mkdir(root,{mode:0o700});
+    const request=join(root,'request.json');await durable(request,{...parameters,operation});
+    return this.run('project-files','InsightProjectFiles',[request]);
+  }
+  async projectOutcome(requestId:string,expected:Record<string,unknown>) {
+    if(!/^a_[a-zA-Z0-9-]+$/.test(requestId))fail('binding','Invalid retained project request identity.');
+    const root=join(this.directory,'project-calls',requestId);
+    try{
+      if(await realpath(root)!==resolve(root))fail('binding','Retained project call moved outside owned storage.');
+      const raw=await readFile(join(root,'request.json'),'utf8'),request=object(parseDomainJson(raw)),journal=object(parseDomainJson(await readFile(join(root,'result.json'),'utf8')));
+      if(journal.schema!==1||journal.request!==requestId||journal.hash!==createHash('sha256').update(raw).digest('hex')||
+        Object.entries(expected).some(([key,value])=>stable(request[key])!==stable(value)))fail('binding','Project completion journal differs from the retained request.');
+      return object(journal.result);
+    }catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
+  }
+  async administration(operation:string,parameters:Record<string,unknown>) {
+    const connection=join(this.root(),'connection.json');
+    if(operation==='status') {
+      try{if(object(JSON.parse(await readFile(connection,'utf8'))).enabled===false)
+        return {connected:false,mode:this.c.profile.values.server?'external':'local',state:'disconnected'};}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    }
+    if(operation==='connect'){await mkdir(this.root(),{recursive:true,mode:0o700});await durable(connection,{enabled:true});}
+    if(operation==='disconnect') {
+      await this.stop();await mkdir(this.root(),{recursive:true,mode:0o700});await durable(connection,{enabled:false});
+      return {connected:false,mode:this.c.profile.values.server?'external':'local'};
+    }
+    if(operation==='status'&&!this.c.profile.values.server) {
+      let local:LocalServer;try{local=JSON.parse(await readFile(join(this.root(),'local.json'),'utf8'));}
+      catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {connected:false,mode:'local',state:'not_started'};throw error;}
+      if(!local.pid||!live(local.pid))return {connected:false,mode:'local',repository:local.repository};
+      await this.identity(local);await this.authority(local);return {connected:true,mode:'local',repository:local.repository};
+    }
+    const binding=await this.ensure();
+    if(operation==='connect'||operation==='status')return {connected:true,mode:binding.mode,repository:binding.repository};
+    if(operation==='set_permissions'&&parameters.repository===binding.repository&&
+      (parameters.user===binding.readerUser&&parameters.access!==0||parameters.user===binding.publisherUser&&![1,2].includes(Number(parameters.access))))
+      fail('authorization','Canonical reader/publisher authority cannot be changed by repository administration.');
+    const root=join(this.root(),'administration',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const request=join(root,'request.json');await durable(request,{operation,...parameters,protected_repository:binding.repository});
+    return this.run('administration','InsightServerAdministration',[request],await this.credentials(binding,'publisher'));
+  }
   async programStatus(binding:ServerBinding,path:string) {
     return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
   }
@@ -106,6 +153,9 @@ export class GhidraServer {
     }
   }
   async ensure(): Promise<ServerBinding> {
+    try{if(object(JSON.parse(await readFile(join(this.root(),'connection.json'),'utf8'))).enabled===false)
+      fail('blocked','Configured server is disconnected; use ghidra server connect before shared operations.');}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     if (!this.state.initializing) this.state.initializing = this.initialize().catch(error => { this.state.initializing = undefined; throw error; });
     const binding=await this.state.initializing;
     if(binding.mode==='local') {

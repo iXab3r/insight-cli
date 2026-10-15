@@ -47,6 +47,7 @@ export class GhidraContexts {
   fork(c: CommandContext) {return new GhidraContexts(this.workspace,this.inputs,c,this.running,this.modelTasks,this.ownedServer.fork(c),this.capacity);}
   private directory() {return join(this.workspace.directory,'ghidra-native');}
   private server() {return this.ownedServer;}
+  async administration(operation:string,parameters:Record<string,unknown>) {return this.server().administration(operation,parameters);}
   private async prepareRoot(kind: ProcessBinding['kind'], target: string, context?: string) {
     const root=join(this.directory(),kind,context??target,randomUUID());await mkdir(root,{recursive:true,mode:0o700});return root;
   }
@@ -386,9 +387,22 @@ public class ${name} extends GhidraScript {
     await gui.http.call('/open_program',{path:gui.binding.program});await this.verified(gui.binding,this.workspace.target(scope.target));
     await durable(join(this.directory(),'context',context.id,'current.json'),gui.binding);
   }
+  async project(operation:string,parameters:Record<string,unknown>) {return this.server().project(operation,parameters);}
+  async projectOutcome(requestId:string,expected:Record<string,unknown>) {return this.server().projectOutcome(requestId,expected);}
   async close(scope: Scope) {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
     this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot});await this.stopRecord(record);
+  }
+  async closed(scope:Scope) {
+    const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');
+    const binding=JSON.parse(await readFile(path,'utf8')) as ProcessBinding,root=resolve(binding.root);
+    if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||binding.context!==context.id||binding.target!==scope.target||
+      stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
+    try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
+      if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;fail('binding','Stopped receipt belongs to another process.');}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    if(!alive(binding.pid))return true;
+    await this.verified(binding,this.workspace.target(scope.target));return false;
   }
   async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {
     const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();

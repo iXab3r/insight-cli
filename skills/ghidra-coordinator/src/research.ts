@@ -9,11 +9,15 @@ import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 
 export interface ResearchBackend {
+  project?(operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
+  projectOutcome?(requestId:string,expected:Record<string,unknown>):Promise<Record<string,unknown>|undefined>;
+  administration?(operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
   open(scope: Scope, request?: string): Promise<GhidraContext>;
   call(scope: Scope, operation: string, parameters?: Record<string,unknown>): Promise<unknown>;
   saved(scope: Scope): Promise<Artifact>;
   mode(scope: Scope, mode: ToolMode): Promise<void>;
   close(scope: Scope): Promise<void>;
+  closed?(scope:Scope):Promise<boolean>;
   dispose(): Promise<void>;
   latest?(target:string):Promise<{revision:number;snapshot:Artifact}>;
   fields?(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>>;
@@ -326,6 +330,31 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='export') {
+        try{const snapshot=execution.snapshot as Artifact;await this.workspace.artifacts.verify(snapshot);
+          const observed=await this.workspace.artifacts.capture(text(execution.output,4096),'snapshot'),current=this.workspace.context(selected);
+          if(observed.id!==snapshot.id||current.generation!==execution.generation)continue;
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot},
+            {...selected,state:'exported',output:execution.output,sha256:snapshot.sha256,size:snapshot.size});
+        }catch{/* Partial or changed output cannot prove an export and is never overwritten. */}
+        continue;
+      }
+      if(execution?.kind==='close'&&backend.closed) {
+        try{if(!await backend.closed(selected))continue;const current=this.workspace.context(selected);
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{},
+            {...selected,state:'closed',pendingChanges:count(current)});
+        }catch{/* A stopped metadata flag alone never proves process release. */}
+        continue;
+      }
+      if(execution?.kind==='save') {
+        try{const snapshot=object(request.result).savedSnapshot as Artifact;if(!snapshot)continue;
+          await this.workspace.artifacts.verify(snapshot);const current=this.workspace.context(selected);
+          if(current.generation!==execution.generation)continue;
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,viewEpoch:(current.viewEpoch??0)+1},
+            {...selected,state:'saved',pendingChanges:count(current)});
+        }catch{/* Unproved save outcome stays retained without another save dispatch. */}
+        continue;
+      }
       if(execution?.kind==='transfer'&&execution.dryRun===false&&backend.transferCheck) {
         try {
           const sourceSnapshot=execution.sourceSnapshot as Artifact,retained=request.result&&object(request.result).savedSnapshot;

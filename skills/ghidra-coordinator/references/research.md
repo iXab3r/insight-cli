@@ -63,3 +63,7 @@ their recorded outcome; recovery retains the source revision actually used by th
 Opening a second input in the same session preserves the first context. Different processes using
 the same session/target share one ordered context. Independent agents choose separate sessions.
 Calls return explicit scope so parallel outputs can be associated with the intended input.
+
+`ghidra status` verifies the selected tool and reports saved pending work. `ghidra save` retains
+private changes without publishing. `ghidra close` saves and releases the owned process; continue
+with the same open selectors to retain local work. Save/close accept the optional request ID.
