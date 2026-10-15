@@ -29,7 +29,10 @@ export interface GhidraContext extends Scope {
   baseRevision?: number; baseSnapshot?: Artifact; workingSnapshot?: Artifact;
   viewEpoch?:number;
   scalars: ScalarChange[]; complexChanges: string[];
+  debugger?:DebuggerState;
 }
+export interface SavedTrace {id:string;name:string;snapshot:Artifact;snap:string;modules:number;threads:number;connected:boolean;thread?:string}
+export interface DebuggerState {traces:SavedTrace[];active?:string;connected:boolean}
 export type RequestState = 'accepted' | 'running' | 'applied' | 'failed' | 'unknown';
 export interface AdministrationRequest {id:string;operation:string;intent:unknown;state:RequestState;callerId?:string;result?:unknown;createdAt:string;updatedAt:string}
 export interface ResearchRequest {
@@ -46,7 +49,7 @@ export interface OpenReservation {
   context: GhidraContext; request: ResearchRequest; replay: boolean;
 }
 type ContextPatch = Partial<Pick<GhidraContext,
-  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'viewEpoch' | 'scalars' | 'complexChanges'>>;
+  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'viewEpoch' | 'scalars' | 'complexChanges' | 'debugger'>>;
 const now = () => new Date().toISOString();
 function loadSettings(value: GhidraLoadSettings): GhidraLoadSettings {
   if (typeof value.autoAnalyze !== 'boolean' || Object.keys(value).some(key =>
@@ -92,7 +95,7 @@ export class Workspace {
         const binding=this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
         if(binding&&binding.value!==profile)fail('binding','Workspace belongs to a different profile; restore its original profile.');
       }
-      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 2)
+      if (Number(this.db.prepare('PRAGMA user_version').get()?.user_version) > 3)
         fail('binding', 'Workspace schema is newer than this build; preserve it and use the matching build.');
       this.db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;
         CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -108,7 +111,7 @@ export class Workspace {
         CREATE TABLE IF NOT EXISTS publications(id TEXT PRIMARY KEY, target TEXT NOT NULL REFERENCES ghidra_models(target), state TEXT NOT NULL, data TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS administration_requests(id TEXT PRIMARY KEY,caller_id TEXT UNIQUE,hash TEXT NOT NULL,state TEXT NOT NULL,data TEXT NOT NULL);
         CREATE UNIQUE INDEX IF NOT EXISTS active_publication ON publications(target) WHERE state IN ('preparing','commit_intent','unknown');
-        PRAGMA user_version=2;`);
+        PRAGMA user_version=3;`);
       this.transaction(() => {
         const binding = this.db.prepare('SELECT value FROM metadata WHERE key=?').get('profile');
         if (binding && binding.value !== profile) fail('binding', 'Workspace belongs to a different profile; restore its original profile.');
@@ -436,13 +439,21 @@ export class Workspace {
   }
   private writeContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     if (!Number.isSafeInteger(expectedGeneration) || expectedGeneration < 0) fail('invalid', 'Invalid context generation.');
-    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'viewEpoch', 'scalars', 'complexChanges'].includes(key)) ||
+    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'viewEpoch', 'scalars', 'complexChanges','debugger'].includes(key)) ||
         patch.state !== undefined && !['opening', 'ready', 'stopped', 'needs_recovery'].includes(patch.state))
       fail('invalid', 'Invalid context state update.');
     if (patch.baseRevision !== undefined) version(patch.baseRevision);
     if(patch.viewEpoch!==undefined&&(!Number.isSafeInteger(patch.viewEpoch)||patch.viewEpoch<0))fail('invalid','View epoch must be a nonnegative integer.');
     if (patch.baseSnapshot) this.knownSnapshot(patch.baseSnapshot);
     if (patch.workingSnapshot) this.knownSnapshot(patch.workingSnapshot);
+    if(patch.debugger){const state=patch.debugger;if(typeof state.connected!=='boolean'||!Array.isArray(state.traces)||state.traces.length>64)fail('invalid','Debugger trace state is malformed.');
+      const ids=new Set<string>();for(const trace of state.traces){
+        if(!/^trace_[a-f0-9-]{36}$/.test(trace.id)||ids.has(trace.id)||!/^\d+$/.test(trace.snap)||!Number.isSafeInteger(trace.modules)||trace.modules<0||!Number.isSafeInteger(trace.threads)||trace.threads<0||typeof trace.connected!=='boolean')fail('invalid','Saved trace identity or counts are malformed.');
+        text(trace.name,512);this.knownSnapshot(trace.snapshot);ids.add(trace.id);
+        if(trace.thread!==undefined&&!/^\d+$/.test(trace.thread))fail('invalid','Saved debugger thread is malformed.');
+      }
+      if(state.active!==undefined&&!ids.has(state.active))fail('invalid','Active trace must belong to the selected context.');
+    }
     const previous = this.context(scope);
     if (previous.generation !== expectedGeneration) fail('binding', 'Context changed before its saved result could be recorded.');
     const next = {...previous, ...patch, generation: expectedGeneration + 1};

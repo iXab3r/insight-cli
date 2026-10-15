@@ -99,6 +99,26 @@ remain open. The whole M5 gate and final installed crash matrix are not complete
 
 ## Engineering defaults
 
+The [debugger checkpoint](verification/debugger.json) exercises all sixteen public debugger
+leaves against an owned macOS Mach-O using LLDB: launch/offers, status, trace/module inventory,
+registers/stack, exact memory, both mapping directions, breakpoints, interrupt/resume and all
+three step kinds. Independently verified packed traces survive GUI closure and reopen as
+disconnected; private static edits and another session remain intact. The
+[response-recovery checkpoint](verification/debugger-recovery.json) loses a successful CPU step
+response and verifies exactly one dispatch, read-only observation, selected-context close and
+disconnected continuation without another launch. Actual memory must be captured and KNOWN;
+the facade refuses unrecorded bytes instead of accepting the backend's zero-filled response.
+Breakpoint verification distinguishes current trace placements from retained static bookmarks.
+Backend/owner crash variants and the final installed matrix remain open.
+
+The [archive checkpoint](verification/archive-exchange.json) exercises both ingest operations
+using the pinned payload builder and an owned local HTTP service contract. Private names and
+comments, exact matching hashes, preview without network, created/updated/conflict counts,
+request retries and lost-response retention are checked. Node owns the network request and
+optional Factory secret; no archive token enters Ghidra or a debuggee. External uncertainty
+does not block local research. The offline suite passes 85 tests. These exact source checkpoints
+do not finish the combined M5 gate, installed crash repetition or remaining functional variants.
+
 The [GUI control checkpoint](verification/ui-controls.json) verifies the four public UI leaves:
 cursor facets, owned tool discovery, goto/readback and temporary prompt policy. Backend program
 names are resolved against verified metadata and replaced with logical session/target scope.

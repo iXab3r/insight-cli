@@ -19,16 +19,22 @@ export class Lifecycle {
     return this.research.ordered(selected,async()=>{
       const request=this.workspace.request(reserved.request.id);
       if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;fail('unknown','This lifecycle outcome is retained; it is not re-executed.',request.result);}
-      const backend=await this.backend();await backend.open(selected);const before=this.workspace.context(selected);
+      const backend=await this.backend(),unresolved=this.workspace.unresolved(selected);
+      const closingExternal=operation==='close'&&unresolved.length>0&&unresolved.every(intent=>['debugger','ui'].includes(String(object(intent.execution??{}).kind)));
+      const alreadyEnded=closingExternal&&backend.closed?await backend.closed(selected):false;
+      if(!closingExternal)await backend.open(selected);const before=this.workspace.context(selected);
       this.workspace.startRequest(request.id,{kind:operation,generation:before.generation,workingSnapshot:before.workingSnapshot});
       let savedSnapshot:Artifact|undefined;
       try {
-        if(operation==='close')await backend.close(selected);
+        if(operation==='close'&&!alreadyEnded)await backend.close(selected);
         const current=this.workspace.context(selected),snapshot=operation==='save'?await backend.saved(selected):current.workingSnapshot;
         if(!snapshot)fail('partial','Lifecycle operation did not retain its private snapshot.');
         savedSnapshot=snapshot;
         const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:current.scalars.length+current.complexChanges.length};
-        this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot},result);return result;
+        if(closingExternal&&backend.closed&&await backend.closed(selected))for(const intent of unresolved){
+          this.workspace.recordRequest(intent.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:object(intent.execution??{}).operation});
+        }
+        this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot,...(operation==='close'?{state:'stopped' as const}:{} )},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;}
     });
   }

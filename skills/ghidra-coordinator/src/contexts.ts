@@ -1,19 +1,22 @@
 import type { CommandContext } from '@eyeauras/cli-factory';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
-import { mkdir, open, readFile, readdir, rename, link, realpath } from 'node:fs/promises';
+import { mkdir, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
+import {constants} from 'node:fs';
 import { join, delimiter, sep, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeHelpers, nativeInputs, type NativeInputs } from './native-inputs.js';
 import { GhidraServer, type ServerBinding } from './server.js';
-import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication } from './workspace.js';
+import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState } from './workspace.js';
 import { type Artifact } from './artifacts.js';
 import { object, fail, text, version, stable } from './model.js';
 import { HttpBridge } from './transport.js';
 import {scriptInventory,scriptPath} from './scripts.js';
 import {logicalPrograms} from './cross-results.js';
 import {uiResult} from './ui-results.js';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -59,6 +62,18 @@ export class GhidraContexts {
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs);
+    let debuggerEnvironment:Record<string,string>={};
+    if(mode==='gui'){
+      const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});
+      const prepared=await promisify(execFile)(this.inputs.java,['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],{timeout:30000,maxBuffer:65536});
+      if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
+      debuggerEnvironment={PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1'};
+      if(process.platform==='darwin'){
+        const bin=join(root,'debug-bin-'+randomUUID());await mkdir(bin,{mode:0o700});
+        await writeFile(join(bin,'lldb'),'#!/bin/sh\nunset GHIDRA_MCP_AUTH_TOKEN GHIDRA_SERVER_PASSWORD\nexec /usr/bin/lldb --no-lldbinit "$@"\n',{mode:0o500});
+        debuggerEnvironment.PATH=bin+delimiter+(this.c.environment.PATH??process.env.PATH??'/usr/bin:/bin');
+      }
+    }
     const main=mode==='gui'?'InsightGuiMain':'InsightHeadlessMain';
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
@@ -67,7 +82,7 @@ export class GhidraContexts {
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
           GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
-          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...credentials}});
+          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}});
     child.on('error',()=>{});child.unref();await log.close();
     if(!child.pid)fail('launch','Owned Ghidra context could not be launched.');
     const binding: ProcessBinding={pid:child.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,target:target.id,
@@ -117,6 +132,10 @@ export class GhidraContexts {
     if(!childFinished&&alive(binding.pid)) {
       if(ready)await this.verified(binding,this.workspace.target(binding.target),false);
       else if(!child||child.pid!==binding.pid)fail('binding','Unready process may only be stopped through its original child handle.');
+      if(ready&&binding.mode==='gui'){
+        const token=await this.c.secrets.require(binding.tokenSecret),http=new HttpBridge(binding.endpoint,this.c.fetch,new AbortController().signal,token,60000);
+        await this.debuggerHelperRecord({...record,http},'Stop','INSIGHT_DEBUGGER_STOPPED');
+      }
       process.kill(binding.pid,'SIGTERM');
       for(let i=0;i<100&&alive(binding.pid);i++)await delay(50);
       if(alive(binding.pid))fail('busy','Owned context did not stop; its stage is retained.');
@@ -379,7 +398,8 @@ public class ${name} extends GhidraScript {
   async mode(scope: Scope, mode: ToolMode): Promise<void> {
     const record=await this.selected(scope);if(record.binding.mode===mode)return;
     const context=this.workspace.context(scope),snapshot=await this.capture(record);
-    this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot});
+    const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
+    this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});
     await this.stopRecord(record,true,false);
     if(mode==='headless'){await this.privateCopy(this.workspace.context(scope),snapshot);return;}
     const gui=await this.launch(record.binding.root,this.workspace.target(scope.target),'context',record.binding.program,'gui',context.id);
@@ -397,10 +417,108 @@ public class ${name} extends GhidraScript {
     const value=await record.http.call(path,operation==='cursor'?{type:'all'}:p);
     return uiResult(operation,p,value,scope,record.binding.program,target.name,name);
   }
+  async archivePayloads(scope:Scope,p:Record<string,unknown>){
+    const record=await this.selected(scope),base='InsightArchivePayloads',name=base+'_'+randomUUID().replaceAll('-','');
+    const source=await readFile(new URL('../../references/native/'+base+'.java',import.meta.url),'utf8');
+    const result=object(await record.http.call('/run_script_inline',{program:record.binding.program,code:source.replace('class '+base+' ',`class ${name} `),args:Buffer.from(JSON.stringify(p)).toString('base64')}));
+    if(result.success!==true||typeof result.console_output!=='string')fail('partial','Archive payload preparation failed.');
+    const lines=result.console_output.split(/\r?\n/).filter(line=>line.includes('INSIGHT_ARCHIVE_PAYLOADS '));
+    if(lines.length!==1)fail('partial','Archive payload preparation omitted its exact result.');
+    return object(JSON.parse(lines[0]!.slice(lines[0]!.indexOf('INSIGHT_ARCHIVE_PAYLOADS ')+'INSIGHT_ARCHIVE_PAYLOADS '.length)));
+  }
+  async debuggerStart(scope:Scope){
+    await this.debuggerHelper(scope,'Start','INSIGHT_DEBUGGER_READY');
+    const saved=this.workspace.context(scope).debugger;
+    if(saved?.traces.length){const record=await this.selected(scope),marker=join(record.binding.root,'traces-restored.json');
+      try{const value=object(JSON.parse(await readFile(marker,'utf8')));if(value.pid===record.binding.pid&&value.tokenSecret===record.binding.tokenSecret)return;}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+      const traces=await Promise.all(saved.traces.map(async trace=>({id:trace.id,input:await this.workspace.artifacts.verify(trace.snapshot),snap:trace.snap,...(trace.thread?{thread:trace.thread}:{})})));
+      await this.traceHelper(scope,{operation:'restore',traces,...(saved.active?{active:saved.active}:{})});
+      await durable(marker,{pid:record.binding.pid,tokenSecret:record.binding.tokenSecret});
+    }
+  }
+  async debuggerStop(scope:Scope){
+    return this.debuggerHelper(scope,'Stop','INSIGHT_DEBUGGER_STOPPED');
+  }
+  private async debuggerHelper(scope:Scope,action:'Start'|'Stop',marker:string){
+    const record=await this.selected(scope);if(record.binding.mode!=='gui')fail('configuration','Debugger requires the owned GUI context.');
+    return this.debuggerHelperRecord(record,action,marker);
+  }
+  private async debuggerHelperRecord(record:Running,action:'Start'|'Stop',marker:string){
+    const base='Insight'+action+'Debugger',name=base+'_'+randomUUID().replaceAll('-',''),source=await readFile(new URL('../../references/native/'+base+'.java',import.meta.url),'utf8');
+    const result=object(await record.http.call('/run_script_inline',{program:record.binding.program,code:source.replace('class '+base+' ',`class ${name} `)}));
+    if(result.success!==true||typeof result.console_output!=='string'||!result.console_output.includes(marker))fail('partial','Owned debugger lifecycle effect was not established.');
+  }
+  async debuggerCall(scope:Scope,operation:string,p:Record<string,unknown>={}){
+    const allowed=['launch','launch_offers','status','traces','resume','interrupt','step','set_breakpoint','remove_breakpoint','list_breakpoints','registers','read_memory','stack_trace','modules','static_to_dynamic','dynamic_to_static'];
+    if(!allowed.includes(operation)||Object.hasOwn(p,'program'))fail('invalid','Unsupported scoped debugger operation.');
+    const record=await this.selected(scope);
+    if(operation==='list_breakpoints')return (await this.traceHelper(scope,{operation:'breakpoints'})).items;
+    if(['resume','interrupt','step','set_breakpoint','remove_breakpoint'].includes(operation))await this.traceHelper(scope,{operation:'focus'});
+    if(operation==='read_memory')await this.traceHelper(scope,{operation:'read_memory',address:p.address,size:p.size});
+    const token=await this.c.secrets.require(record.binding.tokenSecret),timeout=operation==='launch'?(Number(p.timeout_seconds??60)+90)*1000:45000;
+    const raw=await new HttpBridge(record.binding.endpoint,this.c.fetch,this.c.signal,token,timeout).call('/debugger/'+operation,
+      {...p,...(['launch','launch_offers','static_to_dynamic'].includes(operation)?{program:record.binding.program}:{})});
+    const label=this.workspace.target(scope.target).name;
+    if(operation==='modules'&&Array.isArray(raw))return raw.map(value=>{const row=object(value),{path,...rest}=row;return {...rest,...(typeof row.name==='string'&&(row.name.includes(record.binding.root)||['image','image.exe'].includes(row.name))?{name:label}:{})};});
+    if(raw&&typeof raw==='object'&&!Array.isArray(raw)){
+      const value=object(raw),{program,executable_path,target_description,...rest}=value;
+      if(operation==='launch'){
+        if(value.status!=='launched'||executable_path!==p.executable_path||typeof value.trace_name!=='string')fail('binding','Debugger launch did not verify its staged executable.');
+        await this.traceHelper(scope,{operation:'bind_new',name:value.trace_name});
+      }
+      if(program!==undefined){const metadata=await this.source(record,this.workspace.target(scope.target));if(program!==metadata.program_name&&program!==record.binding.program)fail('binding','Debugger selected another static program.');}
+      if(value.trace_name!==undefined)rest.trace_name=label;
+      if(typeof value.module==='string'&&(value.module.includes(record.binding.root)||['image','image.exe'].includes(value.module)))rest.module=label;
+      return rest;
+    }
+    return raw;
+  }
+  private async traceHelper(scope:Scope,p:Record<string,unknown>){
+    const record=await this.selected(scope),context=this.workspace.context(scope),name='InsightTraceState_'+randomUUID().replaceAll('-','');
+    const source=await readFile(new URL('../../references/native/InsightTraceState.java',import.meta.url),'utf8');
+    const args=Buffer.from(JSON.stringify({...p,target:scope.target,context:context.id})).toString('base64');
+    const result=object(await record.http.call('/run_script_inline',{program:record.binding.program,code:source.replace('class InsightTraceState ',`class ${name} `),args}));
+    const output=result.console_output;if(result.success!==true||typeof output!=='string')fail('partial','Trace state action did not complete.');
+    const lines=output.split(/\r?\n/).filter(line=>line.includes('INSIGHT_TRACE_STATE '));
+    if(lines.length!==1)fail('partial','Trace action omitted its exact result marker.');
+    return object(JSON.parse(lines[0]!.slice(lines[0]!.indexOf('INSIGHT_TRACE_STATE ')+'INSIGHT_TRACE_STATE '.length)));
+  }
+  async debuggerSaved(scope:Scope):Promise<DebuggerState>{
+    const record=await this.selected(scope),context=this.workspace.context(scope);let value:Record<string,unknown>|undefined,output='';
+    for(let attempt=0;attempt<12;attempt++){
+      output=join(record.binding.root,'trace-exports',randomUUID());await mkdir(output,{recursive:true,mode:0o700});
+      try{value=await this.traceHelper(scope,{operation:'checkpoint',output});break;}
+      catch(error){if(attempt===11||!String((error as Error).message).includes('Unable to lock due to active transaction'))throw error;await delay(150);}
+    }
+    if(!value||!Array.isArray(value.traces)||value.traces.length>64)fail('partial','Trace checkpoint inventory is malformed.');
+    const traces=[];for(const raw of value.traces){const row=object(raw),traceId=text(row.id);if(!/^trace_[a-f0-9-]{36}$/.test(traceId))fail('binding','Trace checkpoint identity changed.');
+      const snapshot=await this.workspace.captureSnapshot(join(output,traceId+'.gzf')),observed=await this.server().traceInspect(await this.workspace.artifacts.verify(snapshot));
+      if(observed.id!==traceId||observed.target!==scope.target||observed.context!==context.id)fail('binding','Packed trace belongs to another tool context.');
+      if(typeof row.snap!=='string'||!/^\d+$/.test(row.snap)||!Number.isSafeInteger(observed.modules)||!Number.isSafeInteger(observed.threads))fail('partial','Packed trace metadata is incomplete.');
+      if(typeof row.connected!=='boolean')fail('partial','Trace connection state is absent.');
+      if(row.thread!==undefined&&(typeof row.thread!=='string'||!/^\d+$/.test(row.thread)))fail('partial','Trace checkpoint thread identity is invalid.');
+      traces.push({id:traceId,name:text(observed.name),snapshot,snap:row.snap,modules:Number(observed.modules),threads:Number(observed.threads),connected:row.connected,...(row.thread?{thread:String(row.thread)}:{})});
+    }
+    const active=value.active===undefined?undefined:text(value.active);if(active&&!traces.some(trace=>trace.id===active))fail('binding','Active trace is absent from its checkpoint.');
+    return {traces,...(active?{active}:{}),connected:traces.some(trace=>trace.connected)};
+  }
+  async debuggerSelect(scope:Scope,trace:string){await this.traceHelper(scope,{operation:'select',id:trace});}
+  async debuggerLaunch(scope:Scope,p:Record<string,unknown>,request:string){
+    if(!/^q_[a-f0-9-]{36}$/.test(request))fail('binding','Invalid internal debugger launch identity.');
+    const record=await this.selected(scope),target=this.workspace.target(scope.target),root=join(record.binding.root,'debugger-run',request);await mkdir(root,{recursive:true,mode:0o700});
+    const executable=join(root,process.platform==='win32'?'image.exe':'image');await copyFile(await this.workspace.artifacts.verify(target.input),executable,constants.COPYFILE_EXCL);await chmod(executable,0o500);
+    const copied=await this.workspace.artifacts.capture(executable,'input');if(copied.id!==target.input.id)fail('binding','Staged debug executable differs from the immutable target.');
+    await durable(join(record.binding.root,'debugger-run','current.json'),{request,target:scope.target,context:record.binding.context,executable});
+    return this.debuggerCall(scope,'launch',{...p,executable_path:executable,cwd:p.cwd??root,
+      ...(this.c.profile.values.debuggerPython?{python_executable:text(this.c.profile.values.debuggerPython,4096)}:{}),
+      ...(this.c.profile.values.windbgDir?{windbg_dir:text(this.c.profile.values.windbgDir,4096)}:{})});
+  }
   async projectOutcome(requestId:string,expected:Record<string,unknown>) {return this.server().projectOutcome(requestId,expected);}
   async close(scope: Scope) {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
-    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot});await this.stopRecord(record);
+    const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record);
   }
   async closed(scope:Scope) {
     const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');

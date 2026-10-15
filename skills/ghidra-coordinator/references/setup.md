@@ -33,3 +33,11 @@ retained work. This revision conservatively protects retained profile research s
 
 The current native acceptance is macOS. Portable CLI/CI remains required; native Windows/Linux
 acceptance is deferred. The complete delivery and merge/refresh surface are still in progress.
+
+Debugger execution additionally needs a supported host debugger (local LLDB on macOS). Its
+Ghidra Python dependencies are prepared from the installed SDK wheels into owned GUI storage.
+`debuggerPython` optionally configures a Python-backed offer; `windbgDir` configures the Windows
+debugger runtime directory when relevant. These are runtime profile settings, not research scope.
+
+Archive exchange is opt-in through `archiveUrl`; its optional token uses Factory secrets.
+See [archive](archive.md) for the service contract and submission recovery behavior.

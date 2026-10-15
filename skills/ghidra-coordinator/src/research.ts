@@ -1,5 +1,5 @@
 import type { Artifact } from './artifacts.js';
-import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest } from './workspace.js';
+import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState } from './workspace.js';
 import { Workspace } from './workspace.js';
 import { fail, id, object, text } from './model.js';
 import type { ToolMode } from './contexts.js';
@@ -9,6 +9,13 @@ import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 
 export interface ResearchBackend {
+  archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
+  debuggerStart?(scope:Scope):Promise<void>;
+  debuggerCall?(scope:Scope,operation:string,p?:Record<string,unknown>):Promise<unknown>;
+  debuggerSaved?(scope:Scope):Promise<DebuggerState>;
+  debuggerSelect?(scope:Scope,trace:string):Promise<void>;
+  debuggerStop?(scope:Scope):Promise<void>;
+  debuggerLaunch?(scope:Scope,p:Record<string,unknown>,request:string):Promise<unknown>;
   ui?(scope:Scope,operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
   project?(operation:string,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
   projectOutcome?(requestId:string,expected:Record<string,unknown>):Promise<Record<string,unknown>|undefined>;
@@ -331,6 +338,12 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='debugger'){
+        try{if(backend.closed&&await backend.closed(selected))this.workspace.recordRequest(request.id,'failed',
+          {...selected,state:'disconnected',outcome:'unknown',operation:execution.operation});}
+        catch{/* A CPU action is not replayed or inferred from a later program counter. */}
+        continue;
+      }
       if(execution?.kind==='ui') {
         try{
           if(backend.closed&&await backend.closed(selected)){

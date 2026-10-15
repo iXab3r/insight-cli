@@ -9,6 +9,7 @@ import { fail, stable, text } from './model.js';
 export interface NativeInputs {
   java: string; ghidraHome: string; mcpJar: string; jars: string[]; classpath: string;
   ghidraVersion: string; fingerprint: string;
+  debuggerWheels:string[];
 }
 export const pinnedMcpJar = '7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd';
 export const packagedMcpJar=fileURLToPath(new URL('../../runtime/GhidraMCP-7.0.0.jar',import.meta.url));
@@ -52,11 +53,19 @@ export async function nativeInputs(values: Record<string, unknown>): Promise<Nat
   for (const program of ['javac', 'keytool']) if (!(await stat(join(dirname(java), program + (process.platform === 'win32' ? '.exe' : '')))).isFile())
     fail('configuration', 'Java must come from a JDK with javac and keytool.');
   const jars = [mcpJar, ...await moduleJars(ghidraHome)];
+  const debug=join(ghidraHome,'Ghidra','Debug'),debuggerWheels=[
+    join(debug,'Debugger-rmi-trace/pypkg/dist/protobuf-6.31.0-py3-none-any.whl'),
+    join(debug,'Debugger-rmi-trace/pypkg/dist/ghidratrace-12.1-py3-none-any.whl'),
+    join(debug,'Debugger-agent-lldb/pypkg/dist/ghidralldb-12.1-py3-none-any.whl')];
+  const debuggerFiles=[...debuggerWheels];
+  async function collectDebug(path:string){for(const entry of (await readdir(path,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
+    if(entry.isDirectory()&&entry.name!=='__pycache__')await collectDebug(join(path,entry.name));else if(entry.isFile()&&!entry.name.endsWith('.pyc'))debuggerFiles.push(join(path,entry.name));}}
+  for(const module of ['Debugger-rmi-trace','Debugger-agent-lldb'])for(const folder of ['pypkg/src','data'])await collectDebug(join(debug,module,folder));
   const hashes: string[] = [];
   // Sequential streaming keeps peak memory independent of the installation's total size.
-  for (const path of [java, ...jars]) hashes.push(await sha(path));
+  for (const path of [java, ...jars,...debuggerFiles]) hashes.push(await sha(path));
   const fingerprint = createHash('sha256').update(stable({ghidraVersion, hashes})).digest('hex');
-  return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint};
+  return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels};
 }
 
 /** Compile packaged helper sources against the selected installation, never an author checkout. */

@@ -16,6 +16,8 @@ import {Lifecycle,lifecycleCommands} from './lifecycle.js';
 import {utilityCommands} from './utility.js';
 import {Projects,projectCommands} from './projects.js';
 import {UserInterface,uiCommands} from './ui.js';
+import {Debugger,debuggerCommands} from './debugger.js';
+import {Archive,archiveCommands} from './archive.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -25,7 +27,7 @@ export interface Options {
 interface ProfileOwner {
   workspace: Workspace; tasks: Map<string,Promise<unknown>>; backend?: Promise<ResearchBackend>; configuration: string;
 }
-const bindingFields=['java','ghidraHome','mcpJar','mcpJarSha256','server','repository','readerUser','publisherUser','maxContexts'];
+const bindingFields=['java','ghidraHome','mcpJar','mcpJarSha256','server','repository','readerUser','publisherUser','maxContexts','debuggerPython','windbgDir','archiveUrl'];
 class Owner {
   private readonly profiles=new Map<string,ProfileOwner>();
   constructor(private readonly options: Options) {}
@@ -47,7 +49,7 @@ class Owner {
       return result instanceof GhidraContexts?result.fork(c):result;
     };
     const research=new Research(profile.workspace,backend,profile.tasks);
-    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),backend};
+    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
@@ -101,6 +103,9 @@ const fields=[
   ['readerUser','--reader-user <name>','Read-only external account'],
   ['publisherUser','--publisher-user <name>','External publication account'],
   ['maxContexts','--max-contexts <count>','Concurrent contexts (default 4, maximum 16)'],
+  ['debuggerPython','--debugger-python <path>','Optional Python executable for a configured debugger offer'],
+  ['windbgDir','--windbg-dir <path>','Optional Windows debugger runtime directory'],
+  ['archiveUrl','--archive-url <url>','Explicit archive service base URL (disabled by default)'],
 ];
 const mode=(value:unknown):ToolMode|undefined=>{
   if(value===undefined)return;
@@ -127,16 +132,17 @@ export function createDefinition(options: Options = {}): CliDefinition {
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
       ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
     auth:{
-      loginOptions:[{flags:'--role <role>',description:'External reader or publisher role',defaultValue:'reader'},
+      loginOptions:[{flags:'--role <role>',description:'External reader, publisher or archive role',defaultValue:'reader'},
         {flags:'--password-stdin',description:'Read the password from stdin'}],
       async login(c,o) {
-        if(!c.profile.values.server)fail('configuration','Local credentials are managed automatically; login configures an external server profile.');
-        const role=text(o.role);if(!['reader','publisher'].includes(role))fail('invalid','Role must be reader or publisher.');
+        const role=text(o.role);if(!['reader','publisher','archive'].includes(role))fail('invalid','Role must be reader, publisher or archive.');
+        if(role!=='archive'&&!c.profile.values.server)fail('configuration','Local server credentials are managed automatically.');
+        if(role==='archive'&&!c.profile.values.archiveUrl)fail('configuration','Configure an archive URL before storing its token.');
         if(!o.passwordStdin||!c.stdinAvailable)fail('credentials','Supply --password-stdin for this role.');
         let candidate='';for await(const chunk of c.io.input){candidate+=chunk.toString();if(candidate.length>4096)fail('limit','Password input exceeds 4096 characters.');}
         candidate=candidate.replace(/\r?\n$/,'');if(!candidate||/[\r\n\0]/.test(candidate))fail('credentials','Password must be one nonempty line.');
-        await c.secrets.set(role+'Password',candidate);
-        return {authenticated:true,identity:{role,user:c.profile.values[role+'User'],validation:'stored; authority verified at connection'}};
+        await c.secrets.set(role==='archive'?'archiveToken':role+'Password',candidate);
+        return {authenticated:true,identity:{role,...(role==='archive'?{}:{user:c.profile.values[role+'User']}),validation:'stored; authority verified at connection'}};
       },
       async status(c) {
         let reader='readerPassword',publisher='publisherPassword';const external=Boolean(c.profile.values.server);
@@ -148,7 +154,8 @@ export function createDefinition(options: Options = {}): CliDefinition {
         return {authenticated:readerStored&&publisherStored,identity:{mode:external?'external':'local',readerStored,publisherStored}};
       },
       async logout(c) {
-        if(!c.profile.values.server)fail('configuration','Local credentials remain bound to retained owned storage.');
+        await c.secrets.delete('archiveToken');
+        if(!c.profile.values.server)return;
         await c.secrets.delete('readerPassword');await c.secrets.delete('publisherPassword');
       },
     },
@@ -261,6 +268,6 @@ export function createDefinition(options: Options = {}): CliDefinition {
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
       mutationCommands(c=>owner.selected(c).research)),[...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
-        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui)])}):entry)};
+        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

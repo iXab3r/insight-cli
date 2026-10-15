@@ -5,17 +5,18 @@ export interface Descriptor { path: string; method: string; params: { name: stri
 /** The pinned GhidraMCP HTTP side of a dedicated bridge. No discovery by project name. */
 export class HttpBridge {
   private schema?: Map<string, Descriptor>;
-  constructor(readonly endpoint: string, private fetch: typeof globalThis.fetch = globalThis.fetch, private signal?: AbortSignal, private token?: string) {
+  constructor(readonly endpoint: string, private fetch: typeof globalThis.fetch = globalThis.fetch, private signal?: AbortSignal, private token?: string,private timeoutMilliseconds=30000) {
     const url = new URL(endpoint);
     if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || !url.port || url.username || url.password || url.pathname !== '/')
       fail('binding', 'Worker bridge must use an explicit loopback HTTP port.');
+    if(!Number.isSafeInteger(timeoutMilliseconds)||timeoutMilliseconds<1||timeoutMilliseconds>1800000)fail('invalid','Bridge timeout is outside the supported bound.');
   }
   private async request(path: string, method: string, query: Record<string, unknown>, body: Record<string, unknown>): Promise<unknown> {
     const url = new URL(path, this.endpoint);
     for (const [name, value] of Object.entries(query)) url.searchParams.set(name, String(value));
     let response: Response;
     try {
-      response = await this.fetch(url, { method, redirect: 'error', signal: this.signal ? AbortSignal.any([this.signal, AbortSignal.timeout(30000)]) : AbortSignal.timeout(30000), headers: { ...(this.token ? { Authorization: 'Bearer ' + this.token } : {}), ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}) }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) });
+      response = await this.fetch(url, { method, redirect: 'error', signal: this.signal ? AbortSignal.any([this.signal, AbortSignal.timeout(this.timeoutMilliseconds)]) : AbortSignal.timeout(this.timeoutMilliseconds), headers: { ...(this.token ? { Authorization: 'Bearer ' + this.token } : {}), ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}) }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) });
     } catch { fail('transport', 'The dedicated Ghidra bridge request did not complete.'); }
     if (!response.ok) fail('remote', 'Ghidra bridge rejected the operation.');
     // Bound even a chunked/malformed service response; never persist raw payloads as logs.

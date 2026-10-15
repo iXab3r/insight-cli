@@ -33,3 +33,9 @@ Installing this package does not register this skill in an agent's configuration
 For project files, program export/import and configured-server administration, read
 [administration](references/administration.md). These operations preserve separate research views;
 their external effects do not participate in program merge.
+
+For owned GUI execution, CPU state, breakpoints and retained traces, read
+[debugger](references/debugger.md). Execution side effects remain separate from program publication.
+
+For explicit external documentation exchange and retained submission outcomes, read
+[archive](references/archive.md).

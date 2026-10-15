@@ -184,3 +184,20 @@ another goto. It also exercises the correction for a headless stop receipt retai
 project root becomes GUI: that earlier receipt cannot prove whether the replacement process ended.
 Current PID/binding verification remains required. Run `scripts/proof-ui-recovery.mjs` with the
 same flags. Native debugger execution and final installed fault repetition remain separate gates.
+
+[Owned native debugger](debugger.json) covers all sixteen leaves and three step kinds against
+a synthetic Mach-O/LLDB process. Exact memory is read from the target, independently saved
+trace databases reopen disconnected, static private work survives and another session stays
+unchanged. Run `scripts/proof-debugger.mjs` with the disposable/runtime/compiler flags.
+[Debugger response recovery](debugger-recovery.json) repeats that scenario with a lost successful
+step response: four intended steps cause exactly four native calls, repeated retrieval causes
+none, selected-context close succeeds and reopening does not launch a target. Run
+`scripts/proof-debugger-recovery.mjs`. Backend/owner crash variants and the final installed
+artifact remain separate gates.
+
+[Archive exchange](archive-exchange.json) verifies the two pinned payload operations on private
+native PE data against an owned local HTTP contract fixture. It checks preview without requests,
+names/comments/hash fields, created/updated/conflict counts, same-ID retrieval and a deliberately
+lost external response without another POST. Another session is unchanged and private research
+remains usable. Run `scripts/proof-archive.mjs` with the same flags. This proves the integration
+contract; developing or deploying an independent archive service is excluded.

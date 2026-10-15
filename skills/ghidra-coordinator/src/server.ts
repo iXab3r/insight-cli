@@ -87,6 +87,7 @@ export class GhidraServer {
     return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
   }
   async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','InsightSnapshotInspect',[snapshot,request]);}
+  async traceInspect(snapshot:string){return this.run('trace-inspect','InsightTraceInspect',[snapshot]);}
   async project(operation:string,parameters:Record<string,unknown>) {
     const requestId=text(parameters.request_id,128);if(!/^(?:a|read)_[a-zA-Z0-9-]+$/.test(requestId))fail('binding','Invalid internal project request identity.');
     const parent=join(this.directory,'project-calls');await mkdir(parent,{recursive:true,mode:0o700});
