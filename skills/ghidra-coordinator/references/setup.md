@@ -34,7 +34,9 @@ Runtime identity covers installed Ghidra code, language/compiler data, native mo
 inputs together with JDK tools, modules and configuration. Generated Python caches are isolated.
 Changing those runtime inputs requires stopping the old owner before continuing with the new build.
 
-Native acceptance targets macOS. Native Windows/Linux acceptance is deferred.
+Native acceptance separates macOS GUI/LLDB workflows from selected headless Windows/Linux
+SDK, Version Tracking and FID/BSim workflows. Native Windows/Linux debugger/GUI acceptance
+remains deferred. The ordinary CI lane stays offline; disposable native CI is explicit.
 
 Debugger execution additionally needs a supported host debugger (local LLDB on macOS). Its
 Ghidra Python dependencies are prepared from the installed SDK wheels into owned GUI storage.
