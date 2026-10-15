@@ -7,6 +7,12 @@ that the eight bridge controls remain accounted for. This structural check is se
 behavioral acceptance: exact-revision native/installed evidence is required before final delivery.
 No generic raw-MCP passthrough satisfies this ledger.
 
+See [native SDK → MCP → facade gaps](gaps_api_ghidra.md) for the per-operation native API mapping
+and prioritized semantic gaps. In particular, `/find_dead_code` and `/detect_crypto_constants` are
+upstream placeholders currently accepted by our query adapter; catalog/response coverage does not
+mean their advertised algorithms exist. Parameter-level gaps (including memory-block creation inputs)
+are recorded there too. Native SDK breadth and parameter parity are not established by this ledger.
+
 ## Completed combined evidence
 
 The [full acceptance report](verification/full-facade.json) binds 23 passing native groups,
