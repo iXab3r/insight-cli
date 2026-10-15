@@ -29,7 +29,16 @@ The owner also confirmed the archive-service boundary: it is an explicitly confi
 dependency. All owner questions raised for this full pass are answered. The concrete implementation
 backlog is in [work items](WORK-ITEMS.md).
 
-## Completed acceptance
+## Current combined acceptance
+
+The final M0–M5 plus selected P0–P3 gate passes 118 offline tests, all 33 native groups and
+isolated package checks on one unchanged build. The [current full report](verification/full-facade-current.json)
+records two agents/two EXEs/four contexts, explicit and opt-in synchronization, conflict retention,
+backend/owner/server recovery and seven manual plus two automatic actual owner SIGKILL phases.
+[Reproduction and limits](FINAL-ACCEPTANCE.md) keep native macOS, selected older headless OS
+evidence and external archive-service scope distinct. Historical receipts retain their identities.
+
+## Historical original M0–M5 acceptance
 
 M0–M5 passed as one combined result at implementation revision
 `300884e3c9be0928a8e1659e088aa2144c2c70b4`. The
@@ -257,7 +266,7 @@ policies; [the agent contract](../skills/ghidra-coordinator/references/extension
 defines the tested workflows and boundaries.
 
 No further owner choice is required for the closed delivery. All ordered work items have their
-combined acceptance evidence in [the full report](verification/full-facade.json); historical
+combined acceptance evidence in [the current full report](verification/full-facade-current.json); historical
 checkpoints remain available in [verification](verification/README.md). Source delivery is tracked
 under [Factory #49](https://github.com/iXab3r/EyeAuras.CliFactory/issues/49). Npm publication,
 production migration and the deferred scope above are not implied by completion.

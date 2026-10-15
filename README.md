@@ -5,30 +5,29 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
-The agreed **M0–M5 delivery is implemented and verified**: all 210 pinned operations and eight
-bridge-control equivalents remain accounted for. The current command tree has 261 public leaves. The [combined acceptance report](docs/verification/full-facade.json)
-records 93 passing offline tests, 23 passing native groups, the installed CLI/IPC/OS-keyring crash
-matrix and the exact tested source/artifact hashes. [Coverage evidence](docs/verification/coverage-evidence.json)
-joins each inventoried operation to its command/equivalent and verification group.
-The [native SDK → MCP → facade comparison](docs/gaps_api_ghidra.md) now records **G01–G07 P0/P1
-closure**: real bounded replacements for the two upstream analysis stubs, actual type/prototype
-validation, supported emulation ABIs, structured/bounded reads, qualified heuristics, entry
-provenance and complete audited memory/prototype inputs. [Current closure evidence](docs/verification/api-gaps.json)
-binds the newer implementation and affected regressions separately from the historical full M0–M5
-report. The [selected P2 report](docs/verification/api-gaps-p2.json) separately covers native Version
-Tracking, categorized program differences, guarded byte/assembly/context edits, loader/exporter
-selection, FID/BSim, GDT layouts/settings, namespace/external CRUD and bounded typed IR. It also
-covers guarded live debugger writes and selected retained-trace queries. All 104 offline tests,
-eight local native groups, extra SDK response-loss verification and selected Windows/Linux native
-CI pass. See the installed
-[native workflow reference](skills/ghidra-coordinator/references/native-workflows.md).
+The agreed **M0–M5 delivery and selected P0–P3 additions pass combined acceptance**. The current
+tree has 271 public command leaves; all 210 pinned operations and eight bridge-control equivalents
+remain accounted for. The [current report](docs/verification/full-facade-current.json) records
+118 passing offline tests and 33 native groups on one unchanged build, with the exact source and
+installed artifact hashes. The installed CLI/Factory IPC/OS-keyring scenario exercises two agents,
+two EXEs, four private contexts, parallel callers and nine actual owner SIGKILL phases.
 
-Native acceptance targets macOS/Ghidra 12.1.2/Java 21. It includes two simultaneous GUI/LLDB
-contexts, retained trace/mapping recovery, explicit merge/refresh and seven owner SIGKILL phases.
-The P2 report adds selected headless native Windows/Linux workflows and a larger saved DB;
-GUI/LLDB acceptance remains macOS. Automatic strategies, universal native DB merging, external
-archive-service deployment and npm publication remain outside this pass. See
-[design](docs/DESIGN.md), [scenarios](docs/CLI-SCENARIOS.md) and [milestones](docs/PLAN.md).
+The [SDK → MCP → facade comparison](docs/gaps_api_ghidra.md) records the selected P0–P3 contracts
+and limits. They include bounded native analysis and typed reads/edits, Version Tracking,
+FID/BSim, GDT, loaders/exporters, live/trace operations and managed ready-built extensions.
+Opt-in publication after edit/save and refresh before edit use the same conflict/recovery rules;
+manual merge/refresh remains the default. See the installed
+[native workflows](skills/ghidra-coordinator/references/native-workflows.md) and
+[extensions/synchronization reference](skills/ghidra-coordinator/references/extensions-and-sync.md).
+
+[Reproduce the combined gate](docs/FINAL-ACCEPTANCE.md). Native combined acceptance targets macOS,
+Ghidra 12.1.2 and Java 21, including simultaneous GUI/LLDB contexts. The
+[P2 report](docs/verification/api-gaps-p2.json) retains its separate selected headless Windows/Linux
+identity; it does not imply current full GUI/P3 acceptance on those OSes. The
+[original M0–M5 report](docs/verification/full-facade.json) and individual P0–P3 reports retain their
+historical identities. Universal native DB merging, external archive-service deployment and npm
+publication remain outside the selected delivery. See [design](docs/DESIGN.md),
+[scenarios](docs/CLI-SCENARIOS.md) and [milestones](docs/PLAN.md).
 
 Use Node 24 or newer:
 
@@ -60,8 +59,9 @@ Opening returns the actual session/target to retain. Another agent opens with `-
 to receive an independent view of the same input. Read the [workflow skill](skills/ghidra-coordinator/SKILL.md),
 [research guide](skills/ghidra-coordinator/references/research.md) and
 [continuation contract](skills/ghidra-coordinator/references/recovery.md). Ordinary edits are saved
-privately before `applied`; they do not publish themselves. Optional request IDs identify original
-changing intentions and return their result or unresolved state without repeating effects.
+privately before `applied`; with the default manual policy they await explicit merge. Optional
+request IDs identify original changing intentions and return their result or unresolved state
+without repeating effects.
 
 Build prepared artifacts with `npm run pack:cli`. Until a separately authorized IPC npm release,
 install the CLI tarball together with the prepared official Factory IPC tarball:
@@ -76,8 +76,9 @@ reusable external package identity. The installed helper needs no Factory source
 Installing it does not register a skill or rewrite agent settings.
 
 Default tests and isolated package tests are offline after dependency acquisition. Native runners
-require explicit runtime/compiler paths and `--ack-disposable`, refuse CI and use only owned
-fixtures. Native acceptance targets macOS; native Windows/Linux acceptance is deferred.
+require explicit runtime/compiler paths and `--ack-disposable` and use only owned
+fixtures. The [combined gate](docs/FINAL-ACCEPTANCE.md) runs locally on macOS; selected headless
+Windows/Linux P2 workflows have separate explicitly enabled native CI evidence.
 [Verification](docs/verification/README.md) distinguishes each proof's scope and remaining gates.
 
 The earlier `insight-ghidra` coordinator remains an internal regression fixture. Its

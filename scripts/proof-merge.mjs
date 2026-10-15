@@ -19,12 +19,16 @@ test('native saved-state and scalar three-way merge',async()=>{
  const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar']};
  const f=await createCliFixture({after(){}},{applicationId:'insight-cli',profiles:[{name:'default',values,permissions:['ReadOnly','Update']}]});
  let context,losePublishedAnswer=false;
+ // Preserve the complete native backend, including saved-state inspection and command forks.
+ // A hand-maintained method list silently drops newer verification capabilities.
+ const wrap=native=>new Proxy(native,{get(target,key){
+  if(key==='fork')return c=>wrap(target.fork(c));
+  const value=target[key];
+  if(key==='publish')return async publication=>{const result=await value.call(target,publication);if(losePublishedAnswer){losePublishedAnswer=false;throw Error('Synthetic native committed response loss');}return result;};
+  return typeof value==='function'?value.bind(target):value;
+ }});
  const actual=f.createApplication(runtime=>createInsightCli({runtime,backend:async(workspace,c)=>{
-  context=c;const native=new GhidraContexts(workspace,await nativeInputs(values),c);
-  return {open:native.open.bind(native),call:native.call.bind(native),saved:native.saved.bind(native),mode:native.mode.bind(native),
-   close:native.close.bind(native),dispose:native.dispose.bind(native),latest:native.latest.bind(native),fields:native.fields.bind(native),
-   candidate:native.candidate.bind(native),recover:native.recover.bind(native),recoverModel:native.recoverModel.bind(native),
-   async publish(publication){const result=await native.publish(publication);if(losePublishedAnswer){losePublishedAnswer=false;throw Error('Synthetic native committed response loss');}return result;}};
+  context=c;return wrap(new GhidraContexts(workspace,await nativeInputs(values),c));
  }}));
  const exec=promisify(execFile),dir=join(f.root,'input');await mkdir(dir);const c=join(dir,'fixture.c'),obj=join(dir,'fixture.obj'),exe=join(dir,'fixture.exe');
  await writeFile(c,'__declspec(noinline) int first(int x){return x+17;}\n__declspec(noinline) int second(int x){return x+23;}\nint main(void){return first(second(2));}\n');

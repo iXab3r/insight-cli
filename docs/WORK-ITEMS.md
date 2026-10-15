@@ -5,7 +5,15 @@ The owner selected one combined M0–M5 delivery and closed the product decision
 Items produce code, fixtures or exact-revision evidence inside the
 existing product; they do not add separate CLIs, a generic plugin framework or agent-visible jobs.
 
-## Completed delivery
+## Current combined acceptance
+
+The full M0–M5 and selected P0–P3 slice passes one current-build gate: 118 offline tests, 33
+native groups, installed CLI/IPC/keyring, two agents/two EXEs/four contexts and nine actual
+owner-fault phases. See [current full evidence](verification/full-facade-current.json) and
+[the repeatable gate](FINAL-ACCEPTANCE.md). The stale merge-proof adapter was corrected to
+forward saved-state inspection and command forks; its complete native scenario now passes.
+
+## Historical original delivery
 
 All ordered M0–M5 work items, including M5-06, passed combined acceptance at implementation
 revision `300884e3c9be0928a8e1659e088aa2144c2c70b4`. The

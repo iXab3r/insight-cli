@@ -21,12 +21,15 @@ is separate from the historical reports. Those extensions do not change the 210 
 
 ## Completed combined evidence
 
-The [full acceptance report](verification/full-facade.json) binds 23 passing native groups,
-installed CLI/IPC/crash verification and the tested artifact to implementation revision
-`300884e3c9be0928a8e1659e088aa2144c2c70b4`.
-[Machine-readable evidence joins](verification/coverage-evidence.json) map all 210 rows to their
-actual command/equivalent, permission and verification group. This does not widen automatic merge
-semantics or claim an exhaustive matrix of every input combination.
+The [current full acceptance report](verification/full-facade-current.json) binds 33 passing native
+groups, 118 offline tests, installed CLI/IPC/keyring and nine actual owner SIGKILL phases to one
+unchanged build/artifact. It repeats M0–M5 and selected P0–P3; the current audit resolves all 210
+rows and eight controls against the 271-leaf command tree. [Reproduce the gate](FINAL-ACCEPTANCE.md).
+
+The [original full report](verification/full-facade.json) and its
+[machine-readable operation joins](verification/coverage-evidence.json) retain the original
+implementation identity. Current evidence does not widen automatic merge semantics or claim an
+exhaustive matrix of every input combination.
 
 ## Source baseline
 

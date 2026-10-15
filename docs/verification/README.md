@@ -1,5 +1,31 @@
 # Verification scope
 
+## Current combined M0–M5 and P0–P3 acceptance
+
+[Current full evidence](full-facade-current.json) records 118 offline tests and all 33 native
+groups on one unchanged current build. The installed CLI/IPC/keyring scenario covers two agents,
+two EXEs with equal names/addresses, four private contexts, parallel callers, merge/refresh,
+conflict retention, owner/server restart and seven manual plus two automatic real owner SIGKILL
+phases. Native debugger failure tests additionally keep two GUI/debuggees live and verify that
+crashing one preserves the other. SDK response-loss recovery proves one actual mutation.
+
+P0/P1, all selected P2 groups and the nine installed-resource P3 cases repeat in this gate. The
+package is installed/relocated offline; the independent installed IPC pack must have the identical
+SHA256, `6923f2b90129856196cd6e31c127f5c84e3d99fb40af8ad1b0f918ef7cca4a7e`.
+Runtime source, compiled JS, native resources, scripts/fixtures, tests and pinned dependencies are
+hashed after build and checked after packaging and every group. The full report keeps per-group
+assertions/receipt hashes and separates in-process native fixtures from actual installed IPC.
+
+The historical merge proof had a manually enumerated backend adapter that omitted saved-state
+inspection required by the newer signature verifier. It now forwards the complete native backend
+and decorates command forks; the corrected seven-revision native merge case passes. Product
+verification remains enabled. The common runner also reads both Node TAP and spec test summaries.
+
+[Run the final gate and review its scenarios/limits](../FINAL-ACCEPTANCE.md). Combined native
+acceptance is macOS arm64; selected older Windows/Linux evidence below keeps its own identity.
+Earlier reports are not rebound to the current build. No npm publication or production migration
+is implied.
+
 ## P3 extensions and automatic synchronization
 
 [P3 evidence](api-gaps-p3.json) closes N10 and opt-in automatic publication/refresh. It records

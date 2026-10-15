@@ -2,7 +2,8 @@
 
 These are the intended `insight-cli` commands and illustrative responses agreed during product
 design. The public research/edit and merge/refresh contracts have implementation checkpoints;
-combined full-artifact acceptance passed; see [the full report](verification/full-facade.json). The scenarios specify
+combined current-build acceptance passed; see [the full report](verification/full-facade-current.json)
+and [reproduction gate](FINAL-ACCEPTANCE.md). The scenarios specify
 observable behavior; exact schemas and remaining edge cases are tracked in [the plan](PLAN.md).
 The [design](DESIGN.md#agreed-product-model) owns the model. Factory supplies the same command
 tree for CLI help, human/JSON output and API execution; no separate product RPC methods are invented.

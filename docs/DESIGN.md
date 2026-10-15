@@ -7,8 +7,10 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
-This section records the implemented contract. The combined M0–M5 acceptance passed; the
-[full report](verification/full-facade.json) identifies the tested source, artifact and limits.
+This section records the implemented contract. Combined M0–M5 and selected P0–P3 acceptance
+passed on one current build; the [current full report](verification/full-facade-current.json)
+identifies 33 native groups, 118 offline tests, the installed artifact and limits. The
+[original M0–M5 report](verification/full-facade.json) retains its historical source identity.
 The earlier `insight-ghidra` implementation remains a scoped-comment regression fixture for
 publication mechanisms, with its historical behavior recorded below. The agreed walkthroughs
 are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
@@ -24,8 +26,9 @@ catalog and bridge controls. Logical equivalents can replace underlying routing,
 save/close and discovery operations; callers need not receive a literal backend passthrough.
 
 Ordinary work uses owned headless instances. GUI-only operations use managed isolated GUI instances
-for the appropriate contexts when needed. Native acceptance in this pass targets macOS; portable
-CLI/CI remains required, while native Windows/Linux acceptance is deferred. Static PE research and
+for the appropriate contexts when needed. Combined native acceptance targets macOS; portable
+CLI/CI remains required. Earlier selected headless Windows/Linux P2 checks retain their own
+identity; full GUI/P3 native acceptance on those OSes remains deferred. Static PE research and
 native macOS debugger fixtures are distinct acceptance cases; this does not claim macOS can execute
 every imported EXE format. Saved analysis/trace state is recoverable; a crashed live debuggee is not
 silently resumed from a prior CPU execution state.

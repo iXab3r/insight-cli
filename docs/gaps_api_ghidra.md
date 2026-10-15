@@ -71,10 +71,10 @@ content pinning nor an owned JVM promises a security sandbox for third-party ext
 | --- | --- | --- |
 | A — native Ghidra | Ghidra **12.1.2**, Java 21; installed source archives, linked to the [matching release source](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.2_build/Ghidra) | Java SDK, service APIs and extension points. No invented “total SDK endpoints” denominator. |
 | B — GhidraMCP | **7.0.0**, commit `57e37a8bf388b1279cff46378f85be1554548f61` | [210 REST catalog entries](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/tests/endpoints.json), plus eight Python bridge controls accounted separately. |
-| C — insight-cli | Current P3 implementation identified by [closure source hashes](verification/api-gaps-p3.json); [P2 evidence](verification/api-gaps-p2.json) remains separate; historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 271 public leaves across the facade command tree; not 271 distinct native Ghidra capabilities. |
+| C — insight-cli | Current combined M0–M5/P0–P3 build identified by [full acceptance source hashes](verification/full-facade-current.json); selected older [P2 OS evidence](verification/api-gaps-p2.json) retains its own identity | 271 public leaves across the facade command tree; not 271 distinct native Ghidra capabilities. |
 
 Evidence: [coverage ledger](GHIDRA-COVERAGE.md), [210 operation joins](verification/coverage-evidence.json),
-[combined acceptance](verification/full-facade.json), [query contracts](../skills/ghidra-coordinator/references/queries.json),
+[current combined acceptance](verification/full-facade-current.json), [query contracts](../skills/ghidra-coordinator/references/queries.json),
 [mutation contracts](../skills/ghidra-coordinator/references/mutations.json). The historical full M0–M5 report records
 93 offline tests and 23 native groups at its own source revision. The current P0/P1 report records
 the new native acceptance/regressions and package identity separately; it does not rebind that old
@@ -300,8 +300,13 @@ uses the concrete ready-built module workflow described above.
 No P0–P3 item remains open within the audited selected contracts. New SDK/workflow requests
 require their own measured consumer and acceptance boundary.
 
-The current P2/P3 evidence supplements the earlier M0–M5 acceptance at its own implementation identity.
-The P2 report identifies its own GUI/LLDB, selected headless OS and installed-package checks; it does not rebind historical matrices to new code or claim every GUI debugger on every OS.
+The [final combined gate](verification/full-facade-current.json) repeats M0–M5 and selected P0–P3
+on one unchanged current build: 118 offline tests, 33 native groups, two agents/two EXEs/four
+contexts, conflict/refresh/merge, native response loss and nine actual owner SIGKILL phases.
+The installed CLI/IPC and P3-resource tests use the same accepted tarball.
+[Reproduction and limits](FINAL-ACCEPTANCE.md) record the scenarios and corrected merge-proof
+adapter. The earlier P2 report retains its separate selected headless Windows/Linux identity;
+this combined gate is native macOS and does not claim every GUI debugger on every OS.
 
 ## Appendix A — every pinned REST operation, 1:1:1
 
