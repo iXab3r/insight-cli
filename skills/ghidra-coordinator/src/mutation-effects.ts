@@ -13,6 +13,10 @@ const normalized=(value:unknown)=>address(String(value));
 const category=(value:unknown)=>'/'+String(value).replace(/^\/+|\/+$/g,'');
 /** Effect assertions run against an immutable saved program, not the response's success flag. */
 export async function verifyMutation(backend:ResearchBackend,snapshot:Artifact,path:string,p:Record<string,unknown>,response:Record<string,unknown>):Promise<Record<string,unknown>> {
+  if(path.startsWith('/sdk/')){
+    if(!backend.inspect)fail('configuration','Native SDK edits require immutable saved-state inspection.');
+    return backend.inspect(snapshot,{kind:'sdk',operation:path.slice(5),parameters:p});
+  }
   if(path==='/create_memory_block')return verifyMemoryCreation(backend,snapshot,p);
   if(path==='/set_function_prototype') {
     if(!backend.inspect)fail('configuration','Prototype edits require saved-state inspection.');

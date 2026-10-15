@@ -91,3 +91,6 @@ navigates the owned browser and verifies the cursor. `prompt-policy --action ena
 temporarily handles the backend's known prompts in that owned GUI for 1–300 seconds; status and
 disable inspect or end the policy. Changing UI commands accept request IDs. These actions do not
 publish program work. Switching modes retains private edits and other sessions keep their views.
+
+Selected native SDK commands and their effect/budget contracts are described in
+[native workflows](native-workflows.md).

@@ -6,7 +6,7 @@ import {constants} from 'node:fs';
 import { join, delimiter, sep, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
-import { nativeHelpers, nativeInputs, type NativeInputs } from './native-inputs.js';
+import { nativeHelpers, nativeInputs,nativeJvmDirectories, type NativeInputs } from './native-inputs.js';
 import { GhidraServer, type ServerBinding } from './server.js';
 import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState } from './workspace.js';
 import { type Artifact } from './artifacts.js';
@@ -21,6 +21,7 @@ import {fileURLToPath} from 'node:url';
 import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
+import {sdkWrites} from './sdk-contracts.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -56,6 +57,7 @@ export class GhidraContexts {
   private directory() {return join(this.workspace.directory,'ghidra-native');}
   private server() {return this.ownedServer;}
   async administration(operation:string,parameters:Record<string,unknown>) {return this.server().administration(operation,parameters);}
+  async sdkFile(operation:string,parameters:Record<string,unknown>){return this.server().sdkFile(operation,parameters);}
   private async prepareRoot(kind: ProcessBinding['kind'], target: string, context?: string) {
     const root=join(this.directory(),kind,context??target,randomUUID());await mkdir(root,{recursive:true,mode:0o700});return root;
   }
@@ -71,7 +73,7 @@ export class GhidraContexts {
       const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});
       const prepared=await promisify(execFile)(this.inputs.java,['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],{timeout:30000,maxBuffer:65536});
       if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
-      debuggerEnvironment={PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:join(python,'isolated-cache')};
+      debuggerEnvironment={INSIGHT_DEBUGGER_PYTHON:python,PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:join(python,'isolated-cache')};
       if(process.platform==='darwin'){
         const bin=join(root,'debug-bin-'+randomUUID());await mkdir(bin,{mode:0o700});
         const quote=(value:string)=>"'"+value.replaceAll("'","'\\''")+"'",launch=join(root,'debugger-run','current.json');
@@ -85,7 +87,7 @@ export class GhidraContexts {
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
     const child=spawn(this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
-      '-Duser.home='+root,'-Djava.io.tmpdir='+root,'-cp',classes+delimiter+this.inputs.classpath,main,...args],
+      ...nativeJvmDirectories(root),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
           GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
@@ -202,7 +204,16 @@ export class GhidraContexts {
       const project=object(await record.http.call('/open_project',{path:binding.origin+'/'+binding.repository}));
       if(project.shared!==true||project.repository!==binding.repository)fail('binding','Canonical target project differs from its server binding.');
       this.workspace.beginModelInitialization(target.id);
-      const result=object(await record.http.call('/import_file',{file_path:input,auto_analyze:model.settings.autoAnalyze,
+      let result:Record<string,unknown>;
+      if(model.settings.loader){
+        const snapshot=join(root,'explicit-loader.gzf');
+        const loaded=await this.server().sdkFile('import',{input,output:snapshot,loader:model.settings.loader,options:model.settings.loaderOptions??{},
+          auto_analyze:model.settings.autoAnalyze,...(model.settings.language?{language:model.settings.language}:{}),...(model.settings.compilerSpec?{compiler_spec:model.settings.compilerSpec}:{})});
+        if(loaded.state!=='imported'||loaded.sha256!==target.binarySha256)fail('binding','Explicit loader did not preserve consumed input identity.');
+        const imported=object(await record.http.call('/import_program',{gzf_path:snapshot,target_folder:'/',target_name:target.id+'.bin',overwrite:false}));
+        await record.http.call('/open_program',{path:record.binding.program});
+        result={...imported,path:record.binding.program,auto_analyzed:loaded.auto_analyzed};
+      }else result=object(await record.http.call('/import_file',{file_path:input,auto_analyze:model.settings.autoAnalyze,
         ...(model.settings.language?{language:model.settings.language}:{}),...(model.settings.compilerSpec?{compiler_spec:model.settings.compilerSpec}:{})}));
       if(result.success!==true||result.path!==record.binding.program||result.reused_existing===true||
           model.settings.autoAnalyze&&result.auto_analyzed!==true)fail('unknown','Canonical target import is not a verified fresh completed analysis; retain its stage.');
@@ -308,6 +319,13 @@ export class GhidraContexts {
     if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};
     if(operation==='/create_function_signature'&&typeof parameters.parameters!=='string')parameters={...parameters,parameters:JSON.stringify(parameters.parameters)};
     const record=await this.selected(scope);
+    if(operation.startsWith('/sdk/')){
+      if(operation==='/sdk/type-archive-import'){
+        const root=join(record.binding.root,'sdk-archives',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+        const path=join(root,'input.gdt');await link(await this.workspace.artifacts.verify(parameters.archive as Artifact),path);parameters={...parameters,input_path:path};
+      }
+      return nativeQuery(record.http,record.binding.program,operation,parameters,sdkWrites.has(operation));
+    }
     if(nativeQueries.has(operation))return nativeQuery(record.http,record.binding.program,operation,parameters);
     if(operation==='/set_function_prototype'&&parameters.calling_convention==='default') {
       const validation=object(await nativeQuery(record.http,record.binding.program,'/validate_function_prototype',{
@@ -361,6 +379,10 @@ public class ${name} extends GhidraScript {
   }
   async inspect(snapshot:Artifact,parameters:Record<string,unknown>) {
     const root=join(this.directory(),'inspection',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    if(parameters.kind==='sdk'&&parameters.operation==='type-archive-import'){
+      const p=object(parameters.parameters),path=join(root,'input.gdt');await link(await this.workspace.artifacts.verify(p.archive as Artifact),path);
+      parameters={...parameters,parameters:{...p,input_path:path}};
+    }
     const request=join(root,'request.json');await durable(request,parameters);
     const result=await this.server().inspect(await this.workspace.artifacts.verify(snapshot),request);return object(result.value);
   }
@@ -404,6 +426,7 @@ public class ${name} extends GhidraScript {
   async pair(selected:Scope,other:Scope,snapshot:Artifact,operation:string,parameters:Record<string,unknown>) {
     const record=await this.selected(selected);
     return this.withPeer(record,snapshot,async peer=>{
+      if(operation==='/sdk/changes')return nativeQuery(record.http,record.binding.program,operation,{...parameters,peer_program:peer});
       let routing:Record<string,string>;
       if(operation==='/diff_functions')routing={program_a:record.binding.program,program_b:peer};
       else if(operation==='/compare_programs_documentation')routing={program:record.binding.program};
@@ -485,9 +508,10 @@ public class ${name} extends GhidraScript {
     if(result.success!==true||typeof result.console_output!=='string'||!result.console_output.includes(marker))fail('partial','Owned debugger lifecycle effect was not established.');
   }
   async debuggerCall(scope:Scope,operation:string,p:Record<string,unknown>={}){
-    const allowed=['launch','launch_offers','status','traces','resume','interrupt','step','set_breakpoint','remove_breakpoint','list_breakpoints','registers','read_memory','stack_trace','modules','static_to_dynamic','dynamic_to_static'];
+    const allowed=['launch','launch_offers','status','traces','resume','interrupt','step','set_breakpoint','remove_breakpoint','list_breakpoints','registers','read_memory','stack_trace','modules','static_to_dynamic','dynamic_to_static','write_memory','write_register','timeline','objects','object_values','schedule'];
     if(!allowed.includes(operation)||Object.hasOwn(p,'program'))fail('invalid','Unsupported scoped debugger operation.');
     const record=await this.selected(scope);
+    if(['write_memory','write_register','timeline','objects','object_values','schedule'].includes(operation))return this.traceHelper(scope,{...p,operation});
     if(operation==='list_breakpoints')return (await this.traceHelper(scope,{operation:'breakpoints'})).items;
     if(['resume','interrupt','step','set_breakpoint','remove_breakpoint'].includes(operation))await this.traceHelper(scope,{operation:'focus'});
     if(operation==='read_memory')await this.traceHelper(scope,{operation:'read_memory',address:p.address,size:p.size});
@@ -512,7 +536,7 @@ public class ${name} extends GhidraScript {
   private async traceHelper(scope:Scope,p:Record<string,unknown>){
     const record=await this.selected(scope),context=this.workspace.context(scope),name='InsightTraceState_'+randomUUID().replaceAll('-','');
     const source=await readFile(new URL('../../references/native/InsightTraceState.java',import.meta.url),'utf8');
-    const args=Buffer.from(JSON.stringify({...p,target:scope.target,context:context.id})).toString('base64');
+    const args=Buffer.from(JSON.stringify({...p,target:scope.target,context:context.id,owned_root:record.binding.root})).toString('base64');
     const result=object(await record.http.call('/run_script_inline',{program:record.binding.program,code:source.replace('class InsightTraceState ',`class ${name} `),args}));
     const output=result.console_output;if(result.success!==true||typeof output!=='string')fail('partial','Trace state action did not complete.');
     const lines=output.split(/\r?\n/).filter(line=>line.includes('INSIGHT_TRACE_STATE '));

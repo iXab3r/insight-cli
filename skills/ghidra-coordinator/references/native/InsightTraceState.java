@@ -48,6 +48,12 @@ public class InsightTraceState extends GhidraScript {
     }
     if(manager==null)throw new IllegalStateException("Debugger services unavailable");
     var data=project.getProjectData();String operation=string(p,"operation");
+    if(Set.of("write_memory","write_register","timeline","objects","object_values","schedule").contains(operation)){
+      var trace=manager.getCurrentTrace();if(trace==null)throw new IllegalStateException("No selected trace");bind(trace,p,false);
+      Object value=insight.InsightTraceTools.run(trace,manager,selected,p,monitor);
+      String encoded=new GsonBuilder().serializeNulls().create().toJson(value);if(encoded.length()>524288)throw new IllegalArgumentException("Trace result exceeds 512 KiB");
+      println("INSIGHT_TRACE_STATE "+encoded);return;
+    }
     if(operation.equals("breakpoints")){
       var trace=manager.getCurrentTrace();if(trace==null)throw new IllegalStateException("No selected trace");bind(trace,p,false);
       var service=selected.getService(DebuggerLogicalBreakpointService.class);if(service==null)throw new IllegalStateException("Breakpoint service unavailable");
@@ -69,7 +75,7 @@ public class InsightTraceState extends GhidraScript {
     if(operation.equals("bind_new")){
       var trace=manager.getCurrentTrace();if(trace==null||!trace.getName().equals(string(p,"name"))||trace.getOptions("Insight").getString("Trace ID",null)!=null)throw new IllegalStateException("New launch trace was not established");
       bind(trace,p,true);var url=ProgramURLUtils.getUrlFromProgram(currentProgram);if(url==null)throw new IllegalStateException("Selected static program has no project URL");
-      int tx=trace.startTransaction("Bind owned static program");try{trace.getOptions("Insight").setString("Static Program URL",url.toExternalForm());}finally{trace.endTransaction(tx,true);}
+      int tx=trace.startTransaction("Bind owned static program");try{trace.getOptions("Insight").setString("Static Program URL",url.toExternalForm());trace.getOptions("Insight").setString("Owned Context Root",string(p,"owned_root"));}finally{trace.endTransaction(tx,true);}
       println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","bound")));return;
     }
     if(operation.equals("focus")){

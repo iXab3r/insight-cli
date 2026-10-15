@@ -20,6 +20,10 @@ import {Debugger,debuggerCommands} from './debugger.js';
 import {Archive,archiveCommands} from './archive.js';
 import {blockContent} from './memory-inputs.js';
 import {verifyMutation} from './mutation-effects.js';
+import {sdkCommands} from './sdk.js';
+import {SdkFiles,sdkFileCommands} from './sdk-files.js';
+import {parseDomainJson} from './json.js';
+import {VersionTracking,trackingCommands} from './version-tracking.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -51,7 +55,7 @@ class Owner {
       return result instanceof GhidraContexts?result.fork(c):result;
     };
     const research=new Research(profile.workspace,backend,profile.tasks);
-    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
+    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),sdkFiles:new SdkFiles(profile.workspace,research,backend),tracking:new VersionTracking(profile.workspace,research,backend,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
@@ -192,7 +196,8 @@ export function createDefinition(options: Options = {}): CliDefinition {
           try{previous=selected.workspace.model(target).settings;}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
           const settings={...previous,autoAnalyze:o.analysis===false?false:previous?.autoAnalyze??true,
             ...(o.language?{language:text(o.language)}:{}),...(o.compilerSpec?{compilerSpec:text(o.compilerSpec)}:{}),
-            ...(o.imageBase?{imageBase:text(o.imageBase)}:{})};
+            ...(o.imageBase?{imageBase:text(o.imageBase)}:{}),...(o.loader?{loader:text(o.loader,512)}:{}),
+            ...(o.loaderOptions!==undefined?{loaderOptions:object(parseDomainJson(text(o.loaderOptions,16000))) as Record<string,string|number|boolean>}:{})};
           return selected.research.open(target,text(o.session),settings,o.requestId===undefined?undefined:id(o.requestId),mode(o.mode));
         },{permission:Permission.Update,options:[{flags:'--session <id>',description:'Use new for independent work, or an existing session',required:true},
           {flags:'--target <id>',description:'Continue existing input instead of supplying a file'},request,
@@ -200,7 +205,9 @@ export function createDefinition(options: Options = {}): CliDefinition {
           {flags:'--no-analysis',description:'Skip initial automatic analysis'},
           {flags:'--language <id>',description:'Explicit initial loader language'},
           {flags:'--compiler-spec <id>',description:'Explicit initial compiler specification'},
-          {flags:'--image-base <address>',description:'Initial image base'}]}),
+          {flags:'--image-base <address>',description:'Initial image base'},
+          {flags:'--loader <name>',description:'Explicit installed loader name/ID from formats loaders'},
+          {flags:'--loader-options <json>',description:'Named primitive SDK loader options, requiring --loader'}]}),
         command('strings','Read defined strings',[
           command('search','Find literal text and usable addresses',({options:o},c)=>owner.selected(c).research.strings(scope(o),text(o.contains,4096),number(o.limit,100,1),number(o.offset,2147483647)),
             {permission:Permission.ReadOnly,options:[...scoped,{flags:'--contains <text>',description:'Literal case-insensitive substring',required:true},...paged]}),
@@ -214,6 +221,11 @@ export function createDefinition(options: Options = {}): CliDefinition {
             .then(value=>({...scope(o),value})),{permission:Permission.ReadOnly,options:[...scoped,{flags:'--name <name>',description:'Structure name',required:true}]}),
           command('create-struct','Create and save a private structure',({options:o},c)=>{
             const selected=owner.selected(c),who=scope(o),name=text(o.name,512),fields=structureFields(o.fields);
+            if(o.replacePlaceholder){
+              const parameters={path:name.startsWith('/')?name:'/'+name,fields,packing:-1,alignment:0,replace_placeholder:true};
+              return selected.research.mutate(who,'/sdk/type-structure',parameters,async()=>({}),o.requestId===undefined?undefined:id(o.requestId),
+                (backend,snapshot,response)=>verifyMutation(backend,snapshot,'/sdk/type-structure',parameters,response));
+            }
             return selected.research.mutate(who,'/create_struct',{name,fields},async(backend)=>{
               const result=object(await backend.call(who,'/get_struct_layout',{struct_name:name}));
               if(result.name!==name||!Array.isArray(result.fields)||result.fields.length!==fields.length)fail('partial','Structure readback omitted fields or changed its name.');
@@ -221,7 +233,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
               return result;
             },o.requestId===undefined?undefined:id(o.requestId));
           },{permission:Permission.Update,options:[...scoped,{flags:'--name <name>',description:'New structure name',required:true},
-            {flags:'--fields <json>',description:'Array of {name,type,offset?}',required:true},request]}),
+            {flags:'--fields <json>',description:'Array of {name,type,offset?}',required:true},{flags:'--replace-placeholder',description:'Replace only an existing empty structure, with independently verified saved layout'},request]}),
         ]),
         command('memory','Read or edit memory blocks',[
           command('list','Read bounded memory blocks',({options:o},c)=>owner.selected(c).research.read(scope(o),'/list_program_items',{kind:'segments',limit:number(o.limit,100,1),offset:number(o.offset,2147483647)})
@@ -275,7 +287,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   };
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research)),[...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
+      mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
         ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])}):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

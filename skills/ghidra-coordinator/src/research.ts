@@ -1,5 +1,5 @@
 import type { Artifact } from './artifacts.js';
-import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState } from './workspace.js';
+import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
 import { Workspace } from './workspace.js';
 import { fail, id, object, text,digest } from './model.js';
 import type { ToolMode } from './contexts.js';
@@ -9,6 +9,7 @@ import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 
 export interface ResearchBackend {
+  sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
   archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
   debuggerStart?(scope:Scope):Promise<void>;
   debuggerCall?(scope:Scope,operation:string,p?:Record<string,unknown>):Promise<unknown>;
@@ -108,7 +109,7 @@ export class Research {
         original:change.original,local:change.local,shared:change.conflict!.shared})),
       unresolvedRequests:unresolved.map(request=>({...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state}))}};
   }
-  async open(target: string, session: string|'new', settings: {autoAnalyze:boolean;language?:string;compilerSpec?:string;imageBase?:string}, callerId?: string, mode?:ToolMode) {
+  async open(target: string, session: string|'new', settings: GhidraLoadSettings, callerId?: string, mode?:ToolMode) {
     // Mode belongs to the request's effective intent. It does not alter target load identity.
     const reserved=this.workspace.reserveOpen(target,session,settings,callerId,mode);
     return this.ordered(reserved.context,async()=>{
@@ -589,6 +590,7 @@ export class Research {
       const request=this.workspace.request(reserved.request.id);
       if(reserved.replay&&request.state!=='accepted') {
         if(request.state==='applied')return request.result;
+        if(operation.startsWith('/sdk/')&&request.state==='failed'&&object(request.result??{}).state==='rejected')fail('rejected','This SDK transaction was rolled back and is not repeated.',request.result);
         fail('unknown','This saved-state operation retains an unresolved outcome; it is not re-executed.',request.result);
       }
       const backend=await this.backend();await backend.open(selected);
@@ -607,6 +609,9 @@ export class Research {
           pendingChanges:scalars.length+complexChanges.length,value};
         this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges,scalars},result);return result;
       }catch(error){
+        if(operation.startsWith('/sdk/')&&String((error as {code?:unknown}).code).endsWith('.rejected')){
+          this.workspace.recordRequest(request.id,'failed',{...selected,state:'rejected',reason:'native_transaction_rolled_back'});throw error;
+        }
         let savedSnapshot:Artifact|undefined;
         try{savedSnapshot=await backend.saved(selected);}catch{/* A failed/dead backend retains its native stage and the last acknowledged snapshot. */}
         this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;

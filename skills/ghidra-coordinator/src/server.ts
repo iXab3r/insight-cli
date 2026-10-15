@@ -6,7 +6,7 @@ import { delimiter, dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fail, object, stable, text, digest } from './model.js';
-import { nativeHelpers, type NativeInputs } from './native-inputs.js';
+import { nativeHelpers,nativeJvmDirectories, type NativeInputs } from './native-inputs.js';
 import {parseDomainJson} from './json.js';
 
 export interface ServerBinding {
@@ -56,7 +56,7 @@ export class GhidraServer {
     const classes = await nativeHelpers(this.directory, this.inputs);
     const log = await open(join(root, 'diagnostic.log'), 'a', 0o600);
     const child = spawn(this.inputs.java, ['-Djava.awt.headless=true', '-Dghidra.home=' + this.inputs.ghidraHome,
-      '-Duser.home=' + root, '-Djava.io.tmpdir=' + root, '-cp', classes + delimiter + this.inputs.classpath, main, ...args],
+      ...nativeJvmDirectories(root), '-cp', classes + delimiter + this.inputs.classpath, main, ...args],
       {cwd:root,windowsHide:true,env:{PATH:this.c.environment.PATH ?? process.env.PATH,HOME:root,TMPDIR:root,...environment},stdio:['pipe','pipe',log.fd]});
     const exited = new Promise<number|null>((resolve,reject) => { child.once('error',reject); child.once('exit',resolve); });
     exited.catch(()=>{});
@@ -87,6 +87,13 @@ export class GhidraServer {
     return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
   }
   async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','InsightSnapshotInspect',[snapshot,request]);}
+  async sdkFile(operation:string,p:Record<string,unknown>){
+    const root=join(this.root(),'sdk-files',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const tracking=operation.startsWith('vt.');
+    const request=join(root,'request.json');await durable(request,{...p,operation:tracking?operation.slice(3):operation});
+    const main=tracking?'InsightVersionTracking':/^(fid|bsim)-(build|query)$/.test(operation)?'InsightFunctionDatabases':'InsightSdkFiles';
+    const result=await this.run('sdk-file',main,[request]);return object(result.value);
+  }
   async traceInspect(snapshot:string){return this.run('trace-inspect','InsightTraceInspect',[snapshot]);}
   async project(operation:string,parameters:Record<string,unknown>) {
     const requestId=text(parameters.request_id,128);if(!/^(?:a|read)_[a-zA-Z0-9-]+$/.test(requestId))fail('binding','Invalid internal project request identity.');
@@ -236,7 +243,7 @@ export class GhidraServer {
     const processRoot = join(root,'processes',randomUUID()); await mkdir(processRoot,{recursive:true,mode:0o700});
     const log = await open(join(processRoot,'runtime.log'),'a',0o600);
     const child = spawn(this.inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
-      '-Duser.home='+processRoot,'-Djava.io.tmpdir='+processRoot,'-cp',classes+delimiter+this.inputs.classpath,
+      ...nativeJvmDirectories(processRoot),'-cp',classes+delimiter+this.inputs.classpath,
       'InsightServerMain',data,String(local.port),String(local.identityPort),local.instance,keystore],
       {cwd:processRoot,detached:true,windowsHide:true,env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:processRoot,TMPDIR:processRoot,
         INSIGHT_KEYSTORE_PASSWORD:await this.c.secrets.require(local.keySecret),INSIGHT_SERVER_TOKEN:await this.c.secrets.require(local.tokenSecret)},stdio:['ignore',log.fd,log.fd]});

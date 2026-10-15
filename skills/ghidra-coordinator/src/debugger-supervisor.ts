@@ -1,7 +1,7 @@
 /** Internal LLDB child owner. It has no public command or independent product IPC host. */
 import {spawn} from 'node:child_process';
 import {readFile,writeFile,mkdir,open,rename,realpath} from 'node:fs/promises';
-import {join,resolve} from 'node:path';
+import {join,resolve,delimiter} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {HttpBridge} from './transport.js';
 
@@ -19,6 +19,11 @@ async function main(){
   const receipt={schema:1,id,root,guiPid:binding.pid,ownerToken:binding.tokenSecret,context:binding.context,target:binding.target,supervisorPid:process.pid,childPid:0,state:'starting',inferiorTerminated:false};
   async function saved(){const temporary=path+'.new',file=await open(temporary,'w',0o600);try{await file.writeFile(JSON.stringify(receipt));await file.sync();}finally{await file.close();}await rename(temporary,path);const parent=await open(directory,'r');try{await parent.sync();}finally{await parent.close();}}
   await saved();const environment={...process.env};delete environment.GHIDRA_MCP_AUTH_TOKEN;delete environment.GHIDRA_SERVER_PASSWORD;
+  // Ghidra's launcher prepends its source tree to PYTHONPATH. Restore the owned wheel
+  // copy first, including the pinned SBProcess compatibility adapter, before LLDB imports it.
+  const python=await realpath(environment.INSIGHT_DEBUGGER_PYTHON??'');
+  if(!python.startsWith(root+'/debug-python-')||python!==environment.INSIGHT_DEBUGGER_PYTHON)throw Error('Owned debugger Python identity changed');
+  environment.PYTHONPATH=python+delimiter+(environment.PYTHONPATH??'');delete environment.INSIGHT_DEBUGGER_PYTHON;
   let closing=false,finished=false;
   process.once('SIGHUP',close);process.once('SIGTERM',close);
   // A separate session keeps the GUI terminal's SIGHUP from bypassing our orderly kill.

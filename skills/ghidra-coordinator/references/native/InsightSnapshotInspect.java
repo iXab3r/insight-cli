@@ -39,6 +39,7 @@ class InsightSnapshotInspect {
   }
   static Object inspect(ProgramDB program,JsonObject request) throws Exception {
     String kind=string(request,"kind"),name=string(request,"name"),address=string(request,"address");
+    if(kind.equals("sdk"))return insight.InsightSdkTools.verify(program,string(request,"operation"),request.getAsJsonObject("parameters"),TaskMonitor.DUMMY);
     var at=address.isEmpty()?null:program.getAddressFactory().getAddress(address);
     if(!address.isEmpty()&&at==null)throw new IllegalArgumentException("Invalid inspection address");
     if(kind.equals("debugger_bookmarks")){

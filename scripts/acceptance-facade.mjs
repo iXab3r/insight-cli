@@ -24,7 +24,7 @@ const appArguments=new AppArguments(argumentOptions),directory=appArguments.AppD
 await mkdir(directory,{recursive:true,mode:0o700});await mkdir(join(scratch,'artifacts'));
 const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar'],maxContexts:4};
 const profiles=new ProfileStore({applicationId,appArguments});await profiles.set('default',values);
-await profiles.setPermissions('default',['ReadOnly','Update']);
+await profiles.setPermissions('default',['ReadOnly','Update','Destructive']);
 const packed=JSON.parse((await exec('npm',['pack','--offline','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli',
   '--pack-destination',join(scratch,'artifacts')],{cwd:source})).stdout)[0];
 const rootManifest=JSON.parse(await readFile(join(source,'package.json'),'utf8')),
@@ -96,6 +96,11 @@ try {
   await invoke(['ipc-server','stop']);
   const savedBlock=await invoke(['ghidra','memory','create-block',...select(a),'--name','InstalledOwnedBlock','--address','0x180000000','--bytes-hex','616263','--request-id','installed-block']);assert.equal(savedBlock.value.sha256,createHash('sha256').update('abc').digest('hex'));
   assert.deepEqual(await invoke(['ghidra','memory','create-block',...select(a),'--name','InstalledOwnedBlock','--address','0x180000000','--bytes-hex','616263','--request-id','installed-block']),savedBlock);
+  const patched=await invoke(['ghidra','memory','patch-bytes',...select(a),'--address','0x180000000','--expect-hex','616263','--bytes-hex','646566','--request-id','installed-sdk-patch']);assert.equal(patched.value.bytes_hex,'646566');
+  const preview=await invoke(['ghidra','assembly','preview',...select(a),'--address',at,'--instructions','["NOP"]']);assert.equal(preview.value.bytes_hex,'90');
+  await invoke(['ghidra','namespaces','create',...select(a),'--name','InstalledNamespace']);
+  assert.ok((await invoke(['ghidra','namespaces','list',...select(a)])).value.items.some(row=>row.name==='InstalledNamespace'));
+  const exported=await invoke(['ghidra','formats','export',...select(a),'--exporter','Raw Bytes','--ranges','[{"start":"0x180000000","end":"0x180000002"}]','--output-directory',join(scratch,'installed-sdk-export')]);assert.equal(exported.value.selected,true);assert.equal((await readFile(join(scratch,'installed-sdk-export','program.out'))).toString(),'def');
   await invoke(['ipc-server','stop']);
   const phases=options.faults?['accepted','local_effect','local_save','local_ack','published','verified','publication_intent']:[];
   for(let i=0;i<phases.length;i++) {
@@ -126,7 +131,7 @@ try {
   }
   receipt={schema:1,scope:'installed native Factory facade IPC/OS secrets',sourceRevision:options['source-revision']??'working tree',
     artifactSha256:createHash('sha256').update(artifact).digest('hex'),sessions:2,targets:2,contexts:4,
-    packagedNativeQueryKernels:true,packagedSavedMemoryDigest:true,
+    packagedNativeQueryKernels:true,packagedSavedMemoryDigest:true,packagedSdkSavedEdits:true,packagedNativeRestrictedExport:true,
     equalBasenames:true,equalAddresses:true,parallelCliProcesses:true,independentPrivateViews:true,explicitMergeRefresh:true,
     conflictRetainedAfterOwnerRestart:true,managedServerRestartRetainsWork:true,requestIdRetryRetainsSession:true,
     faultPhases:phases,ghidra:'12.1.2',java:'21',node:process.versions.node,

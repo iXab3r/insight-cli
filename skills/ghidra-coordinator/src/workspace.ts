@@ -10,7 +10,7 @@ export interface ResearchTarget {
 }
 export interface ResearchSession { id: string; createdAt: string }
 export interface GhidraLoadSettings {
-  autoAnalyze: boolean; language?: string; compilerSpec?: string; imageBase?: string;
+  autoAnalyze: boolean; language?: string; compilerSpec?: string; imageBase?: string;loader?:string;loaderOptions?:Record<string,string|number|boolean>;
 }
 export interface GhidraModel {
   target: string; settings: GhidraLoadSettings; state: 'opening' | 'ready' | 'unknown';
@@ -55,11 +55,19 @@ type ContextPatch = Partial<Pick<GhidraContext,
 const now = () => new Date().toISOString();
 function loadSettings(value: GhidraLoadSettings): GhidraLoadSettings {
   if (typeof value.autoAnalyze !== 'boolean' || Object.keys(value).some(key =>
-      !['autoAnalyze', 'language', 'compilerSpec', 'imageBase'].includes(key)))
+      !['autoAnalyze', 'language', 'compilerSpec', 'imageBase','loader','loaderOptions'].includes(key)))
     fail('invalid', 'Ghidra load settings are malformed.');
   const result: GhidraLoadSettings = {autoAnalyze: value.autoAnalyze};
   if (value.language !== undefined) result.language = text(value.language, 128);
   if (value.compilerSpec !== undefined) result.compilerSpec = text(value.compilerSpec, 128);
+  if(value.loader!==undefined)result.loader=text(value.loader,512);
+  if(value.loaderOptions!==undefined){
+    if(!value.loader||!value.loaderOptions||Array.isArray(value.loaderOptions)||typeof value.loaderOptions!=='object'||Object.keys(value.loaderOptions).length>64)fail('invalid','Loader options require an explicit loader and at most 64 named primitive values.');
+    const options:Record<string,string|number|boolean>={};for(const [key,item]of Object.entries(value.loaderOptions)){
+      text(key,512);if(!['string','number','boolean'].includes(typeof item)||typeof item==='number'&&!Number.isSafeInteger(item))fail('invalid','Loader options require exact primitive values.');
+      if(typeof item==='string'&&(item.length>4096||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(item)))fail('invalid','Loader option text exceeds its bound.');options[key]=item;
+    }result.loaderOptions=options;
+  }
   if (value.imageBase !== undefined) {
     const address = text(value.imageBase, 128).toLowerCase().replace(/^0x/, '');
     if (!/^[a-f0-9]+$/.test(address)) fail('invalid', 'Image base must be hexadecimal.');

@@ -38,3 +38,6 @@ For owned GUI execution, CPU state, breakpoints and retained traces, read
 
 For explicit external documentation exchange and retained submission outcomes, read
 [archive](references/archive.md).
+
+For selected native SDK extensions (VT, DB differences, byte/assembly edits, formats, GDT,
+FID/BSim, namespaces and typed IR), read [native workflows](references/native-workflows.md).

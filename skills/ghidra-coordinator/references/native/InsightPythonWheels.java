@@ -19,6 +19,13 @@ class InsightPythonWheels {
         }
       }
     }
-    System.out.println("{\"state\":\"prepared\"}");
+    // Ghidra 12.1.2's LLDB adapter calls a nonexistent SBProcess.write_memory method.
+    // Adapt only the newly extracted owned copy; refuse a different upstream implementation.
+    Path methods=root.resolve("ghidralldb/methods.py");String source=Files.readString(methods);
+    String original="    proc.write_memory(offset, data)";
+    if(source.indexOf(original)<0||source.indexOf(original)!=source.lastIndexOf(original))throw new IllegalArgumentException("Unexpected pinned LLDB memory writer");
+    String replacement="    error = lldb.SBError()\n    written = proc.WriteMemory(offset, data, error)\n    if error.Fail() or written != len(data):\n        raise RuntimeError(\"LLDB memory write failed: \" + error.GetCString())";
+    Files.writeString(methods,source.replace(original,replacement),StandardOpenOption.TRUNCATE_EXISTING);
+    System.out.println("{\"state\":\"prepared\",\"lldb_memory_adapter\":\"insight-sbprocess-v1\"}");
   }
 }
