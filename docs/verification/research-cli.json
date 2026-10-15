@@ -16,23 +16,5 @@
   "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
   "limitations": [
     "source-package Factory fixture transport and credential adapter; final installed IPC/credential/crash/full-catalog gates remain"
-  ],
-  "sourceHashes": {
-    "scripts/proof-research-cli.mjs": "5bc619eadde4006560337b4d149be66543545b2084f607dd0d350e3469ac741a",
-    "skills/ghidra-coordinator/src/cli.ts": "117072af1876e80bbc7026919edfc2fe830be92360acdbe7bac351dc3940ef27",
-    "skills/ghidra-coordinator/src/research.ts": "0002073ed64feb3ebb739f8b1cd2493f003238f8841b314501f706d645db4c73",
-    "skills/ghidra-coordinator/src/workspace.ts": "c5e01a75ddcf8001a90b59f4f14de8da23ca0412d9da21befb2dcadf6141dc01",
-    "skills/ghidra-coordinator/src/artifacts.ts": "014c4bd019612d3110aa16e5e3a9ed87d9fda4f984efc06fb84c6a1fa89ae9c5",
-    "skills/ghidra-coordinator/src/contexts.ts": "9a4bb6370ea855f134c149b7688e097e815d4972dd2a201e33721ebdd4629261",
-    "skills/ghidra-coordinator/src/native-inputs.ts": "2c379480de4a947245779a544584f2462db92571c6e0c8a3cf7df2362a8978b9",
-    "skills/ghidra-coordinator/src/server.ts": "f827a5063a61b71e2b7d12dfb36bb0665ba344e98ff864506f7e080bcea624f7",
-    "skills/ghidra-coordinator/src/transport.ts": "13d7dd3118b1ef97c90211b89c675aef97340cf38ba2639a68f194e7162fa7dd",
-    "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
-    "skills/ghidra-coordinator/references/InsightRepositoryProbe.java": "63c8c5f747a88eeba1006338019c28c7725c860c91acc31808fbaa97dc53b16e",
-    "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "dbb3fa594b99cb1338a099002317806b6434de9c2d1fc5d94dc2219eb347aad8",
-    "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
-    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
-    "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
-    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6"
-  }
+  ]
 }

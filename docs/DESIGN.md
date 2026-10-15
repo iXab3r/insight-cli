@@ -7,13 +7,12 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
-This section records the intended contract. The `insight-cli` research subset and native context
-foundations are under implementation. The earlier `insight-ghidra` implementation remains a
-scoped-comment regression fixture for publication mechanisms.
-The prototype's behavior and tested limits are recorded below. The agreed walkthroughs are
-collected in [CLI scenarios](CLI-SCENARIOS.md); the agreed implementation sequence and exit
-criteria are in [the milestone plan](PLAN.md). Autonomous implementation is underway;
-[work items](WORK-ITEMS.md) distinguish verified checkpoints from remaining delivery work.
+This section records the implemented contract. The combined M0–M5 acceptance passed; the
+[full report](verification/full-facade.json) identifies the tested source, artifact and limits.
+The earlier `insight-ghidra` implementation remains a scoped-comment regression fixture for
+publication mechanisms, with its historical behavior recorded below. The agreed walkthroughs
+are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
+[work items](WORK-ITEMS.md) retain the delivery contract and checkpoint history.
 
 ### Full delivery scope agreed on 2026-10-14
 
@@ -94,8 +93,8 @@ insight-cli ghidra open --session s_a --target t_client --json
 
 The second form continues an existing context after reconnecting or process replacement.
 Separate target/session management can remain available, but is not required setup for each
-research task. Opening and ordinary research/edit commands are available; the full delivery gate
-remains open.
+research task. The combined native/installed acceptance covers opening and ordinary research/edit commands
+together with the full inventoried facade.
 
 Program-scoped research calls identify the session and target rather than changing a global
 active program. The facade resolves backend bindings and captures changes automatically;

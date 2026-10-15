@@ -7,6 +7,15 @@ that the eight bridge controls remain accounted for. This structural check is se
 behavioral acceptance: exact-revision native/installed evidence is required before final delivery.
 No generic raw-MCP passthrough satisfies this ledger.
 
+## Completed combined evidence
+
+The [full acceptance report](verification/full-facade.json) binds 23 passing native groups,
+installed CLI/IPC/crash verification and the tested artifact to implementation revision
+`300884e3c9be0928a8e1659e088aa2144c2c70b4`.
+[Machine-readable evidence joins](verification/coverage-evidence.json) map all 210 rows to their
+actual command/equivalent, permission and verification group. This does not widen automatic merge
+semantics or claim an exhaustive matrix of every input combination.
+
 ## Source baseline
 
 - GhidraMCP source: `57e37a8bf388b1279cff46378f85be1554548f61`, version 7.0.0.

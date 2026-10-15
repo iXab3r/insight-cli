@@ -17,41 +17,14 @@
   "independentFullBuffersVerified": true,
   "recoveryDoesNotCheckInAgain": true,
   "complexSavedStatePublished": true,
-  "scalarAfterLocalSignaturePublished": true,
   "complexDivergenceRetainsBoth": true,
   "publishedRevisions": 7,
   "ghidra": "12.1.2",
   "java": "21",
   "node": "24.21.0",
   "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
-  "elapsedMilliseconds": 248310,
-  "offlineTests": 49,
   "limitations": [
     "complete crash matrix and full complex catalog remain separate gates",
     "source Factory fixture transport and credential adapter"
-  ],
-  "sourceHashes": {
-    "scripts/proof-merge.mjs": "3eff9a53f54a0d43da30d73996a4d0c6a6f70f4205d92fa8ae1fa69f77eaa08d",
-    "skills/ghidra-coordinator/src/cli.ts": "f3833e9dd5c05b95af256ebcdbd51755b6f4fcdbc30b6f6db5aa85ff4f9b46e4",
-    "skills/ghidra-coordinator/src/research.ts": "bc0d57209d5e19e9f85102e0682b049b4fa692358c6cda754ddeaa7218a61c4d",
-    "skills/ghidra-coordinator/src/merge.ts": "08e1533ae1cc4c1d1a57748419f33187c1623afe0be6dab60f363aff8b6aff5c",
-    "skills/ghidra-coordinator/src/workspace.ts": "ce5ab7bd46a4200d16e92f5d7434731a9a6f7d8f8bc514d5aed9dc409381a6a0",
-    "skills/ghidra-coordinator/src/artifacts.ts": "014c4bd019612d3110aa16e5e3a9ed87d9fda4f984efc06fb84c6a1fa89ae9c5",
-    "skills/ghidra-coordinator/src/contexts.ts": "a3e22c1a062d5325fdba79755f427ea0a2adb2dd740daa67e3e18261313fecaf",
-    "skills/ghidra-coordinator/src/native-inputs.ts": "2c379480de4a947245779a544584f2462db92571c6e0c8a3cf7df2362a8978b9",
-    "skills/ghidra-coordinator/src/server.ts": "36e8bea7f5d8945b0c09458cd76e72e45a811985631331a34b683a2e8a751964",
-    "skills/ghidra-coordinator/src/transport.ts": "13d7dd3118b1ef97c90211b89c675aef97340cf38ba2639a68f194e7162fa7dd",
-    "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
-    "skills/ghidra-coordinator/references/InsightRepositoryProbe.java": "63c8c5f747a88eeba1006338019c28c7725c860c91acc31808fbaa97dc53b16e",
-    "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "cdf8769e1da82c9abe8a4f745bb34b1ee94a5c05ccad875f29452dd2e30d2edf",
-    "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "c2eb095f84356bef47c1526ba88ab6134499a5287d3dfc47ef538ebd04c5d371",
-    "skills/ghidra-coordinator/references/native/InsightHeadlessMain.java": "d401df336937d557792b2b07d8a624d5715c39899c35db7db26570254f8fb60e",
-    "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
-    "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "12288d388905dfdbb31afd03c8da174a931a3ad1966157c88c1259604b4a5ff0",
-    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
-    "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
-    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6",
-    "skills/ghidra-coordinator/references/native/InsightSnapshotFields.java": "5aa75cf5524ae3ad2e4acdd1d630cd0b557f38fec8998aa4db92a0c705e239a9",
-    "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "7860b40fcae7aafe9f1f3f3092a995fd307b3fd7d3b0dbf8b6bf0ec59ce6be00"
-  }
+  ]
 }

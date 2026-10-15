@@ -48,10 +48,10 @@
     "src/transport.ts": "5c078269e49cf71932770e3dfee0ac5fd8351fa3a38aa5f002d745af496dca97",
     "src/scripts.ts": "8e76f4370d242d9aaa1bda4cca01b2932c7c8908e6fd0816d2c48986ec757e01",
     "src/queries.ts": "a6e2670723a90ceabeef9a9ab2b8ba12afa629d2002d924eae7e3cc2237f0f76",
-    "src/query-results.ts": "4f8ee3bb74e6b63e9497e12aa9d18b32c7f9a707c0c0bac1741c28b7b48c8d56",
+    "src/query-results.ts": "91ea046ac501f95092d0d68e756ec68294cf6869d2688e6b73e712443bb79006",
     "references/queries.json": "744a31289f05b788f3030c9c769fd7a518d24536f6a023b88bd3f03a9ecb7bf2",
     "references/mutations.json": "8939bd1761b52da1f71ea8522fcf75fb8fdc08ab7708497b2de439a71243a63e",
-    "references/native/InsightServerAdministration.java": "de0c77cd9c2842a819729789ddf7e3e58350b564c40bbae35b2d468aebe2518e",
+    "references/native/InsightServerAdministration.java": "c2a546c2fc488fe67b6d286e26f7583eabdf60e8fd2704cb27ab5c34c28f5c78",
     "references/native/InsightSnapshotInspect.java": "3bcf35c44bf94a8c6f90a9d401243033fc8ed019186a10b4d955267f8a2f8307",
     "references/native/InsightApplyDocumentation.java": "3548b99a04b771d5e1defba9bc4fbf0c26de2a11b211091aecf74ad2467aeab1"
   },

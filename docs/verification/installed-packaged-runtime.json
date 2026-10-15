@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "scope": "installed native packaged runtime without a bridge checkout",
+  "artifactSha256": "64d52ed60e896e973596a243be66c3fe4bab9884fee2f1480956da4184e31e88",
+  "sourceRevision": "300884e3c9be0928a8e1659e088aa2144c2c70b4",
+  "profileMcpJarOverrideAbsent": true,
+  "installedJarClasspathVerified": true,
+  "packagedJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "publicOpenAndFunctionRead": true,
+  "ownedCloseVerified": true,
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "limitations": [
+    "source-independent installed API with the Factory credential fixture; real IPC/OS-keyring acceptance is in installed-sessions.json"
+  ]
+}

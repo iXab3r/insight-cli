@@ -5,7 +5,21 @@ The owner selected one combined M0–M5 delivery and closed the product decision
 Items produce code, fixtures or exact-revision evidence inside the
 existing product; they do not add separate CLIs, a generic plugin framework or agent-visible jobs.
 
-## Current progress
+## Completed delivery
+
+All ordered M0–M5 work items, including M5-06, passed combined acceptance at implementation
+revision `300884e3c9be0928a8e1659e088aa2144c2c70b4`. The
+[full report](verification/full-facade.json) records 23 native groups, 93 offline tests, installed
+CLI/Factory IPC/OS-keyring checks and seven actual owner-crash phases. All 210 operations and eight
+bridge equivalents have [command/effect evidence](verification/coverage-evidence.json).
+The installed native runtime also works without a `mcpJar` override or bridge checkout.
+
+The records below are checkpoint history: their intermediate open-gate notes are superseded by
+the combined report, while each receipt still identifies exactly what its individual runner proved.
+Native Windows/Linux, automatic strategies, archive-service deployment and npm publication remain
+outside the selected delivery.
+
+## Checkpoint history
 
 M1-01 passed on an owned native fixture: private save/reopen, headless/GUI interchange,
 full-state publication, independent readback and stale-base refusal. The

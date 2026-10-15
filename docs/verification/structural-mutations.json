@@ -44,19 +44,19 @@
   "node": "24.21.0",
   "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
   "sourceHashes": {
-    "src/mutations.ts": "91c9fa139f3146881f80abb585777886457e934f1d102cb75c7e863ee80e031f",
-    "src/mutation-effects.ts": "ab5b32e768498ac20d2f4c12ad10d18d11fe17ee069e46be29284bc827fa11b7",
-    "src/research.ts": "27d23b9ed0b269154adf6dc5e2188b4bab994a3201bef2e4d3bd7d373c4b2447",
-    "src/contexts.ts": "64e163414b13d190714ac9818371fa75a97b2b84e1dc2150ad3eeb7eff58f3f5",
-    "src/server.ts": "9413165ae8a929b0e1bcf1f357e9325a65b37b3b4328c19f0a120af81fdd427a",
-    "src/native-inputs.ts": "4b2038cc862158d23716ab8306c6ba18935a85a6d5a7ba4dc68918cebbbbb2dc",
-    "src/arguments.ts": "fc072668f2528ae15e492d96a996d994dcb676bdc1a9b4c6134d69d350700560",
+    "src/mutations.ts": "573bc1880402ec3fc81af883e03d3550d13be6e1bd13496ea5f2176d9852b7c6",
+    "src/mutation-effects.ts": "a0c454853a45589cd55dd039cbc71214fd7cfa4d3cf55669e8323145d59030df",
+    "src/research.ts": "2531374cf42d82b357d79ee495da8816d456bdd0375a1bbda83f0ebd02e91942",
+    "src/contexts.ts": "7ccd4ecfbd3c206cde1d6fccf1c7bcfb84254fe28e8f06debd48dd3234cb007f",
+    "src/server.ts": "648af95e8e5badd16c7c616f34fd96af0b6104687dcfc3ab66a5218ac73695c7",
+    "src/native-inputs.ts": "a165fd886343cc5ae7fe2c0fe18d0c369a2fd8b627032080713fdd559661f14f",
+    "src/arguments.ts": "818e28e7bc578c3a4aa4be461aa53d0af7f78b1178d44b35bf1c893071ca2bb0",
     "src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
-    "src/transport.ts": "4984a5cba241590be514e95b8555e63843e441ecfe7e99fea35637fa2b35c5a5",
-    "references/mutations.json": "236da17d1a0b6082fffd598639b01395c96da5e0c1ffc9a9f8231606aacbedf3",
-    "references/native/InsightSnapshotInspect.java": "f9dc96cce9a4ec1f671396ef780cff783f3a39ea0fee4ab7984a4e328c291725"
+    "src/transport.ts": "5c078269e49cf71932770e3dfee0ac5fd8351fa3a38aa5f002d745af496dca97",
+    "references/mutations.json": "8939bd1761b52da1f71ea8522fcf75fb8fdc08ab7708497b2de439a71243a63e",
+    "references/native/InsightSnapshotInspect.java": "3bcf35c44bf94a8c6f90a9d401243033fc8ed019186a10b4d955267f8a2f8307"
   },
-  "bundledRuntime": true,
+  "bundledRuntime": false,
   "limitations": [
     "source Factory fixture and synthetic credentials",
     "remaining program edit groups and result variants still require acceptance"

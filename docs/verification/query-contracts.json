@@ -1,18 +1,18 @@
 {
   "sourceHashes": {
-    "src/cli.ts": "419703cb7377dbcc07166166c4ba54e6506b5daed7036aeaf1129b264dfea5dc",
+    "src/cli.ts": "2bf90f087faffc2c7416fbd2a937c2b5ec31fccd23a0d1ec8d3d09f6bd11adce",
     "src/queries.ts": "a6e2670723a90ceabeef9a9ab2b8ba12afa629d2002d924eae7e3cc2237f0f76",
-    "src/query-results.ts": "4f8ee3bb74e6b63e9497e12aa9d18b32c7f9a707c0c0bac1741c28b7b48c8d56",
+    "src/query-results.ts": "91ea046ac501f95092d0d68e756ec68294cf6869d2688e6b73e712443bb79006",
     "src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
     "src/transport.ts": "5c078269e49cf71932770e3dfee0ac5fd8351fa3a38aa5f002d745af496dca97",
     "src/scripts.ts": "8e76f4370d242d9aaa1bda4cca01b2932c7c8908e6fd0816d2c48986ec757e01",
-    "src/research.ts": "96ba70574f7233d1f5e8ca6e69f352725b5fd53dceae7cc6811687511dca0eff",
-    "src/contexts.ts": "c05c2baa49e066dfeb16f1ad97bfc0419d81a367f2c2cfdf8fb42591a56b4730",
+    "src/research.ts": "2531374cf42d82b357d79ee495da8816d456bdd0375a1bbda83f0ebd02e91942",
+    "src/contexts.ts": "7ccd4ecfbd3c206cde1d6fccf1c7bcfb84254fe28e8f06debd48dd3234cb007f",
     "src/server.ts": "648af95e8e5badd16c7c616f34fd96af0b6104687dcfc3ab66a5218ac73695c7",
-    "src/native-inputs.ts": "af18d6fa16899983199fdd4a348e0c9202da1f4cb11a6769a8c3cb567b5174ce",
-    "src/workspace.ts": "20ed6653029535b74dc480ae1467b529ca798d599f3dd8d0415c910c6640d314",
+    "src/native-inputs.ts": "a165fd886343cc5ae7fe2c0fe18d0c369a2fd8b627032080713fdd559661f14f",
+    "src/workspace.ts": "42eafc11ed9fc709f199026ad7a319e4d988b161686fbdbd8fe44320d5dd6ffd",
     "references/queries.json": "744a31289f05b788f3030c9c769fd7a518d24536f6a023b88bd3f03a9ecb7bf2",
-    "references/native/InsightSnapshotInspect.java": "a86e9b05aa1376e537b3cbbdc60828dd694f8b6df4991c055e4f7bcd9cc51d6f"
+    "references/native/InsightSnapshotInspect.java": "3bcf35c44bf94a8c6f90a9d401243033fc8ed019186a10b4d955267f8a2f8307"
   },
   "schema": 1,
   "scope": "owned native scoped query contracts",

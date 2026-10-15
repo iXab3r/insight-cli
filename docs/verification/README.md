@@ -1,5 +1,28 @@
 # Verification scope
 
+## Combined full facade acceptance
+
+The [full report](full-facade.json) records the completed M0–M5 gate: 93 offline tests, 23 native
+groups and the exact installed artifact/source hashes. [Operation evidence](coverage-evidence.json)
+accounts for all 210 pinned operations and eight bridge equivalents. The installed matrix uses
+real Factory IPC, OS-keyring accounts, two inputs/four contexts and seven owner SIGKILL phases.
+[Installed packaged runtime](installed-packaged-runtime.json) additionally verifies native loading
+from the installed bundled JAR without a source-checkout override.
+
+Implementation revision: `300884e3c9be0928a8e1659e088aa2144c2c70b4`. Tarball SHA256:
+`64d52ed60e896e973596a243be66c3fe4bab9884fee2f1480956da4184e31e88`. Native acceptance is macOS,
+Ghidra 12.1.2, Java 21 and Node 24.21.0; other native OS acceptance is deferred. Archive evidence
+checks the integration contract against an owned fixture. External-service deployment, automatic
+strategies, universal native DB merge, execution resurrection and npm publication are excluded.
+
+Every runner is under `scripts/` and requires `--ack-disposable` plus explicit `--java`,
+`--ghidra-home`, `--mcp-jar`, `--clang` and `--lld` paths as applicable. Run
+`acceptance-facade.mjs --faults` for installed owner failures; native runners refuse CI and use only
+owned fixtures. The full report lists all 23 runner names and individual receipt hashes.
+Historical prototype/checkpoint notes below do not limit or replace the completed combined gate.
+
+## Historical and individual checkpoint scope
+
 The default suite uses offline synthetic publishers and real child-process SIGKILL at acceptance,
 local application, save, persisted check-in intent, publication acknowledgment and verification.
 It checks journal survival, recovery without another check-in, live-owner refusal, idempotency,

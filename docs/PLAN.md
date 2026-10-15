@@ -3,8 +3,8 @@
 The owner requested documentation and milestone planning on 2026-10-14. The product contract is
 in [DESIGN](DESIGN.md#agreed-product-model), with concrete [CLI scenarios](CLI-SCENARIOS.md).
 The owner subsequently selected one full M0–M5 implementation pass and answered the product
-decisions below. This plan records the full delivery contract and internal checkpoints; this
-documentation update does not implement the facade or approve npm publication.
+decisions below. This plan records the delivery contract and completed acceptance. Npm
+publication remains excluded.
 
 ## Closed owner decisions
 
@@ -29,7 +29,16 @@ The owner also confirmed the archive-service boundary: it is an explicitly confi
 dependency. All owner questions raised for this full pass are answered. The concrete implementation
 backlog is in [work items](WORK-ITEMS.md).
 
-## Current baseline
+## Completed acceptance
+
+M0–M5 passed as one combined result at implementation revision
+`300884e3c9be0928a8e1659e088aa2144c2c70b4`. The
+[full report](verification/full-facade.json) binds all 23 native groups and the installed owner/IPC
+crash matrix to the tested tarball. All 93 offline tests and isolated package checks pass.
+[Coverage evidence](verification/coverage-evidence.json) accounts for all 210 operations and eight
+bridge equivalents; native macOS limits and deferred scope remain explicit.
+
+## Starting baseline (historical)
 
 | Area | Existing evidence | Remaining work |
 | --- | --- | --- |
@@ -65,12 +74,12 @@ can change only with the real product transition; this plan adds no second imple
 
 | ID | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
-| M0 | Documented contract, pinned coverage audit and acceptance plan | — | Contract and source catalog audited; typed adapter schemas belong to implementation |
-| M1 | Open and continue isolated contexts for several inputs and agents | M0; relevant M1 decisions | Native and public implementation checkpoints verified |
-| M2 | Agent reads and makes recoverable ordinary edits | M1; relevant M2 decisions | Public research/save checkpoint verified |
-| M3 | Publish, refresh and resolve supported conflicts | M2; relevant M3 decisions | Scalar/complex publication, refresh and recovery checkpoint verified |
-| M4 | Installed research workflow passes concurrent/crash checks | M3 | Installed owner/IPC matrix verified; remaining failure cases and final repeat pending |
-| M5 | Full inventoried facade and combined delivery acceptance | M4; operation-specific engineering | In progress; full functional coverage and final gate remain open |
+| M0 | Documented contract, pinned coverage audit and acceptance plan | — | Complete: contract, source catalog and typed adapter accounting |
+| M1 | Open and continue isolated contexts for several inputs and agents | M0; relevant M1 decisions | Complete: native and public isolation/recovery verified |
+| M2 | Agent reads and makes recoverable ordinary edits | M1; relevant M2 decisions | Complete: ordinary reads/edits and durable save verified |
+| M3 | Publish, refresh and resolve supported conflicts | M2; relevant M3 decisions | Complete: scalar/complex publication, refresh and recovery verified |
+| M4 | Installed research workflow passes concurrent/crash checks | M3 | Complete: final installed owner/IPC/keyring matrix passed |
+| M5 | Full inventoried facade and combined delivery acceptance | M4; operation-specific engineering | Complete: full catalog and combined final artifact gate passed |
 
 M1–M4 are internal implementation/verification checkpoints in one pass. Delivery is complete only
 after M5 covers the whole agreed inventory and the combined artifact repeats the reliability and
@@ -235,8 +244,8 @@ source/artifact revision. Broad functional availability does not widen automatic
 Pause/finish/reopen workflow expansion, a hypothetical second tool, cross-tool transactions and a
 general plugin framework remain deferred. Add them only when a concrete consumer scenario needs them.
 
-No further owner choice is required for the decisions closed above. The next implementation task
-is the M1 native private-state/publication proof, followed by the storage/runtime work in
-[the backlog](WORK-ITEMS.md). Typed operation work proceeds within the closed plan. Track delivery
-under [Factory #49](https://github.com/iXab3r/EyeAuras.CliFactory/issues/49)
-and keep the consumer PR draft until combined full-delivery acceptance passes.
+No further owner choice is required for the closed delivery. All ordered work items have their
+combined acceptance evidence in [the full report](verification/full-facade.json); historical
+checkpoints remain available in [verification](verification/README.md). Source delivery is tracked
+under [Factory #49](https://github.com/iXab3r/EyeAuras.CliFactory/issues/49). Npm publication,
+production migration and the deferred scope above are not implied by completion.

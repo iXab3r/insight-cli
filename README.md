@@ -5,14 +5,17 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
-**Implementation checkpoint:** the command tree now accounts for all 210 pinned operations and
-eight bridge-control equivalents, including static reads/edits, merge/refresh, project/server/GUI
-controls, native LLDB debugging, archive exchange and explicit save/discard lifecycle. The
-[native checkpoints](docs/verification/README.md) identify their exact sources and limitations;
-93 offline tests pass. The final combined installed/crash acceptance remains in progress. The
-owner requested the complete M0–M5 result; command accounting alone does not finish that gate.
-See [design](docs/DESIGN.md), [scenarios](docs/CLI-SCENARIOS.md), [work items](docs/WORK-ITEMS.md) and
-[coverage](docs/GHIDRA-COVERAGE.md). No npm publication is included.
+The agreed **M0–M5 delivery is implemented and verified**: all 210 pinned operations and eight
+bridge-control equivalents map to 215 public leaves. The [combined acceptance report](docs/verification/full-facade.json)
+records 93 passing offline tests, 23 passing native groups, the installed CLI/IPC/OS-keyring crash
+matrix and the exact tested source/artifact hashes. [Coverage evidence](docs/verification/coverage-evidence.json)
+joins each inventoried operation to its command/equivalent and verification group.
+
+Native acceptance targets macOS/Ghidra 12.1.2/Java 21. It includes two simultaneous GUI/LLDB
+contexts, retained trace/mapping recovery, explicit merge/refresh and seven owner SIGKILL phases.
+Native Windows/Linux acceptance, automatic strategies, universal native DB merging, external
+archive-service deployment and npm publication remain outside this pass. See
+[design](docs/DESIGN.md), [scenarios](docs/CLI-SCENARIOS.md) and [milestones](docs/PLAN.md).
 
 Use Node 24 or newer:
 
