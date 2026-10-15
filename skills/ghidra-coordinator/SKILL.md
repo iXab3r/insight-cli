@@ -15,8 +15,8 @@ these installed resources. Use generated `--help` for syntax; read the reference
 3. Pass both `--session` and `--target` on research calls. Follow strings to xrefs and their
    function addresses, then inspect/decompile. See [research](references/research.md).
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
-   verified saved private work. Other sessions keep their own views; local edits remain unpublished.
-5. Publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.
+   verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
+5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.
    Resolve overlapping names/comments against an explicitly observed shared value. A conflict
    prevents the whole selected merge and retains local work.
 6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
@@ -41,3 +41,6 @@ For explicit external documentation exchange and retained submission outcomes, r
 
 For selected native SDK extensions (VT, DB differences, byte/assembly edits, formats, GDT,
 FID/BSim, namespaces and typed IR), read [native workflows](references/native-workflows.md).
+
+For managed SDK extension modules, actual language/analyzer/plugin discovery and opt-in
+automatic synchronization, read [extensions and sync](references/extensions-and-sync.md).

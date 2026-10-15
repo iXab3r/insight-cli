@@ -1,5 +1,35 @@
 # Verification scope
 
+## P3 extensions and automatic synchronization
+
+[P3 evidence](api-gaps-p3.json) closes N10 and opt-in automatic publication/refresh. It records
+118 passing offline tests, nine P3 native cases, 13 native SDK regression cases and two real
+Factory IPC-owner SIGKILL phases (`local_ack`, `verified`). The caller's request ID reserves the
+whole workflow; repeating it after a crash produces one setter and one publication. The native
+installed-package checks also cover conflict retention, lost publication responses and module
+activation across owner replacement.
+
+A disposable extension supplies an actual compiled analyzer, GUI plugin, script and Sleigh
+processor/compiler. The tests discover them through native APIs, run/configure analysis, publish
+saved effects, import/assemble with the new language and toggle the owned GUI plugin. Every
+runtime input is hashed before/after acceptance; the isolated installed JS/Java resources match
+those hashes. The tested npm artifact SHA256 is
+`6923f2b90129856196cd6e31c127f5c84e3d99fb40af8ad1b0f918ef7cca4a7e`.
+
+Native P3 acceptance is macOS headless/GUI. Earlier P2 Windows/Linux evidence retains its own
+identity and does not imply all P3 operations ran on those OSes. Ordinary CI stays offline.
+Ready-built module consumption and synchronization boundaries are in the installed
+[agent reference](../../skills/ghidra-coordinator/references/extensions-and-sync.md).
+
+Reproduce after the locked dependency setup with `npm test` and
+`node scripts/test-package.mjs --keep-installed`. The latter prints its owned installed path.
+Run `scripts/proof-p3.mjs --ack-disposable` with explicit Java/Ghidra/clang/lld paths; optional
+`--installed-package` and `--installed-tarball` select that isolated artifact and verify its
+resource bytes. `scripts/acceptance-facade.mjs --automatic-faults --ack-disposable` adds actual
+owner kills using fixture-only barriers; it also requires the pinned MCP JAR path. The unchanged
+`scripts/proof-p2-sdk.mjs` supplies the affected SDK regression. All runners create/stop their
+own resources; no existing user project or instance is selected.
+
 ## Selected P2 workflows
 
 [Separate P2 evidence](api-gaps-p2.json) records candidate `98983d3972c9f09807fd9b03ce99ce46e86a45ff`,

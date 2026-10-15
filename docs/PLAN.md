@@ -11,7 +11,7 @@ publication remains excluded.
 | Topic | Selected behavior |
 | --- | --- |
 | Delivery | Entire M0–M5, accepted as one combined result |
-| Publication mode | Explicit merge/refresh; automatic strategies deferred |
+| Publication mode | Explicit merge/refresh by default; subsequent P3 adds opt-in after-edit/after-save publication and before-edit refresh |
 | Complex program edits | Publish a verified saved result if shared base is unchanged; after divergence automatically combine only verified categories |
 | Complex conflicts | Preserve local/shared versions; caller transfers desired work onto the current base; no force replacement |
 | Mixed merge | Any conflict prevents publication of the whole selected merge; preserve all local work |
@@ -152,7 +152,7 @@ Local persistence and mutation ordering are required now, not deferred to final 
 
 Deliver explicit `ghidra merge` and `ghidra refresh` for the selected context, initially for
 comments and function names once their exact field contracts are settled. The owner selected this
-explicit mode for the entire pass; automatic modes are deferred.
+explicit mode for the M0–M5 pass; P3 subsequently adds opt-in per-context synchronization.
 
 Exit:
 
@@ -230,6 +230,15 @@ The final artifact must also repeat the M4 A/B/crash suite after all operation g
 pass installed CLI/skill/Factory transport checks and satisfy the coverage ledger at the exact
 source/artifact revision. Broad functional availability does not widen automatic merge claims.
 
+## Subsequent P3 delivery
+
+The later autonomous P3 request expands the original scope with ready-built managed SDK modules
+and opt-in per-context synchronization. Language/analyzer/script/GUI plugin workflows and
+publication after edit/save plus refresh before edit use the existing sessions, targets, saved
+contexts and conflict/recovery rules. No new agent-visible lifecycle object is introduced.
+[P3 evidence](verification/api-gaps-p3.json) records native macOS and installed-package checks
+at their own source identity. Defaults and historical M0–M5/P2 evidence stay explicit.
+
 ## Engineering work owned by implementation
 
 | Before | Engineering task | Constraint already agreed |
@@ -241,8 +250,11 @@ source/artifact revision. Broad functional availability does not widen automatic
 | M3 multi-change operations | Capture verified saved state; test dependencies, partial failures, refresh and publication gates | Merge publishes nothing on conflict; refresh receives safe changes; no unproved atomicity |
 | M5 operation groups | Scripts/batches, structural changes, GUI/debugger and external effects | Full functionality; unchanged-base publication; divergence conflicts outside verified categories |
 
-Pause/finish/reopen workflow expansion, a hypothetical second tool, cross-tool transactions and a
-general plugin framework remain deferred. Add them only when a concrete consumer scenario needs them.
+Pause/finish/reopen workflow expansion, a hypothetical second tool, cross-tool transactions and
+an unrestricted plugin SDK remain outside the selected contracts. P3 adds content-pinned ready-built
+extension modules, native capability discovery, managed GUI enablement and explicit synchronization
+policies; [the agent contract](../skills/ghidra-coordinator/references/extensions-and-sync.md)
+defines the tested workflows and boundaries.
 
 No further owner choice is required for the closed delivery. All ordered work items have their
 combined acceptance evidence in [the full report](verification/full-facade.json); historical

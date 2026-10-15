@@ -12,10 +12,12 @@ and **G01–G07 P0/P1 closure**. The upstream `/find_dead_code` and `/detect_cry
 have bounded native facade replacements; nested placeholders fail. Audited memory/prototype input
 variants and stronger semantic/result contracts are implemented. [Current closure evidence](verification/api-gaps.json)
 identifies the newer implementation and affected native/installed regressions. The historical 210/8/215 count
-does not imply complete SDK breadth or an exhaustive parameter matrix. The current 261-leaf tree
+does not imply complete SDK breadth or an exhaustive parameter matrix. The current 271-leaf tree
 adds [selected native P2 workflows](verification/api-gaps-p2.json), including genuine VT/FID/BSim,
 DB differences, byte/assembly/context editing, formats, GDT, namespaces, typed IR and live/trace
-operations. Those extensions do not change the 210 pinned operation mappings or eight controls.
+operations. P3 adds managed ready-built SDK modules, native capability inventories, owned GUI
+plugin enablement and opt-in per-context synchronization; [its evidence](verification/api-gaps-p3.json)
+is separate from the historical reports. Those extensions do not change the 210 pinned operation mappings or eight controls.
 
 ## Completed combined evidence
 

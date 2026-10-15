@@ -1,4 +1,4 @@
-import { command, createCli, Permission, CliError, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
+import { command, createCli, Permission, CliError, ProfileStore, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
 import { join, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -15,7 +15,7 @@ import {Administration,administrationCommands} from './administration.js';
 import {Lifecycle,lifecycleCommands} from './lifecycle.js';
 import {utilityCommands} from './utility.js';
 import {Projects,projectCommands} from './projects.js';
-import {UserInterface,uiCommands} from './ui.js';
+import {UserInterface,uiCommands,pluginCommands} from './ui.js';
 import {Debugger,debuggerCommands} from './debugger.js';
 import {Archive,archiveCommands} from './archive.js';
 import {blockContent} from './memory-inputs.js';
@@ -24,6 +24,8 @@ import {sdkCommands} from './sdk.js';
 import {SdkFiles,sdkFileCommands} from './sdk-files.js';
 import {parseDomainJson} from './json.js';
 import {VersionTracking,trackingCommands} from './version-tracking.js';
+import {Extensions,extensionCommands,extensionState,extensionInventoryCommands,managedExtensions} from './extensions.js';
+import {Synchronization,synchronizationCommands} from './sync-policy.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -39,7 +41,7 @@ class Owner {
   constructor(private readonly options: Options) {}
   selected(c: CommandContext) {
     const directory=c.appArguments.AppDataDirectory;
-    const configuration=digest(Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])));
+    const configuration=digest({profile:Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])),extensions:extensionState(join(directory,'workspace')).modules.filter(m=>m.enabled).map(m=>[m.name,m.sha256])});
     let profile=this.profiles.get(directory);
     if(!profile) {
       profile={workspace:new Workspace(join(directory,'workspace'),c.profile.name),tasks:new Map(),configuration};
@@ -49,13 +51,17 @@ class Owner {
     const selected=profile;
     const backend=async()=>{
       if(!selected.backend)selected.backend=Promise.resolve(this.options.backend?
-        this.options.backend(selected.workspace,c):nativeInputs(c.profile.values).then(inputs=>new GhidraContexts(selected.workspace,inputs,c)))
+        this.options.backend(selected.workspace,c):nativeInputs(c.profile.values,selected.workspace.directory).then(inputs=>new GhidraContexts(selected.workspace,inputs,c)))
         .catch(error=>{selected.backend=undefined;throw error;});
       const result=await selected.backend;
+      if(result instanceof GhidraContexts)await managedExtensions(selected.workspace.directory);
       return result instanceof GhidraContexts?result.fork(c):result;
     };
     const research=new Research(profile.workspace,backend,profile.tasks);
-    return {workspace:profile.workspace,research,administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),sdkFiles:new SdkFiles(profile.workspace,research,backend),tracking:new VersionTracking(profile.workspace,research,backend,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
+    return {workspace:profile.workspace,research,synchronization:new Synchronization(profile.workspace,research,async()=>{
+      const store=this.options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
+      if(!(await store.getPermissions(c.profile.name))?.includes(Permission.Update))throw new CliError('Automatic synchronization requires the current Factory Update permission.',{code:'permission.denied',next:[['permissions','grant','Update']]});
+    }),administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),sdkFiles:new SdkFiles(profile.workspace,research,backend),tracking:new VersionTracking(profile.workspace,research,backend,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
@@ -118,10 +124,20 @@ const mode=(value:unknown):ToolMode|undefined=>{
   if(value!=='headless'&&value!=='gui')fail('invalid','Mode must be headless or gui.');return value;
 };
 const targetView=(target:ReturnType<Workspace['target']>)=>({target:target.id,name:target.name,binarySha256:target.binarySha256,size:target.size,createdAt:target.createdAt});
-function scopedFailures(entry:CommandDefinition):CommandDefinition {
+function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[]):CommandDefinition {
+  const path=[...parents,entry.name.split(' ')[0]!],name=path.join(' ');
   const run=entry.run;
-  return {...entry,...(entry.children?{children:entry.children.map(scopedFailures)}:{}),...(run?{run:async(input,c)=>{
-    try{return await run(input,c);}catch(error){
+  return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{
+    try{
+      let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
+      if(!selected)return await run(input,c);
+      const services=owner.selected(c);
+      return await services.research.boundary(selected,async()=>{
+        const excluded=['open','merge','refresh','sync-policy','close','changes','debugger','ui','version-tracking','archive','projects','repository','server','formats','libraries','plugins'];
+        const eligible=entry.permission!==Permission.ReadOnly&&entry.permission!==undefined&&!excluded.includes(path[1]!)&&!['ghidra types archive-export','ghidra documentation transfer'].includes(name);
+        return eligible?services.synchronization.execute(selected,name,{...input.options,commandArguments:input.args},async requestId=>run({...input,options:{...input.options,...(requestId?{requestId}:{})}},c)):run(input,c);
+      });
+    }catch(error){
       let selected;try{selected=scope(input.options);}catch{throw error;}
       if(!(error instanceof CliError))throw error;
       const result=error.result&&typeof error.result==='object'&&!Array.isArray(error.result)?error.result:{};
@@ -288,6 +304,6 @@ export function createDefinition(options: Options = {}): CliDefinition {
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
       mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
-        ...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])}):entry)};
+        ...extensionCommands(c=>new Extensions(join(c.appArguments.AppDataDirectory,'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

@@ -6,7 +6,7 @@ import {constants} from 'node:fs';
 import { join, delimiter, sep, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
-import { nativeHelpers, nativeInputs,nativeJvmDirectories, type NativeInputs } from './native-inputs.js';
+import { nativeHelpers, nativeInputs,nativeJvmDirectories,nativeExtensionArguments, type NativeInputs } from './native-inputs.js';
 import { GhidraServer, type ServerBinding } from './server.js';
 import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState } from './workspace.js';
 import { type Artifact } from './artifacts.js';
@@ -63,7 +63,7 @@ export class GhidraContexts {
   }
   private async launch(root: string, target: ResearchTarget, kind: ProcessBinding['kind'], program: string,
     mode: ToolMode, context?: string, credentials: Record<string,string> = {}): Promise<Running> {
-    if((await nativeInputs(this.c.profile.values)).fingerprint!==this.inputs.fingerprint)
+    if((await nativeInputs(this.c.profile.values,this.workspace.directory)).fingerprint!==this.inputs.fingerprint)
       fail('binding','Native runtime inputs changed; stop the owner before using a different build.');
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
@@ -87,7 +87,7 @@ export class GhidraContexts {
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
     const child=spawn(this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
-      ...nativeJvmDirectories(root),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
+      ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
           GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
@@ -340,8 +340,18 @@ export class GhidraContexts {
         code:source.replace('class InsightApplyDocumentation ',`class ${name} `),
         args:Buffer.from(JSON.stringify(parameters.json_body),'utf8').toString('base64')});
     }
+    if(operation==='/configure_analyzer'&&(this.inputs.extensionRoots?.length??0)>0){
+      // A packed program need not persist disabled/default analyzer option registrations.
+      // Register this JVM's actual applicable extension analyzers before the pinned handler's
+      // Options.contains check. The surrounding program request already owns its journal.
+      const name='InsightAnalyzerOptions_'+randomUUID().replaceAll('-','');
+      const code=`import ghidra.app.script.GhidraScript;
+public class ${name} extends GhidraScript {public void run(){ghidra.app.plugin.core.analysis.AutoAnalysisManager.getAnalysisManager(currentProgram).initializeOptions();println("INSIGHT_ANALYZER_OPTIONS_READY");}}`;
+      const initialized=object(await record.http.call('/run_script_inline',{program:record.binding.program,code}));
+      if(initialized.success!==true||typeof initialized.console_output!=='string'||!initialized.console_output.includes('INSIGHT_ANALYZER_OPTIONS_READY'))fail('partial','Installed analyzer option registration could not be established.');
+    }
     if(operation==='/run_ghidra_script') {
-      const script=String(parameters.script_name),path=await scriptPath(this.inputs.ghidraHome,record.binding.root,script);
+      const script=String(parameters.script_name),path=await scriptPath(this.inputs.ghidraHome,record.binding.root,script,this.inputs.extensionRoots);
       const value=object(await record.http.call(operation,{...parameters,script_name:path,program:record.binding.program}));
       delete value.script_path;value.script_name=script;return value;
     }
@@ -375,7 +385,7 @@ public class ${name} extends GhidraScript {
   async saved(scope: Scope): Promise<Artifact> {return this.capture(await this.selected(scope));}
   async scripts(scope:Scope,filter:string,limit:number,offset:number) {
     const record=await this.selected(scope);
-    return scriptInventory(this.inputs.ghidraHome,record.binding.root,filter,limit,offset);
+    return scriptInventory(this.inputs.ghidraHome,record.binding.root,filter,limit,offset,this.inputs.extensionRoots);
   }
   async inspect(snapshot:Artifact,parameters:Record<string,unknown>) {
     const root=join(this.directory(),'inspection',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
@@ -469,6 +479,14 @@ public class ${name} extends GhidraScript {
   async project(operation:string,parameters:Record<string,unknown>) {return this.server().project(operation,parameters);}
   async ui(scope:Scope,operation:string,p:Record<string,unknown>){
     const record=await this.selected(scope);await this.reconcilePeers(record);
+    if(operation==='plugins_list'||operation==='plugins_set'){
+      if(record.binding.mode!=='gui')fail('configuration','Managed plugins require the owned GUI context.');
+      const base='InsightPlugins',name=base+'_'+randomUUID().replaceAll('-',''),source=await readFile(new URL('../../references/native/'+base+'.java',import.meta.url),'utf8');
+      const result=object(await record.http.call('/run_script_inline',{program:record.binding.program,code:source.replace('class '+base+' ',`class ${name} `),args:Buffer.from(JSON.stringify({...p,operation:operation==='plugins_list'?'list':'set'})).toString('base64')}));
+      const lines=typeof result.console_output==='string'?result.console_output.split(/\r?\n/).filter(line=>line.includes('INSIGHT_PLUGINS:')):[];
+      if(result.success!==true||lines.length!==1)fail('partial','Managed plugin effect was not established.');
+      return object(JSON.parse(lines[0]!.slice(lines[0]!.indexOf('INSIGHT_PLUGINS:')+16)));
+    }
     const paths:Record<string,string>={cursor:'/get_ui_cursor',tools:'/tool/running_tools',goto:'/tool/goto_address',prompt_policy:'/prompt_policy'},path=paths[operation];
     if(!path)fail('invalid','Unsupported UI operation.');
     const target=this.workspace.target(scope.target),metadata=await this.source(record,target),name=text(metadata.program_name);

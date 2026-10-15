@@ -18,7 +18,8 @@ const secretStore={get:(...args)=>nativeSecrets.get(...args),delete:(...args)=>n
 function barrier(workspace,phase,requestId) {
   let fault;try{fault=JSON.parse(readFileSync(join(directory,'fault.json'),'utf8'));}catch{return;}
   const request=workspace.request(requestId);
-  if(fault.phase!==phase||fault.requestId!==request.callerId)return;
+  const matches=fault.requestId===request.callerId||typeof fault.requestIdPrefix==='string'&&request.callerId?.startsWith(fault.requestIdPrefix);
+  if(fault.phase!==phase||!matches)return;
   writeFileSync(join(directory,'barrier.json'),JSON.stringify({phase,requestId:request.callerId,ownerPid:process.pid,
     session:request.intent.session,target:request.intent.target}),{mode:0o600});
   // Deliberately freezes this fixture owner until the runner kills its validated PID.

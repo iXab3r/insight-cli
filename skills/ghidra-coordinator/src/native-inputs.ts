@@ -5,11 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fail, stable, text } from './model.js';
+import {managedExtensions,extensionJvmArguments} from './extensions.js';
 
 export interface NativeInputs {
   java: string; ghidraHome: string; mcpJar: string; jars: string[]; classpath: string;
   ghidraVersion: string; fingerprint: string;
   debuggerWheels:string[];
+  extensionRoots?:string[];serverClasspath?:string;
 }
 export const pinnedMcpJar = '7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd';
 export const packagedMcpJar=fileURLToPath(new URL('../../runtime/GhidraMCP-7.0.0.jar',import.meta.url));
@@ -64,7 +66,7 @@ export async function nativeRuntimeFingerprint(ghidraVersion:string,files:Native
   const hashes=[];for(const file of files)hashes.push({name:file.name,sha256:await sha(file.path)});
   return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
 }
-export async function nativeInputs(values: Record<string, unknown>): Promise<NativeInputs> {
+export async function nativeInputs(values: Record<string, unknown>,directory?:string): Promise<NativeInputs> {
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
   if (!requested.every(isAbsolute)) fail('configuration', 'Configure absolute Java, Ghidra home and GhidraMCP jar paths.');
   const [java, ghidraHome, mcpJar] = await Promise.all(requested.map(path => realpath(path))) as [string,string,string];
@@ -81,16 +83,19 @@ export async function nativeInputs(values: Record<string, unknown>): Promise<Nat
     fail('configuration', 'A Java 21 JDK is required.');
   for (const program of ['javac', 'keytool']) if (!(await stat(join(dirname(java), program + (process.platform === 'win32' ? '.exe' : '')))).isFile())
     fail('configuration', 'Java must come from a JDK with javac and keytool.');
-  const jars = [mcpJar, ...await moduleJars(ghidraHome)];
+  const modules=await managedExtensions(directory);
+  const extraJars=modules.flatMap(m=>m.files.filter(f=>/^lib\/[^/]+\.jar$/.test(f.name)).map(f=>join(m.root,f.name)));
+  const baseJars=[mcpJar,...await moduleJars(ghidraHome)],jars=[...baseJars,...extraJars];
   const debug=join(ghidraHome,'Ghidra','Debug'),debuggerWheels=[
     join(debug,'Debugger-rmi-trace/pypkg/dist/protobuf-6.31.0-py3-none-any.whl'),
     join(debug,'Debugger-rmi-trace/pypkg/dist/ghidratrace-12.1-py3-none-any.whl'),
     join(debug,'Debugger-agent-lldb/pypkg/dist/ghidralldb-12.1-py3-none-any.whl')];
   const files=await nativeRuntimeFiles(ghidraHome,java);
+  for(const module of modules)for(const file of module.files)files.push({name:'extension/'+module.name+'/'+file.name,path:join(module.root,file.name)});
   // Logical names bind locations without embedding the author's installation path.
   files.push({name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar});
   const fingerprint=await nativeRuntimeFingerprint(ghidraVersion,files);
-  return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels};
+  return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels,extensionRoots:modules.map(m=>m.root),serverClasspath:baseJars.join(delimiter)};
 }
 
 /** Compile packaged helper sources against the selected installation, never an author checkout. */
@@ -123,3 +128,5 @@ export async function nativeHelpers(directory: string, inputs: NativeInputs): Pr
   }
   finally { await rm(temporary, {recursive: true, force: true}); }
 }
+
+export const nativeExtensionArguments=(inputs:NativeInputs)=>extensionJvmArguments(inputs.extensionRoots??[]);

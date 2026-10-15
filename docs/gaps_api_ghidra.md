@@ -11,7 +11,7 @@ It does not claim every native overload or parameter combination is covered.
 **G01–G07 P0/P1 are implemented in the facade.** The pinned upstream source/JAR is unchanged.
 Its two analysis stubs are replaced with facade-owned native algorithms, and nested unavailable
 responses are rejected. The facade also closes the audited memory/prototype input gaps.
-The 210 operation mappings and eight bridge equivalents remain accounted for; the current tree has 261 public leaves, including selected native SDK extensions.
+The 210 operation mappings and eight bridge equivalents remain accounted for; the current tree has 271 public leaves, including selected native SDK extensions.
 This remains a selected native API facade, not complete Ghidra SDK coverage.
 
 [Current closure evidence](verification/api-gaps.json) binds the implementation source hashes,
@@ -40,10 +40,30 @@ The pinned MCP source/JAR remains unchanged. Native helpers call actual Ghidra f
 MCP function hashes are not presented as Version Tracking, FID or BSim.
 
 Program edits remain independently verified complex private changes. A diverged base retains an
-explicit conflict; no universal native DB merger or automatic publication strategy was introduced.
+explicit conflict; P2 introduced no universal native DB merger or automatic publication strategy.
+P3 subsequently adds opt-in synchronization using these same merge/refresh rules.
 Live target writes have separate durable intents and never replay an uncertain effect. Schedules
 are parsed/validated without execution. Whole-SDK parity and calibrated similarity probabilities
 are outside these selected workflow contracts.
+
+## P3 closure: extensions and synchronization
+
+**Both P3 items are closed for the selected contracts.** [P3 evidence](verification/api-gaps-p3.json)
+records 118 passing offline tests, nine installed real-Ghidra P3 cases, 13 native SDK regression
+cases and two actual IPC-owner SIGKILL phases. All groups match the same executable source inputs
+and npm artifact. Native acceptance is macOS headless/GUI.
+
+The P3 consumer is an agent team that needs a processor/analyzer outside the base distribution
+and wants to choose when verified private edits reach the shared program. The selected extension
+contract consumes ready-built standard 12.1.2 modules, pins every file, discovers native capabilities
+and configures managed GUI plugin enablement. The selected synchronization contract adds
+per-context `after-edit` / `after-save` publication and `before-edit` refresh, with manual defaults.
+See the installed [extension/synchronization reference](../skills/ghidra-coordinator/references/extensions-and-sync.md).
+
+This is a concrete workflow contract rather than a denominator for every Java extension API.
+Building/downloading third-party packages, arbitrary plugin option schemas, hot unloading,
+automatic native markup application and universal semantic merging are outside it. Neither
+content pinning nor an owned JVM promises a security sandbox for third-party extension code.
 
 ## Baseline, sources and scope
 
@@ -51,7 +71,7 @@ are outside these selected workflow contracts.
 | --- | --- | --- |
 | A — native Ghidra | Ghidra **12.1.2**, Java 21; installed source archives, linked to the [matching release source](https://github.com/NationalSecurityAgency/ghidra/tree/Ghidra_12.1.2_build/Ghidra) | Java SDK, service APIs and extension points. No invented “total SDK endpoints” denominator. |
 | B — GhidraMCP | **7.0.0**, commit `57e37a8bf388b1279cff46378f85be1554548f61` | [210 REST catalog entries](https://github.com/bethington/ghidra-mcp/blob/57e37a8bf388b1279cff46378f85be1554548f61/tests/endpoints.json), plus eight Python bridge controls accounted separately. |
-| C — insight-cli | Current P2 implementation identified by [closure source hashes](verification/api-gaps-p2.json); historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 261 public leaves across the facade command tree; not 261 distinct native Ghidra capabilities. |
+| C — insight-cli | Current P3 implementation identified by [closure source hashes](verification/api-gaps-p3.json); [P2 evidence](verification/api-gaps-p2.json) remains separate; historical full M0–M5 baseline `300884e3c9be0928a8e1659e088aa2144c2c70b4` | 271 public leaves across the facade command tree; not 271 distinct native Ghidra capabilities. |
 
 Evidence: [coverage ledger](GHIDRA-COVERAGE.md), [210 operation joins](verification/coverage-evidence.json),
 [combined acceptance](verification/full-facade.json), [query contracts](../skills/ghidra-coordinator/references/queries.json),
@@ -242,7 +262,7 @@ The following is a selected workflow inventory, not an exhaustive census of the 
 | N07 / P2 | [DataTypeManager][sdk-DataTypeManager] source archives/settings and [Structure][sdk-Structure] packing/bitfields | CRUD and C declaration import, no complete archive/layout API | **Closed, selected GDT/layout contract:** `types layout/define-layout/set-settings/archive-export/archive-import`. Real GDT round-trip with source archive ID, packing, bitfields and native default-setting definitions/clear. Conflicting layouts reject; divergent private archive work remains a complex conflict. ≤256 selected type paths/fields, consumed GDT ≤64 MiB. |
 | N08 / P2 | [ExternalManager][sdk-ExternalManager] and [SymbolTable][sdk-SymbolTable] namespace/class/library/location CRUD | Reads/labels/symbol rename; selected class operations | **Closed:** `namespaces list/create/update/delete` and external library/location create/update/delete/list. Real saved native CRUD; only ordinary namespaces/classes, empty-container deletion and retained-dependency refusal. Existing `list_program_items` remains useful inventory. |
 | N09 / P2 | [DecompInterface][sdk-DecompInterface] options/simplification and [HighFunction][sdk-HighFunction] typed SSA | Selected decompile/P-code/dataflow output | **Closed, bounded view:** `decompiler ir` returns actual SSA operations/typed varnodes, address-space/offset/size and block identity, selected native options/simplification, timeout/completion diagnostics and separate IR truncation. Positive and one-op partial fixtures; ≤10000 ops, ≤120-second native timeout. No entire Java object graph. |
-| N10 / P3 | [GhidraScript][sdk-GhidraScript], [SleighLanguage][sdk-SleighLanguage] and extension points for new analyzers/languages/plugins | Script entry points; no generic plugin installation/configuration SDK wrapper | Keep script escape hatch and pinned runtime checks. A general plugin/language-management API needs a real consumer; it is not required to finish catalog equivalence. |
+| N10 / P3 | [GhidraScript][sdk-GhidraScript], [SleighLanguage][sdk-SleighLanguage], [GhidraApplicationLayout][sdk-GhidraApplicationLayout] / [ExtensionUtils][sdk-ExtensionUtils] and analyzer/plugin extension points | Script entry points; no generic plugin installation/configuration SDK wrapper | **Closed, selected module contract:** `extensions inspect/install/list/enable/disable/capabilities`, extension script inventory IDs and `plugins list/set`. Immutable consumed module trees, 12.1.2 metadata and runtime digests, owner restart boundary, actual SDK language/compiler/analyzer/plugin inventories, existing analyzer configuration/run and owned GUI plugin activation with saved private work. Native acceptance is recorded in the [P3 report](verification/api-gaps-p3.json); no arbitrary plugin option SDK or package acquisition/build promise. |
 
 Ghidra already has multi-user merge machinery: `ProgramMultiUserMergeManager` takes original,
 local, latest and result programs, and coordinates memory/type/listing/context and other resolvers.
@@ -252,14 +272,15 @@ The gap is exposing/adapting the needed native behavior, not the absence of nati
 The selected P2 workflows are now shipped together. New domain workflows should be driven by
 measured agent tasks: first identify an actual format, analysis, trace or porting limitation,
 then add a bounded/effect-aware contract and a native fixture. Further statistical calibration,
-generic plugins and universal merging do not follow merely from the SDK containing those APIs.
+unrestricted plugin-specific SDK wrappers and universal merging do not follow merely from the SDK containing those APIs. P3
+uses the concrete ready-built module workflow described above.
 
 ## What our API adds above Ghidra/MCP
 
 | Agent need | insight-cli contract | Relationship to native state |
 | --- | --- | --- |
 | Several EXEs and independent agents | Immutable root targets, root sessions, `(session, target, ghidra)` contexts; explicit selectors | Same EXE can have independent saved program copies. No shared global active program as caller routing. |
-| A publishes while B continues | Explicit `ghidra merge` / `ghidra refresh`; status exposes pending/conflicted work | Verified scalar merge; refresh takes safe incoming changes while retaining local/shared conflicting values. Any merge conflict prevents the entire publication. |
+| A publishes while B continues | Explicit `ghidra merge` / `ghidra refresh`; optional persisted `sync-policy`; status exposes pending/conflicted work | Verified scalar merge; refresh takes safe incoming changes while retaining local/shared conflicting values. Any merge conflict prevents the entire publication. |
 | Complex edits on a diverged base | Retain both versions; agent transfers desired work onto the current base | Whole-program saved state may publish at unchanged shared base; universal complex DB merging is not implemented. This restriction is intentional. |
 | Lost answer / owner failure | Optional `--request-id`, durable intents/results, saved work and reconciliation | No blind check-in/script/external-post replay. Debuggee execution is a separate live effect. |
 | Dependable local startup | Managed server/repository/accounts, isolated headless workers, GUI on demand; external profile supported | Caller does not operate MCP ports/processes/checkout ownership. Administrative project/server operations remain separately scoped and do not become program merge proposals. |
@@ -274,9 +295,12 @@ generic plugins and universal merging do not follow merely from the SDK containi
 | **P1** | **Closed — G03:** supported ABI policies and honest termination | x86/Windows x64/SysV x64 native cases; unsupported architecture/lowering rejection. |
 | **P1** | **Closed — G04/G07:** structured common results, bounded/reported work and missing domain variants | Large fixture budget, saved bytes/metadata/convention checks, retained lost-response effects and A/B publication. |
 | **P2** | **Closed for the selected N01–N09 workflows and G07 convenience**, with larger saved-DB and native OS evidence recorded separately | Real native domain effects, lost-reply rules, conflicts, bounded new reads and installed-package checks. Conditional extra kernels/calibration require a concrete measured workload, rather than an implied whole-SDK promise. |
-| **P3** | Generic extensions and automatic publication strategies | Defer until a separate consumer/contract. |
+| **P3** | **Closed — N10 and automatic synchronization:** managed extensions and opt-in publication/refresh strategies | Content-pinned ready-built SDK modules; native language/analyzer/script/GUI workflows. `sync-policy` composes the existing verified merge/refresh with durable local acknowledgment; conflicts and unknown outcomes retain work. Manual default; no timer or automatic semantic conflict winner. |
 
-The current evidence supplements the earlier M0–M5 acceptance at its own implementation identity.
+No P0–P3 item remains open within the audited selected contracts. New SDK/workflow requests
+require their own measured consumer and acceptance boundary.
+
+The current P2/P3 evidence supplements the earlier M0–M5 acceptance at its own implementation identity.
 The P2 report identifies its own GUI/LLDB, selected headless OS and installed-package checks; it does not rebind historical matrices to new code or claim every GUI debugger on every OS.
 
 ## Appendix A — every pinned REST operation, 1:1:1
@@ -721,3 +745,6 @@ or extend the combined native acceptance, and do not authorize npm publication.
 [sdk-VTSession]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Features/VersionTracking/src/main/java/ghidra/feature/vt/api/main/VTSession.java
 [sdk-Variable]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/SoftwareModeling/src/main/java/ghidra/program/model/listing/Variable.java
 [sdk-VariableStorage]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/SoftwareModeling/src/main/java/ghidra/program/model/listing/VariableStorage.java
+
+[sdk-GhidraApplicationLayout]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Utility/src/main/java/ghidra/GhidraApplicationLayout.java
+[sdk-ExtensionUtils]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Generic/src/main/java/ghidra/util/extensions/ExtensionUtils.java

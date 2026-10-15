@@ -1,3 +1,4 @@
+import insight.InsightExtensions;
 import com.google.gson.*;
 import ghidra.GhidraApplicationLayout;
 import ghidra.framework.*;
@@ -67,7 +68,7 @@ class InsightSdkFiles {
             if(selectedSpec==null)throw new IllegalArgumentException("Loader needs a complete language/compiler selection");
             Language effectiveLanguage=language;if(effectiveLanguage==null&&selectedSpec.getLanguageCompilerSpec()!=null)effectiveLanguage=DefaultLanguageService.getLanguageService().getLanguage(selectedSpec.getLanguageCompilerSpec().languageID);
             var options=configured(loader.getDefaultOptions(provider,selectedSpec,null,false,false),optionValues(p),effectiveLanguage==null?null:effectiveLanguage.getAddressFactory());
-            String error=loader.validateOptions(provider,selectedSpec,options,null);if(error!=null)throw new IllegalArgumentException("Native loader rejected options");
+            String error=loader.validateOptions(provider,selectedSpec,options,null);if(error!=null)throw new IllegalArgumentException("Native loader rejected options: "+error);
             var settings=new Loader.ImporterSettings(provider,"OwnedInput",null,"/",false,selectedSpec,options,consumer,new MessageLog(),TaskMonitor.DUMMY);
             var result=loader.load(settings);
             if(result==null)throw new IllegalStateException("Native loader did not return a program");
@@ -110,7 +111,7 @@ class InsightSdkFiles {
         }
     }
     static Object run(JsonObject p) throws Exception {
-        String operation=text(p,"operation");if(operation.equals("loaders"))return loaders(p);if(operation.equals("import"))return importProgram(p);
+        String operation=text(p,"operation");if(operation.equals("extension-inventory"))return InsightExtensions.inventory(p);if(operation.equals("loaders"))return loaders(p);if(operation.equals("import"))return importProgram(p);
         Object consumer=new Object();var db=PackedDatabase.getPackedDatabase(Path.of(text(p,"snapshot")).toFile(),true,TaskMonitor.DUMMY).open(TaskMonitor.DUMMY);
         ProgramDB program=new ProgramDB(db,OpenMode.IMMUTABLE,TaskMonitor.DUMMY,consumer);
         try {return switch(operation){case "exporters"->exporters(program);case "export"->export(program,p);case "archive-export"->archive(program,p);default->throw new IllegalArgumentException("Unknown SDK file operation");};}

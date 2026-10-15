@@ -5,14 +5,14 @@ import {id,text,object,fail} from './model.js';
 import {selectedOptions} from './arguments.js';
 export class UserInterface {
   constructor(private readonly workspace:Workspace,private readonly research:Research,private readonly backend:()=>Promise<ResearchBackend>){}
-  async read(selected:Scope,operation:'cursor'|'tools',facet='all'){
+  async read(selected:Scope,operation:'cursor'|'tools'|'plugins_list',facet='all'){
     return this.research.ordered(selected,async()=>{const backend=await this.backend();await backend.open(selected);
-      if(operation==='tools')await backend.mode(selected,'gui');if(!backend.ui)fail('configuration','Selected backend lacks the UI adapter.');
+      if(operation==='tools'||operation==='plugins_list')await backend.mode(selected,'gui');if(!backend.ui)fail('configuration','Selected backend lacks the UI adapter.');
       const value=await backend.ui(selected,operation,{});
       return {...selected,value:operation==='cursor'&&facet!=='all'?{[facet]:value[facet],...(value[facet]===null?{reason:value[facet+'_unavailable']}:{})}:value};
     });
   }
-  async change(selected:Scope,operation:'goto'|'prompt_policy',p:Record<string,unknown>,callerId?:string){
+  async change(selected:Scope,operation:'goto'|'prompt_policy'|'plugins_set',p:Record<string,unknown>,callerId?:string){
     const reserved=this.workspace.reserveRequest(selected,'ghidra.ui.'+operation,p,callerId);
     return this.research.ordered(selected,async()=>{
       const request=this.workspace.request(reserved.request.id);
@@ -26,7 +26,10 @@ export class UserInterface {
           const cursor=await backend.ui(selected,'cursor',{}),location=object(cursor.address);
           if(location.session!==selected.session||location.target!==selected.target||address(location.address)!==address(p.address))fail('partial','Cursor did not reach the requested context and address.');
         }
-        const result={...selected,state:'applied',value};this.workspace.completeSavedRequest(selected,request.id,context.generation,{},result);return result;
+        const plugin=operation==='plugins_set',snapshot=plugin?await backend.saved(selected):undefined;
+        const complexChanges=plugin?[...context.complexChanges,request.id]:context.complexChanges;
+        const result={...selected,state:'applied',value,...(plugin?{sharedState:'pending',pendingChanges:context.scalars.length+complexChanges.length}:{})};
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,plugin?{workingSnapshot:snapshot,complexChanges}:{},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',operation});throw error;}
     });
   }
@@ -48,3 +51,8 @@ export function uiCommands(service:(c:CommandContext)=>UserInterface):CommandDef
       {flags:'--reason <text>',description:'Recorded policy reason',defaultValue:'automation'},{flags:'--seconds <count>',description:'Requested duration (1–300 seconds)',defaultValue:120},request]}),
   ])];
 }
+
+export function pluginCommands(service:(c:CommandContext)=>UserInterface):CommandDefinition[]{return [command('plugins','Configure plugins from enabled managed modules in an owned GUI',[
+  command('list','Read enabled managed plugins in this GUI tool',({options:o},c)=>service(c).read(scope(o),'plugins_list'),{permission:Permission.ReadOnly,options:selectedOptions}),
+  command('set','Enable or disable one installed managed plugin with immediate readback',({options:o},c)=>{if(o.enabled!=='true'&&o.enabled!=='false')fail('invalid','enabled must be true or false.');return service(c).change(scope(o),'plugins_set',{plugin:text(o.plugin,512),enabled:o.enabled==='true'},o.requestId===undefined?undefined:id(o.requestId));},{permission:'Destructive',options:[...selectedOptions,{flags:'--plugin <class>',description:'Managed plugin ID from extensions capabilities',required:true},{flags:'--enabled <boolean>',description:'true or false',required:true},{flags:'--request-id <id>',description:'Retrieve the original plugin outcome without replay'}]})
+])];}

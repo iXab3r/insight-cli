@@ -6,7 +6,7 @@ import { delimiter, dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fail, object, stable, text, digest } from './model.js';
-import { nativeHelpers,nativeJvmDirectories, type NativeInputs } from './native-inputs.js';
+import { nativeHelpers,nativeJvmDirectories,nativeExtensionArguments, type NativeInputs } from './native-inputs.js';
 import {parseDomainJson} from './json.js';
 
 export interface ServerBinding {
@@ -56,7 +56,7 @@ export class GhidraServer {
     const classes = await nativeHelpers(this.directory, this.inputs);
     const log = await open(join(root, 'diagnostic.log'), 'a', 0o600);
     const child = spawn(this.inputs.java, ['-Djava.awt.headless=true', '-Dghidra.home=' + this.inputs.ghidraHome,
-      ...nativeJvmDirectories(root), '-cp', classes + delimiter + this.inputs.classpath, main, ...args],
+      ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs), '-cp', classes + delimiter + this.inputs.classpath, main, ...args],
       {cwd:root,windowsHide:true,env:{PATH:this.c.environment.PATH ?? process.env.PATH,HOME:root,TMPDIR:root,...environment},stdio:['pipe','pipe',log.fd]});
     const exited = new Promise<number|null>((resolve,reject) => { child.once('error',reject); child.once('exit',resolve); });
     exited.catch(()=>{});
@@ -243,7 +243,7 @@ export class GhidraServer {
     const processRoot = join(root,'processes',randomUUID()); await mkdir(processRoot,{recursive:true,mode:0o700});
     const log = await open(join(processRoot,'runtime.log'),'a',0o600);
     const child = spawn(this.inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
-      ...nativeJvmDirectories(processRoot),'-cp',classes+delimiter+this.inputs.classpath,
+      ...nativeJvmDirectories(processRoot),'-cp',classes+delimiter+(this.inputs.serverClasspath??this.inputs.classpath),
       'InsightServerMain',data,String(local.port),String(local.identityPort),local.instance,keystore],
       {cwd:processRoot,detached:true,windowsHide:true,env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:processRoot,TMPDIR:processRoot,
         INSIGHT_KEYSTORE_PASSWORD:await this.c.secrets.require(local.keySecret),INSIGHT_SERVER_TOKEN:await this.c.secrets.require(local.tokenSecret)},stdio:['ignore',log.fd,log.fd]});

@@ -3,21 +3,22 @@ import {join,relative,sep} from 'node:path';
 import {constants} from 'node:fs';
 import {fail} from './model.js';
 
-export interface ScriptItem {script:string;name:string;language:'Java'|'Python';origin:'installation'|'context';category?:string}
+export interface ScriptItem {script:string;name:string;language:'Java'|'Python';origin:'installation'|'context'|'extension';category?:string}
 export interface ScriptPage {items:ScriptItem[];count:number;total:number;offset:number;limit:number;truncated:boolean}
 /** Resolve only an explicit inventory ID; native search paths never choose another script. */
-export async function scriptPath(home:string,contextRoot:string,script:string):Promise<string> {
-  if(!/^(installation|context):[^\0]+\.(java|py)$/.test(script)||script.includes('..')||script.includes('\\'))
+export async function scriptPath(home:string,contextRoot:string,script:string,extensions:string[]=[]):Promise<string> {
+  if(!/^(installation|context|extension):[^\0]+\.(java|py)$/.test(script)||script.includes('..')||script.includes('\\'))
     fail('invalid','Choose an explicit script ID returned by ghidra scripts list.');
-  const page=await scriptInventory(home,contextRoot,script,20000,0),item=page.items.find(item=>item.script===script);
+  const page=await scriptInventory(home,contextRoot,script,20000,0,extensions),item=page.items.find(item=>item.script===script);
   if(!item)fail('notFound','Script ID is absent from this context and installation.');
   const part=script.slice(script.indexOf(':')+1);
+  if(item.origin==='extension'){const [module,...rest]=part.split('/'),root=extensions.find(p=>p.split(/[\\/]/).pop()===module);if(!root)fail('binding','Script module is no longer enabled.');return join(root,'ghidra_scripts',...rest);}
   if(item.origin==='context')return join(contextRoot,'ghidra_scripts',part);
   const segments=part.split('/'),filename=segments.pop()!;
   return join(home,'Ghidra',...segments,'ghidra_scripts',filename);
 }
 /** Enumerate configured installation and owned context scripts without exposing native paths. */
-export async function scriptInventory(home:string,contextRoot:string,filter:string,limit:number,offset:number):Promise<ScriptPage> {
+export async function scriptInventory(home:string,contextRoot:string,filter:string,limit:number,offset:number,extensions:string[]=[]):Promise<ScriptPage> {
   const items:ScriptItem[]=[];
   async function scripts(folder:string,origin:ScriptItem['origin'],module:string) {
     let entries;try{entries=await readdir(folder,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
@@ -43,7 +44,7 @@ export async function scriptInventory(home:string,contextRoot:string,filter:stri
       else if(!['data','lib','os','src','docs'].includes(entry.name))await modules(path,depth+1);
     }
   }
-  await modules(installed,0);await scripts(join(contextRoot,'ghidra_scripts'),'context','');
+  await modules(installed,0);for(const root of extensions)await scripts(join(root,'ghidra_scripts'),'extension',root.split(/[\\/]/).pop()!);await scripts(join(contextRoot,'ghidra_scripts'),'context','');
   const matched=items.filter(item=>!filter||[item.name,item.script,item.category??''].some(value=>value.toLowerCase().includes(filter.toLowerCase())))
     .sort((a,b)=>a.script.localeCompare(b.script));
   const page=matched.slice(offset,offset+limit);

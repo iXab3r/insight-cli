@@ -1,3 +1,4 @@
+import {p3Inputs} from './native-p3-inputs.mjs';
 import {runNpm} from './npm-command.mjs';
 // Owned installed-package CLI/IPC acceptance; all native data and keyring accounts are disposable.
 import assert from 'node:assert/strict';
@@ -11,7 +12,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {AppArguments,ProfileStore,KeyringSecretStore,ProfileSecrets} from '@eyeauras/cli-factory';
 const source=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile),options={};
 for(let i=2;i<process.argv.length;i++) {
-  const arg=process.argv[i];if(arg==='--ack-disposable')options.ack=true;else if(arg==='--faults')options.faults=true;
+  const arg=process.argv[i];if(arg==='--ack-disposable')options.ack=true;else if(arg==='--faults')options.faults=true;else if(arg==='--automatic-faults')options.automaticFaults=true;
   else if(arg.startsWith('--')&&process.argv[i+1])options[arg.slice(2)]=process.argv[++i];else throw Error('Invalid acceptance argument');
 }
 assert.equal(options.ack,true);
@@ -63,6 +64,7 @@ async function input(label,increment){const dir=join(scratch,label);await mkdir(
   await exec(options.lld,['/entry:main','/subsystem:console','/nodefaultlib','/export:first','/export:main','/out:'+exe,obj]);return exe;}
 async function killed(pid){process.kill(pid,'SIGKILL');for(let i=0;i<100;i++){try{process.kill(pid,0);}catch(error){if(error.code==='ESRCH')return;throw error;}await delay(50);}throw Error('Owned fixture owner remained live');}
 async function barrier(){for(let i=0;i<1200;i++){try{return JSON.parse(await readFile(join(directory,'barrier.json'),'utf8'));}catch{}await delay(100);}throw Error('Owned fault barrier did not arrive');}
+const sourceHashes=options.automaticFaults?await p3Inputs():undefined,harnessHashes=Object.fromEntries(await Promise.all(['scripts/acceptance-facade.mjs','scripts/fixtures/facade-owner.mjs','scripts/npm-command.mjs'].map(async path=>[path,createHash('sha256').update(await readFile(join(source,path))).digest('hex')])));
 let receipt,activeFaultOwner;
 try {
   const exe=await input('client',17),helper=await input('helper',23);
@@ -103,6 +105,28 @@ try {
   assert.ok((await invoke(['ghidra','namespaces','list',...select(a)])).value.items.some(row=>row.name==='InstalledNamespace'));
   const exported=await invoke(['ghidra','formats','export',...select(a),'--exporter','Raw Bytes','--ranges','[{"start":"0x180000000","end":"0x180000002"}]','--output-directory',join(scratch,'installed-sdk-export')]);assert.equal(exported.value.selected,true);assert.equal((await readFile(join(scratch,'installed-sdk-export','program.out'))).toString(),'def');
   await invoke(['ipc-server','stop']);
+  const automaticFaultPhases=options.automaticFaults?['local_ack','verified']:[];
+  if(automaticFaultPhases.length){
+    const auto=await invoke(['ghidra','open',exe,'--session','new']);
+    await invoke(['ghidra','sync-policy','set',...select(auto),'--publish','after-edit','--refresh','manual']);
+    for(const phase of automaticFaultPhases){
+      const baseline=await invoke(['sessions','status',auto.session,'--target',auto.target]),expected='R'+(Number(baseline.ghidra.sharedRevision.slice(1))+1),requestId='automatic-fault-'+phase;
+      const earlier=(await readFile(join(directory,'effect-calls.jsonl'),'utf8')).trim().split('\n').map(JSON.parse),before=earlier.filter(e=>e.operation==='publish').length,beforeSetters=earlier.filter(e=>e.operation==='set_comment').length;
+      await rm(join(directory,'barrier.json'),{force:true});const owner=await invoke(['ipc-server','status']);activeFaultOwner=owner.pid;
+      await writeFile(join(directory,'fault.json'),JSON.stringify({phase,requestIdPrefix:phase==='verified'?'auto-merge-':'auto-local-'}),{mode:0o600});
+      const args=['ghidra','comments','set',...select(auto),'--address',at,'--kind','eol','--text','Automatic retained '+phase,'--request-id',requestId];
+      const pending=invoke(args,false),held=await barrier();assert.equal(held.ownerPid,owner.pid);assert.equal(held.session,auto.session);assert.equal(held.target,auto.target);
+      assert.ok(held.requestId.startsWith(phase==='verified'?'auto-merge-':'auto-local-'));
+      await killed(held.ownerPid);activeFaultOwner=undefined;await pending;await rm(join(directory,'fault.json'));
+      await invoke(['ghidra','open',...select(auto)]);const replay=await invoke(args);assert.equal(replay.state,'applied');assert.equal(replay.pendingChanges,0);assert.equal(replay.automatic.publication.sharedRevision,expected);
+      assert.deepEqual(await invoke(args),replay);assert.equal(await read(auto),'Automatic retained '+phase);
+      const effects=(await readFile(join(directory,'effect-calls.jsonl'),'utf8')).trim().split('\n').map(JSON.parse);assert.equal(effects.filter(e=>e.operation==='set_comment').length,beforeSetters+1);assert.equal(effects.filter(e=>e.operation==='publish').length,before+1);
+      const fresh=await invoke(['ghidra','open',exe,'--session','new']);assert.equal(await read(fresh),'Automatic retained '+phase);await invoke(['ghidra','close',...select(fresh)]);
+      await invoke(['ipc-server','stop']);console.log('Owned automatic owner crash verified:',phase);
+    }
+    assert.deepEqual(await p3Inputs(),sourceHashes,'Runtime source changed during automatic owner-crash acceptance');
+    for(const [path,sha]of Object.entries(harnessHashes))assert.equal(createHash('sha256').update(await readFile(join(source,path))).digest('hex'),sha);
+  }
   const phases=options.faults?['accepted','local_effect','local_save','local_ack','published','verified','publication_intent']:[];
   for(let i=0;i<phases.length;i++) {
     const phase=phases[i],binary=await input('fault-'+phase,100+i),a=await invoke(['ghidra','open',binary,'--session','new']);
@@ -135,7 +159,7 @@ try {
     packagedNativeQueryKernels:true,packagedSavedMemoryDigest:true,packagedSdkSavedEdits:true,packagedNativeRestrictedExport:true,
     equalBasenames:true,equalAddresses:true,parallelCliProcesses:true,independentPrivateViews:true,explicitMergeRefresh:true,
     conflictRetainedAfterOwnerRestart:true,managedServerRestartRetainsWork:true,requestIdRetryRetainsSession:true,
-    faultPhases:phases,ghidra:'12.1.2',java:'21',node:process.versions.node,
+    faultPhases:phases,automaticFaultPhases,...(sourceHashes?{sourceHashes,harnessHashes}:{}),ghidra:'12.1.2',java:'21',node:process.versions.node,
     limitations:['tiny owned static PE inputs','test-only barriers and isolated application identity','debugger/archive/full catalog final gate remains']};
 } catch(error) {
   console.error('Owned installed fixture failure:',error.message);console.error('Owned installed fixture diagnostics:',scratch);

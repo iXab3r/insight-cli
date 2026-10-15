@@ -168,7 +168,9 @@ edit is recorded for recovery; `sharedState: pending` means it has not yet been 
 This is a required facade behavior, not a durability claim about the existing prototype.
 
 The owner selected explicit `merge` and `refresh` for this pass. Automatic publication and incoming
-refresh strategies are deferred. If any selected local change conflicts, merge publishes nothing
+refresh strategies were deferred in M0–M5. The owner's subsequent P3 request adds explicit per-context `sync-policy`: publication after an edit/save
+and incoming refresh before an edit; default behavior stays manual. See
+[extensions and sync](../skills/ghidra-coordinator/references/extensions-and-sync.md). If any selected local change conflicts, merge publishes nothing
 and preserves all local work. This is a publication gate, not a claim that separate backend calls
 are atomic: incomplete stages remain recoverable and never receive a successful publication result.
 

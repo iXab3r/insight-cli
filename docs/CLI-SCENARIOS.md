@@ -27,7 +27,8 @@ one input. Input-opening calls may derive target identity from the supplied path
 results echo both identifiers. Counts describe the selected context. Missing selectors fail
 with a nonzero exit status rather than guessing an active input.
 
-The owner selected explicit merge/refresh for the complete delivery; automatic strategies are deferred.
+The original complete delivery selected explicit merge/refresh. Subsequent P3 adds opt-in
+per-context synchronization; manual remains the default. See [extensions and sync](../skills/ghidra-coordinator/references/extensions-and-sync.md).
 Target source bytes are immutable; publishing analysis does not patch the EXE.
 
 ## Research one input
@@ -361,3 +362,21 @@ insight-cli ghidra open --session new --target t_client --json
 The agent reads its old work through `s_b`, applies the desired changes through `s_b_current`
 against that current base, then merges normally. This uses the existing session/target model;
 no automatic whole-version overwrite or new rebase entity is required.
+
+## Opt-in publication in the A/B workflow
+
+```sh
+insight-cli ghidra sync-policy set --session s_a --target t_client --publish after-edit --refresh manual
+insight-cli ghidra comments set --session s_a --target t_client --address 0x140001000 --kind eol --text "A verified name" --request-id a_edit
+insight-cli ghidra sync-policy set --session s_b --target t_client --publish after-save --refresh before-edit
+insight-cli ghidra comments set --session s_b --target t_client --address 0x140001000 --kind pre --text "B evidence"
+insight-cli ghidra save --session s_b --target t_client --request-id b_save
+```
+
+A's edit includes a verified `automatic.publication` result. B's edit first receives A's shared
+change and saves B's local comment; B's scoped save then publishes its pending work. Ordinary
+reads preserve B's private view until this refresh boundary or explicit refresh. If B already
+changed the same field, before-edit refresh retains both values and refuses to start the edit.
+If divergence appears before save's merge, save fails with the retained local acknowledgment
+and publishes nothing. A lost merge reply follows the same reconciliation and no-replay rules
+as explicit merge; the request ID retrieves this workflow after owner replacement.

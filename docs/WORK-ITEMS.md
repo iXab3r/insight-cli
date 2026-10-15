@@ -16,8 +16,23 @@ The installed native runtime also works without a `mcpJar` override or bridge ch
 
 The records below are checkpoint history: their intermediate open-gate notes are superseded by
 the combined report, while each receipt still identifies exactly what its individual runner proved.
-Native Windows/Linux, automatic strategies, archive-service deployment and npm publication remain
-outside the selected delivery.
+Native Windows/Linux and automatic strategies were outside the original M0–M5 delivery. P2
+subsequently adds selected headless OS evidence; P3 adds the opt-in synchronization and managed
+module workflows described in the gap ledger. Archive-service deployment and npm publication
+remain excluded.
+
+## Subsequent P3 extension
+
+The owner's later request adds two concrete work items beyond M0–M5 and selected P2:
+
+| Item | Delivered contract | Evidence |
+| --- | --- | --- |
+| P3-01 | Content-pinned ready-built extension modules in profile storage; actual native language/compiler/analyzer/plugin discovery, analyzer/script workflows and owned GUI enablement | [P3 report](verification/api-gaps-p3.json) |
+| P3-02 | Opt-in per-context publication after edit/save and refresh before edit; durable workflow identity, conflict retention, no uncertain replay and schema upgrade | [P3 report](verification/api-gaps-p3.json) |
+
+The default stays manual; neither work item adds automatic semantic conflict resolution or a
+universal plugin-specific Java SDK wrapper. The installed [agent reference](../skills/ghidra-coordinator/references/extensions-and-sync.md)
+defines the public commands and selected boundaries.
 
 ## Checkpoint history
 

@@ -49,10 +49,10 @@ test('schema upgrade preserves version-one research and prevents older readers f
     sql.exec('DROP TABLE administration_requests; PRAGMA user_version=1;');
     assert.throws(()=>new Workspace(directory,'other'),/different profile/);assert.equal(sql.prepare('PRAGMA user_version').get()?.user_version,1);
     const upgraded=openWorkspace();assert.equal(upgraded.request(research.request.id).callerId,'old-open');
-    assert.equal(sql.prepare('PRAGMA user_version').get()?.user_version,4);
+    assert.equal(sql.prepare('PRAGMA user_version').get()?.user_version,5);
     upgraded.reserveAdministration('server.connect',{},'new-admin');
     assert.throws(()=>upgraded.reserveOpen(target.id,research.context.session,settings,'new-admin'),/administration operation/);
-    sql.exec('PRAGMA user_version=5;');assert.throws(()=>new Workspace(directory,'default'),/newer than this build/);
+    sql.exec('PRAGMA user_version=6;');assert.throws(()=>new Workspace(directory,'default'),/newer than this build/);
   }finally{sql.close();}
 });
 
