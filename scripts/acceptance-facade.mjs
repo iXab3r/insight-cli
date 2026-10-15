@@ -1,3 +1,4 @@
+import {runNpm} from './npm-command.mjs';
 // Owned installed-package CLI/IPC acceptance; all native data and keyring accounts are disposable.
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
@@ -25,7 +26,7 @@ await mkdir(directory,{recursive:true,mode:0o700});await mkdir(join(scratch,'art
 const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar'],maxContexts:4};
 const profiles=new ProfileStore({applicationId,appArguments});await profiles.set('default',values);
 await profiles.setPermissions('default',['ReadOnly','Update','Destructive']);
-const packed=JSON.parse((await exec('npm',['pack','--offline','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli',
+const packed=JSON.parse((await runNpm(['pack','--offline','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli',
   '--pack-destination',join(scratch,'artifacts')],{cwd:source})).stdout)[0];
 const rootManifest=JSON.parse(await readFile(join(source,'package.json'),'utf8')),
   lock=JSON.parse(await readFile(join(source,'package-lock.json'),'utf8')),
@@ -41,7 +42,7 @@ lock.packages['node_modules/@ixab3r/insight-cli']={version:cliManifest.version,r
   engines:cliManifest.engines,bin:cliManifest.bin,license:cliManifest.license};
 await cp(join(source,'vendor'),join(scratch,'vendor'),{recursive:true});
 await writeFile(join(scratch,'package.json'),JSON.stringify(manifest));await writeFile(join(scratch,'package-lock.json'),JSON.stringify(lock));
-await exec('npm',['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:scratch,timeout:60000,maxBuffer:262144});
+await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:scratch,timeout:60000,maxBuffer:262144});
 await cp(join(source,'scripts/fixtures/facade-owner.mjs'),entry);
 await writeFile(join(scratch,'fixture-config.json'),JSON.stringify({applicationId,appArguments:argumentOptions}),{mode:0o600});
 const {writePackageBuildManifest}=await import('@eyeauras/cli-factory-ipc/build');await writePackageBuildManifest(scratch);

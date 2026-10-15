@@ -1,8 +1,9 @@
 import {mkdir} from 'node:fs/promises';
-import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {runNpm} from './npm-command.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 await mkdir(new URL('../artifacts/',import.meta.url),{recursive:true});
-const result=spawnSync(process.platform==='win32'?'npm.cmd':'npm',['pack','--workspace','@ixab3r/insight-cli','--pack-destination','artifacts'],{cwd:root,stdio:'inherit'});
-if(result.error)throw result.error;
-process.exitCode=result.status??1;
+try{
+ const result=await runNpm(['pack','--workspace','@ixab3r/insight-cli','--pack-destination','artifacts'],{cwd:root,maxBuffer:1024*1024});
+ process.stdout.write(result.stdout);process.stderr.write(result.stderr);
+}catch(error){process.stdout.write(error.stdout??'');process.stderr.write(error.stderr??String(error));process.exitCode=typeof error.code==='number'?error.code:1;}
