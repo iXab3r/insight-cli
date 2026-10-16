@@ -9,6 +9,7 @@ import {Workspace,type Scope} from '../src/workspace.js';
 import {type ResearchBackend} from '../src/research.js';
 import {address} from '../src/research.js';
 import type {ToolMode} from '../src/contexts.js';
+import {CliError} from '@eyeauras/cli-factory';
 
 const entry='140001000';
 interface View {name:string;comments:Record<string,string|null>}
@@ -50,6 +51,20 @@ class Fake implements ResearchBackend {
   async dispose(){this.views.clear();}
 }
 type Opened={session:string;target:string;state:string};
+test('failed initial open exposes retained scope and continuation; retry is nonzero without reimport',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let attempts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+   const backend=new Fake(workspace);backend.open=async()=>{attempts++;throw new CliError('Ghidra request /import_file exceeded 600 seconds.',{code:'coordinator.timeout',result:{operation:'/import_file',timeoutMilliseconds:600000}});};
+   return Object.assign(backend,{recoverModel:async()=>false});
+ }}));
+ const exe=join(f.root,'slow.exe');await writeFile(exe,'synthetic slow import');
+ const args=['ghidra','open',exe,'--session','new','--request-id','slow-open','--json'];
+ const failed=await f.run(app,args);assert.notEqual(failed.exitCode,0);
+ const result=JSON.parse(failed.stdout) as Opened&{requestId:string;detail:{operation:string}};
+ assert.match(result.session,/^s_/);assert.match(result.target,/^t_/);assert.equal(result.state,'unknown');assert.equal(result.requestId,'slow-open');assert.equal(result.detail.operation,'/import_file');
+ assert.match(failed.stderr,/sessions.*status/);assert.match(failed.stderr,/ghidra.*open/);
+ const retried=await f.run(app,args);assert.notEqual(retried.exitCode,0);assert.equal(JSON.parse(retried.stdout).session,result.session);assert.equal(attempts,1);
+});
 test('public help and skill are local; missing selectors and permissions reject before input or native state',async t=>{
   const f=await createCliFixture(t,{applicationId:'insight-cli'});let started=0;
   const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{started++;return new Fake(workspace);}}));

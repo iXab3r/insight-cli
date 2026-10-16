@@ -6,6 +6,13 @@ there is no literal bijection between SDK methods, MCP endpoints and CLI command
 The appendix is a full operation inventory; G07 separately records parameter/variant gaps.
 It does not claim every native overload or parameter combination is covered.
 
+The later [production-EXE CLI walkthrough](AGENT-CLI-WALKTHROUGH.md) exercises discovery,
+decompilation, isolated annotations and publication through the installed public facade. It
+fixes an operational gap: synchronous import/analysis exceeded the generic HTTP budget.
+Import now allows ten minutes; retained opening failures expose scope and continuation commands,
+and unresolved open retries return nonzero without reimporting. Its focused evidence keeps a
+separate source/artifact identity from the catalog-closure and combined reports below.
+
 ## P0/P1 closure
 
 **G01–G07 P0/P1 are implemented in the facade.** The pinned upstream source/JAR is unchanged.

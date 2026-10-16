@@ -1,5 +1,9 @@
 # Combined facade acceptance
 
+The later [real-EXE CLI walkthrough](AGENT-CLI-WALKTHROUGH.md) has its own source/artifact
+identity and focused regression evidence. The 33-group result below remains bound to its
+recorded build; it is not automatically attributed to subsequent changes.
+
 **Passed:** 118 offline tests, all 33 native groups and isolated package checks. The
 [current report](verification/full-facade-current.json) binds the exact source/artifact to the
 assertions below, including seven manual and two automatic real owner SIGKILL phases.

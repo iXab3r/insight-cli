@@ -1,5 +1,16 @@
 # Verification scope
 
+## Real-EXE public CLI walkthrough
+
+[7-Zip evidence](agent-cli-7zip.json) and the [command walkthrough](../AGENT-CLI-WALKTHROUGH.md)
+cover a production PE through the actual installed CLI and normal Factory owner, without
+research fixture hooks or direct backend access. This later focused run fixes the first-import
+timeout and exposes retained open scope/follow-up commands. Unknown open retries are nonzero
+and do not replay import. Its new source/artifact identity does not replace the 33-group receipt.
+The same artifact passes 122 offline tests and the separate
+[installed native regression](agent-cli-regression.json): two agents/two EXEs/four contexts,
+conflicts, owner/server restart and automatic `local_ack`/`verified` owner SIGKILL phases.
+
 ## Current combined M0–M5 and P0–P3 acceptance
 
 [Current full evidence](full-facade-current.json) records 118 offline tests and all 33 native

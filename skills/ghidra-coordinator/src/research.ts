@@ -7,6 +7,7 @@ import {fieldKey,scalarMerge,scalarRefresh} from './merge.js';
 import type {ScriptPage} from './scripts.js';
 import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
+import {CliError} from '@eyeauras/cli-factory';
 
 export interface ResearchBackend {
   sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
@@ -116,13 +117,14 @@ export class Research {
   async open(target: string, session: string|'new', settings: GhidraLoadSettings, callerId?: string, mode?:ToolMode) {
     // Mode belongs to the request's effective intent. It does not alter target load identity.
     const reserved=this.workspace.reserveOpen(target,session,settings,callerId,mode);
+    const retained=(state:string)=>({session:reserved.context.session,target,state,...(callerId?{requestId:callerId}:{})});
+    const next=[['sessions','status',reserved.context.session,'--target',target],['ghidra','open','--session',reserved.context.session,'--target',target]];
     return this.ordered(reserved.context,async()=>{
       if(this.workspace.request(reserved.request.id).state==='applied')return this.workspace.request(reserved.request.id).result;
       const backend=await this.backend();await this.sharedOrder(target,()=>this.reconcile(reserved.context,backend));
       const request=this.workspace.request(reserved.request.id);
       if(request.state==='applied')return request.result;
-      if(reserved.replay&&request.state!=='accepted')return {session:reserved.context.session,target,state:request.state,
-        ...(request.callerId?{requestId:request.callerId}:{})};
+      if(reserved.replay&&request.state!=='accepted')throw new CliError('This open retains an unproved outcome; inspect the retained context before continuing.',{code:'coordinator.unknown',result:retained(request.state),next});
       if(this.workspace.unresolved(reserved.context).some(other=>other.id!==request.id)) {
         const result={session:reserved.context.session,target,state:'blocked'};
         this.workspace.recordRequest(request.id,'failed',result);
@@ -137,7 +139,9 @@ export class Research {
           sharedRevision:revision(this.workspace.model(target).sharedRevision),pendingChanges:count(context)};
         this.workspace.completeSavedRequest(context,request.id,context.generation,{},result);return result;
       } catch(error) {
-        this.workspace.recordRequest(request.id,'unknown',{session:reserved.context.session,target,state:'unknown'});throw error;
+        const result=retained('unknown');this.workspace.recordRequest(request.id,'unknown',result);
+        throw new CliError(error instanceof CliError?error.message:'Ghidra open did not complete; the context is retained for reconciliation.',{
+          code:error instanceof CliError?error.code:'coordinator.unknown',result:{...result,...(error instanceof CliError&&error.result&&typeof error.result==='object'?{detail:error.result}:{})},next});
       }
     });
   }

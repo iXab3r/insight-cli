@@ -1,5 +1,9 @@
 # Agent CLI scenarios
 
+For an observed installed-CLI investigation on a production EXE, see the
+[7-Zip walkthrough](AGENT-CLI-WALKTHROUGH.md), including the initial-import timeout fix and
+nonzero unresolved-open retry behavior. The examples below remain illustrative.
+
 These are the intended `insight-cli` commands and illustrative responses agreed during product
 design. The public research/edit and merge/refresh contracts have implementation checkpoints;
 combined current-build acceptance passed; see [the full report](verification/full-facade-current.json)

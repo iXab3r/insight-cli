@@ -21,3 +21,22 @@ test('HTTP status alone is insufficient, schema controls body/query selectors',a
  await assert.rejects(bridge.call('/set_comment',{unknown:'selector'}),/parameter/);
 });
 test('worker URLs require an exact loopback port',()=>{for(const endpoint of ['http://example.test:19000','http://127.0.0.1','https://127.0.0.1:19000','http://user:password@127.0.0.1:19000'])assert.throws(()=>new HttpBridge(endpoint));});
+test('initial import allows analysis to exceed discovery budget without retrying the operation',async t=>{
+ const budgets:number[]=[],paths:string[]=[];
+ t.mock.method(AbortSignal,'timeout',(ms:number)=>{budgets.push(ms);return new AbortController().signal;});
+ const fetch=async(input:string|URL|Request)=>{const path=new URL(String(input)).pathname;paths.push(path);return Response.json(path==='/mcp/schema'?{tools:[{path:'/import_file',method:'POST',params:[]}]}:{success:true});};
+ await new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch).call('/import_file');
+ assert.deepEqual(budgets,[30000,600000]);assert.deepEqual(paths,['/mcp/schema','/import_file']);
+});
+test('timeout and caller cancellation retain useful operation details without exposing credentials',async t=>{
+ t.mock.method(AbortSignal,'timeout',()=>AbortSignal.abort(new DOMException('Timed out','TimeoutError')));
+ const fetch=async(_input:string|URL|Request,init?:RequestInit)=>{init!.signal!.throwIfAborted();return Response.json({});};
+ const timeout=new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch,undefined,'private-test-token');
+ await assert.rejects(timeout.instance(),(error:unknown)=>{const e=error as {code:string;message:string;result:unknown};assert.equal(e.code,'coordinator.timeout');assert.match(e.message,/mcp\/instance_info.*30 seconds/);assert.doesNotMatch(e.message,/private-test-token|19000/);return true;});
+ const cancelled=new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch,AbortSignal.abort());
+ await assert.rejects(cancelled.instance(),(error:unknown)=>(error as {code:string}).code==='coordinator.cancelled');
+});
+test('response stream failure is a bounded transport error rather than a raw stack',async()=>{
+ const fetch=async()=>new Response(new ReadableStream({start(controller){controller.error(new Error('private native error'));}}));
+ await assert.rejects(new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch).instance(),/Ghidra request \/mcp\/instance_info did not complete/);
+});

@@ -7,9 +7,11 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
-This section records the implemented contract. Combined M0–M5 and selected P0–P3 acceptance
-passed on one current build; the [current full report](verification/full-facade-current.json)
-identifies 33 native groups, 118 offline tests, the installed artifact and limits. The
+This section records the implemented contract. The last combined M0–M5 and selected P0–P3
+acceptance passed on its recorded build; the [full report](verification/full-facade-current.json)
+identifies 33 native groups, 118 offline tests, the installed artifact and limits. The later
+[production-EXE walkthrough](AGENT-CLI-WALKTHROUGH.md) keeps separate focused evidence for
+the import timeout and open-error improvements. The
 [original M0–M5 report](verification/full-facade.json) retains its historical source identity.
 The earlier `insight-ghidra` implementation remains a scoped-comment regression fixture for
 publication mechanisms, with its historical behavior recorded below. The agreed walkthroughs
@@ -95,6 +97,12 @@ insight-cli ghidra open --session s_a --target t_client --json
 ```
 
 The second form continues an existing context after reconnecting or process replacement.
+If native opening fails after its intent is reserved, the failure returns the retained session,
+target and optional caller request ID, with follow-up commands to inspect status and continue.
+An unresolved open retry exits nonzero and preserves the original intent; it never reimports
+merely to obtain a successful response. Initial synchronous import/analysis has a bounded
+ten-minute HTTP budget. The [production-EXE walkthrough](AGENT-CLI-WALKTHROUGH.md) records the
+observed timeout problem, fix and pre-version-control recovery limit.
 Separate target/session management can remain available, but is not required setup for each
 research task. The combined native/installed acceptance covers opening and ordinary research/edit commands
 together with the full inventoried facade.
