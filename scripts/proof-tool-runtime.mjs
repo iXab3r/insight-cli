@@ -14,11 +14,11 @@ await mkdir(join(root,'bin'));await symlink(process.execPath,join(root,'bin/node
 const environment={...process.env,PATH:join(root,'bin')+':/usr/bin:/bin'};for(const key of ['JAVA_HOME','GHIDRA_HOME','GHIDRA_MCP_HOME','DOTNET_ROOT'])delete environment[key];
 const exeSha=sha(await readFile(exe)),assemblySha=sha(await readFile(assembly)),report={schema:1,state:'running',scope:'global installed CLI; mirrored delivery, Ghidra and ILSpy, recovery and safe removal',platform:process.platform,architecture:process.arch,node:process.version,inputSha256:{exe:exeSha,assembly:assemblySha},checks,calls};
 let profile,sequence=0;
-async function call(args,{global=false,success=true}={}){
+async function call(args,{global=false,success=true,result=false}={}){
  const start=performance.now(),n=++sequence;let r,code=0;
  try{r=await exec(cli,[...(global?[]:['--profile',profile]),...args,'--json'],{cwd:root,env:environment,timeout:1200000,maxBuffer:8*1024**2});}catch(e){r=e;code=typeof e.code==='number'?e.code:1;}
  await writeFile(join(root,n+'.stdout'),r.stdout??'',{mode:0o600});await writeFile(join(root,n+'.stderr'),r.stderr??'',{mode:0o600});calls.push({command:args.slice(0,3).join(' '),code,seconds:(performance.now()-start)/1000});
- assert.equal(code===0,success,'Unexpected CLI outcome: '+args.slice(0,3).join(' ')+'; transcript '+root+'/'+n);return JSON.parse(success?r.stdout:r.stderr);
+ assert.equal(code===0,success,'Unexpected CLI outcome: '+args.slice(0,3).join(' ')+'; transcript '+root+'/'+n);return JSON.parse(success||result?r.stdout:r.stderr);
 }
 const scoped=(s,args,options)=>call(['ghidra',...args,'--session',s.session,'--target',s.target],options);
 try{
@@ -33,9 +33,9 @@ try{
  assert.equal(report.ghidra.state,'passed');const skill=await call(['skill'],{global:true});report.installedBuild=JSON.parse(await readFile(join(dirname(skill.path),'.cli-package-build.json'),'utf8'));report.installedVersion=JSON.parse(await readFile(join(dirname(skill.path),'package.json'),'utf8')).version;
  const a=await call(['ghidra','open',exe,'--session','new']),b=await call(['ghidra','open',exe,'--session','new']);assert.equal(a.target,b.target);const entry=report.ghidra.entry;
  const parallel=await Promise.all([scoped(a,['functions','decompile','--address',entry]),scoped(b,['functions','decompile','--address',entry])]);assert.ok(parallel.every(v=>v.code.includes('case 3')));checks.parallelPublicClients=true;
- const shared='Shared core A conflict evidence',local='Shared core B retained evidence',disjoint='B safe field retained atomically';
+ const trial=Date.now(),shared='Shared core A conflict evidence '+trial,local='Shared core B retained evidence '+trial,disjoint='B safe field retained atomically '+trial;
  await scoped(a,['comments','set','--address',entry,'--kind','plate','--text',shared]);await scoped(b,['comments','set','--address',entry,'--kind','plate','--text',local]);await scoped(b,['comments','set','--address',entry,'--kind','repeatable','--text',disjoint]);
- const merged=await scoped(a,['merge']);const conflict=await scoped(b,['merge']);assert.equal(conflict.state,'conflict');
+ const merged=await scoped(a,['merge']);const conflict=await scoped(b,['merge'],{success:false,result:true});assert.equal(conflict.state,'conflict');
  const witness=await call(['ghidra','open','--target',a.target,'--session','new']);assert.equal((await scoped(witness,['comments','get','--address',entry,'--kind','plate'])).text,shared);assert.notEqual((await scoped(witness,['comments','get','--address',entry,'--kind','repeatable'])).text,disjoint);
  await scoped(b,['refresh']);assert.equal((await scoped(b,['comments','get','--address',entry,'--kind','plate'])).text,local);assert.equal((await scoped(b,['comments','get','--address',entry,'--kind','repeatable'])).text,disjoint);
  await scoped(b,['comments','set','--address',entry,'--kind','plate','--text',local,'--resolve-conflict','--expect-shared',shared]);assert.equal((await scoped(b,['merge'])).state,'merged');checks.atomicConflictAndRefresh=true;

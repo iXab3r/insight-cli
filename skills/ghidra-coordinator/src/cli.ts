@@ -1,7 +1,8 @@
+import {listProcesses} from './tool-runtime/supervisor.js';
 import {ilspyCommands} from './ilspy.js';
 import {toolProcessCommands} from './tool-runtime/commands.js';
 import {ghidraProcessHooks} from './ghidra-processes.js';
-import {assertUnused,withToolLock,toolUseCount} from './tool-runtime/store.js';
+import {withToolLock,toolProfileBusy} from './tool-runtime/store.js';
 import { command, createCli, Permission, CliError, ProfileStore, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
 import { join, resolve } from 'node:path';
 import { readFile, readdir } from 'node:fs/promises';
@@ -89,7 +90,8 @@ class Owner {
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
     if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress; finish it before changing or deleting the profile.');
-    for(const tool of ['ghidra','ilspy']){if(toolUseCount(directory,tool))fail('busy','A tool operation is active.');await assertUnused(directory,tool);}
+    if(toolProfileBusy(directory))fail('busy','A tool operation is active.');
+    if((await listProcesses(directory)).some(r=>!['exited','failed'].includes(r.state)))fail('busy','The profile has active or unverified tool processes.');
     const materials=await readdir(join(directory,'materials')).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
     if(existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
       fail('blocked','Profile has retained research data; preserve its workspace and materials before deleting or reconfiguring it.');

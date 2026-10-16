@@ -20,19 +20,20 @@ const key=(directory:string,tool:string)=>resolve(directory)+'\0'+tool;
 export async function withToolLock<T>(directory:string,tool:string,action:()=>Promise<T>,signal?:AbortSignal):Promise<T>{
  signal?.throwIfAborted();const k=key(directory,tool);if(held.getStore()?.has(k))return action();
  const previous=queues.get(k)??Promise.resolve();
- const execution=previous.then(()=>{signal?.throwIfAborted();return held.run(new Set([...(held.getStore()??[]),k]),action);});
+ let started=false;const execution=previous.then(()=>{signal?.throwIfAborted();started=true;return held.run(new Set([...(held.getStore()??[]),k]),action);});
  const tail=execution.then(()=>{},()=>{});queues.set(k,tail);void tail.then(()=>{if(queues.get(k)===tail)queues.delete(k);});
  if(!signal)return execution;
  return new Promise<T>((ok,bad)=>{
-  const aborted=()=>bad(signal.reason);signal.addEventListener('abort',aborted,{once:true});
+  const aborted=()=>{if(!started)bad(signal.reason);};signal.addEventListener('abort',aborted,{once:true});
   if(signal.aborted)aborted();
   execution.then(ok,bad).finally(()=>signal.removeEventListener('abort',aborted));
  });
 }
+export function toolProfileBusy(directory:string){const prefix=resolve(directory)+'\0';return [...queues.keys(),...uses.keys()].some(k=>k.startsWith(prefix));}
 export function toolUseCount(directory:string,tool:string){return uses.get(key(directory,tool))??0;}
 export async function withToolUse<T>(directory:string,tool:string,acquire:()=>Promise<T>,signal?:AbortSignal):Promise<{value:T;release:()=>void}>{
  return withToolLock(directory,tool,async()=>{
-  const value=await acquire(),k=key(directory,tool);uses.set(k,(uses.get(k)??0)+1);let released=false;
+  const value=await acquire();signal?.throwIfAborted();const k=key(directory,tool);uses.set(k,(uses.get(k)??0)+1);let released=false;
   return {value,release(){if(released)return;released=true;const n=(uses.get(k)??1)-1;if(n)uses.set(k,n);else uses.delete(k);}};
  },signal);
 }
