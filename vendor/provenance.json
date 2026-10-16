@@ -6,5 +6,6 @@
   "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
   "commit": "a2094fb5d1cc80a82a5f599fe9d5f37c57a04d46",
   "license": "MIT",
-  "distribution": "Prepared official package artifact; registry publication not performed"
+  "distribution": "Prepared official Factory IPC artifact; installed automatically from the immutable URL, without a separate IPC registry publication",
+  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
 }

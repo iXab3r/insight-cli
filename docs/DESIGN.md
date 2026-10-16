@@ -377,7 +377,10 @@ SQLite recovery. Real Ghidra write acceptance is a separate local-only disposabl
 not Factory's ReadOnly service proof and not CI. Report limits at the tested revision/environment.
 
 Core and MCP SDK use MIT; SQLite is provided by Node. Ghidra/GhidraMCP/Python are configured external
-runtimes with their own licenses. Prepared unpublished IPC dependency artifact is pinned with
-source provenance; install it alongside the CLI artifact until an authorized Factory npm release.
+runtimes with their own licenses. The official prepared IPC dependency is pinned to an immutable
+GitHub tarball URL with source/license/hash provenance; npm installs it automatically. The vendor
+copy remains an offline mirror, and IPC is not separately published by this consumer.
 Packing prepares Factory's manifest after compilation and includes skill/resources; installation
-never edits an agent's personal settings. Registry publication is outside this delivery.
+never edits an agent's personal settings. The owner separately authorized registry publication and
+global-install verification on 2026-10-16 under `@eyeauras/insight-cli`; the command/application ID
+remains `insight-cli`. See [npm distribution](NPM-RELEASE.md).

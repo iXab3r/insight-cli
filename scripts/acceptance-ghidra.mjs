@@ -36,7 +36,7 @@ const values={server:serverOrigin,readerUser:'reader',publisherUser:'publisher',
 await store.set('default',values);await store.setPermissions('default',['ReadOnly','Update']);
 ownerBin=join(root,'fixture-bin.mjs');
 const artifactDirectory=join(root,'artifacts');await mkdir(artifactDirectory);
-const packed=JSON.parse((await exec('npm',['pack','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli','--pack-destination',artifactDirectory],{cwd:source})).stdout)[0];
+const packed=JSON.parse((await exec('npm',['pack','--ignore-scripts','--json','--workspace','@eyeauras/insight-cli','--pack-destination',artifactDirectory],{cwd:source})).stdout)[0];
 await writeFile(join(root,'package.json'),JSON.stringify({name:'disposable-insight-owner',version:'0.1.0',type:'module',files:['fixture-bin.mjs','fixture-config.json','.cli-package-build.json']}));
 await exec('npm',['install','--ignore-scripts','--no-audit','--no-fund',join(artifactDirectory,packed.filename),join(source,'vendor/factory-ipc-a2094fb.tgz')],{cwd:root,timeout:120000,maxBuffer:262144});
 await cp(join(source,'scripts/fixtures/native-owner.mjs'),ownerBin);

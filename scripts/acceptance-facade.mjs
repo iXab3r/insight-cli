@@ -27,18 +27,18 @@ await mkdir(directory,{recursive:true,mode:0o700});await mkdir(join(scratch,'art
 const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar'],maxContexts:4};
 const profiles=new ProfileStore({applicationId,appArguments});await profiles.set('default',values);
 await profiles.setPermissions('default',['ReadOnly','Update','Destructive']);
-const packed=JSON.parse((await runNpm(['pack','--offline','--ignore-scripts','--json','--workspace','@ixab3r/insight-cli',
+const packed=JSON.parse((await runNpm(['pack','--offline','--ignore-scripts','--json','--workspace','@eyeauras/insight-cli',
   '--pack-destination',join(scratch,'artifacts')],{cwd:source})).stdout)[0];
 const rootManifest=JSON.parse(await readFile(join(source,'package.json'),'utf8')),
   lock=JSON.parse(await readFile(join(source,'package-lock.json'),'utf8')),
   cliManifest=JSON.parse(await readFile(join(source,'skills/ghidra-coordinator/package.json'),'utf8'));
 const manifest={name:'owned-insight-facade-proof',version:'0.1.0',private:true,type:'module',
   files:['fixture-bin.mjs','fixture-config.json','.cli-package-build.json'],
-  dependencies:{...rootManifest.dependencies,'@ixab3r/insight-cli':'file:artifacts/'+packed.filename},devDependencies:rootManifest.devDependencies};
+  dependencies:{...rootManifest.dependencies,'@eyeauras/insight-cli':'file:artifacts/'+packed.filename},devDependencies:rootManifest.devDependencies};
 lock.name=manifest.name;lock.version=manifest.version;lock.packages['']=manifest;
 for(const [path,item]of Object.entries(lock.packages))if(item.link||path.startsWith('skills/'))delete lock.packages[path];
 const artifact=await readFile(join(scratch,'artifacts',packed.filename));
-lock.packages['node_modules/@ixab3r/insight-cli']={version:cliManifest.version,resolved:manifest.dependencies['@ixab3r/insight-cli'],
+lock.packages['node_modules/@eyeauras/insight-cli']={version:cliManifest.version,resolved:manifest.dependencies['@eyeauras/insight-cli'],
   integrity:'sha512-'+createHash('sha512').update(artifact).digest('base64'),dependencies:cliManifest.dependencies,
   engines:cliManifest.engines,bin:cliManifest.bin,license:cliManifest.license};
 await cp(join(source,'vendor'),join(scratch,'vendor'),{recursive:true});
@@ -91,8 +91,8 @@ try {
   const conflicted=await invoke(['sessions','status',b.session,'--target',b.target]);assert.equal(conflicted.ghidra.conflicts[0].local,'B overlap');
   await invoke(['ipc-server','stop']);
   const nativeSecrets=new KeyringSecretStore(),secrets=new ProfileSecrets(nativeSecrets,applicationId,'default');
-  const {GhidraServer}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/server.js'));
-  const {nativeInputs}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/native-inputs.js'));
+  const {GhidraServer}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/server.js'));
+  const {nativeInputs}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js'));
   const context={profile:{name:'default',values},environment:{PATH:process.env.PATH},signal:new AbortController().signal,fetch,secrets};
   await new GhidraServer(join(directory,'workspace'),await nativeInputs(values),context).stop();
   await invoke(['ghidra','open',...select(b)]);assert.equal(await read(b),'B overlap');assert.equal(await read(ah),'A helper');
@@ -168,10 +168,10 @@ try {
 finally {
   await rm(join(directory,'fault.json'),{force:true});
   await invoke(['ipc-server','stop'],false);
-  const {GhidraServer}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/server.js')),
-    {GhidraContexts}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/contexts.js')),
-    {Workspace}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/workspace.js')),
-    {nativeInputs}=await import(join(scratch,'node_modules/@ixab3r/insight-cli/dist/src/native-inputs.js'));
+  const {GhidraServer}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/server.js')),
+    {GhidraContexts}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/contexts.js')),
+    {Workspace}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/workspace.js')),
+    {nativeInputs}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js'));
   const secrets=new ProfileSecrets(new KeyringSecretStore(),applicationId,'default');
   const context={profile:{name:'default',values},environment:{PATH:process.env.PATH},signal:new AbortController().signal,fetch,secrets};
   const inputs=await nativeInputs(values),workspace=new Workspace(join(directory,'workspace'),'default'),native=new GhidraContexts(workspace,inputs,context);

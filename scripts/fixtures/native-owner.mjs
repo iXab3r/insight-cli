@@ -5,8 +5,8 @@ import {join} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
 import {AppArguments,KeyringSecretStore} from '@eyeauras/cli-factory';
 import {runHosted} from '@eyeauras/cli-factory-ipc';
-import {createDefinition} from '@ixab3r/insight-cli/dist/src/prototype-cli.js';
-import {GhidraRuntime} from '@ixab3r/insight-cli/dist/src/ghidra.js';
+import {createDefinition} from '@eyeauras/insight-cli/dist/src/prototype-cli.js';
+import {GhidraRuntime} from '@eyeauras/insight-cli/dist/src/ghidra.js';
 
 const config=JSON.parse(await readFile(new URL('./fixture-config.json',import.meta.url),'utf8'));
 const appArguments=new AppArguments(config.appArguments);

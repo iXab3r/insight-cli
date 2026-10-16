@@ -22,7 +22,7 @@ export async function prepare(root,directory){
  const result=await exec(process.execPath,[join(root,'scripts/test-package.mjs'),'--keep-installed'],{cwd:root,timeout:300000,maxBuffer:8*1024*1024});
  await readFile(join(root,'tests/acceptance/fixtures/research.c'));await save(join(directory,'package-result.json'),{stdout:result.stdout,stderr:result.stderr});
  const installed=result.stdout.match(/^Retained owned installed package: (.+)$/m)?.[1];assert.ok(installed);
- const cli=join(installed,'node_modules/@ixab3r/insight-cli/dist/src/bin.js'),artifact=join(installed,'artifacts/ixab3r-insight-cli-0.1.0.tgz'),inputs=[];
+ const cli=join(installed,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),artifact=join(installed,'artifacts/eyeauras-insight-cli-0.1.0.tgz'),inputs=[];
  for(const version of [1,2]){const folder=join(directory,'build-'+version);await mkdir(folder);const object=join(folder,'client.obj'),path=join(folder,'client.exe');
   await exec(clang,['--target=x86_64-pc-windows-msvc','-O1','-fno-builtin','-DVERSION='+version,'-c',join(root,'tests/acceptance/fixtures/research.c'),'-o',object]);
   await exec(lld,['/entry:main','/subsystem:console','/nodefaultlib','/timestamp:0','/out:'+path,object]);const bytes=await readFile(path);inputs.push({version,path,sha256:sha(bytes),exports:exportsOf(bytes)});

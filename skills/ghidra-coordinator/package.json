@@ -1,5 +1,5 @@
 {
-  "name": "@ixab3r/insight-cli",
+  "name": "@eyeauras/insight-cli",
   "version": "0.1.0",
   "type": "module",
   "description": "Agent-facing durable sessions and isolated Ghidra research contexts",
@@ -9,6 +9,7 @@
     "insight-cli": "./dist/src/bin.js"
   },
   "files": [
+    "README.md",
     "dist/src",
     "SKILL.md",
     "skills",
@@ -24,7 +25,7 @@
   "dependencies": {
     "@eyeauras/cli-factory": "0.4.1",
     "@modelcontextprotocol/sdk": "1.32.1",
-    "@eyeauras/cli-factory-ipc": "0.1.0"
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
   },
   "engines": {
     "node": ">=24"
@@ -34,5 +35,13 @@
     "type": "git",
     "url": "git+https://github.com/iXab3r/insight-cli.git",
     "directory": "skills/ghidra-coordinator"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "homepage": "https://github.com/iXab3r/insight-cli#readme",
+  "bugs": {
+    "url": "https://github.com/iXab3r/insight-cli/issues"
   }
 }

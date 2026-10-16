@@ -43,13 +43,13 @@ console.log('Offline acceptance passed:',tests);
 const packaged=await exec(process.execPath,[join(root,'scripts/test-package.mjs'),'--keep-installed'],{cwd:root,timeout:300000,maxBuffer:8*1024*1024});
 await writeFile(join(directory,'package.log'),packaged.stdout+'\n'+packaged.stderr);
 const install=packaged.stdout.match(/^Retained owned installed package: (.+)$/m)?.[1];assert.ok(install,'Missing retained installed artifact');
-const tarball=join(install,'artifacts','ixab3r-insight-cli-0.1.0.tgz'),artifactSha256=sha(await readFile(tarball));
+const tarball=join(install,'artifacts','eyeauras-insight-cli-0.1.0.tgz'),artifactSha256=sha(await readFile(tarball));
 assert.deepEqual(await inputs(),sourceHashes,'Inputs changed during package acceptance');
 const groups=[];
 for(const name of runners){
  console.log('Full native acceptance started:',name);const started=Date.now();
  const extra=name==='acceptance-facade'?['--faults','--automatic-faults','--source-revision',baseRevision]:
-  name==='proof-p3'?['--installed-package',join(install,'node_modules/@ixab3r/insight-cli'),'--installed-tarball',tarball]:[];
+  name==='proof-p3'?['--installed-package',join(install,'node_modules/@eyeauras/insight-cli'),'--installed-tarball',tarball]:[];
  let output;
  try{output=await exec(process.execPath,[join(root,'scripts',name+'.mjs'),...args,...extra],{cwd:root,timeout:1800000,maxBuffer:16*1024*1024});}
  catch(error){await writeFile(join(directory,name+'.log'),(error.stdout??'')+'\n'+(error.stderr??''));console.error('Full acceptance failed:',name,'; owned diagnostics:',directory);throw error;}

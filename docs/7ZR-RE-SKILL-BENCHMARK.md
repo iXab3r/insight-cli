@@ -316,3 +316,8 @@ full findings/transcripts, selectors and personal runtime paths remain outside G
 The [earlier pre-skill measurements](7ZR-LIVE-RESEARCH.md) and their
 [time analysis](7ZR-TIME-ANALYSIS.md) keep their original outcomes. Different reporting and
 orchestration contracts prevent attributing a before/after difference solely to the skill.
+
+The frozen experiment uses its recorded unpublished `@ixab3r/insight-cli` artifact and
+source revision. The later registry package is named `@eyeauras/insight-cli`; use the
+recorded artifact/source when reproducing this historical timing series. Its receipts
+are not rebound to the registry release.

@@ -3,9 +3,9 @@ import {readFileSync,writeFileSync,appendFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {AppArguments,KeyringSecretStore} from '@eyeauras/cli-factory';
 import {runHosted} from '@eyeauras/cli-factory-ipc';
-import {createDefinition} from '@ixab3r/insight-cli';
-import {GhidraContexts} from '@ixab3r/insight-cli/dist/src/contexts.js';
-import {nativeInputs} from '@ixab3r/insight-cli/dist/src/native-inputs.js';
+import {createDefinition} from '@eyeauras/insight-cli';
+import {GhidraContexts} from '@eyeauras/insight-cli/dist/src/contexts.js';
+import {nativeInputs} from '@eyeauras/insight-cli/dist/src/native-inputs.js';
 
 const config=JSON.parse(readFileSync(new URL('./fixture-config.json',import.meta.url),'utf8'));
 const appArguments=new AppArguments(config.appArguments),directory=appArguments.AppDataDirectory;

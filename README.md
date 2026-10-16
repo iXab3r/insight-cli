@@ -67,11 +67,24 @@ Ghidra 12.1.2 and Java 21, including simultaneous GUI/LLDB contexts. The
 [P2 report](docs/verification/api-gaps-p2.json) retains its separate selected headless Windows/Linux
 identity; it does not imply current full GUI/P3 acceptance on those OSes. The
 [original M0–M5 report](docs/verification/full-facade.json) and individual P0–P3 reports retain their
-historical identities. Universal native DB merging, external archive-service deployment and npm
-publication remain outside the selected delivery. See [design](docs/DESIGN.md),
+historical identities. Universal native DB merging and external archive-service deployment
+remain outside the selected functional delivery. See [design](docs/DESIGN.md),
 [scenarios](docs/CLI-SCENARIOS.md) and [milestones](docs/PLAN.md).
 
-Use Node 24 or newer:
+Install the CLI with Node 24 or newer:
+
+```sh
+npm install --global @eyeauras/insight-cli
+insight-cli --help
+insight-cli skill insight-re
+```
+
+The executable is `insight-cli`; npm's global executable directory must be on PATH. No source
+checkout or build is needed. The pinned official IPC tarball is fetched automatically from an
+immutable GitHub URL; installation needs registry and GitHub access. Java/Ghidra are configured
+separately for native analysis. See [npm distribution](docs/NPM-RELEASE.md).
+
+For development:
 
 ```sh
 npm ci --ignore-scripts
@@ -91,7 +104,7 @@ measurements. `npm run test:business` runs their installed public-CLI/native gat
 [business acceptance](docs/BUSINESS-ACCEPTANCE.md) records the passing native gate, protocol and measurement limits.
 
 The canonical npm helper and its progressive skill live in `skills/ghidra-coordinator`; the npm
-package is `@ixab3r/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
+package is `@eyeauras/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared
 IPC ownership. Update permission starts disabled. All mutable state derives from profile AppData.
 
@@ -114,12 +127,14 @@ privately before `applied`; with the default manual policy they await explicit m
 request IDs identify original changing intentions and return their result or unresolved state
 without repeating effects.
 
-Build prepared artifacts with `npm run pack:cli`. Until a separately authorized IPC npm release,
-install the CLI tarball together with the prepared official Factory IPC tarball:
+Build prepared artifacts with `npm run pack:cli`. The tarball also installs by itself:
 
 ```sh
-npm install ./vendor/factory-ipc-a2094fb.tgz ./artifacts/ixab3r-insight-cli-0.1.0.tgz
+npm install --global ./artifacts/eyeauras-insight-cli-0.1.0.tgz
 ```
+
+The IPC dependency uses the recorded immutable tarball URL, so no separate dependency archive
+is supplied by the caller. The local vendor copy remains a provenance/offline mirror.
 
 Core is pinned to 0.4.1. [IPC provenance](vendor/provenance.json) records Factory source, license and
 artifact hash; [Factory PR #51](https://github.com/iXab3r/EyeAuras.CliFactory/pull/51) implements

@@ -27,6 +27,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@eyeauras/cli-factory-ipc": "file:vendor/factory-ipc-a2094fb.tgz"
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
   }
 }

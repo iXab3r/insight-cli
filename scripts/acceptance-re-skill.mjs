@@ -35,7 +35,7 @@ if(action==='prepare'){
  const bytes=await readFile(input);assert.equal(sha(bytes),expected);await mkdir(join(directory,'input'));await copyFile(input,join(directory,'input/7zr.exe'));
  for(const folder of ['A-password','B-extraction','C-binary'])await mkdir(join(directory,'research',folder),{recursive:true});
  await mkdir(join(directory,'receipts'));
- const artifact=join(installed,'artifacts/ixab3r-insight-cli-0.1.0.tgz'),m={schema:1,directory,cli:join(installed,'node_modules/@ixab3r/insight-cli/dist/src/bin.js'),
+ const artifact=join(installed,'artifacts/eyeauras-insight-cli-0.1.0.tgz'),m={schema:1,directory,cli:join(installed,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),
   artifact,artifactSha256:sha(await readFile(artifact)),profile:'re-skill-'+randomUUID(),java:'/opt/homebrew/opt/openjdk@21/bin/java',ghidra:'/opt/homebrew/opt/ghidra/libexec',
   inputs:[{path:join(directory,'input/7zr.exe'),sha256:expected,bytes:bytes.length}]};
  await save(join(directory,'manifest.json'),m);const cli=await client(m,'prepare');
@@ -88,7 +88,7 @@ if(action==='prepare'){
  console.log(JSON.stringify({passed:true,finalMaterials:copied,cleanupComplete:true}));
 }else if(action==='inspect'){
  const previous=await json(join(directory,'manifest.json')),completed=await json(join(directory,'result.json'));
- assert.equal(completed.cleanupComplete,true);const cliPath=join(installed,'node_modules/@ixab3r/insight-cli/dist/src/bin.js');
+ assert.equal(completed.cleanupComplete,true);const cliPath=join(installed,'node_modules/@eyeauras/insight-cli/dist/src/bin.js');
  const m={...previous,cli:cliPath},cli=await client(m,'inspect-correction');await cli.call(['ghidra','server','connect']);
  const scopeFile=join(directory,'inspect-scope.json'),retained=await json(scopeFile).catch(error=>{if(error.code==='ENOENT')return null;throw error;});
  const reader=retained?await cli.call(['ghidra','open','--target',previous.a.target,'--session',retained.session]):await cli.fresh(previous.a.target);
@@ -102,7 +102,7 @@ if(action==='prepare'){
  const history=await cli.history(reader.target);assert.deepEqual(history.versions.map(v=>v.version).sort(),[1,2,3]);
  const copied=await cli.call(['artifacts','save',join(directory,'research')]);await sameTree(join(directory,'research'),copied.path);
  const notes=await cli.call(['artifacts','save',join(directory,'research/notes.md')]);assert.equal(await readFile(notes.path,'utf8'),await readFile(join(directory,'research/notes.md'),'utf8'));
- const artifact=join(installed,'artifacts/ixab3r-insight-cli-0.1.0.tgz'),skill=join(installed,'node_modules/@ixab3r/insight-cli/skills/insight-re/SKILL.md');
+ const artifact=join(installed,'artifacts/eyeauras-insight-cli-0.1.0.tgz'),skill=join(installed,'node_modules/@eyeauras/insight-cli/skills/insight-re/SKILL.md');
  const result={artifactSha256:sha(await readFile(artifact)),skillSha256:sha(await readFile(skill)),inputSha256:sha(await readFile(previous.inputs[0].path)),
   singleFunction:true,fieldSubset:true,bulk:true,historyUnchanged:true,folder:copied,file:notes};
  assert.equal(result.inputSha256,expected);assert.equal(result.skillSha256,previous.skillSha256);
