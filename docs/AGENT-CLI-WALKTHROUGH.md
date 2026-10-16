@@ -1,5 +1,9 @@
 # Agent walkthrough on a real Windows EXE
 
+Follow-up: [interrupted first-import recovery](INITIAL-IMPORT-RECOVERY.md) closes the bootstrap
+limit found in this walkthrough, including the same retained profile. The evidence and limits
+below describe this earlier build.
+
 The 2026-10-16 walkthrough uses the installed `insight-cli` executable, its ordinary Factory
 IPC owner and a separate disposable profile. Every research, edit, publication and continuation
 action uses public CLI commands. There are no in-process fixtures, custom entry points, runtime

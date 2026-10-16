@@ -56,6 +56,14 @@ class InsightSdkFiles {
     }
     static Object importProgram(JsonObject p) throws Exception {
         String selected=text(p,"loader");Object consumer=new Object();Loader loader=null;
+        if(selected.isEmpty()){
+            Language language=text(p,"language").isEmpty()?null:DefaultLanguageService.getLanguageService().getLanguage(new LanguageID(text(p,"language")));
+            CompilerSpec compiler=language==null?null:text(p,"compiler_spec").isEmpty()?language.getDefaultCompilerSpec():language.getCompilerSpecByID(new CompilerSpecID(text(p,"compiler_spec")));
+            var loaded=language==null?AutoImporter.importByUsingBestGuess(Path.of(text(p,"input")).toFile(),null,"/",consumer,new MessageLog(),TaskMonitor.DUMMY):
+                AutoImporter.importByLookingForLcs(Path.of(text(p,"input")).toFile(),null,"/",language,compiler,consumer,new MessageLog(),TaskMonitor.DUMMY);
+            try{if(loaded==null||loaded.size()!=1)throw new IllegalArgumentException("Expected one imported program");return saveImport(loaded.getPrimaryDomainObject(),p,"automatic");}
+            finally{if(loaded!=null)loaded.release(consumer);}
+        }
         for(Loader candidate:ClassSearcher.getInstances(Loader.class))if(candidate.getClass().getName().equals(selected)||candidate.getClass().getSimpleName().equals(selected)||candidate.getName().equals(selected)){
             if(loader!=null)throw new IllegalArgumentException("Ambiguous installed loader");loader=candidate;}
         if(loader==null)throw new IllegalArgumentException("Unknown installed loader");
@@ -74,14 +82,21 @@ class InsightSdkFiles {
             if(result==null)throw new IllegalStateException("Native loader did not return a program");
             try {
                 if(result.size()!=1||!(result.getPrimaryDomainObject() instanceof Program))throw new IllegalArgumentException("Loader must produce one program per explicit target");
-                Program program=(Program)result.getPrimaryDomainObject();
-                boolean analyze=p.has("auto_analyze")&&p.get("auto_analyze").getAsBoolean();
-                if(analyze){AutoAnalysisManager analysis=AutoAnalysisManager.getAnalysisManager(program);analysis.initializeOptions();analysis.reAnalyzeAll(null);analysis.startAnalysis(TaskMonitor.DUMMY);}
-                program.saveToPackedFile(Path.of(text(p,"output")).toFile(),TaskMonitor.DUMMY);
-                return Map.of("state","imported","loader",loader.getClass().getName(),"language",program.getLanguageID().toString(),
-                    "compiler",program.getCompilerSpec().getCompilerSpecID().toString(),"sha256",program.getExecutableSHA256(),"auto_analyzed",analyze);
+                return saveImport((Program)result.getPrimaryDomainObject(),p,loader.getClass().getName());
             } finally {result.release(consumer);}
         }
+    }
+    static Object saveImport(Program program,JsonObject p,String loader)throws Exception{
+        boolean analyze=p.has("auto_analyze")&&p.get("auto_analyze").getAsBoolean();
+        if(analyze){ghidra.app.script.GhidraScriptUtil.acquireBundleHostReference();int tx=program.startTransaction("Initial analysis");boolean success=false;
+            try{AutoAnalysisManager analysis=AutoAnalysisManager.getAnalysisManager(program);analysis.initializeOptions();analysis.reAnalyzeAll(null);analysis.startAnalysis(TaskMonitor.DUMMY);success=true;}
+            finally{program.endTransaction(tx,success);ghidra.app.script.GhidraScriptUtil.releaseBundleHostReference();}}
+        if(p.has("image_base")){int tx=program.startTransaction("Initial image base");boolean success=false;
+            try{program.setImageBase(program.getAddressFactory().getDefaultAddressSpace().getAddress(new BigInteger(text(p,"image_base"),16).longValue()),true);success=true;}
+            finally{program.endTransaction(tx,success);}}
+        program.saveToPackedFile(Path.of(text(p,"output")).toFile(),TaskMonitor.DUMMY);
+        return Map.of("state","imported","loader",loader,"language",program.getLanguageID().toString(),"base_address",program.getImageBase().toString(),
+            "compiler",program.getCompilerSpec().getCompilerSpecID().toString(),"sha256",program.getExecutableSHA256(),"auto_analyzed",analyze);
     }
     static Object exporters(Program program) throws Exception {
         List<Object> rows=new ArrayList<>();for(Exporter exporter:ClassSearcher.getInstances(Exporter.class)){

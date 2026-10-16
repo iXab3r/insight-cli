@@ -27,6 +27,12 @@ class InsightRepositoryProbe {
       int split = args[1].lastIndexOf('/');
       String folder = split == 0 ? "/" : args[1].substring(0, split), name = args[1].substring(split + 1);
       var item = repository.getItem(folder, name);
+      if(item==null){
+        boolean reserved=repository.fileExists(folder,name);
+        repository.disconnect();manager.server().disconnect();
+        output.println(new Gson().toJson(Map.of("state",reserved?"reserved":"absent","repository",args[0],"path",args[1],"permission",user.getPermissionType())));
+        System.exit(0);
+      }
       var checkouts = repository.getCheckouts(folder, name);
       var versions = repository.getVersions(folder, name);
       if (item == null || checkouts == null || versions == null || versions.length == 0) throw new IllegalStateException();

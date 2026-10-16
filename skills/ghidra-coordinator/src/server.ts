@@ -51,7 +51,7 @@ export class GhidraServer {
     private readonly state: {initializing?: Promise<ServerBinding>; child?: ChildProcess} = {}) {}
   fork(c: CommandContext) {return new GhidraServer(this.directory,this.inputs,c,this.state);}
   private root() { return join(this.directory, 'server'); }
-  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0]): Promise<Record<string,unknown>> {
+  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0],timeoutMilliseconds=120000): Promise<Record<string,unknown>> {
     const root = join(this.root(), 'calls', label + '-' + randomUUID()); await mkdir(root, {recursive:true,mode:0o700});
     const classes = await nativeHelpers(this.directory, this.inputs);
     const log = await open(join(root, 'diagnostic.log'), 'a', 0o600);
@@ -64,8 +64,8 @@ export class GhidraServer {
     let output = '', overflow = false;
     child.stdout!.on('data', chunk => { if (!overflow) output += chunk.toString(); if (Buffer.byteLength(output) > 1024 * 1024) { overflow = true; child.kill('SIGTERM'); } });
     const abort = () => child.kill('SIGTERM'); this.c.signal.addEventListener('abort', abort, {once:true});
-    const timer = setTimeout(abort, 120000);
-    const force = setTimeout(()=>{if(child.exitCode===null && child.signalCode===null)child.kill('SIGKILL');},125000);
+    const timer = setTimeout(abort, timeoutMilliseconds);
+    const force = setTimeout(()=>{if(child.exitCode===null && child.signalCode===null)child.kill('SIGKILL');},timeoutMilliseconds+5000);
     try {
       child.stdin!.on('error',()=>{}); child.stdin!.end(input);
       if (this.c.signal.aborted) abort();
@@ -143,6 +143,10 @@ export class GhidraServer {
   }
   async programStatus(binding:ServerBinding,path:string) {
     return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
+  }
+  async initialImport(root:string){return this.run('initial-import','InsightInitialImport',[root],{},undefined,[0],600000);}
+  async initialPublication(binding:ServerBinding,root:string,operation:'stage'|'verify-stage'|'promote'|'verify'='stage'){
+    return this.run('initial-publication','db.InsightInitialPublication',[root,operation],await this.credentials(binding,operation.startsWith('verify')?'reader':'publisher'));
   }
   async publish(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
     return this.run('publish','db.InsightSnapshotPublisher',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],

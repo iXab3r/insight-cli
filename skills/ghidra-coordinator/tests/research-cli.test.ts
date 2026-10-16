@@ -51,6 +51,20 @@ class Fake implements ResearchBackend {
   async dispose(){this.views.clear();}
 }
 type Opened={session:string;target:string;state:string};
+test('reconciled first open returns the public ready envelope and preserves its original scope',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let attempts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+   const backend=new Fake(workspace),open=backend.open.bind(backend);
+   backend.open=async(selected,request)=>{if(attempts++===0)throw Error('Interrupted initial import');return open(selected,request);};
+   return Object.assign(backend,{recoverModel:async()=>true});
+ }}));
+ const exe=join(f.root,'resume.exe');await writeFile(exe,'synthetic interrupted input');
+ const args=['ghidra','open',exe,'--session','new','--request-id','resume'];
+ const first=await f.run(app,[...args,'--json']);assert.notEqual(first.exitCode,0);const retained=JSON.parse(first.stdout);
+ const ready=await f.json(app,args) as Opened;assert.equal(ready.session,retained.session);assert.equal(ready.target,retained.target);assert.equal(ready.state,'ready');
+ assert.deepEqual(Object.keys(ready).sort(),['session','target','state','baseRevision','sharedRevision','pendingChanges'].sort());
+ assert.deepEqual(await f.json(app,args),ready);assert.equal(attempts,2);
+});
 test('failed initial open exposes retained scope and continuation; retry is nonzero without reimport',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let attempts=0;
  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{

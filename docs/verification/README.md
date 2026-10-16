@@ -1,5 +1,21 @@
 # Verification scope
 
+## Interrupted initial import
+
+[First-import recovery evidence](initial-import-recovery.json) records four real production-EXE
+CLI crash cases and a prior-build migration with the original profile/session/target/request.
+Analysis completion receipts, independently verified staging and conditional server promotion
+establish one canonical R1; every case subsequently merges an annotation as R2 and reads it
+from a new session. The earlier actual blocked profile and development partial-create profile
+are also retained and ready. Historical development transitions are distinguished from the
+fresh final-artifact migration test.
+
+The same installed artifact passes 128 offline tests, the
+[installed facade regression](initial-import-regression.json) and nine
+[P3 native cases](initial-import-p3.json). Runtime source/compiled/native resources and installed
+package hashes are bound independently from the earlier 33-group gate. See
+[commands, protocol and reproduction](../INITIAL-IMPORT-RECOVERY.md).
+
 ## Real-EXE public CLI walkthrough
 
 [7-Zip evidence](agent-cli-7zip.json) and the [command walkthrough](../AGENT-CLI-WALKTHROUGH.md)

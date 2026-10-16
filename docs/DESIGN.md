@@ -100,9 +100,11 @@ The second form continues an existing context after reconnecting or process repl
 If native opening fails after its intent is reserved, the failure returns the retained session,
 target and optional caller request ID, with follow-up commands to inspect status and continue.
 An unresolved open retry exits nonzero and preserves the original intent; it never reimports
-merely to obtain a successful response. Initial synchronous import/analysis has a bounded
-ten-minute HTTP budget. The [production-EXE walkthrough](AGENT-CLI-WALKTHROUGH.md) records the
-observed timeout problem, fix and pre-version-control recovery limit.
+merely to obtain a successful response. Initial import/analysis has a bounded ten-minute native
+job budget. [First-import recovery](INITIAL-IMPORT-RECOVERY.md) uses private completion receipts,
+independently verified staging and conditional canonical promotion; it also handles retained
+legacy failures without resetting a profile. The earlier
+[production-EXE walkthrough](AGENT-CLI-WALKTHROUGH.md) keeps its original timeout-fix evidence.
 Separate target/session management can remain available, but is not required setup for each
 research task. The combined native/installed acceptance covers opening and ordinary research/edit commands
 together with the full inventoried facade.

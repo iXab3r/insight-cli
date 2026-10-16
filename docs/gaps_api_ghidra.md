@@ -12,6 +12,9 @@ fixes an operational gap: synchronous import/analysis exceeded the generic HTTP 
 Import now allows ten minutes; retained opening failures expose scope and continuation commands,
 and unresolved open retries return nonzero without reimporting. Its focused evidence keeps a
 separate source/artifact identity from the catalog-closure and combined reports below.
+The subsequent [first-import recovery](INITIAL-IMPORT-RECOVERY.md) closes the retained-bootstrap
+limit in that walkthrough: private completion receipts, independent staging readback and
+conditional promotion recover the same profile without a repeated canonical check-in.
 
 ## P0/P1 closure
 

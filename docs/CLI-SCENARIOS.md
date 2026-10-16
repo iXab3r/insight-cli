@@ -1,5 +1,9 @@
 # Agent CLI scenarios
 
+[Interrupted first-import recovery](INITIAL-IMPORT-RECOVERY.md) uses the existing scoped open
+or original request ID. Private analysis receipts and verified staging preserve the same
+profile/session/target without replaying a canonical check-in.
+
 For an observed installed-CLI investigation on a production EXE, see the
 [7-Zip walkthrough](AGENT-CLI-WALKTHROUGH.md), including the initial-import timeout fix and
 nonzero unresolved-open retry behavior. The examples below remain illustrative.

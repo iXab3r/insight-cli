@@ -22,6 +22,7 @@ import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
 import {sdkWrites} from './sdk-contracts.js';
+import {initialIntent,initializeModel} from './initial-model.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
@@ -193,49 +194,32 @@ export class GhidraContexts {
       await this.verified(record.binding,target);return record;
     } catch(error){await this.stopRecord(record,false);throw error;}
   }
+  private async retireLegacyBootstrap(target:ResearchTarget){
+    const parent=join(this.directory(),'bootstrap',target.id);
+    let entries;try{entries=await readdir(parent,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
+    for(const entry of entries){
+      if(!entry.isDirectory())continue;
+      const root=join(parent,entry.name);if(await realpath(root)!==resolve(root))fail('binding','Legacy initial-import stage moved outside owned storage.');
+      const binding=JSON.parse(await readFile(join(root,'process.json'),'utf8')) as ProcessBinding;
+      if(binding.root!==root||binding.target!==target.id||binding.kind!=='bootstrap'||binding.program!==programPath(target.id))fail('binding','Legacy bootstrap receipt changed.');
+      let stopped=false;
+      try{const receipt=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;}
+      catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+      if(stopped)continue;
+      if(alive(binding.pid))await this.stopRecord(await this.verified(binding,target,false));
+    }
+  }
   private async initialModel(target: ResearchTarget) {
     const model=this.workspace.model(target.id);if(model.state==='ready')return;
-    if(model.state==='unknown')fail('blocked','Shared model initialization requires reconciliation.');
-    const server=this.server(),binding=await server.ensure(),root=await this.prepareRoot('bootstrap',target.id);
-    const record=await this.launch(root,target,'bootstrap',programPath(target.id),'headless',undefined,await server.credentials(binding,'publisher'));
-    try {
-      const input=join(root,target.id+'.bin');await link(await this.workspace.artifacts.verify(target.input),input);
-      await record.http.call('/server/connect');
-      const project=object(await record.http.call('/open_project',{path:binding.origin+'/'+binding.repository}));
-      if(project.shared!==true||project.repository!==binding.repository)fail('binding','Canonical target project differs from its server binding.');
-      this.workspace.beginModelInitialization(target.id);
-      let result:Record<string,unknown>;
-      if(model.settings.loader){
-        const snapshot=join(root,'explicit-loader.gzf');
-        const loaded=await this.server().sdkFile('import',{input,output:snapshot,loader:model.settings.loader,options:model.settings.loaderOptions??{},
-          auto_analyze:model.settings.autoAnalyze,...(model.settings.language?{language:model.settings.language}:{}),...(model.settings.compilerSpec?{compiler_spec:model.settings.compilerSpec}:{})});
-        if(loaded.state!=='imported'||loaded.sha256!==target.binarySha256)fail('binding','Explicit loader did not preserve consumed input identity.');
-        const imported=object(await record.http.call('/import_program',{gzf_path:snapshot,target_folder:'/',target_name:target.id+'.bin',overwrite:false}));
-        await record.http.call('/open_program',{path:record.binding.program});
-        result={...imported,path:record.binding.program,auto_analyzed:loaded.auto_analyzed};
-      }else result=object(await record.http.call('/import_file',{file_path:input,auto_analyze:model.settings.autoAnalyze,
-        ...(model.settings.language?{language:model.settings.language}:{}),...(model.settings.compilerSpec?{compiler_spec:model.settings.compilerSpec}:{})}));
-      if(result.success!==true||result.path!==record.binding.program||result.reused_existing===true||
-          model.settings.autoAnalyze&&result.auto_analyzed!==true)fail('unknown','Canonical target import is not a verified fresh completed analysis; retain its stage.');
-      if(model.settings.imageBase)await record.http.call('/set_image_base',{program:record.binding.program,address:'0x'+model.settings.imageBase});
-      const metadata=await this.source(record,target);
-      if(model.settings.language&&metadata.language!==model.settings.language||model.settings.compilerSpec&&metadata.compiler!==model.settings.compilerSpec||
-          model.settings.imageBase&&String(metadata.base_address).replace(/^0+(?=.)/,'')!==model.settings.imageBase)
-        fail('binding','Actual imported program does not match its requested load settings.');
-      const added=object(await record.http.call('/server/version_control/add',{path:record.binding.program,comment:'insight target '+target.id,keep_checked_out:false}));
-      if(added.success!==true)fail('unknown','Initial target publication was not verified.');
-    } finally {await this.stopRecord(record,false);}
-    const reader=await this.shared(target,binding);
-    try {
-      const history=object(await reader.http.call('/server/version_history',{path:reader.binding.program}));
-      if(history.count!==1)fail('unknown','Initial canonical target has an unexpected version history.');
-      // A read-only export does not save or alter the canonical program.
-      const output=join(reader.binding.root,'exports');await mkdir(output,{mode:0o700});
-      const exported=object(await reader.http.call('/export_program',{program_name:reader.binding.program,output_dir:output,output_name:'base.gzf'}));
-      if(exported.success!==true)fail('save','Canonical snapshot export was not acknowledged.');
-      const snapshot=await this.workspace.captureSnapshot(join(output,'base.gzf'));
-      this.workspace.establishModel(target.id,1,snapshot);
-    } finally {await this.stopRecord(reader);}
+    const server=this.server(),binding=await server.ensure();
+    if(!await initialIntent(this.workspace,target.id)){
+      // Old builds imported into an unversioned local shared-project stage. First stop
+      // its authenticated worker; a failed probe is never treated as authoritative absence.
+      if(model.state==='unknown')await this.retireLegacyBootstrap(target);
+      const status=await server.programStatus(binding,programPath(target.id));
+      if(status.state!=='absent')fail('unknown','Canonical initial target already exists or is reserved; retain its original stage for independent reconciliation.');
+    }
+    await initializeModel(this.workspace,target,binding,server,this.inputs.fingerprint);
   }
   private async model(target: ResearchTarget) {
     let task=this.modelTasks.get(target.id);
@@ -696,8 +680,11 @@ public class ${name} extends GhidraScript {
     if(this.workspace.activePublication(targetId))return false;
     const model=this.workspace.model(targetId);if(model.state==='ready')return true;if(model.state==='opening')return true;
     const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();
+    if(await initialIntent(this.workspace,targetId)){await this.model(target);return this.workspace.model(targetId).state==='ready';}
+    await this.retireLegacyBootstrap(target);
     let status;
     try{status=await server.programStatus(binding,programPath(targetId));}catch{return false;}
+    if(status.state==='absent'){await this.model(target);return this.workspace.model(targetId).state==='ready';}
     if(status.version!==1||status.checkinActive!==false||!Array.isArray(status.versions)||status.versions.length!==1||
         object(status.versions[0]).comment!=='insight target '+targetId)return false;
     const record=await this.shared(target,binding);

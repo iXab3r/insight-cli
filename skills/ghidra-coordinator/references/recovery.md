@@ -5,6 +5,25 @@ Retain the session/target returned by initial open. Continue the tuple through
 pending scalar comparisons persist independently of a backend process. Reopening preserves
 private work; it does not silently receive a newer shared version.
 
+First-import recovery uses the same scoped `ghidra open` or the original request ID/input.
+Import/analysis writes a private snapshot and completion receipt before any initial publication.
+If its worker is still running, continuation reports busy; wait and continue the same scope.
+If that worker stopped before completing its receipt, continuation can repeat private analysis
+from the immutable input while retaining previous attempts. A completed snapshot is reused.
+Initial publication first creates a uniquely named staging object. A separate read-only process
+verifies its complete saved DB buffers before a conditional server move to the absent canonical
+path. It never checks in a new version of an existing canonical item. Lost promotion replies
+are reconciled against the retained identity, one-version history and complete saved buffers.
+Interrupted staging objects remain retained and can be replaced by another private stage;
+they are not adopted as the canonical model. Foreign or mismatched canonical state stays blocked.
+An older direct create that is provably owned and left only an incomplete `<Recovered>` entry
+can be moved aside without deletion; its bytes and original receipt remain preserved.
+
+Legacy first-import failures are also recoverable in the original profile. Continuation first
+establishes that the old owned bootstrap worker has ended, then uses an authoritative repository
+probe. An absent canonical item permits private preparation; an existing first version requires
+independent readback. The old project, intent and original session/target remain preserved.
+
 If a response was lost, inspect `sessions status <session> --target <target>`. Never infer
 `applied` from a connection failure. A changing command's optional request ID binds one effective
 intent inside the profile. Repeating the same ID/input retrieves its recorded outcome or

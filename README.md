@@ -9,6 +9,8 @@ The [real-EXE agent walkthrough](docs/AGENT-CLI-WALKTHROUGH.md) follows an offic
 through installed public CLI commands: strings, xrefs, decompilation, private annotations,
 merge and another agent's refresh. It records the resulting import timeout/diagnostic fixes
 and focused verification separately from the earlier combined gate below.
+The subsequent [first-import recovery](docs/INITIAL-IMPORT-RECOVERY.md) continues interrupted
+analysis/publication in the original profile using verified staging and conditional promotion.
 
 The agreed **M0–M5 delivery and selected P0–P3 additions pass combined acceptance**. The current
 tree has 271 public command leaves; all 210 pinned operations and eight bridge-control equivalents
