@@ -6,9 +6,25 @@ Neither command registers skills or changes agent settings. The RE skill describ
 agents investigate, share intermediate findings, retain useful files, review conclusions
 and publish Ghidra annotations. It does not run or schedule agents itself.
 
-Use any appropriate external tool directly. Keep a short `notes.md` and relevant output
-files with relative links. Independent agents own separate subfolders; the lead owns the
-common notes. No evidence IDs, schema or additional research database is required.
+Read applicable project instructions, linked RE approaches and evidence templates first.
+They determine tools, source of truth, canonical paths, naming, evidence sections, confidence,
+recheck steps and promotion rules. The packaged skill supplies workflow defaults only for
+unspecified details. Workers receive those rules and write directly to their assigned project
+slices; there is no required parallel `research/`, `notes.md` or `finding.md` representation.
+
+For example, a project may require `builds/<build>/<binary>/<intent>/`, structured evidence
+notes with `Observations`, `Inferences` and `How To Recheck`, confidence labels and related
+`.re.cpp` mirrors. Keep that contract, including any cross-build promotion gate and preferred
+IDA/Ghidra/runtime tools. The skill does not replace it with a generic report or make Ghidra
+authoritative merely because it supplies isolated contexts. Project policy can prescribe
+additional metadata; insight-cli adds no mandatory evidence schema.
+
+When no project convention exists, short notes and relevant output files with relative links
+are a simple fallback. Independent agents own separate files or subfolders; one lead owns a
+shared summary when useful. Use appropriate external tools directly. `artifacts save` can
+checkpoint an existing project file or folder without conversion; its copy does not replace
+the canonical project records. Saving is useful for requested checkpoints or handoff, rather
+than a prerequisite for considering a project-formatted finding valid.
 
 ```sh
 insight-cli skill insight-re
@@ -73,6 +89,8 @@ to merge another agent's work. B had one scalar annotation, preserved across ref
 
 ## Reproduction and boundaries
 
+The filenames below belong to this fixed acceptance scenario, not a required project RE format.
+
 Run `npm test` and `node scripts/test-package.mjs --keep-installed` with Node 24. The package
 check verifies relocated skill links and file/folder saves through CLI/RPC without native
 configuration. `quick_validate.py` from the skill-creator skill also validates the RE skill.
@@ -110,3 +128,7 @@ executable and personal runtime paths stay outside Git.
 This is functional acceptance of the new skill/materials workflow. It is not a new speedup
 measurement, the complete business suite, or a repeat of the historical GUI/debugger gate.
 The existing [timing conclusions](7ZR-TIME-ANALYSIS.md) remain unchanged.
+
+The project-convention clarification changes packaged instructions only. Historical native
+and timing receipts retain their original artifact/skill hashes; they are not measurements
+of this later wording.

@@ -15,7 +15,11 @@ review. Agents can use any external CLI/MCP/script directly; an insight-cli adap
 required. `insight-cli ghidra` provides isolation and merge/refresh for several clients;
 `insight-cli artifacts save <path>` retains ordinary files/directories independently of
 Ghidra. No investigation database, evidence IDs, finding schemas or automatic capture hooks
-are introduced. Short findings link to raw files by relative path; one lead maintains notes.
+are introduced. Applicable user/project RE rules own evidence layout, templates, confidence,
+recheck steps, source of truth, tool choices and promotion. The skill fills unspecified gaps;
+it does not require converting records or adding parallel `notes.md`/`finding.md` trees.
+Ordinary short notes with raw links are a fallback when the project has no convention.
+Artifact checkpoints preserve the selected project bytes without replacing canonical records.
 
 `skill` still locates the original `insight-cli` skill; `skill insight-re` locates the RE
 skill in the same relocatable package. Artifact saves need Update, store completed copies

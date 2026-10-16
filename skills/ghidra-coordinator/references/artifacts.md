@@ -5,9 +5,13 @@ the selected profile's AppData. It needs Factory Update permission and does not 
 Ghidra, Java, authentication, target/session selectors or evidence metadata. Relative input
 paths resolve against the caller's working directory. Use `--help` for generated syntax.
 
+Save existing project files in their existing format; no `notes.md`, `finding.md` or
+`research/` layout is required. The saved copy is a checkpoint and does not replace the
+project's canonical evidence location or its source-of-truth rules.
+
 Write notes and useful external-tool outputs as ordinary files while investigating. When
 the selected files are no longer being edited, save one file, a completed worker subfolder
-or the whole research folder. For example:
+or the relevant project folder. For a project without a prescribed layout, for example:
 
 ```sh
 insight-cli artifacts save ./research --json

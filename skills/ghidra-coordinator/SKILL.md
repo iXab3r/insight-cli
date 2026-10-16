@@ -7,10 +7,13 @@ description: Research several executable inputs through durable independent sess
 
 This skill and its executable helper are one npm package. Run `insight-cli skill` to locate
 these installed resources. Use generated `--help` for syntax; read the references as needed.
+Follow applicable project RE rules for tools, source of truth, evidence layout and format;
+this package's walkthroughs fill gaps rather than replacing those conventions.
 
 For coordinating a reverse-engineering investigation with ordinary files, external tools
 and multiple agents, read the packaged [Insight RE skill](skills/insight-re/SKILL.md),
-also located by `insight-cli skill insight-re`. Preserve a completed file or folder with
+also located by `insight-cli skill insight-re`. When a retained checkpoint is useful, save
+a completed project file or folder with
 `insight-cli artifacts save <path>`; [save semantics](references/artifacts.md) describe the
 ordinary saved copy and its receipt. Neither operation requires a Ghidra installation.
 
