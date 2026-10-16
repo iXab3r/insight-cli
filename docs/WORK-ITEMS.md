@@ -7,6 +7,10 @@ existing product; they do not add separate CLIs, a generic plugin framework or a
 
 ## Current combined acceptance
 
+New work is tracked in the [shared tool runtime backlog](TOOL-RUNTIME.md#ordered-work-and-acceptance),
+TR-01–TR-10: CORE, mirrored distribution, execution/supervision, Ghidra migration, ILSpy and
+combined acceptance. Those items are planned; the delivered acceptance below does not close them.
+
 The full M0–M5 and selected P0–P3 slice passes one current-build gate: 118 offline tests, 33
 native groups, installed CLI/IPC/keyring, two agents/two EXEs/four contexts and nine actual
 owner-fault phases. See [current full evidence](verification/full-facade-current.json) and

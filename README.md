@@ -5,6 +5,10 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
+The next planned slice is a [shared tool runtime](docs/TOOL-RUNTIME.md): reusable delivery and
+process helpers, tool distributions retained in our GitHub Releases, Ghidra migration and ILSpy.
+The document separates the planned contract and ordered tasks from the delivered functionality.
+
 The package includes an [RE workflow skill](skills/ghidra-coordinator/skills/insight-re/SKILL.md)
 for multiple agents, Ghidra and ordinary external tools. Locate it with
 `insight-cli skill insight-re`. Keep useful outputs and short findings as ordinary files;
