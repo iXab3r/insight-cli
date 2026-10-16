@@ -77,6 +77,11 @@ than being ordinary program-DB edits awaiting merge.
 
 ### Shared targets and sessions
 
+The owner requested shared delivery/execution helpers for additional RE tools and retained tool
+distributions in our GitHub Releases. [Tool runtime](TOOL-RUNTIME.md) specifies the planned CORE,
+ownership boundaries, mirror policy and sequential backlog. It is not implemented acceptance;
+the delivered Ghidra lifecycle and its historical receipts remain the current baseline.
+
 | Entity | Responsibility |
 | --- | --- |
 | Target | A specific immutable input revision, such as an EXE; shared identity for all tools |
