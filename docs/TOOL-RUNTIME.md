@@ -95,6 +95,12 @@ The release workflow performs this sequence:
 5. Publish with GitHub immutable releases enabled and verify the resulting release/asset identity.
    Update the installer catalog only after publication and independent download verification.
 
+One-time setup enables immutable releases through an administrator and sets the repository variable
+`TOOL_RELEASE_IMMUTABLE_READY=true`. GitHub Actions cannot read that administrative setting with
+its ordinary token. Publication checks the explicit setup flag and verifies the actual published
+release is immutable; it does not store or request an administrative token. Existing published
+releases are verified against the recipe without requiring upstream availability again.
+
 The workflow is manually dispatched, serialized per distribution identity and uses repository
 permissions scoped to its release job. Pull-request validation cannot publish tool assets.
 It does not execute downloaded installer scripts, add binaries to Git/npm, grant new npm publishing

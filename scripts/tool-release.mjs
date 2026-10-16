@@ -52,14 +52,21 @@ async function readback(recipe,assets,directory,download=true){
 }
 export async function mirror(recipe,directory,publish=false){
  validateRecipe(recipe);await mkdir(directory,{recursive:true});
- for(const a of recipe.assets)await acquire(a,directory);
  const manifest=Buffer.from(JSON.stringify(recipe,null,2)+'\n');
  const manifestAsset={name:'manifest.json',size:manifest.length,sha256:createHash('sha256').update(manifest).digest('hex')};
  const file=await open(join(directory,'manifest.json'),'w',0o600);try{await file.writeFile(manifest);}finally{await file.close();}
  const assets=[...recipe.assets,manifestAsset];
- if(!publish)return {state:'prepared',tag:recipe.tag,assets:assets.length};
- if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
+ if(!publish){for(const a of recipe.assets)await acquire(a,directory);return {state:'prepared',tag:recipe.tag,assets:assets.length};}
+ if(process.env.GITHUB_ACTIONS==='true'){
+  if(process.env.TOOL_RELEASE_IMMUTABLE_READY!=='true')throw Error('Repository immutability setup is not confirmed');
+ }else if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
  let current=release(recipe);
+ if(current&&!current.draft){
+  current=await readback(recipe,assets,directory,false);
+  if(current.immutable!==true)throw Error('Existing release is not immutable');
+  return {state:'published_verified',tag:recipe.tag,url:current.html_url,assets:assets.length};
+ }
+ for(const a of recipe.assets)await acquire(a,directory);
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
   gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??gh('rev-parse','HEAD'),'--title',recipe.title,'--notes',recipe.redistribution);

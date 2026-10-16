@@ -48,6 +48,7 @@ jobs:
       - name: Acquire, verify and retain tool distribution
         env:
           GH_TOKEN: ${{ github.token }}
+          TOOL_RELEASE_IMMUTABLE_READY: ${{ vars.TOOL_RELEASE_IMMUTABLE_READY }}
           COMPONENT: ${{ inputs.component }}
           PUBLISH: ${{ inputs.publish }}
         run: |
