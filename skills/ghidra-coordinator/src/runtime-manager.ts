@@ -1,23 +1,20 @@
-import {command,Permission,CliError,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
-import {readFile,mkdir,rename,rm,open,realpath,readdir,stat,cp} from 'node:fs/promises';
-import {existsSync,constants} from 'node:fs';
+import {type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
+import {readFile,mkdir,rename,rm,realpath,readdir,stat,cp} from 'node:fs/promises';
+import {existsSync} from 'node:fs';
 import {join,dirname,resolve,delimiter,basename} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {runtimeRoot,runtimeSelection,runtimeValues,type RuntimeSelection} from './runtime-selection.js';
 import {runtimeCatalog,type RuntimeArtifact} from './runtime-catalog.js';
-import {cacheArtifact,extractArchive,fileSha256} from './tool-runtime/archives.js';
+import {cacheArtifact,extractArchive,consumeArchive} from './tool-runtime/archives.js';
 import {nativeInputs,nativeHelpers,nativeJvmDirectories,pinnedMcpJar,type NativeInputs} from './native-inputs.js';
 import {GhidraServer,stopLocalServer} from './server.js';
 import {fail,text,digest,object} from './model.js';
+import {atomicWrite,installationStage,removeInstallation,withToolLock,assertUnused} from './tool-runtime/store.js';
+import {lifecycleCommands as sharedLifecycle} from './tool-runtime/definition.js';
 const exec=promisify(execFile),suffix=process.platform==='win32'?'.exe':'';
-export async function runtimeWrite(path:string,value:unknown){
- await mkdir(dirname(path),{recursive:true,mode:0o700});const temporary=path+'.new-'+randomUUID(),handle=await open(temporary,'wx',0o600);
- try{await handle.writeFile(JSON.stringify(value,null,2)+'\n');await handle.sync();}finally{await handle.close();}
- await rename(temporary,path);
- if(process.platform!=='win32'){const parent=await open(dirname(path),'r');try{await parent.sync();}finally{await parent.close();}}
-}
+export const runtimeWrite=atomicWrite;
 const live=(pid:unknown)=>{if(!Number.isSafeInteger(pid)||Number(pid)<1)return false;try{process.kill(Number(pid),0);return true;}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')return false;throw error;}};
 /** Passive, conservative inventory: a reused PID blocks deletion; it never grants kill authority. */
 export async function runtimeProcesses(directory:string){
@@ -78,22 +75,9 @@ export class RuntimeManager {
  }
  private async archive(artifact:RuntimeArtifact,provided:unknown,checksum:unknown,offline:boolean){
   if(provided===undefined)return {path:await cacheArtifact(artifact,join(this.root,'cache'),this.c.fetch,this.c.signal,offline),artifact};
-  const path=await realpath(resolve(this.c.cwd,text(provided,4096))),cache=join(this.root,'cache');
-  await mkdir(cache,{recursive:true,mode:0o700});const temporary=join(cache,'local.partial-'+randomUUID());
-  const source=await open(path,constants.O_RDONLY|(constants.O_NOFOLLOW??0));
-  try{
-   const metadata=await source.stat();if(!metadata.isFile()||metadata.size>2*1024**3)fail('invalid','Local runtime archive must be a regular file no larger than two GiB.');
-   const target=await open(temporary,'wx',0o600);let size=0;
-   try{for await(const chunk of source.createReadStream({autoClose:false})){if((size+=chunk.length)>2*1024**3)fail('limit','Local runtime archive grew beyond two GiB.');await target.writeFile(chunk);}await target.sync();}finally{await target.close();}
-   const hash=await fileSha256(temporary);
-   if(checksum!==undefined&&hash!==text(checksum,64).toLowerCase())fail('binding','Local runtime archive differs from its expected SHA256.');
-   const format=(await readMagic(temporary))==='504b'?'zip':'tgz',owned=join(cache,hash+'.'+format);
-   if(existsSync(owned)){if(await fileSha256(owned)!==hash)fail('binding','Existing local-archive cache entry is corrupt; remove it before retrying.');}
-   else await rename(temporary,owned);
-   return {path:owned,artifact:{...artifact,sha256:hash,format} as RuntimeArtifact};
-  }finally{await source.close();await rm(temporary,{force:true});}
-
+  return consumeArchive(resolve(this.c.cwd,text(provided,4096)),join(this.root,'cache'),artifact,checksum===undefined?undefined:text(checksum,64),this.c.signal);
  }
+
  private async cleanupProbes(){
   // A killed owner may leave a disposable validation server alive. Its authenticated
   // receipt, not PID existence, authorizes recovery; no research repository is touched.
@@ -108,7 +92,8 @@ export class RuntimeManager {
    }
   }
  }
- async install(o:Record<string,unknown>){
+ async install(o:Record<string,unknown>){return withToolLock(this.directory,'ghidra',async()=>{
+  await assertUnused(this.directory,'ghidra');
   await this.cleanupProbes();
   if(o.executable&&o.archive)fail('invalid','Choose --executable or --archive.');
   if(o.archiveSha256&&!o.archive||o.javaArchiveSha256&&!o.javaArchive)fail('invalid','Archive checksum requires its archive path.');
@@ -118,59 +103,48 @@ export class RuntimeManager {
   if(java&&o.javaArchive)fail('invalid','Choose --java or --java-archive.');
   const jdk=java?undefined:await this.archive(catalog.java,o.javaArchive,o.javaArchiveSha256,offline);
   const identity=digest({schema:1,platform:process.platform,architecture:process.arch,external,java,ghidra:ghidra?.artifact.sha256,jdk:jdk?.artifact.sha256,bridge:pinnedMcpJar});
-  const installation=join(this.root,'installations',identity),temporary=join(this.root,'stages',randomUUID());
-  await mkdir(temporary,{recursive:true,mode:0o700});
-  let selected:RuntimeSelection|undefined,complete=false;
-  try{
-   let inputs:NativeInputs;
-   if(existsSync(join(installation,'ready.json'))){
-    const receipt=object(JSON.parse(await readFile(join(installation,'ready.json'),'utf8')));
-    inputs=await nativeInputs({...this.c.profile.values,java:java??receipt.java,ghidraHome:external??join(installation,'ghidra')});
-    if(inputs.fingerprint!==receipt.fingerprint)fail('binding','Installed runtime differs from its verified installation receipt.');
-   }else{
+  const receipt=await installationStage<Record<string,unknown>>(this.root,identity,async(temporary,installation)=>{
     let ghidraHome=external;
     if(ghidra){
-     const extracted=join(temporary,'ghidra-extract');await extractArchive(ghidra.path,extracted,ghidra.artifact.format);
+     const extracted=join(temporary,'ghidra-extract');await extractArchive(ghidra.path,extracted,ghidra.artifact.format,this.c.signal);
      const found=await findRoot(extracted,'Ghidra/application.properties');if(!found)fail('configuration','Archive omitted a complete Ghidra installation.');
      await rename(found,join(temporary,'ghidra'));await rm(extracted,{recursive:true,force:true});ghidraHome=join(temporary,'ghidra');
      const host=process.arch==='arm64'?'mac_arm_64':'mac_x86_64';
      if(process.platform==='darwin'&&!existsSync(join(ghidraHome,'Ghidra/Features/Decompiler/os',host,'decompile'))){
       const bottle=await cacheArtifact(catalog.ghidra,join(this.root,'cache'),this.c.fetch,this.c.signal,offline),nativeRoot=join(temporary,'native-extract');
-      await extractArchive(bottle,nativeRoot,'tgz');const nativeHome=join(nativeRoot,catalog.ghidra.root);
+      await extractArchive(bottle,nativeRoot,'tgz',this.c.signal);const nativeHome=join(nativeRoot,catalog.ghidra.root);
       for(const module of ['Decompiler','FileFormats'])await cp(join(nativeHome,'Ghidra/Features',module,'os',host),join(ghidraHome,'Ghidra/Features',module,'os',host),{recursive:true,errorOnExist:true});
       await rm(nativeRoot,{recursive:true,force:true});
      }
     }
     let javaPath=java;
-    if(jdk){const extracted=join(temporary,'jdk-extract');await extractArchive(jdk.path,extracted,jdk.artifact.format);
+    if(jdk){const extracted=join(temporary,'jdk-extract');await extractArchive(jdk.path,extracted,jdk.artifact.format,this.c.signal);
      const home=await findRoot(extracted,'bin/java'+suffix);if(!home)fail('configuration','Java archive omitted a JDK.');await rename(home,join(temporary,'jdk'));await rm(extracted,{recursive:true,force:true});javaPath=join(temporary,'jdk/bin/java'+suffix);}
-    inputs=await nativeInputs({...this.c.profile.values,java:javaPath,ghidraHome});
+    const inputs=await nativeInputs({...this.c.profile.values,java:javaPath,ghidraHome});
     await this.probe(inputs,join(temporary,'validation'));
     await rm(join(temporary,'validation'),{recursive:true,force:true});
     const receipt={schema:1,id:identity,ghidraVersion:inputs.ghidraVersion,fingerprint:inputs.fingerprint,java:java??join(installation,'jdk/bin/java'+suffix),ghidraHome:external??join(installation,'ghidra'),
      archives:[...(ghidra?[{sha256:ghidra.artifact.sha256,source:o.archive?'local':catalog.ghidra.url}]:[]),...(jdk?[{sha256:jdk.artifact.sha256,source:o.javaArchive?'local':catalog.java.url}]:[])],verifiedAt:new Date().toISOString(),checks:['jdk','native-decompiler','local-server-reader-publisher-authority']};
-    await runtimeWrite(join(temporary,'ready.json'),receipt);await mkdir(dirname(installation),{recursive:true,mode:0o700});
-    if(existsSync(installation))fail('binding','Incomplete installation directory is retained; inspect it before removing it.');
-    await rename(temporary,installation);
-    if(process.platform!=='win32'){const parent=await open(dirname(installation),'r');try{await parent.sync();}finally{await parent.close();}}
-   }
-   selected={schema:1,mode:external?'external':'managed',id:identity,ghidraHome:external??join(installation,'ghidra'),java:java??join(installation,'jdk/bin/java'+suffix),fingerprint:inputs.fingerprint,selectedAt:new Date().toISOString()};
-   await runtimeWrite(join(this.root,'selection.json'),selected);
-   complete=true;return {state:'installed',...selected,checks:['jdk','native-decompiler','local-server-reader-publisher-authority']};
-  }catch(error){
-   await runtimeWrite(join(temporary,'failure.json'),{state:'failed',code:error instanceof CliError?error.code:'installation',message:error instanceof Error?error.message:'Runtime installation failed'});
-   if(error instanceof CliError)throw new CliError(error.message,{code:error.code,result:{...(error.result&&typeof error.result==='object'?error.result:{}),diagnostics:temporary}});throw error;
-  }finally{if(complete)await rm(temporary,{recursive:true,force:true});}
- }
- async uninstall(purgeCache=false){
+    return receipt;
+  },async receipt=>{
+   const inputs=await nativeInputs({...this.c.profile.values,java:receipt.java,ghidraHome:receipt.ghidraHome});
+   if(inputs.fingerprint!==receipt.fingerprint)fail('binding','Installed runtime differs from its verified installation receipt.');
+  },this.c.signal);
+  const selected:RuntimeSelection={schema:1,mode:external?'external':'managed',id:identity,ghidraHome:String(receipt.ghidraHome),java:String(receipt.java),fingerprint:String(receipt.fingerprint),selectedAt:new Date().toISOString()};
+  await runtimeWrite(join(this.root,'selection.json'),selected);return {state:'installed',...selected,checks:receipt.checks};
+ },this.c.signal);}
+
+ async uninstall(purgeCache=false){return withToolLock(this.directory,'ghidra',async()=>{
+  await assertUnused(this.directory,'ghidra');
   await this.cleanupProbes();
   const selected=runtimeSelection(this.directory);if(!selected)fail('configuration','No managed selection exists; externally configured profile paths are never removed.');
-  if(selected.id){if(!/^[a-f0-9]{64}$/.test(selected.id))fail('binding','Invalid installation identity.');await rm(join(this.root,'installations',selected.id),{recursive:true,force:true});}
-  if(purgeCache)await rm(join(this.root,'cache'),{recursive:true,force:true});
+  if(purgeCache&&selected.id){const receipt=object(JSON.parse(await readFile(join(this.root,'installations',selected.id,'ready.json'),'utf8')));
+   for(const a of Array.isArray(receipt.archives)?receipt.archives:[]){const sha=String(object(a).sha256);if(!/^[a-f0-9]{64}$/.test(sha))fail('binding','Invalid cached component identity.');for(const ext of ['zip','tgz'])await rm(join(this.root,'cache',sha+'.'+ext),{force:true});}}
+  if(selected.id)await removeInstallation(this.root,selected.id);
   await runtimeWrite(join(this.root,'selection.json'),{...selected,uninstalledAt:new Date().toISOString()});
   // Retain the selection: an explicit external profile must never become an implicit fallback.
   return {state:'uninstalled',mode:selected.mode,externalInstallationPreserved:selected.mode==='external',researchPreserved:true,materialsPreserved:true,cachePreserved:!purgeCache};
- }
+ },this.c.signal);}
  private async probe(inputs:NativeInputs,root:string){
   await mkdir(root,{recursive:true,mode:0o700});const classes=await nativeHelpers(root,inputs),log=join(root,'doctor.log');
   let output;
@@ -197,7 +171,6 @@ export class RuntimeManager {
  }
 }
 function runtimeValuesForStatus(selection:RuntimeSelection,values:Record<string,unknown>){return {...values,java:selection.java,ghidraHome:selection.ghidraHome};}
-async function readMagic(path:string){const handle=await open(path,'r');try{const b=Buffer.alloc(2);await handle.read(b,0,2,0);return b.toString('hex');}finally{await handle.close();}}
 export function runtimeCommands(exclusive:<T>(c:CommandContext,action:()=>Promise<T>,quiescent?:boolean)=>Promise<T>):CommandDefinition[]{
  const source=[{flags:'--archive <path>',description:'Local Ghidra zip/tar.gz; missing dependencies are downloaded'},
   {flags:'--archive-sha256 <sha256>',description:'Expected SHA256 for the supplied Ghidra archive'},
@@ -206,8 +179,10 @@ export function runtimeCommands(exclusive:<T>(c:CommandContext,action:()=>Promis
   {flags:'--java <path>',description:'Use an external Java 21 JDK executable'},
   {flags:'--executable <path>',description:'Use an external Ghidra launcher or installation directory; never deleted'},
   {flags:'--offline',description:'Use local archives/cache only; never access the network'}];
- return [command('download','Cache the pinned complete Ghidra/JDK distribution without activation',({options:o},c)=>exclusive(c,()=>new RuntimeManager(c).download(Boolean(o.offline)),false),{permission:Permission.Update,options:[source.at(-1)!]}),
-  command('install','Prepare, verify and select a complete runtime, including Ghidra Server',({options:o},c)=>exclusive(c,()=>new RuntimeManager(c).install(o)),{permission:Permission.Update,options:source}),
-  command('uninstall','Remove selected owned runtime files while preserving research and external installations',({options:o},c)=>exclusive(c,()=>new RuntimeManager(c).uninstall(Boolean(o.purgeCache))),{permission:'Destructive',options:[{flags:'--purge-cache',description:'Also remove owned downloaded archives'}]}),
-  command('doctor','Launch a disposable native decompiler and local server probe',(_input,c)=>exclusive(c,()=>new RuntimeManager(c).doctor(),false),{permission:Permission.Update})];
+ return sharedLifecycle({id:'ghidra',description:'Complete Ghidra runtime',components:[],installOptions:source,lifecycle:{
+  download:(o,c)=>exclusive(c,()=>new RuntimeManager(c).download(Boolean(o.offline)),false),
+  install:(o,c)=>exclusive(c,()=>new RuntimeManager(c).install(o)),
+  uninstall:(o,c)=>exclusive(c,()=>new RuntimeManager(c).uninstall(Boolean(o.purgeCache))),
+  doctor:(_o,c)=>exclusive(c,()=>new RuntimeManager(c).doctor(),false),
+ }});
 }
