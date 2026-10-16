@@ -9,6 +9,9 @@ failed merge with ENOSPC and retains an unknown publication; five remaining prep
 were not executed. No failed/slower result was replaced. A separate cold pair passed
 correctness at 415.24 s versus 328.11 s (1.266x). See the
 [protocol, findings, recovery state and limits](../7ZR-LIVE-RESEARCH.md).
+The retrospective [time breakdown](7zr-time-breakdown.json) and
+[analysis/priorities](../7ZR-TIME-ANALYSIS.md) account for every completed wall clock,
+including slow-actor tails, CLI calls and serial publication/acceptance costs.
 
 ## Public-CLI business Gherkin acceptance
 

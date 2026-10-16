@@ -11,6 +11,8 @@ disk-full merge failure. The separate cold pair achieved 1.266x. Real findings w
 and verified from fresh sessions in all completed runs; the failed publication remains
 retained without a retry. [Evidence](docs/verification/7zr-live-research.json) includes every
 attempt and the unexecuted remainder of the planned series.
+The [time analysis](docs/7ZR-TIME-ANALYSIS.md) accounts for agent critical paths, CLI latency,
+serial publication/verification and experiment overhead, with concrete optimization priorities.
 
 The [25 business Gherkin scenarios](docs/BUSINESS-ACCEPTANCE.md) pass through the installed
 public CLI on real Ghidra, covering two EXEs, private contexts, merge/refresh, conflicts

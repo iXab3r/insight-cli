@@ -12,6 +12,8 @@ general reasoning-speed benefit or attribute the benefit to Ghidra alone.
 
 [Machine-readable evidence](verification/7zr-live-research.json) contains exact timings,
 phase costs, verified findings, worker observations, the frozen protocol and 419 source hashes.
+The subsequent [time analysis](7ZR-TIME-ANALYSIS.md) reconstructs per-agent critical paths,
+CLI costs, experiment overhead and remaining instrumentation gaps from these same receipts.
 This experiment is separate from the [25 business scenarios](BUSINESS-ACCEPTANCE.md): their
 controlled hash-research workload previously achieved 1.601x. That number does not describe
 live AI research on this production executable.
