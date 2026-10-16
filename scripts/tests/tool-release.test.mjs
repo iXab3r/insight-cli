@@ -16,3 +16,22 @@ test('mirror acquisition verifies size and hash and reuses exact retained bytes'
  await assert.rejects(acquire({...a,name:'bad.zip',sha256:'f'.repeat(64)},dir,fetcher),/differs/);
  await assert.rejects(acquire({...a,name:'oversize.zip',size:1},dir,fetcher),/Oversized/);
 });
+test('published immutable verification needs neither upstream acquisition nor upload authority',async t=>{
+ const {writeFile,mkdir,chmod}=await import('node:fs/promises');
+ const {execFile}=await import('node:child_process');const {promisify}=await import('node:util');
+ const {createHash}=await import('node:crypto');const {fileURLToPath}=await import('node:url');
+ const root=await mkdtemp(join(tmpdir(),'mirror-retry-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',assets:[a],redistribution:'Fixture'};
+ const bytes=Buffer.from(JSON.stringify(recipe,null,2)+'\n');
+ const remote={draft:false,immutable:true,html_url:'https://example.invalid/release',assets:[{name:a.name,size:a.size,digest:'sha256:'+a.sha256},{name:'manifest.json',size:bytes.length,digest:'sha256:'+createHash('sha256').update(bytes).digest('hex')}]};
+ const input=join(root,'recipe.json');await writeFile(input,bytes);const bin=join(root,'bin');await mkdir(bin);
+ const executable=join(bin,process.platform==='win32'?'gh.cmd':'gh');
+ if(process.platform==='win32')return; // POSIX CLI seam; production portable acquisition tests run above.
+ await writeFile(executable,'#!'+process.execPath+'\nif(process.argv[2]!=="api"||!process.argv[3].includes("/releases/tags/"))process.exit(11);console.log('+JSON.stringify(JSON.stringify(remote))+');\n');await chmod(executable,0o755);
+ const run=promisify(execFile),script=fileURLToPath(new URL('../tool-release.mjs',import.meta.url));
+ const env={...process.env,PATH:bin+':'+process.env.PATH,GITHUB_ACTIONS:'true',TOOL_RELEASE_IMMUTABLE_READY:'true'};
+ const result=await run(process.execPath,[script,input,join(root,'out'),'--publish'],{env});
+ assert.equal(JSON.parse(result.stdout).state,'published_verified');
+ const {stat}=await import('node:fs/promises');await assert.rejects(stat(join(root,'out',a.name)));
+ await assert.rejects(run(process.execPath,[script,input,join(root,'denied'),'--publish'],{env:{...env,TOOL_RELEASE_IMMUTABLE_READY:''}}),/setup is not confirmed/);
+});
