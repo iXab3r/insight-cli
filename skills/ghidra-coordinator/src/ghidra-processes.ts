@@ -55,7 +55,11 @@ export function ghidraProcessHooks(workspace:(c:CommandContext)=>Workspace,close
   async beforeKill(r,c){
    // Save debugger traces and terminate the inferior through the existing authenticated GUI
    // protocol. A generic signal to LLDB cannot establish that its debuggee has exited.
-   if(r.role==='gui'&&r.session&&r.target)await close({session:r.session,target:r.target},c);
+   if(r.role==='gui'&&r.session&&r.target){
+    const scope={session:r.session,target:r.target},w=workspace(c),context=w.context(scope);
+    const debuggerActive=context.debugger?.connected||context.debugger?.traces.some(t=>t.connected)||w.unresolved(scope).some(q=>(q.execution as {kind?:string}|undefined)?.kind==='debugger');
+    if(debuggerActive)await close(scope,c);
+   }
    if(r.role.startsWith('debugger'))fail('blocked','Close the owning GUI context to verify debugger and inferior cleanup.');
   },
  };

@@ -123,7 +123,7 @@ public sealed class IntegrationSteps(ScenarioContext context)
         using var receipt = JsonDocument.Parse(line);
         Assert.That(receipt.RootElement.GetProperty("state").GetString(), Is.EqualTo("passed"));
         foreach (var check in new[] { "parallelPublicClients", "atomicConflictAndRefresh", "saveAwareProcessStop",
-            "authenticatedOwnerCrashRecovery", "contextKillRetainsAcknowledgedWork", "serverKillRetainsLocalWork",
+            "guiForceKillRetainsSavedWork", "authenticatedOwnerCrashRecovery", "contextKillRetainsAcknowledgedWork", "serverKillRetainsLocalWork",
             "privateDotnetMirroredDelivery", "usefulManagedResearchAndPlainSavedFiles", "multiToolTargetAndRunInventory",
             "failedToolRetainsDiagnostics", "uninstallRetainsBothToolsResearch", "offlineLocalArchiveReinstall",
             "externalIlspyAndSafeUninstall", "noLiveOwnedToolProcesses", "unchangedInputs" })

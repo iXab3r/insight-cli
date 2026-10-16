@@ -41,6 +41,9 @@ try{
  await scoped(b,['comments','set','--address',entry,'--kind','plate','--text',local,'--resolve-conflict','--expect-shared',shared]);assert.equal((await scoped(b,['merge'])).state,'merged');checks.atomicConflictAndRefresh=true;
  await scoped(witness,['close']);const list=await call(['tools','processes','--tool','ghidra']);let ar=list.items.find(r=>r.session===a.session&&r.target===a.target&&r.role==='context'),br=list.items.find(r=>r.session===b.session&&r.target===b.target&&r.role==='context');assert.ok(ar&&br);assert.notEqual(ar.pid,br.pid);
  await call(['tools','processes','stop',ar.id]);assert.equal((await call(['sessions','status',a.session,'--target',a.target])).ghidra.state,'stopped');checks.saveAwareProcessStop=true;
+ await call(['ghidra','open','--session',a.session,'--target',a.target,'--mode','gui']);const guiNote='Saved GUI evidence before force kill '+trial;await scoped(a,['comments','set','--address',entry,'--kind','post','--text',guiNote]);
+ const gui=(await call(['tools','processes','--tool','ghidra','--session',a.session])).items.find(r=>r.role==='gui'&&r.state==='running');assert.ok(gui);assert.equal((await call(['tools','processes','kill',gui.id])).state,'killed');
+ await call(['ghidra','open','--session',a.session,'--target',a.target,'--mode','headless']);assert.equal((await scoped(a,['comments','get','--address',entry,'--kind','post'])).text,guiNote);await scoped(a,['close']);checks.guiForceKillRetainsSavedWork=true;
  const acknowledged='Acknowledged work survives process kill and owner replacement';await scoped(b,['comments','set','--address',entry,'--kind','post','--text',acknowledged]);
  br=(await call(['tools','processes','--tool','ghidra','--session',b.session])).items.find(r=>r.target===b.target&&r.role==='context'&&r.state==='running');assert.ok(br);
  const owner=await call(['ipc-server','status'],{global:true});assert.equal(owner.running,true);process.kill(owner.pid,'SIGKILL');await delay(300);
