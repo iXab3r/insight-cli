@@ -1,13 +1,18 @@
 name: Release npm
-run-name: Release npm from ${{ github.ref_name }} (publish=${{ inputs.publish }})
+run-name: Release npm from ${{ github.ref_name }} (${{ inputs.bump }}, publish=${{ inputs.publish }})
 
 on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish the checked package version to npm latest
+        description: Publish to npm latest (unchecked builds a preview only)
         type: boolean
         default: true
+      bump:
+        description: Increment from the greater of source version and npm latest; none uses source version
+        type: choice
+        options: [patch, minor, major, none]
+        default: patch
 
 permissions:
   contents: read
@@ -17,9 +22,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  version:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - name: Publish only from main
         env:
@@ -41,6 +46,45 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
+      - name: Restore the original version on a re-run
+        if: github.run_attempt != '1'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: npm-version-${{ github.run_id }}
+          path: version-record
+      - name: Reserve or validate this run's version
+        env:
+          RELEASE_BUMP: ${{ inputs.bump }}
+        run: node scripts/release-version.mjs resolve
+      - name: Retain the version before any package can publish
+        if: github.run_attempt == '1'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-version-${{ github.run_id }}
+          path: version-record/version.json
+          if-no-files-found: error
+          retention-days: 90
+
+  build:
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      artifact_id: ${{ steps.package.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: npm-version-${{ github.run_id }}
+          path: version-record
+      - name: Apply the reserved version to package and skills
+        run: node scripts/release-version.mjs apply
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run test:package
@@ -49,7 +93,7 @@ jobs:
         env:
           SOURCE_REF: ${{ github.ref }}
         run: |
-          git diff --exit-code
+          node scripts/release-version.mjs verify
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
           import {readFile, mkdir, copyFile, writeFile, appendFile} from 'node:fs/promises';
@@ -57,12 +101,14 @@ jobs:
           import {execFileSync} from 'node:child_process';
           const pkg=JSON.parse(await readFile('skills/ghidra-coordinator/package.json','utf8'));
           assert.equal(pkg.name,'@eyeauras/insight-cli');
-          assert.match(pkg.version,/^\d+\.\d+\.\d+$/,'Only stable committed versions publish as latest');
+          assert.match(pkg.version,/^\d+\.\d+\.\d+$/,'Only stable versions publish as latest');
+          const versioning=JSON.parse(await readFile('version-record/version.json','utf8'));
+          assert.equal(pkg.version,versioning.version);
           const archive=`artifacts/eyeauras-insight-cli-${pkg.version}.tgz`;
           const bytes=await readFile(archive);
           const manifest={schema:1,name:pkg.name,version:pkg.version,
             sourceCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
-            sourceRef:process.env.SOURCE_REF,bytes:bytes.length,
+            sourceRef:process.env.SOURCE_REF,versioning,bytes:bytes.length,
             sha256:createHash('sha256').update(bytes).digest('hex'),
             integrity:'sha512-'+createHash('sha512').update(bytes).digest('base64')};
           await mkdir('release',{recursive:true});
@@ -72,11 +118,12 @@ jobs:
             `### Built ${pkg.name}@${pkg.version}\n\nSource: \`${manifest.sourceCommit}\`\n\nSHA-256: \`${manifest.sha256}\`\n\nDownload the npm-package artifact for the exact archive and receipt.\n`);
           NODE
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        id: package
         with:
           name: npm-package-${{ github.run_id }}-${{ github.run_attempt }}
           path: release/
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 90
 
   publish:
     if: inputs.publish
@@ -95,8 +142,9 @@ jobs:
       - run: npm install --global npm@11.17.0 --ignore-scripts --no-audit --no-fund
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: npm-package-${{ github.run_id }}-${{ github.run_attempt }}
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
           path: release
+          merge-multiple: true
       - name: Publish once using OIDC and verify registry integrity
         run: |
           node --input-type=module <<'NODE'
@@ -160,7 +208,8 @@ jobs:
           if-no-files-found: error
 
   verify-global:
-    needs: publish
+    needs: [build, publish]
+    if: ${{ !cancelled() && needs.build.result == 'success' && (!inputs.publish || needs.publish.result == 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -171,9 +220,12 @@ jobs:
           node-version: 24
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: npm-package-${{ github.run_id }}-${{ github.run_attempt }}
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
           path: release
-      - name: Install the exact registry version globally and exercise public CLI
+          merge-multiple: true
+      - name: Install the release globally and exercise public CLI
+        env:
+          PUBLISH: ${{ inputs.publish }}
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
@@ -184,8 +236,10 @@ jobs:
           assert.equal(manifest.name,'@eyeauras/insight-cli');
           assert.match(manifest.version,/^\d+\.\d+\.\d+$/);
           const prefix=join(process.env.RUNNER_TEMP,'global-cli');
+          const published=process.env.PUBLISH==='true';
+          const spec=published?`${manifest.name}@${manifest.version}`:'./release/package.tgz';
           execFileSync('npm',['install','--global','--prefix',prefix,'--cache',join(process.env.RUNNER_TEMP,'fresh-npm-cache'),
-            '--userconfig','/dev/null','--registry','https://registry.npmjs.org/',`${manifest.name}@${manifest.version}`],{stdio:'inherit'});
+            '--userconfig','/dev/null','--registry','https://registry.npmjs.org/',spec],{stdio:'inherit'});
           const cli=join(prefix,'bin/insight-cli');
           const call=args=>execFileSync(cli,args,{encoding:'utf8',timeout:60000});
           assert.equal(call(['--version']).trim(),manifest.version);
@@ -203,5 +257,5 @@ jobs:
           assert.equal(status.processes.length,0);
           call(['--profile','ci-release-check','ipc-server','stop']);
           await appendFile(process.env.GITHUB_STEP_SUMMARY,
-            `### Registry global install passed\n\nVersion, help, installed RE skill, artifacts save and passive Ghidra status verified. Native Ghidra acceptance is a separate gate.\n`);
+            `### ${published?'Registry':'Preview archive'} global install passed\n\nVersion, help, installed RE skill, artifacts save and passive Ghidra status verified. Native Ghidra acceptance is a separate gate.\n`);
           NODE
