@@ -30,11 +30,12 @@ async function main(){
   const python=await realpath(environment.INSIGHT_DEBUGGER_PYTHON??'');
   if(!python.startsWith(root+'/debug-python-')||python!==environment.INSIGHT_DEBUGGER_PYTHON)throw Error('Owned debugger Python identity changed');
   environment.PYTHONPATH=python+delimiter+(environment.PYTHONPATH??'');delete environment.INSIGHT_DEBUGGER_PYTHON;
-  let closing=false,finished=false;
+  let closing=false,finished=false,launchComplete=false;
   process.once('SIGHUP',close);process.once('SIGTERM',close);
   // A separate session keeps the GUI terminal's SIGHUP from bypassing our orderly kill.
   const child=await launchProcess(appData,{...processSpec,role:'debugger'},'/usr/bin/lldb',['--no-lldbinit','-o','settings set auto-confirm true',...process.argv.slice(3)],{env:environment,detached:true,stdio:['pipe','pipe','pipe']});
-  const exited=new Promise<void>((ok,bad)=>{child.once('error',bad);child.once('exit',()=>{finished=true;ok();});});
+  launchComplete=true;
+  const exited=child.toolClosed.then(()=>{finished=true;});
   void exited.catch(()=>{});receipt.childPid=child.pid??0;receipt.state='running';
   let diagnostics='';const capture=(chunk:Buffer)=>{diagnostics=(diagnostics+chunk.toString()).slice(-65536);};child.stdout!.on('data',capture);child.stderr!.on('data',capture);
   process.stdout.on('error',()=>{});process.stderr.on('error',()=>{});child.stdin!.on('error',()=>{});
@@ -55,7 +56,7 @@ async function main(){
     'path.write_text(json.dumps({"id":'+JSON.stringify(id)+',"pid":pid,"inferiorTerminated":done,"error":error}))',
     'os.chmod(str(path),0o600)',
   ].join('\n');
-  function close(){if(closing||finished)return;closing=true;process.stdin.pause();child.stdout!.unpipe(process.stdout);child.stderr!.unpipe(process.stderr);child.stdout!.resume();child.stderr!.resume();
+  function close(){if(closing||finished)return;if(!launchComplete){setTimeout(close,10).unref();return;}closing=true;process.stdin.pause();child.stdout!.unpipe(process.stdout);child.stderr!.unpipe(process.stderr);child.stdout!.resume();child.stderr!.resume();
     const commands='script exec('+JSON.stringify(code)+')\nquit\n';child.stdin!.write(commands);
     setTimeout(()=>{if(!finished){child.kill('SIGINT');child.stdin!.write(commands);}},3000).unref();}
   process.once('SIGINT',()=>{if(!closing)child.kill('SIGINT');});process.stdin.once('end',close);process.stdin.once('error',close);

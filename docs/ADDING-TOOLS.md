@@ -61,3 +61,9 @@ lock service. Runtime state derives from profile AppData. Existing Ghidra paths 
 additional selections live under `runtime/tools/<tool>`, shared cache under `runtime/cache`, process
 records under `runtime/processes`, and bounded run diagnostics under `runtime/runs`. Changing a
 runtime does not change the RE finding format or promote saved output into a source of truth.
+
+Two opt-in macOS LLDB lifetime fault tests exercise exit-before-readiness and stop-during-startup:
+`INSIGHT_NATIVE_LLDB=1 node --test skills/ghidra-coordinator/dist/tests/debugger-owner.test.js`.
+They use a fixture identity endpoint and real LLDB without executing a target; the combined
+Gherkin gate independently uses real Ghidra GUI and a native debuggee. Default offline CI
+skips these host-dependent checks.
