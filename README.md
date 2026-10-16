@@ -157,5 +157,6 @@ into root sessions or exposed as public worker/proposal commands. Existing RE en
 not adopted or modified by the facade.
 
 Managed Ghidra delivery: [runtime commands and ownership](skills/ghidra-coordinator/references/managed-runtime.md).
-Version 0.2.0 is verified as a globally installed candidate archive; npm registry 0.1.0 remains the
-previous published release until a separately authorized registry publication.
+Version 0.2.0 is published on npm as `latest`. The manual release workflow passes build,
+OIDC publication and a fresh registry global installation; the archive matches the native-tested
+candidate byte for byte. See [release verification](docs/verification/npm-release-0.2.0.json).

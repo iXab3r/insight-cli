@@ -71,3 +71,16 @@ the upload. After a missing registry response, inspect the run before a manual r
 Build success is not proof of package-side authorization or publication. The release is
 complete only when **publish** and **verify-global** succeed. A build-only run can verify
 the pipeline before one-time authorization is available.
+
+## Verified initial release
+
+The [0.2.0 release run](https://github.com/iXab3r/insight-cli/actions/runs/38960073085) passes
+all three jobs. One-time authorization is configured, with no stored npm token. Its archive
+matches the native-tested macOS archive byte for byte, and npm provenance identifies the exact
+main commit. The registry installation also passes on macOS.
+[Release receipt](verification/npm-release-0.2.0.json) records the source, hashes, jobs and boundaries.
+
+Clean builds explicitly set the CLI entrypoint's POSIX executable mode before preparing identity,
+so a pre-existing output file cannot change archive integrity. npm receives `./release/package.tgz`;
+the `./` is required to avoid GitHub-shorthand parsing. Both preflight corrections are covered
+by packaging/publication checks.
