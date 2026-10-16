@@ -35,9 +35,21 @@ export async function acquire(a,directory,fetcher=fetch){
 }
 const gh=(...args)=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:4*1024**2}).trim();
 function api(path){return JSON.parse(gh('api',path));}
-function release(recipe){try{return api(`repos/${recipe.repository}/releases/tags/${recipe.tag}`);}catch(e){if(e.stderr?.includes('HTTP 404'))return;throw e;}}
+function release(recipe){
+ try{return api(`repos/${recipe.repository}/releases/tags/${recipe.tag}`);}
+ catch(e){
+  if(!e.stderr?.includes('HTTP 404'))throw e;
+  // The by-tag endpoint does not expose untagged drafts. Reconcile exact drafts through inventory.
+  const pages=JSON.parse(gh('api',`repos/${recipe.repository}/releases?per_page=100`,'--paginate','--slurp'));
+  return pages.flat().find(r=>r.tag_name===recipe.tag);
+ }
+}
+export async function waitFor(reader,ready,attempts=20,delayMs=500){
+ for(let i=0;i<attempts;i++){const value=await reader();if(ready(value))return value;if(i+1<attempts)await new Promise(ok=>setTimeout(ok,delayMs));}
+ throw Error('Release visibility is unresolved; inspect this exact tag before retrying');
+}
 async function readback(recipe,assets,directory,download=true){
- const current=release(recipe);if(!current)throw Error('Release outcome is unknown');
+ const current=await waitFor(()=>release(recipe),r=>r&&r.assets.length>=assets.length);
  if(current.assets.length!==assets.length)throw Error('Release asset inventory differs');
  for(const a of assets){
   const remote=current.assets.find(x=>x.name===a.name);if(!remote||remote.size!==a.size)throw Error('Missing/different asset: '+a.name);
@@ -52,18 +64,25 @@ async function readback(recipe,assets,directory,download=true){
 }
 export async function mirror(recipe,directory,publish=false){
  validateRecipe(recipe);await mkdir(directory,{recursive:true});
- for(const a of recipe.assets)await acquire(a,directory);
  const manifest=Buffer.from(JSON.stringify(recipe,null,2)+'\n');
  const manifestAsset={name:'manifest.json',size:manifest.length,sha256:createHash('sha256').update(manifest).digest('hex')};
  const file=await open(join(directory,'manifest.json'),'w',0o600);try{await file.writeFile(manifest);}finally{await file.close();}
  const assets=[...recipe.assets,manifestAsset];
- if(!publish)return {state:'prepared',tag:recipe.tag,assets:assets.length};
- if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
+ if(!publish){for(const a of recipe.assets)await acquire(a,directory);return {state:'prepared',tag:recipe.tag,assets:assets.length};}
+ if(process.env.GITHUB_ACTIONS==='true'){
+  if(process.env.TOOL_RELEASE_IMMUTABLE_READY!=='true')throw Error('Repository immutability setup is not confirmed');
+ }else if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
  let current=release(recipe);
+ if(current&&!current.draft){
+  current=await readback(recipe,assets,directory,false);
+  if(current.immutable!==true)throw Error('Existing release is not immutable');
+  return {state:'published_verified',tag:recipe.tag,url:current.html_url,assets:assets.length};
+ }
+ for(const a of recipe.assets)await acquire(a,directory);
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
-  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??gh('rev-parse','HEAD'),'--title',recipe.title,'--notes',recipe.redistribution);
-  current=release(recipe);if(!current)throw Error('Draft release creation outcome is unknown');
+  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);
+  current=await waitFor(()=>release(recipe),Boolean);
  }
  if(current.draft){
   for(const a of assets){
@@ -76,6 +95,7 @@ export async function mirror(recipe,directory,publish=false){
   try{gh('release','edit',recipe.tag,'--repo',recipe.repository,'--draft=false','--latest=false');}
   catch(e){current=release(recipe);if(!current||current.draft)throw Error('Publication outcome is unknown; inspect this exact tag before retrying',{cause:e});}
  }
+ await waitFor(()=>release(recipe),r=>r&&!r.draft);
  current=await readback(recipe,assets,directory,false);
  if(current.draft||current.immutable!==true)throw Error('Published release is not verified immutable');
  return {state:'published_verified',tag:recipe.tag,url:current.html_url,assets:assets.length};
