@@ -57,3 +57,13 @@ test('a copied process record cannot grant another profile control of the origin
  const record=await processStatus(root,child.toolProcessId);await atomicWrite(join(other,'runtime/processes',record.id+'.json'),{...record,root:join(other,'runtime/runs',record.id)});
  await assert.rejects(terminateProcess(other,record.id,true),/unverified/);assert.equal(child.exitCode,null);await terminateProcess(root,record.id,true);
 });
+
+test('adapter launch binding completes durably before execution is authorized',async t=>{
+ const root=await fixture(t),marker=join(root,'started'),binding=join(root,'adapter-binding.json');let release!:()=>void,entered!:()=>void;const held=new Promise<void>(ok=>release=ok),ready=new Promise<void>(ok=>entered=ok);
+ const launch=launchProcess(root,{tool:'fixture',role:'adapter',installation:'fixture'},process.execPath,['-e','require("node:fs").writeFileSync(process.argv[1],"started");setInterval(()=>{},1000)',marker],{detached:process.platform!=='win32',stdio:'ignore'},{onSpawn:async child=>{entered();await held;await atomicWrite(binding,{pid:child.pid,id:child.toolProcessId});}});
+ await ready;await delay(100);
+ if(process.platform!=='win32')await assert.rejects(stat(marker));release();const child=await launch;
+ t.after(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');});
+ for(let i=0;i<100;i++){try{await stat(marker);break;}catch{await delay(20);}}
+ assert.equal(JSON.parse(await readFile(binding,'utf8')).pid,child.pid);assert.equal(await readFile(marker,'utf8'),'started');await terminateProcess(root,child.toolProcessId,true);
+});

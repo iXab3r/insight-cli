@@ -21,7 +21,7 @@ const owned=new Map<string,Owned>();
 const ownedKey=(directory:string,id:string)=>resolve(directory)+'\0'+id;
 export interface TrackedChild extends ChildProcess {toolProcessId:string;toolClosed:Promise<void>}
 export type OwnershipVerifier=(record:ProcessRecord)=>Promise<boolean|undefined>;
-export async function launchProcess(directory:string,spec:ProcessSpec,executable:string,args:string[],options:SpawnOptions={},control:{id?:string;finalize?:boolean;onSpawn?:(child:TrackedChild)=>void;signal?:AbortSignal}={}):Promise<TrackedChild>{
+export async function launchProcess(directory:string,spec:ProcessSpec,executable:string,args:string[],options:SpawnOptions={},control:{id?:string;finalize?:boolean;onSpawn?:(child:TrackedChild)=>void|Promise<void>;signal?:AbortSignal}={}):Promise<TrackedChild>{
  return withToolLock(directory,spec.tool,async()=>{
   control.signal?.throwIfAborted();toolRoot(directory,spec.tool);if(!isAbsolute(executable))throw new CliError('Tool executable must be absolute.',{code:'tool.configuration'});
   const id=control.id??randomUUID();if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Invalid process identity');
@@ -41,7 +41,7 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
    await atomicWrite(path,current);owned.delete(ownedKey(directory,id));
   },async()=>{Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);owned.delete(ownedKey(directory,id));}).catch(()=>{});
   try{
-   control.onSpawn?.(child);if(!child.pid)throw Error('Owned tool spawn did not obtain a PID');
+   await control.onSpawn?.(child);if(!child.pid)throw Error('Owned tool spawn did not obtain a PID');
    if(gated){
     const channel=child.stdio[fd] as Writable;channel.on('error',()=>{});channel.end(JSON.stringify({executable,arguments:args,environment:Object.fromEntries(Object.entries(environment).filter(([,v])=>v!==undefined)),nonce}));
     let armed=false;

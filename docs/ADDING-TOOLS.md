@@ -27,7 +27,9 @@ additional repository, GUI and debugger invariants.
    not argv or metadata. CORE stores redacted bounded logs, exit state, timing and diagnostic paths.
    Keep target/session validation and output parsing in the adapter. Outputs remain ordinary files.
 5. Persistent tools use `launchProcess` with a role, installation and non-secret resource metadata.
-   The POSIX launch gate records intent and OS identity before authorizing exec. Supply readiness
+   The POSIX launch gate records intent and OS identity before authorizing exec.
+   An async `onSpawn` hook may durably bind adapter PID/identity/secret references before that grant;
+   use it when reconnecting requires more than the common process record. Supply readiness
    checks and authenticated identity verification through `ToolProcessHooks`. On macOS birth times
    have one-second resolution; a recovered process requires authenticated tool proof. Register only
    previously owned, authenticated resources through `registerExistingProcess`. Never adopt a process
