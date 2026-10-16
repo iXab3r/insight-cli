@@ -3,9 +3,10 @@
 For the manual GitHub Actions build/release and its one-time authorization, see
 [Release CI](RELEASE-CI.md). Its build-only mode also supplies an inspected package artifact.
 
-This page preserves the published 0.1.0 release. The later [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md)
-is the 0.2.0 candidate and has its own global CLI/Gherkin verifier. Run the historical
-`proof-global-package.mjs` only with its matching 0.1.0 executable/artifact.
+The current release is 0.2.0, including [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md).
+The historical 0.1.0 receipt and executable proof remain below. Run the historical
+`proof-global-package.mjs` only with its matching 0.1.0 executable/artifact; current releases use
+the manual CI build, publication and global-install gate.
 
 The owner authorized npm publication, global installation and verification on 2026-10-16.
 The package is `@eyeauras/insight-cli`; its executable and application ID stay `insight-cli`.
@@ -25,8 +26,9 @@ insight-cli skill insight-re
 npm's global executable directory must be on PATH. Installation needs no source checkout,
 TypeScript, .NET, Automation or Factory checkout. It does not register skills or edit agent
 settings. [Packaged instructions](../skills/ghidra-coordinator/README.md) cover profile creation,
-permissions, opening inputs and research. Ghidra 12.1.2 and Java 21 are external runtime
-requirements for Ghidra operations; help, skill discovery and ordinary file saves need neither.
+permissions, opening inputs and research. `insight-cli ghidra install` delivers Ghidra 12.1.2,
+Java 21 and local server support; external installations remain supported. Help, skill discovery
+and ordinary file saves need neither.
 
 The package pins published Factory Core 0.4.1 and MCP SDK 1.32.1. Factory IPC 0.1.0 is the
 verified official prepared artifact, fetched by npm from an immutable GitHub tarball URL.
@@ -46,7 +48,7 @@ npm ci --ignore-scripts
 npm test
 npm run test:package
 npm run pack:cli
-npm publish ./artifacts/eyeauras-insight-cli-0.1.0.tgz --access public --ignore-scripts
+npm publish ./artifacts/eyeauras-insight-cli-0.2.0.tgz --access public --ignore-scripts
 ```
 
 Publish the inspected archive, not an unbuilt workspace. The prepack build prepares Factory's
@@ -60,7 +62,33 @@ Authentication is npm's normal browser login/2FA, outside package code. It grant
 runtime permissions. Verify the served version's SHA-1/integrity against the exact local tarball
 before claiming publication, then install that exact version from the registry using `-g`.
 
-## Public executable proof
+## Published 0.2.0 and manual CI
+
+[`@eyeauras/insight-cli@0.2.0`](https://www.npmjs.com/package/@eyeauras/insight-cli/v/0.2.0)
+is published with `latest=0.2.0`. [Verification](verification/npm-release-0.2.0.json) binds
+source commit `a8479eec06eead393d434486311fddb7eb403303` to the exact native-tested archive:
+1,005,214 bytes, 174 files, SHA-256
+`ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab`.
+Registry SHA-1/SHA-512 match, and the npm provenance statement identifies that commit and
+[release run 38960073085](https://github.com/iXab3r/insight-cli/actions/runs/38960073085).
+
+The workflow's build, OIDC publication and fresh Linux registry global-install jobs all pass.
+The ordinary macOS global installation also uses the registry, with a fresh cache and user npm
+config disabled; all 174 installed files match the inspected archive. Version/help, installed
+RE skill and managed-runtime command discovery pass. Native Ghidra acceptance is inherited
+only through exact artifact equality; its separate scope and platform boundaries remain intact.
+
+The one-time npm Trusted Publisher targets `iXab3r/insight-cli`, `release-npm.yml` and environment
+`npm-release`. That environment permits main only, with no extra review gate; `NPM_RELEASE_READY`
+is true. No npm token is stored in GitHub. Use **Actions → Release npm → Run workflow**, main,
+publish checked. Build-only remains available by unchecking publish.
+
+Preflight found and corrected a clean-build executable-mode difference and a relative archive
+argument that npm interpreted as GitHub shorthand. The first full run failed before publication;
+the corrected run accepted 0.2.0 once. Five offline publication cases now cover local archive
+syntax, immutable-version comparison, downgrade rejection and lost-response readback.
+
+## Historical 0.1.0 public executable proof
 
 The opt-in [global proof](../scripts/proof-global-package.mjs) runs the real executable from
 outside the source tree, in an owned disposable profile. On this macOS Ghidra/Java environment:
@@ -84,7 +112,7 @@ acceptance. Personal installation paths and raw transcripts remain outside Git.
 ## Published 0.1.0 receipt
 
 [`@eyeauras/insight-cli@0.1.0`](https://www.npmjs.com/package/@eyeauras/insight-cli)
-is published with `latest=0.1.0`. [Verification](verification/npm-release-0.1.0.json)
+was published with `latest=0.1.0` at that release. [Verification](verification/npm-release-0.1.0.json)
 binds source commit `e800acfa3e8d1e860c847072fa3da9b2f51e1659` to the exact tested tarball:
 990075 bytes, SHA-256
 `f8448298834d21577aa711086359d82e828f544101fa87da6329724c8170be05`, registry SHA-1

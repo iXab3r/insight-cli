@@ -9,12 +9,23 @@ byte-identical. The final `@runtime` Gherkin gate passes 1/1 scenario with 73 pu
 reinstall preservation, official ZIP/native supplementation, GUI/live LLDB, extensions and an
 external Homebrew launcher with a delivered JDK. 154/154 offline tests, isolated package and both
 skills pass. Native scope is macOS ARM64; host developer tools/authorization remain OS prerequisites.
-This candidate was installed with `npm -g` from its archive; the registry release below remains 0.1.0.
+The same archive is now published as 0.2.0; registry and native proof are bound by exact hash equality.
 
 
 ## Published npm package and actual global installation
 
-[`@eyeauras/insight-cli@0.1.0`](npm-release-0.1.0.json) is public on npm with `latest=0.1.0`.
+[`@eyeauras/insight-cli@0.2.0`](npm-release-0.2.0.json) is public on npm with `latest=0.2.0`.
+The [manual release run](https://github.com/iXab3r/insight-cli/actions/runs/38960073085) passes
+build, OIDC publication and fresh Linux registry global installation. Its archive SHA-256 is
+`ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab`, identical to the native-tested
+candidate. Registry integrity matches; the decoded npm provenance identifies source
+`a8479eec06eead393d434486311fddb7eb403303` and the same workflow run. The actual macOS global
+registry install also matches all 174 packaged files. 154 application tests plus five offline
+publication cases pass. [Release CI](../RELEASE-CI.md) documents the button, authorization and re-runs.
+
+The following evidence is historical for 0.1.0:
+
+[`@eyeauras/insight-cli@0.1.0`](npm-release-0.1.0.json) was published with `latest=0.1.0` at that release.
 Its served SHA-1/SHA-512 match the inspected tarball; a committed rebuild is byte-identical.
 An ordinary package-name global install in the default machine prefix, with empty cache and
 user npm config disabled, supplies the real `insight-cli` PATH command. All 164 package files

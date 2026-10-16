@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "package": "@eyeauras/insight-cli",
+  "version": "0.2.0",
+  "state": "passed",
+  "publishedAt": "2026-10-16T20:10:44.487Z",
+  "sourceCommit": "a8479eec06eead393d434486311fddb7eb403303",
+  "registry": {
+    "url": "https://registry.npmjs.org/",
+    "latest": "0.2.0",
+    "tarball": "https://registry.npmjs.org/@eyeauras/insight-cli/-/insight-cli-0.2.0.tgz",
+    "sha1": "9723bcbc8138b998ec9e0fe4d156f702707c0d62",
+    "integrity": "sha512-6nDvLj+Tz4lLFvzI/1WV+LuDVyLdyuOrPQWB+gy5VnV0Bvr9AVmvd9nVfrSet21+2tjmrMzfI79Mt4td1/cPeQ==",
+    "exactNativeTestedBytes": true,
+    "publicationAcceptedOnce": true,
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@eyeauras%2finsight-cli@0.2.0",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    }
+  },
+  "artifact": {
+    "sha256": "ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab",
+    "bytes": 1005214,
+    "files": 174
+  },
+  "workflow": {
+    "file": "release-npm.yml",
+    "trigger": "workflow_dispatch",
+    "runId": 38960073085,
+    "url": "https://github.com/iXab3r/insight-cli/actions/runs/38960073085",
+    "sourceRef": "refs/heads/main",
+    "jobs": [
+      {
+        "name": "build",
+        "conclusion": "success",
+        "startedAt": "2026-10-16T20:08:38Z",
+        "completedAt": "2026-10-16T20:09:09Z"
+      },
+      {
+        "name": "publish",
+        "conclusion": "success",
+        "startedAt": "2026-10-16T20:09:13Z",
+        "completedAt": "2026-10-16T20:10:53Z"
+      },
+      {
+        "name": "verify-global",
+        "conclusion": "success",
+        "startedAt": "2026-10-16T20:10:55Z",
+        "completedAt": "2026-10-16T20:11:12Z"
+      }
+    ]
+  },
+  "authorization": {
+    "method": "npm Trusted Publishing / GitHub Actions OIDC",
+    "repository": "iXab3r/insight-cli",
+    "workflow": "release-npm.yml",
+    "environment": "npm-release",
+    "deploymentBranches": [
+      "main"
+    ],
+    "additionalReviewerGate": false,
+    "readinessVariable": true,
+    "storedNpmToken": false,
+    "initialNpm2FAConfirmed": true
+  },
+  "verification": {
+    "offlineApplicationTests": 154,
+    "offlinePublicationTests": 5,
+    "isolatedPackageInstall": true,
+    "actionlint": "1.7.12",
+    "linuxRegistryGlobalInstall": {
+      "nodeMajor": 24,
+      "versionAndHelp": true,
+      "installedReSkill": true,
+      "ordinaryArtifactsSave": true,
+      "passiveGhidraStatus": true
+    },
+    "macRegistryGlobalInstall": {
+      "node": "v26.4.0",
+      "versionAndHelp": true,
+      "managedRuntimeCommandHelp": true,
+      "installedReSkill": true,
+      "freshCache": true,
+      "userNpmConfigDisabled": true,
+      "packagedFilesCompared": 174,
+      "allFileHashesMatch": true
+    },
+    "provenance": {
+      "decodedClaimMatchesSource": true,
+      "decodedClaimMatchesWorkflowRun": true,
+      "independentCryptographicVerificationPerformed": false
+    },
+    "nativeGhidra": {
+      "receipt": "managed-ghidra-runtime.json",
+      "repeatedForThisRegistryInstall": false,
+      "boundByExactArtifactEquality": true,
+      "scope": "existing macOS ARM64 Ghidra/server/GUI/debugger acceptance; no new Windows/Linux native claim"
+    }
+  },
+  "preflight": {
+    "firstBuildRun": 38958327003,
+    "firstBuildOutcome": "passed; 174 payload files equal, entrypoint mode differed",
+    "normalizedBuildRun": 38958749229,
+    "normalizedBuildMatchedNativeArchive": true,
+    "failedFullRun": 38959013466,
+    "failedBeforePublication": "npm parsed release/package.tgz as GitHub shorthand; fixed to ./release/package.tgz",
+    "correctionPRs": [
+      2,
+      3
+    ]
+  },
+  "boundaries": [
+    "The release workflow checks global installation without downloading Ghidra or re-running native acceptance.",
+    "Historical native/source receipts retain their original identities.",
+    "Private profiles, local paths, auth challenges and raw local transcripts are excluded."
+  ]
+}
