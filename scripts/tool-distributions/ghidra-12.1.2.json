@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-ghidra-12.1.2-r1",
+  "title": "ghidra-12.1.2",
+  "assets": [
+    {
+      "name": "ghidra-12.1.2-arm64_sonoma.tar.gz",
+      "upstream": "https://ghcr.io/v2/homebrew/core/ghidra/blobs/sha256:40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725",
+      "sha256": "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725",
+      "size": 470315169,
+      "format": "tgz",
+      "root": "ghidra/12.1.2/libexec",
+      "license": "Apache-2.0 and included third-party licenses",
+      "role": "binary"
+    },
+    {
+      "name": "ghidra-12.1.2-arm64_sequoia.tar.gz",
+      "upstream": "https://ghcr.io/v2/homebrew/core/ghidra/blobs/sha256:90aa942184fca2337ad0a123f818f37372ea642e8e69e969d45cc144a6f26fdf",
+      "sha256": "90aa942184fca2337ad0a123f818f37372ea642e8e69e969d45cc144a6f26fdf",
+      "size": 470268922,
+      "format": "tgz",
+      "root": "ghidra/12.1.2/libexec",
+      "license": "Apache-2.0 and included third-party licenses",
+      "role": "binary"
+    },
+    {
+      "name": "ghidra-12.1.2-arm64_tahoe.tar.gz",
+      "upstream": "https://ghcr.io/v2/homebrew/core/ghidra/blobs/sha256:079007d8a3a477c8d5901e6596947612d86c8641956424a2bcb71ecd798bedcc",
+      "sha256": "079007d8a3a477c8d5901e6596947612d86c8641956424a2bcb71ecd798bedcc",
+      "size": 470255318,
+      "format": "tgz",
+      "root": "ghidra/12.1.2/libexec",
+      "license": "Apache-2.0 and included third-party licenses",
+      "role": "binary"
+    },
+    {
+      "name": "ghidra-12.1.2-sonoma.tar.gz",
+      "upstream": "https://ghcr.io/v2/homebrew/core/ghidra/blobs/sha256:e30f8c84b64331f87f6ef1890cbdded6672bb7fcc8b674794ac93e4b3e62ad2b",
+      "sha256": "e30f8c84b64331f87f6ef1890cbdded6672bb7fcc8b674794ac93e4b3e62ad2b",
+      "size": 470418808,
+      "format": "tgz",
+      "root": "ghidra/12.1.2/libexec",
+      "license": "Apache-2.0 and included third-party licenses",
+      "role": "binary"
+    },
+    {
+      "name": "ghidra-12.1.2.zip",
+      "upstream": "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.2_build/ghidra_12.1.2_PUBLIC_20260605.zip",
+      "sha256": "b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d",
+      "size": 572803866,
+      "format": "zip",
+      "root": "ghidra_12.1.2_PUBLIC",
+      "license": "Apache-2.0 and included third-party licenses",
+      "role": "binary"
+    },
+    {
+      "name": "ghidra-12.1.2-source.tar.gz",
+      "upstream": "https://codeload.github.com/NationalSecurityAgency/ghidra/tar.gz/refs/tags/Ghidra_12.1.2_build",
+      "sha256": "c30fe709ec5d5e68bf799a6c1f4dfc6853dacb189d10203eb882ecbb408db216",
+      "size": 79274014,
+      "role": "source",
+      "license": "Apache-2.0 and included GPL/third-party notices"
+    }
+  ],
+  "redistribution": "Original distributions retained with embedded licenses/notices and source companions. Ghidra bottles retain their embedded .brew formula; sources and build instructions are in the source companion. ILSpy original transitive NuGet packages retain their own licenses/notices."
+}

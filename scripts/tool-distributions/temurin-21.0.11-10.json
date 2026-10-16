@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-temurin-21.0.11-10-r1",
+  "title": "temurin-21.0.11-10",
+  "assets": [
+    {
+      "name": "temurin-21.0.11+10-darwin-arm64.tar.gz",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.11_10.tar.gz",
+      "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",
+      "size": 200030394,
+      "format": "tgz",
+      "root": "jdk-21.0.11+10.jdk/Contents/Home",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+      "role": "binary"
+    },
+    {
+      "name": "temurin-21.0.11+10-darwin-x64.tar.gz",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_x64_mac_hotspot_21.0.11_10.tar.gz",
+      "sha256": "34180eb03e6d207c388cce3da668f6cc7cd7508c185c24782fadac2c9c0e66f9",
+      "size": 194283642,
+      "format": "tgz",
+      "root": "jdk-21.0.11+10.jdk/Contents/Home",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+      "role": "binary"
+    },
+    {
+      "name": "temurin-21.0.11+10-linux-x64.tar.gz",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_x64_linux_hotspot_21.0.11_10.tar.gz",
+      "sha256": "4b2220e232a97997b436ca6ab15cbf70171ecff52958a46159dfa5a8c44ca4de",
+      "size": 207513939,
+      "format": "tgz",
+      "root": "jdk-21.0.11+10",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+      "role": "binary"
+    },
+    {
+      "name": "temurin-21.0.11+10-win32-x64.zip",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk_x64_windows_hotspot_21.0.11_10.zip",
+      "sha256": "d3625e7cadf23787ea540229544b6e2ab494b3b54da1801879e583e1dfee0a64",
+      "size": 205073954,
+      "format": "zip",
+      "root": "jdk-21.0.11+10",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+      "role": "binary"
+    },
+    {
+      "name": "temurin-21.0.11-10-source.tar.gz",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk-sources_21.0.11_10.tar.gz",
+      "sha256": "891a3dd2341c37580fb81b56c4262f135e90c8f2acb059adb6ff0fdd76ae4385",
+      "size": 114935577,
+      "role": "source",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0 and included notices"
+    },
+    {
+      "name": "temurin-build-source.tar.gz",
+      "upstream": "https://codeload.github.com/adoptium/temurin-build/tar.gz/a612825ee82a20ac872d60958c349854c1f29a8e",
+      "sha256": "1c0cdcec98d7f43652ad26b7a54f33172089018ca58759ffc6d6fc0ee18ebd3f",
+      "size": 594017,
+      "role": "source",
+      "license": "Apache-2.0 and included notices"
+    },
+    {
+      "name": "temurin-build-metadata.json",
+      "upstream": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jdk-sources_21.0.11_10.tar.gz.json",
+      "sha256": "36e0c569da499d85470e1721cc79ff4562471b17f4d60fb02ab8c5599d3b0209",
+      "size": 32440,
+      "role": "provenance",
+      "license": "Public upstream build provenance"
+    }
+  ],
+  "redistribution": "Original distributions retained with embedded licenses/notices and source companions. Ghidra bottles retain their embedded .brew formula; sources and build instructions are in the source companion. ILSpy original transitive NuGet packages retain their own licenses/notices."
+}
