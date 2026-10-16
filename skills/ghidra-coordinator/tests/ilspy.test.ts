@@ -12,7 +12,7 @@ test('ILSpy uses shared lifecycle, immutable targets, literal argv and plain fil
  const input=join(f.root,'managed input ;.dll'),tool=join(f.root,'ilspy fixture'),output=join(f.root,'ordinary code.cs');await writeFile(input,'fixture PE bytes');
  await writeFile(tool,'#!'+process.execPath+'\n'+`if(process.argv.includes('--version'))console.log('ilspycmd: 11.1.0.9782');else console.log(JSON.stringify(process.argv.slice(2)));\n`,{mode:0o755});
  const installed=await f.json(app,['ilspy','install','--executable',tool]) as any;assert.equal(installed.mode,'external');
- const types=await f.json(app,['ilspy','types',input]) as any;assert.match(types.content,/--disable-updatecheck/);assert.equal(types.truncated,false);
+ const types=await f.json(app,['ilspy','types',input]) as any;assert.match(types.content,/--disable-updatecheck/);assert.ok(JSON.parse(types.content).includes('cisde'));assert.equal(types.truncated,false);
  const decompiled=await f.json(app,['ilspy','decompile','--target',types.target,'--member','M:Example;literal','--output',output]) as any;
  assert.equal(decompiled.target,types.target);assert.match(await readFile(output,'utf8'),/M:Example;literal/);
  const occupied=await f.run(app,['ilspy','decompile',input,'--output',output,'--json']);assert.notEqual(occupied.exitCode,0);assert.match(await readFile(output,'utf8'),/M:Example;literal/);

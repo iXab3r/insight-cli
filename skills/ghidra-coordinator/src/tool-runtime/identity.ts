@@ -25,7 +25,7 @@ export async function processIdentity(pid:number):Promise<ProcessIdentity|undefi
   }
   try{process.kill(pid,0);return {birth:'unverified',strong:false};}catch{return;}
  }catch(error){
-  if(['ENOENT','EACCES','EPERM'].includes((error as NodeJS.ErrnoException).code??'')||(error as {code?:number}).code===1)return unavailable(pid);
+  if(['ENOENT','ESRCH','EACCES','EPERM'].includes((error as NodeJS.ErrnoException).code??'')||(error as {code?:number}).code===1)return unavailable(pid);
   throw error;
  }
 }

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {readFile,writeFile,mkdtemp,cp,readdir,stat} from 'node:fs/promises';
+import {readFile,writeFile,mkdtemp,cp,readdir,stat,mkdir,symlink} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
@@ -10,7 +10,8 @@ import {setTimeout as delay} from 'node:timers/promises';
 const exec=promisify(execFile),[cli,exe,assembly,reportPath,external,ghidraArchive,ilspyArchive,dotnetArchive]=process.argv.slice(2);
 assert.equal(process.env.INSIGHT_NATIVE_DISPOSABLE,'1');assert.equal(process.platform,'darwin');assert.ok(dotnetArchive);
 const root=await mkdtemp('/private/tmp/insight-tool-runtime-proof-'),calls=[],checks={},sha=b=>createHash('sha256').update(b).digest('hex');
-const environment={...process.env,PATH:'/opt/homebrew/bin:/usr/bin:/bin'};for(const key of ['JAVA_HOME','GHIDRA_HOME','GHIDRA_MCP_HOME','DOTNET_ROOT'])delete environment[key];
+await mkdir(join(root,'bin'));await symlink(process.execPath,join(root,'bin/node'));
+const environment={...process.env,PATH:join(root,'bin')+':/usr/bin:/bin'};for(const key of ['JAVA_HOME','GHIDRA_HOME','GHIDRA_MCP_HOME','DOTNET_ROOT'])delete environment[key];
 const exeSha=sha(await readFile(exe)),assemblySha=sha(await readFile(assembly)),report={schema:1,state:'running',scope:'global installed CLI; mirrored delivery, Ghidra and ILSpy, recovery and safe removal',platform:process.platform,architecture:process.arch,node:process.version,inputSha256:{exe:exeSha,assembly:assemblySha},checks,calls};
 let profile,sequence=0;
 async function call(args,{global=false,success=true}={}){

@@ -50,7 +50,7 @@ export function ilspyCommands(workspace:(c:CommandContext)=>Workspace):CommandDe
   const directory=operation==='project'||operation==='resource';if(directory&&!o.output)fail('invalid','This operation requires --output DIRECTORY.');
   const stage=directory?join(c.appArguments.AppDataDirectory,'runtime/exports',randomUUID()):undefined;if(stage)await mkdir(stage,{recursive:true,mode:0o700});
   const parameters:string[]=['--disable-updatecheck'];
-  if(operation==='types'){const kind=o.kind===undefined?'c,i,s,d,e':text(o.kind,32);if(!/^[cisde](?:,[cisde])*$/.test(kind))fail('invalid','kind must be c,i,s,d,e selections.');parameters.push('--list',kind);}
+  if(operation==='types'){const kind=o.kind===undefined?'c,i,s,d,e':text(o.kind,32);if(!/^[cisde](?:,[cisde])*$/.test(kind))fail('invalid','kind must be c,i,s,d,e selections.');parameters.push('--list',kind.replaceAll(',',''));}
   if(o.type)parameters.push('--type',text(o.type,4096));if(o.member)parameters.push('--member',text(o.member,4096));
   if(operation==='il')parameters.push('--ilcode');if(operation==='resources')parameters.push('--list-resources');
   if(operation==='resource')parameters.push('--resource',text(o.name,4096),'--outputdir',stage!);
