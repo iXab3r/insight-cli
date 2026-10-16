@@ -1,5 +1,10 @@
 # Agent CLI scenarios
 
+The [business acceptance hierarchy](BUSINESS-SCENARIOS.md) fixes 25 agent-outcome
+scenarios, including several CLIs on the same EXE and required prepared-base acceleration
+with three Ghidra workers. It is an agreed specification awaiting executable implementation;
+the command examples below and historical technical evidence retain their own scope.
+
 [Interrupted first-import recovery](INITIAL-IMPORT-RECOVERY.md) uses the existing scoped open
 or original request ID. Private analysis receipts and verified staging preserve the same
 profile/session/target without replaying a canonical check-in.

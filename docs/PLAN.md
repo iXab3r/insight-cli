@@ -6,6 +6,16 @@ The owner subsequently selected one full M0–M5 implementation pass and answere
 decisions below. This plan records the delivery contract and completed acceptance. Npm
 publication remains excluded.
 
+## Business acceptance follow-up
+
+On 2026-10-16 the owner agreed the [25 business scenarios](BUSINESS-SCENARIOS.md) in five
+branches and requested documentation before implementation. BS-23 requires demonstrable
+one-versus-three Ghidra acceleration on a prepared base; BS-24 measures cold start
+separately without a required cold-start speedup. A 1.5x margin has not been agreed.
+The catalogue owns the acceptance criteria and measurement boundaries. Its executable
+business scenarios and benchmark are planned; earlier technical acceptance does not
+mark these scenarios complete.
+
 ## Closed owner decisions
 
 | Topic | Selected behavior |

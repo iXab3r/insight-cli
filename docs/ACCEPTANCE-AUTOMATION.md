@@ -7,9 +7,10 @@ process sentinel. Product bindings belong to this repository. Automation supplie
 process ownership, deadlines, logs and cleanup; insight-cli retains its existing CLI,
 Factory lifecycle and native acceptance assertions.
 
-This is the connection and migration foundation. The agreed next step is to design
-a hierarchy of 20–30 business scenarios together. The technical bridge features below
-do not substitute for that hierarchy and do not claim to cover it.
+This is the connection and migration foundation. The owner agreed the
+[25 business scenarios and acceptance criteria](BUSINESS-SCENARIOS.md), organized into
+five branches. Their executable implementation remains pending. The technical bridge
+features below do not establish acceptance of that catalogue.
 
 [Connection evidence](verification/automation-bootstrap.json) records two passing offline
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
@@ -84,11 +85,14 @@ gate. Existing push/PR offline CI remains independent of that private dependency
 
 ## Business hierarchy and parallel throughput
 
-The next design pass should organize scenarios by an agent's outcome: investigate one
-EXE through one CLI; cooperate through two CLIs on the same EXE; work on several EXEs;
-retain findings through conflict and interruption; finish a shared investigation with
-three workers. Assertions should check discoveries and the accepted shared result through
-the public CLI. Technical recovery fault matrices remain a supporting integration layer.
+The [agreed hierarchy](BUSINESS-SCENARIOS.md) covers one EXE, several EXEs, collaboration
+through independent CLIs, interrupted investigations and shared-task throughput. It owns
+the stable BS-01–BS-25 IDs and business acceptance criteria. Technical recovery fault
+matrices remain a supporting integration layer.
+
+Acceleration is **required on the prepared base** (BS-23). Cold-start time is measured
+separately (BS-24), with no required cold-start speedup. No numeric margin such as 1.5x
+has been agreed. Freeze the concrete workload and comparison protocol before measurement.
 
 **A shorter test run alone does not prove that three Ghidra instances accelerate research.**
 The planned comparative acceptance must establish all of the following:
