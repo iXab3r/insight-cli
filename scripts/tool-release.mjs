@@ -69,7 +69,7 @@ export async function mirror(recipe,directory,publish=false){
  for(const a of recipe.assets)await acquire(a,directory);
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
-  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??gh('rev-parse','HEAD'),'--title',recipe.title,'--notes',recipe.redistribution);
+  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);
   current=release(recipe);if(!current)throw Error('Draft release creation outcome is unknown');
  }
  if(current.draft){
