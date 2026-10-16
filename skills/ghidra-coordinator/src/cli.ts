@@ -1,3 +1,4 @@
+import {ilspyCommands} from './ilspy.js';
 import {toolProcessCommands} from './tool-runtime/commands.js';
 import {ghidraProcessHooks} from './ghidra-processes.js';
 import {assertUnused,withToolLock,toolUseCount} from './tool-runtime/store.js';
@@ -214,6 +215,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     })],
     commands:[
       ...artifactsCommands(),
+      ...ilspyCommands(c=>owner.selected(c).workspace),
       ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))}),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
