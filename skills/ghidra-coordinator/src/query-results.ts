@@ -87,6 +87,9 @@ export function queryResult(path:string,parameters:Record<string,unknown>,result
  if(path==='/get_comment')shape=bulkComments?{results:'array',requested:'number',returned:'number',with_comments:'number'}:{address:'string',has_comment:'boolean'};
  if(path==='/find_data_types')shape={...(parameters.categories?{categories:'array' as const}:{data_types:'array' as const}),count:'number'};
  if(path==='/get_function_hash')shape=parameters.function?{hash:'string',function_name:'string',instruction_count:'number'}:{functions:'array'};
+ // The pinned service returns a bare bundle for function=, a map/counts for functions=.
+ // Bulk selection takes precedence even when both selectors are supplied.
+ if(path==='/get_functions'&&!String(parameters.functions??'').trim())shape={name:'string',size:'number'};
  if(path==='/get_program_options')shape=parameters.group?{options:'array'}:{groups:'array'};
  // The pinned implementation retains format as a deprecated no-op and always returns JSON.
  if(path==='/list_data_items_by_xrefs')shape={data_items:'array',count:'number',total:'number'};

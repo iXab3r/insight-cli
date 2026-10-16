@@ -25,3 +25,14 @@ test('pinned bulk comments and address-based call graphs accept their actual JSO
  assert.throws(()=>queryResult('/get_full_call_graph',{format:'json_edges'},{...graph,edges:[{caller_addr:'1000'}]}),/callee_addr/);
  assert.throws(()=>queryResult('/get_full_call_graph',{format:'dot'},{format:'dot'}),/diagram/);
 });
+
+test('function inspection distinguishes a single bundle from the pinned bulk response',()=>{
+ const single={name:'ReadPassword',size:42,signature:'int ReadPassword(void)'};
+ const bulk={functions:{'1000':single},count:1,requested:1};
+ assert.deepEqual(queryResult('/get_functions',{function:'1000',fields:'signature'},single),single);
+ assert.deepEqual(queryResult('/get_functions',{function:'1000',functions:'   '},single),single);
+ assert.deepEqual(queryResult('/get_functions',{function:'ignored',functions:'1000'},bulk),bulk);
+ assert.throws(()=>queryResult('/get_functions',{function:'1000'},bulk),/name/);
+ assert.throws(()=>queryResult('/get_functions',{functions:'1000'},single),/functions/);
+ assert.throws(()=>queryResult('/get_functions',{function:'1000'},{name:'ReadPassword'}),/size/);
+});

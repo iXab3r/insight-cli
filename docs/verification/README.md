@@ -1,5 +1,14 @@
 # Verification scope
 
+## Packaged RE skill and saved materials
+
+[RE workflow evidence](re-skill.json) and [reproduction](../RE-SKILL.md) separate the
+three-agent installed-skill run on real 7zr.exe from the final artifact's focused native
+inspection/save regression. Two independent Ghidra contexts publish R2/R3 with explicit
+refresh and preserved local work; an external-tool agent contributes ordinary files.
+Fresh native readback, repository history and exact saved-copy comparisons verify the
+result. This functional check adds no speedup or full-facade claim.
+
 ## Live-agent production EXE research
 
 [7zr.exe evidence](7zr-live-research.json) records three completed prepared pairs with

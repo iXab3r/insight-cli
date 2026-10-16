@@ -5,6 +5,16 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
+The package includes an [RE workflow skill](skills/ghidra-coordinator/skills/insight-re/SKILL.md)
+for multiple agents, Ghidra and ordinary external tools. Locate it with
+`insight-cli skill insight-re`. Keep useful outputs and short findings as ordinary files;
+`insight-cli artifacts save ./research --json` retains a file or folder and returns a
+browsable saved path. It uses the profile's Update permission and needs no Ghidra/Java.
+The [save contract](skills/ghidra-coordinator/references/artifacts.md) covers stable folders,
+independent copies and receipts. Installing the package does not register either skill.
+The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
+contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
+
 The [live-agent 7zr.exe comparison](docs/7ZR-LIVE-RESEARCH.md) does **not confirm repeatable
 acceleration**: prepared pairs achieved 1.475x, 1.609x and 0.971x; the next attempt hit a
 disk-full merge failure. The separate cold pair achieved 1.266x. Real findings were merged
@@ -30,7 +40,7 @@ The subsequent [first-import recovery](docs/INITIAL-IMPORT-RECOVERY.md) continue
 analysis/publication in the original profile using verified staging and conditional promotion.
 
 The agreed **M0–M5 delivery and selected P0–P3 additions pass combined acceptance**. The current
-tree has 271 public command leaves; all 210 pinned operations and eight bridge-control equivalents
+tree has 272 public command leaves; all 210 pinned operations and eight bridge-control equivalents
 remain accounted for. The [earlier combined report](docs/verification/full-facade-current.json) records
 118 passing offline tests and 33 native groups on its unchanged build, with the exact source and
 installed artifact hashes. The installed CLI/Factory IPC/OS-keyring scenario exercises two agents,

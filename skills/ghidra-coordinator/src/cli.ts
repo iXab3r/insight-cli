@@ -1,6 +1,6 @@
 import { command, createCli, Permission, CliError, ProfileStore, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
 import { join, resolve } from 'node:path';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Workspace } from './workspace.js';
@@ -26,6 +26,7 @@ import {parseDomainJson} from './json.js';
 import {VersionTracking,trackingCommands} from './version-tracking.js';
 import {Extensions,extensionCommands,extensionState,extensionInventoryCommands,managedExtensions} from './extensions.js';
 import {Synchronization,synchronizationCommands} from './sync-policy.js';
+import {artifactsCommands} from './saved-materials.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -65,8 +66,9 @@ class Owner {
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
-    if(existsSync(join(directory,'workspace','workspace.sqlite')))
-      fail('blocked','Profile has retained research state; preserve its workspace before deleting the profile.');
+    const materials=await readdir(join(directory,'materials')).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
+    if(existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
+      fail('blocked','Profile has retained research data; preserve its workspace and materials before deleting or reconfiguring it.');
     if(profile) {await (await profile.backend)?.dispose();profile.workspace.close();this.profiles.delete(directory);}
   }
   async dispose() {
@@ -181,8 +183,14 @@ export function createDefinition(options: Options = {}): CliDefinition {
         await c.secrets.delete('readerPassword');await c.secrets.delete('publisherPassword');
       },
     },
-    builtins:[command('skill','Locate the installed workflow skill',()=>({version:'0.1.0',path:fileURLToPath(new URL('../../SKILL.md',import.meta.url))}))],
+    builtins:[command('skill [name]','Locate the installed insight-cli or insight-re skill',({args})=>{
+      const name=args.name===undefined?'insight-cli':text(args.name);
+      if(!['insight-cli','insight-re'].includes(name))fail('notFound','Unknown skill; choose insight-cli or insight-re.');
+      return {version:'0.1.0',name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
+        skills:['insight-cli','insight-re']};
+    })],
     commands:[
+      ...artifactsCommands(),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
         command('list','List known inputs',({options:o},c)=>{

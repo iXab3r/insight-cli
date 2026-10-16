@@ -7,6 +7,22 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
+### RE workflow and saved materials
+
+The owner chose a simple RE-skill workflow above the tool applications. The packaged
+`insight-re` skill guides questions, assignments, tool choice, ordinary research files and
+review. Agents can use any external CLI/MCP/script directly; an insight-cli adapter is not
+required. `insight-cli ghidra` provides isolation and merge/refresh for several clients;
+`insight-cli artifacts save <path>` retains ordinary files/directories independently of
+Ghidra. No investigation database, evidence IDs, finding schemas or automatic capture hooks
+are introduced. Short findings link to raw files by relative path; one lead maintains notes.
+
+`skill` still locates the original `insight-cli` skill; `skill insight-re` locates the RE
+skill in the same relocatable package. Artifact saves need Update, store completed copies
+under profile AppData, and return an ordinary path plus file/byte counts and a digest.
+They neither execute tools nor publish Ghidra changes. The
+[artifact reference](../skills/ghidra-coordinator/references/artifacts.md) owns save semantics.
+
 This section records the implemented contract. The last combined M0–M5 and selected P0–P3
 acceptance passed on its recorded build; the [full report](verification/full-facade-current.json)
 identifies 33 native groups, 118 offline tests, the installed artifact and limits. The later

@@ -8,6 +8,12 @@ description: Research several executable inputs through durable independent sess
 This skill and its executable helper are one npm package. Run `insight-cli skill` to locate
 these installed resources. Use generated `--help` for syntax; read the references as needed.
 
+For coordinating a reverse-engineering investigation with ordinary files, external tools
+and multiple agents, read the packaged [Insight RE skill](skills/insight-re/SKILL.md),
+also located by `insight-cli skill insight-re`. Preserve a completed file or folder with
+`insight-cli artifacts save <path>`; [save semantics](references/artifacts.md) describe the
+ordinary saved copy and its receipt. Neither operation requires a Ghidra installation.
+
 1. Select the configured runtime profile. Ordinary work uses a managed local server; an external
    server is optional. See [setup](references/setup.md). Factory permissions authorize changes.
 2. Open the input with `ghidra open <input> --session new`. Retain the returned session and target.
