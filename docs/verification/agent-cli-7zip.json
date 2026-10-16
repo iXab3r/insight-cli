@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "completedAt": "2026-10-16T00:22:22.595425+00:00",
+  "scope": "Installed public CLI investigation of the official production 7zr.exe; normal Factory owner and OS keyring; static headless research, three independent sessions, explicit publication/refresh and saved continuation",
+  "sourceBaseRevision": "b4b03adb1dd313f0efe27302d3a5305966a2f754",
+  "artifact": {
+    "sha256": "a875f493f0e041fb60d3aae6a025b771bf47161209d27258931438ae20998e62",
+    "installedBin": true,
+    "ordinaryHostedOwner": true,
+    "noRuntimeHooks": true,
+    "matchedPackagedFiles": 99
+  },
+  "runtime": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "ghidra": "12.1.2",
+    "java": "21",
+    "node": "24.21.0"
+  },
+  "input": {
+    "url": "https://www.7-zip.org/a/7zr.exe",
+    "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "bytes": 602624,
+    "format": "PE32 x86 console",
+    "executed": false,
+    "unchangedAfterMerge": true
+  },
+  "research": {
+    "question": "Locate unknown CLI switch handling and publish evidence-based annotations",
+    "string": {
+      "address": "0x47c2ac",
+      "text": "Unknown switch:"
+    },
+    "stringMatches": 6,
+    "stringScan": {
+      "visited": 14428,
+      "maximum": 100000,
+      "complete": true,
+      "reason": "exhausted",
+      "timeout_seconds": 5
+    },
+    "xref": {
+      "from": "0x4012e5",
+      "to": "0x47c2ac",
+      "kind": "DATA",
+      "function": {
+        "address": "0x40125a",
+        "name": "FUN_0040125a"
+      }
+    },
+    "functionBefore": {
+      "address": "0x40125a",
+      "name": "FUN_0040125a",
+      "signature": "undefined4 __stdcall FUN_0040125a(void)",
+      "comments": {
+        "eol": null,
+        "pre": null,
+        "post": null,
+        "plate": null,
+        "repeatable": null
+      }
+    },
+    "decompileSha256": "b659c1b1d47443d5170991b90a7643f681774ae2b9658fa6f4f2d277ecf4d4c5",
+    "decompileTruncated": false,
+    "functionAfter": {
+      "address": "0x40125a",
+      "name": "ParseSwitchArgument",
+      "signature": "undefined4 __stdcall ParseSwitchArgument(void)",
+      "comments": {
+        "eol": null,
+        "pre": "Independent review B: decompilation uses a leading 0x2d test and switch-table matching. Argument types and recovered calling convention remain unverified.",
+        "post": null,
+        "plate": "Inferred switch-argument parser: matches a leading dash against a switch table and validates duplicate use and postfix length/content. Evidence: xref from Unknown switch: at 0x47c2ac and decompiled diagnostics Multiple instances for switch:, Too long switch:, Incorrect switch postfix:, Too short switch:. Recovered prototype is uncertain.",
+        "repeatable": null
+      }
+    },
+    "interpretation": "Inferred switch argument parser; recovered prototype deliberately remains unverified"
+  },
+  "workflow": {
+    "sessions": 3,
+    "targets": 1,
+    "openedA": {
+      "state": "ready",
+      "baseRevision": "R1",
+      "sharedRevision": "R1",
+      "pendingChanges": 0
+    },
+    "openedB": {
+      "state": "ready",
+      "baseRevision": "R1",
+      "sharedRevision": "R1",
+      "pendingChanges": 0
+    },
+    "bIsolatedBeforeAndAfterMerge": true,
+    "mergeA": {
+      "state": "merged",
+      "sharedRevision": "R2",
+      "applied": 2,
+      "pendingChanges": 0
+    },
+    "refreshB": {
+      "state": "updated",
+      "sharedRevision": "R2",
+      "receivedChanges": 2,
+      "preservedLocalChanges": 1,
+      "conflicts": []
+    },
+    "mergeB": {
+      "state": "merged",
+      "sharedRevision": "R3",
+      "applied": 1,
+      "pendingChanges": 0
+    },
+    "openedIndependentReader": {
+      "state": "ready",
+      "baseRevision": "R3",
+      "sharedRevision": "R3",
+      "pendingChanges": 0
+    },
+    "independentSharedReadback": true,
+    "ownerStoppedAndReplaced": true,
+    "continued": {
+      "state": "ready",
+      "baseRevision": "R3",
+      "sharedRevision": "R3",
+      "pendingChanges": 0
+    },
+    "sameFieldsAfterRestart": true,
+    "ownedContextClosed": true,
+    "ownedServerDisconnected": true,
+    "ownerStoppedAtEnd": true
+  },
+  "fixedProblems": {
+    "initialImportBudgetMilliseconds": 600000,
+    "ordinaryBudgetMilliseconds": 30000,
+    "initialFailureObservedImportMilliseconds": 32079,
+    "retainedScopeAndFactoryFollowupCommands": true,
+    "unresolvedOpenRetryExitCodeBefore": 0,
+    "unresolvedOpenRetryExitCodeAfter": 1,
+    "sameRetainedIntentAfterUpgrade": true,
+    "unknownImportNotRepeatedOrReset": true,
+    "timeoutCancellationAndStreamErrorsClassified": true
+  },
+  "offlineTests": 122,
+  "environmentInterruption": "ENOSPC interrupted cleanup and the first regression attempt after R3. CLI continuation/readback/shutdown repeated successfully after disk space became available; no research journals reset.",
+  "limitations": [
+    "one production static x86 PE; no target execution",
+    "manual agent-driven command sequence; logs inspected only for transport diagnosis",
+    "unproved pre-version-control initial import remains blocked and retained",
+    "the earlier 33-group full GUI/debugger/archive gate retains its own build identity"
+  ],
+  "changedInputHashes": {
+    "skills/ghidra-coordinator/src/transport.ts": "749441b01700437b03dec727b162f08490fb01199f4e62e4edddf429f199465d",
+    "skills/ghidra-coordinator/src/research.ts": "88697cdd3ffd8bf141c2dfc4c5cfa051c4d1bf7e2a3ffbfe9b3d57a32447f205",
+    "skills/ghidra-coordinator/dist/src/transport.js": "c9d4ebea272fb953b664ccab1c5a77b0882f41df5051746e73f7b015a9db98bb",
+    "skills/ghidra-coordinator/dist/src/research.js": "e5d57b00d296d2cc3740a4ee86d588034168abf47253d50bef33c54e2af8b858",
+    "skills/ghidra-coordinator/tests/transport.test.ts": "76be90dc55dbf0fa4d36a97c83a5da98dc121f45c0004c27c6b6e8d78c4b32d6",
+    "skills/ghidra-coordinator/tests/research-cli.test.ts": "31e9de8aae1be6830cad849f9c4cbc934caf9fd4e923d5812a61c841776586d9"
+  },
+  "regression": {
+    "state": "passed",
+    "runner": "scripts/acceptance-facade.mjs --ack-disposable --automatic-faults",
+    "receipt": "agent-cli-regression.json",
+    "receiptSha256": "070211ef0a48db573a92d74ddf443f4839eaf5ed81854fbf0adc93d94317e56f",
+    "sourceInputsVerified": 153,
+    "harnessInputsVerified": 3,
+    "sameArtifactAsPublicWalkthrough": true,
+    "scope": "Separate installed-package native fixture with isolated application identity and test-only crash barriers; two agents, two EXEs, four contexts, conflicts, owner/server restart, saved SDK edits/restricted export, automatic local_ack and verified owner SIGKILL phases"
+  },
+  "verificationCompletedAt": "2026-10-16T00:27:45.960595+00:00"
+}

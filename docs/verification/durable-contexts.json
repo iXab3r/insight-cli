@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "owned native durable context lifecycle proof",
+  "targets": 2,
+  "researchSessions": 2,
+  "totalSessions": 3,
+  "privateContexts": 4,
+  "capacityRefusalReservations": 1,
+  "equalBasenames": true,
+  "equalFunctionAddresses": true,
+  "privateReadOwnWrites": true,
+  "otherAgentUnchanged": true,
+  "otherTargetUnchanged": true,
+  "headlessGuiInterchange": true,
+  "closeReopen": true,
+  "replacementRuntimePreservesWork": true,
+  "unpublishedChangesRetained": true,
+  "capacityLimit": true,
+  "backendSigkillPreservesWork": true,
+  "wrongSourceStartupRejected": true,
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "runtimeFingerprint": "a863dac3aa633eb0b78b538cfdaff9bc5857b302262b07766d32f51f08ebd60e",
+  "limitations": [
+    "direct context layer; public CLI/Factory and crash matrix remain separate gates",
+    "synthetic fixture credential interface"
+  ]
+}

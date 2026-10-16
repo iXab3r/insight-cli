@@ -1,0 +1,34 @@
+{
+  "name": "insight-agent-repository",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "skills/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run build && npm run test:coverage && node --test skills/ghidra-coordinator/dist/tests/*.test.js && npm run test:release",
+    "test:release": "node --test scripts/tests/release-workflow.test.mjs",
+    "test:coverage": "node scripts/audit-coverage.mjs --summary",
+    "pack:cli": "node scripts/pack-cli.mjs",
+    "test:package": "node scripts/test-package.mjs",
+    "automation": "node scripts/run-automation.mjs",
+    "test:acceptance": "node scripts/run-automation.mjs test --suite acceptance --tag offline --property RestoreLockedMode=true",
+    "test:acceptance:native": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag facade --property RestoreLockedMode=true --timeout-seconds 2400",
+    "test:acceptance:full": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag full --property RestoreLockedMode=true --timeout-seconds 18000",
+    "test:business": "node scripts/business/run.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/yauzl": "3.4.0",
+    "typescript": "5.9.3"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
+  }
+}

@@ -1,0 +1,1424 @@
+{
+  "source": "57e37a8bf388b1279cff46378f85be1554548f61",
+  "tools": [
+    {
+      "path": "/add_struct_field",
+      "command": "types add-struct-field",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "struct_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "field_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "field_type",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "-1"
+        }
+      ]
+    },
+    {
+      "path": "/apply_data_type",
+      "command": "types apply-data-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "clear_existing",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "strict_mode",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/clone_data_type",
+      "command": "types clone-data-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "source_type",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/create_data_type_category",
+      "command": "types create-data-type-category",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "category_path",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/create_derived_type",
+      "command": "types create-derived-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "base_type",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "length",
+          "type": "integer",
+          "required": false,
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "path": "/create_enum",
+      "command": "types create-enum",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "values",
+          "type": "json",
+          "required": true
+        },
+        {
+          "name": "size",
+          "type": "integer",
+          "required": false,
+          "default": "4"
+        }
+      ]
+    },
+    {
+      "path": "/create_function_signature",
+      "command": "types create-function-signature",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "return_type",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "parameters",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        }
+      ]
+    },
+    {
+      "path": "/create_union",
+      "command": "types create-union",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "type": "json",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/delete_data_type",
+      "command": "types delete-data-type",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "resolve_demangler_duplicate",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/modify_struct_field",
+      "command": "types modify-struct-field",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "struct_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "field_name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "new_type",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/move_data_type_to_category",
+      "command": "types move-data-type-to-category",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "category_path",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/recreate_struct",
+      "command": "types recreate-struct",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "fields",
+          "type": "json",
+          "required": true
+        },
+        {
+          "name": "size",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "replace_placeholder",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/remove_struct_field",
+      "command": "types remove-struct-field",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "struct_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "field_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/rename_data_type",
+      "command": "types rename-data-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "old_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/resize_struct",
+      "command": "types resize-struct",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "new_size",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "preserve_fields",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/resolve_duplicate_type",
+      "command": "types resolve-duplicate-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "delete_demangler_stub",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/create_property_map",
+      "command": "program create-property-map",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "default": "string"
+        }
+      ]
+    },
+    {
+      "path": "/delete_bookmark",
+      "command": "program delete-bookmark",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/delete_property_map",
+      "command": "program delete-property-map",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/remove_program_option",
+      "command": "program remove-program-option",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "group",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/remove_property",
+      "command": "program remove-property",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "map",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/set_bookmark",
+      "command": "program set-bookmark",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/set_image_base",
+      "command": "program set-image-base",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/set_memory_block",
+      "command": "memory set-block",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "block",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "read",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "write",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "execute",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "volatile",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/set_program_option",
+      "command": "program set-program-option",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "group",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/set_property",
+      "command": "program set-property",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "map",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/create_label",
+      "command": "symbols create-label",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        }
+      ]
+    },
+    {
+      "path": "/delete_label",
+      "command": "symbols delete-label",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        }
+      ]
+    },
+    {
+      "path": "/rename_symbol",
+      "command": "symbols rename-symbol",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "target",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": false,
+          "default": "auto"
+        },
+        {
+          "name": "old_name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "strict_mode",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/add_memory_reference",
+      "command": "xrefs add-memory-reference",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "from_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "to_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "ref_type",
+          "type": "string",
+          "required": false,
+          "default": "DATA"
+        },
+        {
+          "name": "source_type",
+          "type": "string",
+          "required": false,
+          "default": "USER_DEFINED"
+        },
+        {
+          "name": "operand_index",
+          "type": "integer",
+          "required": false,
+          "default": "-1"
+        }
+      ]
+    },
+    {
+      "path": "/remove_reference",
+      "command": "xrefs remove-reference",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "from_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "to_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "operand_index",
+          "type": "integer",
+          "required": false,
+          "default": "-1"
+        }
+      ]
+    },
+    {
+      "path": "/add_function_tag",
+      "command": "functions add-function-tag",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "function_ref"
+        },
+        {
+          "name": "tags",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "tag_comments",
+          "type": "object",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "assignments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        }
+      ]
+    },
+    {
+      "path": "/batch_rename_function_components",
+      "command": "functions batch-rename-function-components",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "function_name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "parameter_renames",
+          "type": "object",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "local_renames",
+          "type": "object",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "return_type",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/clear_instruction_flow_override",
+      "command": "functions clear-instruction-flow-override",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/create_function",
+      "command": "functions create",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "disassemble_first",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/delete_function",
+      "command": "functions delete",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        }
+      ]
+    },
+    {
+      "path": "/delete_function_tag",
+      "command": "functions delete-function-tag",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/disassemble_bytes",
+      "command": "functions disassemble-bytes",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "start_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "end_address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "length",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "restrict_to_execute_memory",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_instructions",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "max_instructions",
+          "type": "integer",
+          "required": false,
+          "default": "1000"
+        }
+      ]
+    },
+    {
+      "path": "/remove_function_tag",
+      "command": "functions remove-function-tag",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "function_ref"
+        },
+        {
+          "name": "tags",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "assignments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        }
+      ]
+    },
+    {
+      "path": "/rename_variables",
+      "command": "functions rename-variables",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "variable_renames",
+          "type": "object",
+          "required": true
+        },
+        {
+          "name": "force_individual",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_no_return",
+      "command": "functions set-function-no-return",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "no_return",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/set_function_tag_comment",
+      "command": "functions set-function-tag-comment",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": true,
+          "allowEmpty": true
+        }
+      ]
+    },
+    {
+      "path": "/set_variable_storage",
+      "command": "functions set-variable-storage",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "variable_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "storage",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/set_variable_type",
+      "command": "functions set-variable-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "variable_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "new_type",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/set_variables",
+      "command": "functions set-variables",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "variables",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/run_ghidra_script",
+      "command": "scripts run",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "script_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "args",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "300"
+        },
+        {
+          "name": "capture_output",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/run_script_inline",
+      "command": "scripts run-inline",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "code",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "args",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/configure_analyzer",
+      "command": "analysis configure-analyzer",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "access": "WRITE"
+    },
+    {
+      "path": "/run_analysis",
+      "command": "analysis run",
+      "params": [],
+      "access": "WRITE"
+    },
+    {
+      "path": "/reanalyze",
+      "command": "analysis reanalyze",
+      "params": [],
+      "access": "WRITE"
+    },
+    {
+      "path": "/batch_apply_documentation",
+      "command": "analysis batch-apply-documentation",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "goto",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "prototype",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "calling_convention",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "variable_types",
+          "type": "object",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "variable_renames",
+          "type": "object",
+          "required": false,
+          "default": "{}"
+        },
+        {
+          "name": "plate_comment",
+          "type": "string",
+          "required": false,
+          "allowEmpty": true
+        },
+        {
+          "name": "decompiler_comments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "disassembly_comments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "score",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/batch_set_comments",
+      "command": "comments set-batch",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "decompiler_comments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "disassembly_comments",
+          "type": "array",
+          "required": false,
+          "default": "[]"
+        },
+        {
+          "name": "plate_comment",
+          "type": "string",
+          "required": false,
+          "allowEmpty": true
+        }
+      ]
+    },
+    {
+      "path": "/clear_function_comments",
+      "command": "comments clear-function",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "clear_plate",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "clear_pre",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "clear_eol",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/apply_data_classification",
+      "command": "types apply-data-classification",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "classification",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "type_definition",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/import_data_types",
+      "command": "types import-data-types",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "default": "c"
+        }
+      ]
+    },
+    {
+      "path": "/set_global",
+      "command": "types set-global",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "allowEmpty": true
+        },
+        {
+          "name": "array_length",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "plate_comment",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "allowEmpty": true
+        },
+        {
+          "name": "strict_mode",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "allow_evict",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/apply_function_documentation",
+      "command": "documentation apply",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "json_body",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/clear_flow_and_repair",
+      "command": "functions clear-flow-and-repair",
+      "access": "DESTRUCTIVE",
+      "params": [
+        {
+          "name": "start_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "end_address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_this_type",
+      "command": "functions set-function-this-type",
+      "access": "WRITE",
+      "params": [
+        {
+          "name": "function_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "this_type",
+          "type": "string",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

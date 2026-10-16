@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "inputSha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+  "inputUrl": "https://www.7-zip.org/a/7zr.exe",
+  "question": "Explain three user-visible failure/security paths in this stripped 7zr.exe: invalid switches, password acquisition, and extraction error reporting. Publish an evidence-backed navigation guide in the shared analysis database.",
+  "parts": [
+    {
+      "id": "switches",
+      "kind": "plate",
+      "clue": "Unknown switch:",
+      "question": "Locate the switch-argument parser. Explain how it recognizes switch arguments and rejects unknown, duplicate or malformed switch postfixes. Identify the relevant function and at least three concrete conditions/behaviors in its decompilation. Distinguish observed code from an inferred source-level name."
+    },
+    {
+      "id": "password",
+      "kind": "pre",
+      "clue": "Enter password (will not be echoed):",
+      "question": "Locate interactive password acquisition. Follow its relevant helper/callers as needed to explain the prompt, suppression/restoration of console echo and failure/termination behavior actually visible in this binary. Provide at least three concrete code-backed behaviors; do not infer secure erasure or encryption strength from a prompt."
+    },
+    {
+      "id": "extraction",
+      "kind": "post",
+      "clue": "CRC Failed",
+      "question": "Locate extraction-result diagnostic selection. Explain how the code distinguishes CRC failure, data error and unsupported method, including how encrypted-file/password suspicion changes diagnostics. Recover actual numeric case/flag relationships if visible. Provide at least three concrete code-backed behaviors and preserve uncertainty about recovered parameter types."
+    }
+  ],
+  "delivery": "Each part produces one structured finding with a main function address, at least one exact clue-string/xref chain, at least three substantive claims with function addresses and literal decompiled-code quotations, limitations, and a private comment saved through the public CLI. The lead reads all findings through the public CLI, copies them into its context and merges once. A fresh independent session verifies all comments, clue references and code quotations without counting the new comments as code evidence.",
+  "agents": "Fresh collaboration agents with fork_turns=none, inherited identical parent model/settings and no overrides. The serial agent receives all three part prompts; each parallel agent receives one. No previous trial answers, repository source, external source or other actors' files are available by instruction. Actual inference/tool/orchestration wall time is included.",
+  "preparedPairs": 6,
+  "modeOrder": [1, 3, 3, 1, 1, 3, 3, 1, 1, 3, 3, 1],
+  "comparison": "All six prepared pairs must pass correctness and T3<T1 to claim repeatable speedup; exact one-sided paired sign probability 1/64. Report all trials and variability, with no automatic exclusion or replacement. Failure remains a failure; no workload padding or forced speedup.",
+  "preparedClock": "Fresh independent profiles are imported/analyzed and all one/three contexts ready before the monotonic task clock starts. No measured-task strings, functions, decompilation, answers or findings are warmed/precomputed for agents. The clock starts before the first agent dispatch and ends after independent publication/content verification.",
+  "coldClock": "A separate one/three pair starts before first open/import in a new profile, including native startup and all later agent work/collection/merge/verification. OS/tool caches are not flushed. Profile configuration and already-installed software are outside this clock. No cold speedup gate.",
+  "calibration": "An unmeasured pilot establishes that the questions are answerable and the correctness oracle is valid. Pilot answers are withheld from all fresh timed agents. Freeze protocol, prompts, harness and hidden verification oracle before acceptance. Retain unsuccessful attempts."
+}

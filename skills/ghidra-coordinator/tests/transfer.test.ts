@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCliFixture} from '@eyeauras/cli-factory/testing';
+import {writeFile,readFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {createInsightCli} from '../src/cli.js';
+import {SessionBackend} from './fixtures/session-backend.js';
+import type {ResearchBackend} from '../src/research.js';
+import {transferCategories} from '../src/cross-results.js';
+test('lost transfer acknowledgment retains its source revision and reconciles without transferring a later source',async t=>{
+  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});
+  let backend:SessionBackend&Pick<ResearchBackend,'transfer'|'transferCheck'>,dispatches=0;
+  const result=(dryRun:boolean,remaining:number)=>({dry_run:dryRun,errors:0,...Object.fromEntries(transferCategories.map(key=>[key,{planned:key==='instruction_comments'?remaining:0,applied:key==='instruction_comments'?remaining:0}]))});
+  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+    backend=new SessionBackend(workspace);
+    const decode=async(snapshot:Parameters<NonNullable<ResearchBackend['transfer']>>[1])=>JSON.parse(await readFile(await workspace.artifacts.verify(snapshot),'utf8'));
+    backend.transfer=async(selected,source,dryRun)=>{assert.equal(dryRun,false);dispatches++;const view=await decode(source);
+      backend.views.get(workspace.context(selected).id)!.view.comments=structuredClone(view.comments);throw Error('Completed transfer response lost');};
+    backend.transferCheck=async(_selected,source,candidate)=>result(true,JSON.stringify((await decode(source)).comments)===JSON.stringify((await decode(candidate)).comments)?0:1);
+    return backend;
+  }}));
+  const exe=join(f.root,'fixture.exe');await writeFile(exe,'owned synthetic input');
+  const a=await f.json(app,['ghidra','open',exe,'--session','new']) as {session:string;target:string},b=await f.json(app,['ghidra','open',exe,'--session','new']) as typeof a;
+  const selectors=(who:typeof a)=>['--session',who.session,'--target',who.target];
+  const set=(text:string)=>f.json(app,['ghidra','comments','set',...selectors(a),'--address','1000','--kind','eol','--text',text]);
+  await set('retained source');
+  await f.json(app,['ghidra','comments','set',...selectors(b),'--address','1000','--kind','eol','--text','superseded destination']);
+  const intent=['ghidra','documentation','transfer',...selectors(b),'--source-session',a.session,'--source-target',a.target,'--request-id','lost-transfer'];
+  assert.notEqual((await f.run(app,[...intent,'--json'])).exitCode,0);assert.equal(dispatches,1);
+  await set('later source');await backend!.close(b);
+  assert.equal((await f.json(app,['ghidra','open',...selectors(b)]) as {state:string}).state,'ready');
+  assert.equal((await f.json(app,intent) as {state:string}).state,'applied');assert.equal(dispatches,1);
+  const read=await f.json(app,['ghidra','comments','get',...selectors(b),'--address','1000','--kind','eol']) as {text:string};assert.equal(read.text,'retained source');
+  assert.equal(backend!.workspace.context(b).scalars[0]!.local,'retained source','Retained scalar comparison must agree with the saved transferred value');
+});

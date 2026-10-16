@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "sourceBase": "a6ce61115d25ae54fc92c26976f4d8ee0787f2a9",
+  "sourceSha256": {
+    "skills/ghidra-coordinator/src/cli.ts": "aff40c527105188152af2987bdb4266412739a41522f508faa0d8410f36000ef",
+    "skills/ghidra-coordinator/src/saved-materials.ts": "182866fad90c8386cf384e4cefce3dcb6f8c4675484a7888fc5232b843a2a3a8",
+    "skills/ghidra-coordinator/src/query-results.ts": "f471adcd147b0bdba7bc9f4405b7036ae4994d16fedb3e95c888147791198c3c",
+    "skills/ghidra-coordinator/tests/materials-cli.test.ts": "62c4cae5a92ad5bb633a7becdad7b041f5429c6aecfd49cb02227ce0e2167c2d",
+    "skills/ghidra-coordinator/tests/saved-materials.test.ts": "9c122cbd2b9914ab72149c027aa48513b8a4275a930af5a4684e09c144bfeb2a",
+    "skills/ghidra-coordinator/tests/query-results.test.ts": "1fc17b9362fcd45129218b4e0e94ceede0e826f7812944e47680b5bd26a9eb4d",
+    "skills/ghidra-coordinator/skills/insight-re/SKILL.md": "d072bc258367a9b0b38356bba4d996b9d0faa441d4e544fedde7b9322c25f8fb",
+    "skills/ghidra-coordinator/references/artifacts.md": "8a383888ad453de865c5d24cd56c96418ab606cc9af7a3d91c04d9523a7f4a73",
+    "skills/ghidra-coordinator/package.json": "8d084e670025d1f849d7e21f4fc77c80ed92fcd472bc25946916aef9326db8b0"
+  },
+  "input": {
+    "name": "7zr.exe",
+    "bytes": 602624,
+    "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "analysis": "static; target never executed"
+  },
+  "environment": {
+    "os": "macOS arm64",
+    "cpu": "Apple M5",
+    "logicalCpus": 10,
+    "memoryGiB": 16,
+    "node": "24.21.0",
+    "ghidra": "12.1.2",
+    "java": "21.0.11",
+    "externalTools": {
+      "file": "5.41",
+      "shasum": "6.02",
+      "llvmReadobj": "22.1.8"
+    }
+  },
+  "offline": {
+    "passed": 139,
+    "failed": 0,
+    "skipped": 0,
+    "coverageCommandLeaves": 272,
+    "installedPackageProof": "passed; isolated relocation, CLI/RPC, no native configuration, relative links, spaces/Unicode, empty file and source-edit independence",
+    "skillValidation": "skill-creator quick_validate.py passed"
+  },
+  "multiAgent": {
+    "artifactSha256": "d0c66d71a1b44f8f30b6383173ee1ddef6e8f8fbd9d2af68397e93186fc71c72",
+    "skillSha256": "d072bc258367a9b0b38356bba4d996b9d0faa441d4e544fedde7b9322c25f8fb",
+    "agents": 3,
+    "separateGhidraProcesses": 2,
+    "distinctOwnedRootHashes": [
+      "10c69fb31f4e868a517b813105a18ec8e0f95c8603e03f5a64837c02f49490b7",
+      "41a171a618fda32b812abe5b0c71ff1ecd243ef9960725734ce1e55457bd7f59"
+    ],
+    "externalAgent": true,
+    "publicCliOnly": true,
+    "findings": [
+      {
+        "agent": "A",
+        "entry": "0x43f4f5",
+        "established": "Best-effort console echo suppression; conditional restoration on normal reader return; line termination and caller status propagation; static/exception limits retained."
+      },
+      {
+        "agent": "B",
+        "entry": "0x436fea",
+        "established": "Result-to-text mapping; flag selects encrypted-file suspicion wording for data/CRC cases; metadata flag origin remains qualified."
+      },
+      {
+        "agent": "C",
+        "established": "Independent input SHA-256, PE32 i386 console headers/resources and console API imports; import presence is not executed behavior."
+      }
+    ],
+    "originalSharedRevision": "R1",
+    "aPending": 3,
+    "aMerge": {
+      "state": "merged",
+      "revision": "R2",
+      "applied": 3
+    },
+    "bStaysOnOriginalUntilRefresh": true,
+    "bRefresh": {
+      "state": "updated",
+      "revision": "R2",
+      "preservedLocalChanges": 1,
+      "conflicts": []
+    },
+    "bMerge": {
+      "state": "merged",
+      "revision": "R3",
+      "applied": 1
+    },
+    "historyVersions": [
+      1,
+      2,
+      3
+    ],
+    "freshNativeCodeAndCommentReadback": true,
+    "savedWorkers": [
+      {
+        "agent": "A",
+        "folder": "A-password",
+        "state": "saved",
+        "kind": "directory",
+        "files": 28,
+        "bytes": 37103,
+        "sha256": "2087f4bf86c4608f2d110f07b1779a91f1ac824b32678b3f6bb60edc1aa4a032",
+        "findingSha256": "5bf65d7fbd1171cd45f51abf8bddddecd5b0ebbf35948addff9efb8d7c4bb433"
+      },
+      {
+        "agent": "B",
+        "folder": "B-extraction",
+        "state": "saved",
+        "kind": "directory",
+        "files": 43,
+        "bytes": 122351,
+        "sha256": "d8219fd1480ecbf5b87f7a0e95634e58dd3c4e3c3ddcc7a27d2d9063b67d3de7",
+        "findingSha256": "1de183da97e7753f18e62ff7a1333dea565ff99ebaa048a8e502281ccac3353b"
+      },
+      {
+        "agent": "C",
+        "folder": "C-binary",
+        "state": "saved",
+        "kind": "directory",
+        "files": 12,
+        "bytes": 24993,
+        "sha256": "117915f9699130641a1664c8eb3bfdcb9e4fb7148178813ae048d113edf233a9",
+        "findingSha256": "a36d6af2ad28ea8f189e6d5798b3a1e28fa626721b39134ad59b298263f63e55"
+      }
+    ],
+    "savedResearch": {
+      "state": "saved",
+      "kind": "directory",
+      "files": 84,
+      "bytes": 186547,
+      "sha256": "e5d54ef3cdbab6a6e079315039aff2c5c198eed073045369601cc5f325b48cdf"
+    },
+    "savedSingleFile": {
+      "state": "saved",
+      "kind": "file",
+      "files": 1,
+      "bytes": 2100,
+      "sha256": "3ec4616ebd1154eb1ad73a0ce378789dc8ac1120c0f2a30a19fa98d8af25c99c"
+    },
+    "exactTreeAndBytesCompared": true,
+    "inputAndArtifactUnchanged": true,
+    "cleanupComplete": true
+  },
+  "finalArtifact": {
+    "sha256": "d818a43fe1b036901a7bd2b6334be7cbad637dd7efe51f51b3be73105e6b8a54",
+    "skillSha256": "d072bc258367a9b0b38356bba4d996b9d0faa441d4e544fedde7b9322c25f8fb",
+    "installedRelevantRuntimeMatchesSourceBuild": true,
+    "nativeRegression": {
+      "singleFunctionInspection": true,
+      "fieldSubset": true,
+      "bulkInspection": true,
+      "historyUnchanged": true,
+      "folder": {
+        "state": "saved",
+        "kind": "directory",
+        "files": 84,
+        "bytes": 186547,
+        "sha256": "e5d54ef3cdbab6a6e079315039aff2c5c198eed073045369601cc5f325b48cdf"
+      },
+      "file": {
+        "state": "saved",
+        "kind": "file",
+        "files": 1,
+        "bytes": 2100,
+        "sha256": "3ec4616ebd1154eb1ad73a0ce378789dc8ac1120c0f2a30a19fa98d8af25c99c"
+      },
+      "exactTreeAndBytesCompared": true,
+      "inputUnchanged": true,
+      "cleanupComplete": true
+    }
+  },
+  "corrections": [
+    "Ship a discoverable, relocatable RE skill without automatic registration.",
+    "Save ordinary files/folders without creating Ghidra workspace state; protect retained materials during profile invalidation.",
+    "Accept pinned single-function inspection bundles as well as bulk map/count responses; preserve bulk-selector precedence."
+  ],
+  "developmentAttempts": [
+    "Initial package proof needed ordinary local IPC permissions outside the shell sandbox. A concurrent developer build invalidated an earlier prepared package manifest; final build/pack ran after edits settled.",
+    "Focused final regression first met an old-owner build mismatch before dispatch. Status then showed no owner. A subsequent open retained a blocked session because the test had disconnected its server; the driver now connects and resumes that exact session.",
+    "Focused regression initially compared native address text 0043f4b1 to 0x43f4b1; driver now compares numeric addresses. No publication was repeated."
+  ],
+  "limits": [
+    "Multi-agent research ran on the original artifact; the final artifact separately repeated real single/subset/bulk inspection and file/folder saves. Hashes are distinct and not rebound.",
+    "Saved copies retain bytes, not execution attestations. No evidence database or mandatory finding schema.",
+    "No new speedup benchmark, full business/GUI suite or Windows/Linux native acceptance; historical measurements remain unchanged.",
+    "Raw logs, full findings, executable, selectors and personal runtime paths remain outside Git."
+  ]
+}

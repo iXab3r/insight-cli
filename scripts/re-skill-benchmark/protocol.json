@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "inputSha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+  "question": "Explain invalid-switch recognition/rejection, interactive password-input guarantees and extraction-result diagnostics in this stripped 7zr.exe. Publish an evidence-backed navigation guide and retain ordinary research files.",
+  "parts": [
+    {"id":"switches","clue":"Unknown switch:","question":"Locate the switch parser. Explain recognition, matching/name selection, duplicate rejection and malformed-postfix handling with at least three concrete code-backed facts. Distinguish actual conditions from inferred source-level names."},
+    {"id":"password","clue":"Enter password (will not be echoed):","question":"Locate interactive password acquisition. Explain prompt/flush, echo suppression/restoration and line termination/failure handling with at least three concrete code-backed facts. Follow relevant helpers as needed, retaining static/exception limits; no secure-erasure or encryption-strength inference."},
+    {"id":"extraction","clue":"CRC Failed","question":"Locate extraction diagnostic selection. Recover numeric relationships for unsupported method, data error and CRC failure, and how a separate argument changes encrypted-file/password-suspicion wording. Give at least three concrete code-backed facts and qualify recovered flag meanings."}
+  ],
+  "preparedPairs":3,
+  "modeOrder":[1,3,3,1,1,3],
+  "agents":"Fresh agents, fork_turns=none, identical inherited model/settings, no overrides; all read the same installed insight-re skill. One agent handles all parts with free ordering/batched reads; three handle one part each in independent Ghidra contexts. No answers, addresses, prior trials, source or oracle supplied.",
+  "delivery":"Each part: short ordinary finding.md, at least three substantive facts with addresses and relative links to saved raw CLI output, limitations, one private annotation and artifacts save of its settled folder. No finding JSON schema or manual quote transcription. Same three parts and acceptance criteria in both modes.",
+  "clock":"All contexts ready before task clock. Start immediately before dispatch; include skill reading, research, writing, private saves, artifacts, handoff, lead collection, one merge, fresh native verification, semantic review and final summary/materials save. Cleanup outside. First-import/preparation measured separately; no new cold end-to-end agent comparison.",
+  "publication":"Lead collects all three actual annotations into one context, merges once in both modes. Fresh session checks comments, clue/reference chains, independently decompiled main/helper code and exact R1/R2 history. Lead semantically checks required business coverage. No skipping verification for speed.",
+  "comparison":"Report every attempt, failure and slower result without replacement. Three paired ratios are descriptive; all three T3<T1 supports only repeatability in these three observations (one-sided sign probability 1/8), not a general speedup claim. No forced delay, workload padding or exclusion.",
+  "instrumentation":"Monotonic timestamps for every CLI wrapper call start/end/error and ready/writing/written/done markers; raw replies auto-retained. Observer samples exact owned native PIDs/CPU/free disk. Overlap uses interval unions. Outside-CLI time is not identified as model inference or wasted time.",
+  "limits":"Provider/model deployment/token timings and OS/provider cache state are opaque. The split changes AI-agent and native-worker count together. Earlier pre-skill results used a different output contract; before/after is not a controlled causal skill experiment. Do not reopen or mutate historical failed publications."
+}

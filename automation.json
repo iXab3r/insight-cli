@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "rootDirectory": ".",
+  "resultsDirectory": ".automation/results",
+  "suites": {
+    "acceptance": {
+      "project": "tests/acceptance/Insight.Acceptance.csproj",
+      "timeoutSeconds": 900
+    }
+  }
+}

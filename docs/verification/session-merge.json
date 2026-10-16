@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "owned native public merge commands",
+  "unchangedBaseFullSnapshot": true,
+  "divergedScalarMerge": true,
+  "callerRetryDoesNotCheckInAgain": true,
+  "otherAgentViewStable": true,
+  "independentPublishedRead": true,
+  "overlapRetainsPrivate": true,
+  "anyConflictPublishesZero": true,
+  "refreshPreservesLocal": true,
+  "refreshRetainsConflict": true,
+  "staleResolutionRejected": true,
+  "explicitResolutionPublishes": true,
+  "committedResponseLossReconciled": true,
+  "unknownBlocksAllPublishers": true,
+  "independentFullBuffersVerified": true,
+  "recoveryDoesNotCheckInAgain": true,
+  "complexSavedStatePublished": true,
+  "complexDivergenceRetainsBoth": true,
+  "publishedRevisions": 7,
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "limitations": [
+    "complete crash matrix and full complex catalog remain separate gates",
+    "source Factory fixture transport and credential adapter"
+  ]
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(RestoreLockedMode)' == ''">true</RestoreLockedMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../vendor/EyeAuras.Automation/src/EyeAuras.Automation.Cli/EyeAuras.Automation.Cli.csproj" />
+  </ItemGroup>
+</Project>

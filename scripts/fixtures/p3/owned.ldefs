@@ -1,0 +1,1 @@
+<language_definitions><language processor="OwnedP3" endian="little" size="16" variant="default" version="1.0" slafile="owned.sla" processorspec="owned.pspec" id="OwnedP3:LE:16:default"><description>Owned disposable processor</description><compiler name="default" spec="owned.cspec" id="default"/></language></language_definitions>

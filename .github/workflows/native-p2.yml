@@ -1,0 +1,65 @@
+name: disposable-native-p2
+on:
+  push:
+    branches: [bugfix/ghidra-coordinator]
+  workflow_dispatch:
+    inputs:
+      disposable:
+        description: Run only newly created synthetic Ghidra fixtures
+        required: true
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  native:
+    if: inputs.disposable || contains(github.event.head_commit.message, '[native-p2]')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      INSIGHT_DISPOSABLE_NATIVE_CI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install Linux compiler
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+      - name: Acquire and verify official pinned SDK
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'ghidra.zip'
+          Invoke-WebRequest 'https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.2_build/ghidra_12.1.2_PUBLIC_20260605.zip' -OutFile $archive
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLower() -ne 'b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d') { throw 'Official SDK digest differs' }
+          $destination = Join-Path $env:RUNNER_TEMP 'owned-ghidra'
+          if ($IsWindows) { Expand-Archive $archive $destination } else { New-Item -ItemType Directory $destination; & unzip -q $archive -d $destination; if ($LASTEXITCODE) { throw 'SDK extraction failed' } }
+          "INSIGHT_NATIVE_HOME=$(Join-Path $destination 'ghidra_12.1.2_PUBLIC')" >> $env:GITHUB_ENV
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run test:package
+      - name: Selected native SDK, VT and FID/BSim workflows
+        shell: pwsh
+        run: |
+          $java = Join-Path $env:JAVA_HOME $(if ($IsWindows) { 'bin/java.exe' } else { 'bin/java' })
+          $clang = (Get-Command clang -CommandType Application | Select-Object -First 1).Source
+          $lld = (Get-Command lld-link -CommandType Application | Select-Object -First 1).Source
+          New-Item -ItemType Directory -Force native-results
+          foreach ($group in @('sdk','tracking','databases')) {
+            & node "scripts/proof-p2-$group.mjs" --ack-disposable --java $java --ghidra-home $env:INSIGHT_NATIVE_HOME --clang $clang --lld $lld 2>&1 | Tee-Object "native-results/$group.log"
+            if ($LASTEXITCODE) { throw "Native $group failed" }
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-p2-${{ runner.os }}
+          path: native-results

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "CliWrap": {
+        "type": "Transitive",
+        "resolved": "3.10.5",
+        "contentHash": "L5SghZThsAVhV8ucwwW5FLMzKj1Ps57JB8DM2bEjpBNTyGi1EDjDO7Mi39Yx1FoXM2fZ1l9j39xqlPsZI1QCJQ=="
+      },
+      "System.CommandLine": {
+        "type": "Transitive",
+        "resolved": "2.0.13",
+        "contentHash": "TIO2lMV+sSP7WW7pD/oCRHD9ENWY+jqwXmYzgks3R46cEdDzwjQOAhsiBn+M3EegfGjgTpa2h+eIrcU+AM2k6A=="
+      },
+      "eyeauras.automation": {
+        "type": "Project",
+        "dependencies": {
+          "CliWrap": "[3.10.5, )"
+        }
+      },
+      "eyeauras.automation.cli": {
+        "type": "Project",
+        "dependencies": {
+          "EyeAuras.Automation": "[1.0.0, )",
+          "System.CommandLine": "[2.0.13, )"
+        }
+      }
+    }
+  }
+}

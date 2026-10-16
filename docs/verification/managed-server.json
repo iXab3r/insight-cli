@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "scope": "owned local bootstrap and external profile authority proof",
+  "localBootstrap": true,
+  "strongCredentialsBeforeListener": true,
+  "readerReadOnly": true,
+  "publisherAdmin": true,
+  "ownedIdentityVerified": true,
+  "wrongTokenCannotStopServer": true,
+  "wrongAuthorityRejected": true,
+  "externalProfile": true,
+  "externalStopDoesNotStopServer": true,
+  "wrongProfileRejected": true,
+  "restartPreservesRepository": true,
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "runtimeFingerprint": "a863dac3aa633eb0b78b538cfdaff9bc5857b302262b07766d32f51f08ebd60e",
+  "limitations": [
+    "server/bootstrap only; no combined session facade acceptance",
+    "synthetic credential interface; Factory credential-store integration is a later installed CLI gate"
+  ]
+}

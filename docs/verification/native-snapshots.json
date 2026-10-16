@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "owned native full-state publication proof",
+  "binarySha256": "4aed42e8a5e66beab9cdb274095f40b931c9b6d56917c62a259024c7a98ecf88",
+  "privateSaveReopen": true,
+  "comments": true,
+  "names": true,
+  "types": true,
+  "prototype": true,
+  "memory": true,
+  "publishedVersion": 2,
+  "staleBaseRejected": true,
+  "historyCount": 2,
+  "snapshotDatabaseIdPreserved": true,
+  "guiInteroperability": true,
+  "limitations": [
+    "tiny fixture only",
+    "conservative native change set; no native automatic database merge"
+  ],
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "ghidraMcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "sourceHashes": {
+    "scripts/proof-native-snapshots.mjs": "99cf9e0c47034c2d6e93db35e255b411053964b0b9a77499d87a4e8dd2ba27ee",
+    "scripts/fixtures/InsightSnapshotPublisher.java": "d30a4ef7fbd4db4cd9a175ed3fc329b675e3530ea8b06b0b74e0f69da7d8a3b9",
+    "scripts/fixtures/InsightBlockTransfer.java": "68a9bbb2b460351959cbc2bb61609055fd7f71729c579f02d4aa70e6996b692b",
+    "scripts/fixtures/InsightGuiFixture.java": "9c29cc8214e236bcafc1ce712bd3617f801b89f6e7d1b5bba8024f3ea3bb06a1"
+  }
+}

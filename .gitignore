@@ -1,0 +1,12 @@
+node_modules/
+**/dist/
+artifacts/*
+.workspace/
+*.tgz
+**/.cli-package-build.json
+!vendor/*.tgz
+.automation/
+tests/**/bin/
+tests/**/obj/
+tests/**/TestResults/
+tests/**/*.feature.cs

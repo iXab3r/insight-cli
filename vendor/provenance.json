@@ -1,0 +1,11 @@
+{
+  "package": "@eyeauras/cli-factory-ipc",
+  "version": "0.1.0",
+  "file": "factory-ipc-a2094fb.tgz",
+  "sha256": "380515b48c2505fbbf772437f131fd58040332c2e0b9780e5538b76006503e33",
+  "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
+  "commit": "a2094fb5d1cc80a82a5f599fe9d5f37c57a04d46",
+  "license": "MIT",
+  "distribution": "Prepared official Factory IPC artifact; installed automatically from the immutable URL, without a separate IPC registry publication",
+  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
+}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "scope": "owned native Factory research commands",
+  "sessions": 2,
+  "targets": 1,
+  "openRetryRetainsSession": true,
+  "stringsXrefsFunctionsTraversable": true,
+  "renameAndCommentsReadback": true,
+  "savedPrivateEdits": true,
+  "otherAgentUnchanged": true,
+  "clearReturnsNull": true,
+  "jsonRpcSameScope": true,
+  "ghidra": "12.1.2",
+  "java": "21",
+  "node": "24.21.0",
+  "mcpJarSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "limitations": [
+    "source-package Factory fixture transport and credential adapter; final installed IPC/credential/crash/full-catalog gates remain"
+  ]
+}

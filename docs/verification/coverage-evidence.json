@@ -1,0 +1,3687 @@
+{
+  "schema": 1,
+  "scope": "Command/equivalence evidence joined to the completed combined native acceptance and installed package checks",
+  "catalogCommit": "57e37a8bf388b1279cff46378f85be1554548f61",
+  "sourceOperations": 210,
+  "bridgeControls": 8,
+  "publicLeaves": 215,
+  "operations": [
+    {
+      "path": "/analyze_control_flow",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-control-flow",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_data_region",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-data-region",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_dataflow",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-dataflow",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_for_documentation",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-for-documentation",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_function_complete",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-function-complete",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_function_completeness",
+      "category": "analysis",
+      "command": "ghidra analysis analyze-function-completeness",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/batch_apply_documentation",
+      "category": "analysis",
+      "command": "ghidra analysis batch-apply-documentation",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/configure_analyzer",
+      "category": "analysis",
+      "command": "ghidra analysis configure-analyzer",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/detect_array_bounds",
+      "category": "analysis",
+      "command": "ghidra analysis detect-array-bounds",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_code_gaps",
+      "category": "analysis",
+      "command": "ghidra analysis find-code-gaps",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_dead_code",
+      "category": "analysis",
+      "command": "ghidra analysis find-dead-code",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_next_undefined_function",
+      "category": "analysis",
+      "command": "ghidra analysis find-next-undefined-function",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_similar_functions",
+      "category": "analysis",
+      "command": "ghidra analysis find-similar-functions",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_field_access_context",
+      "category": "analysis",
+      "command": "ghidra analysis get-field-access-context",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_pcode",
+      "category": "analysis",
+      "command": "ghidra analysis get-function-pcode",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/inspect_memory_content",
+      "category": "analysis",
+      "command": "ghidra analysis inspect-memory-content",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_analyzers",
+      "category": "analysis",
+      "command": "ghidra analysis list-analyzers",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/run_analysis",
+      "category": "analysis",
+      "command": "ghidra analysis run",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/search_byte_patterns",
+      "category": "analysis",
+      "command": "ghidra analysis search-byte-patterns",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/search_instructions",
+      "category": "analysis",
+      "command": "ghidra analysis search-instructions",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/batch_set_comments",
+      "category": "comment",
+      "command": "ghidra comments set-batch",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "scalar candidate",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/clear_function_comments",
+      "category": "comment",
+      "command": "ghidra comments clear-function",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "scalar candidate",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_comment",
+      "category": "comment",
+      "command": "ghidra comments inspect",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_comment",
+      "category": "comment",
+      "command": "ghidra comments set",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "scalar candidate",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/add_struct_field",
+      "category": "datatype",
+      "command": "ghidra types add-struct-field",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_global_completeness",
+      "category": "datatype",
+      "command": "ghidra types analyze-global-completeness",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_struct_field_usage",
+      "category": "datatype",
+      "command": "ghidra types analyze-struct-field-usage",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/apply_data_classification",
+      "category": "datatype",
+      "command": "ghidra types apply-data-classification",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/apply_data_type",
+      "category": "datatype",
+      "command": "ghidra types apply-data-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/audit_global",
+      "category": "datatype",
+      "command": "ghidra types audit-global",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/audit_globals_in_function",
+      "category": "datatype",
+      "command": "ghidra types audit-globals-in-function",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/clone_data_type",
+      "category": "datatype",
+      "command": "ghidra types clone-data-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_data_type_category",
+      "category": "datatype",
+      "command": "ghidra types create-data-type-category",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_derived_type",
+      "category": "datatype",
+      "command": "ghidra types create-derived-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_enum",
+      "category": "datatype",
+      "command": "ghidra types create-enum",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_function_signature",
+      "category": "datatype",
+      "command": "ghidra types create-function-signature",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_struct",
+      "category": "datatype",
+      "command": "ghidra types create-struct",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_union",
+      "category": "datatype",
+      "command": "ghidra types create-union",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_data_type",
+      "category": "datatype",
+      "command": "ghidra types delete-data-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_data_types",
+      "category": "datatype",
+      "command": "ghidra types find-data-types",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_enum_values",
+      "category": "datatype",
+      "command": "ghidra types get-enum-values",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_struct_layout",
+      "category": "datatype",
+      "command": "ghidra types get-struct-layout",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_type_size",
+      "category": "datatype",
+      "command": "ghidra types get-type-size",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_valid_data_types",
+      "category": "datatype",
+      "command": "ghidra types get-valid-data-types",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/import_data_types",
+      "category": "datatype",
+      "command": "ghidra types import-data-types",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/modify_struct_field",
+      "category": "datatype",
+      "command": "ghidra types modify-struct-field",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/move_data_type_to_category",
+      "category": "datatype",
+      "command": "ghidra types move-data-type-to-category",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/recreate_struct",
+      "category": "datatype",
+      "command": "ghidra types recreate-struct",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/remove_struct_field",
+      "category": "datatype",
+      "command": "ghidra types remove-struct-field",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/rename_data_type",
+      "category": "datatype",
+      "command": "ghidra types rename-data-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/resize_struct",
+      "category": "datatype",
+      "command": "ghidra types resize-struct",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/resolve_duplicate_type",
+      "category": "datatype",
+      "command": "ghidra types resolve-duplicate-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_global",
+      "category": "datatype",
+      "command": "ghidra types set-global",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/suggest_field_names",
+      "category": "datatype",
+      "command": "ghidra types suggest-field-names",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/validate_data_type",
+      "category": "datatype",
+      "command": "ghidra types validate-data-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/validate_function_prototype",
+      "category": "datatype",
+      "command": "ghidra types validate-function-prototype",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/dynamic_to_static",
+      "category": "debugger",
+      "command": "ghidra debugger dynamic-to-static",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/interrupt",
+      "category": "debugger",
+      "command": "ghidra debugger interrupt",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/launch",
+      "category": "debugger",
+      "command": "ghidra debugger launch",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/launch_offers",
+      "category": "debugger",
+      "command": "ghidra debugger launch-offers",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/list_breakpoints",
+      "category": "debugger",
+      "command": "ghidra debugger list-breakpoints",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/modules",
+      "category": "debugger",
+      "command": "ghidra debugger modules",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/read_memory",
+      "category": "debugger",
+      "command": "ghidra debugger read-memory",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/registers",
+      "category": "debugger",
+      "command": "ghidra debugger registers",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/remove_breakpoint",
+      "category": "debugger",
+      "command": "ghidra debugger remove-breakpoint",
+      "mode": "gui",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/resume",
+      "category": "debugger",
+      "command": "ghidra debugger resume",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/set_breakpoint",
+      "category": "debugger",
+      "command": "ghidra debugger set-breakpoint",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/stack_trace",
+      "category": "debugger",
+      "command": "ghidra debugger stack-trace",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/static_to_dynamic",
+      "category": "debugger",
+      "command": "ghidra debugger static-to-dynamic",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/status",
+      "category": "debugger",
+      "command": "ghidra debugger status",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/step",
+      "category": "debugger",
+      "command": "ghidra debugger step",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/debugger/traces",
+      "category": "debugger",
+      "command": "ghidra debugger traces",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-debugger",
+          "receipt": "debugger.json"
+        }
+      ]
+    },
+    {
+      "path": "/apply_function_documentation",
+      "category": "documentation",
+      "command": "ghidra documentation apply",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/archive_ingest_function",
+      "category": "documentation",
+      "command": "ghidra archive ingest-function",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "archive",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-archive",
+          "receipt": "archive-exchange.json"
+        }
+      ]
+    },
+    {
+      "path": "/archive_ingest_program",
+      "category": "documentation",
+      "command": "ghidra archive ingest-program",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "archive",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-archive",
+          "receipt": "archive-exchange.json"
+        }
+      ]
+    },
+    {
+      "path": "/batch_string_anchor_report",
+      "category": "documentation",
+      "command": "ghidra documentation batch-string-anchor-report",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/bulk_fuzzy_match",
+      "category": "documentation",
+      "command": "ghidra documentation bulk-fuzzy-match",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "X",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-cross",
+          "receipt": "cross-reads.json"
+        }
+      ]
+    },
+    {
+      "path": "/compare_programs_documentation",
+      "category": "documentation",
+      "command": "ghidra documentation compare",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "X",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-cross",
+          "receipt": "cross-reads.json"
+        }
+      ]
+    },
+    {
+      "path": "/diff_functions",
+      "category": "documentation",
+      "command": "ghidra functions diff",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "X",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-cross",
+          "receipt": "cross-reads.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_similar_functions_fuzzy",
+      "category": "documentation",
+      "command": "ghidra documentation find-similar-functions-fuzzy",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "X",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-cross",
+          "receipt": "cross-reads.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_undocumented_by_string",
+      "category": "documentation",
+      "command": "ghidra documentation find-undocumented-by-string",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_documentation",
+      "category": "documentation",
+      "command": "ghidra documentation get",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_hash",
+      "category": "documentation",
+      "command": "ghidra documentation get-function-hash",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/merge_program_documentation",
+      "category": "documentation",
+      "command": "ghidra documentation transfer",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "X",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-transfer",
+          "receipt": "documentation-transfer.json"
+        }
+      ]
+    },
+    {
+      "path": "/emulate_function",
+      "category": "emulation",
+      "command": "ghidra emulation emulate-function",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/emulate_hash_batch",
+      "category": "emulation",
+      "command": "ghidra emulation emulate-hash-batch",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/add_function_tag",
+      "category": "function",
+      "command": "ghidra functions add-function-tag",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/batch_rename_function_components",
+      "category": "function",
+      "command": "ghidra functions batch-rename-function-components",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/clear_flow_and_repair",
+      "category": "function",
+      "command": "ghidra functions clear-flow-and-repair",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/clear_instruction_flow_override",
+      "category": "function",
+      "command": "ghidra functions clear-instruction-flow-override",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_function",
+      "category": "function",
+      "command": "ghidra functions create",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_function",
+      "category": "function",
+      "command": "ghidra functions delete",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_function_tag",
+      "category": "function",
+      "command": "ghidra functions delete-function-tag",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/disassemble_bytes",
+      "category": "function",
+      "command": "ghidra functions disassemble-bytes",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/disassemble_function",
+      "category": "function",
+      "command": "ghidra functions disassemble",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/force_decompile",
+      "category": "function",
+      "command": "ghidra functions force-decompile",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_functions",
+      "category": "function",
+      "command": "ghidra functions inspect",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_class_members",
+      "category": "function",
+      "command": "ghidra functions list-class-members",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_function_tags",
+      "category": "function",
+      "command": "ghidra functions list-function-tags",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/remove_function_tag",
+      "category": "function",
+      "command": "ghidra functions remove-function-tag",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/rename_function",
+      "category": "function",
+      "command": "ghidra functions rename",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "scalar candidate",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/rename_variables",
+      "category": "function",
+      "command": "ghidra functions rename-variables",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_no_return",
+      "category": "function",
+      "command": "ghidra functions set-function-no-return",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_prototype",
+      "category": "function",
+      "command": "ghidra functions set-function-prototype",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_tag_comment",
+      "category": "function",
+      "command": "ghidra functions set-function-tag-comment",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_function_this_type",
+      "category": "function",
+      "command": "ghidra functions set-function-this-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-data",
+          "receipt": "data-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_variable_storage",
+      "category": "function",
+      "command": "ghidra functions set-variable-storage",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_variable_type",
+      "category": "function",
+      "command": "ghidra functions set-variable-type",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_variables",
+      "category": "function",
+      "command": "ghidra functions set-variables",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_ui_cursor",
+      "category": "getter",
+      "command": "ghidra ui cursor",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-ui-recovery",
+          "receipt": "ui-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/close_project",
+      "category": "headless",
+      "command": "ghidra projects close",
+      "mode": "headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_project",
+      "category": "headless",
+      "command": "ghidra projects create",
+      "mode": "headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/open_project",
+      "category": "headless",
+      "command": "ghidra projects open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/convert_number",
+      "category": "listing",
+      "command": "ghidra utility convert-number",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "U",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_functions",
+      "category": "listing",
+      "command": "ghidra functions search",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_entry_points",
+      "category": "listing",
+      "command": "ghidra listing get-entry-points",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_external_location",
+      "category": "listing",
+      "command": "ghidra listing get-external-location",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_count",
+      "category": "listing",
+      "command": "ghidra listing get-function-count",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_calling_conventions",
+      "category": "listing",
+      "command": "ghidra listing list-calling-conventions",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_data_items_by_xrefs",
+      "category": "listing",
+      "command": "ghidra listing list-data-items-by-xrefs",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_globals",
+      "category": "listing",
+      "command": "ghidra listing list-globals",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_program_items",
+      "category": "listing",
+      "command": "ghidra listing list-program-items",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_shadowed_globals",
+      "category": "listing",
+      "command": "ghidra listing list-shadowed-globals",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_strings",
+      "category": "listing",
+      "command": "ghidra strings list",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/search_strings",
+      "category": "listing",
+      "command": "ghidra strings search-regex",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_api_call_chains",
+      "category": "malware",
+      "command": "ghidra analysis analyze-api-call-chains",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/detect_crypto_constants",
+      "category": "malware",
+      "command": "ghidra analysis detect-crypto-constants",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/detect_malware_behaviors",
+      "category": "malware",
+      "command": "ghidra analysis detect-malware-behaviors",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/extract_iocs_with_context",
+      "category": "malware",
+      "command": "ghidra analysis extract-iocs-with-context",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/find_anti_analysis_techniques",
+      "category": "malware",
+      "command": "ghidra analysis find-anti-analysis-techniques",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/analysis_status",
+      "category": "program",
+      "command": "ghidra analysis status",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/close_program",
+      "category": "program",
+      "command": "ghidra close",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_memory_block",
+      "category": "program",
+      "command": "ghidra memory create-block",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_property_map",
+      "category": "program",
+      "command": "ghidra program create-property-map",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_bookmark",
+      "category": "program",
+      "command": "ghidra program delete-bookmark",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_property_map",
+      "category": "program",
+      "command": "ghidra program delete-property-map",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/exit_ghidra",
+      "category": "program",
+      "command": "ghidra close",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_address_spaces",
+      "category": "program",
+      "command": "ghidra memory spaces",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_language_metadata",
+      "category": "program",
+      "command": "ghidra program get-language-metadata",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_metadata",
+      "category": "program",
+      "command": "ghidra program metadata",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_program_options",
+      "category": "program",
+      "command": "ghidra program get-program-options",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_property",
+      "category": "program",
+      "command": "ghidra program get-property",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/import_file",
+      "category": "program",
+      "command": "ghidra open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "acceptance-facade",
+          "receipt": "installed-sessions.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_bookmarks",
+      "category": "program",
+      "command": "ghidra program list-bookmarks",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_open_programs",
+      "category": "program",
+      "command": "sessions status",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "contract": "offline public session status + acceptance-facade",
+          "receipt": "installed-sessions.json",
+          "offlineSource": "skills/ghidra-coordinator/tests/research-cli.test.ts"
+        }
+      ]
+    },
+    {
+      "path": "/list_project_files",
+      "category": "program",
+      "command": "ghidra projects files",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_properties",
+      "category": "program",
+      "command": "ghidra program list-properties",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_scripts",
+      "category": "program",
+      "command": "ghidra scripts list",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/open_program",
+      "category": "program",
+      "command": "ghidra open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "acceptance-facade",
+          "receipt": "installed-sessions.json"
+        }
+      ]
+    },
+    {
+      "path": "/read_memory",
+      "category": "program",
+      "command": "ghidra memory read",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/reanalyze",
+      "category": "program",
+      "command": "ghidra analysis reanalyze",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/remove_program_option",
+      "category": "program",
+      "command": "ghidra program remove-program-option",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/remove_property",
+      "category": "program",
+      "command": "ghidra program remove-property",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/run_ghidra_script",
+      "category": "program",
+      "command": "ghidra scripts run",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "script",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/run_script_inline",
+      "category": "program",
+      "command": "ghidra scripts run-inline",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "script",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-functions",
+          "receipt": "function-edits.json"
+        }
+      ]
+    },
+    {
+      "path": "/save_all_programs",
+      "category": "program",
+      "command": "ghidra save-all",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-lifecycle-selection",
+          "receipt": "lifecycle-selection.json"
+        }
+      ]
+    },
+    {
+      "path": "/save_program",
+      "category": "program",
+      "command": "ghidra save",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_bookmark",
+      "category": "program",
+      "command": "ghidra program set-bookmark",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_image_base",
+      "category": "program",
+      "command": "ghidra program set-image-base",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_memory_block",
+      "category": "program",
+      "command": "ghidra memory set-block",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_program_option",
+      "category": "program",
+      "command": "ghidra program set-program-option",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/set_property",
+      "category": "program",
+      "command": "ghidra program set-property",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/switch_program",
+      "category": "program",
+      "command": "ghidra open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "acceptance-facade",
+          "receipt": "installed-sessions.json"
+        }
+      ]
+    },
+    {
+      "path": "/archive_project",
+      "category": "project",
+      "command": "ghidra projects archive",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_folder",
+      "category": "project",
+      "command": "ghidra projects create-folder",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_file",
+      "category": "project",
+      "command": "ghidra projects delete-file",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_project",
+      "category": "project",
+      "command": "ghidra projects delete",
+      "mode": "headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/export_program",
+      "category": "project",
+      "command": "ghidra program export",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_project_info",
+      "category": "project",
+      "command": "ghidra projects info",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/import_program",
+      "category": "project",
+      "command": "ghidra program import",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/list_projects",
+      "category": "project",
+      "command": "ghidra projects list",
+      "mode": "headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/move_file",
+      "category": "project",
+      "command": "ghidra projects move-file",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/move_folder",
+      "category": "project",
+      "command": "ghidra projects move-folder",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/restore_project",
+      "category": "project",
+      "command": "ghidra projects restore",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "project/files",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-project-recovery",
+          "receipt": "project-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/checkin_program",
+      "category": "server",
+      "command": "ghidra merge",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-merge",
+          "receipt": "session-merge.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/admin/set_permissions",
+      "category": "server",
+      "command": "ghidra server admin set-permissions",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/admin/terminate_all_checkouts",
+      "category": "server",
+      "command": "ghidra server admin terminate-all-checkouts",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/admin/terminate_checkout",
+      "category": "server",
+      "command": "ghidra server admin terminate-checkout",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/admin/users",
+      "category": "server",
+      "command": "ghidra server admin users",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/authenticate",
+      "category": "server",
+      "command": "auth login",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Factory builtin",
+      "requestId": false,
+      "evidence": [
+        {
+          "contract": "public Factory credential contract",
+          "receipt": "credential-contract.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/checkouts",
+      "category": "server",
+      "command": "ghidra server checkouts",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/connect",
+      "category": "server",
+      "command": "ghidra server connect",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/disconnect",
+      "category": "server",
+      "command": "ghidra server disconnect",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/repositories",
+      "category": "server",
+      "command": "ghidra server repositories list",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/repository/create",
+      "category": "server",
+      "command": "ghidra server repositories create",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "server",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/repository/file",
+      "category": "server",
+      "command": "ghidra server repositories file",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/repository/files",
+      "category": "server",
+      "command": "ghidra server repositories files",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/status",
+      "category": "server",
+      "command": "ghidra server status",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/version_control/add",
+      "category": "server",
+      "command": "ghidra open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "P",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "acceptance-facade",
+          "receipt": "installed-sessions.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/version_control/checkout",
+      "category": "server",
+      "command": "ghidra open",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "acceptance-facade",
+          "receipt": "installed-sessions.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/version_control/undo_checkout",
+      "category": "server",
+      "command": "ghidra changes discard",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-lifecycle-selection",
+          "receipt": "lifecycle-selection.json"
+        }
+      ]
+    },
+    {
+      "path": "/server/version_history",
+      "category": "server",
+      "command": "ghidra server history",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "P",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-administration",
+          "receipt": "server-administration.json"
+        }
+      ]
+    },
+    {
+      "path": "/can_rename_at_address",
+      "category": "symbol",
+      "command": "ghidra symbols can-rename-at-address",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/create_label",
+      "category": "symbol",
+      "command": "ghidra symbols create-label",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/delete_label",
+      "category": "symbol",
+      "command": "ghidra symbols delete-label",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/rename_symbol",
+      "category": "symbol",
+      "command": "ghidra symbols rename-symbol",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/prompt_policy",
+      "category": "system",
+      "command": "ghidra ui prompt-policy",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-ui-recovery",
+          "receipt": "ui-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/check_connection",
+      "category": "utility",
+      "command": "ghidra status",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/mcp/health",
+      "category": "utility",
+      "command": "ghidra status",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "lifecycle",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-facade-lifecycle",
+          "receipt": "facade-lifecycle.json"
+        }
+      ]
+    },
+    {
+      "path": "/mcp/schema",
+      "category": "utility",
+      "command": "--help",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "U",
+      "effect": "lifecycle",
+      "factoryPermission": "Factory builtin",
+      "requestId": false,
+      "evidence": [
+        {
+          "contract": "installed package help + Factory command definition",
+          "receipt": "full-facade.json",
+          "source": "scripts/test-package.mjs"
+        }
+      ]
+    },
+    {
+      "path": "/tool/goto_address",
+      "category": "utility",
+      "command": "ghidra ui goto",
+      "mode": "gui",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-ui-recovery",
+          "receipt": "ui-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/tool/running_tools",
+      "category": "utility",
+      "command": "ghidra ui tools",
+      "mode": "gui",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "debugger/UI",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-ui-recovery",
+          "receipt": "ui-recovery.json"
+        }
+      ]
+    },
+    {
+      "path": "/add_memory_reference",
+      "category": "xref",
+      "command": "ghidra xrefs add-memory-reference",
+      "mode": "gui + headless",
+      "upstreamAccess": "WRITE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Update",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_call_graph",
+      "category": "xref",
+      "command": "ghidra xrefs analyze-call-graph",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_assembly_context",
+      "category": "xref",
+      "command": "ghidra xrefs get-assembly-context",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_full_call_graph",
+      "category": "xref",
+      "command": "ghidra xrefs get-full-call-graph",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        },
+        {
+          "runner": "proof-query-variants",
+          "receipt": "query-variants.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_call_graph",
+      "category": "xref",
+      "command": "ghidra xrefs get-function-call-graph",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_xrefs_from",
+      "category": "xref",
+      "command": "ghidra xrefs from",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/get_xrefs_to",
+      "category": "xref",
+      "command": "ghidra xrefs inspect-to",
+      "mode": "gui + headless",
+      "upstreamAccess": "READ_ONLY",
+      "scope": "C",
+      "effect": "query",
+      "factoryPermission": "ReadOnly",
+      "requestId": false,
+      "evidence": [
+        {
+          "runner": "proof-queries",
+          "receipt": "query-contracts.json"
+        }
+      ]
+    },
+    {
+      "path": "/remove_reference",
+      "category": "xref",
+      "command": "ghidra xrefs remove-reference",
+      "mode": "gui + headless",
+      "upstreamAccess": "DESTRUCTIVE",
+      "scope": "C",
+      "effect": "program state",
+      "factoryPermission": "Destructive",
+      "requestId": true,
+      "evidence": [
+        {
+          "runner": "proof-mutations",
+          "receipt": "structural-mutations.json"
+        }
+      ]
+    }
+  ],
+  "bridge": [
+    {
+      "control": "list_instances",
+      "equivalent": "Root sessions/targets/status report logical owned contexts; backend roster is internal.",
+      "evidence": {
+        "receipt": "installed-sessions.json",
+        "contract": "logical context selection"
+      }
+    },
+    {
+      "control": "connect_instance",
+      "equivalent": "Scoped open/continuation chooses and verifies the owned binding; no mutable caller routing.",
+      "evidence": {
+        "receipt": "installed-sessions.json",
+        "contract": "logical context selection"
+      }
+    },
+    {
+      "control": "list_tool_groups",
+      "equivalent": "Factory generated group help/discovery accounts for available facade functionality.",
+      "evidence": {
+        "receipt": "full-facade.json",
+        "contract": "Factory command discovery and generated help"
+      }
+    },
+    {
+      "control": "load_tool_group",
+      "equivalent": "Facade commands are discoverable through Factory; bridge lazy loading is managed internally.",
+      "evidence": {
+        "receipt": "full-facade.json",
+        "contract": "Factory command discovery and generated help"
+      }
+    },
+    {
+      "control": "unload_tool_group",
+      "equivalent": "Internal discovery/resource behavior; caller functionality remains available through Factory.",
+      "evidence": {
+        "receipt": "full-facade.json",
+        "contract": "Factory command discovery and generated help"
+      }
+    },
+    {
+      "control": "check_tools",
+      "equivalent": "Facade capability/status checks report availability and prerequisites without MCP group management.",
+      "evidence": {
+        "receipt": "full-facade.json",
+        "contract": "Factory command discovery and generated help"
+      }
+    },
+    {
+      "control": "search_tools",
+      "equivalent": "Factory command help/discovery searches the facade functionality.",
+      "evidence": {
+        "receipt": "full-facade.json",
+        "contract": "Factory command discovery and generated help"
+      }
+    },
+    {
+      "control": "import_file",
+      "equivalent": "`ghidra open` performs scoped input import/selection; does not discover arbitrary external instances.",
+      "evidence": {
+        "receipt": "installed-sessions.json",
+        "contract": "logical context selection"
+      }
+    }
+  ],
+  "sourceRevision": "300884e3c9be0928a8e1659e088aa2144c2c70b4",
+  "artifactSha256": "64d52ed60e896e973596a243be66c3fe4bab9884fee2f1480956da4184e31e88",
+  "combinedEvidence": "full-facade.json"
+}

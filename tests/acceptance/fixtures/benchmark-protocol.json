@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "task": "Resolve three input hash dictionaries using the executable's FNV-1a, DJB2 and SDBM implementations; publish and independently read the complete hash-to-candidate-ID tables, dictionary identity and function addresses",
+  "batchesPerPart": [64, 64, 64],
+  "unevenBatchesPerPart": [128, 32, 32],
+  "candidatesPerBatch": 20,
+  "candidateLength": 1024,
+  "publicationStrategy": "lead-collector-v1: the lead reads all three producers' private findings through public CLI, copies other producers' complete tables into its context, and publishes the combined result with one merge; all collection, copy, merge and independent verification costs are timed in both modes",
+  "pairedRepetitions": 6,
+  "modeOrder": [1, 3, 3, 1, 1, 3, 3, 1, 1, 3, 3, 1],
+  "comparison": "Every one of six paired prepared-base trials must have T3 < T1; exact one-sided paired sign probability 1/64, below 0.05. No 1.5x margin.",
+  "timeoutSecondsPerBatch": 30,
+  "maxStepsPerCandidate": 100000,
+  "warmup": "One separate short candidate per algorithm per allocated worker before the prepared clock; no measured candidates or findings are precomputed",
+  "coldPolicy": "Fresh product profile and no imported canonical program; OS, tool installation and compiler caches are not flushed",
+  "invalidTrials": "Retain all attempts. Any failed business or timed trial fails the run; no automatic exclusion or replacement. A later code fix requires a new complete acceptance run."
+}

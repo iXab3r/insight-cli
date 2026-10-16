@@ -1,0 +1,44 @@
+name: gherkin-integration
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  offline-gherkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require read access to the private Automation dependency
+        env:
+          AUTOMATION_READ_TOKEN: ${{ secrets.AUTOMATION_READ_TOKEN }}
+        run: test -n "$AUTOMATION_READ_TOKEN" || { echo 'Configure AUTOMATION_READ_TOKEN with read access to iXab3r/EyeAuras.Automation.'; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          repository: iXab3r/EyeAuras.Automation
+          ref: b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033
+          path: tests/vendor/EyeAuras.Automation
+          token: ${{ secrets.AUTOMATION_READ_TOKEN }}
+          persist-credentials: false
+      - name: Verify Automation matches the repository gitlink
+        run: test "$(git rev-parse HEAD:tests/vendor/EyeAuras.Automation)" = "$(git -C tests/vendor/EyeAuras.Automation rev-parse HEAD)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm run test:acceptance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gherkin-integration-results
+          path: |
+            .automation/results/**/tests.trx
+            .automation/results/**/run.json
+            .automation/results/**/scenarios/**/scenario.json
+            .automation/results/**/scenarios/**/timing.json
+            .automation/results/**/scenarios/**/command-timing.json
+          include-hidden-files: true
+      - run: git diff --exit-code

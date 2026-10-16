@@ -1,0 +1,11 @@
+{
+  "artifact": "GhidraMCP-7.0.0.jar",
+  "version": "7.0.0",
+  "sha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "source": "https://github.com/bethington/ghidra-mcp",
+  "catalogCommit": "57e37a8bf388b1279cff46378f85be1554548f61",
+  "catalogSha256": "ebdaa9195ec2ea55fb706107bba1ee3732abd2eda783ed67a6ccc7359fdc5c66",
+  "license": "Apache-2.0",
+  "verifiedRuntime": {"ghidra": "12.1.2", "java": "21"},
+  "distribution": "Prepared bridge artifact pinned by SHA256 and native acceptance. Ghidra and the JDK are separately installed dependencies."
+}

@@ -1,0 +1,3991 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "All 25 business Gherkin scenarios",
+  "baseRevision": "3ceaa1023a4e2bc7bbbcd9fa507d0c72bdfda086",
+  "sourceHashes": {
+    "scripts/acceptance-facade.mjs": "86ea1499ef2735dfd5e70530eaefcefeb170d57fd41919d9fffbee6ec56fb6b1",
+    "scripts/acceptance-full.mjs": "8fdf8c0a14bea40bcde0693ea173a535441160b295d4d9a0e846e3769b4220fb",
+    "scripts/acceptance-ghidra.mjs": "817763e53a2602f85b9bdf03f44e72b585c017462e69ad597da06654780e3393",
+    "scripts/acceptance-initial-import.mjs": "47aa03d89ed6965b1d36670271bd210f2ce07120c0d2a521a2d5e8b1c87fbc72",
+    "scripts/audit-coverage.mjs": "e6d1ea58cc00520474fbdacea88ea0e30add9ca3c03a1fce58288bae9d5dbb20",
+    "scripts/business/cases.mjs": "f4d7277d0e2c02a23422b84e8dac1714a1ac2280da2066074351a6bed49ecd72",
+    "scripts/business/driver.mjs": "29a6168d01a4d77c2e8fd5ad704c92db97802b53372b5c76744d6fd5c99d0726",
+    "scripts/business/prepare.mjs": "50f1f425448e21305f334b3895f4ff06706ad3b8e9b55567c1226a699df22a59",
+    "scripts/business/public-cli.mjs": "3fab52aafcf44e81a104762f5475bc743aa6b251c1ec5cff889b2d72b49a1e5a",
+    "scripts/business/run.mjs": "75df317268351c6e9bf10763faac1be5a885dfb3b999c2de46bbeb5816abe93d",
+    "scripts/business/throughput.mjs": "add440af036564427a92e8dee90033458d365269ff194853d53ab48f538253f7",
+    "scripts/fixtures/InsightAdministrativeFixture.java": "229f38973388847e09746bc16fd0dc2f5130f81707e2ad2042c35099e08367ce",
+    "scripts/fixtures/InsightBlockTransfer.java": "68a9bbb2b460351959cbc2bb61609055fd7f71729c579f02d4aa70e6996b692b",
+    "scripts/fixtures/InsightGuiFixture.java": "9c29cc8214e236bcafc1ce712bd3617f801b89f6e7d1b5bba8024f3ea3bb06a1",
+    "scripts/fixtures/InsightSnapshotPublisher.java": "d30a4ef7fbd4db4cd9a175ed3fc329b675e3530ea8b06b0b74e0f69da7d8a3b9",
+    "scripts/fixtures/facade-owner.mjs": "b3223c9336f6e6111ffff389bc3f9cc58a68cff9bcb7a1b1847a0cf88033cf56",
+    "scripts/fixtures/native-owner.mjs": "d4e5994076fe16d4d2e5cc44f170c0bdc2397c829d234c77c61873722fd08e26",
+    "scripts/fixtures/p3/OwnedP3Analyzer.java": "981854f48866fd3e73a35d14a9aa553ca8941a276d37310401acdbdcf763b891",
+    "scripts/fixtures/p3/OwnedP3Plugin.java": "14cc7d5498653ccd256f10fd422a3dca72fb149ebab95a221e0532943415f05c",
+    "scripts/fixtures/p3/OwnedP3Script.java": "aeddc4d589a7a49f25be1a76fa9fde3ddcdedf225e5b6c0e9a3afc6bbc92eb85",
+    "scripts/fixtures/p3/owned.cspec": "8123ebc934e985a2f070caebb0ddc73f6a2a170dcf5e8f5d48a37b3112dfe7a3",
+    "scripts/fixtures/p3/owned.ldefs": "f2577e18b61c45e7f6fba026f63e8f84b5a7f41e67e1ea5620e48c7b7e5d4d26",
+    "scripts/fixtures/p3/owned.pspec": "b2e6f07485eed36637a4ba4533136c0387e5590058f7cc77a1480e67f4d0b924",
+    "scripts/fixtures/p3/owned.slaspec": "a29ccfff696385fe0ec39e7e2362a549f0145d1fcd778e68a79585696c3b6c17",
+    "scripts/native-p3-inputs.mjs": "3d4adde6011f00cb3314b70f13b284ddde861bfa6c86cf86d42618dfcd30504e",
+    "scripts/native-proof-guard.mjs": "48d0fedeb3b84c29bc93fee76db82209d7c6dbce4ffe8b846452ff19ef76ea39",
+    "scripts/npm-command.mjs": "5bd238d6a51a4cd78115844f1eef357ad71b60ffb62a5f5d7ec026e5eaad582f",
+    "scripts/pack-cli.mjs": "06d61291c3be850e6c20b89ae69b0017e4fdcc7229de950f3a3e692268f6ea39",
+    "scripts/prepare-package.mjs": "7b135ec827a1033c0f369b28e5f23b01a9b9bc1be9121e59336d30acc26626a3",
+    "scripts/proof-administration.mjs": "28049dd14eaf6515ad2db36ed30c7831cde797d5dcc51601770c8a9690c1751e",
+    "scripts/proof-api-gaps-matrix.mjs": "e96ceb9428929b19239b40ed05820744e9466205630be6e8410c14ea069afc75",
+    "scripts/proof-api-gaps.mjs": "f143ece33962a98e84be51d5cab01aebf226a924738cb46f07badfeeea604201",
+    "scripts/proof-archive.mjs": "901a61fc894f7e4936d8a684d24b688e39ceb1fc970071de5108fc53dd80dc3f",
+    "scripts/proof-contexts.mjs": "d0c471f09da06d8049f9b350180fe1e8ae2e7471abeb7dac89a133a373840f5a",
+    "scripts/proof-cross-faults.mjs": "1dc2daf2d6104024c43d6ccf67ff9e925d13a33d32c47cee4bff3d5b3b7401b6",
+    "scripts/proof-cross.mjs": "711ca0c2e500ac75c247a4732cd34efc0a44621a497b0b5548566574843b193f",
+    "scripts/proof-data.mjs": "af91c65368f6c22031bca21125f1d5e442d8a113c17a2df56c7adc3ae1b06642",
+    "scripts/proof-debugger-bootstrap.mjs": "3c8034bbf1390eede67df3b0a7e0721fec474f32a775c1ab42ab4f214c68906a",
+    "scripts/proof-debugger-crash.mjs": "931ff93e1767cb96268bce7500fc33238ee4b46bf84764dfbace8075589898c5",
+    "scripts/proof-debugger-recovery.mjs": "24f4ab04097fd679b0a2b4ae9e3ae3d85a2dff9a3a4f57ac4bba484c781b7521",
+    "scripts/proof-debugger.mjs": "5c1c181df1536a881271627ca345207c9da321bcb8e79ca1dfd72f0e17e1d691",
+    "scripts/proof-facade-lifecycle.mjs": "e8e792d8cae02ca75ba768f9648c4c026721de17e66d01de39b1e8e1e16af8dc",
+    "scripts/proof-functions.mjs": "f168e2c926f3ffeab32180171c020e2808ab717486a6de4763cc216462776b7d",
+    "scripts/proof-lifecycle-selection.mjs": "a0917daed6e2ce355f60982395aa20b9a65183c28f051a17962a5f94e44fc7bb",
+    "scripts/proof-managed-server.mjs": "24d2bdc817e50fd8b34c46aa6781947b04d59c8913ef476f07f51f1c5558fada",
+    "scripts/proof-merge.mjs": "4b05fb77cbaf39dd2ef3f7544186172a1ecc2fb6539b3e83048c567030dad260",
+    "scripts/proof-mutations.mjs": "096372ef396d3e954861c480cd421a5a5f434489f62c42baa63a044b6e6ee23f",
+    "scripts/proof-native-snapshots.mjs": "99cf9e0c47034c2d6e93db35e255b411053964b0b9a77499d87a4e8dd2ba27ee",
+    "scripts/proof-p2-databases.mjs": "59e28a9721bd631387445d2f47471c1c82066a7f6750b4845240559e303db98f",
+    "scripts/proof-p2-matrix.mjs": "65fdde3a8f8a1805efb97eda2f845a1438077554f968a8b9e9fd2a3ac6c56454",
+    "scripts/proof-p2-recovery.mjs": "8493816345217d243eba39ce44a69677a379e318cb8949b00101107d4410a3e7",
+    "scripts/proof-p2-sdk.mjs": "7924735bd5c43664d55b6c0336ef1b3802461edb6fbc2ce715e7296a8544832d",
+    "scripts/proof-p2-trace.mjs": "aa2e0b8fe5a8b84aea2c33767ae26b3fd41f0f9ed41f24c56cf605824eb98990",
+    "scripts/proof-p2-tracking.mjs": "6081399a472d286365f0f74dd90637ed3d15a2fbd67782ed6da6f00fad26af02",
+    "scripts/proof-p3.mjs": "fc89f4e5862a9fe7123e232fdd9b192888689ad47026919f248d3ef7de2d7dc4",
+    "scripts/proof-project-recovery.mjs": "685895d20451ab026e44e2490c2d43c208c1391d9595a8bf4ec500117d587033",
+    "scripts/proof-projects.mjs": "8d2b87a7b1d1ccd2b2e687c06d24c683488792d3bed20062040eaaa385cddf49",
+    "scripts/proof-queries.mjs": "89fa0dfcc70d21ab73188133757eb3aaa71a09ad657e7fce2a6a09a98ccc2ef4",
+    "scripts/proof-query-variants.mjs": "ef04cdb685c87330b56b9ae3efbe903cb30e162494f0c08866dcdc69292bb416",
+    "scripts/proof-research-cli.mjs": "5bc619eadde4006560337b4d149be66543545b2084f607dd0d350e3469ac741a",
+    "scripts/proof-scalar-projection.mjs": "0d418c71b5f47aedca8cbdf8a086c37228f30bcbc1c0cd05ca9f40e2deb6b5d1",
+    "scripts/proof-transfer.mjs": "b5c2559bb83787337878e4a5d6768d3face23c605ef5efc00bf74d5ae8e912ac",
+    "scripts/proof-ui-recovery.mjs": "b5e80ff6fc2c32cc22b400528333c5e69a7a0fc03dbda8dc6f548e064faf31a7",
+    "scripts/proof-ui.mjs": "6fac479739e68fc653ec055e573df21e3a8eb6224e1868cf34f8105303fa44b2",
+    "scripts/run-automation.mjs": "aba76bfe7e13acbdba839390473901a2a07cc959025d4b610b2f30caca8a1717",
+    "scripts/test-package.mjs": "2ff5e22d20b0bc0653bfae070c90128b6fbb4bde16536238beb10be51e822c57",
+    "skills/ghidra-coordinator/src/administration-results.ts": "a9047f9e954916dfffe795ca36e339f0b03c77a56be83dd714e4a5ad835d8835",
+    "skills/ghidra-coordinator/src/administration.ts": "d9d271bb3b9dbf998f4b05e5836b8a78f9f4b9e77dd2d9c925b749bdffa3ed61",
+    "skills/ghidra-coordinator/src/archive-contract.ts": "5a39c33b1790bb7972cba755e2066e04809ac73387c8778891d7a5f0f1cd3ddf",
+    "skills/ghidra-coordinator/src/archive.ts": "5075662ff64f71253a3ea6be0b9cb4cd35fdd82e316e12239e0dc3e11e0f00b2",
+    "skills/ghidra-coordinator/src/arguments.ts": "e0390df470b0eeb92fd33fe65f57ea0611805ebb4998e3e88a87f4fe89da3323",
+    "skills/ghidra-coordinator/src/artifacts.ts": "f916f0844670b7dcf34152eb1f7521f77b62f3b4606dabd8d47ee3d037d37a88",
+    "skills/ghidra-coordinator/src/bin.ts": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+    "skills/ghidra-coordinator/src/cli.ts": "944bee93b77a7cc65ee54356d5e28db3f7bd2389698557d35f8702e7f3ce90df",
+    "skills/ghidra-coordinator/src/comment-effects.ts": "94f33fd05d18c816d5a590402a0f312308bb79a1d59e4245686fe0eeaeb75d68",
+    "skills/ghidra-coordinator/src/contexts.ts": "eed1960e9e9521e671159019c240a250688edee1710cf7cbda48addcc1349182",
+    "skills/ghidra-coordinator/src/coordinator.ts": "be67a13ff9139456d57671e3ebde4d18dc64f7bf06a3a2e5087f0d10b6a33f8c",
+    "skills/ghidra-coordinator/src/cross-results.ts": "be3cd5832318841eaabb883569906fbd4ee5ce4958a2008e897dba33b55579de",
+    "skills/ghidra-coordinator/src/cross.ts": "3e9718b901b8937335796b1d56a795725e1c09c0645813b2c73db468809499c8",
+    "skills/ghidra-coordinator/src/data-effects.ts": "33de1f98aabfcc77e07d5ff93b95d5fa2e9e507b16b53e01b413fa3e581a3753",
+    "skills/ghidra-coordinator/src/debugger-results.ts": "1db245642625738c96b05ae7cf5f552c3df1c48683ec74a214ca88ec05475598",
+    "skills/ghidra-coordinator/src/debugger-supervisor.ts": "23900e7f52b9463b791d0183b4b1900b4d48d8b60a1d36e2bbe9f6d5d84025c3",
+    "skills/ghidra-coordinator/src/debugger.ts": "936d9b84db11b76f39519b54a87ceab5308edfe17104c2aa9663a3cedc7a1f6a",
+    "skills/ghidra-coordinator/src/documentation-effects.ts": "60efbeb9be7c41122cc725162dd105a417132e0387ea1524188f55a199adc272",
+    "skills/ghidra-coordinator/src/extensions.ts": "ed4e2b013b643631552aadd69ca6ba375984ae41270fe74266f373bc1e9349ce",
+    "skills/ghidra-coordinator/src/function-effects.ts": "02f83617d4ec80d0a887493476f452b1fd205c13dd1b3b5277069c929fe7498a",
+    "skills/ghidra-coordinator/src/ghidra.ts": "8fa3787b769b40558cbb98943030006581ca2669aeab7f546ca3943abf02f962",
+    "skills/ghidra-coordinator/src/index.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
+    "skills/ghidra-coordinator/src/initial-model.ts": "d98c30ae08b895ded939bd5950b859212f8cf436f57630202e9a1f5604b44ebe",
+    "skills/ghidra-coordinator/src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
+    "skills/ghidra-coordinator/src/lifecycle.ts": "c2ce7ac5bfda775da98297c4346b3520992572128bb58ce8933823a28cedadef",
+    "skills/ghidra-coordinator/src/memory-inputs.ts": "368c81a987457314b19562d9c3eae545c270f4dc344a820ffbe4df611506e538",
+    "skills/ghidra-coordinator/src/merge.ts": "08e1533ae1cc4c1d1a57748419f33187c1623afe0be6dab60f363aff8b6aff5c",
+    "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
+    "skills/ghidra-coordinator/src/mutation-effects.ts": "2c6fafedc93a1a35cf8795c30440234e75ea70f9911977ba5b8016fedb1f2041",
+    "skills/ghidra-coordinator/src/mutation-inputs.ts": "4ba523f095f0602d3631cc7e0509070ab5a6b693e4ec976ba94b385450d8ddbd",
+    "skills/ghidra-coordinator/src/mutations.ts": "573bc1880402ec3fc81af883e03d3550d13be6e1bd13496ea5f2176d9852b7c6",
+    "skills/ghidra-coordinator/src/native-inputs.ts": "7920b89335cf309cae2a1f935dbf9c56f733a0b724abb5085f7e84ccdcefb491",
+    "skills/ghidra-coordinator/src/native-queries.ts": "0a1d51e10fb55d146ccacf5977c908aad9e6f937c57d223efd194cca5d110c1f",
+    "skills/ghidra-coordinator/src/projects.ts": "6aaa3d29690bc4aafaa2abc22a85d055c28b2fb17cd57c75cc29f80226a502d2",
+    "skills/ghidra-coordinator/src/prototype-cli.ts": "e82d6befb8a051461ee9cbba598ca34cfc9885dc37893d83694e08f84be7b0d2",
+    "skills/ghidra-coordinator/src/queries.ts": "e8f60c2d6c60573bc17f237df3e289e2f78970dc982947b035601bc2d178c5ec",
+    "skills/ghidra-coordinator/src/query-policy.ts": "6c790b9c67161aebc2aed1307a0628490d0d4f3c4da0b9ea86ca794e699534bf",
+    "skills/ghidra-coordinator/src/query-results.ts": "cbab02c14f68f2e0b4f5a0f23bbe4a53a26d26a9d413adfab7f53bcf525dc3df",
+    "skills/ghidra-coordinator/src/research.ts": "db0697a1154157febf86ee1515a8cef315a0a9f358f470af5ba2864dabc10128",
+    "skills/ghidra-coordinator/src/scripts.ts": "84d9885f6309bd271d6987939297dba934e3afdd78d4111c8d0a4210d47d1179",
+    "skills/ghidra-coordinator/src/sdk-contracts.ts": "0f91bf291cfc01f61e3d80045583dbdcab8ba5d1fa74f250c790fc5b15aa9cd9",
+    "skills/ghidra-coordinator/src/sdk-files.ts": "b77779caf0407fc5f2665b2a9222e7cc58726c90d7ae380ddfc7d41579d907f3",
+    "skills/ghidra-coordinator/src/sdk.ts": "7f0b6e24f18fef65ff0c84a53859b32922830f12f8f25a0b3e297cd112f0de8d",
+    "skills/ghidra-coordinator/src/server.ts": "597d5c86e750d7a4a5aac6db8ecf4ab740e8db6d4be2a4b5d6c753ae6905235c",
+    "skills/ghidra-coordinator/src/store.ts": "8a2e866c45d0a5de304213f9495d897aeebf41cd4f08a91e60da91cf6470573d",
+    "skills/ghidra-coordinator/src/sync-policy.ts": "6869e795c9b1dcf6fe3a05b4768f8ace78de5a660da6773ae394092c2bff90f3",
+    "skills/ghidra-coordinator/src/transport.ts": "749441b01700437b03dec727b162f08490fb01199f4e62e4edddf429f199465d",
+    "skills/ghidra-coordinator/src/ui-results.ts": "59e2bc402ab2187361fa52591bab95cc49fd1a154c5cb25f197889e3ce978fac",
+    "skills/ghidra-coordinator/src/ui.ts": "718a34d1ff84feee3f426888a6543c008625208e01ee406eb1b186e2c8d69338",
+    "skills/ghidra-coordinator/src/utility.ts": "a653c15ffd685f7a75b235e9e96596f769873bf64501a8aa4c4b682fa6ac6770",
+    "skills/ghidra-coordinator/src/version-tracking.ts": "ae7502241d2359e072a8a7f5038e9d23840afda677a18b8269dc8cddca3d488e",
+    "skills/ghidra-coordinator/src/workspace.ts": "a0e0325fa11bc4516d7706fdc09c92f48b3909a3a239377bcd7e51683a129d64",
+    "skills/ghidra-coordinator/dist/src/administration-results.d.ts": "cfa6f6800a9deb6a1ceff40c90b79acf026379b225b915cd3d5d1a4617401449",
+    "skills/ghidra-coordinator/dist/src/administration-results.js": "7fde4ee3d283622eb3cc0cc8aeb7268abaad1c69554fee136896fe3f1f69a539",
+    "skills/ghidra-coordinator/dist/src/administration.d.ts": "49b69a98954dfc5baf7da4af07fb4f85d528b3748a98713ae0f5594be2dbbab8",
+    "skills/ghidra-coordinator/dist/src/administration.js": "440224fa7770287e898230cf5c8b93d818c322d0ae37ad6f3c5a1411f3c28989",
+    "skills/ghidra-coordinator/dist/src/archive-contract.d.ts": "f0c64af53d042432b2ec312f1255109b1ec84d5938f74c48134845d5aa2debd1",
+    "skills/ghidra-coordinator/dist/src/archive-contract.js": "18477d593e0d9cdada031ed8775b3deea2b22e6e83155f9a97462653e62836a1",
+    "skills/ghidra-coordinator/dist/src/archive.d.ts": "1f3891d34035eeaec84ef29ec62970d8d692cba40e399e6a00aff222ee84c74f",
+    "skills/ghidra-coordinator/dist/src/archive.js": "47f169ccd8d2e9bb68dc35f6e56a7f4262adeedd5f9773c28c68d60c7ed3351a",
+    "skills/ghidra-coordinator/dist/src/arguments.d.ts": "8616f2558f2a1eebd025881385f1b5a6e8d729ce60ae7e56a443bafac9bb9a43",
+    "skills/ghidra-coordinator/dist/src/arguments.js": "d2314a828258c5f85b3d4cd481183d5049ebabbd36d9ad5daa98f6f966d0697b",
+    "skills/ghidra-coordinator/dist/src/artifacts.d.ts": "ffcd77abaa7336c648192d3683764f17ff92a3cc844372cb5395411bd0d0fa5a",
+    "skills/ghidra-coordinator/dist/src/artifacts.js": "f96a352b2ecd25c14f26f7f9bc911ddd10b23e7ce2b6ed7ff50c57e5b10ea296",
+    "skills/ghidra-coordinator/dist/src/bin.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+    "skills/ghidra-coordinator/dist/src/bin.js": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+    "skills/ghidra-coordinator/dist/src/cli.d.ts": "bd55b2865f6aa5f2bca64ce0566ebb935f58f6624e25b304bfd569810c4aa1c5",
+    "skills/ghidra-coordinator/dist/src/cli.js": "0847d2cfd110f8c01edd7f6f8af4c2a081ce71c18b53c5f35a87390f6fd463a7",
+    "skills/ghidra-coordinator/dist/src/comment-effects.d.ts": "b8ed05305361a59a66032c7bd45d4d5ab11aef1ee2386e5310f40dd17d58370e",
+    "skills/ghidra-coordinator/dist/src/comment-effects.js": "e82ffbbdb5b382df4b67ae03a9314868bbc0fe8afdca164b93046c43cfbe9f0a",
+    "skills/ghidra-coordinator/dist/src/contexts.d.ts": "faa532053c2326ae6570fd7d093c2f27143ba9d2ddfca89771aa662f44feca72",
+    "skills/ghidra-coordinator/dist/src/contexts.js": "8a5f1f2253223c1dba6940590c8929e258448a21ff9fdac6230d0fa41c5b6097",
+    "skills/ghidra-coordinator/dist/src/coordinator.d.ts": "4d0fee9577b0357627da15c108821590c2b4bc1263297a0d13f795b90cadf392",
+    "skills/ghidra-coordinator/dist/src/coordinator.js": "81e187d3e22003298064074fecc5045c4d52cca85b8325873a0fee0984f9544e",
+    "skills/ghidra-coordinator/dist/src/cross-results.d.ts": "33b9746ea093b0029ae92901c799d54388b976e74f9814b6a84caceed045eab5",
+    "skills/ghidra-coordinator/dist/src/cross-results.js": "2334c137e2d218dfb4f399fe9de64b8234188599917d8663b268db557ffd7bab",
+    "skills/ghidra-coordinator/dist/src/cross.d.ts": "1ecc23810ddf06229b30b379863cf13cf6e8986524c3a737d87eaffdbf090479",
+    "skills/ghidra-coordinator/dist/src/cross.js": "f948c65a5329e77e63b63d6d4ef7f07547fb6cb20f41659ccefdcf2fa8ab0e5e",
+    "skills/ghidra-coordinator/dist/src/data-effects.d.ts": "d34d7a13de68e6695d3549fc0103bfbe3ea92fc767fbafaeeb3f4c8cd8f1bafc",
+    "skills/ghidra-coordinator/dist/src/data-effects.js": "f90b0c6706f2d90b89ae3b8f6cf0c076a5f94c4cece32bbbc094e85e46c137e6",
+    "skills/ghidra-coordinator/dist/src/debugger-results.d.ts": "7756f65265c4fee03db86cb55aad2aea37e24b69f7a7dc8ff586527906882d7f",
+    "skills/ghidra-coordinator/dist/src/debugger-results.js": "5545227b620c0148f173a38258d9ac8016058a984aac2197df093bc67d61b90e",
+    "skills/ghidra-coordinator/dist/src/debugger-supervisor.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/src/debugger-supervisor.js": "5c7777b43c40889041bc5f0c3d7a98f651210bf6e77bb23cb88f332bc2a90f01",
+    "skills/ghidra-coordinator/dist/src/debugger.d.ts": "cd3eca8fa7c7714d686503dab8473c2865f034a33b9e63167bdc3a00da8d6129",
+    "skills/ghidra-coordinator/dist/src/debugger.js": "93ddfedada30d139dcf9f747a8ab6833cc105d8d65a60ee511d1bdd455979a4f",
+    "skills/ghidra-coordinator/dist/src/documentation-effects.d.ts": "0c5ee1c92325679c6be8dc9d2ebea0951a7aac177f6d096ab078361d68fd85ad",
+    "skills/ghidra-coordinator/dist/src/documentation-effects.js": "b3039912b1585423a3a717095755f15c20a74ca225a670c56e67f5b9a74207a2",
+    "skills/ghidra-coordinator/dist/src/extensions.d.ts": "fba5767814ce830c9f8ea474ae31a506d3a13f5401df654094a5b379f532522f",
+    "skills/ghidra-coordinator/dist/src/extensions.js": "2cc54ee0559c50b221a9da2a6ef6da7680f4b3cc2f87a09e11ca2b9c88141db8",
+    "skills/ghidra-coordinator/dist/src/function-effects.d.ts": "10f2f98bbee593e41638ffe771342870e2372d4ac373acbd49d7124a3522e815",
+    "skills/ghidra-coordinator/dist/src/function-effects.js": "b57a6adca1d0ff7fbec66aa411c0ff8c4a657238e7c143cc5d960e44415b6252",
+    "skills/ghidra-coordinator/dist/src/ghidra.d.ts": "d0fa7d83dfa1bd3afce153917bb7f89336341c3a9fb1fd98eb7223090c30fef4",
+    "skills/ghidra-coordinator/dist/src/ghidra.js": "3523c711b8968e451b4c4a2776054e2f1dc12f7cae5fe51f739b4585e5c6944f",
+    "skills/ghidra-coordinator/dist/src/index.d.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
+    "skills/ghidra-coordinator/dist/src/index.js": "d80f77bea2810a11a8cdbc77122902d9436abc3a4be6d710b1bfaba11e56c56f",
+    "skills/ghidra-coordinator/dist/src/initial-model.d.ts": "b1683b5829bf4f600a9736d45c8932ccc977a59e6e6c337c0c1fd42d1fd3ac48",
+    "skills/ghidra-coordinator/dist/src/initial-model.js": "673d8e3749373c88ff337c392621f2622eac9e483668ebf0bf7e65878dc0b5b6",
+    "skills/ghidra-coordinator/dist/src/json.d.ts": "78ed50bcf0e654146bd701a52e1004198544e5cc6cac1095d8ce828a55a0534b",
+    "skills/ghidra-coordinator/dist/src/json.js": "e53873ad7e88fe0cece3744ac5ae70d564bd9110b0f8947c597c3496c996e126",
+    "skills/ghidra-coordinator/dist/src/lifecycle.d.ts": "42953fff1b2f6987d80bce00d6f190854e0c74334adf45f8548a6c454a7a2342",
+    "skills/ghidra-coordinator/dist/src/lifecycle.js": "46e636eb635aa7f166d820a1454fbcecbb71ab0b496e990ef64df8602e2582f1",
+    "skills/ghidra-coordinator/dist/src/memory-inputs.d.ts": "6cd0a69f1b62bbd84d101b2c397d817e21aa0af4c0ae330d3df7a5203c5f33aa",
+    "skills/ghidra-coordinator/dist/src/memory-inputs.js": "8cd4e258c7495f35508c7f0eb92ea3f9745fe9f6c1375f6f78959ebfec722e17",
+    "skills/ghidra-coordinator/dist/src/merge.d.ts": "11cf9c6ea4297279d3b83be7d6c60ba3e847fa278fbc73a2670dc4a5e9451d6a",
+    "skills/ghidra-coordinator/dist/src/merge.js": "0ffc5ae18ab27308f16e17ff996a7354a5116478470634d62142b51c644c064f",
+    "skills/ghidra-coordinator/dist/src/model.d.ts": "93ff8d366710ce963592da9b4d825bc8d21f34308dc2553f65a0a53fb3377f7e",
+    "skills/ghidra-coordinator/dist/src/model.js": "dbd28b9d00be3c0d680f316755a5f4741467c8e7f6358555b16695235aad3371",
+    "skills/ghidra-coordinator/dist/src/mutation-effects.d.ts": "cc133e99f06a9659a09aa2e64c1c5f92c518ff702f0713a1727f968b8e01cc94",
+    "skills/ghidra-coordinator/dist/src/mutation-effects.js": "743caca7ad5b071e4774e7769a0f95d7535fb6c101d112fc60c237d2df79a0cd",
+    "skills/ghidra-coordinator/dist/src/mutation-inputs.d.ts": "3a401bc1f471d9467b0ac983adb570e125c9806f12e6c450b9f32d0aec0e5de7",
+    "skills/ghidra-coordinator/dist/src/mutation-inputs.js": "39b9619fbb7e4cbc084c9ac7e61c4798fe8a700de0ff97887663c810f17ea596",
+    "skills/ghidra-coordinator/dist/src/mutations.d.ts": "ee1cd8448bd26ed8c3f09247eff169f42ee1543560128bf5ca6b746d8cae5439",
+    "skills/ghidra-coordinator/dist/src/mutations.js": "57b791c209afd47eb2145c567f006844f5b0c228a61781810359204d8522e3da",
+    "skills/ghidra-coordinator/dist/src/native-inputs.d.ts": "180d9d21e6021ead3b0df5d5e2ebb9f6157b1d7e8fc1a5b1bfb09771cb26e462",
+    "skills/ghidra-coordinator/dist/src/native-inputs.js": "8907d69c0cbebbc5684d8894d93a84fb3ed9ec0c836a0e803c370bfa9043d8c2",
+    "skills/ghidra-coordinator/dist/src/native-queries.d.ts": "5436612b4af25ba1f49a4c6223127256b41edae1d536359452962c250feef686",
+    "skills/ghidra-coordinator/dist/src/native-queries.js": "2c8dec00eb9dcadf9454594751f1e083beb0314f4e7642067d676d050edb7698",
+    "skills/ghidra-coordinator/dist/src/projects.d.ts": "9619410a7b33b8ace9e8ce90b68f0a83915e31e56b8a426d4c7ffafe46a716e1",
+    "skills/ghidra-coordinator/dist/src/projects.js": "c3887b009fa1209b651d8f327cf8c1bfea44612f9fbc71259330e79f17846585",
+    "skills/ghidra-coordinator/dist/src/prototype-cli.d.ts": "15f058aad1c9bd95a91ad5587ebeaee19f2a8840f452d5d119001bd4e8a36877",
+    "skills/ghidra-coordinator/dist/src/prototype-cli.js": "783ce70380d3ae0b1c1a434f79effc88f080054ea4acd3ba67d1bd1fbc5fe5d2",
+    "skills/ghidra-coordinator/dist/src/queries.d.ts": "3196227799cd571d0cda00447c147db7475b47a71d48623bdf1c881dc480c78c",
+    "skills/ghidra-coordinator/dist/src/queries.js": "810678e371c3e20aa16a1f7baad1281f8256b01cfc8338a5902e7e3588dd5989",
+    "skills/ghidra-coordinator/dist/src/query-policy.d.ts": "0892f882545256bfe541cef81837bf1c1ec90eac52f3f9095f40062d5590511c",
+    "skills/ghidra-coordinator/dist/src/query-policy.js": "44b846c16872b6496f01a618e4405b965bc5297bab882584d1ae059f92eacb58",
+    "skills/ghidra-coordinator/dist/src/query-results.d.ts": "85c5fc70ead1617fac837d12bf1305f3069adcccde6aaca8af535b599fed0bdd",
+    "skills/ghidra-coordinator/dist/src/query-results.js": "25d916f182760dbf4db65f08f7c2c311cc331ad6594f3acf41c8598f0e8f35af",
+    "skills/ghidra-coordinator/dist/src/research.d.ts": "94eb914e5cc2f82a8ea3b384492735c234a5f17d7622cbf38b0784adff80f33c",
+    "skills/ghidra-coordinator/dist/src/research.js": "ec540cb3a4b14dd1e972c0157889cfbc9a6a2ebcb157805371b75a389047241e",
+    "skills/ghidra-coordinator/dist/src/scripts.d.ts": "f6d3e06cdad00413852c9de150a6e43e18ff5f29e8b6664adb420f92860f04e3",
+    "skills/ghidra-coordinator/dist/src/scripts.js": "c2b41ca155427c4b2fe2eb953fdba8af522edb9d1282e503751a71605bc5df08",
+    "skills/ghidra-coordinator/dist/src/sdk-contracts.d.ts": "3ce5830ae76f7b56fd0de25656c02eb518b2822cc2be9bb7bf2a14a6df3fd05d",
+    "skills/ghidra-coordinator/dist/src/sdk-contracts.js": "7c7ea9087a5e9ef5d767bfa0ac627a176aa82a6a3b7a0c2bdee6ffc45b8f9ea5",
+    "skills/ghidra-coordinator/dist/src/sdk-files.d.ts": "9349fbf119550c021c7869c5f7a83839541accea07d5d341bba2f9a72e820161",
+    "skills/ghidra-coordinator/dist/src/sdk-files.js": "afde3460e0e2a76d30a5dbd7eb5ebcf419b92ea24f0d85b6cd642d294cefc624",
+    "skills/ghidra-coordinator/dist/src/sdk.d.ts": "921e760fa2394c7f8dac45a4eebbef72a9bf399ea996894940374f3cc3b705ae",
+    "skills/ghidra-coordinator/dist/src/sdk.js": "14187c15ed9e9db022b6a63bc32aa78ee2fa4c4d9b917f1a8b778ef70c6c9799",
+    "skills/ghidra-coordinator/dist/src/server.d.ts": "48b8171ea26cab0f8a034000231b91e1f181f121f32f84fd03654337b496a701",
+    "skills/ghidra-coordinator/dist/src/server.js": "812028a7a7a7762c25f6e2539273fa8b4938bb3d538887ba8688091c854e4e4e",
+    "skills/ghidra-coordinator/dist/src/store.d.ts": "a04b3862dea8fc65b0e14e52ab41536d9cd81d3f8d1c8e2647ac0101ee4f1dd3",
+    "skills/ghidra-coordinator/dist/src/store.js": "ced32632b9b4157b9ff519a51122b094ef4334b043d2e4d9cec805cf9467006f",
+    "skills/ghidra-coordinator/dist/src/sync-policy.d.ts": "52c16eafcaba5d01b524ce7eb6eb721beb438fedc82ac0f2ba69965aafb3021e",
+    "skills/ghidra-coordinator/dist/src/sync-policy.js": "3514100bf6c170c86c023d5083b31474a16f1a1df8c40f5a620af517f459858a",
+    "skills/ghidra-coordinator/dist/src/transport.d.ts": "65b485fe414a9ba2d8271fe2b2fe288ecb00a818111257576b36672246ee86bf",
+    "skills/ghidra-coordinator/dist/src/transport.js": "c9d4ebea272fb953b664ccab1c5a77b0882f41df5051746e73f7b015a9db98bb",
+    "skills/ghidra-coordinator/dist/src/ui-results.d.ts": "aeb578379005c1cf0c7941c30d76a4813394a04df52dfdc0dd321747fd402ae7",
+    "skills/ghidra-coordinator/dist/src/ui-results.js": "628732686728bed5efa58ac3ddaf443657c60ab895b76a85c2af441610fa3589",
+    "skills/ghidra-coordinator/dist/src/ui.d.ts": "3e024522f2b3d253a67c603576bafbec9a9aea6a25ae48f08c5dbb87246c2c93",
+    "skills/ghidra-coordinator/dist/src/ui.js": "d880cb7b299789a105eb448caf91f911fa3de39c6be439d20a732f61299003b2",
+    "skills/ghidra-coordinator/dist/src/utility.d.ts": "13ed4f511eec161381f97d5011b2bde1da7db05702487f1ec2a9102ab21d25cf",
+    "skills/ghidra-coordinator/dist/src/utility.js": "7e9e0ec2f429094a1443e30313f68abc3329bcc3f907652a92bf2271259b3ee4",
+    "skills/ghidra-coordinator/dist/src/version-tracking.d.ts": "475e6ceecf44d5efce0c531ab6bf838ebc456a188b1f6f357d0f33c426dfc702",
+    "skills/ghidra-coordinator/dist/src/version-tracking.js": "3c8a44b1a9ab41794a3af0e3790a8779032b128b7b6aa893f2485c8da3d33e04",
+    "skills/ghidra-coordinator/dist/src/workspace.d.ts": "5b752c292ca6ae1aa169a328889e4d531b668318880f04698071316f779c0171",
+    "skills/ghidra-coordinator/dist/src/workspace.js": "be5ea050ec0f4ad4c3db0c633dbb1cf5c14e14791045bc81bcebf733632dd501",
+    "skills/ghidra-coordinator/dist/tests/administration-results.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/administration-results.test.js": "fd01ecb82c48b1861c0c7fa2d2ad0af59269c6af92011e28927ab5ce568840f1",
+    "skills/ghidra-coordinator/dist/tests/administration.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/administration.test.js": "f9bd88ac01d7f3c2dadec76825c8d391592977a38d891ec37f2c16cd4fd99151",
+    "skills/ghidra-coordinator/dist/tests/api-gaps.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/api-gaps.test.js": "7e93e7f1ff2ca502d7a15017047a2bc7b83cdadd1476e62be405edf19f617399",
+    "skills/ghidra-coordinator/dist/tests/archive.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/archive.test.js": "36fd32ccf40240cd697e38e516ef24d4348e17399276c6035445110c6d412638",
+    "skills/ghidra-coordinator/dist/tests/cli.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/cli.test.js": "76fd7b189a8741fec5af4cd3b8b37dda8a6f1af092f3b9187228530978e0e0f1",
+    "skills/ghidra-coordinator/dist/tests/comment-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/comment-effects.test.js": "a1d302b852903f23202528144b2591a8e894a2ba94242824485c1de36b7f535f",
+    "skills/ghidra-coordinator/dist/tests/context-owner.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/context-owner.test.js": "2029ca95ff64a21e5de29c11c8df635c33d4498ad1c1b81068ff5f3c04318ac8",
+    "skills/ghidra-coordinator/dist/tests/coordinator.test.d.ts": "27576af71e8af663ad7be67da34b3984f092c9bf6aad79f95b199157d5b8b509",
+    "skills/ghidra-coordinator/dist/tests/coordinator.test.js": "a6bcdf74fbe7c62db2dccf2b61ab6f64f7bd55fe7e57f85530b1a39453128a9c",
+    "skills/ghidra-coordinator/dist/tests/crash-child.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/crash-child.js": "72b8c8c00d3139ff2df13da7095f5875e58a9b4c3dd3568b6fe31a49b026ca65",
+    "skills/ghidra-coordinator/dist/tests/crash.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/crash.test.js": "8abf54bfc199bbdb62575fb8fdfbb29602575df0bda46c5cbb3dbcc4512a086b",
+    "skills/ghidra-coordinator/dist/tests/cross.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/cross.test.js": "1ef701c4aa52e63e9d1ec91583a1146c3f3c2d6e62d7db5015ea051593c2557e",
+    "skills/ghidra-coordinator/dist/tests/data-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/data-effects.test.js": "4d45820821b00b122c795b0e5eccba89a8e5ba114b567461bfe26e72f09c9953",
+    "skills/ghidra-coordinator/dist/tests/debugger.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/debugger.test.js": "48b9eae1e0b7a6627c57e734c2f0f74d76d7a99dfe7f0844b41697e952ebb6e5",
+    "skills/ghidra-coordinator/dist/tests/facade-lifecycle.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/facade-lifecycle.test.js": "b1cb2a943c37ebf0a1c6ab789c377b0e21861b1216859b6fa728b3be39949bbd",
+    "skills/ghidra-coordinator/dist/tests/fixtures/session-backend.d.ts": "d5d690d5e7fb1eac7a6171176d9efcdaeeb6d6090a1b3feafa4c9104a58e8418",
+    "skills/ghidra-coordinator/dist/tests/fixtures/session-backend.js": "c63b43322e5d8997d1750eb110ad06d76f0f76905ba7436b4dc54df90a7d995e",
+    "skills/ghidra-coordinator/dist/tests/function-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/function-effects.test.js": "2596cfcb5ce1e371e8fb53c3f0d908eca1c89c2a73684e0df290dcf0857c59be",
+    "skills/ghidra-coordinator/dist/tests/initial-model.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/initial-model.test.js": "eb4c43aae1670826009fd2f84ddd497290bd7f5d1377cbf44ee3a8c7429b4435",
+    "skills/ghidra-coordinator/dist/tests/json.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/json.test.js": "cfc4816380b1d119bc4d7175420ec0e7b28bb0c64447124d6357d4f86f037ef1",
+    "skills/ghidra-coordinator/dist/tests/lifecycle-selection.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/lifecycle-selection.test.js": "dba0cc4e7b60038bfa4c372fc6b105d8051b89b0bd4e8489e7b9de90fc9dfb59",
+    "skills/ghidra-coordinator/dist/tests/lifecycle.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/lifecycle.test.js": "c9f2bf4d9df346affbc963e97a2e390b68b3f3d722eafa741cda9780da6cdfb0",
+    "skills/ghidra-coordinator/dist/tests/merge.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/merge.test.js": "52ff3ffdc75a2e556a4211b32bd45968678f30851e2c9d1c6fbb544b64642082",
+    "skills/ghidra-coordinator/dist/tests/mutation-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/mutation-effects.test.js": "edda646bce45fd29792567a51c5359992f76eb65e847f579ce4026a7fc672298",
+    "skills/ghidra-coordinator/dist/tests/native-inputs.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/native-inputs.test.js": "0a929c3afe7a17101b7bc1b85cadd4834f2590e5dde6a953d795193b40cfa0fc",
+    "skills/ghidra-coordinator/dist/tests/p2-workflows.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/p2-workflows.test.js": "05e1927eda33d3d89d0c77c4a85a966c25a3adf1f4bfc205d88614363c8d1561",
+    "skills/ghidra-coordinator/dist/tests/p3-workflows.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/p3-workflows.test.js": "bf45462e0487c168667db22b1fe2ec5fa0a03b6e23b1480b10da2a159974a95c",
+    "skills/ghidra-coordinator/dist/tests/program-recovery.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/program-recovery.test.js": "1ca0524c5fe09f2f13d29e0fe2a83343b6c5dada5451d4c7e41ada50f38b4f18",
+    "skills/ghidra-coordinator/dist/tests/projects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/projects.test.js": "5b7d312aaace92f04e2cc0cb96767a15ff2270d8a53970b5d931a0f43fef4f43",
+    "skills/ghidra-coordinator/dist/tests/publication.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/publication.test.js": "272ee9626647e488c2bfb87267577c53a040e9ca221e14fcf289ed2deb1954d3",
+    "skills/ghidra-coordinator/dist/tests/queries.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/queries.test.js": "94707875918a8a9a745132b03962517d99a111d9a341bfa65cb3ccca9da34eee",
+    "skills/ghidra-coordinator/dist/tests/query-results.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/query-results.test.js": "c2d6cda223d1beb3117617738361c5fe8120d8707908f5ea2d561153c2f3e14d",
+    "skills/ghidra-coordinator/dist/tests/recovery-child.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/recovery-child.js": "08bbca55e838260c6a24cfb76c427f081eac0a0953205f67dd1128db7c4f6007",
+    "skills/ghidra-coordinator/dist/tests/research-cli.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/research-cli.test.js": "0ed3167f5e453b8ff2ab84ee2ee2f65a615c46e1dbdc8141f12ed9c6fdcad522",
+    "skills/ghidra-coordinator/dist/tests/scalar-projection.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/scalar-projection.test.js": "24a1730d679ac3755247e7fb32ccddb512dc74614e174d425224d2613d314595",
+    "skills/ghidra-coordinator/dist/tests/scripts.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/scripts.test.js": "cb5fb03e01fbbcf81bf2d9c99233efb95795df69550784f0197148364df56518",
+    "skills/ghidra-coordinator/dist/tests/session-merge.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/session-merge.test.js": "a3cdf8597276c89c6918f61068c194b3ac4611b3952905cc83ffd61cb95baf08",
+    "skills/ghidra-coordinator/dist/tests/transfer.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/transfer.test.js": "b665ee678c0185c36047097b0d26717e8a5802374f675e188dff29a42dfdc531",
+    "skills/ghidra-coordinator/dist/tests/transport.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/transport.test.js": "13b28c18e7cd521a0fa2bb25967735432a6cbba3c53da82fbfaa3ffdffd7fa88",
+    "skills/ghidra-coordinator/dist/tests/ui.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/ui.test.js": "297b9c1ec7a560a4750f855183bb61d0b0a8f31cbd13f7aa9669eb3b2bcbf37c",
+    "skills/ghidra-coordinator/dist/tests/utility.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/utility.test.js": "1173e685eb99756e619e1c3cc4ea4544fa2fecdd9460852f19cf37ee68c0c8a7",
+    "skills/ghidra-coordinator/dist/tests/workspace.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "skills/ghidra-coordinator/dist/tests/workspace.test.js": "7199eb596b94cea1cee113ca1f41a063f7f62a4b480b09b5c0444bba99e454b6",
+    "skills/ghidra-coordinator/tests/administration-results.test.ts": "5d9d6577cb9b46c0e8027636e9eddd7a7e3f2e433830b002b924800e0f1b3545",
+    "skills/ghidra-coordinator/tests/administration.test.ts": "5427f352d8eece1563414e9a223d425e3ea82cf209f04ce244bbc9641a8784e1",
+    "skills/ghidra-coordinator/tests/api-gaps.test.ts": "a0febf99a20ae4a7aa50c0f29a3f17a6d7f4ab554499f408742c54c87d021735",
+    "skills/ghidra-coordinator/tests/archive.test.ts": "7dd185880bd087254798ab898f3ff055c21573f1b814dd7ce503aaa1dc513592",
+    "skills/ghidra-coordinator/tests/cli.test.ts": "9e0e1502858340017f211d814efc97ab7a98f0b2321ab2d28218c8a69ed869f3",
+    "skills/ghidra-coordinator/tests/comment-effects.test.ts": "5b224cc558bd9f8a512a4a31378606bc2d0578cfee32d3c3cfb0d2b8b3de2582",
+    "skills/ghidra-coordinator/tests/context-owner.test.ts": "a9e3423d10690741fdeb9bc76ad30183a1accd8b4fbc87230f2c5ebb0218de02",
+    "skills/ghidra-coordinator/tests/coordinator.test.ts": "2392b9b0784dfbceb6d18522a57f887c537f40e2bb184b29bf97d8bcda9c5362",
+    "skills/ghidra-coordinator/tests/crash-child.ts": "86b7e8d021c9ca768a1ac99b7bf073ab9ad6ffa5ee6b806eaa1bdb6fe1766d39",
+    "skills/ghidra-coordinator/tests/crash.test.ts": "1ac9c5b31014e838e9e2f65e414a21c915452f4367340f5dd7286fd1739f4fa9",
+    "skills/ghidra-coordinator/tests/cross.test.ts": "64c4a21bdc12f570d95abf8e3f1dc79a1ea8c0b79425a8d723488f30c5596c6c",
+    "skills/ghidra-coordinator/tests/data-effects.test.ts": "e7484e249bd0dddcec435e93aa3e31ef2ac3b7584ac8ba35fca61b587ebb2b2e",
+    "skills/ghidra-coordinator/tests/debugger.test.ts": "bd1a0c016c8ca24491bb7a33ca950b627a6754ca05abc303f9c07e9191d5ffbe",
+    "skills/ghidra-coordinator/tests/facade-lifecycle.test.ts": "e2745a1cfd1550626dde36dfca5b09219b04c430b4b3fe6eea03ea0f37195a16",
+    "skills/ghidra-coordinator/tests/fixtures/session-backend.ts": "38d523319c9130c386b81394a90dd777abaad8afd28f6dd39c4f85e85e80dec1",
+    "skills/ghidra-coordinator/tests/function-effects.test.ts": "59ccc568f9d841127810766082465428fb1c66aad0f5d263bc7d001aa189d095",
+    "skills/ghidra-coordinator/tests/initial-model.test.ts": "c5b3905934c31983642e3a8d23e7b5b25939a0c225ddee3407cbb417de5a11ca",
+    "skills/ghidra-coordinator/tests/json.test.ts": "8a9402a41efc85cc6647b0944764820bbedbfc0fa9da812301eaab0421169f0b",
+    "skills/ghidra-coordinator/tests/lifecycle-selection.test.ts": "6eacb7339e304e2779b35554f5d9f1c3c78250a7c96eacb0c3972b6b617738e8",
+    "skills/ghidra-coordinator/tests/lifecycle.test.ts": "3567cf037c188448046c766b9ac36faea4ad6e4c4b866142eeeb6039bc864950",
+    "skills/ghidra-coordinator/tests/merge.test.ts": "b69b1985cc837ec168845e688cab3bd89483e7bd74f341c229e8713dcb23d5ce",
+    "skills/ghidra-coordinator/tests/mutation-effects.test.ts": "01efabc31c11a1db7d60814f7d95a5ad4169177ca792cf81b5cedf31e45766a9",
+    "skills/ghidra-coordinator/tests/native-inputs.test.ts": "5d3fdcebd8d90023865824fb7d3c60a7b48de203c5d3d81f202901f639f1e385",
+    "skills/ghidra-coordinator/tests/p2-workflows.test.ts": "525759948dd8f3e7d10d04abafd5b85e963ac3e1d09236614801deb719074bd9",
+    "skills/ghidra-coordinator/tests/p3-workflows.test.ts": "d335c54e778e203e7efc05451902aecda1a164c9a6a70554eae7aac3935c2e79",
+    "skills/ghidra-coordinator/tests/program-recovery.test.ts": "9bd54e963a17096dfd408b2b48af95174645ca13968d11bede43309190706533",
+    "skills/ghidra-coordinator/tests/projects.test.ts": "6dbb9e4b36713550297649f21fc67f167289ea9df0f75ab330ef617fbab617e0",
+    "skills/ghidra-coordinator/tests/publication.test.ts": "a4dcdb9c8a85d926a97ba75b554724d155af9b390723017affda3d519ac6b7d8",
+    "skills/ghidra-coordinator/tests/queries.test.ts": "dafaa03ab8bfd167bb98b789509975afef4c52fe3a6d5af0196aebf5db827e0f",
+    "skills/ghidra-coordinator/tests/query-results.test.ts": "2332aa3a9d3d16f400cd54a3d1a7a21e1990d258b2aae49a44365af84151fd5a",
+    "skills/ghidra-coordinator/tests/recovery-child.ts": "a8d8e0d3a84b0be016c63d08e70b9120800c715e515756ea0e589ae6a0d54afe",
+    "skills/ghidra-coordinator/tests/research-cli.test.ts": "3f8dec545f6dc08e5c882fe30d86897fa8efce541d62f7845d8eb49358864f25",
+    "skills/ghidra-coordinator/tests/scalar-projection.test.ts": "2a7ad37a5c860dce90ee2b2eff6bdeb9034a7730a59d0260a0ed56dd66272e8f",
+    "skills/ghidra-coordinator/tests/scripts.test.ts": "9d3a907d23910bb325b3ff094129a2f2c3859ecc50be892de60c4862e02a27da",
+    "skills/ghidra-coordinator/tests/session-merge.test.ts": "0040aa6a7e3b7da955547b23ebebf68a5e8095c420e1753fc03668d9181f3ac6",
+    "skills/ghidra-coordinator/tests/transfer.test.ts": "0ae72a502ad82052ac96b1826f72371163e30c72c092eb988f6eeec4367a1200",
+    "skills/ghidra-coordinator/tests/transport.test.ts": "76be90dc55dbf0fa4d36a97c83a5da98dc121f45c0004c27c6b6e8d78c4b32d6",
+    "skills/ghidra-coordinator/tests/ui.test.ts": "a2385539e1b25ec80f005f5ac9318da5e584f7c3b40fcca2faea7983ca948e21",
+    "skills/ghidra-coordinator/tests/utility.test.ts": "071bea24a2c36e97195021270f307fc6341d83b9c03bd90a56e87b1d9d9b5176",
+    "skills/ghidra-coordinator/tests/workspace.test.ts": "82e7ca4c7540c26435813057ba8fd305d82663d2ca301f0deafe2f44697801a9",
+    "skills/ghidra-coordinator/references/InsightRepositoryProbe.java": "bb5d4033c322e79953bd7f7f61cd8b40d9347376e0bf345d36ec594a42d8f855",
+    "skills/ghidra-coordinator/references/administration.md": "dab2f162c5b87388dc8ffeb986e1fa25263c8858d0dcc53b501de6d6672b07f6",
+    "skills/ghidra-coordinator/references/archive.md": "1eab5ac440df402003dd1483d283917a043269525f343a188eed389ec9bc3ee0",
+    "skills/ghidra-coordinator/references/debugger.md": "ef05f68a92aaa9758322fac04894e7bd5980b34c2c41a2fe974708f5550f88f1",
+    "skills/ghidra-coordinator/references/extensions-and-sync.md": "b523aa92e13bddb22f29b8d1d96f46e8d77208209f01187f956ae0f47defc654",
+    "skills/ghidra-coordinator/references/mutations.json": "8939bd1761b52da1f71ea8522fcf75fb8fdc08ab7708497b2de439a71243a63e",
+    "skills/ghidra-coordinator/references/native/InsightApplyDocumentation.java": "3548b99a04b771d5e1defba9bc4fbf0c26de2a11b211091aecf74ad2467aeab1",
+    "skills/ghidra-coordinator/references/native/InsightArchivePayloads.java": "7862461244fe613f25ea6a08d72b951aacca3493e19f5aa790aa77fbe58f5618",
+    "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "cdf8769e1da82c9abe8a4f745bb34b1ee94a5c05ccad875f29452dd2e30d2edf",
+    "skills/ghidra-coordinator/references/native/InsightEmulation.java": "56afd7b83955743dc24d7a46f22a763cf0929a926820a9f5071e7deb2e8ab641",
+    "skills/ghidra-coordinator/references/native/InsightExtensions.java": "9c6792b313cdfbb957d9410f4a671a870f9eae0d064486796e2cf79b23f267af",
+    "skills/ghidra-coordinator/references/native/InsightFunctionDatabases.java": "f20d671c8f6bb7e212747b87a1a489f38b7b8cb891bffabb19b5cc034088a99f",
+    "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "c2eb095f84356bef47c1526ba88ab6134499a5287d3dfc47ef538ebd04c5d371",
+    "skills/ghidra-coordinator/references/native/InsightHeadlessMain.java": "d401df336937d557792b2b07d8a624d5715c39899c35db7db26570254f8fb60e",
+    "skills/ghidra-coordinator/references/native/InsightInitialImport.java": "f1757da09912a7b82bee53c22e794e47af19a3678795f2acb0a7d62ecdfbd7b6",
+    "skills/ghidra-coordinator/references/native/InsightInitialJournal.java": "b84a67e9d791cdfe90cf9878ea7bdb70cf81284c10f2e31c9aa15cc13d9b2584",
+    "skills/ghidra-coordinator/references/native/InsightInitialPublication.java": "8e8692a254632b145a77bcd4d3591eefd9157a46a83b6da7bfd4fb10afd9a02b",
+    "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
+    "skills/ghidra-coordinator/references/native/InsightNativeReceipt.java": "36a0e8980584dea96cbda5c715ecfef3ff291a5c25406328337298d74b042a75",
+    "skills/ghidra-coordinator/references/native/InsightPlugins.java": "f0bdd91527bf41851ae25110c5636539ec0565f71377322a2bb70bc8a02b78ee",
+    "skills/ghidra-coordinator/references/native/InsightProjectFiles.java": "007df5ec3c5ae8fcb2cd5580502050aa0b6f93fd016de34d08af2c41bfde0db6",
+    "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "12288d388905dfdbb31afd03c8da174a931a3ad1966157c88c1259604b4a5ff0",
+    "skills/ghidra-coordinator/references/native/InsightPythonWheels.java": "0e3f433f342fb78053047a4d9035a01f06d9d228a75648eec652b52fe997f44c",
+    "skills/ghidra-coordinator/references/native/InsightResearchQueries.java": "1de57a623fb258ceae4dfc6635a03b0dcf95a7f3fd5d25dc4873f8d191a28cca",
+    "skills/ghidra-coordinator/references/native/InsightSdkFiles.java": "518c8c393f36e26c8a7920e4af706ba05023c74e8fa91e6cfd5da1f4edc583e9",
+    "skills/ghidra-coordinator/references/native/InsightSdkScript.java": "0182b69505f18f10ec423d12c44e9f593ca7bd6b1046a62463c138906bf45ca1",
+    "skills/ghidra-coordinator/references/native/InsightSdkTools.java": "a86238c62c8b6ecc8d54e5d44e3f79ea7178cbbb00cf063d760e5438d2b965a6",
+    "skills/ghidra-coordinator/references/native/InsightSdkTypes.java": "b0290a71ac8ef947bf6fcee7145ef5cb5ce64d0f0914516440f3698f37bd17e2",
+    "skills/ghidra-coordinator/references/native/InsightServerAdministration.java": "c2a546c2fc488fe67b6d286e26f7583eabdf60e8fd2704cb27ab5c34c28f5c78",
+    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
+    "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
+    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotFields.java": "f12bf8d88f3ba1998336fa41f91b37db07c0d36d32fbd96c0b85f6f4fb38594a",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotInspect.java": "d161fc8210289b1add4fb054721e7f275466c73db33dfab8601299bfa231e210",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "7860b40fcae7aafe9f1f3f3092a995fd307b3fd7d3b0dbf8b6bf0ec59ce6be00",
+    "skills/ghidra-coordinator/references/native/InsightStartDebugger.java": "3cf55ab86303dab43ef8cf0a5f18bb60331d729e93eb498d59490ca3fe18aa96",
+    "skills/ghidra-coordinator/references/native/InsightStopDebugger.java": "c8e9df60bc41bf6f86d4918dd3ff28f6818c71b37bbcb1d4d25382b55ecfbf95",
+    "skills/ghidra-coordinator/references/native/InsightTraceInspect.java": "476dfa7b6db5dbbee02eca496d3da86a35796a6cb11e3e6bdeb91482570030b6",
+    "skills/ghidra-coordinator/references/native/InsightTraceState.java": "c037b08cd023019c37e031d0d743ca5d74b62d342728a4412718522c734310ce",
+    "skills/ghidra-coordinator/references/native/InsightTraceTools.java": "ec3ca5176898e59ccfa2e2e0c6ca4fa6708dac5d61bd2643f90879ea7370c434",
+    "skills/ghidra-coordinator/references/native/InsightVersionTracking.java": "dc9e96654e589b4deb9303a9d57ae820c95eded251fd29243add41362a61b9aa",
+    "skills/ghidra-coordinator/references/native-workflows.md": "daba1474e6515d5b0d12640324cfb5ec61c011d693279b6ac965981c17c006d5",
+    "skills/ghidra-coordinator/references/queries.json": "78a78a70b6f77691a6717b747c0d9cf41078c957c490bfbddf3e5a03352123cf",
+    "skills/ghidra-coordinator/references/query-semantics.md": "4d1388580d06d993e5967d14d80e47531d6b002760973fcd5b7dd16534b2deb4",
+    "skills/ghidra-coordinator/references/recovery.md": "9cb7e5043894d0e08751b8067df9d4fb67c063de579009c1ea26d9015b15a210",
+    "skills/ghidra-coordinator/references/research.md": "47737c616625222fc2bae591ee35fb4ac41b568f4c2f94ae6e42d0c1c8314e2f",
+    "skills/ghidra-coordinator/references/setup.md": "d204d48f6c1a1ce89fbd964fa213bb2ea7f352cc0b51eb19da22f034af359292",
+    "skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+    "skills/ghidra-coordinator/runtime/GhidraMCP-LICENSE": "dc7fb54997c081b5bc3a9de54d90fe7290b8db7a0bb0df3c18c75832aed5a3f1",
+    "skills/ghidra-coordinator/runtime/GhidraMCP-NOTICE": "17c5d159536b0ec6aeb9764237b5f6bec10c2eef5150edc53c537f8c027fe014",
+    "skills/ghidra-coordinator/runtime/provenance.json": "5eb77d25dba4e9a84b018ffdd02785597692a3922a98b145656b64227a74fe28",
+    "tests/acceptance/Bindings/BusinessSteps.cs": "19170a434847b52d7ae59e020292dd2407c56ab40eb2bf801451fb7a133a964b",
+    "tests/acceptance/Bindings/IntegrationSteps.cs": "aa52433953aa32a7c6a8f7f0baa9717b9b63bf7291edd08f9ad90700c2bd90c6",
+    "tests/acceptance/Features/Business/01-OneExecutable.feature": "32b75054751b322efd8ff2dfac5168de084ac514d1d037f1f4dd398768350aad",
+    "tests/acceptance/Features/Business/02-SeveralExecutables.feature": "96a5c6e2224b911654426f792e5ea934e1f377b4ee79eb696d68295de7b237b3",
+    "tests/acceptance/Features/Business/03-Collaboration.feature": "66a0f837600dae6b7ff42d9ba60284887239f9b34e1012b35116c2b8309efb76",
+    "tests/acceptance/Features/Business/04-InterruptedInvestigations.feature": "2f044711d6a6b752745eb04b27432075df0f7c1e4956064cff496bbd844c9263",
+    "tests/acceptance/Features/Business/05-SharedTaskThroughput.feature": "e0ef181c19ca26210dec4402d7d15585f5da4fc9ac63fb53c6c8a934640c342e",
+    "tests/acceptance/Features/IntegrationSmoke.feature": "cc55a62c6f4761b4b0bf48ac4c24c40826d6aeda8815df927d910e9c0af78e0d",
+    "tests/acceptance/Features/NativeIntegration.feature": "56cf4e4cde9d3d7202c97eb7fb48765777440a90e773e34ff48f1ad3afe832b1",
+    "tests/acceptance/Insight.Acceptance.csproj": "35f61f28c73557bcd1a15634766937d76c589c4495eb8ec6186cb2f0c77c0931",
+    "tests/acceptance/fixtures/benchmark-protocol.json": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+    "tests/acceptance/fixtures/business-actions.json": "4cce6d27c5f8b8dc510e769fe49eb4e4a8c7a684db58162cbf3369fb6d6c3f12",
+    "tests/acceptance/fixtures/research.c": "cd3b078b0e40b74c140ed575f60e36e1b64b9b28228a8a75344fa0837e38b68d",
+    "tests/acceptance/packages.lock.json": "a08cf3e992537688d05232f33fdacfe43abcb235f23a1c62254fcab8a3d9fdc7",
+    "tests/automation/Host/Insight.Automation.Host.csproj": "6bee4ad3f71501ab03dff699345ed9a212282e7f4a1c6736a099e91be4919a9d",
+    "tests/automation/Host/Program.cs": "6d414002d1acd8e20ad656305275858dd72a796b5e70e792b260e1c76edab65e",
+    "tests/automation/Host/packages.lock.json": "e762ac56d1f0fcccc84fce7449c370ba975b6541823eed20113c40ec38d31423",
+    "automation.json": "d67571d086acb7f6ab1ca59c844524d13ab9210a34428c8feb621c9cb791de43",
+    "global.json": "20c93ca7812d0a9825eef71217156f95ab2f4fe5aadfeb22ebc1c24b630018d3",
+    "package.json": "5da6f0f6f3093de704072094d661b839a6a33bc6bf0e887c2ca0e716024be1ec",
+    "package-lock.json": "afe4ee374a6ffa033077cdc8b0a01065b371b621463d1254cacd0edb9d509cef",
+    ".gitmodules": "39c3dc845db235c46117995bc5ba013e002e5357f62c7a3e7383530f37666ad1"
+  },
+  "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+  "inputSha256": [
+    "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+    "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+  ],
+  "corpus": [
+    {
+      "version": 1,
+      "sha256": "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+      "exports": {
+        "case1": "0x140001000",
+        "case10": "0x140001090",
+        "case11": "0x1400010a0",
+        "case12": "0x1400010b0",
+        "case13": "0x1400010c0",
+        "case14": "0x1400010d0",
+        "case15": "0x1400010e0",
+        "case16": "0x1400010f0",
+        "case17": "0x140001100",
+        "case18": "0x140001110",
+        "case19": "0x140001120",
+        "case2": "0x140001010",
+        "case20": "0x140001130",
+        "case21": "0x140001140",
+        "case22": "0x140001150",
+        "case23": "0x140001160",
+        "case24": "0x140001170",
+        "case25": "0x140001180",
+        "case3": "0x140001020",
+        "case4": "0x140001030",
+        "case5": "0x140001040",
+        "case6": "0x140001050",
+        "case7": "0x140001060",
+        "case8": "0x140001070",
+        "case9": "0x140001080",
+        "config_read": "0x140001190",
+        "evidence_config": "0x140002000",
+        "evidence_version": "0x140002020",
+        "hash_djb": "0x1400011f0",
+        "hash_fnv": "0x1400011c0",
+        "hash_sdbm": "0x140001230",
+        "main": "0x140001260"
+      }
+    },
+    {
+      "version": 2,
+      "sha256": "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617",
+      "exports": {
+        "case1": "0x140001000",
+        "case10": "0x140001090",
+        "case11": "0x1400010a0",
+        "case12": "0x1400010b0",
+        "case13": "0x1400010c0",
+        "case14": "0x1400010d0",
+        "case15": "0x1400010e0",
+        "case16": "0x1400010f0",
+        "case17": "0x140001100",
+        "case18": "0x140001110",
+        "case19": "0x140001120",
+        "case2": "0x140001010",
+        "case20": "0x140001130",
+        "case21": "0x140001140",
+        "case22": "0x140001150",
+        "case23": "0x140001160",
+        "case24": "0x140001170",
+        "case25": "0x140001180",
+        "case3": "0x140001020",
+        "case4": "0x140001030",
+        "case5": "0x140001040",
+        "case6": "0x140001050",
+        "case7": "0x140001060",
+        "case8": "0x140001070",
+        "case9": "0x140001080",
+        "config_read": "0x140001190",
+        "evidence_config": "0x140002000",
+        "evidence_version": "0x140002020",
+        "hash_djb": "0x1400011f0",
+        "hash_fnv": "0x1400011c0",
+        "hash_sdbm": "0x140001230",
+        "main": "0x140001260"
+      }
+    }
+  ],
+  "automationCommit": "b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033",
+  "protocol": {
+    "schema": 1,
+    "task": "Resolve three input hash dictionaries using the executable's FNV-1a, DJB2 and SDBM implementations; publish and independently read the complete hash-to-candidate-ID tables, dictionary identity and function addresses",
+    "batchesPerPart": [
+      64,
+      64,
+      64
+    ],
+    "unevenBatchesPerPart": [
+      128,
+      32,
+      32
+    ],
+    "candidatesPerBatch": 20,
+    "candidateLength": 1024,
+    "publicationStrategy": "lead-collector-v1: the lead reads all three producers' private findings through public CLI, copies other producers' complete tables into its context, and publishes the combined result with one merge; all collection, copy, merge and independent verification costs are timed in both modes",
+    "pairedRepetitions": 6,
+    "modeOrder": [
+      1,
+      3,
+      3,
+      1,
+      1,
+      3,
+      3,
+      1,
+      1,
+      3,
+      3,
+      1
+    ],
+    "comparison": "Every one of six paired prepared-base trials must have T3 < T1; exact one-sided paired sign probability 1/64, below 0.05. No 1.5x margin.",
+    "timeoutSecondsPerBatch": 30,
+    "maxStepsPerCandidate": 100000,
+    "warmup": "One separate short candidate per algorithm per allocated worker before the prepared clock; no measured candidates or findings are precomputed",
+    "coldPolicy": "Fresh product profile and no imported canonical program; OS, tool installation and compiler caches are not flushed",
+    "invalidTrials": "Retain all attempts. Any failed business or timed trial fails the run; no automatic exclusion or replacement. A later code fix requires a new complete acceptance run."
+  },
+  "scenarios": [
+    {
+      "schema": 1,
+      "id": "BS-01",
+      "state": "passed",
+      "checks": {
+        "inputIdentity": true,
+        "contextUsable": true
+      },
+      "facts": {
+        "scope": {
+          "session": "s_96336a77-1bda-419d-9f3a-c71bfbcdad69",
+          "target": "t_d803a79cad6888183e9d5b7f69709eb2"
+        }
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-02",
+      "state": "passed",
+      "checks": {
+        "knownClueAddress": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-03",
+      "state": "passed",
+      "checks": {
+        "knownClueAddress": true,
+        "clueReferencesExpectedFunction": true,
+        "decompilationExplainsClue": true
+      },
+      "facts": {
+        "clueFunction": "0x140001190"
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-04",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "privateNameAndComment": true,
+        "otherAgentDoesNotSeeUnpublished": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-05",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "privateNameAndComment": true,
+        "otherAgentDoesNotSeeUnpublished": true,
+        "publishedName": true,
+        "independentPublishedReadback": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-06",
+      "state": "passed",
+      "checks": {
+        "twoDistinctInputs": true,
+        "privateTargetIsolation": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-07",
+      "state": "passed",
+      "checks": {
+        "twoDistinctInputs": true,
+        "privateTargetIsolation": true,
+        "equalBasenamesAndAddresses": true,
+        "otherSharedTargetUnaffected": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-08",
+      "state": "passed",
+      "checks": {
+        "twoDistinctInputs": true,
+        "privateTargetIsolation": true,
+        "versionDifferencesBoundToTargets": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-09",
+      "state": "passed",
+      "checks": {
+        "twoDistinctInputs": true,
+        "privateTargetIsolation": true,
+        "originalContextResumed": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-10",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "overlappingCliCalls": true,
+        "twoNativeWorkers": true,
+        "independentPrivateResults": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-11",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "bothContributionsAccepted": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-12",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "stableUntilExplicitRefresh": true,
+        "refreshPreservesLocalWork": true,
+        "combinedResultDelivered": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-13",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "agreementWithoutConflict": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-14",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "conflictReported": true,
+        "bothConflictVersionsRetained": true,
+        "deliberateResolutionDelivered": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-15",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "conflictReported": true,
+        "bothConflictVersionsRetained": true,
+        "entireLocalSetRetained": true,
+        "noPartialPublication": true,
+        "deliberateResolutionDelivered": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-16",
+      "state": "passed",
+      "checks": {
+        "sameTargetIndependentSessions": true,
+        "complexDivergenceRetained": true,
+        "transferredStructureAndSharedFinding": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-17",
+      "state": "passed",
+      "checks": {
+        "firstOpenInterrupted": true,
+        "originalScopeRetained": true,
+        "oneInitialPublication": true,
+        "recoveredInvestigationDelivered": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-18",
+      "state": "passed",
+      "checks": {
+        "savedWorkRecovered": true,
+        "recoveredWorkDelivered": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-19",
+      "state": "passed",
+      "checks": {
+        "replyDiscardedAtClientBoundary": true,
+        "outcomeEstablished": true,
+        "sameIntentNotDuplicated": true,
+        "retryIdentityRejectsDifferentIntent": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-20",
+      "state": "passed",
+      "checks": {
+        "replyDiscardedAtClientBoundary": true,
+        "outcomeEstablished": true,
+        "onePublicationAfterRetry": true
+      },
+      "facts": {},
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-21",
+      "state": "passed",
+      "checks": {
+        "expectedFindingsPublished": true
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "protocolSha256": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+      "trials": [
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "single-complete-task",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 245.24685504200002,
+          "phases": {
+            "setupSeconds": 46.229445542,
+            "researchSeconds": 217.35234125,
+            "collectionSeconds": 1.4617937500000115,
+            "publicationSeconds": 14.693767915999983,
+            "verificationSeconds": 11.738931582999998,
+            "completionSeconds": 27.894505333999987
+          },
+          "resultDigest": "fe3b7560e96c6e352802dc0fb862eca8d9131798e7f5f5d079799effe8c8e465",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "4539af181729901463312227949d017e550d0bc2a4a7e744b8b96151d704dd93",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "fe8ea5d9ad2ffb15aa14ce21e15290562087143a21a57354894a85853acb3e08",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9e5c5ae2",
+                "candidateIds": [
+                  "single-complete-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xa6f23c5d",
+                "candidateIds": [
+                  "single-complete-task/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "90eb9d456753ea70869fc31a55a56826d76feb335e337c9acd7ae36c43938e91",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "19a7a015cf6b20de6827efa96c7f3d8d9cb69adbc07d5df2dc9a2429e95454af",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xff3377c9",
+                "candidateIds": [
+                  "single-complete-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xab9020a6",
+                "candidateIds": [
+                  "single-complete-task/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "63bb9b8a6f731d624fd2ec28d6632cdad9bc375af1433c1c04343049b4e31fc3",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "5bacf7f73419bf86f17f3224d4b8abe0cc90772926658aea44be3d41eb3982cb",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x43ae7a99",
+                "candidateIds": [
+                  "single-complete-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5baee5d2",
+                "candidateIds": [
+                  "single-complete-task/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              36183
+            ],
+            "cpuBefore": {
+              "36183": 11.35
+            },
+            "cpuAfter": {
+              "36183": 207.4
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 46261.09075,
+              "ended": 121092.040541
+            },
+            {
+              "part": 1,
+              "started": 121092.045833,
+              "ended": 201108.516291
+            },
+            {
+              "part": 2,
+              "started": 201108.518583,
+              "ended": 263384.935666
+            }
+          ],
+          "rawTrialSha256": "402d3fb9cfac45bb6382115bae27445270feec77b255819de92a32ce4b45e80a"
+        }
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-22",
+      "state": "passed",
+      "checks": {
+        "expectedFindingsPublished": true,
+        "threeNativeWorkersActive": true
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "protocolSha256": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+      "trials": [
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "single-complete-task",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 140.240765458,
+          "phases": {
+            "setupSeconds": 68.89907416599999,
+            "researchSeconds": 106.19623812500002,
+            "collectionSeconds": 5.1491843750000115,
+            "publicationSeconds": 14.760036166000006,
+            "verificationSeconds": 14.135226791000022,
+            "completionSeconds": 34.04451970799998
+          },
+          "resultDigest": "fe3b7560e96c6e352802dc0fb862eca8d9131798e7f5f5d079799effe8c8e465",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "4539af181729901463312227949d017e550d0bc2a4a7e744b8b96151d704dd93",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "fe8ea5d9ad2ffb15aa14ce21e15290562087143a21a57354894a85853acb3e08",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9e5c5ae2",
+                "candidateIds": [
+                  "single-complete-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xa6f23c5d",
+                "candidateIds": [
+                  "single-complete-task/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "90eb9d456753ea70869fc31a55a56826d76feb335e337c9acd7ae36c43938e91",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "19a7a015cf6b20de6827efa96c7f3d8d9cb69adbc07d5df2dc9a2429e95454af",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xff3377c9",
+                "candidateIds": [
+                  "single-complete-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xab9020a6",
+                "candidateIds": [
+                  "single-complete-task/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "63bb9b8a6f731d624fd2ec28d6632cdad9bc375af1433c1c04343049b4e31fc3",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "single-complete-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "5bacf7f73419bf86f17f3224d4b8abe0cc90772926658aea44be3d41eb3982cb",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x43ae7a99",
+                "candidateIds": [
+                  "single-complete-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5baee5d2",
+                "candidateIds": [
+                  "single-complete-task/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              38465,
+              38508,
+              38518
+            ],
+            "cpuBefore": {
+              "38465": 8.56,
+              "38508": 7.98,
+              "38518": 7.65
+            },
+            "cpuAfter": {
+              "38465": 100.33,
+              "38508": 102.59,
+              "38518": 85.26
+            },
+            "commonActiveSamples": 361,
+            "commonActiveWindow": {
+              "first": {
+                "at": 69175.206833,
+                "cpu": {
+                  "38465": 8.56,
+                  "38508": 7.98,
+                  "38518": 7.75
+                }
+              },
+              "last": {
+                "at": 162526.71725,
+                "cpu": {
+                  "38465": 99.72999999999999,
+                  "38508": 92.47,
+                  "38518": 84.77
+                }
+              }
+            },
+            "overlapSeconds": 93.806423833
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 68924.090833,
+              "ended": 162730.700625
+            },
+            {
+              "part": 2,
+              "started": 68924.276792,
+              "ended": 162751.294875
+            },
+            {
+              "part": 1,
+              "started": 68924.209375,
+              "ended": 174954.552875
+            }
+          ],
+          "rawTrialSha256": "0f53d26102b559e4b3a25cb277e7b491022f31d2529d01bad32692fdce05f6e8"
+        }
+      ],
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-23",
+      "state": "passed",
+      "checks": {
+        "sixPairedImprovements": true,
+        "equivalentResults": true
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "protocolSha256": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+      "trials": [
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-0",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 234.837482542,
+          "phases": {
+            "setupSeconds": 47.901714459000004,
+            "researchSeconds": 208.83290087499998,
+            "collectionSeconds": 1.1581807499999994,
+            "publicationSeconds": 14.01276800000001,
+            "verificationSeconds": 10.833622124999994,
+            "completionSeconds": 26.004578791000007
+          },
+          "resultDigest": "f12bf68805bdc216877187039ee6d77b7182806cd64da3e49709858849c75641",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "1cbaeb73435bf332f459ddabab3917ba9d3a59ba8fa01749a90230696cc6af9e",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "a67ce5768f466bafd1bfe18d269dcb030bf60666948261ce1efe8c60ba1f7eaf",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xe15f707a",
+                "candidateIds": [
+                  "paired-task-0/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xf9ead9c8",
+                "candidateIds": [
+                  "paired-task-0/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "c49bbfd84d1523b6dbd452f99cf6693d4fc4f48f83be1527c7125114f70895b4",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0fcfb70368be677af06606a539bc93fbb204308a384c5a4b14a09615712f52a1",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x14ee434b",
+                "candidateIds": [
+                  "paired-task-0/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x538952b5",
+                "candidateIds": [
+                  "paired-task-0/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "2d1ab4a44086662f3b80bff6674150e75ac26ab3c911f89a9ec3bc493793e341",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0c0980b6c2ebe675c08378ec49c4e38f15cb5a6c19a93a329fc9955c2c17512d",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xee72e107",
+                "candidateIds": [
+                  "paired-task-0/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xa2d77159",
+                "candidateIds": [
+                  "paired-task-0/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              46562
+            ],
+            "cpuBefore": {
+              "46562": 9.79
+            },
+            "cpuAfter": {
+              "46562": 205.39
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 47925.444416,
+              "ended": 113001.823083
+            },
+            {
+              "part": 1,
+              "started": 113001.827458,
+              "ended": 196519.346375
+            },
+            {
+              "part": 2,
+              "started": 196519.348833,
+              "ended": 256708.764916
+            }
+          ],
+          "rawTrialSha256": "edc3e330021bb8977ac925774ff445056ba4b8febfe864e7b497156c31910a95"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-0",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 135.999981875,
+          "phases": {
+            "setupSeconds": 68.57726520799997,
+            "researchSeconds": 105.41745991700003,
+            "collectionSeconds": 5.667114582999958,
+            "publicationSeconds": 14.159490416000015,
+            "verificationSeconds": 10.755858375000011,
+            "completionSeconds": 30.582518958
+          },
+          "resultDigest": "f12bf68805bdc216877187039ee6d77b7182806cd64da3e49709858849c75641",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "1cbaeb73435bf332f459ddabab3917ba9d3a59ba8fa01749a90230696cc6af9e",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "a67ce5768f466bafd1bfe18d269dcb030bf60666948261ce1efe8c60ba1f7eaf",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xe15f707a",
+                "candidateIds": [
+                  "paired-task-0/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xf9ead9c8",
+                "candidateIds": [
+                  "paired-task-0/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "c49bbfd84d1523b6dbd452f99cf6693d4fc4f48f83be1527c7125114f70895b4",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0fcfb70368be677af06606a539bc93fbb204308a384c5a4b14a09615712f52a1",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x14ee434b",
+                "candidateIds": [
+                  "paired-task-0/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x538952b5",
+                "candidateIds": [
+                  "paired-task-0/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "2d1ab4a44086662f3b80bff6674150e75ac26ab3c911f89a9ec3bc493793e341",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-0",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0c0980b6c2ebe675c08378ec49c4e38f15cb5a6c19a93a329fc9955c2c17512d",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xee72e107",
+                "candidateIds": [
+                  "paired-task-0/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xa2d77159",
+                "candidateIds": [
+                  "paired-task-0/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              49022,
+              49011,
+              48994
+            ],
+            "cpuBefore": {
+              "48994": 8.68,
+              "49011": 7.97,
+              "49022": 7.53
+            },
+            "cpuAfter": {
+              "48994": 88.88,
+              "49011": 100.83,
+              "49022": 86.12
+            },
+            "commonActiveSamples": 353,
+            "commonActiveWindow": {
+              "first": {
+                "at": 356352.8195,
+                "cpu": {
+                  "48994": 8.68,
+                  "49011": 7.97,
+                  "49022": 7.63
+                }
+              },
+              "last": {
+                "at": 447422.838208,
+                "cpu": {
+                  "48994": 88.31,
+                  "49011": 89.4,
+                  "49022": 85.78999999999999
+                }
+              }
+            },
+            "overlapSeconds": 91.57457175
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 356102.338916,
+              "ended": 447677.005125
+            },
+            {
+              "part": 2,
+              "started": 356102.433375,
+              "ended": 449257.727916
+            },
+            {
+              "part": 1,
+              "started": 356102.401958,
+              "ended": 461288.222791
+            }
+          ],
+          "rawTrialSha256": "cb49c20bbcde660f2f84f06b8d13f83ceafa44066492d1acab8b21e7f110079a"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-1",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 136.76673137499998,
+          "phases": {
+            "setupSeconds": 69.97284562500002,
+            "researchSeconds": 107.27336562499998,
+            "collectionSeconds": 5.196955582999974,
+            "publicationSeconds": 13.600388749999926,
+            "verificationSeconds": 10.696006416999968,
+            "completionSeconds": 29.493364416000084
+          },
+          "resultDigest": "47948b46851f56419a267ed9f2fbd3abb1b8eed91d20bff999b05cd36c19078e",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "24963617878fb802d3581a62fe767eaf8d63ca67d74e141a8deedf3a45a02a3a",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "522c5227b3234b996ada2381e4f9dfe159d4150d28fbbaf41f4e43d5531ab798",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xf4752f7b",
+                "candidateIds": [
+                  "paired-task-1/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xfb0a90c9",
+                "candidateIds": [
+                  "paired-task-1/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "021fb7797bb1821cd456a7e7da001e666e7ffcab92954cba1262357abaab15ca",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "809b7aa3edc7b658e31d256f9cc60668bef8a8a2c169ebf59dc4758efc5d97ee",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x75f4adac",
+                "candidateIds": [
+                  "paired-task-1/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xb48fbd16",
+                "candidateIds": [
+                  "paired-task-1/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "ec3378a34c8d1bf88906e80c7bd35a28c89b279c3929b90b5381b9f0dd71249b",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0a6506908063f9e60e03ada2d637d17bc389327507a9177866a22024b590b789",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9d252dc6",
+                "candidateIds": [
+                  "paired-task-1/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5189be18",
+                "candidateIds": [
+                  "paired-task-1/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              56949,
+              56908,
+              56934
+            ],
+            "cpuBefore": {
+              "56908": 8.59,
+              "56934": 7.98,
+              "56949": 7.86
+            },
+            "cpuAfter": {
+              "56908": 94.69,
+              "56934": 105.09,
+              "56949": 92
+            },
+            "commonActiveSamples": 362,
+            "commonActiveWindow": {
+              "first": {
+                "at": 568836.798708,
+                "cpu": {
+                  "56908": 8.59,
+                  "56934": 7.98,
+                  "56949": 7.93
+                }
+              },
+              "last": {
+                "at": 662260.112125,
+                "cpu": {
+                  "56908": 94.25,
+                  "56934": 94.07,
+                  "56949": 91.66
+                }
+              }
+            },
+            "overlapSeconds": 93.816202667
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 568586.877333,
+              "ended": 662403.173625
+            },
+            {
+              "part": 2,
+              "started": 568586.970958,
+              "ended": 663795.298875
+            },
+            {
+              "part": 1,
+              "started": 568586.944166,
+              "ended": 675750.820708
+            }
+          ],
+          "rawTrialSha256": "db957d8f85ab72f08d9fd703b87fbde9f3f3e158bd270beb81899150b3ef27e5"
+        },
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-1",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 218.37923233399994,
+          "phases": {
+            "setupSeconds": 46.36067379200004,
+            "researchSeconds": 191.48883629200003,
+            "collectionSeconds": 1.4022182090000714,
+            "publicationSeconds": 14.458371082999976,
+            "verificationSeconds": 11.029799624999985,
+            "completionSeconds": 26.890393334000024
+          },
+          "resultDigest": "47948b46851f56419a267ed9f2fbd3abb1b8eed91d20bff999b05cd36c19078e",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "24963617878fb802d3581a62fe767eaf8d63ca67d74e141a8deedf3a45a02a3a",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "522c5227b3234b996ada2381e4f9dfe159d4150d28fbbaf41f4e43d5531ab798",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xf4752f7b",
+                "candidateIds": [
+                  "paired-task-1/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xfb0a90c9",
+                "candidateIds": [
+                  "paired-task-1/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "021fb7797bb1821cd456a7e7da001e666e7ffcab92954cba1262357abaab15ca",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "809b7aa3edc7b658e31d256f9cc60668bef8a8a2c169ebf59dc4758efc5d97ee",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x75f4adac",
+                "candidateIds": [
+                  "paired-task-1/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xb48fbd16",
+                "candidateIds": [
+                  "paired-task-1/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "ec3378a34c8d1bf88906e80c7bd35a28c89b279c3929b90b5381b9f0dd71249b",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-1",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "0a6506908063f9e60e03ada2d637d17bc389327507a9177866a22024b590b789",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9d252dc6",
+                "candidateIds": [
+                  "paired-task-1/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5189be18",
+                "candidateIds": [
+                  "paired-task-1/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              65353
+            ],
+            "cpuBefore": {
+              "65353": 8.74
+            },
+            "cpuAfter": {
+              "65353": 191.59
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 758336.439833,
+              "ended": 817827.427083
+            },
+            {
+              "part": 1,
+              "started": 817827.429583,
+              "ended": 890947.648625
+            },
+            {
+              "part": 2,
+              "started": 890947.651541,
+              "ended": 949784.696041
+            }
+          ],
+          "rawTrialSha256": "0fc16d3a819079e09bacf294f1f625bf91d8c039e6d6e08181767967c0a9da0e"
+        },
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-2",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 217.55784595799994,
+          "phases": {
+            "setupSeconds": 45.14227899999998,
+            "researchSeconds": 191.74104991699988,
+            "collectionSeconds": 1.1534065829999745,
+            "publicationSeconds": 13.90251537499996,
+            "verificationSeconds": 10.760867541000014,
+            "completionSeconds": 25.816794207999948
+          },
+          "resultDigest": "195f7fb0cccf8f67304dc053f59b1a145f0d916359b96a2f5a40cdb6cd55c6bf",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "a9891c8e1d77efe153397248ea7f416a6ef2f27f38c0395f29d1fb659b662a79",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "63d30150db664ef82e31f8cb3c340a32bffe9c4dd66bf55fb89b79f5ae712eec",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xd2e91c18",
+                "candidateIds": [
+                  "paired-task-2/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x792fd87a",
+                "candidateIds": [
+                  "paired-task-2/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "4f5a412b8220d383d0b8ee6906872825eb1733af724acf2c5ffc71936a823a35",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "13d39ab7a8ec28f83801eb6d322f89e7d7b23bfe5586f59d587f1267bffc72db",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xd6fb180d",
+                "candidateIds": [
+                  "paired-task-2/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x15962777",
+                "candidateIds": [
+                  "paired-task-2/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "ce7532a77724aaf6bfe74858f3374ef10c341eadde82420ef9c600f4922adb5f",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c120c010d6c46727e2004cb9b21dc093ccc8d4a6090f6b537e5831b830677e51",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x4bd77a85",
+                "candidateIds": [
+                  "paired-task-2/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x3c0ad7",
+                "candidateIds": [
+                  "paired-task-2/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              67454
+            ],
+            "cpuBefore": {
+              "67454": 8.77
+            },
+            "cpuAfter": {
+              "67454": 191.49
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 1026531.251625,
+              "ended": 1085594.99125
+            },
+            {
+              "part": 1,
+              "started": 1085594.994083,
+              "ended": 1159212.16675
+            },
+            {
+              "part": 2,
+              "started": 1159212.168958,
+              "ended": 1218248.762541
+            }
+          ],
+          "rawTrialSha256": "17322c807994526b8a5ab45be374828de39cc92357cd22686bc5f475920551d3"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-2",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 138.67810283300003,
+          "phases": {
+            "setupSeconds": 68.98656087499997,
+            "researchSeconds": 108.80875949999992,
+            "collectionSeconds": 5.101596750000026,
+            "publicationSeconds": 13.873655000000028,
+            "verificationSeconds": 10.894021082999883,
+            "completionSeconds": 29.86933595800004
+          },
+          "resultDigest": "195f7fb0cccf8f67304dc053f59b1a145f0d916359b96a2f5a40cdb6cd55c6bf",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "a9891c8e1d77efe153397248ea7f416a6ef2f27f38c0395f29d1fb659b662a79",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "63d30150db664ef82e31f8cb3c340a32bffe9c4dd66bf55fb89b79f5ae712eec",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xd2e91c18",
+                "candidateIds": [
+                  "paired-task-2/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x792fd87a",
+                "candidateIds": [
+                  "paired-task-2/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "4f5a412b8220d383d0b8ee6906872825eb1733af724acf2c5ffc71936a823a35",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "13d39ab7a8ec28f83801eb6d322f89e7d7b23bfe5586f59d587f1267bffc72db",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xd6fb180d",
+                "candidateIds": [
+                  "paired-task-2/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x15962777",
+                "candidateIds": [
+                  "paired-task-2/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "ce7532a77724aaf6bfe74858f3374ef10c341eadde82420ef9c600f4922adb5f",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-2",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c120c010d6c46727e2004cb9b21dc093ccc8d4a6090f6b537e5831b830677e51",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x4bd77a85",
+                "candidateIds": [
+                  "paired-task-2/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x3c0ad7",
+                "candidateIds": [
+                  "paired-task-2/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              69647,
+              69636,
+              69704
+            ],
+            "cpuBefore": {
+              "69636": 7.62,
+              "69647": 7.9,
+              "69704": 7.15
+            },
+            "cpuAfter": {
+              "69636": 100.59,
+              "69647": 101.18,
+              "69704": 92.95
+            },
+            "commonActiveSamples": 376,
+            "commonActiveWindow": {
+              "first": {
+                "at": 1318001.247791,
+                "cpu": {
+                  "69636": 7.62,
+                  "69647": 7.9,
+                  "69704": 7.23
+                }
+              },
+              "last": {
+                "at": 1415230.062458,
+                "cpu": {
+                  "69636": 100.27000000000001,
+                  "69647": 92.08,
+                  "69704": 92.67
+                }
+              }
+            },
+            "overlapSeconds": 97.5704593750001
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 1317750.240666,
+              "ended": 1415320.774375
+            },
+            {
+              "part": 2,
+              "started": 1317750.315,
+              "ended": 1415339.591208
+            },
+            {
+              "part": 1,
+              "started": 1317750.290041,
+              "ended": 1426335.778833
+            }
+          ],
+          "rawTrialSha256": "5abd90d7966f7cdc9035e9f72e99080b30ab8a2a12eac9615b9ea7daf8ee3caf"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-3",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 137.5881696250001,
+          "phases": {
+            "setupSeconds": 69.71441033400014,
+            "researchSeconds": 107.70873533300008,
+            "collectionSeconds": 5.054612082999898,
+            "publicationSeconds": 13.87363037499995,
+            "verificationSeconds": 10.951176624999848,
+            "completionSeconds": 29.87943108400004
+          },
+          "resultDigest": "dc2d41a113fc84c35f411c02323c2839a07eac67aec76da4137a63f2471bf476",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "e40cdaa9cd43ee05b74eb5bfdb8a1f1f1a7bf257ad6a417dac4da7f9c1359653",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "ea98191ca06e24ed58556e027e47302e158a661771ef3e7363e1abfc284edbd3",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x775507f9",
+                "candidateIds": [
+                  "paired-task-3/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x2069e103",
+                "candidateIds": [
+                  "paired-task-3/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "c3016750ff45f040bd9bae5a8599a58adcfac2ced9fddcddc3d15aa7fc14591d",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "86752bf5a39af8a1cb667d96e0e65a56bdb01d5459fd43fc3fba1710f1368755",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x3801826e",
+                "candidateIds": [
+                  "paired-task-3/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x769c91d8",
+                "candidateIds": [
+                  "paired-task-3/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "b38a4fa437f0de45f1c98fcbc4e7c66a13368f98af4e744c454f6c86ed4f2d01",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "89844ce963a4fa380903441e407b26ca4897bab60408c662235aea3d8a67a4e6",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xfa89c744",
+                "candidateIds": [
+                  "paired-task-3/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xaeee5796",
+                "candidateIds": [
+                  "paired-task-3/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              78375,
+              78386,
+              78403
+            ],
+            "cpuBefore": {
+              "78375": 8.72,
+              "78386": 8.57,
+              "78403": 8.07
+            },
+            "cpuAfter": {
+              "78375": 92.07,
+              "78386": 104.25999999999999,
+              "78403": 102.74000000000001
+            },
+            "commonActiveSamples": 367,
+            "commonActiveWindow": {
+              "first": {
+                "at": 1532952.001875,
+                "cpu": {
+                  "78375": 8.72,
+                  "78386": 8.57,
+                  "78403": 8.15
+                }
+              },
+              "last": {
+                "at": 1627821.394208,
+                "cpu": {
+                  "78375": 91.51,
+                  "78386": 93.61,
+                  "78403": 102.33
+                }
+              }
+            },
+            "overlapSeconds": 95.32316162500018
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 1532701.658208,
+              "ended": 1628024.902958
+            },
+            {
+              "part": 2,
+              "started": 1532701.741333,
+              "ended": 1628509.23375
+            },
+            {
+              "part": 1,
+              "started": 1532701.709916,
+              "ended": 1640261.460583
+            }
+          ],
+          "rawTrialSha256": "534ccfc139540511251c512ba3b6315bf71ff01d302e87226fc22fb468d4d021"
+        },
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-3",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 220.78076000000001,
+          "phases": {
+            "setupSeconds": 45.87237379100011,
+            "researchSeconds": 193.23823699999997,
+            "collectionSeconds": 1.1713971249999013,
+            "publicationSeconds": 14.118418540999992,
+            "verificationSeconds": 12.252701334000099,
+            "completionSeconds": 27.542519957999932
+          },
+          "resultDigest": "dc2d41a113fc84c35f411c02323c2839a07eac67aec76da4137a63f2471bf476",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "e40cdaa9cd43ee05b74eb5bfdb8a1f1f1a7bf257ad6a417dac4da7f9c1359653",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "ea98191ca06e24ed58556e027e47302e158a661771ef3e7363e1abfc284edbd3",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x775507f9",
+                "candidateIds": [
+                  "paired-task-3/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x2069e103",
+                "candidateIds": [
+                  "paired-task-3/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "c3016750ff45f040bd9bae5a8599a58adcfac2ced9fddcddc3d15aa7fc14591d",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "86752bf5a39af8a1cb667d96e0e65a56bdb01d5459fd43fc3fba1710f1368755",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x3801826e",
+                "candidateIds": [
+                  "paired-task-3/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x769c91d8",
+                "candidateIds": [
+                  "paired-task-3/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "b38a4fa437f0de45f1c98fcbc4e7c66a13368f98af4e744c454f6c86ed4f2d01",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-3",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "89844ce963a4fa380903441e407b26ca4897bab60408c662235aea3d8a67a4e6",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xfa89c744",
+                "candidateIds": [
+                  "paired-task-3/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xaeee5796",
+                "candidateIds": [
+                  "paired-task-3/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              87014
+            ],
+            "cpuBefore": {
+              "87014": 8.95
+            },
+            "cpuAfter": {
+              "87014": 190.86
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 1722671.50175,
+              "ended": 1782652.469625
+            },
+            {
+              "part": 1,
+              "started": 1782652.471458,
+              "ended": 1856255.221416
+            },
+            {
+              "part": 2,
+              "started": 1856255.222583,
+              "ended": 1915755.352
+            }
+          ],
+          "rawTrialSha256": "79d620fefd24590feaf0c8a059ff056f921bb2274e283bb6e68a38150c01ac0a"
+        },
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-4",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 222.5943095829999,
+          "phases": {
+            "setupSeconds": 45.46082125000004,
+            "researchSeconds": 196.50619783399975,
+            "collectionSeconds": 1.1579871669998392,
+            "publicationSeconds": 13.913610083000268,
+            "verificationSeconds": 11.016510249999817,
+            "completionSeconds": 26.088110165999737
+          },
+          "resultDigest": "35817df267b87d3d31c6477b603cd783e837681ee51ea10963f4076e39e90d45",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "d2b512c8e3a480af1b74b4d37c774fa178ee36fd8c43a106a9b01a41a19a3141",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "843115a374d4e463faa4b19873f0e3631e19c7bcddec2b07584761ed7094a247",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x909b5d6",
+                "candidateIds": [
+                  "paired-task-4/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x6f2ee52c",
+                "candidateIds": [
+                  "paired-task-4/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "0a09131d1cc5146eeca9b4832008f644c469c286e2138269bad5512288e5d550",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c9960cb92d9174e74bcf37a462e2d8f0fa58a45204e2766473870741b8a2f7aa",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9907eccf",
+                "candidateIds": [
+                  "paired-task-4/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xd7a2fc39",
+                "candidateIds": [
+                  "paired-task-4/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "df67e9ceb027593897c009fa5b707a653e9b8450519473e696ccd2dcc212613d",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "10d54a51a35e3a47cd30cef0fec80a2d2c623963c8ca21dc339a1234b53ed827",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xa93c1403",
+                "candidateIds": [
+                  "paired-task-4/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5da0a455",
+                "candidateIds": [
+                  "paired-task-4/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              89179
+            ],
+            "cpuBefore": {
+              "89179": 8.77
+            },
+            "cpuAfter": {
+              "89179": 193.2
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 1993800.756625,
+              "ended": 2054486.48125
+            },
+            {
+              "part": 1,
+              "started": 2054486.483125,
+              "ended": 2129142.56525
+            },
+            {
+              "part": 2,
+              "started": 2129142.56675,
+              "ended": 2190289.718375
+            }
+          ],
+          "rawTrialSha256": "33f30e984c47f4af73d04da9c28e05141dcdc67dfd001144be20fc9d3039157a"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-4",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 137.97063125000008,
+          "phases": {
+            "setupSeconds": 68.63903704200033,
+            "researchSeconds": 108.13086299999989,
+            "collectionSeconds": 5.177220583000221,
+            "publicationSeconds": 13.952719459000043,
+            "verificationSeconds": 10.709790665999986,
+            "completionSeconds": 29.839766208000015
+          },
+          "resultDigest": "35817df267b87d3d31c6477b603cd783e837681ee51ea10963f4076e39e90d45",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "d2b512c8e3a480af1b74b4d37c774fa178ee36fd8c43a106a9b01a41a19a3141",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "843115a374d4e463faa4b19873f0e3631e19c7bcddec2b07584761ed7094a247",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x909b5d6",
+                "candidateIds": [
+                  "paired-task-4/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x6f2ee52c",
+                "candidateIds": [
+                  "paired-task-4/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "0a09131d1cc5146eeca9b4832008f644c469c286e2138269bad5512288e5d550",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c9960cb92d9174e74bcf37a462e2d8f0fa58a45204e2766473870741b8a2f7aa",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9907eccf",
+                "candidateIds": [
+                  "paired-task-4/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xd7a2fc39",
+                "candidateIds": [
+                  "paired-task-4/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "df67e9ceb027593897c009fa5b707a653e9b8450519473e696ccd2dcc212613d",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-4",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "10d54a51a35e3a47cd30cef0fec80a2d2c623963c8ca21dc339a1234b53ed827",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xa93c1403",
+                "candidateIds": [
+                  "paired-task-4/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x5da0a455",
+                "candidateIds": [
+                  "paired-task-4/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              91397,
+              91411,
+              91465
+            ],
+            "cpuBefore": {
+              "91397": 7.59,
+              "91411": 7.61,
+              "91465": 7.02
+            },
+            "cpuAfter": {
+              "91397": 100.02000000000001,
+              "91411": 100.96000000000001,
+              "91465": 101.12
+            },
+            "commonActiveSamples": 372,
+            "commonActiveWindow": {
+              "first": {
+                "at": 2289979.133416,
+                "cpu": {
+                  "91397": 7.59,
+                  "91411": 7.61,
+                  "91465": 7.07
+                }
+              },
+              "last": {
+                "at": 2386276.869125,
+                "cpu": {
+                  "91397": 99.53,
+                  "91411": 91.94,
+                  "91465": 100.72
+                }
+              }
+            },
+            "overlapSeconds": 96.69610779200029
+          },
+          "workEvents": [
+            {
+              "part": 2,
+              "started": 2289728.171708,
+              "ended": 2386424.2795
+            },
+            {
+              "part": 0,
+              "started": 2289728.050666,
+              "ended": 2386443.562208
+            },
+            {
+              "part": 1,
+              "started": 2289728.096041,
+              "ended": 2397747.250083
+            }
+          ],
+          "rawTrialSha256": "9764c11259dde92d31004a2d3118cea7dea181c2cd286d9a6260d062a651da40"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "paired-task-5",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 139.2252276659999,
+          "phases": {
+            "setupSeconds": 69.21934537500003,
+            "researchSeconds": 108.86820229199995,
+            "collectionSeconds": 5.284053415999748,
+            "publicationSeconds": 14.175773500000126,
+            "verificationSeconds": 10.897175665999763,
+            "completionSeconds": 30.357022000000345
+          },
+          "resultDigest": "cda642dbc457f7edfb78b6a28478fc84dd8f1c528f4d0025fdb3ff0e675d08f5",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "5112936e5c6238fa43c42c1bb1b7914a3b6440f855930141e3d56ebcf3a0ac37",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "d62da484257a229442d73f94445edd5b664f7fcd0f4d4469ead8ce3f95633669",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xc17cd7d7",
+                "candidateIds": [
+                  "paired-task-5/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x4d4a564d",
+                "candidateIds": [
+                  "paired-task-5/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "95f9350eabae0d36ed50f80f7f5efb43a4cc5592ae8651f9f2e5bfc3cb78b345",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "ff550eb48f5a8d02bf6cc7aae70effd3b56fd88b304e0b592fdc204f1defe0bb",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xfa0e5730",
+                "candidateIds": [
+                  "paired-task-5/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x38a9669a",
+                "candidateIds": [
+                  "paired-task-5/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "5d586003cb5b6a2404cff21faf85770d397b48805b88cdd52ee3fa4a637bd0cd",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "d41f3224ba53fd4b70030cb5397e8319f89e250db85a5ff54ad2a3480c69251e",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x57ee60c2",
+                "candidateIds": [
+                  "paired-task-5/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xc52f114",
+                "candidateIds": [
+                  "paired-task-5/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              482,
+              507,
+              527
+            ],
+            "cpuBefore": {
+              "482": 8.84,
+              "507": 8.72,
+              "527": 8.61
+            },
+            "cpuAfter": {
+              "482": 103.27000000000001,
+              "507": 103.3,
+              "527": 99.92
+            },
+            "commonActiveSamples": 373,
+            "commonActiveWindow": {
+              "first": {
+                "at": 2503633.699625,
+                "cpu": {
+                  "482": 8.84,
+                  "507": 8.72,
+                  "527": 8.61
+                }
+              },
+              "last": {
+                "at": 2600162.735916,
+                "cpu": {
+                  "482": 103.11,
+                  "507": 93.36,
+                  "527": 99.86
+                }
+              }
+            },
+            "overlapSeconds": 96.81761970800022
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 2503383.430791,
+              "ended": 2600201.124458
+            },
+            {
+              "part": 2,
+              "started": 2503383.50475,
+              "ended": 2600206.555458
+            },
+            {
+              "part": 1,
+              "started": 2503383.475583,
+              "ended": 2612029.149708
+            }
+          ],
+          "rawTrialSha256": "07fb3784b0839dedb57fb97345022a8154c04fad15952da0096f82674037d106"
+        },
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "paired-task-5",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 221.43064920799992,
+          "phases": {
+            "setupSeconds": 46.088178082999775,
+            "researchSeconds": 195.25560083300016,
+            "collectionSeconds": 1.1888655409999191,
+            "publicationSeconds": 14.111795874999837,
+            "verificationSeconds": 10.874381042000373,
+            "completionSeconds": 26.175045500000007
+          },
+          "resultDigest": "cda642dbc457f7edfb78b6a28478fc84dd8f1c528f4d0025fdb3ff0e675d08f5",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "5112936e5c6238fa43c42c1bb1b7914a3b6440f855930141e3d56ebcf3a0ac37",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "d62da484257a229442d73f94445edd5b664f7fcd0f4d4469ead8ce3f95633669",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xc17cd7d7",
+                "candidateIds": [
+                  "paired-task-5/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x4d4a564d",
+                "candidateIds": [
+                  "paired-task-5/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "95f9350eabae0d36ed50f80f7f5efb43a4cc5592ae8651f9f2e5bfc3cb78b345",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "ff550eb48f5a8d02bf6cc7aae70effd3b56fd88b304e0b592fdc204f1defe0bb",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xfa0e5730",
+                "candidateIds": [
+                  "paired-task-5/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x38a9669a",
+                "candidateIds": [
+                  "paired-task-5/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "5d586003cb5b6a2404cff21faf85770d397b48805b88cdd52ee3fa4a637bd0cd",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "paired-task-5",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "d41f3224ba53fd4b70030cb5397e8319f89e250db85a5ff54ad2a3480c69251e",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x57ee60c2",
+                "candidateIds": [
+                  "paired-task-5/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xc52f114",
+                "candidateIds": [
+                  "paired-task-5/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              9689
+            ],
+            "cpuBefore": {
+              "9689": 9.06
+            },
+            "cpuAfter": {
+              "9689": 200.71
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 2695273.600125,
+              "ended": 2756298.53925
+            },
+            {
+              "part": 1,
+              "started": 2756298.541083,
+              "ended": 2830289.130625
+            },
+            {
+              "part": 2,
+              "started": 2830289.134166,
+              "ended": 2890472.718
+            }
+          ],
+          "rawTrialSha256": "415c9d65a0ca8f539340cd34e8c8b8e6827754549dff3a91dc14fd4c138993c7"
+        }
+      ],
+      "comparison": {
+        "pairs": [
+          {
+            "serialSeconds": 234.837482542,
+            "parallelSeconds": 135.999981875,
+            "speedup": 1.7267464252888158,
+            "efficiency": 0.5755821417629386
+          },
+          {
+            "serialSeconds": 218.37923233399994,
+            "parallelSeconds": 136.76673137499998,
+            "speedup": 1.5967277285820853,
+            "efficiency": 0.5322425761940284
+          },
+          {
+            "serialSeconds": 217.55784595799994,
+            "parallelSeconds": 138.67810283300003,
+            "speedup": 1.5687973913227604,
+            "efficiency": 0.5229324637742535
+          },
+          {
+            "serialSeconds": 220.78076000000001,
+            "parallelSeconds": 137.5881696250001,
+            "speedup": 1.6046492994400852,
+            "efficiency": 0.5348830998133618
+          },
+          {
+            "serialSeconds": 222.5943095829999,
+            "parallelSeconds": 137.97063125000008,
+            "speedup": 1.6133455907704255,
+            "efficiency": 0.5377818635901418
+          },
+          {
+            "serialSeconds": 221.43064920799992,
+            "parallelSeconds": 139.2252276659999,
+            "speedup": 1.5904491802247944,
+            "efficiency": 0.5301497267415981
+          }
+        ],
+        "oneSidedSignProbability": 0.015625,
+        "summary": {
+          "medianPairedSpeedup": 1.6006885140110851,
+          "minimumPairedSpeedup": 1.5687973913227604,
+          "maximumPairedSpeedup": 1.7267464252888158,
+          "medianEfficiency": 0.5335628380036951,
+          "serialMedianSeconds": 221.10570460399998,
+          "parallelMedianSeconds": 137.7794004375001,
+          "serialSampleStdDevSeconds": 6.287625291905189,
+          "parallelSampleStdDevSeconds": 1.1941243799805017
+        }
+      },
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-24",
+      "state": "passed",
+      "checks": {
+        "coldResultsEquivalent": true,
+        "coldTimesReportedWithoutSpeedupGate": true
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "protocolSha256": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+      "trials": [
+        {
+          "workers": 1,
+          "cold": true,
+          "seed": "cold-task",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 258.25258316699995,
+          "phases": {
+            "setupSeconds": 34.947307458999994,
+            "researchSeconds": 196.998773125,
+            "collectionSeconds": 1.386286582999979,
+            "publicationSeconds": 13.899781833999993,
+            "verificationSeconds": 11.020415333000011,
+            "completionSeconds": 26.306494875000006
+          },
+          "resultDigest": "761039e0fe784dd4282b2ae0c6585bed6079ed9e5f0ed69957f54d7e75d0c7e9",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "b615c4413352e0a9312a89a38665eb1a6fcbb950defae9d160a43f609a31e7a6",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "5aff36d943dca881c7e13ef7bf9309b1aeecd9267a3a2b55dad950b6a8a3eaa6",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x773e0662",
+                "candidateIds": [
+                  "cold-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x9da3688c",
+                "candidateIds": [
+                  "cold-task/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "877533828fac198f2acb4d1748126ca234268b158dac303e4eb618b85849bec8",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "bee1245dc71e71dce14a403bee3f42cb2f59158b868d3a651bf1e9002b1ee4d9",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xee0a435b",
+                "candidateIds": [
+                  "cold-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x19193031",
+                "candidateIds": [
+                  "cold-task/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "26fdaeb8efcfe75d0e09cfec57425121c0385ef58cd545a341f65b634d1aa0a2",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c9d2b8b73f69c7bf55da932c59571e252db48e1ff7706c27fab5e375042505f5",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x3f2d3255",
+                "candidateIds": [
+                  "cold-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xcbf8d627",
+                "candidateIds": [
+                  "cold-task/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              12132
+            ],
+            "cpuBefore": {
+              "12132": 5.3
+            },
+            "cpuAfter": {
+              "12132": 211.48
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 35746.595542,
+              "ended": 99267.936458
+            },
+            {
+              "part": 1,
+              "started": 99267.9405,
+              "ended": 173121.24525
+            },
+            {
+              "part": 2,
+              "started": 173121.247125,
+              "ended": 232675.559417
+            }
+          ],
+          "rawTrialSha256": "6d79593c6ced912c1d18935ee9408be2843f0ef8a014b9d57fbac12ee8f36a31"
+        },
+        {
+          "workers": 3,
+          "cold": true,
+          "seed": "cold-task",
+          "counts": [
+            64,
+            64,
+            64
+          ],
+          "elapsedSeconds": 194.004125375,
+          "phases": {
+            "setupSeconds": 53.93540058300004,
+            "researchSeconds": 109.23764437499997,
+            "collectionSeconds": 5.0664837919999846,
+            "publicationSeconds": 14.179618791000044,
+            "verificationSeconds": 11.584916333,
+            "completionSeconds": 30.831071166999987
+          },
+          "resultDigest": "761039e0fe784dd4282b2ae0c6585bed6079ed9e5f0ed69957f54d7e75d0c7e9",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "b615c4413352e0a9312a89a38665eb1a6fcbb950defae9d160a43f609a31e7a6",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "5aff36d943dca881c7e13ef7bf9309b1aeecd9267a3a2b55dad950b6a8a3eaa6",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x773e0662",
+                "candidateIds": [
+                  "cold-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x9da3688c",
+                "candidateIds": [
+                  "cold-task/0/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "877533828fac198f2acb4d1748126ca234268b158dac303e4eb618b85849bec8",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "bee1245dc71e71dce14a403bee3f42cb2f59158b868d3a651bf1e9002b1ee4d9",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xee0a435b",
+                "candidateIds": [
+                  "cold-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0x19193031",
+                "candidateIds": [
+                  "cold-task/1/63/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 64,
+              "tested": 1280,
+              "resultDigest": "26fdaeb8efcfe75d0e09cfec57425121c0385ef58cd545a341f65b634d1aa0a2",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "cold-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 64,
+              "resolutionTableSha256": "c9d2b8b73f69c7bf55da932c59571e252db48e1ff7706c27fab5e375042505f5",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x3f2d3255",
+                "candidateIds": [
+                  "cold-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 63,
+                "targetHash": "0xcbf8d627",
+                "candidateIds": [
+                  "cold-task/2/63/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              12793,
+              12809,
+              12778
+            ],
+            "cpuBefore": {
+              "12778": 5.07,
+              "12793": 5.12,
+              "12809": 4.54
+            },
+            "cpuAfter": {
+              "12778": 101.43,
+              "12793": 100.50999999999999,
+              "12809": 96.71000000000001
+            },
+            "commonActiveSamples": 374,
+            "commonActiveWindow": {
+              "first": {
+                "at": 319627.705167,
+                "cpu": {
+                  "12778": 5.07,
+                  "12793": 5.13,
+                  "12809": 4.54
+                }
+              },
+              "last": {
+                "at": 416278.410333,
+                "cpu": {
+                  "12778": 101.16,
+                  "12793": 90.73,
+                  "12809": 96.56
+                }
+              }
+            },
+            "overlapSeconds": 97.09993745800003
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 319375.36125,
+              "ended": 416475.397958
+            },
+            {
+              "part": 2,
+              "started": 319375.4605,
+              "ended": 416475.451042
+            },
+            {
+              "part": 1,
+              "started": 319375.432792,
+              "ended": 428545.677792
+            }
+          ],
+          "rawTrialSha256": "9da40fed727e7cfd0616aef404e2cb4e14a3034416c59be31d6771b6d01f1d78"
+        }
+      ],
+      "comparison": {
+        "serialSeconds": 258.25258316699995,
+        "parallelSeconds": 194.004125375,
+        "speedup": 1.3311705752020015,
+        "efficiency": 0.44372352506733387,
+        "speedupRequired": false
+      },
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    },
+    {
+      "schema": 1,
+      "id": "BS-25",
+      "state": "passed",
+      "checks": {
+        "unevenResultsEquivalent": true,
+        "actualScalingReported": true
+      },
+      "artifactSha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "inputSha256": [
+        "a69b4dddee4481d97c64910d54c5fd75132bbd7d908048de86b2b901b8d6402a",
+        "399f4fa221a0721d13cdea75e4768d296ba22a6f4464ab82cfe470c4eab00617"
+      ],
+      "protocolSha256": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+      "trials": [
+        {
+          "workers": 1,
+          "cold": false,
+          "seed": "uneven-task",
+          "counts": [
+            128,
+            32,
+            32
+          ],
+          "elapsedSeconds": 212.57649391700002,
+          "phases": {
+            "setupSeconds": 46.597875667,
+            "researchSeconds": 186.70304329200002,
+            "collectionSeconds": 1.16696995899998,
+            "publicationSeconds": 13.945138917000003,
+            "verificationSeconds": 10.761325083000003,
+            "completionSeconds": 25.873443417
+          },
+          "resultDigest": "950706085816a59d53295eb6d047d34d290f2b4f248a797be1b351f9bdaf0972",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 128,
+              "tested": 2560,
+              "resultDigest": "b48f6053fc17959e1f93b7fd867df2cfa705d948c90bc45691cf55e27d8e8e9b",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 128,
+              "resolutionTableSha256": "e1dfceeb82962436384d8adf822c2eb26649d6feda38308e51fcb048fb822797",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xdb4cf003",
+                "candidateIds": [
+                  "uneven-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 127,
+                "targetHash": "0x6313613b",
+                "candidateIds": [
+                  "uneven-task/0/127/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 32,
+              "tested": 640,
+              "resultDigest": "34ded1889592edc3f78dcf9ec096bf8d1bc2d9ccbb93f196805b8cc5f5b928de",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 32,
+              "resolutionTableSha256": "8b4e9caef0391854cd0dd62c44a095611009b3129e1a34210efb4cb3309cde96",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9fc1937a",
+                "candidateIds": [
+                  "uneven-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 31,
+                "targetHash": "0x17a35a67",
+                "candidateIds": [
+                  "uneven-task/1/31/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 32,
+              "tested": 640,
+              "resultDigest": "728ac6728a8594a97718276729698027f1f0614cc228b5ea7f184dccb019bcb1",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 32,
+              "resolutionTableSha256": "020600707e6ad7fe1fa6e0798a0da98fd7861e36313a1601edd84197c973e5ec",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x46ed09e4",
+                "candidateIds": [
+                  "uneven-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 31,
+                "targetHash": "0x4b208831",
+                "candidateIds": [
+                  "uneven-task/2/31/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 1,
+            "processIds": [
+              20302
+            ],
+            "cpuBefore": {
+              "20302": 8.7
+            },
+            "cpuAfter": {
+              "20302": 195.11
+            },
+            "commonActiveSamples": 0,
+            "overlapSeconds": 0
+          },
+          "workEvents": [
+            {
+              "part": 0,
+              "started": 46621.42025,
+              "ended": 164932.650333
+            },
+            {
+              "part": 1,
+              "started": 164932.653583,
+              "ended": 202830.967041
+            },
+            {
+              "part": 2,
+              "started": 202830.968958,
+              "ended": 233168.720166
+            }
+          ],
+          "rawTrialSha256": "e24b03b38257c990da6f427f359b1cfec9187674d44ac549c91c0f1df8446e45"
+        },
+        {
+          "workers": 3,
+          "cold": false,
+          "seed": "uneven-task",
+          "counts": [
+            128,
+            32,
+            32
+          ],
+          "elapsedSeconds": 173.43636125,
+          "phases": {
+            "setupSeconds": 69.23579470899998,
+            "researchSeconds": 144.00631191699998,
+            "collectionSeconds": 5.07559262499999,
+            "publicationSeconds": 13.612233416999981,
+            "verificationSeconds": 10.742197125000006,
+            "completionSeconds": 29.430048207999963
+          },
+          "resultDigest": "950706085816a59d53295eb6d047d34d290f2b4f248a797be1b351f9bdaf0972",
+          "parts": [
+            {
+              "algorithm": "hash_fnv",
+              "address": "0x1400011c0",
+              "batches": 128,
+              "tested": 2560,
+              "resultDigest": "b48f6053fc17959e1f93b7fd867df2cfa705d948c90bc45691cf55e27d8e8e9b",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 0,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 128,
+              "resolutionTableSha256": "e1dfceeb82962436384d8adf822c2eb26649d6feda38308e51fcb048fb822797",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0xdb4cf003",
+                "candidateIds": [
+                  "uneven-task/0/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 127,
+                "targetHash": "0x6313613b",
+                "candidateIds": [
+                  "uneven-task/0/127/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_djb",
+              "address": "0x1400011f0",
+              "batches": 32,
+              "tested": 640,
+              "resultDigest": "34ded1889592edc3f78dcf9ec096bf8d1bc2d9ccbb93f196805b8cc5f5b928de",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 1,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 32,
+              "resolutionTableSha256": "8b4e9caef0391854cd0dd62c44a095611009b3129e1a34210efb4cb3309cde96",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x9fc1937a",
+                "candidateIds": [
+                  "uneven-task/1/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 31,
+                "targetHash": "0x17a35a67",
+                "candidateIds": [
+                  "uneven-task/1/31/7"
+                ]
+              }
+            },
+            {
+              "algorithm": "hash_sdbm",
+              "address": "0x140001230",
+              "batches": 32,
+              "tested": 640,
+              "resultDigest": "728ac6728a8594a97718276729698027f1f0614cc228b5ea7f184dccb019bcb1",
+              "dictionary": {
+                "format": "business-hash-dictionary-v1",
+                "seed": "uneven-task",
+                "part": 2,
+                "candidatesPerBatch": 20,
+                "candidateLength": 1024
+              },
+              "resolutionCount": 32,
+              "resolutionTableSha256": "020600707e6ad7fe1fa6e0798a0da98fd7861e36313a1601edd84197c973e5ec",
+              "firstResolution": {
+                "batch": 0,
+                "targetHash": "0x46ed09e4",
+                "candidateIds": [
+                  "uneven-task/2/0/7"
+                ]
+              },
+              "lastResolution": {
+                "batch": 31,
+                "targetHash": "0x4b208831",
+                "candidateIds": [
+                  "uneven-task/2/31/7"
+                ]
+              }
+            }
+          ],
+          "native": {
+            "distinctWorkers": 3,
+            "processIds": [
+              22745,
+              22756,
+              22766
+            ],
+            "cpuBefore": {
+              "22745": 8.79,
+              "22756": 8.91,
+              "22766": 9.01
+            },
+            "cpuAfter": {
+              "22745": 165.16,
+              "22756": 61.08,
+              "22766": 58.93
+            },
+            "commonActiveSamples": 197,
+            "commonActiveWindow": {
+              "first": {
+                "at": 333346.700583,
+                "cpu": {
+                  "22745": 8.79,
+                  "22756": 8.91,
+                  "22766": 9.02
+                }
+              },
+              "last": {
+                "at": 384245.930083,
+                "cpu": {
+                  "22745": 59.77,
+                  "22756": 55.58,
+                  "22766": 58.54
+                }
+              }
+            },
+            "overlapSeconds": 51.270968541999984
+          },
+          "workEvents": [
+            {
+              "part": 2,
+              "started": 333096.008083,
+              "ended": 384366.976625
+            },
+            {
+              "part": 1,
+              "started": 333095.980458,
+              "ended": 392489.213333
+            },
+            {
+              "part": 0,
+              "started": 333095.9295,
+              "ended": 477091.107375
+            }
+          ],
+          "rawTrialSha256": "25da238e8aa49ba29fccd1cab8a08636b70338685e61ef8780dc27060dcffb70"
+        }
+      ],
+      "comparison": {
+        "serialSeconds": 212.57649391700002,
+        "parallelSeconds": 173.43636125,
+        "speedup": 1.2256743187236352,
+        "efficiency": 0.4085581062412117,
+        "speedupRequired": false
+      },
+      "publicCliOnly": true,
+      "cleanupComplete": true
+    }
+  ],
+  "runtime": {
+    "java": "openjdk version \"21.0.11\" 2026-04-21\nOpenJDK Runtime Environment Homebrew (build 21.0.11)\nOpenJDK 64-Bit Server VM Homebrew (build 21.0.11, mixed mode, sharing)",
+    "ghidraProperties": [
+      "application.build.date=2026-Jun-05 2059 GMT",
+      "application.version=12.1.2",
+      "application.release.name=PUBLIC"
+    ],
+    "clang": "Homebrew clang version 22.1.8",
+    "lld": "Homebrew LLD 22.1.8",
+    "cpu": "Apple M5",
+    "logicalCpus": 10,
+    "memoryBytes": 17179869184,
+    "osRelease": "25.6.0",
+    "node": "24.21.0",
+    "dotnet": "10.0.303",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "cleanupComplete": true,
+  "generatedAtUtc": "2026-10-16T10:51:52.762080+00:00",
+  "evidence": {
+    "automationRunId": "6c4a73fec46c417c8e2a61e98f4c755c",
+    "automationCounters": {
+      "total": "25",
+      "executed": "25",
+      "passed": "25",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "95e640c7cc6ce7ae2e90afb2546e1f7cf91012d272e5decf8dc4e4ecbf5ccc33",
+    "rawReportSha256": "8ba9c6ca9894045180bdf15bad5deec0fd5fd4808da92f5d62d06b7052dfca6a",
+    "publicationPolicy": "Sanitized report; repeated full resolution tables are compacted to count, compact-JSON SHA-256 and first/last row. Full original tables, raw trials, transcripts, manifests and TRX remain retained privately.",
+    "sourceIdentity": "Acceptance ran against the intended uncommitted tree based on baseRevision; sourceHashes bind the subsequently committed implementation. Documentation outside those inputs was edited separately.",
+    "nativeScope": "25 real-Ghidra public-CLI business scenarios on two compiled PE fixtures; no claim that the historical 33-group GUI/full-SDK gate was rerun.",
+    "offline": {
+      "passed": 129,
+      "logSha256": "dd720fd3e010294faecff887dfa8f02aed1de102e7bedc52bfef18e9509e754f"
+    },
+    "technicalOfflineGherkin": {
+      "passed": 2,
+      "runId": "6e86e1b0ba3e495c9e7a7de52ae0f4f4",
+      "logSha256": "8284f6b9616beb4b3c0401ceda893135d216a00b8b8ba265291b5e4abd219ae9"
+    },
+    "automation": {
+      "outcome": "passed",
+      "exitCode": 0,
+      "cleanupComplete": true,
+      "errors": [],
+      "allTrackedChildrenExited": true,
+      "runJsonSha256": "9ef9e955b54ce76b060fd85a2e5a8115c5d166a2f5f7df01bd6ecbb84094402d"
+    },
+    "ownedResourceObservation": {
+      "recordedProfiles": 4,
+      "remainingOwnedProcesses": 0,
+      "method": "Read-only OS process listing matched only the four recorded disposable profile names after suite cleanup."
+    },
+    "automationTimes": {
+      "creation": "2026-10-16T11:19:18.2253590+02:00",
+      "queuing": "2026-10-16T11:19:18.2253590+02:00",
+      "start": "2026-10-16T11:18:38.9029840+02:00",
+      "finish": "2026-10-16T12:51:33.3998780+02:00"
+    }
+  },
+  "excludedDevelopmentEvidence": [
+    {
+      "kind": "small-task calibration, earlier artifact",
+      "serialSeconds": 54.49044,
+      "parallelSeconds": 74.80572,
+      "accepted": false
+    },
+    {
+      "kind": "cancelled digest-only full attempt",
+      "automationRunId": "7ea81b10c4e1439baa586f003f034e2a",
+      "accepted": false,
+      "reason": "Publication lacked usable complete lookup tables."
+    },
+    {
+      "kind": "failed three-publication strategy",
+      "automationRunId": "fbeb17cc05304984abe2685a06f8df7c",
+      "accepted": false,
+      "pairs": [
+        {
+          "serialSeconds": 236.24276049999997,
+          "parallelSeconds": 236.00690987500002,
+          "speedup": 1.000999337795342
+        },
+        {
+          "serialSeconds": 233.41404437500006,
+          "parallelSeconds": 279.78495762500006,
+          "speedup": 0.8342623075821266
+        }
+      ],
+      "reason": "Separate publications consumed parallel compute gain; run cancelled after the recorded failed pair. Revised lead-collector strategy has its own complete frozen acceptance run."
+    }
+  ]
+}

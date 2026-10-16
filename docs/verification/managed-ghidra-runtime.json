@@ -1,0 +1,583 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "global public CLI; fresh managed install and external launcher; real 7zr research and publication",
+  "package": "@eyeauras/insight-cli",
+  "version": "0.2.0",
+  "artifact": {
+    "sha256": "ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab",
+    "sha1": "9723bcbc8138b998ec9e0fe4d156f702707c0d62",
+    "integrity": "sha512-6nDvLj+Tz4lLFvzI/1WV+LuDVyLdyuOrPQWB+gy5VnV0Bvr9AVmvd9nVfrSet21+2tjmrMzfI79Mt4td1/cPeQ==",
+    "bytes": 1005214,
+    "filesVerified": 174,
+    "byteIdenticalRepack": true,
+    "build": {
+      "version": 1,
+      "artifact": "e6afb01edf053fe9b2087f5cc2ca38dd13cb0587a804ebbb1d39c4e5f433c6a3"
+    }
+  },
+  "runtime": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "runnerNode": "v24.21.0",
+    "cliNode": "v26.4.0",
+    "ghidra": "12.1.2",
+    "jdk": "Temurin 21.0.11+10",
+    "managedFingerprint": "b7e9152830c9caf3123bcacc17ed9506f8b7a3cb6dca8f8c5b065bfcf6ce534e"
+  },
+  "input": {
+    "name": "7zr.exe",
+    "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "entry": "0x436fea",
+    "executed": false
+  },
+  "archives": [
+    {
+      "name": "ghidra-12.1.2-arm64_tahoe",
+      "sha256": "079007d8a3a477c8d5901e6596947612d86c8641956424a2bcb71ecd798bedcc",
+      "license": "Apache-2.0 and included third-party licenses"
+    },
+    {
+      "name": "temurin-21.0.11+10-darwin-arm64",
+      "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",
+      "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices"
+    },
+    {
+      "name": "official-ghidra-12.1.2-zip",
+      "sha256": "b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d",
+      "license": "Apache-2.0 and included third-party licenses"
+    }
+  ],
+  "externalSelection": "Homebrew ghidraRun wrapper with automatically managed JDK",
+  "checks": {
+    "freshProfileWithoutRuntimePaths": true,
+    "pinnedDownloadsAndOfflineCache": true,
+    "nativeInstallAndDoctor": true,
+    "explicitOwnedServerLifecycle": true,
+    "multiClientRealExeResearchMergeRefresh": true,
+    "busyRuntimeAndServerProtected": true,
+    "uninstallPreservesResearchAndArtifacts": true,
+    "localArchivesAndResearchContinuation": true,
+    "officialZipWithManagedMacNatives": true,
+    "managedGuiAndLiveDebugger": true,
+    "managedBaseAndIsolatedExtension": true,
+    "externalLauncherRealExeMergeAndSafeUninstall": true,
+    "unchangedInput": true
+  },
+  "automation": {
+    "runId": "f4a8b106f75d4720966398d9f462afc8",
+    "scenarioCount": 1,
+    "failed": 0,
+    "skipped": 0,
+    "scenario": "Managed delivery and an external launcher both support real EXE research",
+    "framework": "EyeAuras.Automation / Reqnroll / NUnit",
+    "selectedTag": "runtime",
+    "scenarioDuration": "00:11:10.7176840"
+  },
+  "offline": {
+    "tests": 154,
+    "passed": 154,
+    "failed": 0,
+    "isolatedPackage": "passed",
+    "skillsValidated": 2
+  },
+  "calls": [
+    {
+      "command": "skill",
+      "code": 0,
+      "seconds": 1.097602625
+    },
+    {
+      "command": "profile create <disposable>",
+      "code": 0,
+      "seconds": 2.272560333
+    },
+    {
+      "command": "permissions grant Update",
+      "code": 0,
+      "seconds": 0.879861959
+    },
+    {
+      "command": "permissions grant Destructive",
+      "code": 0,
+      "seconds": 1.091371
+    },
+    {
+      "command": "profile create <disposable>",
+      "code": 0,
+      "seconds": 0.937658625
+    },
+    {
+      "command": "permissions grant Update",
+      "code": 0,
+      "seconds": 1.131997209
+    },
+    {
+      "command": "permissions grant Destructive",
+      "code": 0,
+      "seconds": 1.029025417
+    },
+    {
+      "command": "ghidra status",
+      "code": 0,
+      "seconds": 1.041560833
+    },
+    {
+      "command": "ghidra server status",
+      "code": 0,
+      "seconds": 1.006208833
+    },
+    {
+      "command": "ghidra download",
+      "code": 0,
+      "seconds": 55.470587583
+    },
+    {
+      "command": "ghidra download --offline",
+      "code": 0,
+      "seconds": 2.592384917
+    },
+    {
+      "command": "ghidra install --offline",
+      "code": 0,
+      "seconds": 44.113686125
+    },
+    {
+      "command": "ghidra doctor",
+      "code": 0,
+      "seconds": 19.25902475
+    },
+    {
+      "command": "ghidra server start",
+      "code": 0,
+      "seconds": 6.65437125
+    },
+    {
+      "command": "ghidra server status",
+      "code": 0,
+      "seconds": 2.670997333
+    },
+    {
+      "command": "ghidra open <input>",
+      "code": 0,
+      "seconds": 61.471461083
+    },
+    {
+      "command": "ghidra open <input>",
+      "code": 0,
+      "seconds": 11.550596459
+    },
+    {
+      "command": "ghidra strings search",
+      "code": 0,
+      "seconds": 1.079287667
+    },
+    {
+      "command": "ghidra xrefs to",
+      "code": 0,
+      "seconds": 0.543249208
+    },
+    {
+      "command": "ghidra xrefs to",
+      "code": 0,
+      "seconds": 0.544989125
+    },
+    {
+      "command": "ghidra functions decompile",
+      "code": 0,
+      "seconds": 0.817430625
+    },
+    {
+      "command": "ghidra comments set",
+      "code": 0,
+      "seconds": 2.569932917
+    },
+    {
+      "command": "ghidra comments set",
+      "code": 0,
+      "seconds": 2.738425333
+    },
+    {
+      "command": "ghidra merge --session",
+      "code": 0,
+      "seconds": 35.8057175
+    },
+    {
+      "command": "ghidra refresh --session",
+      "code": 0,
+      "seconds": 19.928213958
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 4.05947825
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 0.860389334
+    },
+    {
+      "command": "ghidra merge --session",
+      "code": 0,
+      "seconds": 33.809894541
+    },
+    {
+      "command": "ghidra uninstall",
+      "code": 1,
+      "seconds": 2.074793584
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 1,
+      "seconds": 0.918600209
+    },
+    {
+      "command": "artifacts save <path>",
+      "code": 0,
+      "seconds": 0.852616208
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 9.619520583
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 10.188781958
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 1.39498475
+    },
+    {
+      "command": "ghidra uninstall",
+      "code": 0,
+      "seconds": 1.257734708
+    },
+    {
+      "command": "ghidra status",
+      "code": 0,
+      "seconds": 0.937918667
+    },
+    {
+      "command": "targets list",
+      "code": 0,
+      "seconds": 0.866330583
+    },
+    {
+      "command": "ghidra install --archive",
+      "code": 0,
+      "seconds": 39.255428125
+    },
+    {
+      "command": "ghidra open --session",
+      "code": 0,
+      "seconds": 9.190259791
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 1.497703
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 2.051605125
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 1.135011708
+    },
+    {
+      "command": "ghidra install --archive",
+      "code": 0,
+      "seconds": 31.214545959
+    },
+    {
+      "command": "ghidra open --session",
+      "code": 0,
+      "seconds": 6.916275416
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 0.9255655
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 1.789747209
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 0.505235125
+    },
+    {
+      "command": "ghidra open <input>",
+      "code": 0,
+      "seconds": 39.022325458
+    },
+    {
+      "command": "ghidra debugger launch-offers",
+      "code": 0,
+      "seconds": 12.254417333
+    },
+    {
+      "command": "ghidra debugger launch",
+      "code": 0,
+      "seconds": 29.963837667
+    },
+    {
+      "command": "ghidra debugger interrupt",
+      "code": 0,
+      "seconds": 8.868441459
+    },
+    {
+      "command": "ghidra debugger registers",
+      "code": 0,
+      "seconds": 5.950090459
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 6.400995709
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 0.970717875
+    },
+    {
+      "command": "ghidra extensions inspect",
+      "code": 0,
+      "seconds": 0.472593042
+    },
+    {
+      "command": "ghidra extensions install",
+      "code": 0,
+      "seconds": 0.503923459
+    },
+    {
+      "command": "ipc-server stop",
+      "code": 0,
+      "seconds": 0.153452875
+    },
+    {
+      "command": "ghidra open --session",
+      "code": 0,
+      "seconds": 7.372361625
+    },
+    {
+      "command": "ghidra scripts run",
+      "code": 0,
+      "seconds": 3.278834208
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 0.476323041
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 1.350726625
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 0.504484041
+    },
+    {
+      "command": "ghidra install --executable",
+      "code": 0,
+      "seconds": 15.57314075
+    },
+    {
+      "command": "ghidra open <input>",
+      "code": 0,
+      "seconds": 58.917586417
+    },
+    {
+      "command": "ghidra functions decompile",
+      "code": 0,
+      "seconds": 1.130835625
+    },
+    {
+      "command": "ghidra comments set",
+      "code": 0,
+      "seconds": 2.73438525
+    },
+    {
+      "command": "ghidra merge --session",
+      "code": 0,
+      "seconds": 15.840072084
+    },
+    {
+      "command": "ghidra open --target",
+      "code": 0,
+      "seconds": 10.344060333
+    },
+    {
+      "command": "ghidra comments get",
+      "code": 0,
+      "seconds": 0.48786075
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 1.333338875
+    },
+    {
+      "command": "ghidra close --session",
+      "code": 0,
+      "seconds": 4.552151542
+    },
+    {
+      "command": "ghidra server stop",
+      "code": 0,
+      "seconds": 0.937022042
+    },
+    {
+      "command": "ghidra uninstall --purge-cache",
+      "code": 0,
+      "seconds": 0.503213083
+    }
+  ],
+  "commandSeconds": 669.5178146269998,
+  "sourceInputs": {
+    "skills/ghidra-coordinator/src/administration-results.ts": "61780789f02414cc677321f6adf93e233f268fb7af8a648cea2c4c7ee44d0103",
+    "skills/ghidra-coordinator/src/administration.ts": "fcec0c2bf76ac0d55189eb2df8054215c8720a71c5c9e85714e14f3a06ff53da",
+    "skills/ghidra-coordinator/src/archive-contract.ts": "5a39c33b1790bb7972cba755e2066e04809ac73387c8778891d7a5f0f1cd3ddf",
+    "skills/ghidra-coordinator/src/archive.ts": "5075662ff64f71253a3ea6be0b9cb4cd35fdd82e316e12239e0dc3e11e0f00b2",
+    "skills/ghidra-coordinator/src/arguments.ts": "e0390df470b0eeb92fd33fe65f57ea0611805ebb4998e3e88a87f4fe89da3323",
+    "skills/ghidra-coordinator/src/artifacts.ts": "f916f0844670b7dcf34152eb1f7521f77b62f3b4606dabd8d47ee3d037d37a88",
+    "skills/ghidra-coordinator/src/bin.ts": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+    "skills/ghidra-coordinator/src/cli.ts": "7cd9339706bc55e0ec30cfb5298472fcb0d065ed2dcef4f0d9b8d8e1581661fc",
+    "skills/ghidra-coordinator/src/comment-effects.ts": "94f33fd05d18c816d5a590402a0f312308bb79a1d59e4245686fe0eeaeb75d68",
+    "skills/ghidra-coordinator/src/contexts.ts": "d93cfb645c4ef824aa7590c199a7c97a6170a864508b1fc88993fc6e6e1fc63a",
+    "skills/ghidra-coordinator/src/coordinator.ts": "be67a13ff9139456d57671e3ebde4d18dc64f7bf06a3a2e5087f0d10b6a33f8c",
+    "skills/ghidra-coordinator/src/cross-results.ts": "be3cd5832318841eaabb883569906fbd4ee5ce4958a2008e897dba33b55579de",
+    "skills/ghidra-coordinator/src/cross.ts": "3e9718b901b8937335796b1d56a795725e1c09c0645813b2c73db468809499c8",
+    "skills/ghidra-coordinator/src/data-effects.ts": "33de1f98aabfcc77e07d5ff93b95d5fa2e9e507b16b53e01b413fa3e581a3753",
+    "skills/ghidra-coordinator/src/debugger-results.ts": "1db245642625738c96b05ae7cf5f552c3df1c48683ec74a214ca88ec05475598",
+    "skills/ghidra-coordinator/src/debugger-supervisor.ts": "23900e7f52b9463b791d0183b4b1900b4d48d8b60a1d36e2bbe9f6d5d84025c3",
+    "skills/ghidra-coordinator/src/debugger.ts": "936d9b84db11b76f39519b54a87ceab5308edfe17104c2aa9663a3cedc7a1f6a",
+    "skills/ghidra-coordinator/src/documentation-effects.ts": "60efbeb9be7c41122cc725162dd105a417132e0387ea1524188f55a199adc272",
+    "skills/ghidra-coordinator/src/extensions.ts": "ed4e2b013b643631552aadd69ca6ba375984ae41270fe74266f373bc1e9349ce",
+    "skills/ghidra-coordinator/src/function-effects.ts": "02f83617d4ec80d0a887493476f452b1fd205c13dd1b3b5277069c929fe7498a",
+    "skills/ghidra-coordinator/src/ghidra.ts": "8fa3787b769b40558cbb98943030006581ca2669aeab7f546ca3943abf02f962",
+    "skills/ghidra-coordinator/src/index.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
+    "skills/ghidra-coordinator/src/initial-model.ts": "d98c30ae08b895ded939bd5950b859212f8cf436f57630202e9a1f5604b44ebe",
+    "skills/ghidra-coordinator/src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
+    "skills/ghidra-coordinator/src/lifecycle.ts": "0c04377f2b9b3e183fe9e095e23da5eb0283bf3a27ac8347bb24a8767333abf6",
+    "skills/ghidra-coordinator/src/memory-inputs.ts": "368c81a987457314b19562d9c3eae545c270f4dc344a820ffbe4df611506e538",
+    "skills/ghidra-coordinator/src/merge.ts": "08e1533ae1cc4c1d1a57748419f33187c1623afe0be6dab60f363aff8b6aff5c",
+    "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
+    "skills/ghidra-coordinator/src/mutation-effects.ts": "2c6fafedc93a1a35cf8795c30440234e75ea70f9911977ba5b8016fedb1f2041",
+    "skills/ghidra-coordinator/src/mutation-inputs.ts": "4ba523f095f0602d3631cc7e0509070ab5a6b693e4ec976ba94b385450d8ddbd",
+    "skills/ghidra-coordinator/src/mutations.ts": "573bc1880402ec3fc81af883e03d3550d13be6e1bd13496ea5f2176d9852b7c6",
+    "skills/ghidra-coordinator/src/native-inputs.ts": "0379d5764d785c111a6d28aa984808afacc34e801dc9d7181cec49865279c634",
+    "skills/ghidra-coordinator/src/native-queries.ts": "0a1d51e10fb55d146ccacf5977c908aad9e6f937c57d223efd194cca5d110c1f",
+    "skills/ghidra-coordinator/src/projects.ts": "6aaa3d29690bc4aafaa2abc22a85d055c28b2fb17cd57c75cc29f80226a502d2",
+    "skills/ghidra-coordinator/src/prototype-cli.ts": "e82d6befb8a051461ee9cbba598ca34cfc9885dc37893d83694e08f84be7b0d2",
+    "skills/ghidra-coordinator/src/queries.ts": "e8f60c2d6c60573bc17f237df3e289e2f78970dc982947b035601bc2d178c5ec",
+    "skills/ghidra-coordinator/src/query-policy.ts": "6c790b9c67161aebc2aed1307a0628490d0d4f3c4da0b9ea86ca794e699534bf",
+    "skills/ghidra-coordinator/src/query-results.ts": "f471adcd147b0bdba7bc9f4405b7036ae4994d16fedb3e95c888147791198c3c",
+    "skills/ghidra-coordinator/src/research.ts": "db0697a1154157febf86ee1515a8cef315a0a9f358f470af5ba2864dabc10128",
+    "skills/ghidra-coordinator/src/runtime-archives.ts": "2028ed2d8cce0397ca0d411a5c619666d3a96740bd92063bb25e89a802f044e1",
+    "skills/ghidra-coordinator/src/runtime-catalog.ts": "7900c8b72c4ff216d8da7d483d27493fb9213d2878656182ac5f15721666732d",
+    "skills/ghidra-coordinator/src/runtime-manager.ts": "f8922f294c521216e95ac73d2a738f0128fe384a24bb42d4263c2c8e99e6d7b2",
+    "skills/ghidra-coordinator/src/runtime-selection.ts": "fa379adba2d1c0cde795eb4635c254b7e1d0c7cef2743976f03eab1812c26670",
+    "skills/ghidra-coordinator/src/saved-materials.ts": "182866fad90c8386cf384e4cefce3dcb6f8c4675484a7888fc5232b843a2a3a8",
+    "skills/ghidra-coordinator/src/scripts.ts": "84d9885f6309bd271d6987939297dba934e3afdd78d4111c8d0a4210d47d1179",
+    "skills/ghidra-coordinator/src/sdk-contracts.ts": "0f91bf291cfc01f61e3d80045583dbdcab8ba5d1fa74f250c790fc5b15aa9cd9",
+    "skills/ghidra-coordinator/src/sdk-files.ts": "b77779caf0407fc5f2665b2a9222e7cc58726c90d7ae380ddfc7d41579d907f3",
+    "skills/ghidra-coordinator/src/sdk.ts": "7f0b6e24f18fef65ff0c84a53859b32922830f12f8f25a0b3e297cd112f0de8d",
+    "skills/ghidra-coordinator/src/server.ts": "29a72c843c1df0d28e553e4afa1e6e0ecf5a730c782bf1a2912f9f6b474d7ddc",
+    "skills/ghidra-coordinator/src/store.ts": "8a2e866c45d0a5de304213f9495d897aeebf41cd4f08a91e60da91cf6470573d",
+    "skills/ghidra-coordinator/src/sync-policy.ts": "6869e795c9b1dcf6fe3a05b4768f8ace78de5a660da6773ae394092c2bff90f3",
+    "skills/ghidra-coordinator/src/transport.ts": "749441b01700437b03dec727b162f08490fb01199f4e62e4edddf429f199465d",
+    "skills/ghidra-coordinator/src/ui-results.ts": "59e2bc402ab2187361fa52591bab95cc49fd1a154c5cb25f197889e3ce978fac",
+    "skills/ghidra-coordinator/src/ui.ts": "718a34d1ff84feee3f426888a6543c008625208e01ee406eb1b186e2c8d69338",
+    "skills/ghidra-coordinator/src/utility.ts": "a653c15ffd685f7a75b235e9e96596f769873bf64501a8aa4c4b682fa6ac6770",
+    "skills/ghidra-coordinator/src/version-tracking.ts": "ae7502241d2359e072a8a7f5038e9d23840afda677a18b8269dc8cddca3d488e",
+    "skills/ghidra-coordinator/src/workspace.ts": "a0e0325fa11bc4516d7706fdc09c92f48b3909a3a239377bcd7e51683a129d64",
+    "skills/ghidra-coordinator/references/InsightRepositoryProbe.java": "bb5d4033c322e79953bd7f7f61cd8b40d9347376e0bf345d36ec594a42d8f855",
+    "skills/ghidra-coordinator/references/mutations.json": "8939bd1761b52da1f71ea8522fcf75fb8fdc08ab7708497b2de439a71243a63e",
+    "skills/ghidra-coordinator/references/native/InsightApplyDocumentation.java": "3548b99a04b771d5e1defba9bc4fbf0c26de2a11b211091aecf74ad2467aeab1",
+    "skills/ghidra-coordinator/references/native/InsightArchivePayloads.java": "7862461244fe613f25ea6a08d72b951aacca3493e19f5aa790aa77fbe58f5618",
+    "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "cdf8769e1da82c9abe8a4f745bb34b1ee94a5c05ccad875f29452dd2e30d2edf",
+    "skills/ghidra-coordinator/references/native/InsightEmulation.java": "56afd7b83955743dc24d7a46f22a763cf0929a926820a9f5071e7deb2e8ab641",
+    "skills/ghidra-coordinator/references/native/InsightExtensions.java": "9c6792b313cdfbb957d9410f4a671a870f9eae0d064486796e2cf79b23f267af",
+    "skills/ghidra-coordinator/references/native/InsightFunctionDatabases.java": "f20d671c8f6bb7e212747b87a1a489f38b7b8cb891bffabb19b5cc034088a99f",
+    "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "c2eb095f84356bef47c1526ba88ab6134499a5287d3dfc47ef538ebd04c5d371",
+    "skills/ghidra-coordinator/references/native/InsightHeadlessMain.java": "d401df336937d557792b2b07d8a624d5715c39899c35db7db26570254f8fb60e",
+    "skills/ghidra-coordinator/references/native/InsightInitialImport.java": "f1757da09912a7b82bee53c22e794e47af19a3678795f2acb0a7d62ecdfbd7b6",
+    "skills/ghidra-coordinator/references/native/InsightInitialJournal.java": "b84a67e9d791cdfe90cf9878ea7bdb70cf81284c10f2e31c9aa15cc13d9b2584",
+    "skills/ghidra-coordinator/references/native/InsightInitialPublication.java": "8e8692a254632b145a77bcd4d3591eefd9157a46a83b6da7bfd4fb10afd9a02b",
+    "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
+    "skills/ghidra-coordinator/references/native/InsightNativeReceipt.java": "36a0e8980584dea96cbda5c715ecfef3ff291a5c25406328337298d74b042a75",
+    "skills/ghidra-coordinator/references/native/InsightPlugins.java": "f0bdd91527bf41851ae25110c5636539ec0565f71377322a2bb70bc8a02b78ee",
+    "skills/ghidra-coordinator/references/native/InsightProjectFiles.java": "007df5ec3c5ae8fcb2cd5580502050aa0b6f93fd016de34d08af2c41bfde0db6",
+    "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "12288d388905dfdbb31afd03c8da174a931a3ad1966157c88c1259604b4a5ff0",
+    "skills/ghidra-coordinator/references/native/InsightPythonWheels.java": "0e3f433f342fb78053047a4d9035a01f06d9d228a75648eec652b52fe997f44c",
+    "skills/ghidra-coordinator/references/native/InsightResearchQueries.java": "1de57a623fb258ceae4dfc6635a03b0dcf95a7f3fd5d25dc4873f8d191a28cca",
+    "skills/ghidra-coordinator/references/native/InsightRuntimeDoctor.java": "b04103ef09fa452f9740c4eb83f690ddd355d1d15bede229eb816d802bedbca1",
+    "skills/ghidra-coordinator/references/native/InsightSdkFiles.java": "518c8c393f36e26c8a7920e4af706ba05023c74e8fa91e6cfd5da1f4edc583e9",
+    "skills/ghidra-coordinator/references/native/InsightSdkScript.java": "0182b69505f18f10ec423d12c44e9f593ca7bd6b1046a62463c138906bf45ca1",
+    "skills/ghidra-coordinator/references/native/InsightSdkTools.java": "a86238c62c8b6ecc8d54e5d44e3f79ea7178cbbb00cf063d760e5438d2b965a6",
+    "skills/ghidra-coordinator/references/native/InsightSdkTypes.java": "b0290a71ac8ef947bf6fcee7145ef5cb5ce64d0f0914516440f3698f37bd17e2",
+    "skills/ghidra-coordinator/references/native/InsightServerAdministration.java": "c2a546c2fc488fe67b6d286e26f7583eabdf60e8fd2704cb27ab5c34c28f5c78",
+    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
+    "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
+    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotFields.java": "f12bf8d88f3ba1998336fa41f91b37db07c0d36d32fbd96c0b85f6f4fb38594a",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotInspect.java": "d161fc8210289b1add4fb054721e7f275466c73db33dfab8601299bfa231e210",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "7860b40fcae7aafe9f1f3f3092a995fd307b3fd7d3b0dbf8b6bf0ec59ce6be00",
+    "skills/ghidra-coordinator/references/native/InsightStartDebugger.java": "3cf55ab86303dab43ef8cf0a5f18bb60331d729e93eb498d59490ca3fe18aa96",
+    "skills/ghidra-coordinator/references/native/InsightStopDebugger.java": "c8e9df60bc41bf6f86d4918dd3ff28f6818c71b37bbcb1d4d25382b55ecfbf95",
+    "skills/ghidra-coordinator/references/native/InsightTraceInspect.java": "476dfa7b6db5dbbee02eca496d3da86a35796a6cb11e3e6bdeb91482570030b6",
+    "skills/ghidra-coordinator/references/native/InsightTraceState.java": "c037b08cd023019c37e031d0d743ca5d74b62d342728a4412718522c734310ce",
+    "skills/ghidra-coordinator/references/native/InsightTraceTools.java": "ec3ca5176898e59ccfa2e2e0c6ca4fa6708dac5d61bd2643f90879ea7370c434",
+    "skills/ghidra-coordinator/references/native/InsightVersionTracking.java": "dc9e96654e589b4deb9303a9d57ae820c95eded251fd29243add41362a61b9aa",
+    "skills/ghidra-coordinator/references/queries.json": "78a78a70b6f77691a6717b747c0d9cf41078c957c490bfbddf3e5a03352123cf",
+    "package.json": "ed89c9db944747d46b552365ba4b75c469c287d540da4cd045f53a77b4ab689f",
+    "package-lock.json": "f3f3707781c0a3a73aebecf38d71c73cd1f3f2dde42ec71821cc66373c78ab03",
+    "skills/ghidra-coordinator/package.json": "ffcafc5ed1449e6df8a9f8af775440974e8105ca4d56731bb27bbdbcb1202041",
+    "scripts/proof-managed-runtime.mjs": "3678f2d5e7d1afa0f02afa6f7add3dcc77df85ed851dba5a4f9fb1dd69786b6d",
+    "scripts/test-package.mjs": "85649abf58dc9f27e4eb67f022412bc002ff68b7f85e2be942766915c8939fe1",
+    "skills/ghidra-coordinator/tests/runtime-manager.test.ts": "99eaf0edc20c096c680c25cceea6e706a5ce29d604f6a5f68d27722fd0eaba57",
+    "tests/acceptance/Bindings/IntegrationSteps.cs": "77c62010f781a6df70742388d2e0ef3f7033343e39a26119e344a3e68f448a54",
+    "tests/acceptance/Features/ManagedRuntime.feature": "1b88120b5083f47268df57ad793d9a4985d39621ed5383563c4e7730db64c2d7"
+  },
+  "limits": [
+    "Fresh application profiles on an existing macOS host, not a newly imaged OS.",
+    "Native acceptance is macOS ARM64; Windows/Linux catalog entries have no new native acceptance claim.",
+    "Host LLDB/developer tools, GUI/keychain access and debugger authorization are OS prerequisites.",
+    "Offline fault checks and native busy/uninstall/reinstall are covered; no exhaustive installer-owner SIGKILL matrix was run.",
+    "Global installation used the inspected 0.2.0 archive. No npm registry publication; prior public latest remains 0.1.0.",
+    "No parallel-speedup or historical full-facade reacceptance claim."
+  ],
+  "sourceBaseRevision": "2cc875c4991281e2221917c4bc7b80c0ba52a64a",
+  "testedWorkingTree": true,
+  "postAcceptanceCleanup": {
+    "profiles": 2,
+    "items": [
+      {
+        "mode": "managed",
+        "liveNativeProcesses": 0,
+        "server": "stopped"
+      },
+      {
+        "mode": "external",
+        "liveNativeProcesses": 0,
+        "server": "stopped"
+      }
+    ]
+  }
+}

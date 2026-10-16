@@ -1,0 +1,8 @@
+define endian=little;
+define alignment=1;
+define space ram type=ram_space size=2 default;
+define space register type=register_space size=2;
+define register offset=0 size=2 [sp r0];
+define token instr(8) op=(0,7);
+:NOP is op=0 { }
+:RET is op=1 { return [r0]; }

@@ -1,0 +1,1761 @@
+{
+  "source": "57e37a8bf388b1279cff46378f85be1554548f61",
+  "tools": [
+    {
+      "path": "/analyze_control_flow",
+      "command": "analysis analyze-control-flow",
+      "params": [
+        {
+          "name": "function_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/analyze_dataflow",
+      "command": "analysis analyze-dataflow",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "variable",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "default": "backward"
+        },
+        {
+          "name": "max_steps",
+          "type": "integer",
+          "required": false,
+          "default": "20"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_for_documentation",
+      "command": "analysis analyze-for-documentation",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_function_complete",
+      "command": "analysis analyze-function-complete",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "include_xrefs",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_callees",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_callers",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_disasm",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_variables",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_completeness",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_function_completeness",
+      "command": "analysis analyze-function-completeness",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "function_ref"
+        },
+        {
+          "name": "compact",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "addresses",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/find_code_gaps",
+      "command": "analysis find-code-gaps",
+      "params": [
+        {
+          "name": "min_size",
+          "type": "integer",
+          "required": false,
+          "default": "1"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/find_dead_code",
+      "command": "analysis find-dead-code",
+      "params": [
+        {
+          "name": "function_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "path": "/find_next_undefined_function",
+      "command": "analysis find-next-undefined-function",
+      "params": [
+        {
+          "name": "start_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "criteria",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/find_similar_functions",
+      "command": "analysis find-similar-functions",
+      "params": [
+        {
+          "name": "target_function",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "required": false,
+          "default": "0.8"
+        }
+      ]
+    },
+    {
+      "path": "/get_field_access_context",
+      "command": "analysis get-field-access-context",
+      "params": [
+        {
+          "name": "struct_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "field_offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "num_examples",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_pcode",
+      "command": "analysis get-function-pcode",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "granularity",
+          "type": "string",
+          "required": false,
+          "default": "high"
+        }
+      ]
+    },
+    {
+      "path": "/inspect_memory_content",
+      "command": "analysis inspect-memory-content",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "length",
+          "type": "integer",
+          "required": false,
+          "default": "64"
+        },
+        {
+          "name": "detect_strings",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/list_analyzers",
+      "command": "analysis list-analyzers",
+      "params": []
+    },
+    {
+      "path": "/search_byte_patterns",
+      "command": "analysis search-byte-patterns",
+      "params": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "mask",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "max_bytes",
+          "type": "integer",
+          "required": false,
+          "default": "1048576"
+        },
+        {
+          "name": "scan_from",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/search_instructions",
+      "command": "analysis search-instructions",
+      "params": [
+        {
+          "name": "mnemonic",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "operand_pattern",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "500"
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "path": "/get_comment",
+      "command": "comments inspect",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "addresses",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "only_with_comments",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_global_completeness",
+      "command": "types analyze-global-completeness",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "compact",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_struct_field_usage",
+      "command": "types analyze-struct-field-usage",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "struct_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "max_functions",
+          "type": "integer",
+          "required": false,
+          "default": "10"
+        }
+      ]
+    },
+    {
+      "path": "/audit_global",
+      "command": "types audit-global",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/audit_globals_in_function",
+      "command": "types audit-globals-in-function",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        }
+      ]
+    },
+    {
+      "path": "/find_data_types",
+      "command": "types find-data-types",
+      "params": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "categories",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/get_enum_values",
+      "command": "types get-enum-values",
+      "params": [
+        {
+          "name": "enum_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/get_struct_layout",
+      "command": "types get-struct-layout",
+      "params": [
+        {
+          "name": "struct_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/get_type_size",
+      "command": "types get-type-size",
+      "params": [
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/get_valid_data_types",
+      "command": "types get-valid-data-types",
+      "params": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "default": "all"
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "path": "/suggest_field_names",
+      "command": "types suggest-field-names",
+      "params": [
+        {
+          "name": "struct_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "struct_size",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "path": "/validate_data_type",
+      "command": "types validate-data-type",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "type_name",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "path": "/validate_function_prototype",
+      "command": "types validate-function-prototype",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "prototype",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "calling_convention",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/batch_string_anchor_report",
+      "command": "documentation batch-string-anchor-report",
+      "params": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": false,
+          "default": ".cpp"
+        }
+      ]
+    },
+    {
+      "path": "/find_undocumented_by_string",
+      "command": "documentation find-undocumented-by-string",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_documentation",
+      "command": "documentation get",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_hash",
+      "command": "documentation get-function-hash",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "function_ref"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/emulate_function",
+      "command": "emulation emulate-function",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        },
+        {
+          "name": "registers",
+          "type": "json",
+          "required": true
+        },
+        {
+          "name": "memory",
+          "type": "json",
+          "required": true
+        },
+        {
+          "name": "max_steps",
+          "type": "integer",
+          "required": false,
+          "default": "10000"
+        },
+        {
+          "name": "return_registers",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "read_memory_after",
+          "type": "json",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "abi",
+          "type": "string",
+          "required": false,
+          "default": "auto"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "arguments",
+          "type": "array",
+          "required": false
+        }
+      ]
+    },
+    {
+      "path": "/emulate_hash_batch",
+      "command": "emulation emulate-hash-batch",
+      "params": [
+        {
+          "name": "hash_function_address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "string_register",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "result_register",
+          "type": "string",
+          "required": false,
+          "default": "EAX"
+        },
+        {
+          "name": "target_hash",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "candidates",
+          "type": "json",
+          "required": true
+        },
+        {
+          "name": "initial_registers",
+          "type": "json",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "wide_string",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "abi",
+          "type": "string",
+          "required": false,
+          "default": "auto"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "max_steps",
+          "type": "integer",
+          "required": false,
+          "default": "10000"
+        }
+      ]
+    },
+    {
+      "path": "/disassemble_function",
+      "command": "functions disassemble",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/force_decompile",
+      "command": "functions force-decompile",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": true,
+          "semantic": "function_ref"
+        }
+      ]
+    },
+    {
+      "path": "/get_functions",
+      "command": "functions inspect",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "function_ref"
+        },
+        {
+          "name": "functions",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "fields",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "include_call_context",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "call_context_limit",
+          "type": "integer",
+          "required": false,
+          "default": "6"
+        },
+        {
+          "name": "call_context_lines",
+          "type": "integer",
+          "required": false,
+          "default": "3"
+        },
+        {
+          "name": "include_disasm",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/list_class_members",
+      "command": "functions list-class-members",
+      "params": [
+        {
+          "name": "class_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "200"
+        }
+      ]
+    },
+    {
+      "path": "/list_function_tags",
+      "command": "functions list-function-tags",
+      "params": [
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "500"
+        }
+      ]
+    },
+    {
+      "path": "/find_functions",
+      "command": "functions search",
+      "params": [
+        {
+          "name": "name_pattern",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "regex",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "min_xrefs",
+          "type": "integer",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "max_xrefs",
+          "type": "integer",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "calling_convention",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "has_custom_name",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "is_thunk",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "is_external",
+          "type": "boolean",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "tag",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "default": "address"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/get_entry_points",
+      "command": "listing get-entry-points",
+      "params": [
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "path": "/get_external_location",
+      "command": "listing get-external-location",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "dll_name",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/get_function_count",
+      "command": "listing get-function-count",
+      "params": []
+    },
+    {
+      "path": "/list_calling_conventions",
+      "command": "listing list-calling-conventions",
+      "params": []
+    },
+    {
+      "path": "/list_data_items_by_xrefs",
+      "command": "listing list-data-items-by-xrefs",
+      "params": [
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "default": "text"
+        },
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "default": "defined"
+        },
+        {
+          "name": "type_filter",
+          "type": "string",
+          "required": false,
+          "default": "all"
+        },
+        {
+          "name": "min_xrefs",
+          "type": "integer",
+          "required": false,
+          "default": "1"
+        },
+        {
+          "name": "include_all_sections",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/list_globals",
+      "command": "listing list-globals",
+      "params": [
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "default": "all"
+        },
+        {
+          "name": "type_filter",
+          "type": "string",
+          "required": false,
+          "default": "all"
+        },
+        {
+          "name": "min_xrefs",
+          "type": "integer",
+          "required": false,
+          "default": "1"
+        },
+        {
+          "name": "include_all_sections",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "name_substring",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/list_program_items",
+      "command": "listing list-program-items",
+      "params": [
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/list_shadowed_globals",
+      "command": "listing list-shadowed-globals",
+      "params": [
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "500"
+        },
+        {
+          "name": "include_all_sections",
+          "type": "boolean",
+          "required": false,
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "path": "/list_strings",
+      "command": "strings list",
+      "params": [
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/search_strings",
+      "command": "strings search-regex",
+      "params": [
+        {
+          "name": "search_term",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "min_length",
+          "type": "integer",
+          "required": false,
+          "default": "4"
+        },
+        {
+          "name": "encoding",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_api_call_chains",
+      "command": "analysis analyze-api-call-chains",
+      "params": []
+    },
+    {
+      "path": "/detect_crypto_constants",
+      "command": "analysis detect-crypto-constants",
+      "params": [
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "default": "100000"
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "max_bytes",
+          "type": "integer",
+          "required": false,
+          "default": "1048576"
+        },
+        {
+          "name": "scan_from",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/detect_malware_behaviors",
+      "command": "analysis detect-malware-behaviors",
+      "params": []
+    },
+    {
+      "path": "/extract_iocs_with_context",
+      "command": "analysis extract-iocs-with-context",
+      "params": []
+    },
+    {
+      "path": "/find_anti_analysis_techniques",
+      "command": "analysis find-anti-analysis-techniques",
+      "params": []
+    },
+    {
+      "path": "/analysis_status",
+      "command": "analysis status",
+      "params": []
+    },
+    {
+      "path": "/get_address_spaces",
+      "command": "memory spaces",
+      "params": []
+    },
+    {
+      "path": "/get_language_metadata",
+      "command": "program get-language-metadata",
+      "params": [
+        {
+          "name": "include_registers",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_default_symbols",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/get_metadata",
+      "command": "program metadata",
+      "params": []
+    },
+    {
+      "path": "/get_program_options",
+      "command": "program get-program-options",
+      "params": [
+        {
+          "name": "group",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/get_property",
+      "command": "program get-property",
+      "params": [
+        {
+          "name": "map",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/list_bookmarks",
+      "command": "program list-bookmarks",
+      "params": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/list_properties",
+      "command": "program list-properties",
+      "params": [
+        {
+          "name": "map",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "start",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "end",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/list_scripts",
+      "command": "scripts list",
+      "params": [
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "path": "/read_memory",
+      "command": "memory read",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "length",
+          "type": "integer",
+          "required": false,
+          "default": "16"
+        }
+      ]
+    },
+    {
+      "path": "/can_rename_at_address",
+      "command": "symbols can-rename-at-address",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_call_graph",
+      "command": "xrefs analyze-call-graph",
+      "params": [
+        {
+          "name": "start_function",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "end_function",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "analysis_type",
+          "type": "string",
+          "required": false,
+          "default": "summary"
+        }
+      ]
+    },
+    {
+      "path": "/get_assembly_context",
+      "command": "xrefs get-assembly-context",
+      "params": [
+        {
+          "name": "xref_sources",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "context_instructions",
+          "type": "integer",
+          "required": false,
+          "default": "5"
+        }
+      ]
+    },
+    {
+      "path": "/get_full_call_graph",
+      "command": "xrefs get-full-call-graph",
+      "params": [
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "default": "edges"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "1000"
+        }
+      ]
+    },
+    {
+      "path": "/get_function_call_graph",
+      "command": "xrefs get-function-call-graph",
+      "params": [
+        {
+          "name": "function",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "depth",
+          "type": "integer",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "default": "both"
+        }
+      ]
+    },
+    {
+      "path": "/get_xrefs_from",
+      "command": "xrefs from",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/get_xrefs_to",
+      "command": "xrefs inspect-to",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": false,
+          "default": "",
+          "semantic": "address"
+        },
+        {
+          "name": "addresses",
+          "type": "string",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "default": "100"
+        }
+      ]
+    },
+    {
+      "path": "/analyze_data_region",
+      "command": "analysis analyze-data-region",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "max_scan_bytes",
+          "type": "integer",
+          "required": false,
+          "default": "1024"
+        },
+        {
+          "name": "include_xref_map",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        },
+        {
+          "name": "include_boundary_detection",
+          "type": "boolean",
+          "required": false,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "path": "/detect_array_bounds",
+      "command": "analysis detect-array-bounds",
+      "params": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "semantic": "address"
+        },
+        {
+          "name": "max_scan_range",
+          "type": "integer",
+          "required": false,
+          "default": "2048"
+        }
+      ]
+    }
+  ]
+}
