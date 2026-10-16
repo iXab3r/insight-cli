@@ -67,3 +67,7 @@ Two opt-in macOS LLDB lifetime fault tests exercise exit-before-readiness and st
 They use a fixture identity endpoint and real LLDB without executing a target; the combined
 Gherkin gate independently uses real Ghidra GUI and a native debuggee. Default offline CI
 skips these host-dependent checks.
+
+Before native acceptance, verify the global installation against the exact tarball with
+`node scripts/verify-global-package.mjs <tarball> <installed-package-root-or-POSIX-executable> <receipt.json>`.
+It compares every packaged file, retaining only the count, package SHA256 and build identity.
