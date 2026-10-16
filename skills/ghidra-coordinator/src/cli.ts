@@ -28,6 +28,7 @@ import {Extensions,extensionCommands,extensionState,extensionInventoryCommands,m
 import {Synchronization,synchronizationCommands} from './sync-policy.js';
 import {artifactsCommands} from './saved-materials.js';
 import {RuntimeManager,runtimeCommands,runtimeProcesses} from './runtime-manager.js';
+import {packageVersion} from './package-version.js';
 import {runtimeSelection} from './runtime-selection.js';
 
 export interface Options {
@@ -169,7 +170,7 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
 export function createDefinition(options: Options = {}): CliDefinition {
   const owner=new Owner(options);
   const definition:CliDefinition={
-    name:'insight-cli',applicationId:'insight-cli',version:'0.2.0',description:'Isolated research contexts and coordinated Ghidra analysis',
+    name:'insight-cli',applicationId:'insight-cli',version:packageVersion,description:'Isolated research contexts and coordinated Ghidra analysis',
     resources:[owner],permissions:{categories:[{name:'Destructive',description:'Explicit deletion or replacement of retained research data',enabledByDefault:false}]},...(options.runtime?{runtime:options.runtime}:{}),
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
       ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
@@ -204,7 +205,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     builtins:[command('skill [name]','Locate the installed insight-cli or insight-re skill',({args})=>{
       const name=args.name===undefined?'insight-cli':text(args.name);
       if(!['insight-cli','insight-re'].includes(name))fail('notFound','Unknown skill; choose insight-cli or insight-re.');
-      return {version:'0.2.0',name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
+      return {version:packageVersion,name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
         skills:['insight-cli','insight-re']};
     })],
     commands:[

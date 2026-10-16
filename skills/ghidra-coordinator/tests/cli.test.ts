@@ -5,12 +5,13 @@ import { createInsightCli } from '../src/prototype-cli.js';
 import { stat, writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Store } from '../src/store.js';
+import {packageVersion} from '../src/package-version.js';
 const server='ghidra://127.0.0.1:14100';
 const identity={profile:'default',server,repository:'synthetic',programPath:'/fixture.exe',binarySha256:'a'.repeat(64),language:'x86:LE:64:default',compilerSpec:'windows',imageBase:'140000000'};
 test('help and local skill discovery work without configured profile or runtime directory',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-ghidra'});const app=f.createApplication(runtime=>createInsightCli({runtime}));
  const help=await f.run(app,['--help']);assert.equal(help.exitCode,0);assert.match(help.stdout,/findings/);
- const skill=await f.json(app,['skill']) as {path:string;version:string};assert.equal(skill.version,'0.1.0');assert.match(await readFile(skill.path,'utf8'),/insight-cli 0.2.0/);
+ const skill=await f.json(app,['skill']) as {path:string;version:string};assert.equal(skill.version,'0.1.0');assert.ok((await readFile(skill.path,'utf8')).includes('insight-cli '+packageVersion));
  await assert.rejects(stat(f.appArguments.AppDataDirectory));
 });
 test('Update denied before files/state, JSON and RPC share command declaration and profile isolation',async t=>{

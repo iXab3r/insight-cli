@@ -2,6 +2,9 @@
 
 For the manual GitHub Actions build/release and its one-time authorization, see
 [Release CI](RELEASE-CI.md). Its build-only mode also supplies an inspected package artifact.
+The workflow now increments patch by default and keeps the selected version across re-runs;
+minor, major and the exact source version are explicit choices. The 0.2.0 receipts below remain
+historical evidence of the initial CI publication.
 
 The current release is 0.2.0, including [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md).
 The historical 0.1.0 receipt and executable proof remain below. Run the historical

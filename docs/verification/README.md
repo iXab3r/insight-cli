@@ -1,5 +1,15 @@
 # Verification scope
 
+## Automatic release versioning
+
+[Auto-version evidence](release-auto-version.json) covers default patch selection to 0.2.1,
+global preview installation, a full re-run with the same reservation and byte-identical archive,
+and a verify-only re-run using the previous build's exact artifact ID. All three attempts of
+[run 38964728835](https://github.com/iXab3r/insight-cli/actions/runs/38964728835) pass. Six version
+and five publication tests pass in addition to the 154 application tests and package gate.
+This is a preview/retry proof; it does not publish another npm version or rebind native coverage.
+[Release CI](../RELEASE-CI.md) explains patch/minor/major/none and missing-reservation behavior.
+
 ## Managed runtime delivery and external launcher
 
 [Runtime delivery](managed-ghidra-runtime.json) and [reproduction](../MANAGED-GHIDRA-RUNTIME.md)
