@@ -127,6 +127,10 @@ privately before `applied`; with the default manual policy they await explicit m
 request IDs identify original changing intentions and return their result or unresolved state
 without repeating effects.
 
+The manual [Release npm workflow](https://github.com/iXab3r/insight-cli/actions/workflows/release-npm.yml)
+provides the same build checks, an archive/receipt artifact and optional registry publication.
+See [release setup and re-runs](docs/RELEASE-CI.md).
+
 Build prepared artifacts with `npm run pack:cli`. The tarball also installs by itself:
 
 ```sh

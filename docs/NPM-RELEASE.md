@@ -1,5 +1,8 @@
 # npm distribution
 
+For the manual GitHub Actions build/release and its one-time authorization, see
+[Release CI](RELEASE-CI.md). Its build-only mode also supplies an inspected package artifact.
+
 This page preserves the published 0.1.0 release. The later [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md)
 is the 0.2.0 candidate and has its own global CLI/Gherkin verifier. Run the historical
 `proof-global-package.mjs` only with its matching 0.1.0 executable/artifact.
