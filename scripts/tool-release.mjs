@@ -44,8 +44,12 @@ function release(recipe){
   return pages.flat().find(r=>r.tag_name===recipe.tag);
  }
 }
+export async function waitFor(reader,ready,attempts=20,delayMs=500){
+ for(let i=0;i<attempts;i++){const value=await reader();if(ready(value))return value;if(i+1<attempts)await new Promise(ok=>setTimeout(ok,delayMs));}
+ throw Error('Release visibility is unresolved; inspect this exact tag before retrying');
+}
 async function readback(recipe,assets,directory,download=true){
- const current=release(recipe);if(!current)throw Error('Release outcome is unknown');
+ const current=await waitFor(()=>release(recipe),r=>r&&r.assets.length>=assets.length);
  if(current.assets.length!==assets.length)throw Error('Release asset inventory differs');
  for(const a of assets){
   const remote=current.assets.find(x=>x.name===a.name);if(!remote||remote.size!==a.size)throw Error('Missing/different asset: '+a.name);
@@ -78,7 +82,7 @@ export async function mirror(recipe,directory,publish=false){
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
   gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);
-  current=release(recipe);if(!current)throw Error('Draft release creation outcome is unknown');
+  current=await waitFor(()=>release(recipe),Boolean);
  }
  if(current.draft){
   for(const a of assets){
@@ -91,6 +95,7 @@ export async function mirror(recipe,directory,publish=false){
   try{gh('release','edit',recipe.tag,'--repo',recipe.repository,'--draft=false','--latest=false');}
   catch(e){current=release(recipe);if(!current||current.draft)throw Error('Publication outcome is unknown; inspect this exact tag before retrying',{cause:e});}
  }
+ await waitFor(()=>release(recipe),r=>r&&!r.draft);
  current=await readback(recipe,assets,directory,false);
  if(current.draft||current.immutable!==true)throw Error('Published release is not verified immutable');
  return {state:'published_verified',tag:recipe.tag,url:current.html_url,assets:assets.length};

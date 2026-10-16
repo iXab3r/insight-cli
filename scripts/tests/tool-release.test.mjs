@@ -35,3 +35,8 @@ test('published immutable verification needs neither upstream acquisition nor up
  const {stat}=await import('node:fs/promises');await assert.rejects(stat(join(root,'out',a.name)));
  await assert.rejects(run(process.execPath,[script,input,join(root,'denied'),'--publish'],{env:{...env,TOOL_RELEASE_IMMUTABLE_READY:''}}),/setup is not confirmed/);
 });
+test('draft/readback reconciliation tolerates delayed visibility with bounded read-only polling',async()=>{
+ const {waitFor}=await import('../tool-release.mjs');let reads=0;
+ assert.equal(await waitFor(()=>++reads>=3?'visible':undefined,Boolean,4,1),'visible');assert.equal(reads,3);
+ await assert.rejects(waitFor(()=>undefined,Boolean,2,1),/visibility is unresolved/);
+});
