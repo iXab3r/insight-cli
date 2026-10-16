@@ -1,0 +1,5 @@
+{
+ "switches":{"entry":"0x40125a","clue":"Unknown switch:","string":"0x47c2ac","hops":["0x4012e5"],"code":["Unknown switch:","Multiple instances for switch:","Incorrect switch postfix:","Too short switch:","Too long switch:","0x2d","FUN_00402576"],"helpers":{"0x402576":["0x40","0x5b","0x20"]}},
+ "password":{"entry":"0x43f4f5","clue":"Enter password (will not be echoed):","string":"0x481cc0","hops":["0x43f50b"],"code":["GetStdHandle(","GetConsoleMode(","SetConsoleMode(","0xfffffffb","FUN_00401f02"],"helpers":{"0x401ec8":["== -1","\\0","\\n"],"0x43f4b1":["0x80070057","0x80004005","0x80004004"]}},
+ "extraction":{"entry":"0x436fea","clue":"CRC Failed","string":"0x47f8f4","hops":["0x47f6b0","0x437021"],"code":["case 1:","Unsupported Method","case 2:","Data Error","case 3:","CRC Failed","param_2 == 0","Wrong password?","case 9:","Error #"],"helpers":{}}
+}

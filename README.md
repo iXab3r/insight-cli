@@ -15,6 +15,14 @@ independent copies and receipts. Installing the package does not register either
 The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
 contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
 
+The [RE-skill comparison on 7zr.exe](docs/7ZR-RE-SKILL-BENCHMARK.md) completes three
+prepared-base live-agent pairs with useful findings, one merge and fresh verification:
+**1.516x median full-task speedup** (1.419–1.528x). Two original baselines restored their
+prepared contexts after owner idle shutdown; a separate continuously warm-process pair
+passes at **1.640x**. Its detailed wall-time breakdown distinguishes research, handoff,
+publication and acceptance, with retained errors and CPU-observation limits.
+[Evidence](docs/verification/7zr-re-skill-benchmark.json) retains all eight runs.
+
 The [live-agent 7zr.exe comparison](docs/7ZR-LIVE-RESEARCH.md) does **not confirm repeatable
 acceleration**: prepared pairs achieved 1.475x, 1.609x and 0.971x; the next attempt hit a
 disk-full merge failure. The separate cold pair achieved 1.266x. Real findings were merged

@@ -9,6 +9,24 @@ refresh and preserved local work; an external-tool agent contributes ordinary fi
 Fresh native readback, repository history and exact saved-copy comparisons verify the
 result. This functional check adds no speedup or full-facade claim.
 
+## RE-skill live-agent comparison
+
+[Eight real 7zr.exe runs](7zr-re-skill-benchmark.json) pass useful research, one merge,
+fresh code/clue/comment/history verification and exact saved-copy checks. Three original
+prepared-base pairs yield **1.516x median full-task speedup**, range 1.419–1.528x, and
+1.806x median active-research speedup. Baseline pairs 1 and 3 restored native contexts
+from prepared R1 after the 60 s owner idle shutdown; their initial-PID CPU samples are
+partial. A separate one-pair control keeps the same native PIDs alive with recorded
+read-only metadata in both modes and yields **1.640x** full-task speedup.
+
+[Protocol, results and detailed timing](../7ZR-RE-SKILL-BENCHMARK.md) retain the original
+six plus both supplemental runs, one 50.266 s private-note correction, wrapper/CLI errors,
+maintenance overlays, handoff asymmetry and all sampling limits. Exact exclusive wall
+partitions sum in integer nanoseconds. These are descriptive combined agent/context
+results, with no causal skill-on/off or isolated native-parallelism claim. Product runtime
+is unchanged; the existing 139 offline tests pass. This focused benchmark does not rebind
+historical full-facade or GUI acceptance.
+
 ## Live-agent production EXE research
 
 [7zr.exe evidence](7zr-live-research.json) records three completed prepared pairs with

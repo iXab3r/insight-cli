@@ -1,0 +1,10 @@
+{
+  "schema":1,
+  "kind":"supplemental control; original six trials retained without replacement",
+  "pairs":1,
+  "modeOrder":[1,3],
+  "sameTaskAndAcceptance":"Reuse unchanged original controller, agent contract, binary, installed RE skill, annotations/materials/one merge/fresh verification. Fresh agents inherit identical settings, fork_turns none, no overrides.",
+  "reason":"Original baseline pairs 1 and 3 lost their initial native PID after the Factory 60s owner idle shutdown. Their persistent R1 bases remained prepared, but first research reads restored native contexts. Two additional trials control this lifecycle effect; they do not replace original results.",
+  "maintenance":"After preparation and through task finish, issue ordinary ReadOnly targets list --limit 1 every 15 seconds in both modes. This keeps the Factory owner active without task-specific Ghidra reads. Record every maintenance call, failure and native observation coverage; include maintenance interference in elapsed task time.",
+  "acceptance":"Initial exact native PIDs must remain observed through final done (sampling tolerance 2s) and every native worker must grow CPU in the common research window. Report one control ratio descriptively, alongside all original attempts. No broad statistical claim or skill-on/off causal inference."
+}
