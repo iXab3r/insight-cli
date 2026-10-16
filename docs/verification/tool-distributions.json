@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "TR-01 contracts and TR-02 tool distributions; not combined runtime migration acceptance",
+  "source": "bf2407668b48db3e68d275e26e5746068e591992",
+  "distributions": [
+    {
+      "tag": "tool-ghidra-12.1.2-r1",
+      "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-ghidra-12.1.2-r1",
+      "immutable": true,
+      "assets": 7,
+      "binaryAssets": 5,
+      "readback": "Every asset downloaded and SHA256/size verified before publication; immutable inventory rechecked after publication."
+    },
+    {
+      "tag": "tool-temurin-21.0.11-10-r1",
+      "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-temurin-21.0.11-10-r1",
+      "immutable": true,
+      "assets": 8,
+      "binaryAssets": 4,
+      "readback": "Every asset downloaded and SHA256/size verified before publication; immutable inventory rechecked after publication."
+    },
+    {
+      "tag": "tool-ilspy-11.1.0.9782-r1",
+      "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-ilspy-11.1.0.9782-r1",
+      "immutable": true,
+      "assets": 49,
+      "binaryAssets": 1,
+      "readback": "Every asset downloaded and SHA256/size verified before publication; immutable inventory rechecked after publication."
+    },
+    {
+      "tag": "tool-dotnet-10.0.13-r1",
+      "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-dotnet-10.0.13-r1",
+      "immutable": true,
+      "assets": 6,
+      "binaryAssets": 4,
+      "readback": "Every asset downloaded and SHA256/size verified before publication; immutable inventory rechecked after publication."
+    }
+  ],
+  "assetCount": 70,
+  "binaryAssetCount": 14,
+  "offline": {
+    "applicationTests": 155,
+    "releaseTests": 15,
+    "package": "isolated relocation and global help/IPC passed"
+  },
+  "limits": [
+    "Publication/upload/readback executed locally with gh; scoped Actions token independently verifies published exact releases. Initial Actions runs failed before publication on an administrative API preflight; fixed without an admin token in CI.",
+    "Native ILSpy help ran with the private delivered .NET runtime on macOS ARM64. Ghidra common-runtime migration is not claimed by this receipt."
+  ],
+  "workflowVerification": [
+    {
+      "component": "dotnet",
+      "run": "https://github.com/iXab3r/insight-cli/actions/runs/38972543757"
+    },
+    {
+      "component": "ilspy",
+      "run": "https://github.com/iXab3r/insight-cli/actions/runs/38972546081"
+    },
+    {
+      "component": "ghidra",
+      "run": "https://github.com/iXab3r/insight-cli/actions/runs/38973813305"
+    },
+    {
+      "component": "temurin",
+      "run": "https://github.com/iXab3r/insight-cli/actions/runs/38973815713"
+    }
+  ]
+}
