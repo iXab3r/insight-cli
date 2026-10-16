@@ -1,5 +1,19 @@
 # Verification scope
 
+## Published npm package and actual global installation
+
+[`@eyeauras/insight-cli@0.1.0`](npm-release-0.1.0.json) is public on npm with `latest=0.1.0`.
+Its served SHA-1/SHA-512 match the inspected tarball; a committed rebuild is byte-identical.
+An ordinary package-name global install in the default machine prefix, with empty cache and
+user npm config disabled, supplies the real `insight-cli` PATH command. All 164 package files
+and 80 IPC files match. Both candidate and registry installations pass real 7zr.exe research,
+a private edit, one R2 merge, fresh native readback, file/folder save and owned cleanup.
+139 offline tests and isolated-package checks pass; native global proof targets macOS,
+Ghidra 12.1.2 and Java 21 on Node 26.4.0. [Distribution/reproduction](../NPM-RELEASE.md)
+records the immutable official IPC tarball dependency, first-publication processing delay,
+preflight corrections and boundaries. No separate IPC registry publication was made.
+
+
 ## Packaged RE skill and saved materials
 
 [RE workflow evidence](re-skill.json) and [reproduction](../RE-SKILL.md) separate the

@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "package": "@eyeauras/insight-cli",
+  "version": "0.1.0",
+  "publishedAt": "2026-10-16T17:07:16.967Z",
+  "sourceCommit": "e800acfa3e8d1e860c847072fa3da9b2f51e1659",
+  "registry": {
+    "url": "https://registry.npmjs.org/",
+    "access": "public",
+    "latest": "0.1.0",
+    "tarball": "https://registry.npmjs.org/@eyeauras/insight-cli/-/insight-cli-0.1.0.tgz",
+    "sha1": "af8244f84d5c70836c2bb94ef29660ffa422793d",
+    "integrity": "sha512-9DpDyLA4x8ZAl5AsFR+cDAFjVFlcRgjkDhdRY5U3TzccjPhecXkazTaUhsH5P5sjLGvXA+Od9zVEAUSZo92ccA==",
+    "exactTestedBytes": true,
+    "publicationAcceptedOnce": true,
+    "readOnlyAvailabilityWaitSeconds": 184.898
+  },
+  "artifact": {
+    "bytes": 990075,
+    "sha256": "f8448298834d21577aa711086359d82e828f544101fa87da6329724c8170be05",
+    "files": 164
+  },
+  "runtimeDependency": {
+    "package": "@eyeauras/cli-factory-ipc",
+    "version": "0.1.0",
+    "file": "factory-ipc-a2094fb.tgz",
+    "sha256": "380515b48c2505fbbf772437f131fd58040332c2e0b9780e5538b76006503e33",
+    "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
+    "commit": "a2094fb5d1cc80a82a5f599fe9d5f37c57a04d46",
+    "license": "MIT",
+    "distribution": "Prepared official Factory IPC artifact; installed automatically from the immutable URL, without a separate IPC registry publication",
+    "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
+  },
+  "verification": {
+    "offline": {
+      "node": 24,
+      "testsPassed": 139,
+      "failed": 0
+    },
+    "isolatedPackageInstall": {
+      "passed": true,
+      "onlyCliArchiveSupplied": true,
+      "relocationAndSkillLinks": true,
+      "jsonRpcAndSaveChecks": true
+    },
+    "prePublicationGlobalCandidate": {
+      "schema": 1,
+      "package": "@eyeauras/insight-cli",
+      "version": "0.1.0",
+      "node": "v26.4.0",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "inputSha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+      "checks": {
+        "executableHelpAndVersion": true,
+        "installedSkill": true,
+        "fileAndFolderSaves": true,
+        "realGhidraResearch": true,
+        "mergeAndFreshReadback": true,
+        "unchangedInput": true,
+        "ownedNativeCleanup": true
+      },
+      "sharedRevision": "R2",
+      "entry": "0x436fea",
+      "state": "passed",
+      "calls": [
+        {
+          "operation": "--help",
+          "code": 0,
+          "seconds": 0.509083166
+        },
+        {
+          "operation": "--version",
+          "code": 0,
+          "seconds": 0.373178875
+        },
+        {
+          "operation": "skill insight-re",
+          "code": 0,
+          "seconds": 0.094930458
+        },
+        {
+          "operation": "profile create",
+          "code": 0,
+          "seconds": 0.568460542
+        },
+        {
+          "operation": "permissions grant",
+          "code": 0,
+          "seconds": 0.517322625
+        },
+        {
+          "operation": "artifacts save",
+          "code": 0,
+          "seconds": 0.536758917
+        },
+        {
+          "operation": "artifacts save",
+          "code": 0,
+          "seconds": 0.578141958
+        },
+        {
+          "operation": "ghidra open",
+          "code": 0,
+          "seconds": 71.396713583
+        },
+        {
+          "operation": "ghidra strings search",
+          "code": 0,
+          "seconds": 2.097013167
+        },
+        {
+          "operation": "ghidra xrefs to",
+          "code": 0,
+          "seconds": 0.745209708
+        },
+        {
+          "operation": "ghidra xrefs to",
+          "code": 0,
+          "seconds": 0.630545166
+        },
+        {
+          "operation": "ghidra functions decompile",
+          "code": 0,
+          "seconds": 0.874289292
+        },
+        {
+          "operation": "ghidra comments set",
+          "code": 0,
+          "seconds": 2.814705917
+        },
+        {
+          "operation": "ghidra merge",
+          "code": 0,
+          "seconds": 18.354936625
+        },
+        {
+          "operation": "ghidra open",
+          "code": 0,
+          "seconds": 12.135549958
+        },
+        {
+          "operation": "ghidra comments get",
+          "code": 0,
+          "seconds": 0.854911208
+        },
+        {
+          "operation": "ghidra functions decompile",
+          "code": 0,
+          "seconds": 0.698519917
+        },
+        {
+          "operation": "ghidra close",
+          "code": 0,
+          "seconds": 1.229278958
+        },
+        {
+          "operation": "ghidra close",
+          "code": 0,
+          "seconds": 4.247839166
+        },
+        {
+          "operation": "ghidra server disconnect",
+          "code": 0,
+          "seconds": 0.867885459
+        }
+      ]
+    },
+    "publishedGlobalInstall": {
+      "defaultGlobalPrefix": true,
+      "command": "insight-cli",
+      "commandResolvedThroughPath": true,
+      "installedByPackageName": "@eyeauras/insight-cli@0.1.0",
+      "userConfigDisabled": true,
+      "initiallyEmptyNpmCache": true,
+      "packagedFiles": 164,
+      "allPackagedFilesByteIdentical": true,
+      "ipcFiles": 80,
+      "installedIpcMatchesOfficialArtifact": true,
+      "commandOnNormalPath": true,
+      "proof": {
+        "schema": 1,
+        "package": "@eyeauras/insight-cli",
+        "version": "0.1.0",
+        "node": "v26.4.0",
+        "platform": "darwin",
+        "architecture": "arm64",
+        "inputSha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+        "checks": {
+          "executableHelpAndVersion": true,
+          "installedSkill": true,
+          "fileAndFolderSaves": true,
+          "realGhidraResearch": true,
+          "mergeAndFreshReadback": true,
+          "unchangedInput": true,
+          "ownedNativeCleanup": true
+        },
+        "sharedRevision": "R2",
+        "entry": "0x436fea",
+        "state": "passed",
+        "calls": [
+          {
+            "operation": "--help",
+            "code": 0,
+            "seconds": 0.709607
+          },
+          {
+            "operation": "--version",
+            "code": 0,
+            "seconds": 0.745988625
+          },
+          {
+            "operation": "skill insight-re",
+            "code": 0,
+            "seconds": 0.118683041
+          },
+          {
+            "operation": "profile create",
+            "code": 0,
+            "seconds": 0.704481584
+          },
+          {
+            "operation": "permissions grant",
+            "code": 0,
+            "seconds": 0.607118166
+          },
+          {
+            "operation": "artifacts save",
+            "code": 0,
+            "seconds": 0.718901375
+          },
+          {
+            "operation": "artifacts save",
+            "code": 0,
+            "seconds": 0.71657175
+          },
+          {
+            "operation": "ghidra open",
+            "code": 0,
+            "seconds": 78.269023417
+          },
+          {
+            "operation": "ghidra strings search",
+            "code": 0,
+            "seconds": 1.504333292
+          },
+          {
+            "operation": "ghidra xrefs to",
+            "code": 0,
+            "seconds": 0.408992833
+          },
+          {
+            "operation": "ghidra xrefs to",
+            "code": 0,
+            "seconds": 0.413404292
+          },
+          {
+            "operation": "ghidra functions decompile",
+            "code": 0,
+            "seconds": 0.657460291
+          },
+          {
+            "operation": "ghidra comments set",
+            "code": 0,
+            "seconds": 2.579817083
+          },
+          {
+            "operation": "ghidra merge",
+            "code": 0,
+            "seconds": 18.759995875
+          },
+          {
+            "operation": "ghidra open",
+            "code": 0,
+            "seconds": 10.739956084
+          },
+          {
+            "operation": "ghidra comments get",
+            "code": 0,
+            "seconds": 0.539482708
+          },
+          {
+            "operation": "ghidra functions decompile",
+            "code": 0,
+            "seconds": 0.727651333
+          },
+          {
+            "operation": "ghidra close",
+            "code": 0,
+            "seconds": 1.362528084
+          },
+          {
+            "operation": "ghidra close",
+            "code": 0,
+            "seconds": 4.718522667
+          },
+          {
+            "operation": "ghidra server disconnect",
+            "code": 0,
+            "seconds": 0.947005208
+          }
+        ]
+      }
+    }
+  },
+  "preflightCorrections": [
+    "Partial workspace IPC bundling was rejected before publication: missing bundled/transitive dependency files. The release instead uses the immutable official tarball URL as an ordinary npm dependency.",
+    "An initial test-harness skill invocation selected the disposable profile before creating it; the harness was corrected. No package change was needed for this invocation.",
+    "npm publication processing initially returned 404 for package metadata. Only read-only availability checks and safe installation retries followed; the package was not republished."
+  ],
+  "limits": [
+    "Focused macOS global installation and headless Ghidra research/merge proof; does not rebind historical full-facade, GUI or timing evidence.",
+    "Global native proof uses Node 26.4.0, configured Ghidra 12.1.2 and Java 21; offline tests and isolated package checks also pass on Node 24.",
+    "No IPC registry publication, skill auto-registration, user settings migration or npm trusted-publisher automation is included."
+  ],
+  "receipts": {
+    "candidateProofSha256": "d90a27a66d6bbb8afd71bbf12f2e7994e71cb45aea6b4f04f960a0eedac10dc2",
+    "registryProofSha256": "6f4c672af3939f990f13375b1d5556dd6ed9ea9420f0ba1808b5934ba5aa513c",
+    "globalInstallLogSha256": "7f90c7069e3b887c2d1c0e84af56c5dc41e1864223e698dc8f36d23399459a60",
+    "globalFileProofSha256": "5706e4ba377370516e0c681ff741281483d84c150a8195d35cde553bd9f4afe1",
+    "publicProofScriptSha256": "c74a18e4c3ccd13904336512cae917c356acf068b939598d8b3d8c32b8fefaca",
+    "registryMetadataSha256": "2f73d83e50c0fb0ad13675cc2c44a7381e74c7b2c02d8cd80fd9aebce22bef18"
+  }
+}

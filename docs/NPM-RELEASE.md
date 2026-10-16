@@ -73,3 +73,25 @@ The fixed static input is 7zr.exe SHA-256
 `256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282`.
 This focused distribution proof does not repeat or rebind historical full-facade, GUI or timing
 acceptance. Personal installation paths and raw transcripts remain outside Git.
+
+## Published 0.1.0 receipt
+
+[`@eyeauras/insight-cli@0.1.0`](https://www.npmjs.com/package/@eyeauras/insight-cli)
+is published with `latest=0.1.0`. [Verification](verification/npm-release-0.1.0.json)
+binds source commit `e800acfa3e8d1e860c847072fa3da9b2f51e1659` to the exact tested tarball:
+990075 bytes, SHA-256
+`f8448298834d21577aa711086359d82e828f544101fa87da6329724c8170be05`, registry SHA-1
+`af8244f84d5c70836c2bb94ef29660ffa422793d` and matching SHA-512 integrity.
+
+The committed rebuild is byte-identical to the candidate tested before publication.
+After npm's first-publication processing, ordinary `npm install --global` by package name
+succeeded in the machine's default prefix, with an initially empty cache and user npm config
+disabled. The real PATH command reports 0.1.0. All 164 packaged files and 80 IPC files match
+the inspected sources byte for byte. The registry installation passes the same native 7zr.exe
+research, private annotation, single R2 merge, fresh readback, file/folder save and owned native
+cleanup proof as the candidate. Node 26.4.0 is used for actual global execution; 139 offline
+tests and the locked isolated-package checks pass on Node 24. Release-source CI is green.
+
+The receipt retains preflight corrections and the initial registry 404 propagation delay.
+There was one accepted publication; no repeated upload or replacement version was used.
+The copied EXE, profile names, personal paths and raw CLI output remain outside Git.
