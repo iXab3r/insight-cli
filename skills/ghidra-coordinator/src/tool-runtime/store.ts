@@ -40,10 +40,12 @@ export async function assertUnused(directory:string,tool:string){
  if(toolUseCount(directory,tool))fail('busy','Tool installation is reserved by an active operation.');
  let names:string[];const root=join(directory,'runtime/processes');try{names=await readdir(root);}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
  for(const name of names){if(!/^[a-f0-9-]{36}\.json$/.test(name))continue;
-  const record=await readJson<{tool:string;state:string;pid?:number}>(join(root,name));
+  const record=await readJson<{tool:string;state:string;pid?:number;ownerPid?:number;gated?:boolean}>(join(root,name));
   if(!record||record.tool!==tool||['exited','failed'].includes(record.state))continue;
-  if(record.state==='unverified')fail('busy','Tool has an unverified process outcome; reconcile it before changing installations.');
-  if(!record.pid)fail('busy','Tool has an unresolved process launch; inspect its process record.');
+  if(!record.pid){
+   if(record.gated&&record.ownerPid)try{process.kill(record.ownerPid,0);}catch(e){if((e as NodeJS.ErrnoException).code==='ESRCH')continue;throw e;}
+   fail('busy','Tool has an unresolved process launch; inspect its process record.');
+  }
   try{process.kill(record.pid,0);fail('busy','Tool has an active or unverified process; stop it before changing installations.');}
   catch(e){if((e as NodeJS.ErrnoException).code!=='ESRCH')throw e;}
  }

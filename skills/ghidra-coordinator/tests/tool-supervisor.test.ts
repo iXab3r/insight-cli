@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
 import {spawn} from 'node:child_process';
 import {launchProcess,processStatus,listProcesses,terminateProcess} from '../src/tool-runtime/supervisor.js';
-import {atomicWrite} from '../src/tool-runtime/store.js';
+import {atomicWrite,assertUnused} from '../src/tool-runtime/store.js';
 async function fixture(t:test.TestContext){const root=await mkdtemp(join(tmpdir(),'tool-supervisor-'));t.after(()=>rm(root,{recursive:true,force:true}));return root;}
 test('persistent tool is durably registered before execution and stop/kill verify ownership',async t=>{
  const root=await fixture(t),marker=join(root,'started');
@@ -16,7 +16,7 @@ test('persistent tool is durably registered before execution and stop/kill verif
  assert.equal(await readFile(marker,'utf8'),'started');const record=await processStatus(root,child.toolProcessId);assert.equal(record.state,'running');assert.equal(record.pid,child.pid);assert.ok(record.identity);assert.equal((await listProcesses(root,{session:'s_a'})).length,1);
  await assert.rejects(terminateProcess(root,'../foreign',true),/Invalid/);
  const path=join(root,'runtime/processes',record.id+'.json');await atomicWrite(path,{...record,identity:'synthetic-reused-birth'});
- await assert.rejects(terminateProcess(root,record.id,true),/unverified/);assert.equal(child.exitCode,null);
+ await assert.rejects(terminateProcess(root,record.id,true),/unverified/);await assert.rejects(assertUnused(root,'fixture'),/active or unverified/);assert.equal(child.exitCode,null);
  await atomicWrite(path,record);assert.equal((await terminateProcess(root,record.id,true)).state,'killed');await child.toolClosed;assert.equal((await processStatus(root,record.id)).state,'exited');
 });
 test('a parent crash before exec authorization cannot start the requested program',async t=>{
@@ -25,7 +25,7 @@ test('a parent crash before exec authorization cannot start the requested progra
  const module=new URL('../src/tool-runtime/supervisor.js',import.meta.url).href;
  const source=`import {launchProcess} from ${JSON.stringify(module)};await launchProcess(${JSON.stringify(root)},{tool:'fixture',role:'crash',installation:'fixture'},process.execPath,['-e',${JSON.stringify('require("node:fs").writeFileSync('+JSON.stringify(marker)+',"wrong")')}],{detached:true,stdio:'ignore'},{onSpawn(){process.kill(process.pid,'SIGKILL')}});`;
  const parent=spawn(process.execPath,['--input-type=module','-e',source],{stdio:'ignore'});await new Promise<void>(ok=>parent.once('close',()=>ok()));
- await delay(250);await assert.rejects(stat(marker));const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');
+ await delay(250);await assert.rejects(stat(marker));const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');await assertUnused(root,'fixture');
 });
 test('replacement owner verifies a live tool identity without replaying execution',async t=>{
  const root=await fixture(t),marker=join(root,'identity.json'),token='synthetic-'+Math.random().toString(16).slice(2),module=new URL('../src/tool-runtime/supervisor.js',import.meta.url).href;

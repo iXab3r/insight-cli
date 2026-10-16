@@ -1,3 +1,4 @@
+import {runtimeSelection} from './runtime-selection.js';
 import type {CommandContext} from '@eyeauras/cli-factory';
 import {join,resolve,sep} from 'node:path';
 import {readFile,readdir,realpath} from 'node:fs/promises';
@@ -30,18 +31,18 @@ export function ghidraProcessHooks(workspace:(c:CommandContext)=>Workspace,close
  return {
   verify:verifyGhidraProcess,
   async discover(c){
-   const directory=c.appArguments.AppDataDirectory;
+   const directory=c.appArguments.AppDataDirectory,executable=runtimeSelection(directory)?.java??String(c.profile.values.java??'unverified-legacy-executable');
    async function walk(path:string,depth=0):Promise<void>{
     if(depth>6)return;let entries;try{entries=await readdir(path,{withFileTypes:true});}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
     for(const entry of entries){const at=join(path,entry.name);if(entry.isDirectory())await walk(at,depth+1);else if(entry.name==='process.json'){
      const b=JSON.parse(await readFile(at,'utf8'));if(b.toolProcessId||!b.pid)continue;
      let session:string|undefined;if(b.context)session=workspace(c).contextById(b.context).session;
-     try{await registerExistingProcess(directory,{tool:'ghidra',role:b.mode==='gui'?'gui':b.kind,installation:b.runtimeFingerprint,target:b.target,session,metadata:{contextRoot:b.root}},'legacy-java',b.pid,r=>verifyGhidraProcess(r,c));}catch{}
+     try{await registerExistingProcess(directory,{tool:'ghidra',role:b.mode==='gui'?'gui':b.kind,installation:b.runtimeFingerprint,target:b.target,session,metadata:{contextRoot:b.root}},executable,b.pid,r=>verifyGhidraProcess(r,c));}catch{}
     }}
    }
    await walk(join(directory,'workspace/ghidra-native'));
    try{const b=JSON.parse(await readFile(join(directory,'workspace/server/local.json'),'utf8'));
-    if(!b.toolProcessId&&b.pid)await registerExistingProcess(directory,{tool:'ghidra',role:'server',installation:'legacy',metadata:{serverDirectory:join(directory,'workspace')}},'legacy-java',b.pid,r=>verifyGhidraProcess(r,c));
+    if(!b.toolProcessId&&b.pid)await registerExistingProcess(directory,{tool:'ghidra',role:'server',installation:'legacy',metadata:{serverDirectory:join(directory,'workspace')}},executable,b.pid,r=>verifyGhidraProcess(r,c));
    }catch{}
   },
   async stop(r,c){

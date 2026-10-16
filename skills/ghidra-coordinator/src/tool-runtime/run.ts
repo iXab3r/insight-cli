@@ -43,7 +43,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
     c.signal.addEventListener('abort',aborted,{once:true});if(c.signal.aborted)aborted();
     timer=setTimeout(()=>stop('timeout'),spec.timeoutMs??120000);timer.unref();
    }});
-  await (child as TrackedChild).toolClosed;settled=true;Object.assign(record,await readJson(path));
+  await Promise.race([(child as TrackedChild).toolClosed,new Promise<never>((_ok,bad)=>{abandon=bad;})]);settled=true;Object.assign(record,await readJson(path));
   if((record as ToolProcess&{launchError?:string}).launchError)outcome='launch_failed';
   if(!outcome&&(child.exitCode===null||!(spec.acceptedCodes??[0]).includes(child.exitCode)))outcome='exit_code';
   const result:RunResult={process:id,stdout:redact(Buffer.concat(stdout).toString('utf8')),stderr:redact(Buffer.concat(stderr).toString('utf8')),exitCode:child.exitCode,signal:child.signalCode,elapsedMs:Math.round(performance.now()-started),truncated,diagnostics:root};

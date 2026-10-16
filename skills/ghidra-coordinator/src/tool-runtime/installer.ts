@@ -1,9 +1,10 @@
 import type {CommandContext} from '@eyeauras/cli-factory';
-import {mkdir,stat,rm} from 'node:fs/promises';
+import {mkdir,stat,rm,readdir} from 'node:fs/promises';
 import {join,resolve,sep} from 'node:path';
 import {cacheArtifact,consumeArchive,extractArchive,fileSha256,archiveName} from './archives.js';
 import {atomicWrite,readJson,toolRoot,withToolLock,installationStage,removeInstallation,treeFingerprint,assertUnused,withToolUse} from './store.js';
 import type {ToolArtifact,ToolInstallation} from './definition.js';
+import {listProcesses} from './supervisor.js';
 import {digest,fail,text} from '../model.js';
 export interface ToolLaunch {executable:string;arguments:string[];environment:Record<string,string>}
 export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>}
@@ -22,7 +23,9 @@ export class ToolInstaller {
  async status(){
   const selected=await this.receipt();let present=false;
   if(selected&&!selected.uninstalledAt)try{present=(await stat(selected.executable)).isFile()&&(selected.mode==='external'||Boolean(await readJson(join(this.root,'installations',selected.id,'ready.json'))));}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}
-  return {tool:this.descriptor.id,state:present?'installed':'not_ready',mode:selected?.mode??'unconfigured',installation:selected?.id,executable:selected?.executable,components:selected?.components??{},lastProbe:selected?.lastProbe,recommended:'managed'};
+  const stages=await readdir(join(this.root,'stages')).catch(e=>{if(e.code==='ENOENT')return [];throw e;});
+  const processes=(await listProcesses(this.directory,{tool:this.descriptor.id})).filter(r=>!['exited','failed'].includes(r.state));
+  return {retainedStages:stages.slice(0,100),processes,capabilities:{staticAnalysis:present},tool:this.descriptor.id,state:present?'installed':'not_ready',mode:selected?.mode??'unconfigured',installation:selected?.id,executable:selected?.executable,components:selected?.components??{},lastProbe:selected?.lastProbe,recommended:'managed'};
  }
  async download(offline=false){
   const items=[];for(const [component,a]of Object.entries(this.descriptor.components()))items.push({component,path:await cacheArtifact(a,this.cache,this.c.fetch,this.c.signal,offline),sha256:a.sha256,license:a.license});
