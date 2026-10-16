@@ -1,0 +1,56 @@
+name: Release tool distribution
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Reviewed tool component
+        required: true
+        type: choice
+        options:
+          - ghidra-12.1.2
+          - temurin-21.0.11-10
+          - ilspy-11.1.0.9782
+          - dotnet-10.0.13
+      publish:
+        description: Publish the exact distribution as an immutable non-latest release
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: tool-release-${{ inputs.component }}
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: ${{ !inputs.publish }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: Acquire and verify without publishing
+        env:
+          COMPONENT: ${{ inputs.component }}
+        run: node scripts/tool-release.mjs "scripts/tool-distributions/$COMPONENT.json" "$RUNNER_TEMP/distribution"
+  release:
+    if: inputs.publish && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: Acquire, verify and retain tool distribution
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMPONENT: ${{ inputs.component }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          args=()
+          if [ "$PUBLISH" = true ]; then args+=(--publish); fi
+          node scripts/tool-release.mjs "scripts/tool-distributions/$COMPONENT.json" "$RUNNER_TEMP/distribution" "${args[@]}"

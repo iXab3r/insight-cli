@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-dotnet-10.0.13-r1",
+  "title": "dotnet-10.0.13",
+  "assets": [
+    {
+      "name": "dotnet-runtime-10.0.13-linux-x64.tar.gz",
+      "upstream": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.13/dotnet-runtime-10.0.13-linux-x64.tar.gz",
+      "sha256": "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77",
+      "size": 36648012,
+      "format": "tgz",
+      "root": ".",
+      "role": "binary",
+      "license": "MIT and included LICENSE/ThirdPartyNotices"
+    },
+    {
+      "name": "dotnet-runtime-10.0.13-osx-arm64.tar.gz",
+      "upstream": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.13/dotnet-runtime-10.0.13-osx-arm64.tar.gz",
+      "sha256": "fdf7ef21688338ad5d1d99d7eca7f3cf2e159c86e552d3f5acd0553b11c80ca6",
+      "size": 33248881,
+      "format": "tgz",
+      "root": ".",
+      "role": "binary",
+      "license": "MIT and included LICENSE/ThirdPartyNotices"
+    },
+    {
+      "name": "dotnet-runtime-10.0.13-osx-x64.tar.gz",
+      "upstream": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.13/dotnet-runtime-10.0.13-osx-x64.tar.gz",
+      "sha256": "50fd6ea005731494a6144fd4617746f4155fdc0f3682d0ba7292eac9e9bf46e3",
+      "size": 35605688,
+      "format": "tgz",
+      "root": ".",
+      "role": "binary",
+      "license": "MIT and included LICENSE/ThirdPartyNotices"
+    },
+    {
+      "name": "dotnet-runtime-10.0.13-win-x64.zip",
+      "upstream": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.13/dotnet-runtime-10.0.13-win-x64.zip",
+      "sha256": "8db74a746baa450925d01325a2108ccf6ac39af4018047475292ae155c013d89",
+      "size": 36970749,
+      "format": "zip",
+      "root": ".",
+      "role": "binary",
+      "license": "MIT and included LICENSE/ThirdPartyNotices"
+    },
+    {
+      "name": "dotnet-10.0.13-source.tar.gz",
+      "upstream": "https://codeload.github.com/dotnet/runtime/tar.gz/refs/tags/v10.0.13",
+      "sha256": "4778dca6202f32e10ff13dcac7b6da5cfefc928c500c36a476fc200b1797cc8a",
+      "size": 95263915,
+      "role": "source",
+      "license": "MIT and included ThirdPartyNotices"
+    }
+  ],
+  "redistribution": "Original distributions retained with embedded licenses/notices and source companions. Ghidra bottles retain their embedded .brew formula; sources and build instructions are in the source companion. ILSpy original transitive NuGet packages retain their own licenses/notices."
+}
