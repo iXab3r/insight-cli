@@ -7,7 +7,7 @@ import {gzipSync,crc32} from 'node:zlib';
 import {Header} from 'tar';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
 import {createInsightCli} from '../src/cli.js';
-import {cacheArtifact,extractArchive,fileSha256} from '../src/runtime-archives.js';
+import {cacheArtifact,extractArchive,fileSha256} from '../src/tool-runtime/archives.js';
 import {externalGhidra,runtimeProcesses,runtimeWrite} from '../src/runtime-manager.js';
 import {runtimeSelection,runtimeValues} from '../src/runtime-selection.js';
 import {stopLocalServer,GhidraServer} from '../src/server.js';
