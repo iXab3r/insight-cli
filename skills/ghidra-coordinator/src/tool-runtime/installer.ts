@@ -25,7 +25,7 @@ export class ToolInstaller {
   if(selected&&!selected.uninstalledAt)try{present=(await stat(selected.executable)).isFile()&&(selected.mode==='external'||Boolean(await readJson(join(this.root,'installations',selected.id,'ready.json'))));}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}
   const stages=await readdir(join(this.root,'stages')).catch(e=>{if(e.code==='ENOENT')return [];throw e;});
   const processes=(await listProcesses(this.directory,{tool:this.descriptor.id})).filter(r=>!['exited','failed'].includes(r.state));
-  return {retainedStages:stages.slice(0,100),processes,capabilities:{staticAnalysis:present},tool:this.descriptor.id,state:present?'installed':'not_ready',mode:selected?.mode??'unconfigured',installation:selected?.id,executable:selected?.executable,components:selected?.components??{},lastProbe:selected?.lastProbe,recommended:'managed'};
+  return {retainedStages:stages.slice(0,100),processes,tool:this.descriptor.id,state:present?'installed':'not_ready',mode:selected?.mode??'unconfigured',installation:selected?.id,executable:selected?.executable,components:selected?.components??{},lastProbe:selected?.lastProbe,recommended:'managed'};
  }
  async download(offline=false){
   const items=[];for(const [component,a]of Object.entries(this.descriptor.components()))items.push({component,path:await cacheArtifact(a,this.cache,this.c.fetch,this.c.signal,offline),sha256:a.sha256,license:a.license});

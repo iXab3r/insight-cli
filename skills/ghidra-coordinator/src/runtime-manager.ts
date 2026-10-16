@@ -103,7 +103,7 @@ export class RuntimeManager {
   const jdk=java?undefined:await this.archive(catalog.java,o.javaArchive,o.javaArchiveSha256,offline);
   const identity=digest({schema:1,platform:process.platform,architecture:process.arch,external,java,ghidra:ghidra?.artifact.sha256,jdk:jdk?.artifact.sha256,bridge:pinnedMcpJar});
   const receipt=await installationStage<Record<string,unknown>>(this.root,identity,async(temporary,installation)=>{
-    let ghidraHome=external;
+    let ghidraHome=external,nativeOverlay:RuntimeArtifact|undefined;
     if(ghidra){
      const extracted=join(temporary,'ghidra-extract');await extractArchive(ghidra.path,extracted,ghidra.artifact.format,this.c.signal);
      const found=await findRoot(extracted,'Ghidra/application.properties');if(!found)fail('configuration','Archive omitted a complete Ghidra installation.');
@@ -111,7 +111,7 @@ export class RuntimeManager {
      const host=process.arch==='arm64'?'mac_arm_64':'mac_x86_64';
      if(process.platform==='darwin'&&!existsSync(join(ghidraHome,'Ghidra/Features/Decompiler/os',host,'decompile'))){
       const bottle=await cacheArtifact(catalog.ghidra,join(this.root,'cache'),this.c.fetch,this.c.signal,offline),nativeRoot=join(temporary,'native-extract');
-      await extractArchive(bottle,nativeRoot,'tgz',this.c.signal);const nativeHome=join(nativeRoot,catalog.ghidra.root);
+      nativeOverlay=catalog.ghidra;await extractArchive(bottle,nativeRoot,'tgz',this.c.signal);const nativeHome=join(nativeRoot,catalog.ghidra.root);
       for(const module of ['Decompiler','FileFormats'])await cp(join(nativeHome,'Ghidra/Features',module,'os',host),join(ghidraHome,'Ghidra/Features',module,'os',host),{recursive:true,errorOnExist:true});
       await rm(nativeRoot,{recursive:true,force:true});
      }
@@ -123,7 +123,7 @@ export class RuntimeManager {
     await this.probe(inputs,join(temporary,'validation'));
     await rm(join(temporary,'validation'),{recursive:true,force:true});
     const receipt={schema:1,id:identity,ghidraVersion:inputs.ghidraVersion,fingerprint:inputs.fingerprint,java:java??join(installation,'jdk/bin/java'+suffix),ghidraHome:external??join(installation,'ghidra'),
-     archives:[...(ghidra?[{sha256:ghidra.artifact.sha256,source:o.archive?'local':catalog.ghidra.url}]:[]),...(jdk?[{sha256:jdk.artifact.sha256,source:o.javaArchive?'local':catalog.java.url}]:[])],verifiedAt:new Date().toISOString(),checks:['jdk','native-decompiler','local-server-reader-publisher-authority']};
+     archives:[...(nativeOverlay?[{sha256:nativeOverlay.sha256,source:nativeOverlay.url}]:[]),...(ghidra?[{sha256:ghidra.artifact.sha256,source:o.archive?'local':catalog.ghidra.url}]:[]),...(jdk?[{sha256:jdk.artifact.sha256,source:o.javaArchive?'local':catalog.java.url}]:[])],verifiedAt:new Date().toISOString(),checks:['jdk','native-decompiler','local-server-reader-publisher-authority']};
     return receipt;
   },async receipt=>{
    const inputs=await nativeInputs({...this.c.profile.values,java:receipt.java,ghidraHome:receipt.ghidraHome},undefined,this.c);
