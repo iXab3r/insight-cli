@@ -1,3 +1,6 @@
+import {toolProcessCommands} from './tool-runtime/commands.js';
+import {ghidraProcessHooks} from './ghidra-processes.js';
+import {assertUnused,withToolLock,toolUseCount} from './tool-runtime/store.js';
 import { command, createCli, Permission, CliError, ProfileStore, type CommandDefinition, type CliDefinition, type CliRuntime, type CommandContext, type IAppArguments } from '@eyeauras/cli-factory';
 import { join, resolve } from 'node:path';
 import { readFile, readdir } from 'node:fs/promises';
@@ -53,7 +56,7 @@ class Owner {
       if(!quiescent)return await action();
       const processes=await runtimeProcesses(directory);if(processes.length)fail('busy','Close Ghidra contexts and stop the owned server before changing or checking the runtime.',{processes});
       if(current){await (await current.backend)?.dispose();current.workspace.close();this.profiles.delete(directory);}
-      return await action();
+      return await withToolLock(directory,'ghidra',action,c.signal);
     }finally{this.runtimeChanging.delete(directory);}
   }
   constructor(private readonly options: Options) {}
@@ -70,7 +73,7 @@ class Owner {
     const selected=profile;
     const backend=async()=>{
       if(!selected.backend)selected.backend=Promise.resolve(this.options.backend?
-        this.options.backend(selected.workspace,c):nativeInputs(c.profile.values,selected.workspace.directory).then(inputs=>new GhidraContexts(selected.workspace,inputs,c)))
+        this.options.backend(selected.workspace,c):nativeInputs(c.profile.values,selected.workspace.directory,c).then(inputs=>new GhidraContexts(selected.workspace,inputs,c)))
         .catch(error=>{selected.backend=undefined;throw error;});
       const result=await selected.backend;
       if(result instanceof GhidraContexts)await managedExtensions(selected.workspace.directory);
@@ -85,6 +88,7 @@ class Owner {
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
     if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress; finish it before changing or deleting the profile.');
+    for(const tool of ['ghidra','ilspy']){if(toolUseCount(directory,tool))fail('busy','A tool operation is active.');await assertUnused(directory,tool);}
     const materials=await readdir(join(directory,'materials')).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
     if(existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
       fail('blocked','Profile has retained research data; preserve its workspace and materials before deleting or reconfiguring it.');
@@ -210,6 +214,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     })],
     commands:[
       ...artifactsCommands(),
+      ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))}),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
         command('list','List known inputs',({options:o},c)=>{

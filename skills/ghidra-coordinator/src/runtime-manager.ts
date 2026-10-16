@@ -1,10 +1,9 @@
+import {runTool} from './tool-runtime/run.js';
 import {type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {readFile,mkdir,rename,rm,realpath,readdir,stat,cp} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {join,dirname,resolve,delimiter,basename} from 'node:path';
 import {randomUUID} from 'node:crypto';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
 import {runtimeRoot,runtimeSelection,runtimeValues,type RuntimeSelection} from './runtime-selection.js';
 import {runtimeCatalog,type RuntimeArtifact} from './runtime-catalog.js';
 import {cacheArtifact,extractArchive,consumeArchive} from './tool-runtime/archives.js';
@@ -13,7 +12,7 @@ import {GhidraServer,stopLocalServer} from './server.js';
 import {fail,text,digest,object} from './model.js';
 import {atomicWrite,installationStage,removeInstallation,withToolLock,assertUnused} from './tool-runtime/store.js';
 import {lifecycleCommands as sharedLifecycle} from './tool-runtime/definition.js';
-const exec=promisify(execFile),suffix=process.platform==='win32'?'.exe':'';
+const suffix=process.platform==='win32'?'.exe':'';
 export const runtimeWrite=atomicWrite;
 const live=(pid:unknown)=>{if(!Number.isSafeInteger(pid)||Number(pid)<1)return false;try{process.kill(Number(pid),0);return true;}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')return false;throw error;}};
 /** Passive, conservative inventory: a reused PID blocks deletion; it never grants kill authority. */
@@ -120,14 +119,14 @@ export class RuntimeManager {
     let javaPath=java;
     if(jdk){const extracted=join(temporary,'jdk-extract');await extractArchive(jdk.path,extracted,jdk.artifact.format,this.c.signal);
      const home=await findRoot(extracted,'bin/java'+suffix);if(!home)fail('configuration','Java archive omitted a JDK.');await rename(home,join(temporary,'jdk'));await rm(extracted,{recursive:true,force:true});javaPath=join(temporary,'jdk/bin/java'+suffix);}
-    const inputs=await nativeInputs({...this.c.profile.values,java:javaPath,ghidraHome});
+    const inputs=await nativeInputs({...this.c.profile.values,java:javaPath,ghidraHome},undefined,this.c);
     await this.probe(inputs,join(temporary,'validation'));
     await rm(join(temporary,'validation'),{recursive:true,force:true});
     const receipt={schema:1,id:identity,ghidraVersion:inputs.ghidraVersion,fingerprint:inputs.fingerprint,java:java??join(installation,'jdk/bin/java'+suffix),ghidraHome:external??join(installation,'ghidra'),
      archives:[...(ghidra?[{sha256:ghidra.artifact.sha256,source:o.archive?'local':catalog.ghidra.url}]:[]),...(jdk?[{sha256:jdk.artifact.sha256,source:o.javaArchive?'local':catalog.java.url}]:[])],verifiedAt:new Date().toISOString(),checks:['jdk','native-decompiler','local-server-reader-publisher-authority']};
     return receipt;
   },async receipt=>{
-   const inputs=await nativeInputs({...this.c.profile.values,java:receipt.java,ghidraHome:receipt.ghidraHome});
+   const inputs=await nativeInputs({...this.c.profile.values,java:receipt.java,ghidraHome:receipt.ghidraHome},undefined,this.c);
    if(inputs.fingerprint!==receipt.fingerprint)fail('binding','Installed runtime differs from its verified installation receipt.');
   },this.c.signal);
   const selected:RuntimeSelection={schema:1,mode:external?'external':'managed',id:identity,ghidraHome:String(receipt.ghidraHome),java:String(receipt.java),fingerprint:String(receipt.fingerprint),selectedAt:new Date().toISOString()};
@@ -146,10 +145,10 @@ export class RuntimeManager {
   return {state:'uninstalled',mode:selected.mode,externalInstallationPreserved:selected.mode==='external',researchPreserved:true,materialsPreserved:true,cachePreserved:!purgeCache};
  },this.c.signal);}
  private async probe(inputs:NativeInputs,root:string){
-  await mkdir(root,{recursive:true,mode:0o700});const classes=await nativeHelpers(root,inputs),log=join(root,'doctor.log');
+  await mkdir(root,{recursive:true,mode:0o700});const classes=await nativeHelpers(root,inputs,this.c),log=join(root,'doctor.log');
   let output;
-  try{output=await exec(inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,...nativeJvmDirectories(root),'-cp',classes+delimiter+inputs.classpath,'InsightRuntimeDoctor'],
-    {cwd:root,env:{PATH:dirname(inputs.java),HOME:root,TMPDIR:root},timeout:90000,maxBuffer:1024*1024,signal:this.c.signal});}
+  try{output=await runTool(this.c,{tool:'ghidra',role:'doctor',installation:inputs.fingerprint,executable:inputs.java,arguments:['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,...nativeJvmDirectories(root),'-cp',classes+delimiter+inputs.classpath,'InsightRuntimeDoctor'],
+    cwd:root,environment:{PATH:dirname(inputs.java),HOME:root,TMPDIR:root},timeoutMs:90000,maxOutputBytes:1024*1024});}
   catch(error){await runtimeWrite(log,{failure:String((error as {stderr?:string}).stderr??error)});fail('configuration','Native decompiler probe failed; the diagnostic stage is retained.',{diagnostics:log});}
   const value=object(JSON.parse(output.stdout));if(value.state!=='ready'||value.decompiler!==true||value.expectedReturn!==42)fail('partial','Native decompiler probe did not verify its expected result.');
   const probeContext={...this.c,profile:{...this.c.profile,values:{...this.c.profile.values,server:undefined}}};
@@ -162,8 +161,8 @@ export class RuntimeManager {
  async doctor(){
   await this.cleanupProbes();
   const root=join(this.root,'checks',randomUUID()),values=runtimeValues(this.directory,this.c.profile.values);
-  const inputs=await nativeInputs(values),native=await this.probe(inputs,root);let debuggerCheck:Record<string,unknown>={state:'host_specific'};
-  if(process.platform==='darwin')try{const checked=await exec('/usr/bin/lldb',['--no-lldbinit','--batch','-o','script import lldb,sys; print("INSIGHT_LLDB_PYTHON_OK")'],{env:{PATH:'/usr/bin:/bin',HOME:root,TMPDIR:root},timeout:30000,maxBuffer:65536});
+  const inputs=await nativeInputs(values,undefined,this.c),native=await this.probe(inputs,root);let debuggerCheck:Record<string,unknown>={state:'host_specific'};
+  if(process.platform==='darwin')try{const checked=await runTool(this.c,{tool:'ghidra',role:'debugger-doctor',executable:'/usr/bin/lldb',arguments:['--no-lldbinit','--batch','-o','script import lldb,sys; print("INSIGHT_LLDB_PYTHON_OK")'],environment:{PATH:'/usr/bin:/bin',HOME:root,TMPDIR:root},timeoutMs:30000,maxOutputBytes:65536});
    debuggerCheck={state:checked.stdout.includes('INSIGHT_LLDB_PYTHON_OK')?'ready':'missing',backend:'system-lldb'};
   }catch{debuggerCheck={state:'missing',backend:'system-lldb',reason:'Apple developer tools or debugger authorization is unavailable'};}
   const result={state:'verified',fingerprint:inputs.fingerprint,ghidraVersion:inputs.ghidraVersion,checkedAt:new Date().toISOString(),headless:native.headless,decompiler:native.decompiler,server:true,debugger:debuggerCheck,diagnostics:root};

@@ -1,6 +1,8 @@
+import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
+import {runTool} from './tool-runtime/run.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
-import { spawn, type ChildProcess } from 'node:child_process';
+import {type ChildProcess } from 'node:child_process';
 import { readFile, mkdir, open, rename, readdir, stat, chmod, realpath } from 'node:fs/promises';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:net';
@@ -15,7 +17,7 @@ export interface ServerBinding {
   readerSecret: string; publisherSecret: string;
 }
 interface LocalServer extends ServerBinding {
-  mode: 'local'; instance: string; port: number; identityPort: number;
+  toolProcessId?:string; mode: 'local'; instance: string; port: number; identityPort: number;
   keySecret: string; tokenSecret: string; phase: 'seeded' | 'initialized' | 'running' | 'stopped'; pid?: number;
 }
 const live = (pid: number) => {
@@ -53,30 +55,13 @@ export class GhidraServer {
   private root() { return join(this.directory, 'server'); }
   private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0],timeoutMilliseconds=120000): Promise<Record<string,unknown>> {
     const root = join(this.root(), 'calls', label + '-' + randomUUID()); await mkdir(root, {recursive:true,mode:0o700});
-    const classes = await nativeHelpers(this.directory, this.inputs);
-    const log = await open(join(root, 'diagnostic.log'), 'a', 0o600);
-    const child = spawn(this.inputs.java, ['-Djava.awt.headless=true', '-Dghidra.home=' + this.inputs.ghidraHome,
-      ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs), '-cp', classes + delimiter + this.inputs.classpath, main, ...args],
-      {cwd:root,windowsHide:true,env:{PATH:this.c.environment.PATH ?? process.env.PATH,HOME:root,TMPDIR:root,...environment},stdio:['pipe','pipe',log.fd]});
-    const exited = new Promise<number|null>((resolve,reject) => { child.once('error',reject); child.once('exit',resolve); });
-    exited.catch(()=>{});
-    await log.close();
-    let output = '', overflow = false;
-    child.stdout!.on('data', chunk => { if (!overflow) output += chunk.toString(); if (Buffer.byteLength(output) > 1024 * 1024) { overflow = true; child.kill('SIGTERM'); } });
-    const abort = () => child.kill('SIGTERM'); this.c.signal.addEventListener('abort', abort, {once:true});
-    const timer = setTimeout(abort, timeoutMilliseconds);
-    const force = setTimeout(()=>{if(child.exitCode===null && child.signalCode===null)child.kill('SIGKILL');},timeoutMilliseconds+5000);
-    try {
-      child.stdin!.on('error',()=>{}); child.stdin!.end(input);
-      if (this.c.signal.aborted) abort();
-      const code = await exited;
-      if (code===null||!acceptedCodes.includes(code)||overflow) fail('authorization', 'Native server operation could not be verified; its owned diagnostic stage is retained.');
-      let result;
-      try { result = object(parseDomainJson(output)); } catch { fail('malformed', 'Native server operation returned malformed content.'); }
-      if (result.error || result.state === 'failed') fail('authorization', 'Native server operation did not establish its outcome.');
-      return result;
-    } finally { clearTimeout(timer); clearTimeout(force); this.c.signal.removeEventListener('abort',abort); }
+    const classes = await nativeHelpers(this.directory,this.inputs,this.c);
+    const output=await runTool(this.c,{tool:'ghidra',role:label,installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
+      ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],cwd:root,environment, input,acceptedCodes,timeoutMs:timeoutMilliseconds,maxOutputBytes:1024*1024});
+    let result;try{result=object(parseDomainJson(output.stdout));}catch{fail('malformed','Native server operation returned malformed content.');}
+    if(result.error||result.state==='failed')fail('authorization','Native server operation did not establish its outcome.');return result;
   }
+
   async credentials(binding: ServerBinding, role: 'reader' | 'publisher'): Promise<Record<string,string>> {
     const url = new URL(binding.origin);
     return {GHIDRA_SERVER_HOST:url.hostname,GHIDRA_SERVER_PORT:url.port || '13100',
@@ -244,17 +229,17 @@ export class GhidraServer {
       await this.run('certificate','InsightKeytool',[keystore],{INSIGHT_KEYSTORE_PASSWORD:await this.c.secrets.require(local.keySecret)});
       await chmod(keystore,0o600);
     }
-    const classes = await nativeHelpers(this.directory,this.inputs);
+    const classes = await nativeHelpers(this.directory,this.inputs,this.c);
     const processRoot = join(root,'processes',randomUUID()); await mkdir(processRoot,{recursive:true,mode:0o700});
     const log = await open(join(processRoot,'runtime.log'),'a',0o600);
-    const child = spawn(this.inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
+    const child = await launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:'server',installation:this.inputs.fingerprint,metadata:{serverDirectory:this.directory}},this.inputs.java,['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(processRoot),'-cp',classes+delimiter+(this.inputs.serverClasspath??this.inputs.classpath),
       'InsightServerMain',data,String(local.port),String(local.identityPort),local.instance,keystore],
       {cwd:processRoot,detached:true,windowsHide:true,env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:processRoot,TMPDIR:processRoot,
-        INSIGHT_KEYSTORE_PASSWORD:await this.c.secrets.require(local.keySecret),INSIGHT_SERVER_TOKEN:await this.c.secrets.require(local.tokenSecret)},stdio:['ignore',log.fd,log.fd]});
+        INSIGHT_KEYSTORE_PASSWORD:await this.c.secrets.require(local.keySecret),INSIGHT_SERVER_TOKEN:await this.c.secrets.require(local.tokenSecret)},stdio:['ignore',log.fd,log.fd]},{signal:this.c.signal});
     child.on('error',()=>{}); child.unref(); await log.close();
     if (!child.pid) fail('launch','Owned local Ghidra server could not be started.');
-    this.state.child = child; local.pid = child.pid; local.phase = 'running'; await durable(saved,local);
+    this.state.child = child; local.toolProcessId=child.toolProcessId; local.pid = child.pid; local.phase = 'running'; await durable(saved,local);
     try {
       const deadline = Date.now()+60000;
       while (Date.now()<deadline && child.exitCode===null && child.signalCode===null && !this.c.signal.aborted) {
@@ -273,7 +258,7 @@ export class GhidraServer {
   async stop(){await stopLocalServer(this.directory,this.c);this.state.child=undefined;this.state.initializing=undefined;}
 }
 
-async function serverIdentity(local:LocalServer,c:CommandContext):Promise<Record<string,unknown>>{
+export async function serverIdentity(local:LocalServer,c:CommandContext):Promise<Record<string,unknown>>{
     const token = await c.secrets.require(local.tokenSecret);
     const response = await c.fetch(`http://127.0.0.1:${local.identityPort}/identity`,{redirect:'error',
       signal:AbortSignal.timeout(1000),headers:{Authorization:'Bearer '+token}});
@@ -301,7 +286,9 @@ export async function stopLocalServer(directory:string,c:CommandContext){
     catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
     if (!local.pid) return;
     if (live(local.pid)) {
-      await serverIdentity(local,c); process.kill(local.pid,'SIGTERM');
+      await serverIdentity(local,c);
+      if(local.toolProcessId)await terminateProcess(c.appArguments.AppDataDirectory,local.toolProcessId,false,async r=>Number((await serverIdentity(local,c)).pid)===r.pid);
+      else process.kill(local.pid,'SIGTERM');
       for(let i=0;i<100 && live(local.pid);i++) await delay(50);
       if(live(local.pid)) fail('busy','Owned server did not stop; its receipt is retained.');
     }

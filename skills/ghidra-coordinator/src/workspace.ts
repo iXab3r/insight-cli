@@ -201,6 +201,10 @@ export class Workspace {
     if (!row) fail('notFound', 'No Ghidra context exists for this session and target; open it first.');
     return JSON.parse(String(row.data));
   }
+  contextById(context:string):GhidraContext {
+    const row=this.db.prepare('SELECT data FROM contexts WHERE id=?').get(id(context));
+    if(!row)fail('notFound','Tool context was not found.');return JSON.parse(String(row.data));
+  }
   contexts(session: string, limit = 100, offset = 0): GhidraContext[] {
     this.session(session); page(limit, offset);
     return this.db.prepare('SELECT data FROM contexts WHERE session=? ORDER BY rowid LIMIT ? OFFSET ?').all(session, limit, offset).map(row => JSON.parse(String(row.data)));

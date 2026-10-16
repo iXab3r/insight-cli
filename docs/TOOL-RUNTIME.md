@@ -172,3 +172,29 @@ The first completed slice ends after TR-10; additional candidate tools receive s
 - [GitHub release limits](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 - [Immutable releases and draft-first publication](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
 - [Ghidra distribution notices](https://github.com/NationalSecurityAgency/ghidra/blob/master/NOTICE).
+
+## ILSpy command contract (TR-09)
+
+ILSpy consumes the same immutable targets as Ghidra. It does not create a Ghidra context,
+require a session or merge a decompilation. Supply exactly one file or `--target ID`.
+An optional `--session ID` validates and associates an existing research session with the run.
+The selected managed distribution supplies ILSpy 11.1.0.9782 and private .NET 10.0.13;
+`--dotnet-archive PATH` supplies the runtime archive during offline installation.
+An external `--executable PATH` must expose the same pinned ilspycmd CLI version.
+
+```text
+insight-cli ilspy types [input] [--target ID] [--kind c,i,s,d,e]
+insight-cli ilspy decompile [input] [--target ID] [--type FULL_NAME | --member XML_ID_OR_TOKEN]
+insight-cli ilspy il [input] [--target ID] [--type FULL_NAME]
+insight-cli ilspy resources [input] [--target ID]
+insight-cli ilspy resource [input] --name NAME --output DIRECTORY
+insight-cli ilspy project [input] --output DIRECTORY
+insight-cli ilspy metadata [input] --table NAME_OR_NUMBER
+```
+
+Text operations return content with immutable target SHA, process identity, elapsed time and
+diagnostics. `--output PATH` on text operations writes one new ordinary file; directory operations
+require a new output directory. Existing output is never overwritten. These commands use Update
+because they capture immutable input and start a tool. They perform static analysis; they do not
+execute the analyzed assembly. Tool update checks are disabled. Output remains ordinary files that
+agents may keep according to project conventions or explicitly save with `artifacts save`.

@@ -1,6 +1,9 @@
+import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
+import {runTool} from './tool-runtime/run.js';
+import {verifyGhidraProcess} from './ghidra-processes.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
 import {runtimeProcesses} from './runtime-manager.js';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdir, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
 import {constants} from 'node:fs';
@@ -16,8 +19,6 @@ import { HttpBridge } from './transport.js';
 import {scriptInventory,scriptPath} from './scripts.js';
 import {logicalPrograms} from './cross-results.js';
 import {uiResult} from './ui-results.js';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
@@ -27,7 +28,7 @@ import {initialIntent,initializeModel} from './initial-model.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
-  pid: number; endpoint: string; root: string; target: string; context?: string;
+  toolProcessId?:string; pid: number; endpoint: string; root: string; target: string; context?: string;
   mode: ToolMode; program: string; tokenSecret: string; runtimeFingerprint: string;
   kind: 'context' | 'shared' | 'bootstrap' | 'candidate'; baseRevision?:number;viewEpoch?:number;
 }
@@ -71,15 +72,15 @@ export class GhidraContexts {
   }
   private async launch(root: string, target: ResearchTarget, kind: ProcessBinding['kind'], program: string,
     mode: ToolMode, context?: string, credentials: Record<string,string> = {}): Promise<Running> {
-    if((await nativeInputs(this.c.profile.values,this.workspace.directory)).fingerprint!==this.inputs.fingerprint)
+    if((await nativeInputs(this.c.profile.values,this.workspace.directory,this.c)).fingerprint!==this.inputs.fingerprint)
       fail('binding','Native runtime inputs changed; stop the owner before using a different build.');
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
-    const classes=await nativeHelpers(this.workspace.directory,this.inputs);
+    const classes=await nativeHelpers(this.workspace.directory,this.inputs,this.c);
     let debuggerEnvironment:Record<string,string>={};
     if(mode==='gui'){
       const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});
-      const prepared=await promisify(execFile)(this.inputs.java,['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],{timeout:30000,maxBuffer:65536});
+      const prepared=await runTool(this.c,{tool:'ghidra',role:'debugger-wheels',installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],timeoutMs:30000,maxOutputBytes:65536});
       if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
       debuggerEnvironment={INSIGHT_DEBUGGER_PYTHON:python,PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:join(python,'isolated-cache')};
       if(process.platform==='darwin'){
@@ -94,15 +95,15 @@ export class GhidraContexts {
     const main=mode==='gui'?'InsightGuiMain':'InsightHeadlessMain';
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
-    const child=spawn(this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
+    const child=await launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
-          GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
-          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}});
+          INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
+          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal});
     child.on('error',()=>{});child.unref();await log.close();
     if(!child.pid)fail('launch','Owned Ghidra context could not be launched.');
-    const binding: ProcessBinding={pid:child.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,target:target.id,
+    const binding: ProcessBinding={toolProcessId:child.toolProcessId,pid:child.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,target:target.id,
       ...(context?{context}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
     await durable(join(root,'process.json'),binding);
     const record={binding,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token),child};
@@ -153,7 +154,8 @@ export class GhidraContexts {
         const token=await this.c.secrets.require(binding.tokenSecret),http=new HttpBridge(binding.endpoint,this.c.fetch,new AbortController().signal,token,60000);
         await this.debuggerHelperRecord({...record,http},'Stop','INSIGHT_DEBUGGER_STOPPED');
       }
-      process.kill(binding.pid,'SIGTERM');
+      if(binding.toolProcessId)await terminateProcess(this.c.appArguments.AppDataDirectory,binding.toolProcessId,false,r=>verifyGhidraProcess(r,this.c));
+      else process.kill(binding.pid,'SIGTERM');
       for(let i=0;i<100&&alive(binding.pid);i++)await delay(50);
       if(alive(binding.pid))fail('busy','Owned context did not stop; its stage is retained.');
     }
