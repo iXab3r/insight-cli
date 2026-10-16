@@ -1,0 +1,2193 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "scope": "Live fresh AI agents performing real static research on production 7zr.exe through installed public CLI; task includes collection, one merge and independent correctness verification.",
+  "result": {
+    "repeatablePreparedSpeedupConfirmed": false,
+    "gate": "not_passed",
+    "plannedPreparedPairs": 6,
+    "completedPreparedPairs": 3,
+    "completedPreparedWins": 2,
+    "completedPreparedLosses": 1,
+    "medianObservedPairedSpeedup": 1.475073417358952,
+    "minObservedPairedSpeedup": 0.9705051439109312,
+    "maxObservedPairedSpeedup": 1.609131197582062,
+    "preparedSeriesStoppedAt": "pair-4-3",
+    "stopReason": "Frozen all-six-win condition already failed at pair 3; pair-4-3 then failed merge with ENOSPC. Remaining prepared trials were not run, not marked passing or replaced. Cold comparison completed separately.",
+    "notRun": [
+      "pair-4-1",
+      "pair-5-1",
+      "pair-5-3",
+      "pair-6-3",
+      "pair-6-1"
+    ],
+    "statisticalSignificanceClaim": null
+  },
+  "identity": {
+    "sourceBaseRevision": "0ee655ade6fd30f4411e0ff7e5ab8ec3c0915a7f",
+    "input": {
+      "name": "7zr.exe",
+      "version": "7-Zip 26.04 x86",
+      "bytes": 602624,
+      "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+      "url": "https://www.7-zip.org/a/7zr.exe",
+      "targetExecuted": false
+    },
+    "installedArtifact": {
+      "name": "ixab3r-insight-cli-0.1.0.tgz",
+      "sha256": "cd7b9e2be2c7ea1b18ba2f2a270eab44b3d08cc30629c1afd6ed118b6bdc3504",
+      "ordinaryFactoryOwnerAndOsKeyring": true,
+      "runtimePatches": false,
+      "mcpOrSdkUsedByResearchAgents": false
+    },
+    "environment": {
+      "os": "macOS",
+      "darwin": "25.6.0",
+      "cpu": "Apple M5",
+      "logicalCpu": 10,
+      "memoryGiB": 16,
+      "node": "24.21.0",
+      "java": "21.0.11",
+      "ghidra": "12.1.2"
+    },
+    "freeze": {
+      "schema": 1,
+      "sourceBaseRevision": "0ee655ade6fd30f4411e0ff7e5ab8ec3c0915a7f",
+      "sourceHashes": {
+        "scripts/acceptance-facade.mjs": "86ea1499ef2735dfd5e70530eaefcefeb170d57fd41919d9fffbee6ec56fb6b1",
+        "scripts/acceptance-full.mjs": "8fdf8c0a14bea40bcde0693ea173a535441160b295d4d9a0e846e3769b4220fb",
+        "scripts/acceptance-ghidra.mjs": "817763e53a2602f85b9bdf03f44e72b585c017462e69ad597da06654780e3393",
+        "scripts/acceptance-initial-import.mjs": "47aa03d89ed6965b1d36670271bd210f2ce07120c0d2a521a2d5e8b1c87fbc72",
+        "scripts/audit-coverage.mjs": "e6d1ea58cc00520474fbdacea88ea0e30add9ca3c03a1fce58288bae9d5dbb20",
+        "scripts/business/cases.mjs": "f4d7277d0e2c02a23422b84e8dac1714a1ac2280da2066074351a6bed49ecd72",
+        "scripts/business/driver.mjs": "29a6168d01a4d77c2e8fd5ad704c92db97802b53372b5c76744d6fd5c99d0726",
+        "scripts/business/prepare.mjs": "50f1f425448e21305f334b3895f4ff06706ad3b8e9b55567c1226a699df22a59",
+        "scripts/business/public-cli.mjs": "3fab52aafcf44e81a104762f5475bc743aa6b251c1ec5cff889b2d72b49a1e5a",
+        "scripts/business/run.mjs": "75df317268351c6e9bf10763faac1be5a885dfb3b999c2de46bbeb5816abe93d",
+        "scripts/business/throughput.mjs": "add440af036564427a92e8dee90033458d365269ff194853d53ab48f538253f7",
+        "scripts/fixtures/InsightAdministrativeFixture.java": "229f38973388847e09746bc16fd0dc2f5130f81707e2ad2042c35099e08367ce",
+        "scripts/fixtures/InsightBlockTransfer.java": "68a9bbb2b460351959cbc2bb61609055fd7f71729c579f02d4aa70e6996b692b",
+        "scripts/fixtures/InsightGuiFixture.java": "9c29cc8214e236bcafc1ce712bd3617f801b89f6e7d1b5bba8024f3ea3bb06a1",
+        "scripts/fixtures/InsightSnapshotPublisher.java": "d30a4ef7fbd4db4cd9a175ed3fc329b675e3530ea8b06b0b74e0f69da7d8a3b9",
+        "scripts/fixtures/facade-owner.mjs": "b3223c9336f6e6111ffff389bc3f9cc58a68cff9bcb7a1b1847a0cf88033cf56",
+        "scripts/fixtures/native-owner.mjs": "d4e5994076fe16d4d2e5cc44f170c0bdc2397c829d234c77c61873722fd08e26",
+        "scripts/fixtures/p3/OwnedP3Analyzer.java": "981854f48866fd3e73a35d14a9aa553ca8941a276d37310401acdbdcf763b891",
+        "scripts/fixtures/p3/OwnedP3Plugin.java": "14cc7d5498653ccd256f10fd422a3dca72fb149ebab95a221e0532943415f05c",
+        "scripts/fixtures/p3/OwnedP3Script.java": "aeddc4d589a7a49f25be1a76fa9fde3ddcdedf225e5b6c0e9a3afc6bbc92eb85",
+        "scripts/fixtures/p3/owned.cspec": "8123ebc934e985a2f070caebb0ddc73f6a2a170dcf5e8f5d48a37b3112dfe7a3",
+        "scripts/fixtures/p3/owned.ldefs": "f2577e18b61c45e7f6fba026f63e8f84b5a7f41e67e1ea5620e48c7b7e5d4d26",
+        "scripts/fixtures/p3/owned.pspec": "b2e6f07485eed36637a4ba4533136c0387e5590058f7cc77a1480e67f4d0b924",
+        "scripts/fixtures/p3/owned.slaspec": "a29ccfff696385fe0ec39e7e2362a549f0145d1fcd778e68a79585696c3b6c17",
+        "scripts/native-p3-inputs.mjs": "3d4adde6011f00cb3314b70f13b284ddde861bfa6c86cf86d42618dfcd30504e",
+        "scripts/native-proof-guard.mjs": "48d0fedeb3b84c29bc93fee76db82209d7c6dbce4ffe8b846452ff19ef76ea39",
+        "scripts/npm-command.mjs": "5bd238d6a51a4cd78115844f1eef357ad71b60ffb62a5f5d7ec026e5eaad582f",
+        "scripts/pack-cli.mjs": "06d61291c3be850e6c20b89ae69b0017e4fdcc7229de950f3a3e692268f6ea39",
+        "scripts/prepare-package.mjs": "7b135ec827a1033c0f369b28e5f23b01a9b9bc1be9121e59336d30acc26626a3",
+        "scripts/proof-administration.mjs": "28049dd14eaf6515ad2db36ed30c7831cde797d5dcc51601770c8a9690c1751e",
+        "scripts/proof-api-gaps-matrix.mjs": "e96ceb9428929b19239b40ed05820744e9466205630be6e8410c14ea069afc75",
+        "scripts/proof-api-gaps.mjs": "f143ece33962a98e84be51d5cab01aebf226a924738cb46f07badfeeea604201",
+        "scripts/proof-archive.mjs": "901a61fc894f7e4936d8a684d24b688e39ceb1fc970071de5108fc53dd80dc3f",
+        "scripts/proof-contexts.mjs": "d0c471f09da06d8049f9b350180fe1e8ae2e7471abeb7dac89a133a373840f5a",
+        "scripts/proof-cross-faults.mjs": "1dc2daf2d6104024c43d6ccf67ff9e925d13a33d32c47cee4bff3d5b3b7401b6",
+        "scripts/proof-cross.mjs": "711ca0c2e500ac75c247a4732cd34efc0a44621a497b0b5548566574843b193f",
+        "scripts/proof-data.mjs": "af91c65368f6c22031bca21125f1d5e442d8a113c17a2df56c7adc3ae1b06642",
+        "scripts/proof-debugger-bootstrap.mjs": "3c8034bbf1390eede67df3b0a7e0721fec474f32a775c1ab42ab4f214c68906a",
+        "scripts/proof-debugger-crash.mjs": "931ff93e1767cb96268bce7500fc33238ee4b46bf84764dfbace8075589898c5",
+        "scripts/proof-debugger-recovery.mjs": "24f4ab04097fd679b0a2b4ae9e3ae3d85a2dff9a3a4f57ac4bba484c781b7521",
+        "scripts/proof-debugger.mjs": "5c1c181df1536a881271627ca345207c9da321bcb8e79ca1dfd72f0e17e1d691",
+        "scripts/proof-facade-lifecycle.mjs": "e8e792d8cae02ca75ba768f9648c4c026721de17e66d01de39b1e8e1e16af8dc",
+        "scripts/proof-functions.mjs": "f168e2c926f3ffeab32180171c020e2808ab717486a6de4763cc216462776b7d",
+        "scripts/proof-lifecycle-selection.mjs": "a0917daed6e2ce355f60982395aa20b9a65183c28f051a17962a5f94e44fc7bb",
+        "scripts/proof-managed-server.mjs": "24d2bdc817e50fd8b34c46aa6781947b04d59c8913ef476f07f51f1c5558fada",
+        "scripts/proof-merge.mjs": "4b05fb77cbaf39dd2ef3f7544186172a1ecc2fb6539b3e83048c567030dad260",
+        "scripts/proof-mutations.mjs": "096372ef396d3e954861c480cd421a5a5f434489f62c42baa63a044b6e6ee23f",
+        "scripts/proof-native-snapshots.mjs": "99cf9e0c47034c2d6e93db35e255b411053964b0b9a77499d87a4e8dd2ba27ee",
+        "scripts/proof-p2-databases.mjs": "59e28a9721bd631387445d2f47471c1c82066a7f6750b4845240559e303db98f",
+        "scripts/proof-p2-matrix.mjs": "65fdde3a8f8a1805efb97eda2f845a1438077554f968a8b9e9fd2a3ac6c56454",
+        "scripts/proof-p2-recovery.mjs": "8493816345217d243eba39ce44a69677a379e318cb8949b00101107d4410a3e7",
+        "scripts/proof-p2-sdk.mjs": "7924735bd5c43664d55b6c0336ef1b3802461edb6fbc2ce715e7296a8544832d",
+        "scripts/proof-p2-trace.mjs": "aa2e0b8fe5a8b84aea2c33767ae26b3fd41f0f9ed41f24c56cf605824eb98990",
+        "scripts/proof-p2-tracking.mjs": "6081399a472d286365f0f74dd90637ed3d15a2fbd67782ed6da6f00fad26af02",
+        "scripts/proof-p3.mjs": "fc89f4e5862a9fe7123e232fdd9b192888689ad47026919f248d3ef7de2d7dc4",
+        "scripts/proof-project-recovery.mjs": "685895d20451ab026e44e2490c2d43c208c1391d9595a8bf4ec500117d587033",
+        "scripts/proof-projects.mjs": "8d2b87a7b1d1ccd2b2e687c06d24c683488792d3bed20062040eaaa385cddf49",
+        "scripts/proof-queries.mjs": "89fa0dfcc70d21ab73188133757eb3aaa71a09ad657e7fce2a6a09a98ccc2ef4",
+        "scripts/proof-query-variants.mjs": "ef04cdb685c87330b56b9ae3efbe903cb30e162494f0c08866dcdc69292bb416",
+        "scripts/proof-research-cli.mjs": "5bc619eadde4006560337b4d149be66543545b2084f607dd0d350e3469ac741a",
+        "scripts/proof-scalar-projection.mjs": "0d418c71b5f47aedca8cbdf8a086c37228f30bcbc1c0cd05ca9f40e2deb6b5d1",
+        "scripts/proof-transfer.mjs": "b5c2559bb83787337878e4a5d6768d3face23c605ef5efc00bf74d5ae8e912ac",
+        "scripts/proof-ui-recovery.mjs": "b5e80ff6fc2c32cc22b400528333c5e69a7a0fc03dbda8dc6f548e064faf31a7",
+        "scripts/proof-ui.mjs": "6fac479739e68fc653ec055e573df21e3a8eb6224e1868cf34f8105303fa44b2",
+        "scripts/run-automation.mjs": "aba76bfe7e13acbdba839390473901a2a07cc959025d4b610b2f30caca8a1717",
+        "scripts/test-package.mjs": "2ff5e22d20b0bc0653bfae070c90128b6fbb4bde16536238beb10be51e822c57",
+        "skills/ghidra-coordinator/src/administration-results.ts": "a9047f9e954916dfffe795ca36e339f0b03c77a56be83dd714e4a5ad835d8835",
+        "skills/ghidra-coordinator/src/administration.ts": "d9d271bb3b9dbf998f4b05e5836b8a78f9f4b9e77dd2d9c925b749bdffa3ed61",
+        "skills/ghidra-coordinator/src/archive-contract.ts": "5a39c33b1790bb7972cba755e2066e04809ac73387c8778891d7a5f0f1cd3ddf",
+        "skills/ghidra-coordinator/src/archive.ts": "5075662ff64f71253a3ea6be0b9cb4cd35fdd82e316e12239e0dc3e11e0f00b2",
+        "skills/ghidra-coordinator/src/arguments.ts": "e0390df470b0eeb92fd33fe65f57ea0611805ebb4998e3e88a87f4fe89da3323",
+        "skills/ghidra-coordinator/src/artifacts.ts": "f916f0844670b7dcf34152eb1f7521f77b62f3b4606dabd8d47ee3d037d37a88",
+        "skills/ghidra-coordinator/src/bin.ts": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+        "skills/ghidra-coordinator/src/cli.ts": "944bee93b77a7cc65ee54356d5e28db3f7bd2389698557d35f8702e7f3ce90df",
+        "skills/ghidra-coordinator/src/comment-effects.ts": "94f33fd05d18c816d5a590402a0f312308bb79a1d59e4245686fe0eeaeb75d68",
+        "skills/ghidra-coordinator/src/contexts.ts": "eed1960e9e9521e671159019c240a250688edee1710cf7cbda48addcc1349182",
+        "skills/ghidra-coordinator/src/coordinator.ts": "be67a13ff9139456d57671e3ebde4d18dc64f7bf06a3a2e5087f0d10b6a33f8c",
+        "skills/ghidra-coordinator/src/cross-results.ts": "be3cd5832318841eaabb883569906fbd4ee5ce4958a2008e897dba33b55579de",
+        "skills/ghidra-coordinator/src/cross.ts": "3e9718b901b8937335796b1d56a795725e1c09c0645813b2c73db468809499c8",
+        "skills/ghidra-coordinator/src/data-effects.ts": "33de1f98aabfcc77e07d5ff93b95d5fa2e9e507b16b53e01b413fa3e581a3753",
+        "skills/ghidra-coordinator/src/debugger-results.ts": "1db245642625738c96b05ae7cf5f552c3df1c48683ec74a214ca88ec05475598",
+        "skills/ghidra-coordinator/src/debugger-supervisor.ts": "23900e7f52b9463b791d0183b4b1900b4d48d8b60a1d36e2bbe9f6d5d84025c3",
+        "skills/ghidra-coordinator/src/debugger.ts": "936d9b84db11b76f39519b54a87ceab5308edfe17104c2aa9663a3cedc7a1f6a",
+        "skills/ghidra-coordinator/src/documentation-effects.ts": "60efbeb9be7c41122cc725162dd105a417132e0387ea1524188f55a199adc272",
+        "skills/ghidra-coordinator/src/extensions.ts": "ed4e2b013b643631552aadd69ca6ba375984ae41270fe74266f373bc1e9349ce",
+        "skills/ghidra-coordinator/src/function-effects.ts": "02f83617d4ec80d0a887493476f452b1fd205c13dd1b3b5277069c929fe7498a",
+        "skills/ghidra-coordinator/src/ghidra.ts": "8fa3787b769b40558cbb98943030006581ca2669aeab7f546ca3943abf02f962",
+        "skills/ghidra-coordinator/src/index.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
+        "skills/ghidra-coordinator/src/initial-model.ts": "d98c30ae08b895ded939bd5950b859212f8cf436f57630202e9a1f5604b44ebe",
+        "skills/ghidra-coordinator/src/json.ts": "bdf46ecc6ac7507d6b46dba54ecddb15e62fe20ef6375fa24a0a711d0f676690",
+        "skills/ghidra-coordinator/src/lifecycle.ts": "c2ce7ac5bfda775da98297c4346b3520992572128bb58ce8933823a28cedadef",
+        "skills/ghidra-coordinator/src/memory-inputs.ts": "368c81a987457314b19562d9c3eae545c270f4dc344a820ffbe4df611506e538",
+        "skills/ghidra-coordinator/src/merge.ts": "08e1533ae1cc4c1d1a57748419f33187c1623afe0be6dab60f363aff8b6aff5c",
+        "skills/ghidra-coordinator/src/model.ts": "9a8e9172e723d369e3f693c7a08485d8299ae7e93048bf5f0610f283fa1942de",
+        "skills/ghidra-coordinator/src/mutation-effects.ts": "2c6fafedc93a1a35cf8795c30440234e75ea70f9911977ba5b8016fedb1f2041",
+        "skills/ghidra-coordinator/src/mutation-inputs.ts": "4ba523f095f0602d3631cc7e0509070ab5a6b693e4ec976ba94b385450d8ddbd",
+        "skills/ghidra-coordinator/src/mutations.ts": "573bc1880402ec3fc81af883e03d3550d13be6e1bd13496ea5f2176d9852b7c6",
+        "skills/ghidra-coordinator/src/native-inputs.ts": "7920b89335cf309cae2a1f935dbf9c56f733a0b724abb5085f7e84ccdcefb491",
+        "skills/ghidra-coordinator/src/native-queries.ts": "0a1d51e10fb55d146ccacf5977c908aad9e6f937c57d223efd194cca5d110c1f",
+        "skills/ghidra-coordinator/src/projects.ts": "6aaa3d29690bc4aafaa2abc22a85d055c28b2fb17cd57c75cc29f80226a502d2",
+        "skills/ghidra-coordinator/src/prototype-cli.ts": "e82d6befb8a051461ee9cbba598ca34cfc9885dc37893d83694e08f84be7b0d2",
+        "skills/ghidra-coordinator/src/queries.ts": "e8f60c2d6c60573bc17f237df3e289e2f78970dc982947b035601bc2d178c5ec",
+        "skills/ghidra-coordinator/src/query-policy.ts": "6c790b9c67161aebc2aed1307a0628490d0d4f3c4da0b9ea86ca794e699534bf",
+        "skills/ghidra-coordinator/src/query-results.ts": "cbab02c14f68f2e0b4f5a0f23bbe4a53a26d26a9d413adfab7f53bcf525dc3df",
+        "skills/ghidra-coordinator/src/research.ts": "db0697a1154157febf86ee1515a8cef315a0a9f358f470af5ba2864dabc10128",
+        "skills/ghidra-coordinator/src/scripts.ts": "84d9885f6309bd271d6987939297dba934e3afdd78d4111c8d0a4210d47d1179",
+        "skills/ghidra-coordinator/src/sdk-contracts.ts": "0f91bf291cfc01f61e3d80045583dbdcab8ba5d1fa74f250c790fc5b15aa9cd9",
+        "skills/ghidra-coordinator/src/sdk-files.ts": "b77779caf0407fc5f2665b2a9222e7cc58726c90d7ae380ddfc7d41579d907f3",
+        "skills/ghidra-coordinator/src/sdk.ts": "7f0b6e24f18fef65ff0c84a53859b32922830f12f8f25a0b3e297cd112f0de8d",
+        "skills/ghidra-coordinator/src/server.ts": "597d5c86e750d7a4a5aac6db8ecf4ab740e8db6d4be2a4b5d6c753ae6905235c",
+        "skills/ghidra-coordinator/src/store.ts": "8a2e866c45d0a5de304213f9495d897aeebf41cd4f08a91e60da91cf6470573d",
+        "skills/ghidra-coordinator/src/sync-policy.ts": "6869e795c9b1dcf6fe3a05b4768f8ace78de5a660da6773ae394092c2bff90f3",
+        "skills/ghidra-coordinator/src/transport.ts": "749441b01700437b03dec727b162f08490fb01199f4e62e4edddf429f199465d",
+        "skills/ghidra-coordinator/src/ui-results.ts": "59e2bc402ab2187361fa52591bab95cc49fd1a154c5cb25f197889e3ce978fac",
+        "skills/ghidra-coordinator/src/ui.ts": "718a34d1ff84feee3f426888a6543c008625208e01ee406eb1b186e2c8d69338",
+        "skills/ghidra-coordinator/src/utility.ts": "a653c15ffd685f7a75b235e9e96596f769873bf64501a8aa4c4b682fa6ac6770",
+        "skills/ghidra-coordinator/src/version-tracking.ts": "ae7502241d2359e072a8a7f5038e9d23840afda677a18b8269dc8cddca3d488e",
+        "skills/ghidra-coordinator/src/workspace.ts": "a0e0325fa11bc4516d7706fdc09c92f48b3909a3a239377bcd7e51683a129d64",
+        "skills/ghidra-coordinator/dist/src/administration-results.d.ts": "cfa6f6800a9deb6a1ceff40c90b79acf026379b225b915cd3d5d1a4617401449",
+        "skills/ghidra-coordinator/dist/src/administration-results.js": "7fde4ee3d283622eb3cc0cc8aeb7268abaad1c69554fee136896fe3f1f69a539",
+        "skills/ghidra-coordinator/dist/src/administration.d.ts": "49b69a98954dfc5baf7da4af07fb4f85d528b3748a98713ae0f5594be2dbbab8",
+        "skills/ghidra-coordinator/dist/src/administration.js": "440224fa7770287e898230cf5c8b93d818c322d0ae37ad6f3c5a1411f3c28989",
+        "skills/ghidra-coordinator/dist/src/archive-contract.d.ts": "f0c64af53d042432b2ec312f1255109b1ec84d5938f74c48134845d5aa2debd1",
+        "skills/ghidra-coordinator/dist/src/archive-contract.js": "18477d593e0d9cdada031ed8775b3deea2b22e6e83155f9a97462653e62836a1",
+        "skills/ghidra-coordinator/dist/src/archive.d.ts": "1f3891d34035eeaec84ef29ec62970d8d692cba40e399e6a00aff222ee84c74f",
+        "skills/ghidra-coordinator/dist/src/archive.js": "47f169ccd8d2e9bb68dc35f6e56a7f4262adeedd5f9773c28c68d60c7ed3351a",
+        "skills/ghidra-coordinator/dist/src/arguments.d.ts": "8616f2558f2a1eebd025881385f1b5a6e8d729ce60ae7e56a443bafac9bb9a43",
+        "skills/ghidra-coordinator/dist/src/arguments.js": "d2314a828258c5f85b3d4cd481183d5049ebabbd36d9ad5daa98f6f966d0697b",
+        "skills/ghidra-coordinator/dist/src/artifacts.d.ts": "ffcd77abaa7336c648192d3683764f17ff92a3cc844372cb5395411bd0d0fa5a",
+        "skills/ghidra-coordinator/dist/src/artifacts.js": "f96a352b2ecd25c14f26f7f9bc911ddd10b23e7ce2b6ed7ff50c57e5b10ea296",
+        "skills/ghidra-coordinator/dist/src/bin.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+        "skills/ghidra-coordinator/dist/src/bin.js": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+        "skills/ghidra-coordinator/dist/src/cli.d.ts": "bd55b2865f6aa5f2bca64ce0566ebb935f58f6624e25b304bfd569810c4aa1c5",
+        "skills/ghidra-coordinator/dist/src/cli.js": "0847d2cfd110f8c01edd7f6f8af4c2a081ce71c18b53c5f35a87390f6fd463a7",
+        "skills/ghidra-coordinator/dist/src/comment-effects.d.ts": "b8ed05305361a59a66032c7bd45d4d5ab11aef1ee2386e5310f40dd17d58370e",
+        "skills/ghidra-coordinator/dist/src/comment-effects.js": "e82ffbbdb5b382df4b67ae03a9314868bbc0fe8afdca164b93046c43cfbe9f0a",
+        "skills/ghidra-coordinator/dist/src/contexts.d.ts": "faa532053c2326ae6570fd7d093c2f27143ba9d2ddfca89771aa662f44feca72",
+        "skills/ghidra-coordinator/dist/src/contexts.js": "8a5f1f2253223c1dba6940590c8929e258448a21ff9fdac6230d0fa41c5b6097",
+        "skills/ghidra-coordinator/dist/src/coordinator.d.ts": "4d0fee9577b0357627da15c108821590c2b4bc1263297a0d13f795b90cadf392",
+        "skills/ghidra-coordinator/dist/src/coordinator.js": "81e187d3e22003298064074fecc5045c4d52cca85b8325873a0fee0984f9544e",
+        "skills/ghidra-coordinator/dist/src/cross-results.d.ts": "33b9746ea093b0029ae92901c799d54388b976e74f9814b6a84caceed045eab5",
+        "skills/ghidra-coordinator/dist/src/cross-results.js": "2334c137e2d218dfb4f399fe9de64b8234188599917d8663b268db557ffd7bab",
+        "skills/ghidra-coordinator/dist/src/cross.d.ts": "1ecc23810ddf06229b30b379863cf13cf6e8986524c3a737d87eaffdbf090479",
+        "skills/ghidra-coordinator/dist/src/cross.js": "f948c65a5329e77e63b63d6d4ef7f07547fb6cb20f41659ccefdcf2fa8ab0e5e",
+        "skills/ghidra-coordinator/dist/src/data-effects.d.ts": "d34d7a13de68e6695d3549fc0103bfbe3ea92fc767fbafaeeb3f4c8cd8f1bafc",
+        "skills/ghidra-coordinator/dist/src/data-effects.js": "f90b0c6706f2d90b89ae3b8f6cf0c076a5f94c4cece32bbbc094e85e46c137e6",
+        "skills/ghidra-coordinator/dist/src/debugger-results.d.ts": "7756f65265c4fee03db86cb55aad2aea37e24b69f7a7dc8ff586527906882d7f",
+        "skills/ghidra-coordinator/dist/src/debugger-results.js": "5545227b620c0148f173a38258d9ac8016058a984aac2197df093bc67d61b90e",
+        "skills/ghidra-coordinator/dist/src/debugger-supervisor.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/src/debugger-supervisor.js": "5c7777b43c40889041bc5f0c3d7a98f651210bf6e77bb23cb88f332bc2a90f01",
+        "skills/ghidra-coordinator/dist/src/debugger.d.ts": "cd3eca8fa7c7714d686503dab8473c2865f034a33b9e63167bdc3a00da8d6129",
+        "skills/ghidra-coordinator/dist/src/debugger.js": "93ddfedada30d139dcf9f747a8ab6833cc105d8d65a60ee511d1bdd455979a4f",
+        "skills/ghidra-coordinator/dist/src/documentation-effects.d.ts": "0c5ee1c92325679c6be8dc9d2ebea0951a7aac177f6d096ab078361d68fd85ad",
+        "skills/ghidra-coordinator/dist/src/documentation-effects.js": "b3039912b1585423a3a717095755f15c20a74ca225a670c56e67f5b9a74207a2",
+        "skills/ghidra-coordinator/dist/src/extensions.d.ts": "fba5767814ce830c9f8ea474ae31a506d3a13f5401df654094a5b379f532522f",
+        "skills/ghidra-coordinator/dist/src/extensions.js": "2cc54ee0559c50b221a9da2a6ef6da7680f4b3cc2f87a09e11ca2b9c88141db8",
+        "skills/ghidra-coordinator/dist/src/function-effects.d.ts": "10f2f98bbee593e41638ffe771342870e2372d4ac373acbd49d7124a3522e815",
+        "skills/ghidra-coordinator/dist/src/function-effects.js": "b57a6adca1d0ff7fbec66aa411c0ff8c4a657238e7c143cc5d960e44415b6252",
+        "skills/ghidra-coordinator/dist/src/ghidra.d.ts": "d0fa7d83dfa1bd3afce153917bb7f89336341c3a9fb1fd98eb7223090c30fef4",
+        "skills/ghidra-coordinator/dist/src/ghidra.js": "3523c711b8968e451b4c4a2776054e2f1dc12f7cae5fe51f739b4585e5c6944f",
+        "skills/ghidra-coordinator/dist/src/index.d.ts": "8fad2da1150c141bc12c546362bbe85b6d5189e0400884c067dd714a7bfd17b1",
+        "skills/ghidra-coordinator/dist/src/index.js": "d80f77bea2810a11a8cdbc77122902d9436abc3a4be6d710b1bfaba11e56c56f",
+        "skills/ghidra-coordinator/dist/src/initial-model.d.ts": "b1683b5829bf4f600a9736d45c8932ccc977a59e6e6c337c0c1fd42d1fd3ac48",
+        "skills/ghidra-coordinator/dist/src/initial-model.js": "673d8e3749373c88ff337c392621f2622eac9e483668ebf0bf7e65878dc0b5b6",
+        "skills/ghidra-coordinator/dist/src/json.d.ts": "78ed50bcf0e654146bd701a52e1004198544e5cc6cac1095d8ce828a55a0534b",
+        "skills/ghidra-coordinator/dist/src/json.js": "e53873ad7e88fe0cece3744ac5ae70d564bd9110b0f8947c597c3496c996e126",
+        "skills/ghidra-coordinator/dist/src/lifecycle.d.ts": "42953fff1b2f6987d80bce00d6f190854e0c74334adf45f8548a6c454a7a2342",
+        "skills/ghidra-coordinator/dist/src/lifecycle.js": "46e636eb635aa7f166d820a1454fbcecbb71ab0b496e990ef64df8602e2582f1",
+        "skills/ghidra-coordinator/dist/src/memory-inputs.d.ts": "6cd0a69f1b62bbd84d101b2c397d817e21aa0af4c0ae330d3df7a5203c5f33aa",
+        "skills/ghidra-coordinator/dist/src/memory-inputs.js": "8cd4e258c7495f35508c7f0eb92ea3f9745fe9f6c1375f6f78959ebfec722e17",
+        "skills/ghidra-coordinator/dist/src/merge.d.ts": "11cf9c6ea4297279d3b83be7d6c60ba3e847fa278fbc73a2670dc4a5e9451d6a",
+        "skills/ghidra-coordinator/dist/src/merge.js": "0ffc5ae18ab27308f16e17ff996a7354a5116478470634d62142b51c644c064f",
+        "skills/ghidra-coordinator/dist/src/model.d.ts": "93ff8d366710ce963592da9b4d825bc8d21f34308dc2553f65a0a53fb3377f7e",
+        "skills/ghidra-coordinator/dist/src/model.js": "dbd28b9d00be3c0d680f316755a5f4741467c8e7f6358555b16695235aad3371",
+        "skills/ghidra-coordinator/dist/src/mutation-effects.d.ts": "cc133e99f06a9659a09aa2e64c1c5f92c518ff702f0713a1727f968b8e01cc94",
+        "skills/ghidra-coordinator/dist/src/mutation-effects.js": "743caca7ad5b071e4774e7769a0f95d7535fb6c101d112fc60c237d2df79a0cd",
+        "skills/ghidra-coordinator/dist/src/mutation-inputs.d.ts": "3a401bc1f471d9467b0ac983adb570e125c9806f12e6c450b9f32d0aec0e5de7",
+        "skills/ghidra-coordinator/dist/src/mutation-inputs.js": "39b9619fbb7e4cbc084c9ac7e61c4798fe8a700de0ff97887663c810f17ea596",
+        "skills/ghidra-coordinator/dist/src/mutations.d.ts": "ee1cd8448bd26ed8c3f09247eff169f42ee1543560128bf5ca6b746d8cae5439",
+        "skills/ghidra-coordinator/dist/src/mutations.js": "57b791c209afd47eb2145c567f006844f5b0c228a61781810359204d8522e3da",
+        "skills/ghidra-coordinator/dist/src/native-inputs.d.ts": "180d9d21e6021ead3b0df5d5e2ebb9f6157b1d7e8fc1a5b1bfb09771cb26e462",
+        "skills/ghidra-coordinator/dist/src/native-inputs.js": "8907d69c0cbebbc5684d8894d93a84fb3ed9ec0c836a0e803c370bfa9043d8c2",
+        "skills/ghidra-coordinator/dist/src/native-queries.d.ts": "5436612b4af25ba1f49a4c6223127256b41edae1d536359452962c250feef686",
+        "skills/ghidra-coordinator/dist/src/native-queries.js": "2c8dec00eb9dcadf9454594751f1e083beb0314f4e7642067d676d050edb7698",
+        "skills/ghidra-coordinator/dist/src/projects.d.ts": "9619410a7b33b8ace9e8ce90b68f0a83915e31e56b8a426d4c7ffafe46a716e1",
+        "skills/ghidra-coordinator/dist/src/projects.js": "c3887b009fa1209b651d8f327cf8c1bfea44612f9fbc71259330e79f17846585",
+        "skills/ghidra-coordinator/dist/src/prototype-cli.d.ts": "15f058aad1c9bd95a91ad5587ebeaee19f2a8840f452d5d119001bd4e8a36877",
+        "skills/ghidra-coordinator/dist/src/prototype-cli.js": "783ce70380d3ae0b1c1a434f79effc88f080054ea4acd3ba67d1bd1fbc5fe5d2",
+        "skills/ghidra-coordinator/dist/src/queries.d.ts": "3196227799cd571d0cda00447c147db7475b47a71d48623bdf1c881dc480c78c",
+        "skills/ghidra-coordinator/dist/src/queries.js": "810678e371c3e20aa16a1f7baad1281f8256b01cfc8338a5902e7e3588dd5989",
+        "skills/ghidra-coordinator/dist/src/query-policy.d.ts": "0892f882545256bfe541cef81837bf1c1ec90eac52f3f9095f40062d5590511c",
+        "skills/ghidra-coordinator/dist/src/query-policy.js": "44b846c16872b6496f01a618e4405b965bc5297bab882584d1ae059f92eacb58",
+        "skills/ghidra-coordinator/dist/src/query-results.d.ts": "85c5fc70ead1617fac837d12bf1305f3069adcccde6aaca8af535b599fed0bdd",
+        "skills/ghidra-coordinator/dist/src/query-results.js": "25d916f182760dbf4db65f08f7c2c311cc331ad6594f3acf41c8598f0e8f35af",
+        "skills/ghidra-coordinator/dist/src/research.d.ts": "94eb914e5cc2f82a8ea3b384492735c234a5f17d7622cbf38b0784adff80f33c",
+        "skills/ghidra-coordinator/dist/src/research.js": "ec540cb3a4b14dd1e972c0157889cfbc9a6a2ebcb157805371b75a389047241e",
+        "skills/ghidra-coordinator/dist/src/scripts.d.ts": "f6d3e06cdad00413852c9de150a6e43e18ff5f29e8b6664adb420f92860f04e3",
+        "skills/ghidra-coordinator/dist/src/scripts.js": "c2b41ca155427c4b2fe2eb953fdba8af522edb9d1282e503751a71605bc5df08",
+        "skills/ghidra-coordinator/dist/src/sdk-contracts.d.ts": "3ce5830ae76f7b56fd0de25656c02eb518b2822cc2be9bb7bf2a14a6df3fd05d",
+        "skills/ghidra-coordinator/dist/src/sdk-contracts.js": "7c7ea9087a5e9ef5d767bfa0ac627a176aa82a6a3b7a0c2bdee6ffc45b8f9ea5",
+        "skills/ghidra-coordinator/dist/src/sdk-files.d.ts": "9349fbf119550c021c7869c5f7a83839541accea07d5d341bba2f9a72e820161",
+        "skills/ghidra-coordinator/dist/src/sdk-files.js": "afde3460e0e2a76d30a5dbd7eb5ebcf419b92ea24f0d85b6cd642d294cefc624",
+        "skills/ghidra-coordinator/dist/src/sdk.d.ts": "921e760fa2394c7f8dac45a4eebbef72a9bf399ea996894940374f3cc3b705ae",
+        "skills/ghidra-coordinator/dist/src/sdk.js": "14187c15ed9e9db022b6a63bc32aa78ee2fa4c4d9b917f1a8b778ef70c6c9799",
+        "skills/ghidra-coordinator/dist/src/server.d.ts": "48b8171ea26cab0f8a034000231b91e1f181f121f32f84fd03654337b496a701",
+        "skills/ghidra-coordinator/dist/src/server.js": "812028a7a7a7762c25f6e2539273fa8b4938bb3d538887ba8688091c854e4e4e",
+        "skills/ghidra-coordinator/dist/src/store.d.ts": "a04b3862dea8fc65b0e14e52ab41536d9cd81d3f8d1c8e2647ac0101ee4f1dd3",
+        "skills/ghidra-coordinator/dist/src/store.js": "ced32632b9b4157b9ff519a51122b094ef4334b043d2e4d9cec805cf9467006f",
+        "skills/ghidra-coordinator/dist/src/sync-policy.d.ts": "52c16eafcaba5d01b524ce7eb6eb721beb438fedc82ac0f2ba69965aafb3021e",
+        "skills/ghidra-coordinator/dist/src/sync-policy.js": "3514100bf6c170c86c023d5083b31474a16f1a1df8c40f5a620af517f459858a",
+        "skills/ghidra-coordinator/dist/src/transport.d.ts": "65b485fe414a9ba2d8271fe2b2fe288ecb00a818111257576b36672246ee86bf",
+        "skills/ghidra-coordinator/dist/src/transport.js": "c9d4ebea272fb953b664ccab1c5a77b0882f41df5051746e73f7b015a9db98bb",
+        "skills/ghidra-coordinator/dist/src/ui-results.d.ts": "aeb578379005c1cf0c7941c30d76a4813394a04df52dfdc0dd321747fd402ae7",
+        "skills/ghidra-coordinator/dist/src/ui-results.js": "628732686728bed5efa58ac3ddaf443657c60ab895b76a85c2af441610fa3589",
+        "skills/ghidra-coordinator/dist/src/ui.d.ts": "3e024522f2b3d253a67c603576bafbec9a9aea6a25ae48f08c5dbb87246c2c93",
+        "skills/ghidra-coordinator/dist/src/ui.js": "d880cb7b299789a105eb448caf91f911fa3de39c6be439d20a732f61299003b2",
+        "skills/ghidra-coordinator/dist/src/utility.d.ts": "13ed4f511eec161381f97d5011b2bde1da7db05702487f1ec2a9102ab21d25cf",
+        "skills/ghidra-coordinator/dist/src/utility.js": "7e9e0ec2f429094a1443e30313f68abc3329bcc3f907652a92bf2271259b3ee4",
+        "skills/ghidra-coordinator/dist/src/version-tracking.d.ts": "475e6ceecf44d5efce0c531ab6bf838ebc456a188b1f6f357d0f33c426dfc702",
+        "skills/ghidra-coordinator/dist/src/version-tracking.js": "3c8a44b1a9ab41794a3af0e3790a8779032b128b7b6aa893f2485c8da3d33e04",
+        "skills/ghidra-coordinator/dist/src/workspace.d.ts": "5b752c292ca6ae1aa169a328889e4d531b668318880f04698071316f779c0171",
+        "skills/ghidra-coordinator/dist/src/workspace.js": "be5ea050ec0f4ad4c3db0c633dbb1cf5c14e14791045bc81bcebf733632dd501",
+        "skills/ghidra-coordinator/dist/tests/administration-results.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/administration-results.test.js": "fd01ecb82c48b1861c0c7fa2d2ad0af59269c6af92011e28927ab5ce568840f1",
+        "skills/ghidra-coordinator/dist/tests/administration.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/administration.test.js": "f9bd88ac01d7f3c2dadec76825c8d391592977a38d891ec37f2c16cd4fd99151",
+        "skills/ghidra-coordinator/dist/tests/api-gaps.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/api-gaps.test.js": "7e93e7f1ff2ca502d7a15017047a2bc7b83cdadd1476e62be405edf19f617399",
+        "skills/ghidra-coordinator/dist/tests/archive.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/archive.test.js": "36fd32ccf40240cd697e38e516ef24d4348e17399276c6035445110c6d412638",
+        "skills/ghidra-coordinator/dist/tests/cli.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/cli.test.js": "76fd7b189a8741fec5af4cd3b8b37dda8a6f1af092f3b9187228530978e0e0f1",
+        "skills/ghidra-coordinator/dist/tests/comment-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/comment-effects.test.js": "a1d302b852903f23202528144b2591a8e894a2ba94242824485c1de36b7f535f",
+        "skills/ghidra-coordinator/dist/tests/context-owner.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/context-owner.test.js": "2029ca95ff64a21e5de29c11c8df635c33d4498ad1c1b81068ff5f3c04318ac8",
+        "skills/ghidra-coordinator/dist/tests/coordinator.test.d.ts": "27576af71e8af663ad7be67da34b3984f092c9bf6aad79f95b199157d5b8b509",
+        "skills/ghidra-coordinator/dist/tests/coordinator.test.js": "a6bcdf74fbe7c62db2dccf2b61ab6f64f7bd55fe7e57f85530b1a39453128a9c",
+        "skills/ghidra-coordinator/dist/tests/crash-child.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/crash-child.js": "72b8c8c00d3139ff2df13da7095f5875e58a9b4c3dd3568b6fe31a49b026ca65",
+        "skills/ghidra-coordinator/dist/tests/crash.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/crash.test.js": "8abf54bfc199bbdb62575fb8fdfbb29602575df0bda46c5cbb3dbcc4512a086b",
+        "skills/ghidra-coordinator/dist/tests/cross.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/cross.test.js": "1ef701c4aa52e63e9d1ec91583a1146c3f3c2d6e62d7db5015ea051593c2557e",
+        "skills/ghidra-coordinator/dist/tests/data-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/data-effects.test.js": "4d45820821b00b122c795b0e5eccba89a8e5ba114b567461bfe26e72f09c9953",
+        "skills/ghidra-coordinator/dist/tests/debugger.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/debugger.test.js": "48b9eae1e0b7a6627c57e734c2f0f74d76d7a99dfe7f0844b41697e952ebb6e5",
+        "skills/ghidra-coordinator/dist/tests/facade-lifecycle.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/facade-lifecycle.test.js": "b1cb2a943c37ebf0a1c6ab789c377b0e21861b1216859b6fa728b3be39949bbd",
+        "skills/ghidra-coordinator/dist/tests/fixtures/session-backend.d.ts": "d5d690d5e7fb1eac7a6171176d9efcdaeeb6d6090a1b3feafa4c9104a58e8418",
+        "skills/ghidra-coordinator/dist/tests/fixtures/session-backend.js": "c63b43322e5d8997d1750eb110ad06d76f0f76905ba7436b4dc54df90a7d995e",
+        "skills/ghidra-coordinator/dist/tests/function-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/function-effects.test.js": "2596cfcb5ce1e371e8fb53c3f0d908eca1c89c2a73684e0df290dcf0857c59be",
+        "skills/ghidra-coordinator/dist/tests/initial-model.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/initial-model.test.js": "eb4c43aae1670826009fd2f84ddd497290bd7f5d1377cbf44ee3a8c7429b4435",
+        "skills/ghidra-coordinator/dist/tests/json.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/json.test.js": "cfc4816380b1d119bc4d7175420ec0e7b28bb0c64447124d6357d4f86f037ef1",
+        "skills/ghidra-coordinator/dist/tests/lifecycle-selection.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/lifecycle-selection.test.js": "dba0cc4e7b60038bfa4c372fc6b105d8051b89b0bd4e8489e7b9de90fc9dfb59",
+        "skills/ghidra-coordinator/dist/tests/lifecycle.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/lifecycle.test.js": "c9f2bf4d9df346affbc963e97a2e390b68b3f3d722eafa741cda9780da6cdfb0",
+        "skills/ghidra-coordinator/dist/tests/merge.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/merge.test.js": "52ff3ffdc75a2e556a4211b32bd45968678f30851e2c9d1c6fbb544b64642082",
+        "skills/ghidra-coordinator/dist/tests/mutation-effects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/mutation-effects.test.js": "edda646bce45fd29792567a51c5359992f76eb65e847f579ce4026a7fc672298",
+        "skills/ghidra-coordinator/dist/tests/native-inputs.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/native-inputs.test.js": "0a929c3afe7a17101b7bc1b85cadd4834f2590e5dde6a953d795193b40cfa0fc",
+        "skills/ghidra-coordinator/dist/tests/p2-workflows.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/p2-workflows.test.js": "05e1927eda33d3d89d0c77c4a85a966c25a3adf1f4bfc205d88614363c8d1561",
+        "skills/ghidra-coordinator/dist/tests/p3-workflows.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/p3-workflows.test.js": "bf45462e0487c168667db22b1fe2ec5fa0a03b6e23b1480b10da2a159974a95c",
+        "skills/ghidra-coordinator/dist/tests/program-recovery.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/program-recovery.test.js": "1ca0524c5fe09f2f13d29e0fe2a83343b6c5dada5451d4c7e41ada50f38b4f18",
+        "skills/ghidra-coordinator/dist/tests/projects.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/projects.test.js": "5b7d312aaace92f04e2cc0cb96767a15ff2270d8a53970b5d931a0f43fef4f43",
+        "skills/ghidra-coordinator/dist/tests/publication.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/publication.test.js": "272ee9626647e488c2bfb87267577c53a040e9ca221e14fcf289ed2deb1954d3",
+        "skills/ghidra-coordinator/dist/tests/queries.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/queries.test.js": "94707875918a8a9a745132b03962517d99a111d9a341bfa65cb3ccca9da34eee",
+        "skills/ghidra-coordinator/dist/tests/query-results.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/query-results.test.js": "c2d6cda223d1beb3117617738361c5fe8120d8707908f5ea2d561153c2f3e14d",
+        "skills/ghidra-coordinator/dist/tests/recovery-child.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/recovery-child.js": "08bbca55e838260c6a24cfb76c427f081eac0a0953205f67dd1128db7c4f6007",
+        "skills/ghidra-coordinator/dist/tests/research-cli.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/research-cli.test.js": "0ed3167f5e453b8ff2ab84ee2ee2f65a615c46e1dbdc8141f12ed9c6fdcad522",
+        "skills/ghidra-coordinator/dist/tests/scalar-projection.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/scalar-projection.test.js": "24a1730d679ac3755247e7fb32ccddb512dc74614e174d425224d2613d314595",
+        "skills/ghidra-coordinator/dist/tests/scripts.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/scripts.test.js": "cb5fb03e01fbbcf81bf2d9c99233efb95795df69550784f0197148364df56518",
+        "skills/ghidra-coordinator/dist/tests/session-merge.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/session-merge.test.js": "a3cdf8597276c89c6918f61068c194b3ac4611b3952905cc83ffd61cb95baf08",
+        "skills/ghidra-coordinator/dist/tests/transfer.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/transfer.test.js": "b665ee678c0185c36047097b0d26717e8a5802374f675e188dff29a42dfdc531",
+        "skills/ghidra-coordinator/dist/tests/transport.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/transport.test.js": "13b28c18e7cd521a0fa2bb25967735432a6cbba3c53da82fbfaa3ffdffd7fa88",
+        "skills/ghidra-coordinator/dist/tests/ui.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/ui.test.js": "297b9c1ec7a560a4750f855183bb61d0b0a8f31cbd13f7aa9669eb3b2bcbf37c",
+        "skills/ghidra-coordinator/dist/tests/utility.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/utility.test.js": "1173e685eb99756e619e1c3cc4ea4544fa2fecdd9460852f19cf37ee68c0c8a7",
+        "skills/ghidra-coordinator/dist/tests/workspace.test.d.ts": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "skills/ghidra-coordinator/dist/tests/workspace.test.js": "7199eb596b94cea1cee113ca1f41a063f7f62a4b480b09b5c0444bba99e454b6",
+        "skills/ghidra-coordinator/tests/administration-results.test.ts": "5d9d6577cb9b46c0e8027636e9eddd7a7e3f2e433830b002b924800e0f1b3545",
+        "skills/ghidra-coordinator/tests/administration.test.ts": "5427f352d8eece1563414e9a223d425e3ea82cf209f04ce244bbc9641a8784e1",
+        "skills/ghidra-coordinator/tests/api-gaps.test.ts": "a0febf99a20ae4a7aa50c0f29a3f17a6d7f4ab554499f408742c54c87d021735",
+        "skills/ghidra-coordinator/tests/archive.test.ts": "7dd185880bd087254798ab898f3ff055c21573f1b814dd7ce503aaa1dc513592",
+        "skills/ghidra-coordinator/tests/cli.test.ts": "9e0e1502858340017f211d814efc97ab7a98f0b2321ab2d28218c8a69ed869f3",
+        "skills/ghidra-coordinator/tests/comment-effects.test.ts": "5b224cc558bd9f8a512a4a31378606bc2d0578cfee32d3c3cfb0d2b8b3de2582",
+        "skills/ghidra-coordinator/tests/context-owner.test.ts": "a9e3423d10690741fdeb9bc76ad30183a1accd8b4fbc87230f2c5ebb0218de02",
+        "skills/ghidra-coordinator/tests/coordinator.test.ts": "2392b9b0784dfbceb6d18522a57f887c537f40e2bb184b29bf97d8bcda9c5362",
+        "skills/ghidra-coordinator/tests/crash-child.ts": "86b7e8d021c9ca768a1ac99b7bf073ab9ad6ffa5ee6b806eaa1bdb6fe1766d39",
+        "skills/ghidra-coordinator/tests/crash.test.ts": "1ac9c5b31014e838e9e2f65e414a21c915452f4367340f5dd7286fd1739f4fa9",
+        "skills/ghidra-coordinator/tests/cross.test.ts": "64c4a21bdc12f570d95abf8e3f1dc79a1ea8c0b79425a8d723488f30c5596c6c",
+        "skills/ghidra-coordinator/tests/data-effects.test.ts": "e7484e249bd0dddcec435e93aa3e31ef2ac3b7584ac8ba35fca61b587ebb2b2e",
+        "skills/ghidra-coordinator/tests/debugger.test.ts": "bd1a0c016c8ca24491bb7a33ca950b627a6754ca05abc303f9c07e9191d5ffbe",
+        "skills/ghidra-coordinator/tests/facade-lifecycle.test.ts": "e2745a1cfd1550626dde36dfca5b09219b04c430b4b3fe6eea03ea0f37195a16",
+        "skills/ghidra-coordinator/tests/fixtures/session-backend.ts": "38d523319c9130c386b81394a90dd777abaad8afd28f6dd39c4f85e85e80dec1",
+        "skills/ghidra-coordinator/tests/function-effects.test.ts": "59ccc568f9d841127810766082465428fb1c66aad0f5d263bc7d001aa189d095",
+        "skills/ghidra-coordinator/tests/initial-model.test.ts": "c5b3905934c31983642e3a8d23e7b5b25939a0c225ddee3407cbb417de5a11ca",
+        "skills/ghidra-coordinator/tests/json.test.ts": "8a9402a41efc85cc6647b0944764820bbedbfc0fa9da812301eaab0421169f0b",
+        "skills/ghidra-coordinator/tests/lifecycle-selection.test.ts": "6eacb7339e304e2779b35554f5d9f1c3c78250a7c96eacb0c3972b6b617738e8",
+        "skills/ghidra-coordinator/tests/lifecycle.test.ts": "3567cf037c188448046c766b9ac36faea4ad6e4c4b866142eeeb6039bc864950",
+        "skills/ghidra-coordinator/tests/merge.test.ts": "b69b1985cc837ec168845e688cab3bd89483e7bd74f341c229e8713dcb23d5ce",
+        "skills/ghidra-coordinator/tests/mutation-effects.test.ts": "01efabc31c11a1db7d60814f7d95a5ad4169177ca792cf81b5cedf31e45766a9",
+        "skills/ghidra-coordinator/tests/native-inputs.test.ts": "5d3fdcebd8d90023865824fb7d3c60a7b48de203c5d3d81f202901f639f1e385",
+        "skills/ghidra-coordinator/tests/p2-workflows.test.ts": "525759948dd8f3e7d10d04abafd5b85e963ac3e1d09236614801deb719074bd9",
+        "skills/ghidra-coordinator/tests/p3-workflows.test.ts": "d335c54e778e203e7efc05451902aecda1a164c9a6a70554eae7aac3935c2e79",
+        "skills/ghidra-coordinator/tests/program-recovery.test.ts": "9bd54e963a17096dfd408b2b48af95174645ca13968d11bede43309190706533",
+        "skills/ghidra-coordinator/tests/projects.test.ts": "6dbb9e4b36713550297649f21fc67f167289ea9df0f75ab330ef617fbab617e0",
+        "skills/ghidra-coordinator/tests/publication.test.ts": "a4dcdb9c8a85d926a97ba75b554724d155af9b390723017affda3d519ac6b7d8",
+        "skills/ghidra-coordinator/tests/queries.test.ts": "dafaa03ab8bfd167bb98b789509975afef4c52fe3a6d5af0196aebf5db827e0f",
+        "skills/ghidra-coordinator/tests/query-results.test.ts": "2332aa3a9d3d16f400cd54a3d1a7a21e1990d258b2aae49a44365af84151fd5a",
+        "skills/ghidra-coordinator/tests/recovery-child.ts": "a8d8e0d3a84b0be016c63d08e70b9120800c715e515756ea0e589ae6a0d54afe",
+        "skills/ghidra-coordinator/tests/research-cli.test.ts": "3f8dec545f6dc08e5c882fe30d86897fa8efce541d62f7845d8eb49358864f25",
+        "skills/ghidra-coordinator/tests/scalar-projection.test.ts": "2a7ad37a5c860dce90ee2b2eff6bdeb9034a7730a59d0260a0ed56dd66272e8f",
+        "skills/ghidra-coordinator/tests/scripts.test.ts": "9d3a907d23910bb325b3ff094129a2f2c3859ecc50be892de60c4862e02a27da",
+        "skills/ghidra-coordinator/tests/session-merge.test.ts": "0040aa6a7e3b7da955547b23ebebf68a5e8095c420e1753fc03668d9181f3ac6",
+        "skills/ghidra-coordinator/tests/transfer.test.ts": "0ae72a502ad82052ac96b1826f72371163e30c72c092eb988f6eeec4367a1200",
+        "skills/ghidra-coordinator/tests/transport.test.ts": "76be90dc55dbf0fa4d36a97c83a5da98dc121f45c0004c27c6b6e8d78c4b32d6",
+        "skills/ghidra-coordinator/tests/ui.test.ts": "a2385539e1b25ec80f005f5ac9318da5e584f7c3b40fcca2faea7983ca948e21",
+        "skills/ghidra-coordinator/tests/utility.test.ts": "071bea24a2c36e97195021270f307fc6341d83b9c03bd90a56e87b1d9d9b5176",
+        "skills/ghidra-coordinator/tests/workspace.test.ts": "82e7ca4c7540c26435813057ba8fd305d82663d2ca301f0deafe2f44697801a9",
+        "skills/ghidra-coordinator/references/InsightRepositoryProbe.java": "bb5d4033c322e79953bd7f7f61cd8b40d9347376e0bf345d36ec594a42d8f855",
+        "skills/ghidra-coordinator/references/administration.md": "dab2f162c5b87388dc8ffeb986e1fa25263c8858d0dcc53b501de6d6672b07f6",
+        "skills/ghidra-coordinator/references/archive.md": "1eab5ac440df402003dd1483d283917a043269525f343a188eed389ec9bc3ee0",
+        "skills/ghidra-coordinator/references/debugger.md": "ef05f68a92aaa9758322fac04894e7bd5980b34c2c41a2fe974708f5550f88f1",
+        "skills/ghidra-coordinator/references/extensions-and-sync.md": "b523aa92e13bddb22f29b8d1d96f46e8d77208209f01187f956ae0f47defc654",
+        "skills/ghidra-coordinator/references/mutations.json": "8939bd1761b52da1f71ea8522fcf75fb8fdc08ab7708497b2de439a71243a63e",
+        "skills/ghidra-coordinator/references/native/InsightApplyDocumentation.java": "3548b99a04b771d5e1defba9bc4fbf0c26de2a11b211091aecf74ad2467aeab1",
+        "skills/ghidra-coordinator/references/native/InsightArchivePayloads.java": "7862461244fe613f25ea6a08d72b951aacca3493e19f5aa790aa77fbe58f5618",
+        "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "cdf8769e1da82c9abe8a4f745bb34b1ee94a5c05ccad875f29452dd2e30d2edf",
+        "skills/ghidra-coordinator/references/native/InsightEmulation.java": "56afd7b83955743dc24d7a46f22a763cf0929a926820a9f5071e7deb2e8ab641",
+        "skills/ghidra-coordinator/references/native/InsightExtensions.java": "9c6792b313cdfbb957d9410f4a671a870f9eae0d064486796e2cf79b23f267af",
+        "skills/ghidra-coordinator/references/native/InsightFunctionDatabases.java": "f20d671c8f6bb7e212747b87a1a489f38b7b8cb891bffabb19b5cc034088a99f",
+        "skills/ghidra-coordinator/references/native/InsightGuiMain.java": "c2eb095f84356bef47c1526ba88ab6134499a5287d3dfc47ef538ebd04c5d371",
+        "skills/ghidra-coordinator/references/native/InsightHeadlessMain.java": "d401df336937d557792b2b07d8a624d5715c39899c35db7db26570254f8fb60e",
+        "skills/ghidra-coordinator/references/native/InsightInitialImport.java": "f1757da09912a7b82bee53c22e794e47af19a3678795f2acb0a7d62ecdfbd7b6",
+        "skills/ghidra-coordinator/references/native/InsightInitialJournal.java": "b84a67e9d791cdfe90cf9878ea7bdb70cf81284c10f2e31c9aa15cc13d9b2584",
+        "skills/ghidra-coordinator/references/native/InsightInitialPublication.java": "8e8692a254632b145a77bcd4d3591eefd9157a46a83b6da7bfd4fb10afd9a02b",
+        "skills/ghidra-coordinator/references/native/InsightKeytool.java": "dfc418cc7a8ea9063a79ddac2a4d13ec56573976f2ac32172d34a1cdc97265c7",
+        "skills/ghidra-coordinator/references/native/InsightNativeReceipt.java": "36a0e8980584dea96cbda5c715ecfef3ff291a5c25406328337298d74b042a75",
+        "skills/ghidra-coordinator/references/native/InsightPlugins.java": "f0bdd91527bf41851ae25110c5636539ec0565f71377322a2bb70bc8a02b78ee",
+        "skills/ghidra-coordinator/references/native/InsightProjectFiles.java": "007df5ec3c5ae8fcb2cd5580502050aa0b6f93fd016de34d08af2c41bfde0db6",
+        "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "12288d388905dfdbb31afd03c8da174a931a3ad1966157c88c1259604b4a5ff0",
+        "skills/ghidra-coordinator/references/native/InsightPythonWheels.java": "0e3f433f342fb78053047a4d9035a01f06d9d228a75648eec652b52fe997f44c",
+        "skills/ghidra-coordinator/references/native/InsightResearchQueries.java": "1de57a623fb258ceae4dfc6635a03b0dcf95a7f3fd5d25dc4873f8d191a28cca",
+        "skills/ghidra-coordinator/references/native/InsightSdkFiles.java": "518c8c393f36e26c8a7920e4af706ba05023c74e8fa91e6cfd5da1f4edc583e9",
+        "skills/ghidra-coordinator/references/native/InsightSdkScript.java": "0182b69505f18f10ec423d12c44e9f593ca7bd6b1046a62463c138906bf45ca1",
+        "skills/ghidra-coordinator/references/native/InsightSdkTools.java": "a86238c62c8b6ecc8d54e5d44e3f79ea7178cbbb00cf063d760e5438d2b965a6",
+        "skills/ghidra-coordinator/references/native/InsightSdkTypes.java": "b0290a71ac8ef947bf6fcee7145ef5cb5ce64d0f0914516440f3698f37bd17e2",
+        "skills/ghidra-coordinator/references/native/InsightServerAdministration.java": "c2a546c2fc488fe67b6d286e26f7583eabdf60e8fd2704cb27ab5c34c28f5c78",
+        "skills/ghidra-coordinator/references/native/InsightServerInit.java": "bd6aa9e73d82cc94a8ea21c288045468d2c9516914bc7a4a49a5cd49f8542d31",
+        "skills/ghidra-coordinator/references/native/InsightServerMain.java": "cbf22bcd64b23a79b9f7588bae7a838ca34fcaadb9721600830c3f6949dad22e",
+        "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "962b5c6b5cda1b1f87f880ebd91276ea7a36ef26725c8464d74d6891b1f359e6",
+        "skills/ghidra-coordinator/references/native/InsightSnapshotFields.java": "f12bf8d88f3ba1998336fa41f91b37db07c0d36d32fbd96c0b85f6f4fb38594a",
+        "skills/ghidra-coordinator/references/native/InsightSnapshotInspect.java": "d161fc8210289b1add4fb054721e7f275466c73db33dfab8601299bfa231e210",
+        "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "7860b40fcae7aafe9f1f3f3092a995fd307b3fd7d3b0dbf8b6bf0ec59ce6be00",
+        "skills/ghidra-coordinator/references/native/InsightStartDebugger.java": "3cf55ab86303dab43ef8cf0a5f18bb60331d729e93eb498d59490ca3fe18aa96",
+        "skills/ghidra-coordinator/references/native/InsightStopDebugger.java": "c8e9df60bc41bf6f86d4918dd3ff28f6818c71b37bbcb1d4d25382b55ecfbf95",
+        "skills/ghidra-coordinator/references/native/InsightTraceInspect.java": "476dfa7b6db5dbbee02eca496d3da86a35796a6cb11e3e6bdeb91482570030b6",
+        "skills/ghidra-coordinator/references/native/InsightTraceState.java": "c037b08cd023019c37e031d0d743ca5d74b62d342728a4412718522c734310ce",
+        "skills/ghidra-coordinator/references/native/InsightTraceTools.java": "ec3ca5176898e59ccfa2e2e0c6ca4fa6708dac5d61bd2643f90879ea7370c434",
+        "skills/ghidra-coordinator/references/native/InsightVersionTracking.java": "dc9e96654e589b4deb9303a9d57ae820c95eded251fd29243add41362a61b9aa",
+        "skills/ghidra-coordinator/references/native-workflows.md": "daba1474e6515d5b0d12640324cfb5ec61c011d693279b6ac965981c17c006d5",
+        "skills/ghidra-coordinator/references/queries.json": "78a78a70b6f77691a6717b747c0d9cf41078c957c490bfbddf3e5a03352123cf",
+        "skills/ghidra-coordinator/references/query-semantics.md": "4d1388580d06d993e5967d14d80e47531d6b002760973fcd5b7dd16534b2deb4",
+        "skills/ghidra-coordinator/references/recovery.md": "9cb7e5043894d0e08751b8067df9d4fb67c063de579009c1ea26d9015b15a210",
+        "skills/ghidra-coordinator/references/research.md": "47737c616625222fc2bae591ee35fb4ac41b568f4c2f94ae6e42d0c1c8314e2f",
+        "skills/ghidra-coordinator/references/setup.md": "d204d48f6c1a1ce89fbd964fa213bb2ea7f352cc0b51eb19da22f034af359292",
+        "skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+        "skills/ghidra-coordinator/runtime/GhidraMCP-LICENSE": "dc7fb54997c081b5bc3a9de54d90fe7290b8db7a0bb0df3c18c75832aed5a3f1",
+        "skills/ghidra-coordinator/runtime/GhidraMCP-NOTICE": "17c5d159536b0ec6aeb9764237b5f6bec10c2eef5150edc53c537f8c027fe014",
+        "skills/ghidra-coordinator/runtime/provenance.json": "5eb77d25dba4e9a84b018ffdd02785597692a3922a98b145656b64227a74fe28",
+        "tests/acceptance/Bindings/BusinessSteps.cs": "19170a434847b52d7ae59e020292dd2407c56ab40eb2bf801451fb7a133a964b",
+        "tests/acceptance/Bindings/IntegrationSteps.cs": "aa52433953aa32a7c6a8f7f0baa9717b9b63bf7291edd08f9ad90700c2bd90c6",
+        "tests/acceptance/Features/Business/01-OneExecutable.feature": "32b75054751b322efd8ff2dfac5168de084ac514d1d037f1f4dd398768350aad",
+        "tests/acceptance/Features/Business/02-SeveralExecutables.feature": "96a5c6e2224b911654426f792e5ea934e1f377b4ee79eb696d68295de7b237b3",
+        "tests/acceptance/Features/Business/03-Collaboration.feature": "66a0f837600dae6b7ff42d9ba60284887239f9b34e1012b35116c2b8309efb76",
+        "tests/acceptance/Features/Business/04-InterruptedInvestigations.feature": "2f044711d6a6b752745eb04b27432075df0f7c1e4956064cff496bbd844c9263",
+        "tests/acceptance/Features/Business/05-SharedTaskThroughput.feature": "e0ef181c19ca26210dec4402d7d15585f5da4fc9ac63fb53c6c8a934640c342e",
+        "tests/acceptance/Features/IntegrationSmoke.feature": "cc55a62c6f4761b4b0bf48ac4c24c40826d6aeda8815df927d910e9c0af78e0d",
+        "tests/acceptance/Features/NativeIntegration.feature": "56cf4e4cde9d3d7202c97eb7fb48765777440a90e773e34ff48f1ad3afe832b1",
+        "tests/acceptance/Insight.Acceptance.csproj": "35f61f28c73557bcd1a15634766937d76c589c4495eb8ec6186cb2f0c77c0931",
+        "tests/acceptance/fixtures/benchmark-protocol.json": "73cfa50f13f1e1e9a6b5a158b051f81b9c52f06662abe29e58c5bcd1d0802acc",
+        "tests/acceptance/fixtures/business-actions.json": "4cce6d27c5f8b8dc510e769fe49eb4e4a8c7a684db58162cbf3369fb6d6c3f12",
+        "tests/acceptance/fixtures/research.c": "cd3b078b0e40b74c140ed575f60e36e1b64b9b28228a8a75344fa0837e38b68d",
+        "tests/acceptance/packages.lock.json": "a08cf3e992537688d05232f33fdacfe43abcb235f23a1c62254fcab8a3d9fdc7",
+        "tests/automation/Host/Insight.Automation.Host.csproj": "6bee4ad3f71501ab03dff699345ed9a212282e7f4a1c6736a099e91be4919a9d",
+        "tests/automation/Host/Program.cs": "6d414002d1acd8e20ad656305275858dd72a796b5e70e792b260e1c76edab65e",
+        "tests/automation/Host/packages.lock.json": "e762ac56d1f0fcccc84fce7449c370ba975b6541823eed20113c40ec38d31423",
+        "automation.json": "d67571d086acb7f6ab1ca59c844524d13ab9210a34428c8feb621c9cb791de43",
+        "global.json": "20c93ca7812d0a9825eef71217156f95ab2f4fe5aadfeb22ebc1c24b630018d3",
+        "package.json": "5da6f0f6f3093de704072094d661b839a6a33bc6bf0e887c2ca0e716024be1ec",
+        "package-lock.json": "afe4ee374a6ffa033077cdc8b0a01065b371b621463d1254cacd0edb9d509cef",
+        ".gitmodules": "39c3dc845db235c46117995bc5ba013e002e5357f62c7a3e7383530f37666ad1",
+        "scripts/live-research/observer.mjs": "85ac5a34f694a30ac12326d98c8f58e761dc126b57023333cc0167b02a8cb3a2",
+        "scripts/live-research/AGENT-TASK.md": "5b76bdad12625c5d77016263d6d7ed8594a03b52094115002b2b417a82262dff",
+        "scripts/live-research/protocol.json": "3d2d594588751802a7328c2793cecfef70c02418cf42b8c4ba3f61f7c1da8580",
+        "scripts/live-research/control.mjs": "3a6aa58a5637b04e7c6c0bcaee4d54c355d81ccb0b1c1320ddbb369bf8e595e4"
+      },
+      "protocolSha256": "3d2d594588751802a7328c2793cecfef70c02418cf42b8c4ba3f61f7c1da8580",
+      "oracleSha256": "997456758512814f2a6e1e7c29533ccd0ea37828205c9de855d876a4a9e42900",
+      "frozenAtUtc": "2026-10-16T11:54:25.577906+00:00",
+      "inferenceCachePolicy": "Fresh agents have no conversation/answer history; provider-side prompt/inference caches are not flushed or observable. Parent model/settings inherited without overrides; concrete deployment identifier and token usage are not exposed by collaboration tools.",
+      "promptTemplateSha256": "5e468c738218fd1cd4bb51c663a71f153f2b23e2fb03806fd556a92242289945",
+      "dispatchRule": "Each collaboration spawn uses this exact template with only trial/actor/output selectors and assigned part IDs substituted; fork_turns=none and no model/reasoning overrides."
+    },
+    "postRunVerification": {
+      "allFrozenSourceHashesUnchanged": true,
+      "sourceFiles": 419,
+      "protocolUnchanged": true,
+      "oracleUnchanged": true,
+      "promptTemplateUnchanged": true,
+      "inputUnchanged": true,
+      "artifactUnchanged": true
+    }
+  },
+  "agentConfiguration": {
+    "forkTurns": "none",
+    "modelOverride": null,
+    "reasoningOverride": null,
+    "configuration": "Same inherited parent configuration for all fresh agents; serial gets all parts in order, parallel each one part.",
+    "exactDeploymentModelId": null,
+    "tokenUsage": null,
+    "limitations": [
+      "Deployment model identity and token usage are not exposed by collaboration tools.",
+      "Provider caches, OS page cache and tool caches were not flushed.",
+      "Isolation from source, answers and other actors is instruction based, not an OS security boundary.",
+      "Single-agent baseline was explicitly sequential across parts; this does not compare with its best possible batching.",
+      "Speedup combines concurrent AI inference and independent Ghidra workers; it does not isolate a causal speedup from Ghidra alone."
+    ]
+  },
+  "protocol": {
+    "schema": 1,
+    "inputSha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "inputUrl": "https://www.7-zip.org/a/7zr.exe",
+    "question": "Explain three user-visible failure/security paths in this stripped 7zr.exe: invalid switches, password acquisition, and extraction error reporting. Publish an evidence-backed navigation guide in the shared analysis database.",
+    "parts": [
+      {
+        "id": "switches",
+        "kind": "plate",
+        "clue": "Unknown switch:",
+        "question": "Locate the switch-argument parser. Explain how it recognizes switch arguments and rejects unknown, duplicate or malformed switch postfixes. Identify the relevant function and at least three concrete conditions/behaviors in its decompilation. Distinguish observed code from an inferred source-level name."
+      },
+      {
+        "id": "password",
+        "kind": "pre",
+        "clue": "Enter password (will not be echoed):",
+        "question": "Locate interactive password acquisition. Follow its relevant helper/callers as needed to explain the prompt, suppression/restoration of console echo and failure/termination behavior actually visible in this binary. Provide at least three concrete code-backed behaviors; do not infer secure erasure or encryption strength from a prompt."
+      },
+      {
+        "id": "extraction",
+        "kind": "post",
+        "clue": "CRC Failed",
+        "question": "Locate extraction-result diagnostic selection. Explain how the code distinguishes CRC failure, data error and unsupported method, including how encrypted-file/password suspicion changes diagnostics. Recover actual numeric case/flag relationships if visible. Provide at least three concrete code-backed behaviors and preserve uncertainty about recovered parameter types."
+      }
+    ],
+    "delivery": "Each part produces one structured finding with a main function address, at least one exact clue-string/xref chain, at least three substantive claims with function addresses and literal decompiled-code quotations, limitations, and a private comment saved through the public CLI. The lead reads all findings through the public CLI, copies them into its context and merges once. A fresh independent session verifies all comments, clue references and code quotations without counting the new comments as code evidence.",
+    "agents": "Fresh collaboration agents with fork_turns=none, inherited identical parent model/settings and no overrides. The serial agent receives all three part prompts; each parallel agent receives one. No previous trial answers, repository source, external source or other actors' files are available by instruction. Actual inference/tool/orchestration wall time is included.",
+    "preparedPairs": 6,
+    "modeOrder": [
+      1,
+      3,
+      3,
+      1,
+      1,
+      3,
+      3,
+      1,
+      1,
+      3,
+      3,
+      1
+    ],
+    "comparison": "All six prepared pairs must pass correctness and T3<T1 to claim repeatable speedup; exact one-sided paired sign probability 1/64. Report all trials and variability, with no automatic exclusion or replacement. Failure remains a failure; no workload padding or forced speedup.",
+    "preparedClock": "Fresh independent profiles are imported/analyzed and all one/three contexts ready before the monotonic task clock starts. No measured-task strings, functions, decompilation, answers or findings are warmed/precomputed for agents. The clock starts before the first agent dispatch and ends after independent publication/content verification.",
+    "coldClock": "A separate one/three pair starts before first open/import in a new profile, including native startup and all later agent work/collection/merge/verification. OS/tool caches are not flushed. Profile configuration and already-installed software are outside this clock. No cold speedup gate.",
+    "calibration": "An unmeasured pilot establishes that the questions are answerable and the correctness oracle is valid. Pilot answers are withheld from all fresh timed agents. Freeze protocol, prompts, harness and hidden verification oracle before acceptance. Retain unsuccessful attempts."
+  },
+  "preparedPairs": [
+    {
+      "pair": 1,
+      "oneAgentSeconds": 332.423690791,
+      "threeAgentsSeconds": 225.360776541,
+      "speedup": 1.475073417358952,
+      "threeFaster": true
+    },
+    {
+      "pair": 2,
+      "oneAgentSeconds": 331.072861791,
+      "threeAgentsSeconds": 205.746344542,
+      "speedup": 1.609131197582062,
+      "threeFaster": true
+    },
+    {
+      "pair": 3,
+      "oneAgentSeconds": 315.736321167,
+      "threeAgentsSeconds": 325.331939916,
+      "speedup": 0.9705051439109312,
+      "threeFaster": false
+    }
+  ],
+  "coldComparison": {
+    "oneAgentSeconds": 415.239794792,
+    "threeAgentsSeconds": 328.105779208,
+    "speedup": 1.2655668418713286,
+    "correctnessPassed": true,
+    "performanceGate": null,
+    "scope": "New profile/native processes and first import; already-installed software/configuration and unflushed OS/provider caches."
+  },
+  "trials": [
+    {
+      "name": "pair-1-1",
+      "workers": 1,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 69.326794667,
+      "started": {
+        "monotonicNs": "3927256101787000",
+        "utc": "2026-10-16T11:55:56.482Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3927256102477625",
+        "utc": "2026-10-16T11:55:56.483Z"
+      },
+      "ready": {
+        "monotonicNs": "3927236582982875",
+        "utc": "2026-10-16T11:55:36.963Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 40511,
+          "target": "t_7de06a8b2126e8971bc861dec7ccefee",
+          "ownedRootSha256": "3c84a3931ade295caae069a2c4efbf6e13af0e9a48923626110de020d866d8c0"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/extraction-submitted.json": "daa36a9404cf3c447ff39ed1ad8ead99226bb7d340b665c3033c3b52ed7c8b3b",
+        "actors/0/password-submitted.json": "03df2c0ab7b6bcb0aa4c8ce38ba5fbbc703a60c7d1c8ad32e2ce285ad6bbb592",
+        "actors/0/switches-submitted.json": "88473a468eae86eb0b9114b7a65ed1fbac1a5024d8d03bc2c5baee42947299d4"
+      },
+      "elapsedSeconds": 332.423690791,
+      "finished": {
+        "monotonicNs": "3927588525477791",
+        "utc": "2026-10-16T12:01:28.904Z"
+      },
+      "phases": {
+        "setupSeconds": 69.326794667,
+        "researchSeconds": 274.1006805,
+        "collectionSeconds": 1.553534791,
+        "mergeSeconds": 16.567014959,
+        "independentVerificationSeconds": 28.559987666,
+        "semanticReviewSeconds": 11.64178225
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed all three new conclusions and 20 code-backed claims against the frozen release oracle. Switch recognition, longest configured match, duplicate and postfix policy are covered. Password prompt, best-effort echo bit clearing, conditional restoration, input termination and qualified failure mappings are covered. Extraction 1/2/3 mapping, encrypted zero/nonzero diagnostic selection and suspicion qualification are covered. Independent CLI verification already checked literal code quotations outside comments and the complete clue chains; inferred names, field layouts and signatures remain qualified."
+      },
+      "codeHashes": {
+        "0x40125a": "0e229ca05a7608f0a0f44319cd5a909ae5094c2795b780877f61bf381162524c",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x43f4f5": "fe3ffc89207a5bcfb791235dda501ff495ef8aa3a0e2157099ae1822d320bbe4",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f7f": "998c310ef6d87ef0c299aba36fe0cec029ee7eb4148385332761461722413b5f",
+        "0x401f02": "5ad475324f511b2bd49d24e881f1646b62433ffc372efa330a252f92aa0d7e30",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 1,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 21,
+            "parts": [
+              "switches",
+              "password",
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3927277307505833",
+              "utc": "2026-10-16T11:56:17.688Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3927511321463000",
+              "utc": "2026-10-16T12:00:11.699Z"
+            }
+          }
+        ],
+        "overlapSeconds": 234.013957167,
+        "cpuBefore": {
+          "40511": 7.01
+        },
+        "cpuAfter": {
+          "40511": 16.04
+        },
+        "samples": 291,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3927278297273416",
+            "utc": "2026-10-16T11:56:18.678Z",
+            "cpu": {
+              "40511": 7.02
+            }
+          },
+          "last": {
+            "monotonicNs": "3927510835978916",
+            "utc": "2026-10-16T12:00:11.214Z",
+            "cpu": {
+              "40511": 15.57
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000690625,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-1-3",
+      "workers": 3,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 83.979902375,
+      "started": {
+        "monotonicNs": "3927713239129625",
+        "utc": "2026-10-16T12:03:33.618Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3927713239622166",
+        "utc": "2026-10-16T12:03:33.619Z"
+      },
+      "ready": {
+        "monotonicNs": "3927693483443833",
+        "utc": "2026-10-16T12:03:13.862Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 46202,
+          "target": "t_b9fca195cf6c3ee5735d644ba11ad767",
+          "ownedRootSha256": "dd86e68bd911a94af52f8e5f2962195f504735f3bf14badcf228720539d11fcd"
+        },
+        {
+          "pid": 46152,
+          "target": "t_b9fca195cf6c3ee5735d644ba11ad767",
+          "ownedRootSha256": "2df4fa0a3a9db3c78db1bb04c1de175f37eef0275100177e05864fec7ea69a32"
+        },
+        {
+          "pid": 46282,
+          "target": "t_b9fca195cf6c3ee5735d644ba11ad767",
+          "ownedRootSha256": "cd67c0610a4f2870bf32c85378d3f0b8af2843c6ff8a1c56d08dcf87d642a04e"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/switches-submitted.json": "4768a6cc4aa019937207e02dcaf04e01c3e48f14a403e70754274f08ac866793",
+        "actors/1/password-submitted.json": "7822c145327fc10adc6af4f7530ee98a176d193765d85174051baa2d90cbe0c2",
+        "actors/2/extraction-submitted.json": "176bd7e2f09066ed0286ffc600aaf93c35025090c82b8864346c451d41c31a56"
+      },
+      "elapsedSeconds": 225.360776541,
+      "finished": {
+        "monotonicNs": "3927938599906166",
+        "utc": "2026-10-16T12:07:18.980Z"
+      },
+      "phases": {
+        "setupSeconds": 83.979902375,
+        "researchSeconds": 148.329670167,
+        "collectionSeconds": 6.660566167,
+        "mergeSeconds": 17.914078375,
+        "independentVerificationSeconds": 38.946872083,
+        "semanticReviewSeconds": 13.509097208
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 10
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 8
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed all three independently produced conclusions and 24 literal-code-backed claims against the frozen release oracle. The findings cover leading-hyphen recognition, longest/unknown matches, duplicate rejection and all postfix policies; conditional password prompting, best-effort echo clearing, conditional restoration and qualified input/failure behavior; and extraction results 1/2/3, encrypted zero/nonzero message selection and non-proof password suspicion. Public CLI verification checked all clue chains and actual code outside annotations. Recovered signatures/field meanings remain explicitly uncertain; the three-agent result satisfies the same business coverage as the serial result."
+      },
+      "codeHashes": {
+        "0x40125a": "351f9b173b0c58bd7570287abe4d6c73ef88f9e6c8ea7703c252a8ea2ec2c18a",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x402369": "8a7cfb248c680135d7124b730f2f171993fab8dbea5ea7f1eef8521ca292d58c",
+        "0x43f4f5": "55097b878c25218cf581e44ec507c3393b12f19b30dcbfa3779eb78562393746",
+        "0x401fdf": "d203c076f5714b838396ace306ea03372139213d68014ad98376386af99a64c1",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f7f": "998c310ef6d87ef0c299aba36fe0cec029ee7eb4148385332761461722413b5f",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x401f02": "5ad475324f511b2bd49d24e881f1646b62433ffc372efa330a252f92aa0d7e30",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 3,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 6,
+            "parts": [
+              "switches"
+            ],
+            "firstRead": {
+              "monotonicNs": "3927734240660666",
+              "utc": "2026-10-16T12:03:54.620Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3927840088544833",
+              "utc": "2026-10-16T12:05:40.468Z"
+            }
+          },
+          {
+            "actor": 1,
+            "reads": 11,
+            "parts": [
+              "password"
+            ],
+            "firstRead": {
+              "monotonicNs": "3927741697695666",
+              "utc": "2026-10-16T12:04:02.077Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3927840649711750",
+              "utc": "2026-10-16T12:05:41.030Z"
+            }
+          },
+          {
+            "actor": 2,
+            "reads": 10,
+            "parts": [
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3927757527543958",
+              "utc": "2026-10-16T12:04:17.907Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3927847865527333",
+              "utc": "2026-10-16T12:05:48.245Z"
+            }
+          }
+        ],
+        "overlapSeconds": 82.561000875,
+        "cpuBefore": {
+          "46152": 5.59,
+          "46202": 5.19,
+          "46282": 5.67
+        },
+        "cpuAfter": {
+          "46152": 10.33,
+          "46202": 9,
+          "46282": 8.86
+        },
+        "samples": 171,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3927757761348458",
+            "utc": "2026-10-16T12:04:18.141Z",
+            "cpu": {
+              "46152": 8.78,
+              "46202": 7.51,
+              "46282": 5.7
+            }
+          },
+          "last": {
+            "monotonicNs": "3927839763107875",
+            "utc": "2026-10-16T12:05:40.143Z",
+            "cpu": {
+              "46152": 9.11,
+              "46202": 8.55,
+              "46282": 8.4
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000492541,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-2-3",
+      "workers": 3,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 113.487296084,
+      "started": {
+        "monotonicNs": "3928101373040208",
+        "utc": "2026-10-16T12:10:01.755Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3928101373619041",
+        "utc": "2026-10-16T12:10:01.755Z"
+      },
+      "ready": {
+        "monotonicNs": "3928088147614375",
+        "utc": "2026-10-16T12:09:48.529Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 51853,
+          "target": "t_e6f0428fddecefb5a73569ef10d52118",
+          "ownedRootSha256": "ed7800bfff468e0c979bd8883c676fbd78c9e1fddbc3ccc8a2c52715ad1ebc40"
+        },
+        {
+          "pid": 51793,
+          "target": "t_e6f0428fddecefb5a73569ef10d52118",
+          "ownedRootSha256": "8e47c41af302a24df22b0ad45ec7b48c5c0913533b5d9595812d30ed95800d4c"
+        },
+        {
+          "pid": 51815,
+          "target": "t_e6f0428fddecefb5a73569ef10d52118",
+          "ownedRootSha256": "b4ccc088b81f75d96f51dd3f8272153b6efd35f74b7036efdf463c7af971d300"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/switches-submitted.json": "9cad5f192d69950053571a45bf18ef769ce8b36bc0c774311599acc5f14e8ac1",
+        "actors/1/password-submitted.json": "76f09865c8557f8c8f5b0e066ab730d04f333324c3b303c280b3f84f7bfef031",
+        "actors/2/extraction-submitted.json": "f760629918abcbb3314528642c7fb9d98a17f741b78b4b221a8736db28c8d226"
+      },
+      "elapsedSeconds": 205.746344542,
+      "finished": {
+        "monotonicNs": "3928307119384750",
+        "utc": "2026-10-16T12:13:27.502Z"
+      },
+      "phases": {
+        "setupSeconds": 113.487296084,
+        "researchSeconds": 138.909156625,
+        "collectionSeconds": 5.852342125,
+        "mergeSeconds": 15.455676875,
+        "independentVerificationSeconds": 23.838644375,
+        "semanticReviewSeconds": 21.689945709
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 8
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed the three newly authored conclusions and 21 validated code quotations/claims. All frozen business criteria are covered: switch entry, matching/no-match, duplicate prohibition and malformed postfix handling; conditional password prompt, best-effort console-echo control, conditional restoration and read/return failure behavior; extraction codes 1/2/3, zero/nonzero encrypted diagnostic choice and qualified password suspicion. The observed code and source-release oracle agree, while decompiler prototypes, layouts, flag provenance and abnormal-exit guarantees remain explicitly uncertain."
+      },
+      "codeHashes": {
+        "0x40125a": "8a9a05301a84eaf438148226be0df70335ca792e61813b079935fc87d08c5628",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x43f4f5": "4efb52f97e8a6cf8b912a66dc1611f8bb71cabf29b904e904c55a21d8543ccf9",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f7f": "998c310ef6d87ef0c299aba36fe0cec029ee7eb4148385332761461722413b5f",
+        "0x401f02": "5ad475324f511b2bd49d24e881f1646b62433ffc372efa330a252f92aa0d7e30",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 3,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 5,
+            "parts": [
+              "switches"
+            ],
+            "firstRead": {
+              "monotonicNs": "3928121329526500",
+              "utc": "2026-10-16T12:10:21.711Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3928191261451708",
+              "utc": "2026-10-16T12:11:31.644Z"
+            }
+          },
+          {
+            "actor": 1,
+            "reads": 8,
+            "parts": [
+              "password"
+            ],
+            "firstRead": {
+              "monotonicNs": "3928129381477583",
+              "utc": "2026-10-16T12:10:29.763Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3928229897005541",
+              "utc": "2026-10-16T12:12:10.279Z"
+            }
+          },
+          {
+            "actor": 2,
+            "reads": 9,
+            "parts": [
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3928140116845041",
+              "utc": "2026-10-16T12:10:40.499Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3928210876637958",
+              "utc": "2026-10-16T12:11:51.259Z"
+            }
+          }
+        ],
+        "overlapSeconds": 51.144606667,
+        "cpuBefore": {
+          "51793": 5.59,
+          "51815": 6.01,
+          "51853": 7.44
+        },
+        "cpuAfter": {
+          "51793": 9.74,
+          "51815": 10.41,
+          "51853": 12.04
+        },
+        "samples": 158,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3928141050522250",
+            "utc": "2026-10-16T12:10:41.432Z",
+            "cpu": {
+              "51793": 8.15,
+              "51815": 9.14,
+              "51853": 7.82
+            }
+          },
+          "last": {
+            "monotonicNs": "3928191204531625",
+            "utc": "2026-10-16T12:11:31.587Z",
+            "cpu": {
+              "51793": 8.88,
+              "51815": 9.87,
+              "51853": 11.56
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000578833,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-2-1",
+      "workers": 1,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 59.2814085,
+      "started": {
+        "monotonicNs": "3928413938413375",
+        "utc": "2026-10-16T12:15:14.322Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3928413938908166",
+        "utc": "2026-10-16T12:15:14.322Z"
+      },
+      "ready": {
+        "monotonicNs": "3928393286910250",
+        "utc": "2026-10-16T12:14:53.670Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 56804,
+          "target": "t_41dfc173ed20994489c49af9b2e05492",
+          "ownedRootSha256": "e98b2373162c46d16b7b83c4f8ef0a31826a28f7271565ca56fe24fc440690b5"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/extraction-submitted.json": "80cdfe5e0337cdf41141cef82c3e14131685acc74d4870e59baea178b77f30b3",
+        "actors/0/password-submitted.json": "383486323bbcf968097e20067378d6825a19a10de72dc1584071707204e3b64e",
+        "actors/0/switches-submitted.json": "5f2ec05693470424d238ad96e3adefe7f7e75de28e51ce7ee860b7f5855a7a06"
+      },
+      "elapsedSeconds": 331.072861791,
+      "finished": {
+        "monotonicNs": "3928745011275166",
+        "utc": "2026-10-16T12:20:45.397Z"
+      },
+      "phases": {
+        "setupSeconds": 59.2814085,
+        "researchSeconds": 267.626107209,
+        "collectionSeconds": 1.265381625,
+        "mergeSeconds": 16.215461666,
+        "independentVerificationSeconds": 22.867988625,
+        "semanticReviewSeconds": 23.097427875
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 6
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 6
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed all three newly written findings and 18 literal-code-backed claims. They meet the same frozen coverage: nonempty dash, longest matching prefix and unknown cases, duplicate rejection and malformed postfix checks; conditional prompting, best-effort echo suppression/restoration and line/failure behavior; extraction codes 1/2/3 plus encrypted flag selection and qualified password suspicion. Independent CLI code/anchor verification and the release-source oracle agree. Source names, types, upstream flags and counter interpretations retain explicit uncertainty."
+      },
+      "codeHashes": {
+        "0x40125a": "0500060b03d3ac14efdced2b8bc2e8b22a9fc5d4b2032288966310d8a86cb2a7",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x43f4f5": "b568d515fa86d532c7996cad2d4499f994b43ad0dcf963d627e1a1b307814cfc",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f02": "5ad475324f511b2bd49d24e881f1646b62433ffc372efa330a252f92aa0d7e30",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 1,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 21,
+            "parts": [
+              "switches",
+              "password",
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3928437084587833",
+              "utc": "2026-10-16T12:15:37.468Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3928667071395166",
+              "utc": "2026-10-16T12:19:27.457Z"
+            }
+          }
+        ],
+        "overlapSeconds": 229.986807333,
+        "cpuBefore": {
+          "56804": 5.62
+        },
+        "cpuAfter": {
+          "56804": 13.63
+        },
+        "samples": 284,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3928437126751916",
+            "utc": "2026-10-16T12:15:37.510Z",
+            "cpu": {
+              "56804": 5.64
+            }
+          },
+          "last": {
+            "monotonicNs": "3928666739122083",
+            "utc": "2026-10-16T12:19:27.124Z",
+            "cpu": {
+              "56804": 13.26
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000494791,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-3-1",
+      "workers": 1,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 73.780774917,
+      "started": {
+        "monotonicNs": "3928862362660083",
+        "utc": "2026-10-16T12:22:42.749Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3928862363227458",
+        "utc": "2026-10-16T12:22:42.750Z"
+      },
+      "ready": {
+        "monotonicNs": "3928855849836000",
+        "utc": "2026-10-16T12:22:36.236Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 60943,
+          "target": "t_46e123cdd19a28e4c390256c9403e4bf",
+          "ownedRootSha256": "0646140b015b7b91dbc8a2d1f0ccb8af20eeb4d7ebae148c2001414096f224f9"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/extraction-submitted.json": "b3a64592498a7dc5840d4ef6538a6bc7f790cdceee02c4edd7447d3ee4d1fd30",
+        "actors/0/password-submitted.json": "de0753ec791c48561bcd5b84296418802f001fd7586abe0051cb135b68b43874",
+        "actors/0/switches-submitted.json": "cf1c00fdfe5bf913b5f4065c3562f50e96908909e88ad871680459c990392883"
+      },
+      "elapsedSeconds": 315.736321167,
+      "finished": {
+        "monotonicNs": "3929178098981250",
+        "utc": "2026-10-16T12:27:58.468Z"
+      },
+      "phases": {
+        "setupSeconds": 73.780774917,
+        "researchSeconds": 260.752884708,
+        "collectionSeconds": 1.147632167,
+        "mergeSeconds": 15.209088792,
+        "independentVerificationSeconds": 20.130573333,
+        "semanticReviewSeconds": 18.495574792
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 5
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 1,
+          "factsVerified": 5
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed all three new conclusions and 17 verified code-backed claims against the frozen criteria and release-source oracle. Switch dash entry, longest/unknown match, duplicate rejection and postfix length/content are covered. Password prompting, best-effort 0x4 echo-mask clearing, conditional restoration, newline/EOF/NUL and caller failure codes are covered. Extraction codes 1/2/3 and zero/nonzero encrypted-message selection are explicit, with password suspicion correctly distinguished from proof. Inferred names/types and flag provenance remain qualified; the same shared-result coverage is satisfied."
+      },
+      "codeHashes": {
+        "0x40125a": "3bc7760e808b6a15503affea28862589f802ef78f028ad1687b2a8624f0049f3",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x43f4f5": "372b7ab3d5d2091b76dbcf41aae74643955372cf3fba186919dd424bdd8f7316",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 1,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 20,
+            "parts": [
+              "switches",
+              "password",
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3928882841203083",
+              "utc": "2026-10-16T12:23:03.228Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3929109416553541",
+              "utc": "2026-10-16T12:26:49.786Z"
+            }
+          }
+        ],
+        "overlapSeconds": 226.575350458,
+        "cpuBefore": {
+          "60943": 6.22
+        },
+        "cpuAfter": {
+          "60943": 15.28
+        },
+        "samples": 274,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3928883591270916",
+            "utc": "2026-10-16T12:23:03.978Z",
+            "cpu": {
+              "60943": 6.23
+            }
+          },
+          "last": {
+            "monotonicNs": "3929108871727541",
+            "utc": "2026-10-16T12:26:49.241Z",
+            "cpu": {
+              "60943": 14.84
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000567375,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-3-3",
+      "workers": 3,
+      "cold": false,
+      "state": "passed",
+      "setupSeconds": 83.455099334,
+      "started": {
+        "monotonicNs": "3929306985995625",
+        "utc": "2026-10-16T12:30:07.355Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3929306986525041",
+        "utc": "2026-10-16T12:30:07.356Z"
+      },
+      "ready": {
+        "monotonicNs": "3929286618404375",
+        "utc": "2026-10-16T12:29:46.988Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 65527,
+          "target": "t_f3a721f3689ad669cb58385468fbdd58",
+          "ownedRootSha256": "0f8865e59d1b3522c1655145ae25b6a15765ee4506efdb3030ed0ffa5754745f"
+        },
+        {
+          "pid": 65824,
+          "target": "t_f3a721f3689ad669cb58385468fbdd58",
+          "ownedRootSha256": "c75239ebadadf0945fbd5864a118bb3d9ddc73ed319fde23d7d8b436bb436d91"
+        },
+        {
+          "pid": 65585,
+          "target": "t_f3a721f3689ad669cb58385468fbdd58",
+          "ownedRootSha256": "984c1c04768deeac169e7795d3237dc978694feeea8520c9b7ba371939c15913"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/switches-submitted.json": "42203948a3788ac8e8823a6cd07956dc03ca0ac9e7d7a90fa56bbf08b95e1a87",
+        "actors/1/password-submitted.json": "b71d8402ce1142fc29dd25c27185f0073280c1f08a62c4e845a1216ce98eac46",
+        "actors/2/extraction-submitted.json": "b4eba760dd6ff677c454f125a6aa6a03a7142487c8ac5f6b29fd0ca7a4bdc53e"
+      },
+      "elapsedSeconds": 325.331939916,
+      "finished": {
+        "monotonicNs": "3929632317935541",
+        "utc": "2026-10-16T12:35:32.687Z"
+      },
+      "phases": {
+        "setupSeconds": 83.455099334,
+        "researchSeconds": 241.700858875,
+        "collectionSeconds": 16.160220292,
+        "mergeSeconds": 23.97882275,
+        "independentVerificationSeconds": 26.58031875,
+        "semanticReviewSeconds": 16.911189833
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 10
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 1,
+          "factsVerified": 5
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Reviewed 22 newly authored and independently code-verified claims across all three parts. Every frozen coverage item is present: switch dash entry, longest and absent matches, duplicates and malformed postfixes; conditional prompt/flush, best-effort echo-mask clearing, conditional restoration and input/status paths; extraction result codes 1/2/3 and encrypted zero/nonzero diagnostic selection, with wrong-password suspicion correctly qualified. The observed claims agree with the release oracle. Inferred names/types, minimum-length-dependent optional postfix behavior and unknown flag provenance remain qualified. No extra delay or failed attempt was excluded."
+      },
+      "codeHashes": {
+        "0x40125a": "c9b56d69b9ff02c75abbf3c6e04d56da6170c9503723691a0125ef17af30d43e",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x402369": "8a7cfb248c680135d7124b730f2f171993fab8dbea5ea7f1eef8521ca292d58c",
+        "0x43f4f5": "dbc5f76b3e3e208183c260305d66dfcb9d659689edf439d5a7210c8c05843e0a",
+        "0x401fdf": "d203c076f5714b838396ace306ea03372139213d68014ad98376386af99a64c1",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f02": "5ad475324f511b2bd49d24e881f1646b62433ffc372efa330a252f92aa0d7e30",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 3,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 5,
+            "parts": [
+              "switches"
+            ],
+            "firstRead": {
+              "monotonicNs": "3929332154463125",
+              "utc": "2026-10-16T12:30:32.524Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3929418287119541",
+              "utc": "2026-10-16T12:31:58.656Z"
+            }
+          },
+          {
+            "actor": 1,
+            "reads": 12,
+            "parts": [
+              "password"
+            ],
+            "firstRead": {
+              "monotonicNs": "3929337748697875",
+              "utc": "2026-10-16T12:30:38.118Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3929537938865083",
+              "utc": "2026-10-16T12:33:58.308Z"
+            }
+          },
+          {
+            "actor": 2,
+            "reads": 7,
+            "parts": [
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3929343705504125",
+              "utc": "2026-10-16T12:30:44.075Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3929411453795250",
+              "utc": "2026-10-16T12:31:51.823Z"
+            }
+          }
+        ],
+        "overlapSeconds": 67.748291125,
+        "cpuBefore": {
+          "65527": 6.2,
+          "65585": 5.77,
+          "65824": 5.24
+        },
+        "cpuAfter": {
+          "65527": 9.58,
+          "65585": 9.04,
+          "65824": 9.64
+        },
+        "samples": 170,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3929344567221375",
+            "utc": "2026-10-16T12:30:44.936Z",
+            "cpu": {
+              "65527": 8.31,
+              "65585": 8.03,
+              "65824": 6.81
+            }
+          },
+          "last": {
+            "monotonicNs": "3929411405544041",
+            "utc": "2026-10-16T12:31:51.775Z",
+            "cpu": {
+              "65527": 8.83,
+              "65585": 9,
+              "65824": 9.59
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 0.000529416,
+      "nativePreparationInsideClockSeconds": 0
+    },
+    {
+      "name": "pair-4-3",
+      "workers": 3,
+      "cold": false,
+      "state": "failed",
+      "setupSeconds": 86.908138833,
+      "started": {
+        "monotonicNs": "3929808467518791",
+        "utc": "2026-10-16T12:38:28.837Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3929808468015250",
+        "utc": "2026-10-16T12:38:28.838Z"
+      },
+      "ready": {
+        "monotonicNs": "3929798520238708",
+        "utc": "2026-10-16T12:38:18.890Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 74857,
+          "target": "t_f499e24302a97ea34a65a823e6ee1157",
+          "ownedRootSha256": "fcffdc1179902f1d90976ae3bbcc78bce5f610a3b17c6eb8c158a0d8c965a5d3"
+        },
+        {
+          "pid": 74927,
+          "target": "t_f499e24302a97ea34a65a823e6ee1157",
+          "ownedRootSha256": "39d30c87651eae8ed7e251ad5a24d0c47c584b0813b23004ba0ab2ec6eeb5cd2"
+        },
+        {
+          "pid": 74981,
+          "target": "t_f499e24302a97ea34a65a823e6ee1157",
+          "ownedRootSha256": "8d92f6ca4b4e6a81e690a7f37354771ae6c702ce9dbf57c4dbf4e91abd0aec36"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/switches-submitted.json": "40d85d6c9ebcda1747a292936f6088cf295b0ab490fd56cd4c96e3ffc8362ddd",
+        "actors/1/password-submitted.json": "c188d57bff5c1c1fb1fc742bdd603855652c71e31613ab58ad80f51ce2369fef",
+        "actors/2/extraction-submitted.json": "764f164bc70c2c12997186b9bef5c332c97ea650e8b9917a8aeab3cd5771c644"
+      },
+      "elapsedSeconds": null,
+      "failure": {
+        "phase": "merge",
+        "reason": "native publisher IOException: No space left on device",
+        "observedAt": "2026-10-16T12:45:31.670Z",
+        "priorState": "researching"
+      },
+      "failureResolution": {
+        "historyVersions": [
+          1
+        ],
+        "continuation": "blocked",
+        "noPublicationRetry": true,
+        "localFindingsRetained": true,
+        "blockedLeadClose": true,
+        "nativeTerminationAfterSavedSnapshots": []
+      },
+      "resourcesReleased": true,
+      "publication": {
+        "state": "unknown",
+        "observedHistoryVersions": [
+          1
+        ],
+        "freshSessionReadback": false,
+        "mergeRetried": false
+      }
+    },
+    {
+      "name": "cold-1",
+      "workers": 1,
+      "cold": true,
+      "state": "passed",
+      "setupSeconds": 59.417769791,
+      "started": {
+        "monotonicNs": "3930346731868458",
+        "utc": "2026-10-16T12:47:27.102Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3930415948588500",
+        "utc": "2026-10-16T12:48:36.319Z"
+      },
+      "ready": {
+        "monotonicNs": "3930405386600041",
+        "utc": "2026-10-16T12:48:25.757Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 88893,
+          "target": "t_64e793e8cd78179490a36f4b976076c3",
+          "ownedRootSha256": "5df2cddbadde91764f9d3b8a060a1c716d27eae85fdc245191ba9233e4443ff7"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/extraction-submitted.json": "04c5490df1c1c9c28492324cc91d0f636b84cfda8ca1a8425f3bc646e8492861",
+        "actors/0/password-submitted.json": "ad89842b6c531684467d8f0d413b1a73bfa5b6e5376d797030cedb45d8f94116",
+        "actors/0/switches-submitted.json": "411506292bfe77557d585b61222e921b6ab6f1c571754c0cbd044bc900227275"
+      },
+      "elapsedSeconds": 415.239794792,
+      "finished": {
+        "monotonicNs": "3930761971663250",
+        "utc": "2026-10-16T12:54:22.342Z"
+      },
+      "phases": {
+        "setupSeconds": 59.417769791,
+        "researchSeconds": 288.485750583,
+        "collectionSeconds": 1.302348083,
+        "mergeSeconds": 15.881859709,
+        "independentVerificationSeconds": 24.361374166,
+        "semanticReviewSeconds": 15.991742209
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 7
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Independent content review confirms the required leading-hyphen, longest case-insensitive match, duplicate and postfix checks; conditional prompt, best-effort bit-4 echo handling, conditional normal-return restoration, EOF/NUL semantics and caller error codes; and cases 1/2/3 with zero/nonzero encrypted diagnostics, distinct case 9 and fallback. Source names, recovered types, flags and secure erasure remain qualified. Fresh-reader clue chains and literal code checks passed."
+      },
+      "codeHashes": {
+        "0x40125a": "264db0ae268a519823e55d68afa1acbbbf61159e62f017103d93dbcd52b5550f",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x43f4f5": "eb7ebca1f88c6c206c7e843af5e36c2744cc14f43e2157dd4c27e00de5580f44",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f7f": "998c310ef6d87ef0c299aba36fe0cec029ee7eb4148385332761461722413b5f",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x401fee": "e80e30da276dcf18da58e8aecb1913bc2c6fd2917efe61ad544df5721f312010",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 1,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 22,
+            "parts": [
+              "switches",
+              "password",
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3930437580958083",
+              "utc": "2026-10-16T12:48:57.951Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3930686814801083",
+              "utc": "2026-10-16T12:53:07.185Z"
+            }
+          }
+        ],
+        "overlapSeconds": 249.233843,
+        "cpuBefore": {
+          "88893": 5.51
+        },
+        "cpuAfter": {
+          "88893": 13.45
+        },
+        "samples": 304,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3930438120848375",
+            "utc": "2026-10-16T12:48:58.491Z",
+            "cpu": {
+              "88893": 5.53
+            }
+          },
+          "last": {
+            "monotonicNs": "3930686691633583",
+            "utc": "2026-10-16T12:53:07.062Z",
+            "cpu": {
+              "88893": 13.29
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 69.216720042,
+      "nativePreparationInsideClockSeconds": 58.654731583
+    },
+    {
+      "name": "cold-3",
+      "workers": 3,
+      "cold": true,
+      "state": "passed",
+      "setupSeconds": 81.255064333,
+      "started": {
+        "monotonicNs": "3930785995952000",
+        "utc": "2026-10-16T12:54:46.366Z"
+      },
+      "dispatched": {
+        "monotonicNs": "3930873171885541",
+        "utc": "2026-10-16T12:56:13.556Z"
+      },
+      "ready": {
+        "monotonicNs": "3930866469689583",
+        "utc": "2026-10-16T12:56:06.854Z"
+      },
+      "nativeWorkers": [
+        {
+          "pid": 96414,
+          "target": "t_349b578d84d36b9f0dbd23c306d0fd5b",
+          "ownedRootSha256": "6a3a38e4e8bc330222d7b9ae2e41daa9f5b1fae128630d03838eb444429910b1"
+        },
+        {
+          "pid": 96531,
+          "target": "t_349b578d84d36b9f0dbd23c306d0fd5b",
+          "ownedRootSha256": "2c85df6171a2c0135e40135b99903a02f413c06c5569f2b566316f376d215e60"
+        },
+        {
+          "pid": 96477,
+          "target": "t_349b578d84d36b9f0dbd23c306d0fd5b",
+          "ownedRootSha256": "2560ec6469219f19e6aae4f959d3b0c727f281b03d56185032ef76ac4c36ee1d"
+        }
+      ],
+      "privateFindingHashes": {
+        "actors/0/switches-submitted.json": "df48c2c45325040389b9a3e9ad819f22d4f4585d7efec99930a68590383ddc95",
+        "actors/1/password-submitted.json": "67168f2ba554ce499c04ccc2da76dcdcd68c84772f83a5148e53eb7b5b4ca880",
+        "actors/2/extraction-submitted.json": "9ac3061dc5e883a605fb9aeafcca29af174d6f5dce4a3ea54f5903b672568cd4"
+      },
+      "elapsedSeconds": 328.105779208,
+      "finished": {
+        "monotonicNs": "3931114101731208",
+        "utc": "2026-10-16T13:00:14.487Z"
+      },
+      "phases": {
+        "setupSeconds": 81.255064333,
+        "researchSeconds": 165.845176667,
+        "collectionSeconds": 6.305798,
+        "mergeSeconds": 17.849795542,
+        "independentVerificationSeconds": 39.184333833,
+        "semanticReviewSeconds": 11.744741625
+      },
+      "proof": [
+        {
+          "part": "switches",
+          "anchorsVerified": 1,
+          "factsVerified": 9
+        },
+        {
+          "part": "password",
+          "anchorsVerified": 1,
+          "factsVerified": 8
+        },
+        {
+          "part": "extraction",
+          "anchorsVerified": 2,
+          "factsVerified": 6
+        }
+      ],
+      "review": {
+        "criteria": {
+          "switches": true,
+          "password": true,
+          "extraction": true
+        },
+        "explanation": "Independent semantic review confirms leading UTF-16 hyphen, longest ASCII-insensitive prefix, duplicate/minimum/kind-specific postfix validation; conditional prompt plus fflush, best-effort echo mask 4 clearing with conditional normal-return restoration, line EOF/newline/NUL handling and distinct caller codes; result 1 unsupported, 2 data, 3 CRC with nonzero encrypted suspicion and separate result 9. Fresh-reader literal-code, actual string and indirect xref chain verification passed. Source names/types, global flags and exceptional restoration are appropriately qualified."
+      },
+      "codeHashes": {
+        "0x40125a": "ba71cca57bf099a936973ab0417285bfa6c7ad8d4bc81610f7ceae1ae3e994ba",
+        "0x402576": "0243c846bed736eeb973be5a4235f5ed0acb8eb56b47fed8993bd1e93ad94807",
+        "0x4013ea": "c753c724c0d801d27d6dee424792d66782aa28b5b7d1c56bbda9c7be988e34ca",
+        "0x43f4f5": "759a430769ef1f692057bd00ac7d8f1a3f6c7b85c2f4ec9ac9f1a52712ceddee",
+        "0x401fdf": "d203c076f5714b838396ace306ea03372139213d68014ad98376386af99a64c1",
+        "0x401fee": "e80e30da276dcf18da58e8aecb1913bc2c6fd2917efe61ad544df5721f312010",
+        "0x401ec8": "fe2a4e9a42e27342ddf85856814797563c92380e08065e335d97f308d5688068",
+        "0x401f7f": "998c310ef6d87ef0c299aba36fe0cec029ee7eb4148385332761461722413b5f",
+        "0x43f4b1": "4332ae355c0c001a529df3ab64173f23fd8eab508b2f9b3f4a5d2011204db04e",
+        "0x436fea": "622649f63a58339ea47a6897589c43a91edeeff4b6a6d1489c4c54fe9732812a",
+        "0x4370c4": "7f54fe19eebe6139536f62c9b719875023c97335eb9ef5dbea7a6ecc1c1bd35c"
+      },
+      "nativeProof": {
+        "distinctWorkers": 3,
+        "actors": [
+          {
+            "actor": 0,
+            "reads": 8,
+            "parts": [
+              "switches"
+            ],
+            "firstRead": {
+              "monotonicNs": "3930898884982750",
+              "utc": "2026-10-16T12:56:39.269Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3930987514471875",
+              "utc": "2026-10-16T12:58:07.899Z"
+            }
+          },
+          {
+            "actor": 1,
+            "reads": 11,
+            "parts": [
+              "password"
+            ],
+            "firstRead": {
+              "monotonicNs": "3930906010544208",
+              "utc": "2026-10-16T12:56:46.395Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3931024928725833",
+              "utc": "2026-10-16T12:58:45.314Z"
+            }
+          },
+          {
+            "actor": 2,
+            "reads": 9,
+            "parts": [
+              "extraction"
+            ],
+            "firstRead": {
+              "monotonicNs": "3930912396985833",
+              "utc": "2026-10-16T12:56:52.782Z"
+            },
+            "lastSaved": {
+              "monotonicNs": "3930991135918583",
+              "utc": "2026-10-16T12:58:11.521Z"
+            }
+          }
+        ],
+        "overlapSeconds": 75.117486042,
+        "cpuBefore": {
+          "96414": 5.54,
+          "96477": 5.59,
+          "96531": 5.48
+        },
+        "cpuAfter": {
+          "96414": 10.31,
+          "96477": 9.61,
+          "96531": 8.95
+        },
+        "samples": 188,
+        "commonWindow": {
+          "first": {
+            "monotonicNs": "3930912789859291",
+            "utc": "2026-10-16T12:56:53.174Z",
+            "cpu": {
+              "96414": 8.37,
+              "96477": 8.03,
+              "96531": 5.52
+            }
+          },
+          "last": {
+            "monotonicNs": "3930986784732833",
+            "utc": "2026-10-16T12:58:07.170Z",
+            "cpu": {
+              "96414": 9.01,
+              "96477": 9.09,
+              "96531": 8.45
+            }
+          },
+          "allWorkersCpuGrew": true
+        }
+      },
+      "cleanupComplete": true,
+      "publication": {
+        "state": "merged",
+        "sharedRevision": "R2",
+        "freshSessionReadback": true,
+        "verifiedFindingCount": 3
+      },
+      "beforeDispatchSeconds": 87.175933541,
+      "nativePreparationInsideClockSeconds": 80.473737583
+    }
+  ],
+  "representativePublishedFindings": {
+    "trial": "pair-1-3",
+    "findings": [
+      {
+        "part": "switches",
+        "functionAddress": "0x40125a",
+        "inferredName": "ParseSwitchArgument",
+        "conclusion": "FUN_0040125a is the switch-argument parser (ParseSwitchArgument is an inferred name). It enters switch parsing for a nonempty argument whose first 16-bit code unit is '-'. It searches 12-byte definition records, retaining the longest matching name after the dash, using ASCII-case-insensitive prefix comparison. No match selects 'Unknown switch:'. A per-definition repeat flag and an already-seen byte control duplicate rejection. A minimum postfix length precedes type-dependent checks: type 1 accepts an optional single '-', type 2 copies the suffix, and type 3 validates a single ASCII character against a definition-supplied character list. Unsupported remaining characters select 'Too long switch:', insufficient length selects 'Too short switch:', and invalid single postfixes select 'Incorrect switch postfix:'. Errors are recorded through FUN_004027c0; this function returns with low byte zero, whereas successful recognized switches return with low byte one.",
+        "anchors": [
+          {
+            "text": "Unknown switch:",
+            "stringAddress": "0x47c2ac",
+            "referenceFrom": "0x4012e5",
+            "functionAddress": "0x40125a"
+          }
+        ],
+        "facts": [
+          {
+            "claim": "Switch handling requires a nonzero argument length and leading UTF-16-sized code unit 0x2d; this function does not enter the switch branch for other arguments.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if ((piVar4[1] != 0) && (psVar7 = (short *)*piVar4, *psVar7 == 0x2d)) {"
+          },
+          {
+            "claim": "The parser selects the longest matching definition name after the dash: a candidate must exceed the previous match length and fit within the argument. Equal-length later matches do not replace the first. A negative final match length reaches the Unknown switch label.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if (((*(int *)(unaff_EBP + -0x18) < iVar10) && (iVar10 + 1U <= (uint)piVar4[1])) &&\n           (uVar6 = FUN_00402576((ushort *)(*piVar4 + 2),pbVar5), (char)uVar6 != '\\0')) {\n          iVar11 = *(int *)(unaff_EBP + 8);\n          *(int *)(unaff_EBP + -0x18) = iVar10;\n        }"
+          },
+          {
+            "claim": "Zero definition count immediately selects Unknown switch; exhausting definitions without any matching name reaches the same label.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if (*(int *)(unaff_EBP + 0x10) == 0) {\nLAB_004012e5:\n      pcVar13 = \"Unknown switch:\";\n    }"
+          },
+          {
+            "claim": "The name comparison helper accepts when the byte definition name terminates, so it checks a prefix; unequal letters are normalized only for ASCII A-Z before comparison.",
+            "functionAddress": "0x402576",
+            "codeQuote": "if (bVar1 == 0) {\n        return CONCAT11(uVar2,1);\n      }\n      uVar3 = *param_1;\n      param_1 = param_1 + 1;\n    } while (uVar3 == bVar1);\n    if ((0x40 < uVar3) && (uVar3 < 0x5b)) {\n      uVar3 = uVar3 + 0x20;\n    }\n    if (('@' < (char)bVar1) && ((char)bVar1 < '[')) {\n      in_AX = (ushort)(byte)(bVar1 + 0x20);\n    }"
+          },
+          {
+            "claim": "A definition byte at offset +5 equal to zero forbids repetition if the selected result's first byte is already set. Otherwise the result is marked present, remaining length is computed, and the definition byte at +6 is its minimum accepted postfix length.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if ((*(char *)(*(int *)(unaff_EBP + 0xc) + 5 + iVar11 * 0xc) == '\\0') && (*pcVar13 != '\\0')) {\n        pcVar13 = \"Multiple instances for switch:\";\n      }\n      else {\n        *pcVar13 = '\\x01';\n        *(int *)(unaff_EBP + 0x10) = piVar4[1] - iVar9;\n        if ((uint)*(byte *)(iVar10 + 6) <= *(uint *)(unaff_EBP + 0x10)) {"
+          },
+          {
+            "claim": "For definition type 1 at offset +4, a one-character postfix must be '-' and sets result byte +1. Any other single character takes Incorrect switch postfix. Other lengths reach the shared trailing-character check, which rejects any remainder as Too long switch; zero remainder passes this check, subject to the earlier minimum length.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if (cVar2 == '\\x01') {\n            if (*(int *)(unaff_EBP + 0x10) == 1) {\n              bVar12 = *(short *)(*piVar4 + iVar9 * 2) == 0x2d;\n              iVar10 = CONCAT31((int3)((uint)*piVar4 >> 8),bVar12);\n              pcVar13[1] = bVar12;\n              if (!bVar12) goto LAB_0040136e;\n            }\n            else {\nLAB_004013c2:\n              if (iVar9 != piVar4[1]) {\n                pcVar13 = \"Too long switch:\";\n                goto LAB_004013cc;\n              }\n            }\n          }"
+          },
+          {
+            "claim": "For a non-type-2 definition, only type 3 with exactly one remaining character enters the character-list validation. It requires a code unit below 0x80 and a nonnegative index returned from the definition's +8 character list; it stores that index at result +4. Failure selects Incorrect switch postfix. Other types/lengths reach the shared trailing-character check.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "if (cVar2 != '\\x02') {\n              if ((cVar2 != '\\x03') || (*(int *)(unaff_EBP + 0x10) != 1)) goto LAB_004013c2;\n              uVar3 = *(ushort *)(*piVar4 + iVar9 * 2);\n              if (uVar3 < 0x80) {\n                iVar10 = FUN_00402369(*(char **)(iVar10 + 8),(char)uVar3);\n                *(int *)(pcVar13 + 4) = iVar10;\n                if (-1 < iVar10) goto LAB_004013a5;\n              }\nLAB_0040136e:\n              pcVar13 = \"Incorrect switch postfix:\";\n              goto LAB_004013cc;\n            }"
+          },
+          {
+            "claim": "Type 2 passes the suffix pointer to a string helper and then copies the temporary into result +8 rather than using the single-character validation branch.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "FUN_00402f79((void *)(unaff_EBP + -0x24),(short *)(*piVar4 + iVar9 * 2));\n            *(undefined4 *)(unaff_EBP + -4) = 0;\n            FUN_00441b0f(pcVar13 + 8);"
+          },
+          {
+            "claim": "The enumerated postfix helper performs an exact character lookup, returning the zero-based index on a match and -1 when the terminated list is exhausted.",
+            "functionAddress": "0x402369",
+            "codeQuote": "if (cVar1 == param_2) {\n      return (int)pcVar2 - (int)param_1;\n    }\n    if (cVar1 == '\\0') break;\n    cVar1 = pcVar2[1];\n    pcVar2 = pcVar2 + 1;\n  }\n  return -1;"
+          },
+          {
+            "claim": "The parser routes its chosen diagnostic into an error-string helper, returns low-byte zero on that path, and returns low-byte one on successful recognized-switch handling. No caller exception behavior is established here.",
+            "functionAddress": "0x40125a",
+            "codeQuote": "LAB_004013a5:\n          uVar8 = CONCAT31((int3)((uint)iVar10 >> 8),1);\n          goto LAB_004013d9;\n        }\n        pcVar13 = \"Too short switch:\";\n      }\n    }\nLAB_004013cc:\n    psVar7 = (short *)FUN_004027c0((void *)(*(int *)(unaff_EBP + -0x10) + 0x14),pcVar13);\n  }\n  uVar8 = (uint)psVar7 & 0xffffff00;"
+          }
+        ],
+        "limitations": [
+          "ParseSwitchArgument, definition/result structure meanings, and suffix-copy semantics are inferred from decompiled use; the binary labels the main function FUN_0040125a and its recovered prototype is unreliable (unaff_EBP and extraout_ECX).",
+          "This finding establishes parser-local conditions. The actual switch-definition table, which concrete switches permit repetition or use each type, caller treatment of '--', and user-visible exception/printing policy were not recovered here.",
+          "Type 3 with no postfix can pass the shared no-remainder check when its minimum length permits it; do not infer that all type-3 definitions require one character.",
+          "Only static public-CLI code evidence was used; the target was not executed."
+        ],
+        "kind": "plate"
+      },
+      {
+        "part": "password",
+        "functionAddress": "0x43f4f5",
+        "inferredName": "AcquirePasswordWithConsoleEchoSuppression",
+        "conclusion": "FUN_0043f4f5 is the prompt-and-console-mode wrapper for interactive password acquisition. A non-null output stream receives the prompt and a flush. It reads standard input after attempting to clear console mode bit 0x4, restores the old mode only when that change succeeded, and emits a newline afterward. Failure to obtain/change console mode does not prevent input. The line reader stops on newline or -1 and rejects an embedded NUL. Its caller maps input rejection and stream flag conditions to distinct numeric failure results, including an empty-input termination path. Names and parameter types are inferred from stripped decompilation; the prompt provides no evidence of secure erasure or encryption strength.",
+        "anchors": [
+          {
+            "text": "\nEnter password (will not be echoed):",
+            "stringAddress": "0x481cc0",
+            "referenceFrom": "0x43f50b",
+            "functionAddress": "0x43f4f5"
+          }
+        ],
+        "facts": [
+          {
+            "claim": "The prompt is emitted only when param_1 is non-null, then the output helper is called; that helper explicitly flushes the FILE stream.",
+            "functionAddress": "0x43f4f5",
+            "codeQuote": "if (param_1 != (undefined4 *)0x0) {\n    fputs(\"\\nEnter password (will not be echoed):\",(FILE *)*param_1);\n    FUN_00401fdf(param_1);\n  }"
+          },
+          {
+            "claim": "The output helper flushes the FILE and returns a boolean derived from fflush's status; the prompt wrapper does not inspect that return value.",
+            "functionAddress": "0x401fdf",
+            "codeQuote": "iVar1 = fflush((FILE *)*param_1);\n  return (bool)('\\x01' - (iVar1 != 0));"
+          },
+          {
+            "claim": "The wrapper obtains standard input with GetStdHandle(-10), rejects null/invalid handles for mode operations, and clears bit 0x4 in the saved mode. This is the observed console echo-suppression operation.",
+            "functionAddress": "0x43f4f5",
+            "codeQuote": "hConsoleHandle = GetStdHandle(0xfffffff6);\n  local_c = 0;\n  bVar3 = false;\n  if ((hConsoleHandle != (HANDLE)0xffffffff) && (hConsoleHandle != (HANDLE)0x0)) {\n    BVar1 = GetConsoleMode(hConsoleHandle,&local_c);\n    if (BVar1 != 0) {\n      BVar1 = SetConsoleMode(hConsoleHandle,local_c & 0xfffffffb);\n      bVar3 = BVar1 != 0;\n    }\n  }"
+          },
+          {
+            "claim": "Input runs even if console-mode operations fail. The original mode is restored on the normal return path only when SetConsoleMode previously succeeded; restoration's result is ignored. With output enabled a newline and flush follow input.",
+            "functionAddress": "0x43f4f5",
+            "codeQuote": "uVar2 = FUN_00401f02();\n  local_5 = (undefined1)uVar2;\n  if (bVar3) {\n    SetConsoleMode(hConsoleHandle,local_c);\n  }\n  if (param_1 != (undefined4 *)0x0) {\n    FUN_00401fee(param_1);\n    FUN_00401fdf(param_1);\n  }\n  return local_5;"
+          },
+          {
+            "claim": "The line reader resets its destination, appends characters, stops on -1 or newline with a true low byte, and returns a false low byte upon an embedded NUL.",
+            "functionAddress": "0x401ec8",
+            "codeQuote": "param_1[1] = 0;\n  *(undefined1 *)*param_1 = 0;\n  while( true ) {\n    iVar2 = FUN_00401f7f(this);\n    uVar3 = (uint3)((uint)iVar2 >> 8);\n    if (iVar2 == -1) break;\n    cVar1 = (char)iVar2;\n    if (cVar1 == '\\0') {\n      return (uint)uVar3 << 8;\n    }\n    if (cVar1 == '\\n') break;\n    FUN_004028cf(param_1,cVar1);\n  }\n  return CONCAT31(uVar3,1);"
+          },
+          {
+            "claim": "The character helper calls fgetc on its FILE stream. Its recovered void signature conflicts with the caller's consumption of a return value, so the exact prototype is unreliable.",
+            "functionAddress": "0x401f7f",
+            "codeQuote": "fgetc((FILE *)*param_1);\n  return;"
+          },
+          {
+            "claim": "The direct caller maps a false acquisition result to 0x80070057, stream flag bit 5 to 0x80004005, and stream flag bit 4 plus zero destination length to 0x80004004, otherwise returning zero. This makes empty end-of-input terminate with a distinct result if bit 4 is the stream EOF state, while nonempty input at EOF can pass this test.",
+            "functionAddress": "0x43f4b1",
+            "codeQuote": "cVar1 = FUN_0043f4f5(param_1);\n  if (cVar1 == '\\0') {\n    return 0x80070057;\n  }\n  if ((*(uint *)(DAT_0048e5c0 + 0xc) >> 5 & 1) != 0) {\n    return 0x80004005;\n  }\n  if (((*(uint *)(DAT_0048e5c0 + 0xc) >> 4 & 1) != 0) && (*(int *)(param_2 + 4) == 0)) {\n    return 0x80004004;\n  }\n  return 0;"
+          },
+          {
+            "claim": "The intermediate input routine selects one conversion helper when its code-page value equals 0xfde9 (65001), another otherwise, and returns the low-byte result of the line reader.",
+            "functionAddress": "0x401f02",
+            "codeQuote": "uVar2 = FUN_00401ec8(this,(undefined4 *)(unaff_EBP + -0x18));\n  UVar4 = *(UINT *)((int)this + 4);\n  if (UVar4 == 0xffffffff) {\n    UVar4 = 1;\n  }\n  if (UVar4 == 0xfde9) {\n    FUN_0040430b((undefined4 *)(unaff_EBP + -0x18),piVar1);\n  }\n  else {\n    FUN_00403a58(piVar1,(undefined4 *)(unaff_EBP + -0x18),UVar4);\n  }"
+          }
+        ],
+        "limitations": [
+          "Function names are inferred; stripped decompilation has unreliable parameter/return recovery, notably FUN_00401f02's unaff_EBP/this and FUN_00401f7f's void result despite its caller using a value.",
+          "The wrapper's bit tests and return numbers are directly observed. Identifying stream flag bit 5 as error and bit 4 as EOF is an interpretation consistent with fgetc/FILE use, not a recovered named declaration.",
+          "Restoration is visible on the ordinary return path. No claim is made about restoration after exceptions or abnormal process termination, and SetConsoleMode restoration failure is unchecked.",
+          "No target execution was performed. The prompt and console-mode code establish neither secure password-memory erasure nor encryption strength.",
+          "Three upstream call-site addresses were returned by xrefs, but functions get on those interior addresses was rejected by the public selector; no unverified behavior of those upstream callers is asserted."
+        ],
+        "kind": "pre"
+      },
+      {
+        "part": "extraction",
+        "functionAddress": "0x436fea",
+        "inferredName": "FormatExtractionResultDiagnostic",
+        "conclusion": "FUN_00436fea selects extraction-result text by numeric result code: 1 is Unsupported Method, 2 is Data Error, and 3 is CRC Failed. For codes 2 and 3, a zero second argument selects the plain message and any nonzero value selects the encrypted-file message ending Wrong password?. Code 9 independently selects Wrong password. The function prepends ERROR: and uses Error # plus the numeric result for unrecognized cases. A caller handles result zero separately and forwards nonzero results plus its third argument to this formatter. The descriptive name is inferred; recovered parameter types and the origin of the encrypted-file indicator remain uncertain.",
+        "anchors": [
+          {
+            "text": "CRC Failed",
+            "stringAddress": "0x47f8f4",
+            "referenceFrom": "0x47f6b0",
+            "via": [
+              "0x437021"
+            ],
+            "functionAddress": "0x436fea"
+          },
+          {
+            "text": "CRC Failed in encrypted file. Wrong password?",
+            "stringAddress": "0x47f8c4",
+            "referenceFrom": "0x47f6b4",
+            "via": [
+              "0x437019"
+            ],
+            "functionAddress": "0x436fea"
+          }
+        ],
+        "facts": [
+          {
+            "claim": "Numeric result 1 selects Unsupported Method without consulting the second argument.",
+            "functionAddress": "0x436fea",
+            "codeQuote": "case 1:\n    pcVar1 = \"Unsupported Method\";\n    break;"
+          },
+          {
+            "claim": "Numeric result 2 selects plain Data Error when param_2 is zero, and the encrypted-file/password-suspicion message for any nonzero param_2.",
+            "functionAddress": "0x436fea",
+            "codeQuote": "case 2:\n    if (param_2 == 0) {\n      pcVar1 = \"Data Error\";\n    }\n    else {\n      pcVar1 = \"Data Error in encrypted file. Wrong password?\";\n    }\n    break;"
+          },
+          {
+            "claim": "Numeric result 3 selects plain CRC Failed when param_2 is zero, and the encrypted-file/password-suspicion message for any nonzero param_2.",
+            "functionAddress": "0x436fea",
+            "codeQuote": "case 3:\n    if (param_2 == 0) {\n      pcVar1 = \"CRC Failed\";\n    }\n    else {\n      pcVar1 = \"CRC Failed in encrypted file. Wrong password?\";\n    }\n    break;"
+          },
+          {
+            "claim": "Numeric result 9 has a separate unconditional Wrong password diagnostic, unlike the question-form suspicion for results 2 and 3.",
+            "functionAddress": "0x436fea",
+            "codeQuote": "case 9:\n    pcVar1 = \"Wrong password\";"
+          },
+          {
+            "claim": "The formatter appends ERROR: before either the selected diagnostic or Error # followed by the numeric result if no switch case supplied a message.",
+            "functionAddress": "0x436fea",
+            "codeQuote": "FUN_004029dc(param_3,\"ERROR: \");\n  if (pcVar1 == (char *)0x0) {\n    FUN_004029dc(param_3,\"Error #\");\n    FUN_00402a63(param_3,param_1);\n  }\n  else {\n    FUN_004029dc(param_3,pcVar1);\n  }"
+          },
+          {
+            "claim": "Caller FUN_004370c4 treats result zero separately. On its nonzero branch, when the output pointer at +0xdc is nonzero, it passes result param_2 and indicator param_3 unchanged to the diagnostic formatter and prints the resulting string.",
+            "functionAddress": "0x4370c4",
+            "codeQuote": "if (*(int *)(param_1 + 0xdc) != 0) {\n      FUN_00436c40(param_1);\n      FUN_0040273f(local_10);\n      FUN_00436fea(param_2,param_3,local_10);\n      fputs(local_10[0],(FILE *)**(undefined4 **)(param_1 + 0xdc));"
+          }
+        ],
+        "limitations": [
+          "FormatExtractionResultDiagnostic is an inferred navigation name, not a recovered original source name.",
+          "The decompiler recovers the selector as uint param_1, int param_2, undefined4 *param_3. The second argument is demonstrably tested only for zero/nonzero here; its original source-level boolean/enum type and upstream origin have not been established.",
+          "The encrypted-file meaning of the nonzero indicator is supported by the selected literal messages and argument forwarding; no claim is made that those paths prove an incorrect password rather than corruption.",
+          "FUN_004370c4 has only an observed data reference at 0x481758 in this search; the higher-level callback interface and object-field types were not recovered.",
+          "This is static analysis only; the target was not executed."
+        ],
+        "kind": "post"
+      }
+    ]
+  },
+  "independentOracle": {
+    "withheldFromTimedAgents": true,
+    "sha256": "997456758512814f2a6e1e7c29533ccd0ea37828205c9de855d876a4a9e42900",
+    "officialSourceCrosschecks": {
+      "CPP/Common/CommandLineParser.cpp": {
+        "url": "https://raw.githubusercontent.com/ip7z/7zip/26.04/CPP/Common/CommandLineParser.cpp",
+        "sha256": "59550bdcd39144d6ed595a556aebb193cd29a21363563253acf7265ba28901ab"
+      },
+      "CPP/7zip/UI/Console/UserInputUtils.cpp": {
+        "url": "https://raw.githubusercontent.com/ip7z/7zip/26.04/CPP/7zip/UI/Console/UserInputUtils.cpp",
+        "sha256": "19bd207cd9c17e0c42a33411e04e488139073aae5bc6f6ac5997d242e58cc4fb"
+      },
+      "CPP/7zip/UI/Console/ExtractCallbackConsole.cpp": {
+        "url": "https://raw.githubusercontent.com/ip7z/7zip/26.04/CPP/7zip/UI/Console/ExtractCallbackConsole.cpp",
+        "sha256": "c5fc32c0fddd41a6cbfc71cd7666c201d380e1c36f35439362e4e7f15b7152f0"
+      },
+      "CPP/7zip/Archive/IArchive.h": {
+        "url": "https://raw.githubusercontent.com/ip7z/7zip/26.04/CPP/7zip/Archive/IArchive.h",
+        "sha256": "fff9db3b10763a74853fee6f1769ddd352e69adeacbadbdbee87b5324df8b063"
+      }
+    }
+  },
+  "pilot": {
+    "excludedFromComparison": true,
+    "name": "pilot",
+    "state": "passed",
+    "reason": "Untimed calibration developed indirect data-pointer xref validation; original failed verification and deliberate corrected annotation publication retained privately."
+  },
+  "cleanup": {
+    "ownedProfiles": 10,
+    "matchingOwnedNativeProcessesRemaining": 0,
+    "successfulTrialsClosedAndDisconnected": true,
+    "failedTrialJournalAndSnapshotsRetained": true,
+    "failedLeadPublicClose": "blocked",
+    "failedWorkerProcessesEndedByOrdinaryOwnerCleanup": true,
+    "globalOwnerStopUsed": false
+  },
+  "retention": {
+    "rawPromptsCliTranscriptsAndOracle": "Retained privately; personal paths and runtime data are not published.",
+    "closedDisposableNativeCopies": "Removed after saving diagnostics when disk filled; public observations, findings, code hashes and timing receipts retained.",
+    "failedPublication": "Journal, database and all acknowledged private snapshots retained without reset or publication retry."
+  },
+  "validation": {
+    "harnessSyntax": {
+      "control.mjs": true,
+      "observer.mjs": true
+    },
+    "offlineTests": {
+      "command": "npm test",
+      "passed": 129,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "4b0233448094bde3760e76c8d34e0ae9ff5f65a7e8fa649974e11d3394b81141"
+    }
+  }
+}

@@ -1,5 +1,10 @@
 # Executable agent business acceptance
 
+The subsequent [live-agent production 7zr.exe experiment](7ZR-LIVE-RESEARCH.md) has a
+different workload and result: repeatable acceleration was not confirmed. Its slower pair
+and disk-full merge attempt remain reported. The fixture results below retain their own
+identity and do not imply live-agent research acceleration.
+
 **All 25 business scenarios pass on real Ghidra through the installed public CLI.**
 Six prepared-base pairs demonstrate repeatable acceleration with three native workers.
 This document records the accepted results, limits and reproduction protocol.

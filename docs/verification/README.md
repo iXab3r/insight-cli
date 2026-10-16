@@ -1,5 +1,15 @@
 # Verification scope
 
+## Live-agent production EXE research
+
+[7zr.exe evidence](7zr-live-research.json) records three completed prepared pairs with
+actual fresh AI agents, useful findings, one merge and independent content verification:
+1.475x, 1.609x and 0.971x. Repeatable acceleration is **not confirmed**. The next attempt
+failed merge with ENOSPC and retains an unknown publication; five remaining prepared runs
+were not executed. No failed/slower result was replaced. A separate cold pair passed
+correctness at 415.24 s versus 328.11 s (1.266x). See the
+[protocol, findings, recovery state and limits](../7ZR-LIVE-RESEARCH.md).
+
 ## Public-CLI business Gherkin acceptance
 
 [Business evidence](business-scenarios.json) records 25/25 individual scenarios on one

@@ -5,9 +5,17 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
+The [live-agent 7zr.exe comparison](docs/7ZR-LIVE-RESEARCH.md) does **not confirm repeatable
+acceleration**: prepared pairs achieved 1.475x, 1.609x and 0.971x; the next attempt hit a
+disk-full merge failure. The separate cold pair achieved 1.266x. Real findings were merged
+and verified from fresh sessions in all completed runs; the failed publication remains
+retained without a retry. [Evidence](docs/verification/7zr-live-research.json) includes every
+attempt and the unexecuted remainder of the planned series.
+
 The [25 business Gherkin scenarios](docs/BUSINESS-ACCEPTANCE.md) pass through the installed
 public CLI on real Ghidra, covering two EXEs, private contexts, merge/refresh, conflicts
-and interrupted work. Six prepared-base one-versus-three worker pairs all improve, with
+and interrupted work. On their controlled fixture workload, six prepared-base
+one-versus-three worker pairs all improve, with
 **1.60x median paired speedup** on the declared hash-research workload. Cold start (1.33x)
 and uneven work (1.23x) are measured separately. [Evidence](docs/verification/business-scenarios.json)
 binds exact artifacts, source/input hashes, findings, worker overlap and raw timings.
