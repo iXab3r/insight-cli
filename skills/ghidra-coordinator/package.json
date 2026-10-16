@@ -1,6 +1,6 @@
 {
   "name": "@eyeauras/insight-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Agent-facing durable sessions and isolated Ghidra research contexts",
   "main": "./dist/src/index.js",
@@ -24,8 +24,10 @@
   },
   "dependencies": {
     "@eyeauras/cli-factory": "0.4.1",
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz",
     "@modelcontextprotocol/sdk": "1.32.1",
-    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz"
+    "tar": "7.5.22",
+    "yauzl": "3.4.0"
   },
   "engines": {
     "node": ">=24"

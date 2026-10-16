@@ -13,6 +13,18 @@ owner-fault phases. See [current full evidence](verification/full-facade-current
 [the repeatable gate](FINAL-ACCEPTANCE.md). The stale merge-proof adapter was corrected to
 forward saved-state inspection and command forks; its complete native scenario now passes.
 
+## Managed runtime delivery (2026-10-16)
+
+The separately authorized complete tool slice is implemented and verified as 0.2.0:
+
+| Item | Delivered contract | Evidence |
+| --- | --- | --- |
+| RT-01 | Pinned download/cache, staged Ghidra/JDK/native/server install, archives/offline, passive status, doctor and safe uninstall | [Runtime gate](verification/managed-ghidra-runtime.json) |
+| RT-02 | External launcher/directory and legacy profile support; managed local server lifecycle; preserved research and isolated extensions | [Runtime contract](../skills/ghidra-coordinator/references/managed-runtime.md) |
+| RT-03 | Global archive install, all 174 package files verified, 154 offline tests and real 7zr/GUI/debugger `@runtime` Gherkin acceptance | [Reproduction/results](MANAGED-GHIDRA-RUNTIME.md) |
+
+This does not publish 0.2.0 to npm or rebind historical full-facade/benchmark evidence.
+
 ## Historical original delivery
 
 All ordered M0–M5 work items, including M5-06, passed combined acceptance at implementation

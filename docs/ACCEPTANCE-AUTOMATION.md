@@ -18,7 +18,7 @@ older technical bridge features remain a separate supporting layer.
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
 rejection of an empty selection on macOS ARM64. The full 33-group bridge was discovered
 but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. Current discovery
-finds 29 scenarios: 25 business workflows plus the four technical bridges.
+finds 30 scenarios: 25 business workflows, four technical bridges and the managed runtime delivery scenario.
 
 ## Setup and commands
 
@@ -121,3 +121,15 @@ assume linear scaling or generalize to all investigations. The concrete workload
 three real executable hash functions and publishes complete hash-to-candidate lookup
 findings. See the [business acceptance protocol and results](BUSINESS-ACCEPTANCE.md);
 its prepared-base gate, cold measurements and uneven-partition measurements remain distinct.
+
+## Managed runtime delivery
+
+`ManagedRuntime.feature` adds a separate opt-in `@runtime` scenario. Its public global-CLI
+runner is `scripts/proof-managed-runtime.mjs`, covering fresh acquisition without configured
+Java/Ghidra, native decompilation/server checks, two-agent real 7zr.exe publication/refresh,
+live-process deletion guards, local archives, reinstall continuation and an external launcher.
+It requires `INSIGHT_GLOBAL_CLI`, `INSIGHT_RUNTIME_EXE` (the exact static 7zr fixture) and
+`INSIGHT_EXTERNAL_GHIDRA` (actual external launcher), and `INSIGHT_GHIDRA_ARCHIVE` (official pinned
+12.1.2 zip, to verify macOS native supplementation and GUI/debugger operation). The installed CLI must match the built
+candidate; installation itself is an explicit development/release step. This scenario downloads
+public runtime artifacts and is not part of offline CI or the historical 25 business IDs.

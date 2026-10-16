@@ -130,7 +130,7 @@ without repeating effects.
 Build prepared artifacts with `npm run pack:cli`. The tarball also installs by itself:
 
 ```sh
-npm install --global ./artifacts/eyeauras-insight-cli-0.1.0.tgz
+npm install --global ./artifacts/eyeauras-insight-cli-0.2.0.tgz
 ```
 
 The IPC dependency uses the recorded immutable tarball URL, so no separate dependency archive
@@ -151,3 +151,7 @@ The earlier `insight-ghidra` coordinator remains an internal regression fixture.
 [historical findings contract](docs/prototype-findings.md) and separate journals are not migrated
 into root sessions or exposed as public worker/proposal commands. Existing RE environments are
 not adopted or modified by the facade.
+
+Managed Ghidra delivery: [runtime commands and ownership](skills/ghidra-coordinator/references/managed-runtime.md).
+Version 0.2.0 is verified as a globally installed candidate archive; npm registry 0.1.0 remains the
+previous published release until a separately authorized registry publication.

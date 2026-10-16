@@ -55,7 +55,14 @@ native macOS debugger fixtures are distinct acceptance cases; this does not clai
 every imported EXE format. Saved analysis/trace state is recoverable; a crashed live debuggee is not
 silently resumed from a prior CPU execution state.
 
-On a machine with the configured Ghidra/Java dependencies, the facade starts its owned local server
+The owner authorized full managed runtime delivery on 2026-10-16. `ghidra download/install/status/doctor/uninstall`
+own the complete pinned Ghidra/JDK/native/bridge/server software slice. External launcher/directory
+selection and legacy profile paths remain supported. The [runtime contract](../skills/ghidra-coordinator/references/managed-runtime.md)
+defines archive/offline handling, installation activation, process guards and preserved research.
+Code and caches derive from profile AppData, separately from server repositories and research.
+macOS host debugger/display/keychain authorization remains an explicit OS prerequisite.
+
+With an installed managed or external runtime, the facade starts its owned local server
 and creates its own repository/storage for the ordinary open workflow. An externally configured
 Ghidra Server is also supported through a profile. Factory continues to own profiles, permission
 gates, credentials and host lifecycle. Managed resources live in profile AppData; starting local
@@ -376,8 +383,8 @@ setup step. Unit fault injection proves state semantics; actual process kill tes
 SQLite recovery. Real Ghidra write acceptance is a separate local-only disposable-fixture runner,
 not Factory's ReadOnly service proof and not CI. Report limits at the tested revision/environment.
 
-Core and MCP SDK use MIT; SQLite is provided by Node. Ghidra/GhidraMCP/Python are configured external
-runtimes with their own licenses. The official prepared IPC dependency is pinned to an immutable
+Core and MCP SDK use MIT; SQLite is provided by Node. Ghidra, JDK and GhidraMCP have their own retained license notices; the runtime manager delivers
+the pinned distributions. Ghidra debugger Python wheels are isolated from the SDK, with a host debugger. The official prepared IPC dependency is pinned to an immutable
 GitHub tarball URL with source/license/hash provenance; npm installs it automatically. The vendor
 copy remains an offline mirror, and IPC is not separately published by this consumer.
 Packing prepares Factory's manifest after compilation and includes skill/resources; installation

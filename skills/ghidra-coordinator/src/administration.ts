@@ -3,6 +3,7 @@ import type {ResearchBackend} from './research.js';
 import {Workspace} from './workspace.js';
 import {fail,id,text,object} from './model.js';
 import {option,parsed,key,type Parameter} from './arguments.js';
+import {runtimeProcesses} from './runtime-manager.js';
 import {administrationResult} from './administration-results.js';
 const repository=(value:unknown)=>{const name=text(value,128);if(name!==name.trim()||/[\\/\0]/.test(name)||name.startsWith('.'))fail('invalid','Repository name must be a single bounded name.');return name;};
 export function repositoryPath(value:unknown) {
@@ -38,6 +39,8 @@ export class Administration {
 const repo:Parameter={name:'repository',type:'string',required:true},path:Parameter={name:'path',type:'string',required:false,default:'/'};
 const leaves:{names:string[];operation:string;gate:string;params:Parameter[]}[]=[
   {names:['status'],operation:'status',gate:Permission.ReadOnly,params:[]},
+  {names:['start'],operation:'connect',gate:Permission.Update,params:[]},
+  {names:['stop'],operation:'stop',gate:Permission.Update,params:[]},
   {names:['connect'],operation:'connect',gate:Permission.Update,params:[]},
   {names:['disconnect'],operation:'disconnect',gate:Permission.Update,params:[]},
   {names:['repositories','list'],operation:'repositories',gate:Permission.ReadOnly,params:[]},
@@ -52,11 +55,16 @@ const leaves:{names:string[];operation:string;gate:string;params:Parameter[]}[]=
   {names:['admin','terminate-checkout'],operation:'terminate_checkout',gate:'Destructive',params:[repo,{...path,required:true,default:undefined},{name:'checkout_id',type:'string',required:false}]},
   {names:['admin','terminate-all-checkouts'],operation:'terminate_all_checkouts',gate:'Destructive',params:[repo,path]},
 ];
-export function administrationCommands(service:(context:CommandContext)=>Administration):CommandDefinition[] {
+export function administrationCommands(service:(context:CommandContext)=>Administration,unconfiguredStatus?:(context:CommandContext)=>Promise<Record<string,unknown>|undefined>):CommandDefinition[] {
   const children:CommandDefinition[]=[];
   for(const leaf of leaves) {
     const changing=leaf.gate!==Permission.ReadOnly;
-    const definition=command(leaf.names.at(-1)!,'Operate on the configured server and explicit repository',({options:o},c)=>{
+    const definition=command(leaf.names.at(-1)!,'Operate on the configured server and explicit repository',async({options:o},c)=>{
+      if(leaf.operation==='stop'){
+        if(c.profile.values.server)fail('authorization','External server lifecycle is owned by its operator. Use server disconnect.');
+        if((await runtimeProcesses(c.appArguments.AppDataDirectory)).some(p=>p.kind!=='server'))fail('busy','Close active Ghidra contexts before stopping their server.');
+      }
+      if(leaf.operation==='status'&&unconfiguredStatus){const passive=await unconfiguredStatus(c);if(passive)return passive;}
       const parameters:Record<string,unknown>={};
       for(const p of leaf.params){const value=o[key(p.name)];if(value!==undefined)parameters[p.name]=parsed(p,value);}
       if(parameters.repository!==undefined)parameters.repository=repository(parameters.repository);

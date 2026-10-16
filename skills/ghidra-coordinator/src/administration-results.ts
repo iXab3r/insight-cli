@@ -5,7 +5,7 @@ const array=(value:unknown)=>{if(!Array.isArray(value))fail('partial','Administr
 const file=(value:unknown)=>{const row=object(value);for(const field of ['name','path','type'])if(typeof row[field]!=='string')fail('partial','Repository file identity is incomplete.');integer(row.version,1);return row;};
 export function administrationResult(operation:string,p:Record<string,unknown>,raw:unknown) {
   const value=object(raw);if(JSON.stringify(value).length>1048576)fail('limit','Administration result exceeds one MiB.');
-  if(['status','connect','disconnect'].includes(operation)) {
+  if(['status','connect','disconnect','stop'].includes(operation)) {
     if(typeof value.connected!=='boolean'||!['local','external'].includes(String(value.mode)))fail('partial','Server status is incomplete.');
     if(value.connected&&typeof value.repository!=='string')fail('partial','Connected server omitted its repository.');
   }else if(operation==='repositories'){const values=names(value.repositories);integer(value.count);if(value.count!==values.length)fail('partial','Repository count is inconsistent.');}

@@ -122,6 +122,7 @@ export class GhidraServer {
       catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     }
     if(operation==='connect'){await mkdir(this.root(),{recursive:true,mode:0o700});await durable(connection,{enabled:true});}
+    if(operation==='stop'){await this.stop();return {connected:false,mode:this.c.profile.values.server?'external':'local',state:'stopped'};}
     if(operation==='disconnect') {
       await this.stop();await mkdir(this.root(),{recursive:true,mode:0o700});await durable(connection,{enabled:false});
       return {connected:false,mode:this.c.profile.values.server?'external':'local'};
@@ -268,9 +269,13 @@ export class GhidraServer {
       throw error;
     }
   }
-  private async identity(local: LocalServer): Promise<Record<string,unknown>> {
-    const token = await this.c.secrets.require(local.tokenSecret);
-    const response = await this.c.fetch(`http://127.0.0.1:${local.identityPort}/identity`,{redirect:'error',
+  private identity(local:LocalServer){return serverIdentity(local,this.c);}
+  async stop(){await stopLocalServer(this.directory,this.c);this.state.child=undefined;this.state.initializing=undefined;}
+}
+
+async function serverIdentity(local:LocalServer,c:CommandContext):Promise<Record<string,unknown>>{
+    const token = await c.secrets.require(local.tokenSecret);
+    const response = await c.fetch(`http://127.0.0.1:${local.identityPort}/identity`,{redirect:'error',
       signal:AbortSignal.timeout(1000),headers:{Authorization:'Bearer '+token}});
     if (!response.ok || Number(response.headers.get('content-length')) > 4096) fail('binding','Owned server identity was not verified.');
     const reader = response.body?.getReader(); if (!reader) fail('binding','Owned server identity has no body.');
@@ -288,16 +293,17 @@ export class GhidraServer {
         local.pid !== undefined && result.pid !== local.pid) fail('binding','Server endpoint no longer belongs to the recorded owned process.');
     return result;
   }
-  async stop() {
+
+/** Stop only the authenticated owned server recorded below this workspace/probe root. */
+export async function stopLocalServer(directory:string,c:CommandContext){
     let local: LocalServer;
-    try { local = JSON.parse(await readFile(join(this.root(),'local.json'),'utf8')); }
+    try { local = JSON.parse(await readFile(join(directory,'server','local.json'),'utf8')); }
     catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
     if (!local.pid) return;
     if (live(local.pid)) {
-      await this.identity(local); process.kill(local.pid,'SIGTERM');
+      await serverIdentity(local,c); process.kill(local.pid,'SIGTERM');
       for(let i=0;i<100 && live(local.pid);i++) await delay(50);
       if(live(local.pid)) fail('busy','Owned server did not stop; its receipt is retained.');
     }
-    local.phase='stopped'; delete local.pid; await durable(join(this.root(),'local.json'),local); this.state.child=undefined; this.state.initializing=undefined;
+    local.phase='stopped'; delete local.pid; await durable(join(directory,'server','local.json'),local);
   }
-}

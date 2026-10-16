@@ -87,6 +87,26 @@ public sealed class IntegrationSteps(ScenarioContext context)
             Assert.That(receipt.RootElement.GetProperty(check).GetBoolean(), Is.True, check);
     }
 
+    [When("global CLI runtime delivery acceptance runs")]
+    public Task ManagedRuntime() => Execute("managed-runtime",
+        ["scripts/proof-managed-runtime.mjs", Required("INSIGHT_GLOBAL_CLI"),
+         Required("INSIGHT_RUNTIME_EXE"), Path.Combine(scenario.ArtifactDirectory, "runtime-result.json"),
+         Required("INSIGHT_EXTERNAL_GHIDRA"), Required("INSIGHT_GHIDRA_ARCHIVE")], TimeSpan.FromMinutes(30));
+
+    [Then("managed and external runtime acceptance succeeds")]
+    public void ManagedRuntimePassed()
+    {
+        Passed();
+        var line = result.StandardOutput.Split('\n').Last(x => x.TrimStart().StartsWith('{'));
+        using var receipt = JsonDocument.Parse(line);
+        Assert.That(receipt.RootElement.GetProperty("state").GetString(), Is.EqualTo("passed"));
+        foreach (var check in new[] { "freshProfileWithoutRuntimePaths", "pinnedDownloadsAndOfflineCache",
+                     "nativeInstallAndDoctor", "explicitOwnedServerLifecycle", "multiClientRealExeResearchMergeRefresh",
+                     "busyRuntimeAndServerProtected", "uninstallPreservesResearchAndArtifacts",
+                     "localArchivesAndResearchContinuation", "officialZipWithManagedMacNatives", "managedGuiAndLiveDebugger", "managedBaseAndIsolatedExtension", "externalLauncherRealExeMergeAndSafeUninstall", "unchangedInput" })
+            Assert.That(receipt.RootElement.GetProperty("checks").GetProperty(check).GetBoolean(), Is.True, check);
+    }
+
     [Then("the complete native gate succeeds")]
     public void FullPassed()
     {

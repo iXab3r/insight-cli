@@ -6,6 +6,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fail, stable, text } from './model.js';
 import {managedExtensions,extensionJvmArguments} from './extensions.js';
+import {runtimeValues,runtimeSelection} from './runtime-selection.js';
 
 export interface NativeInputs {
   java: string; ghidraHome: string; mcpJar: string; jars: string[]; classpath: string;
@@ -67,6 +68,8 @@ export async function nativeRuntimeFingerprint(ghidraVersion:string,files:Native
   return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
 }
 export async function nativeInputs(values: Record<string, unknown>,directory?:string): Promise<NativeInputs> {
+  if(directory)values=runtimeValues(dirname(directory),values);
+  if(!values.java||!values.ghidraHome)fail('configuration','Ghidra is not installed. Run insight-cli ghidra install, or supply external runtime paths.');
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
   if (!requested.every(isAbsolute)) fail('configuration', 'Configure absolute Java, Ghidra home and GhidraMCP jar paths.');
   const [java, ghidraHome, mcpJar] = await Promise.all(requested.map(path => realpath(path))) as [string,string,string];
@@ -91,10 +94,12 @@ export async function nativeInputs(values: Record<string, unknown>,directory?:st
     join(debug,'Debugger-rmi-trace/pypkg/dist/ghidratrace-12.1-py3-none-any.whl'),
     join(debug,'Debugger-agent-lldb/pypkg/dist/ghidralldb-12.1-py3-none-any.whl')];
   const files=await nativeRuntimeFiles(ghidraHome,java);
+  const baseFingerprint=await nativeRuntimeFingerprint(ghidraVersion,[...files,{name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar}]);
+  if(directory){const selected=runtimeSelection(dirname(directory));if(selected&&selected.fingerprint!==baseFingerprint)fail('binding','Selected runtime inputs differ from their installation receipt; reinstall or restore the verified files.');}
   for(const module of modules)for(const file of module.files)files.push({name:'extension/'+module.name+'/'+file.name,path:join(module.root,file.name)});
   // Logical names bind locations without embedding the author's installation path.
   files.push({name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar});
-  const fingerprint=await nativeRuntimeFingerprint(ghidraVersion,files);
+  const fingerprint=modules.length?await nativeRuntimeFingerprint(ghidraVersion,files):baseFingerprint;
   return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels,extensionRoots:modules.map(m=>m.root),serverClasspath:baseJars.join(delimiter)};
 }
 

@@ -9,7 +9,7 @@ test('both packaged skills are discoverable without profile, authentication or G
   const f=await createCliFixture(t,{applicationId:'insight-cli'});
   const app=f.createApplication(runtime=>createInsightCli({runtime,backend:()=>{throw Error('Must not start Ghidra');}}));
   const original=await f.json(app,['skill']) as {name:string;path:string;version:string;skills:string[]};
-  assert.equal(original.name,'insight-cli');assert.equal(original.version,'0.1.0');
+  assert.equal(original.name,'insight-cli');assert.equal(original.version,'0.2.0');
   assert.deepEqual(original.skills,['insight-cli','insight-re']);
   const research=await f.json(app,['skill','insight-re']) as {name:string;path:string;version:string};
   assert.equal(research.name,'insight-re');assert.equal(research.version,original.version);

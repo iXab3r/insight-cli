@@ -1,9 +1,10 @@
 import type { CommandContext } from '@eyeauras/cli-factory';
+import {runtimeProcesses} from './runtime-manager.js';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdir, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
 import {constants} from 'node:fs';
-import { join, delimiter, sep, resolve } from 'node:path';
+import { join, delimiter, sep, resolve, dirname } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeHelpers, nativeInputs,nativeJvmDirectories,nativeExtensionArguments, type NativeInputs } from './native-inputs.js';
@@ -57,7 +58,13 @@ export class GhidraContexts {
   fork(c: CommandContext) {return new GhidraContexts(this.workspace,this.inputs,c,this.running,this.modelTasks,this.ownedServer.fork(c),this.capacity);}
   private directory() {return join(this.workspace.directory,'ghidra-native');}
   private server() {return this.ownedServer;}
-  async administration(operation:string,parameters:Record<string,unknown>) {return this.server().administration(operation,parameters);}
+  async administration(operation:string,parameters:Record<string,unknown>) {
+    if(operation==='stop'){
+      if(this.c.profile.values.server)fail('authorization','External server lifecycle is owned by its operator. Use server disconnect.');
+      const processes=await runtimeProcesses(dirname(this.workspace.directory));if(processes.some(p=>p.kind!=='server'))fail('busy','Close active Ghidra contexts before stopping their server.');
+    }
+    return this.server().administration(operation,parameters);
+  }
   async sdkFile(operation:string,parameters:Record<string,unknown>){return this.server().sdkFile(operation,parameters);}
   private async prepareRoot(kind: ProcessBinding['kind'], target: string, context?: string) {
     const root=join(this.directory(),kind,context??target,randomUUID());await mkdir(root,{recursive:true,mode:0o700});return root;

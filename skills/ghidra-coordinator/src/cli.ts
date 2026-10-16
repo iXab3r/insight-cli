@@ -27,6 +27,8 @@ import {VersionTracking,trackingCommands} from './version-tracking.js';
 import {Extensions,extensionCommands,extensionState,extensionInventoryCommands,managedExtensions} from './extensions.js';
 import {Synchronization,synchronizationCommands} from './sync-policy.js';
 import {artifactsCommands} from './saved-materials.js';
+import {RuntimeManager,runtimeCommands,runtimeProcesses} from './runtime-manager.js';
+import {runtimeSelection} from './runtime-selection.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -39,10 +41,25 @@ interface ProfileOwner {
 const bindingFields=['java','ghidraHome','mcpJar','mcpJarSha256','server','repository','readerUser','publisherUser','maxContexts','debuggerPython','windbgDir','archiveUrl'];
 class Owner {
   private readonly profiles=new Map<string,ProfileOwner>();
+  private readonly runtimeChanging=new Set<string>();
+  async runtime<T>(c:CommandContext,action:()=>Promise<T>,quiescent=true):Promise<T>{
+    const directory=c.appArguments.AppDataDirectory;
+    if(this.runtimeChanging.has(directory))fail('busy','Another runtime operation is in progress.');
+    const current=this.profiles.get(directory);
+    if(quiescent&&current?.tasks.size)fail('busy','Research operations are in progress; finish them before managing the runtime.');
+    this.runtimeChanging.add(directory);
+    try{
+      if(!quiescent)return await action();
+      const processes=await runtimeProcesses(directory);if(processes.length)fail('busy','Close Ghidra contexts and stop the owned server before changing or checking the runtime.',{processes});
+      if(current){await (await current.backend)?.dispose();current.workspace.close();this.profiles.delete(directory);}
+      return await action();
+    }finally{this.runtimeChanging.delete(directory);}
+  }
   constructor(private readonly options: Options) {}
   selected(c: CommandContext) {
     const directory=c.appArguments.AppDataDirectory;
-    const configuration=digest({profile:Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])),extensions:extensionState(join(directory,'workspace')).modules.filter(m=>m.enabled).map(m=>[m.name,m.sha256])});
+    if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress.');
+    const configuration=digest({runtime:runtimeSelection(directory),profile:Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])),extensions:extensionState(join(directory,'workspace')).modules.filter(m=>m.enabled).map(m=>[m.name,m.sha256])});
     let profile=this.profiles.get(directory);
     if(!profile) {
       profile={workspace:new Workspace(join(directory,'workspace'),c.profile.name),tasks:new Map(),configuration};
@@ -66,6 +83,7 @@ class Owner {
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
+    if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress; finish it before changing or deleting the profile.');
     const materials=await readdir(join(directory,'materials')).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
     if(existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
       fail('blocked','Profile has retained research data; preserve its workspace and materials before deleting or reconfiguring it.');
@@ -151,7 +169,7 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
 export function createDefinition(options: Options = {}): CliDefinition {
   const owner=new Owner(options);
   const definition:CliDefinition={
-    name:'insight-cli',applicationId:'insight-cli',version:'0.1.0',description:'Isolated research contexts and coordinated Ghidra analysis',
+    name:'insight-cli',applicationId:'insight-cli',version:'0.2.0',description:'Isolated research contexts and coordinated Ghidra analysis',
     resources:[owner],permissions:{categories:[{name:'Destructive',description:'Explicit deletion or replacement of retained research data',enabledByDefault:false}]},...(options.runtime?{runtime:options.runtime}:{}),
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
       ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
@@ -186,7 +204,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     builtins:[command('skill [name]','Locate the installed insight-cli or insight-re skill',({args})=>{
       const name=args.name===undefined?'insight-cli':text(args.name);
       if(!['insight-cli','insight-re'].includes(name))fail('notFound','Unknown skill; choose insight-cli or insight-re.');
-      return {version:'0.1.0',name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
+      return {version:'0.2.0',name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
         skills:['insight-cli','insight-re']};
     })],
     commands:[
@@ -311,7 +329,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   };
   return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration),
-        ...extensionCommands(c=>new Extensions(join(c.appArguments.AppDataDirectory,'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...lifecycleCommands(c=>owner.selected(c).lifecycle),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry)};
+      mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
+        ...extensionCommands(c=>new Extensions(join(c.appArguments.AppDataDirectory,'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...runtimeCommands((c,action,quiescent)=>owner.runtime(c,action,quiescent)),...lifecycleCommands(c=>owner.selected(c).lifecycle,c=>new RuntimeManager(c).status()),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry)};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

@@ -22,7 +22,8 @@ changing that project stays blocked; read-only inspection remains available. Par
 export output does not prove success and is preserved. Retain receipts for continuation.
 
 `ghidra server` operates on the configured local or external server. `status` reports connection
-state; `connect` enables shared operations; `disconnect` releases the owned local server or the
+state, including a missing runtime before installation; `start/stop` manage the owned local
+server (stop requires closed contexts). `connect` enables shared operations; `disconnect` releases the owned local server or the
 external connection. Reconnect preserves repositories. Repository/file/history/checkout commands
 require the explicit repository and relevant path. Admin actions require actual server authority
 alongside Factory permissions. Changing ACLs preserves other users and anonymous access.

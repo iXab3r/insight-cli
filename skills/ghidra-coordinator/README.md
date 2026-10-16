@@ -17,14 +17,17 @@ The executable is `insight-cli`. Its global npm executable directory must be on 
 No source checkout, TypeScript build or separate Factory installation is required.
 The pinned Factory IPC runtime is a normal npm dependency fetched from an immutable
 GitHub tarball URL; installation therefore needs npm registry and GitHub access.
-Ghidra 12.1.2 and Java 21 are external dependencies for Ghidra commands.
+Use `insight-cli ghidra install` to deliver the pinned Ghidra/JDK/native/server runtime.
+External Ghidra launchers and Java paths are also supported.
 Help, skill discovery and saving ordinary files do not need Ghidra or Java.
 
 ## Start
 
 ```sh
-insight-cli profile create local --java /path/to/java --ghidra-home /path/to/ghidra
+insight-cli profile create local
 insight-cli --profile local permissions grant Update
+insight-cli --profile local ghidra install
+insight-cli --profile local ghidra status
 insight-cli --profile local ghidra open ./client.exe --session new --json
 ```
 
@@ -53,3 +56,6 @@ and `insight-cli skill insight-re` to locate packaged instructions and reference
 
 Full documentation and verification: [GitHub](https://github.com/iXab3r/insight-cli).
 License: MIT. The bundled GhidraMCP bridge has its own Apache-2.0 license and notice.
+
+Runtime management, local archives and external paths: [managed runtime](references/managed-runtime.md).
+The host debugger and OS permissions are checked separately by `ghidra doctor`.

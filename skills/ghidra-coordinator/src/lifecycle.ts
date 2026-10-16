@@ -78,13 +78,17 @@ export class Lifecycle {
     if(result.errors)fail('partial','Some selected context saves need recovery; completed saves remain retained.',result);return result;
   }
 }
-export function lifecycleCommands(service:(context:CommandContext)=>Lifecycle):CommandDefinition[] {
+export function lifecycleCommands(service:(context:CommandContext)=>Lifecycle,runtimeStatus?:(context:CommandContext)=>Promise<unknown>):CommandDefinition[] {
   return [command('changes','Manage unpublished edits in the selected context',[
     command('discard','Save a retained copy, then restore the opening base without publication',({options:o},c)=>service(c).discard(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:'Destructive',options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the same local discard result'}]})]),
     command('save-all','Save every Ghidra context in the explicit session; outcomes are per context',({options:o},c)=>service(c).saveAll(id(o.session),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:Permission.Update,options:[{flags:'--session <id>',description:'Explicit session whose contexts are saved',required:true},{flags:'--request-id <id>',description:'Retrieve the recorded session save outcomes'}]}),
-    command('status','Verify tool health and inspect the selected private context',({options:o},c)=>service(c).health(scope(o)),{permission:Permission.ReadOnly,options:selectedOptions}),
+    command('status','Inspect the installed runtime, or verify a selected context',({options:o},c)=>{
+      if(o.session===undefined&&o.target===undefined&&runtimeStatus)return runtimeStatus(c);
+      if(o.session===undefined||o.target===undefined)fail('invalid','Context status requires both --session and --target.');
+      return service(c).health(scope(o));
+    },{permission:Permission.ReadOnly,options:selectedOptions.map(option=>({...option,required:false}))}),
     ...(['save','close'] as const).map(name=>command(name,name==='save'?'Save private work without publication':'Save and release the owned context; reopen retains local work',({options:o},c)=>service(c).change(scope(o),name,o.requestId===undefined?undefined:id(o.requestId)),
       {permission:Permission.Update,options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the lifecycle outcome after a lost response'}]}))];
 }

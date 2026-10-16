@@ -1,7 +1,9 @@
 # Setup
 
-Use Node 24+, Ghidra 12.1.2 and a Java 21 JDK. Configure the runtime with Factory's profile
-commands and generated help: `java` and `ghidraHome` select installed dependencies.
+Use Node 24+ and `ghidra install` to deliver Ghidra 12.1.2, JDK 21, native components and
+server support. See [managed runtime](managed-runtime.md) for download/install/offline archives,
+external executable paths, status/doctor and safe removal. Existing Factory profile `java` and
+`ghidraHome` paths remain supported when no managed/external selection exists.
 The package contains the verified GhidraMCP 7.0.0 bridge, its Apache-2.0 license/notice and
 artifact provenance. Its pinned functionality catalog is from source
 `57e37a8bf388b1279cff46378f85be1554548f61`, with SHA256

@@ -1,5 +1,9 @@
 # Ghidra API gaps: native SDK → GhidraMCP → insight-cli
 
+Runtime delivery is now a separate product layer: [complete Ghidra runtime management](MANAGED-GHIDRA-RUNTIME.md)
+covers managed Ghidra/JDK/native/server installation and external executable selection. The pinned
+SDK/MCP inventory below retains its own acceptance identities.
+
 The subsequent [business Gherkin gate](BUSINESS-ACCEPTANCE.md) passes all 25 public-CLI
 scenarios and six prepared-base speedup pairs on real Ghidra. It corrects one research
 edge case: exported-data `Entry Point` xref metadata is retained as a non-navigable row

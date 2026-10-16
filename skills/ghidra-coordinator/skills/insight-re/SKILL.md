@@ -3,7 +3,7 @@ name: insight-re
 description: Investigate shipped programs and binary artifacts with insight-cli and other available tools; retain ordinary research files, coordinate independent agents and publish Ghidra annotations. Use for reverse engineering behavior, not ordinary source-repository browsing.
 ---
 
-# Insight RE 0.1.0
+# Insight RE 0.2.0
 
 Answer the user's research question with inspectable materials. Agents choose the
 investigation; insight-cli supplies applications such as `ghidra` and `artifacts`.

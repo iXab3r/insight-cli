@@ -3,7 +3,10 @@ name: insight-cli
 description: Research several executable inputs through durable independent sessions and isolated Ghidra contexts using the matching insight-cli facade. Agents supply the investigation and interpret results.
 ---
 
-# insight-cli 0.1.0
+# insight-cli 0.2.0
+
+Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
+For archives, external launchers, server lifecycle or removal, read [managed runtime](references/managed-runtime.md).
 
 This skill and its executable helper are one npm package. Run `insight-cli skill` to locate
 these installed resources. Use generated `--help` for syntax; read the references as needed.

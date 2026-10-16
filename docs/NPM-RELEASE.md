@@ -1,5 +1,9 @@
 # npm distribution
 
+This page preserves the published 0.1.0 release. The later [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md)
+is the 0.2.0 candidate and has its own global CLI/Gherkin verifier. Run the historical
+`proof-global-package.mjs` only with its matching 0.1.0 executable/artifact.
+
 The owner authorized npm publication, global installation and verification on 2026-10-16.
 The package is `@eyeauras/insight-cli`; its executable and application ID stay `insight-cli`.
 The earlier unpublished `@ixab3r` artifacts retain their historical verification identities.
