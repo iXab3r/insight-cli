@@ -35,7 +35,15 @@ export async function acquire(a,directory,fetcher=fetch){
 }
 const gh=(...args)=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','pipe'],maxBuffer:4*1024**2}).trim();
 function api(path){return JSON.parse(gh('api',path));}
-function release(recipe){try{return api(`repos/${recipe.repository}/releases/tags/${recipe.tag}`);}catch(e){if(e.stderr?.includes('HTTP 404'))return;throw e;}}
+function release(recipe){
+ try{return api(`repos/${recipe.repository}/releases/tags/${recipe.tag}`);}
+ catch(e){
+  if(!e.stderr?.includes('HTTP 404'))throw e;
+  // The by-tag endpoint does not expose untagged drafts. Reconcile exact drafts through inventory.
+  const pages=JSON.parse(gh('api',`repos/${recipe.repository}/releases?per_page=100`,'--paginate','--slurp'));
+  return pages.flat().find(r=>r.tag_name===recipe.tag);
+ }
+}
 async function readback(recipe,assets,directory,download=true){
  const current=release(recipe);if(!current)throw Error('Release outcome is unknown');
  if(current.assets.length!==assets.length)throw Error('Release asset inventory differs');
