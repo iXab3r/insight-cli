@@ -25,6 +25,8 @@ jobs:
   version:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      record_artifact_id: ${{ steps.reservation.outputs.artifact-id }}
     steps:
       - name: Publish only from main
         env:
@@ -47,20 +49,34 @@ jobs:
         with:
           node-version: 24
       - name: Restore the original version on a re-run
-        if: github.run_attempt != '1'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        id: version-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          name: npm-version-${{ github.run_id }}
-          path: version-record
+          key: npm-version-${{ github.run_id }}-${{ github.sha }}
+          path: version-record/version.json
       - name: Reserve or validate this run's version
         env:
           RELEASE_BUMP: ${{ inputs.bump }}
         run: node scripts/release-version.mjs resolve
-      - name: Retain the version before any package can publish
-        if: github.run_attempt == '1'
+      - name: Save the reservation before any package can publish
+        if: steps.version-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          key: npm-version-${{ github.run_id }}-${{ github.sha }}
+          path: version-record/version.json
+      - name: Make this attempt's version available to the build
+        # Saving a cache can warn rather than fail; confirm the reservation exists first.
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          key: npm-version-${{ github.run_id }}-${{ github.sha }}
+          path: version-record/version.json
+          lookup-only: true
+          fail-on-cache-miss: true
+      - name: Export this attempt's reserved version
+        id: reservation
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: npm-version-${{ github.run_id }}
+          name: npm-version-${{ github.run_id }}-${{ github.run_attempt }}
           path: version-record/version.json
           if-no-files-found: error
           retention-days: 90
@@ -81,8 +97,9 @@ jobs:
           node-version: 24
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: npm-version-${{ github.run_id }}
+          artifact-ids: ${{ needs.version.outputs.record_artifact_id }}
           path: version-record
+          merge-multiple: true
       - name: Apply the reserved version to package and skills
         run: node scripts/release-version.mjs apply
       - run: npm ci --ignore-scripts

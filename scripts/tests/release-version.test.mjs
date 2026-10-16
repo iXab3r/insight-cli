@@ -45,7 +45,7 @@ test('re-run reuses its reserved version without consulting a newer registry',as
 
 test('missing or corrupt reservation never silently increments a re-run',async t=>{
   const root=await fixture(t);let queries=0;
-  await assert.rejects(reserveVersion(root,{...options,attempt:2,latest:async()=>{queries++;return '0.3.0';}}),/original version artifact/);
+  await assert.rejects(reserveVersion(root,{...options,attempt:2,latest:async()=>{queries++;return '0.3.0';}}),/original version reservation/);
   assert.equal(queries,0);
   await reserveVersion(root,options);
   await writeFile(join(root,'version-record/version.json'),'{invalid');

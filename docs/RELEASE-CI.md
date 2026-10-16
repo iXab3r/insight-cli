@@ -18,8 +18,11 @@ requires main. There is no publication trigger on push, PR or tag creation.
 
 ## What runs
 
-1. Resolve the version once and retain `npm-version-<run>` before a build can publish. Re-runs
-   restore that record, validate its run/source/increment and do not query npm to choose again.
+1. Resolve the version once and save its small reservation file under an exact run/commit cache
+   key before a build can publish. Re-runs restore that record, validate its run/source/increment
+   and do not query npm to choose again. Only this version metadata is cached; source, dependencies,
+   compiled code and credentials are not. Each attempt exports its record as
+   `npm-version-<run>-<attempt>` for the build.
 2. Check out the dispatched commit on Node 24 and apply the reserved version. Install locked
    dependencies without lifecycle scripts; run offline tests, isolated package installation and
    the normal pack. Verify that tracked changes are exactly the four expected version inputs;
@@ -36,7 +39,8 @@ requires main. There is no publication trigger on push, PR or tag creation.
    status. It does not repeat the separate native Ghidra acceptance matrix.
 
 Official actions are pinned to commit SHAs. Runs serialize without cancelling a running
-publication. Version records and build artifacts are retained for 90 days, and registry readback is retained as
+publication. Version-record and build artifacts are retained for 90 days; the retry reservation
+is also subject to GitHub cache eviction. Registry readback is retained as
 a separate artifact. Workflow/job summaries provide the source and integrity receipt.
 
 ## First-time publication authorization
@@ -70,9 +74,9 @@ See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) and
 ## Re-runs and failures
 
 **Run workflow** is a new release intent and resolves a new version. **Re-run jobs** keeps the
-original version, even if npm latest has advanced. Missing/corrupt/expired version records fail
+original version, even if npm latest has advanced. Missing/corrupt/evicted reservations fail
 instead of silently allocating another version. If initial version allocation failed before its
-artifact was uploaded, start a new workflow. Package downloads use the exact build artifact ID,
+reservation was saved, start a new workflow. Package downloads use the exact build artifact ID,
 so retrying only a failed publication/verification job can reuse a previous attempt's build.
 
 If this version already exists with identical SHA-512 integrity and `latest` points to it,

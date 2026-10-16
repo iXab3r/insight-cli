@@ -41,7 +41,7 @@ export async function reserveVersion(root,{sourceCommit,runId,bump,attempt,lates
   const file=join(root,'version-record/version.json');
   try{return validate(JSON.parse(await readFile(file,'utf8')),expected);}
   catch(error){if(error.code!=='ENOENT')throw error;}
-  assert.equal(String(attempt),'1','Re-run requires its original version artifact; start a new workflow if it is missing');
+  assert.equal(String(attempt),'1','Re-run requires its original version reservation; start a new workflow if it is missing');
   const registryLatest=await latest();
   const record={schema:1,package:packageName,...expected,registryLatest,version:nextVersion(pkg.version,registryLatest,bump)};
   await mkdir(dirname(file),{recursive:true});
