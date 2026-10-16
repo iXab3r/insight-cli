@@ -73,9 +73,10 @@ async function readTar(file:string,parser:tar.Parser,event:'end'|'close',signal?
 /** Consume local input once; extraction never races later edits to the caller's archive. */
 export async function consumeArchive(path:string,cache:string,artifact:ToolArtifact,checksum?:string,signal?:AbortSignal){
  const {realpath,stat}=await import('node:fs/promises');
- const source=await realpath(path),input=await open(source,constants.O_RDONLY|(constants.O_NOFOLLOW??0)),metadata=await input.stat();if(!metadata.isFile()||metadata.size>2*1024**3)fail('invalid','Local runtime archive must be a regular file below two GiB.');
- await mkdir(cache,{recursive:true,mode:0o700});const temporary=join(cache,'local.partial-'+randomUUID());
+ const source=await realpath(path),input=await open(source,constants.O_RDONLY|(constants.O_NOFOLLOW??0)),temporary=join(cache,'local.partial-'+randomUUID());
  try{
+  const metadata=await input.stat();if(!metadata.isFile()||metadata.size>2*1024**3)fail('invalid','Local runtime archive must be a regular file below two GiB.');
+  await mkdir(cache,{recursive:true,mode:0o700});
   let size=0;const file=await open(temporary,'wx',0o600),hash=createHash('sha256');
   try{for await(const b of input.createReadStream({signal,autoClose:false})){size+=b.length;if(size>2*1024**3)fail('limit','Local archive grew beyond two GiB.');hash.update(b);await file.writeFile(b);}await file.sync();}finally{await file.close();}
   const sha256=hash.digest('hex');if(checksum!==undefined&&checksum.toLowerCase()!==sha256)fail('binding','Local runtime archive differs from its expected SHA256.');

@@ -42,6 +42,7 @@ export async function assertUnused(directory:string,tool:string){
  for(const name of names){if(!/^[a-f0-9-]{36}\.json$/.test(name))continue;
   const record=await readJson<{tool:string;state:string;pid?:number}>(join(root,name));
   if(!record||record.tool!==tool||['exited','failed'].includes(record.state))continue;
+  if(record.state==='unverified')fail('busy','Tool has an unverified process outcome; reconcile it before changing installations.');
   if(!record.pid)fail('busy','Tool has an unresolved process launch; inspect its process record.');
   try{process.kill(record.pid,0);fail('busy','Tool has an active or unverified process; stop it before changing installations.');}
   catch(e){if((e as NodeJS.ErrnoException).code!=='ESRCH')throw e;}
@@ -83,7 +84,7 @@ export async function treeFingerprint(root:string){
    else if(st.isSymbolicLink()){
     const destination=await realpath(at);if(!destination.startsWith((await realpath(root))+sep))fail('binding','Installed component link escapes its owned directory.');
     hash.update('link:'+relative(root,destination));
-   }else if(st.isFile()){for await(const b of createReadStream(at))hash.update(b);}
+   }else if(st.isFile()){const leaf=createHash('sha256');for await(const b of createReadStream(at))leaf.update(b);hash.update('file:'+st.size+':'+leaf.digest('hex')+'\0');}
    else fail('binding','Unsupported tool installation entry.');
   }
  }
