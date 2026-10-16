@@ -183,3 +183,13 @@ test('continuation inherits original loader settings and negated analysis option
   assert.equal(continued.session,opened.session);assert.equal(continued.state,'ready');
   assert.equal(workspace!.model(opened.target).settings.language,'ARM:LE:32:default');
 });
+
+test('an existing session can first open targets already consumed by another tool through CLI and API',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]}),app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>new Fake(w)}));
+ const files=['first.exe','managed.dll','third.exe'].map(name=>join(f.root,name));for(const [i,path]of files.entries())await writeFile(path,'distinct executable '+i);
+ const first=await f.json(app,['ghidra','open',files[0]!,'--session','new']) as Opened;
+ const second=await f.json(app,['targets','add',files[1]!]) as any,third=await f.json(app,['targets','add',files[2]!]) as any;
+ const opened=await f.json(app,['ghidra','open','--target',second.target,'--session',first.session]) as Opened;assert.equal(opened.session,first.session);assert.equal(opened.target,second.target);assert.equal(opened.state,'ready');
+ const rpc=await f.rpc(app,[['ghidra','open','--target',third.target,'--session',first.session]]);assert.equal((rpc[0] as any).result.state,'ready');assert.equal((rpc[0] as any).result.session,first.session);
+ assert.equal((await f.json(app,['sessions','status',first.session]) as any).contexts.length,3);
+});

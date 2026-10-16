@@ -160,6 +160,11 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
       let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
       if(!selected)return await run(input,c);
       const services=owner.selected(c);
+      // First open of an already known target reserves its context inside Research.open.
+      // Existing contexts still use the command boundary to order automatic sync phases.
+      if(path[1]==='open')try{services.workspace.context(selected);}catch(error){
+        if(error instanceof CliError&&error.code==='coordinator.notFound')return await run(input,c);throw error;
+      }
       return await services.research.boundary(selected,async()=>{
         const excluded=['open','merge','refresh','sync-policy','close','changes','debugger','ui','version-tracking','archive','projects','repository','server','formats','libraries','plugins'];
         const eligible=entry.permission!==Permission.ReadOnly&&entry.permission!==undefined&&!excluded.includes(path[1]!)&&!['ghidra types archive-export','ghidra documentation transfer'].includes(name);
