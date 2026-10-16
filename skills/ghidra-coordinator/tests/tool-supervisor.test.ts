@@ -5,9 +5,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
 import {spawn} from 'node:child_process';
-import {launchProcess,processStatus,listProcesses,terminateProcess} from '../src/tool-runtime/supervisor.js';
+import {launchProcess as startProcess,type TrackedChild,processStatus,listProcesses,terminateProcess} from '../src/tool-runtime/supervisor.js';
 import {atomicWrite,assertUnused} from '../src/tool-runtime/store.js';
-async function fixture(t:test.TestContext){const root=await mkdtemp(join(tmpdir(),'tool-supervisor-'));t.after(()=>rm(root,{recursive:true,force:true}));return root;}
+const children=new Map<string,TrackedChild[]>();
+async function launchProcess(...args:Parameters<typeof startProcess>){const child=await startProcess(...args);children.set(args[0],[...(children.get(args[0])??[]),child]);return child;}
+async function fixture(t:test.TestContext){const root=await mkdtemp(join(tmpdir(),'tool-supervisor-'));t.after(async()=>{for(const child of children.get(root)??[]){if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');await child.toolClosed.catch(()=>{});}children.delete(root);await rm(root,{recursive:true,force:true});});return root;}
 test('persistent tool is durably registered before execution and stop/kill verify ownership',async t=>{
  const root=await fixture(t),marker=join(root,'started');
  const child=await launchProcess(root,{tool:'fixture',role:'service',installation:'fixture',session:'s_a',target:'t_a'},process.execPath,['-e','require("node:fs").writeFileSync(process.argv[1],"started");setInterval(()=>{},1000)',marker],{detached:process.platform!=='win32',stdio:'ignore'});

@@ -34,12 +34,14 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
   let child:TrackedChild;try{child=spawn(gated?process.execPath:executable,gated?['--no-warnings',fileURLToPath(new URL('./launch-worker.js',import.meta.url)),directory,id,String(fd)]:args,
    {cwd:root,...options,stdio,windowsHide:true,env:gated?{PATH:environment.PATH,HOME:root,TMPDIR:root}:environment}) as TrackedChild;}catch(error){Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);throw error;}
   const closed=new Promise<void>((ok,bad)=>{child.on('error',error=>{if(!child.pid)bad(error);});child.once('close',ok);});void closed.catch(()=>{});
-  Object.assign(child,{toolProcessId:id,toolClosed:closed});const handle={child,closed,record};owned.set(ownedKey(directory,id),handle);if(control.finalize===false)void closed.then(()=>{owned.delete(ownedKey(directory,id));},()=>{owned.delete(ownedKey(directory,id));});
-  if(control.finalize!==false)void closed.then(async()=>{
+  const handle:Owned={child,closed,record};owned.set(ownedKey(directory,id),handle);
+  const finalized=control.finalize===false?closed:closed.then(async()=>{
    const current=await readJson<ProcessRecord>(path)??record;
    if(current.state!=='failed'&&current.state!=='unverified')Object.assign(current,{state:'exited',exitCode:child.exitCode,signal:child.signalCode,endedAt:new Date().toISOString(),outcome:current.requestedStop==='kill'?'killed':current.requestedStop==='stop'?'stopped':'completed'});
-   await atomicWrite(path,current);owned.delete(ownedKey(directory,id));
-  },async()=>{Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);owned.delete(ownedKey(directory,id));}).catch(()=>{});
+   await atomicWrite(path,current);
+  },async()=>{Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);});
+  handle.closed=finalized.finally(()=>{owned.delete(ownedKey(directory,id));});void handle.closed.catch(()=>{});
+  Object.assign(child,{toolProcessId:id,toolClosed:handle.closed});
   try{
    await control.onSpawn?.(child);if(!child.pid)throw Error('Owned tool spawn did not obtain a PID');
    if(gated){
@@ -58,7 +60,7 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
    return child;
   }catch(error){
    if(child.exitCode===null&&child.signalCode===null)try{child.kill('SIGKILL');}catch{}
-   await Promise.race([closed.catch(()=>{}),delay(2000)]);
+   await Promise.race([handle.closed.catch(()=>{}),delay(2000)]);
    Object.assign(record,{state:child.exitCode!==null||child.signalCode!==null?'failed':'unverified',phase:'launch_failed'});await atomicWrite(path,record);throw error;
   }
  },control.signal);
@@ -67,6 +69,7 @@ export async function processStatus(directory:string,id:string,verify?:Ownership
  if(!/^[a-f0-9-]{36}$/.test(id))throw new CliError('Invalid process identity.',{code:'tool.process.invalid'});
  const record=await readJson<ProcessRecord>(join(directory,'runtime/processes',id+'.json'));if(!record||record.id!==id)throw new CliError('Unknown tool process.',{code:'tool.process.missing'});
  if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory)))return {...record,state:'unverified',phase:'profile_binding_changed'};
+ const finishing=owned.get(ownedKey(directory,id));if(finishing&&(finishing.child.exitCode!==null||finishing.child.signalCode!==null)){await finishing.closed;return processStatus(directory,id,verify);}
  if(['exited','failed'].includes(record.state))return record;
  if(!record.pid){
   try{process.kill(record.ownerPid,0);return record;}catch{return {...record,state:record.gated?'failed':'unverified',phase:'owner_lost_before_pid'};}
@@ -101,6 +104,7 @@ export async function terminateProcess(directory:string,id:string,force:boolean,
   for(let i=0;i<100;i++){if(!await processIdentity(record.pid))break;await delay(50);}
   if(await processIdentity(record.pid))throw new CliError('Owned process did not stop; its record is retained.',{code:'tool.process.busy'});
  }
+ await owned.get(ownedKey(directory,id))?.closed;
  current={...(await readJson<ProcessRecord>(path)??record),state:'exited',outcome:force?'killed':'stopped',endedAt:new Date().toISOString()};await atomicWrite(path,current);
  return {process:id,state:force?'killed':'stopped',interrupted:force,tool:record.tool,session:record.session,target:record.target};
 }
