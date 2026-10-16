@@ -134,7 +134,7 @@ jobs:
           }
           let published=await inspect(),status=0;
           if(!published){
-            const result=spawnSync('npm',['publish','release/package.tgz','--access','public',
+            const result=spawnSync('npm',['publish','./release/package.tgz','--access','public',
               '--tag','latest','--ignore-scripts','--provenance'],{stdio:'inherit',timeout:180000});
             status=result.status??1;
           }

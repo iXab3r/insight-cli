@@ -34,7 +34,7 @@ for(const scenario of [
     await writeFile(join(root,'fixture.json'),JSON.stringify({scenario,manifest}));
     await writeFile(join(root,'publish.mjs'),program);
     const npm=join(root,'bin','npm');
-    const stub="require('node:fs').writeFileSync('npm-called.json',JSON.stringify(process.argv.slice(2)));process.exit(Number(process.env.FIXTURE_NPM_EXIT)||0);";
+    const stub="const args=process.argv.slice(2);if(!args[1]?.startsWith('./'))throw Error('npm archive argument must be an explicit local path, not a GitHub shorthand');require('node:fs').writeFileSync('npm-called.json',JSON.stringify(args));process.exit(Number(process.env.FIXTURE_NPM_EXIT)||0);";
     await writeFile(npm,'#!/usr/bin/env node\n'+stub,{mode:0o755});
     await writeFile(join(root,'registry.mjs'),`
       import {readFileSync,existsSync} from 'node:fs';
@@ -54,7 +54,7 @@ for(const scenario of [
     assert.equal(succeeded,scenario.success,output);
     let args;try{args=JSON.parse(await readFile(join(root,'npm-called.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
     assert.equal(args?1:0,scenario.calls);
-    if(args)assert.deepEqual(args,['publish','release/package.tgz','--access','public','--tag','latest','--ignore-scripts','--provenance']);
+    if(args)assert.deepEqual(args,['publish','./release/package.tgz','--access','public','--tag','latest','--ignore-scripts','--provenance']);
     if(scenario.success){
       const receipt=JSON.parse(await readFile(join(root,'release/registry.json'),'utf8'));
       assert.equal(receipt.integrity,manifest.integrity);assert.equal(receipt.latest,'0.2.0');
