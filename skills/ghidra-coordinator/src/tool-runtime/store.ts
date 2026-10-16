@@ -30,11 +30,11 @@ export async function withToolLock<T>(directory:string,tool:string,action:()=>Pr
  });
 }
 export function toolUseCount(directory:string,tool:string){return uses.get(key(directory,tool))??0;}
-export async function withToolUse<T>(directory:string,tool:string,acquire:()=>Promise<T>):Promise<{value:T;release:()=>void}>{
+export async function withToolUse<T>(directory:string,tool:string,acquire:()=>Promise<T>,signal?:AbortSignal):Promise<{value:T;release:()=>void}>{
  return withToolLock(directory,tool,async()=>{
   const value=await acquire(),k=key(directory,tool);uses.set(k,(uses.get(k)??0)+1);let released=false;
   return {value,release(){if(released)return;released=true;const n=(uses.get(k)??1)-1;if(n)uses.set(k,n);else uses.delete(k);}};
- });
+ },signal);
 }
 export async function assertUnused(directory:string,tool:string){
  if(toolUseCount(directory,tool))fail('busy','Tool installation is reserved by an active operation.');

@@ -2,7 +2,7 @@ import type {CommandContext} from '@eyeauras/cli-factory';
 import {mkdir,stat,rm} from 'node:fs/promises';
 import {join,resolve,sep} from 'node:path';
 import {cacheArtifact,consumeArchive,extractArchive,fileSha256,archiveName} from './archives.js';
-import {atomicWrite,readJson,toolRoot,withToolLock,installationStage,removeInstallation,treeFingerprint,assertUnused} from './store.js';
+import {atomicWrite,readJson,toolRoot,withToolLock,installationStage,removeInstallation,treeFingerprint,assertUnused,withToolUse} from './store.js';
 import type {ToolArtifact,ToolInstallation} from './definition.js';
 import {digest,fail,text} from '../model.js';
 export interface ToolLaunch {executable:string;arguments:string[];environment:Record<string,string>}
@@ -61,6 +61,10 @@ export class ToolInstaller {
   if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Selected tool receipt differs from its verified installation.');
   const actual=selected.mode==='external'?await fileSha256(selected.executable,this.c.signal):await treeFingerprint(root);
   if(actual!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
+ }
+ async use<T>(action:(selection:SelectedTool)=>Promise<T>):Promise<T>{
+  const lease=await withToolUse(this.directory,this.descriptor.id,()=>this.selected(),this.c.signal);
+  try{return await action(lease.value);}finally{lease.release();}
  }
  async selected(){
   const selected=await this.receipt();if(!selected||selected.uninstalledAt)fail('configuration','Tool is not installed; run insight-cli '+this.descriptor.id+' install.');
