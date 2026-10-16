@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "auto-versioned preview and full/partial retries; no new registry publication",
+  "sourceCommit": "12329d662ec64601fba6eb5427abc6ee7d22ab07",
+  "package": "@eyeauras/insight-cli",
+  "selection": {
+    "sourceVersion": "0.2.0",
+    "observedNpmLatest": "0.2.0",
+    "bump": "patch",
+    "selectedVersion": "0.2.1",
+    "options": [
+      "patch",
+      "minor",
+      "major",
+      "none"
+    ],
+    "default": "patch",
+    "commitsVersionBackToSource": false
+  },
+  "workflow": {
+    "file": "release-npm.yml",
+    "runId": 38964728835,
+    "url": "https://github.com/iXab3r/insight-cli/actions/runs/38964728835",
+    "publish": false,
+    "attempts": [
+      {
+        "attempt": 1,
+        "mode": "initial preview",
+        "outcome": "success"
+      },
+      {
+        "attempt": 2,
+        "mode": "re-run all jobs",
+        "outcome": "success"
+      },
+      {
+        "attempt": 3,
+        "mode": "re-run verify-global only",
+        "outcome": "success",
+        "reusedBuildArtifactId": 12073843545
+      }
+    ]
+  },
+  "artifact": {
+    "version": "0.2.1",
+    "files": 176,
+    "bytes": 1005335,
+    "sha256": "d8a15d0df27bc1c5b85e5efb6e50cd2b8dfe0fdd8e0f8ea44188258f44ee7755",
+    "integrity": "sha512-kHsH4BV3k4SPESiuj4KwglDIjgza0SPpUiNthoAq+7cQIdbtMadfrJbDNnzZOSPC9qUw1WY9fd0oVuiDUjHDkg==",
+    "fullRerunByteIdentical": true
+  },
+  "checks": {
+    "sameVersionOnFullRerun": true,
+    "sameReservationOnFullRerun": true,
+    "sameArchiveOnFullRerun": true,
+    "partialRerunUsesOriginalArtifactId": true,
+    "globalPreviewInstall": true,
+    "cliVersionMatchesPackage": true,
+    "skillApiVersionMatchesPackage": true,
+    "bothSkillHeadingsMatchPackage": true,
+    "fileCheckpointAndPassiveStatus": true,
+    "unexpectedBuildChangesRejected": true,
+    "missingReservationDoesNotAllocate": true,
+    "noNewNpmTokenOrRepositoryWritePermission": true
+  },
+  "tests": {
+    "offlineApplication": 154,
+    "offlineReleaseAndVersion": 11,
+    "isolatedPackageInstall": true,
+    "actionlint": true
+  },
+  "reservation": {
+    "storage": "exact GitHub cache key for run/source commit; validated JSON only",
+    "cacheContainsSourceDependenciesOrCredentials": false,
+    "presenceConfirmedBeforeBuild": true,
+    "onLoss": "fail; never allocate another version for the same run"
+  },
+  "preflight": {
+    "runId": 38963936232,
+    "initialPreviewAndPartialRetryPassed": true,
+    "fullRetryFailedSafelyBeforeBuild": "original version artifact was unavailable; independent reservation storage added"
+  },
+  "sourceFilesSha256": {
+    ".github/workflows/release-npm.yml": "d7520173abaa34575b41a33032c403ec616165ea4ccb672745baa25117184962",
+    "scripts/release-version.mjs": "bac1951dc3c3f85f65ac484debc476cbac788f4dad619204e74de26f2c35a5a0",
+    "scripts/tests/release-version.test.mjs": "2d2b8d83c596412c7b0b8971f11a838f4196f006be0ac524b920a6ba837185d8",
+    "scripts/tests/release-workflow.test.mjs": "00441ddfebd57daa710158b1c9bf001445f732b06d0a5dc145858cc00d5b1adb",
+    "scripts/test-package.mjs": "9d88e75f7248f396c8e36517fffbf918390c556f63654b97694ffc021262e503",
+    "skills/ghidra-coordinator/src/cli.ts": "b58254109f10ae0411bfd4182117d585f057f881dc7dee21e85c872b1a50f4c1",
+    "skills/ghidra-coordinator/src/package-version.ts": "932f07186addc3e885fc45003b1a69d435d4d7bfedf04ef13e04586ff98526ed"
+  },
+  "boundaries": [
+    "The registry publication of 0.2.0 retains its own receipt; preview 0.2.1 was not published.",
+    "This version-metadata change does not repeat or rebind native Ghidra acceptance.",
+    "Missing or evicted reservations stop a re-run; a new Run workflow is a new release intent."
+  ]
+}

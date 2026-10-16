@@ -105,3 +105,17 @@ Clean builds explicitly set the CLI entrypoint's POSIX executable mode before pr
 so a pre-existing output file cannot change archive integrity. npm receives `./release/package.tgz`;
 the `./` is required to avoid GitHub-shorthand parsing. Both preflight corrections are covered
 by packaging/publication checks.
+
+## Auto-version verification
+
+[Preview run 38964728835](https://github.com/iXab3r/insight-cli/actions/runs/38964728835)
+selects 0.2.1 from source/latest 0.2.0 and passes global archive installation. A full re-run
+restores the same reservation and produces an identical archive; a subsequent verify-only
+re-run explicitly downloads the prior build artifact ID and passes. All three attempts pass.
+[Auto-version receipt](verification/release-auto-version.json) records hashes, source and scope.
+The preview does not publish 0.2.1; npm 0.2.0 retains its historical release receipt.
+
+The first retry test exposed unavailable prior-attempt artifacts during a full re-run. The
+reservation now survives independently of those artifacts and is exported again for each attempt.
+If the reservation is evicted, the run fails safely. Six version-selection/mutation/recovery
+cases and five publication cases pass alongside the 154 application tests and isolated package gate.
