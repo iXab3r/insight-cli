@@ -7,7 +7,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {runtimeRoot,runtimeSelection,runtimeValues,type RuntimeSelection} from './runtime-selection.js';
 import {runtimeCatalog,type RuntimeArtifact} from './runtime-catalog.js';
-import {cacheArtifact,extractArchive,fileSha256} from './runtime-archives.js';
+import {cacheArtifact,extractArchive,fileSha256} from './tool-runtime/archives.js';
 import {nativeInputs,nativeHelpers,nativeJvmDirectories,pinnedMcpJar,type NativeInputs} from './native-inputs.js';
 import {GhidraServer,stopLocalServer} from './server.js';
 import {fail,text,digest,object} from './model.js';

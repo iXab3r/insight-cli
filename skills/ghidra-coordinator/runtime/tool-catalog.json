@@ -1,0 +1,128 @@
+{
+  "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77": {
+    "name": "dotnet-runtime-10.0.13-linux-x64.tar.gz",
+    "sha256": "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77",
+    "size": 36648012,
+    "format": "tgz",
+    "root": ".",
+    "license": "MIT and included LICENSE/ThirdPartyNotices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-10.0.13-r1/dotnet-runtime-10.0.13-linux-x64.tar.gz"
+  },
+  "fdf7ef21688338ad5d1d99d7eca7f3cf2e159c86e552d3f5acd0553b11c80ca6": {
+    "name": "dotnet-runtime-10.0.13-osx-arm64.tar.gz",
+    "sha256": "fdf7ef21688338ad5d1d99d7eca7f3cf2e159c86e552d3f5acd0553b11c80ca6",
+    "size": 33248881,
+    "format": "tgz",
+    "root": ".",
+    "license": "MIT and included LICENSE/ThirdPartyNotices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-10.0.13-r1/dotnet-runtime-10.0.13-osx-arm64.tar.gz"
+  },
+  "50fd6ea005731494a6144fd4617746f4155fdc0f3682d0ba7292eac9e9bf46e3": {
+    "name": "dotnet-runtime-10.0.13-osx-x64.tar.gz",
+    "sha256": "50fd6ea005731494a6144fd4617746f4155fdc0f3682d0ba7292eac9e9bf46e3",
+    "size": 35605688,
+    "format": "tgz",
+    "root": ".",
+    "license": "MIT and included LICENSE/ThirdPartyNotices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-10.0.13-r1/dotnet-runtime-10.0.13-osx-x64.tar.gz"
+  },
+  "8db74a746baa450925d01325a2108ccf6ac39af4018047475292ae155c013d89": {
+    "name": "dotnet-runtime-10.0.13-win-x64.zip",
+    "sha256": "8db74a746baa450925d01325a2108ccf6ac39af4018047475292ae155c013d89",
+    "size": 36970749,
+    "format": "zip",
+    "root": ".",
+    "license": "MIT and included LICENSE/ThirdPartyNotices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-10.0.13-r1/dotnet-runtime-10.0.13-win-x64.zip"
+  },
+  "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725": {
+    "name": "ghidra-12.1.2-arm64_sonoma.tar.gz",
+    "sha256": "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725",
+    "size": 470315169,
+    "format": "tgz",
+    "root": "ghidra/12.1.2/libexec",
+    "license": "Apache-2.0 and included third-party licenses",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ghidra-12.1.2-r1/ghidra-12.1.2-arm64_sonoma.tar.gz"
+  },
+  "90aa942184fca2337ad0a123f818f37372ea642e8e69e969d45cc144a6f26fdf": {
+    "name": "ghidra-12.1.2-arm64_sequoia.tar.gz",
+    "sha256": "90aa942184fca2337ad0a123f818f37372ea642e8e69e969d45cc144a6f26fdf",
+    "size": 470268922,
+    "format": "tgz",
+    "root": "ghidra/12.1.2/libexec",
+    "license": "Apache-2.0 and included third-party licenses",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ghidra-12.1.2-r1/ghidra-12.1.2-arm64_sequoia.tar.gz"
+  },
+  "079007d8a3a477c8d5901e6596947612d86c8641956424a2bcb71ecd798bedcc": {
+    "name": "ghidra-12.1.2-arm64_tahoe.tar.gz",
+    "sha256": "079007d8a3a477c8d5901e6596947612d86c8641956424a2bcb71ecd798bedcc",
+    "size": 470255318,
+    "format": "tgz",
+    "root": "ghidra/12.1.2/libexec",
+    "license": "Apache-2.0 and included third-party licenses",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ghidra-12.1.2-r1/ghidra-12.1.2-arm64_tahoe.tar.gz"
+  },
+  "e30f8c84b64331f87f6ef1890cbdded6672bb7fcc8b674794ac93e4b3e62ad2b": {
+    "name": "ghidra-12.1.2-sonoma.tar.gz",
+    "sha256": "e30f8c84b64331f87f6ef1890cbdded6672bb7fcc8b674794ac93e4b3e62ad2b",
+    "size": 470418808,
+    "format": "tgz",
+    "root": "ghidra/12.1.2/libexec",
+    "license": "Apache-2.0 and included third-party licenses",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ghidra-12.1.2-r1/ghidra-12.1.2-sonoma.tar.gz"
+  },
+  "b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d": {
+    "name": "ghidra-12.1.2.zip",
+    "sha256": "b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d",
+    "size": 572803866,
+    "format": "zip",
+    "root": "ghidra_12.1.2_PUBLIC",
+    "license": "Apache-2.0 and included third-party licenses",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ghidra-12.1.2-r1/ghidra-12.1.2.zip"
+  },
+  "74c07facaf1850c78a779fc509031f756e1c0de24b1a536f3363d7ef81ce001f": {
+    "name": "ilspycmd.11.1.0.9782.zip",
+    "sha256": "74c07facaf1850c78a779fc509031f756e1c0de24b1a536f3363d7ef81ce001f",
+    "size": 4632113,
+    "format": "zip",
+    "root": "tools/net10.0/any",
+    "license": "MIT and included dependency notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ilspy-11.1.0.9782-r1/ilspycmd.11.1.0.9782.zip"
+  },
+  "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201": {
+    "name": "temurin-21.0.11+10-darwin-arm64.tar.gz",
+    "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",
+    "size": 200030394,
+    "format": "tgz",
+    "root": "jdk-21.0.11+10.jdk/Contents/Home",
+    "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-darwin-arm64.tar.gz"
+  },
+  "34180eb03e6d207c388cce3da668f6cc7cd7508c185c24782fadac2c9c0e66f9": {
+    "name": "temurin-21.0.11+10-darwin-x64.tar.gz",
+    "sha256": "34180eb03e6d207c388cce3da668f6cc7cd7508c185c24782fadac2c9c0e66f9",
+    "size": 194283642,
+    "format": "tgz",
+    "root": "jdk-21.0.11+10.jdk/Contents/Home",
+    "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-darwin-x64.tar.gz"
+  },
+  "4b2220e232a97997b436ca6ab15cbf70171ecff52958a46159dfa5a8c44ca4de": {
+    "name": "temurin-21.0.11+10-linux-x64.tar.gz",
+    "sha256": "4b2220e232a97997b436ca6ab15cbf70171ecff52958a46159dfa5a8c44ca4de",
+    "size": 207513939,
+    "format": "tgz",
+    "root": "jdk-21.0.11+10",
+    "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-linux-x64.tar.gz"
+  },
+  "d3625e7cadf23787ea540229544b6e2ab494b3b54da1801879e583e1dfee0a64": {
+    "name": "temurin-21.0.11+10-win32-x64.zip",
+    "sha256": "d3625e7cadf23787ea540229544b6e2ab494b3b54da1801879e583e1dfee0a64",
+    "size": 205073954,
+    "format": "zip",
+    "root": "jdk-21.0.11+10",
+    "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-win32-x64.zip"
+  }
+}

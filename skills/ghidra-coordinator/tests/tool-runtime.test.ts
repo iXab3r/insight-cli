@@ -20,3 +20,16 @@ test('Ghidra and one-shot definitions share Factory lifecycle, permission gates 
  assert.throws(()=>tool('bad',[{id:'a',version:'1',artifacts:[],dependencies:['a']}]),/Cyclic/);
  assert.throws(()=>tool('bad',[{id:'a',version:'1',artifacts:[],dependencies:['missing']}]),/Unknown/);
 });
+test('shared cache validates cancellation and declared size without activating partial bytes',async t=>{
+ const {mkdtemp,rm,stat}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {cacheArtifact}=await import('../src/tool-runtime/archives.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-cache-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const a={name:'fixture',url:'https://example.invalid/tool',sha256:'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',size:5,format:'zip' as const,root:'.',license:'Fixture'};
+ const aborted=new AbortController();aborted.abort();let calls=0;
+ const fetcher=(async()=>{calls++;return new Response('hello');}) as typeof fetch;
+ await assert.rejects(cacheArtifact(a,root,fetcher,aborted.signal));assert.equal(calls,0);
+ await assert.rejects(cacheArtifact({...a,size:6},root,fetcher,new AbortController().signal),/size/);
+ await assert.rejects(stat(join(root,a.sha256+'.zip')));
+ const results=await Promise.all([cacheArtifact(a,root,fetcher,new AbortController().signal),cacheArtifact(a,root,fetcher,new AbortController().signal)]);
+ assert.equal(results[0],results[1]);
+});
