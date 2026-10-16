@@ -1,5 +1,16 @@
 # Verification scope
 
+## Automation/Gherkin connection
+
+[Bootstrap evidence](automation-bootstrap.json) records two offline Gherkin scenarios,
+one installed native multi-agent Gherkin scenario and the existing 128 offline tests.
+The native bridge retains two sessions, two EXEs, four contexts, merge/refresh,
+conflict and owner/server restart assertions. Discovery finds four scenarios; an empty
+selection is explicitly rejected. Scenario and command wall times are recorded separately
+from build/restore. The complete 33-group gate and the proposed one-versus-three Ghidra
+throughput comparison were not executed by this connection check. See
+[setup, CI access and measurement boundaries](../ACCEPTANCE-AUTOMATION.md).
+
 ## Interrupted initial import
 
 [First-import recovery evidence](initial-import-recovery.json) records four real production-EXE

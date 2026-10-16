@@ -46,6 +46,12 @@ node skills/ghidra-coordinator/dist/src/bin.js --help
 node skills/ghidra-coordinator/dist/src/bin.js skill
 ```
 
+[Gherkin acceptance](docs/ACCEPTANCE-AUTOMATION.md) connects the pinned
+EyeAuras.Automation runner to existing offline and native integration checks. Its
+development setup requires .NET 10 and access to the private Automation dependency;
+`npm run test:acceptance` selects the offline Gherkin smoke scenarios. The business
+scenario hierarchy and a measured one-versus-three Ghidra comparison are the next design step.
+
 The canonical npm helper and its progressive skill live in `skills/ghidra-coordinator`; the npm
 package is `@ixab3r/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared

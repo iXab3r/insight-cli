@@ -1,0 +1,3 @@
+[submodule "tests/vendor/EyeAuras.Automation"]
+	path = tests/vendor/EyeAuras.Automation
+	url = https://github.com/iXab3r/EyeAuras.Automation.git

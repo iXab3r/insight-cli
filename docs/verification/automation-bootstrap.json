@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "completedAt": "2026-10-16T06:38:12.128327+00:00",
+  "sourceBaseRevision": "a23c8a5c6dff73a1c3f5125a62b99abad61c7a69",
+  "automationCommit": "b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033",
+  "runtime": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "dotnetSdk": "10.0.303",
+    "node": "24",
+    "ghidra": "12.1.2",
+    "java": "21"
+  },
+  "offlineProductTests": 128,
+  "checks": {
+    "offline": {
+      "outcome": "passed",
+      "exitCode": 0,
+      "cleanupComplete": true,
+      "scenarios": [
+        {
+          "scenario": "The installed package exposes the agent interface without its checkout",
+          "elapsedSeconds": 3.28,
+          "commandElapsedSeconds": 3.277,
+          "exitCode": 0,
+          "testFailed": false,
+          "cleanupComplete": true
+        },
+        {
+          "scenario": "Session commands satisfy the existing offline integration checks",
+          "elapsedSeconds": 0.529,
+          "commandElapsedSeconds": 0.511,
+          "exitCode": 0,
+          "testFailed": false,
+          "cleanupComplete": true
+        }
+      ]
+    },
+    "native": {
+      "outcome": "passed",
+      "exitCode": 0,
+      "cleanupComplete": true,
+      "scenarios": [
+        {
+          "scenario": "Independent CLI processes retain isolated work and publish shared results",
+          "elapsedSeconds": 239.227,
+          "commandElapsedSeconds": 239.204,
+          "exitCode": 0,
+          "testFailed": false,
+          "cleanupComplete": true
+        }
+      ]
+    },
+    "emptySelection": {
+      "outcome": "failed",
+      "exitCode": 1,
+      "cleanupComplete": true
+    },
+    "discovery": {
+      "outcome": "passed",
+      "exitCode": 0,
+      "cleanupComplete": true
+    }
+  },
+  "nativeReceipt": {
+    "scope": "installed native Factory facade IPC/OS secrets",
+    "artifactSha256": "f14ec740b4ff1f91fb04e7aff18a6fc1bd664faec4e3d5c4569f2ba25f9d9560",
+    "sessions": 2,
+    "targets": 2,
+    "contexts": 4,
+    "parallelCliProcesses": true,
+    "independentPrivateViews": true,
+    "explicitMergeRefresh": true,
+    "conflictRetainedAfterOwnerRestart": true,
+    "managedServerRestartRetainsWork": true,
+    "faultPhases": [],
+    "automaticFaultPhases": [],
+    "limitations": [
+      "tiny owned static PE inputs",
+      "test-only barriers and isolated application identity",
+      "debugger/archive/full catalog final gate remains"
+    ]
+  },
+  "scope": {
+    "discoveredGherkinScenarios": 4,
+    "executedOfflineGherkinScenarios": 2,
+    "embeddedOfflineCliChecks": 8,
+    "executedNativeGherkinScenarios": 1,
+    "complete33GroupGateExecuted": false,
+    "comparativeOneVersusThreeBenchmarkExecuted": false,
+    "githubGherkinWorkflowExecuted": false,
+    "ciRequiresSecret": "AUTOMATION_READ_TOKEN; read-only private upstream Contents access"
+  },
+  "sourceHashes": {
+    ".gitmodules": "39c3dc845db235c46117995bc5ba013e002e5357f62c7a3e7383530f37666ad1",
+    ".github/workflows/acceptance.yml": "555e4cfdf4898ff17cdba59861b34d1d6462eafbb7f4bb6b9e22231693450fac",
+    "global.json": "20c93ca7812d0a9825eef71217156f95ab2f4fe5aadfeb22ebc1c24b630018d3",
+    "automation.json": "d67571d086acb7f6ab1ca59c844524d13ab9210a34428c8feb621c9cb791de43",
+    "package.json": "501c2f3dc89873a58582a30750bf6824379b05b03fab9f0dc9c55db852af9749",
+    "scripts/run-automation.mjs": "aba76bfe7e13acbdba839390473901a2a07cc959025d4b610b2f30caca8a1717",
+    "tests/acceptance/Bindings/IntegrationSteps.cs": "6cef6b8bc3c87bd1855f7b18c490ec96aacbec56006dc429243c7901cc490c39",
+    "tests/acceptance/Features/IntegrationSmoke.feature": "cc55a62c6f4761b4b0bf48ac4c24c40826d6aeda8815df927d910e9c0af78e0d",
+    "tests/acceptance/Features/NativeIntegration.feature": "56cf4e4cde9d3d7202c97eb7fb48765777440a90e773e34ff48f1ad3afe832b1",
+    "tests/acceptance/Insight.Acceptance.csproj": "35f61f28c73557bcd1a15634766937d76c589c4495eb8ec6186cb2f0c77c0931",
+    "tests/acceptance/packages.lock.json": "a08cf3e992537688d05232f33fdacfe43abcb235f23a1c62254fcab8a3d9fdc7",
+    "tests/automation/Host/Insight.Automation.Host.csproj": "6bee4ad3f71501ab03dff699345ed9a212282e7f4a1c6736a099e91be4919a9d",
+    "tests/automation/Host/Program.cs": "6d414002d1acd8e20ad656305275858dd72a796b5e70e792b260e1c76edab65e",
+    "tests/automation/Host/packages.lock.json": "e762ac56d1f0fcccc84fce7449c370ba975b6541823eed20113c40ec38d31423"
+  }
+}

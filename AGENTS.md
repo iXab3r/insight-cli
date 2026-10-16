@@ -16,6 +16,7 @@ milestone complete using prototype evidence alone or reopen confirmed owner choi
 | `skills/ghidra-coordinator/**` | [coordinator maintainer](docs/roles/coordinator-maintainer.md) |
 | `SKILL.md`, references, packaging | [skill maintainer](docs/roles/skill-maintainer.md) |
 | CI, dependency updates, releases | [repository maintainer](docs/roles/repository-maintainer.md) |
+| `tests/acceptance/**`, Automation runner | [Gherkin acceptance](docs/ACCEPTANCE-AUTOMATION.md) |
 
 Factory owns commands, output, profiles, secrets, permissions and IPC lifecycle. Do not copy
 its core or build helper. Helpers live canonically under the skill npm workspace. Add another

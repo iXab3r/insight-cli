@@ -11,7 +11,11 @@
     "test": "npm run build && npm run test:coverage && node --test skills/ghidra-coordinator/dist/tests/*.test.js",
     "test:coverage": "node scripts/audit-coverage.mjs --summary",
     "pack:cli": "node scripts/pack-cli.mjs",
-    "test:package": "node scripts/test-package.mjs"
+    "test:package": "node scripts/test-package.mjs",
+    "automation": "node scripts/run-automation.mjs",
+    "test:acceptance": "node scripts/run-automation.mjs test --suite acceptance --tag offline --property RestoreLockedMode=true",
+    "test:acceptance:native": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag facade --property RestoreLockedMode=true --timeout-seconds 2400",
+    "test:acceptance:full": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag full --property RestoreLockedMode=true --timeout-seconds 18000"
   },
   "engines": {
     "node": ">=24"
