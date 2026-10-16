@@ -15,7 +15,8 @@
     "automation": "node scripts/run-automation.mjs",
     "test:acceptance": "node scripts/run-automation.mjs test --suite acceptance --tag offline --property RestoreLockedMode=true",
     "test:acceptance:native": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag facade --property RestoreLockedMode=true --timeout-seconds 2400",
-    "test:acceptance:full": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag full --property RestoreLockedMode=true --timeout-seconds 18000"
+    "test:acceptance:full": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag full --property RestoreLockedMode=true --timeout-seconds 18000",
+    "test:business": "node scripts/business/run.mjs"
   },
   "engines": {
     "node": ">=24"

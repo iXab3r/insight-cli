@@ -13,8 +13,11 @@ branches and requested documentation before implementation. BS-23 requires demon
 one-versus-three Ghidra acceleration on a prepared base; BS-24 measures cold start
 separately without a required cold-start speedup. A 1.5x margin has not been agreed.
 The catalogue owns the acceptance criteria and measurement boundaries. Its executable
-business scenarios and benchmark are planned; earlier technical acceptance does not
-mark these scenarios complete.
+Gherkin workflows and benchmark are now implemented; [business acceptance](BUSINESS-ACCEPTANCE.md)
+records their separate passing native gate: 25/25 scenarios and six of six prepared-base
+pairs faster on three workers (1.60x median paired speedup). Cold/uneven timings are
+reported separately. The new gate establishes these business outcomes independently
+from earlier technical acceptance.
 
 ## Closed owner decisions
 

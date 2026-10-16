@@ -22,6 +22,11 @@ Reference results include a containing function address when available. Pass tha
 `ghidra functions get` or `ghidra functions decompile`. Add the same session/target selectors and
 `--json` to each command; consult generated help for paging and exact flags.
 
+An exported object can also have an external-entry metadata reference. That item has
+`from: null`, `kind: "EXTERNAL"` and `source: "entry-point"`; it counts in the returned
+page but has no source address to navigate. Ordinary references retain their hexadecimal
+`from` address and containing function when available.
+
 Use `ghidra functions rename` and `ghidra comments set` for private edits. `--clear` (or empty
 text) represents a null/absent comment. Successful edits are checked by readback and saved before
 `applied`. A later read sees the local result; another session remains independent. These edits

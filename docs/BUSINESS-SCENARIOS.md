@@ -1,8 +1,10 @@
 # Agent business acceptance scenarios
 
 The owner accepted these five branches and 25 scenarios on 2026-10-16. This document
-records the scenario hierarchy and acceptance criteria only. All 25 scenarios are
-**planned**; this agreement adds no executable features, bindings or benchmark.
+owns the scenario hierarchy and acceptance criteria. All 25 scenarios now have
+[individual Gherkin workflows and a frozen benchmark](BUSINESS-ACCEPTANCE.md). That
+execution report records **25/25 passed on real Ghidra**, including all six prepared-base
+speedup pairs, separately from this agreed contract.
 Existing technical checks and historical receipts do not establish acceptance of this
 catalogue. [Automation setup](ACCEPTANCE-AUTOMATION.md) describes the current runner
 and technical bridge; [CLI scenarios](CLI-SCENARIOS.md) describe the public contract.
@@ -146,6 +148,7 @@ acceleration of every investigation is promised.
 ## Delivery and acceptance status
 
 The hierarchy and prepared-versus-cold decision are agreed. Executable business features,
-product bindings, fixtures/oracles and the comparative benchmark are not implemented by
-this documentation change. No BS-01–BS-25 pass result or speedup is claimed. A later
-implementation must map evidence to these stable IDs and preserve the stated boundaries.
+public-CLI bindings, versioned PE fixtures/oracles and the comparative benchmark now map
+to these stable IDs. [Business acceptance](BUSINESS-ACCEPTANCE.md) records the execution
+result (25/25 passed), exact artifact/input identity, raw timings and limits. Earlier
+technical gates do not substitute for this separate business gate.

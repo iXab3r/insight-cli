@@ -5,6 +5,13 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
+The [25 business Gherkin scenarios](docs/BUSINESS-ACCEPTANCE.md) pass through the installed
+public CLI on real Ghidra, covering two EXEs, private contexts, merge/refresh, conflicts
+and interrupted work. Six prepared-base one-versus-three worker pairs all improve, with
+**1.60x median paired speedup** on the declared hash-research workload. Cold start (1.33x)
+and uneven work (1.23x) are measured separately. [Evidence](docs/verification/business-scenarios.json)
+binds exact artifacts, source/input hashes, findings, worker overlap and raw timings.
+
 The [real-EXE agent walkthrough](docs/AGENT-CLI-WALKTHROUGH.md) follows an official `7zr.exe`
 through installed public CLI commands: strings, xrefs, decompilation, private annotations,
 merge and another agent's refresh. It records the resulting import timeout/diagnostic fixes
@@ -14,8 +21,8 @@ analysis/publication in the original profile using verified staging and conditio
 
 The agreed **M0–M5 delivery and selected P0–P3 additions pass combined acceptance**. The current
 tree has 271 public command leaves; all 210 pinned operations and eight bridge-control equivalents
-remain accounted for. The [current report](docs/verification/full-facade-current.json) records
-118 passing offline tests and 33 native groups on one unchanged build, with the exact source and
+remain accounted for. The [earlier combined report](docs/verification/full-facade-current.json) records
+118 passing offline tests and 33 native groups on its unchanged build, with the exact source and
 installed artifact hashes. The installed CLI/Factory IPC/OS-keyring scenario exercises two agents,
 two EXEs, four private contexts, parallel callers and nine actual owner SIGKILL phases.
 
@@ -50,9 +57,10 @@ node skills/ghidra-coordinator/dist/src/bin.js skill
 EyeAuras.Automation runner to existing offline and native integration checks. Its
 development setup requires .NET 10 and access to the private Automation dependency;
 `npm run test:acceptance` selects the offline Gherkin smoke scenarios. The
-[25 agreed business scenarios](docs/BUSINESS-SCENARIOS.md) specify future acceptance,
-including required acceleration on a prepared base and separate cold-start measurements.
-Those business scenarios and the comparative benchmark remain unimplemented.
+[25 business scenarios](docs/BUSINESS-SCENARIOS.md) have individual executable Gherkin
+workflows, including required acceleration on a prepared base and separate cold-start
+measurements. `npm run test:business` runs their installed public-CLI/native gate;
+[business acceptance](docs/BUSINESS-ACCEPTANCE.md) records the passing native gate, protocol and measurement limits.
 
 The canonical npm helper and its progressive skill live in `skills/ghidra-coordinator`; the npm
 package is `@ixab3r/insight-cli`, with executable `insight-cli`. Factory supplies one command tree

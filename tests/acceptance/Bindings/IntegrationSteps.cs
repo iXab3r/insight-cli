@@ -18,7 +18,7 @@ public sealed class IntegrationSteps(ScenarioContext context)
     private static string Root => Required("INSIGHT_REPOSITORY_ROOT");
     private static string Node => Required("INSIGHT_NODE");
 
-    [BeforeScenario]
+    [BeforeScenario("technical")]
     public async Task Start()
     {
         scenario = (await AutomationRun.ConnectAsync()).CreateScenario();
@@ -117,7 +117,7 @@ public sealed class IntegrationSteps(ScenarioContext context)
     private static string Required(string name) => Environment.GetEnvironmentVariable(name)
         is { Length: > 0 } value ? value : throw new InvalidOperationException($"Missing {name}.");
 
-    [AfterScenario]
+    [AfterScenario("technical")]
     public async Task Finish()
     {
         if (scenario is null) return;

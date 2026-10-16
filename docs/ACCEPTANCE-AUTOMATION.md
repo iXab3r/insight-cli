@@ -7,15 +7,18 @@ process sentinel. Product bindings belong to this repository. Automation supplie
 process ownership, deadlines, logs and cleanup; insight-cli retains its existing CLI,
 Factory lifecycle and native acceptance assertions.
 
-This is the connection and migration foundation. The owner agreed the
-[25 business scenarios and acceptance criteria](BUSINESS-SCENARIOS.md), organized into
-five branches. Their executable implementation remains pending. The technical bridge
-features below do not establish acceptance of that catalogue.
+The [25 business scenarios and acceptance criteria](BUSINESS-SCENARIOS.md) now have
+five executable feature files and product-specific public-CLI bindings. Run them with
+`npm run test:business`; [business acceptance](BUSINESS-ACCEPTANCE.md) describes the
+corpus, interruption points, frozen benchmark protocol and passing 25/25 native result
+with six-of-six prepared-base improvements (1.60x median paired speedup). The
+older technical bridge features remain a separate supporting layer.
 
 [Connection evidence](verification/automation-bootstrap.json) records two passing offline
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
 rejection of an empty selection on macOS ARM64. The full 33-group bridge was discovered
-but not executed in this connection check. The existing 128 offline tests also pass.
+but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. Current discovery
+finds 29 scenarios: 25 business workflows plus the four technical bridges.
 
 ## Setup and commands
 
@@ -41,14 +44,16 @@ not require Ghidra or access to the upstream repository after setup.
 
 | Selection | Current behavior | Boundary |
 | --- | --- | --- |
+| `npm run test:business` | 25 separate `@business @native` scenarios, BS-01–BS-25, including six paired prepared-base comparisons | Installed public CLI, ordinary Factory IPC/keyring, owned real Ghidra workers and versioned PE fixtures |
 | `npm run test:acceptance` | Two `@offline @technical` scenarios: isolated npm package/CLI/IPC and existing session CLI integration tests | Session tests use a fake Ghidra backend; package check uses its existing isolated Factory test setup |
 | `npm run test:acceptance:native` | One `@native @facade` scenario: installed multi-agent CLI/IPC, two EXEs/four contexts, merge/refresh/conflicts and owner/server restart | Real Ghidra; synthetic EXEs and existing test-only isolated identity |
 | `npm run test:acceptance:full` | One `@native @full` bridge to the unchanged 33-group combined gate, including its fault phases and artifact/source checks | Full macOS GUI/keyring prerequisites; each original runner still owns its native fixtures |
 
-The existing first-import production-EXE runner remains separate. It has not yet been
-translated into individual Gherkin business scenarios. The same is true of assertions
-inside the other bridged scripts: Gherkin currently selects those runners; their checks
-remain in JavaScript. No native tests were replaced with mocked acceptance.
+The existing first-import production-EXE runner remains separate. BS-17 independently
+exercises that business outcome using the controlled PE corpus and only public CLI
+continuation. The older technical features still select their original JavaScript
+runners. Business features instead select individual agent workflows, with assertions
+in test-side JavaScript and scoped C# bindings. No native tests were replaced with mocks.
 
 Native invocation requires explicit disposable-fixture authorization and tool paths:
 
@@ -95,7 +100,7 @@ separately (BS-24), with no required cold-start speedup. No numeric margin such 
 has been agreed. Freeze the concrete workload and comparison protocol before measurement.
 
 **A shorter test run alone does not prove that three Ghidra instances accelerate research.**
-The planned comparative acceptance must establish all of the following:
+The comparative acceptance must establish all of the following:
 
 1. One fixed, versioned EXE/task and deterministic expected findings. Serial and parallel
    runs perform the same total useful work and produce the same verified shared result.
@@ -112,5 +117,7 @@ The planned comparative acceptance must establish all of the following:
    `T1 / (3 * T3)`. A failed or incomplete trial cannot count as a faster success.
 
 The parallel case must demonstrate a repeatable improvement on the agreed workload, not
-assume linear scaling or generalize to all investigations. Current timing receipts prepare
-measurement collection; neither a comparative workload nor a demonstrated speedup exists yet.
+assume linear scaling or generalize to all investigations. The concrete workload uses
+three real executable hash functions and publishes complete hash-to-candidate lookup
+findings. See the [business acceptance protocol and results](BUSINESS-ACCEPTANCE.md);
+its prepared-base gate, cold measurements and uneven-partition measurements remain distinct.

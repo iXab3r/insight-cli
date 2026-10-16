@@ -1,0 +1,102 @@
+{
+  "start an investigation": {
+    "id": "BS-01",
+    "outcome": "a usable context identifies the intended EXE"
+  },
+  "find a point of interest": {
+    "id": "BS-02",
+    "outcome": "the clue identifies the expected program location"
+  },
+  "trace the behavior behind a clue": {
+    "id": "BS-03",
+    "outcome": "references and decompilation explain the expected behavior"
+  },
+  "record a finding privately": {
+    "id": "BS-04",
+    "outcome": "the agent sees its edits while another session does not"
+  },
+  "deliver a completed result": {
+    "id": "BS-05",
+    "outcome": "an independent session reads the published findings"
+  },
+  "alternate between two EXEs": {
+    "id": "BS-06",
+    "outcome": "each target retains its own private findings"
+  },
+  "distinguish identically named EXEs": {
+    "id": "BS-07",
+    "outcome": "publication affects only the selected executable"
+  },
+  "compare two program versions": {
+    "id": "BS-08",
+    "outcome": "the known differences are tied to the correct builds"
+  },
+  "return to an earlier EXE": {
+    "id": "BS-09",
+    "outcome": "the original context retains its private work"
+  },
+  "divide an investigation between two CLI actors": {
+    "id": "BS-10",
+    "outcome": "concurrent actors retain independent private findings"
+  },
+  "combine independent findings": {
+    "id": "BS-11",
+    "outcome": "the shared result includes both contributions"
+  },
+  "continue after a colleague publishes": {
+    "id": "BS-12",
+    "outcome": "refresh receives shared findings and preserves local work"
+  },
+  "agree independently with a colleague": {
+    "id": "BS-13",
+    "outcome": "identical proposals publish without an artificial conflict"
+  },
+  "resolve contradictory findings": {
+    "id": "BS-14",
+    "outcome": "the chosen resolution is independently readable"
+  },
+  "keep a conflicting finding set intact": {
+    "id": "BS-15",
+    "outcome": "a failed merge publishes none of the selected local work"
+  },
+  "transfer a complex finding to the current base": {
+    "id": "BS-16",
+    "outcome": "the transferred structure and shared findings coexist"
+  },
+  "continue an interrupted first import": {
+    "id": "BS-17",
+    "outcome": "the original scope delivers one initial base and a later finding"
+  },
+  "recover an active investigation": {
+    "id": "BS-18",
+    "outcome": "acknowledged private work survives and can be delivered"
+  },
+  "establish an edit outcome after losing its reply": {
+    "id": "BS-19",
+    "outcome": "the original intent continues without a duplicate effect"
+  },
+  "establish a merge outcome after losing its reply": {
+    "id": "BS-20",
+    "outcome": "the finding is accepted through one publication"
+  },
+  "complete the shared task with one worker": {
+    "id": "BS-21",
+    "outcome": "all expected findings are published by the serial baseline"
+  },
+  "complete the shared task with three workers": {
+    "id": "BS-22",
+    "outcome": "three native workers produce the equivalent shared result"
+  },
+  "compare prepared-base serial and parallel execution": {
+    "id": "BS-23",
+    "outcome": "the declared paired comparison proves repeatable acceleration"
+  },
+  "measure the same task from a cold start": {
+    "id": "BS-24",
+    "outcome": "correct serial and parallel cold timings are reported separately"
+  },
+  "complete a task with uneven work distribution": {
+    "id": "BS-25",
+    "outcome": "all findings and actual scaling limits are reported"
+  }
+}

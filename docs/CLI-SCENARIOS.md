@@ -2,7 +2,8 @@
 
 The [business acceptance hierarchy](BUSINESS-SCENARIOS.md) fixes 25 agent-outcome
 scenarios, including several CLIs on the same EXE and required prepared-base acceleration
-with three Ghidra workers. It is an agreed specification awaiting executable implementation;
+with three Ghidra workers. Its executable Gherkin workflows and frozen benchmark are described in
+[business acceptance](BUSINESS-ACCEPTANCE.md);
 the command examples below and historical technical evidence retain their own scope.
 
 [Interrupted first-import recovery](INITIAL-IMPORT-RECOVERY.md) uses the existing scoped open

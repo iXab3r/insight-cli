@@ -1,5 +1,11 @@
 # Ghidra API gaps: native SDK → GhidraMCP → insight-cli
 
+The subsequent [business Gherkin gate](BUSINESS-ACCEPTANCE.md) passes all 25 public-CLI
+scenarios and six prepared-base speedup pairs on real Ghidra. It corrects one research
+edge case: exported-data `Entry Point` xref metadata is retained as a non-navigable row
+instead of rejecting the entire page. This adds no new catalogue operations; the older
+P0–P3/full-facade receipts below keep their original source/artifact identity.
+
 Source audit: **2026-10-15**. This compares the shipped facade against the pinned implementation,
 not the newest upstream release. The unit of the detailed comparison is a user operation;
 there is no literal bijection between SDK methods, MCP endpoints and CLI commands.

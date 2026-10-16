@@ -1,5 +1,26 @@
 # Verification scope
 
+## Public-CLI business Gherkin acceptance
+
+[Business evidence](business-scenarios.json) records 25/25 individual scenarios on one
+unchanged installed artifact and two versioned PE inputs with real Ghidra. The gate
+covers private research, several EXEs/CLI actors, merge/refresh, conflicts, complex
+transfer, interrupted first import/context and lost replies. All scenarios pass through
+public CLI commands and ordinary Factory IPC/keyring. Fault injection and worker
+observation inspect only owned process receipts, not product result internals.
+
+Six prepared-base pairs all improve with three distinct native workers: median paired
+speedup **1.601x**, range 1.569–1.727x, one-sided paired sign probability 1/64.
+Collection, publication and independent readback are timed. Cold start (1.331x) and
+uneven `[128,32,32]` work (1.226x) retain separate results without a speedup gate.
+All 25 passed without skips; inputs remain unchanged and owned-resource cleanup passed.
+The same product correction passes 129 offline tests and two offline Gherkin smoke cases.
+
+[Protocol, reproduction and limits](../BUSINESS-ACCEPTANCE.md) explain the complete
+lookup findings, earlier failed/cancelled development strategies, workload/machine
+scope and compacted public evidence. This gate found and fixed external-entry xref
+metadata handling. It does not rebind the historical 33-group GUI/full-facade evidence.
+
 ## Automation/Gherkin connection
 
 [Bootstrap evidence](automation-bootstrap.json) records two offline Gherkin scenarios,

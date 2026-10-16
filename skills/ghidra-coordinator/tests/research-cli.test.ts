@@ -30,7 +30,7 @@ class Fake implements ResearchBackend {
     context=this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:context.baseRevision??model.sharedRevision!,
       baseSnapshot:context.baseSnapshot??model.sharedSnapshot!,workingSnapshot:saved});return context;
   }
-  async call(scope:Scope,operation:string,parameters:Record<string,unknown>={}){
+  async call(scope:Scope,operation:string,parameters:Record<string,unknown>={}):Promise<unknown>{
     this.calls++;const view=this.view(scope),at=String(parameters.address??parameters.functions??entry);
     if(operation==='/get_program_options')return {};
     if(operation==='/get_comment')return {address:at,...view.comments};
@@ -51,6 +51,24 @@ class Fake implements ResearchBackend {
   async dispose(){this.views.clear();}
 }
 type Opened={session:string;target:string;state:string};
+test('xref traversal preserves external-entry metadata and navigable references',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
+ let malformed=false;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+  const backend=new Fake(workspace),call=backend.call.bind(backend);
+  backend.call=async(scope,operation,parameters={})=>operation==='/get_xrefs_to'?{
+   references:[{from_address:'Entry Point',type:malformed?'DATA':'EXTERNAL'},{from_address:entry,type:'DATA',from_function:'first'}],
+   count:2,total:2,offset:parameters.offset,limit:parameters.limit}:call(scope,operation,parameters);
+  return backend;
+ }}));
+ const exe=join(f.root,'export.exe');await writeFile(exe,'exported fixture');
+ const scope=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened;
+ const args=['ghidra','xrefs','to','--session',scope.session,'--target',scope.target,'--address','140008000'];
+ const found=await f.json(app,args) as {items:unknown[];total:number};
+ assert.equal(found.total,2);assert.deepEqual(found.items,[{from:null,to:'0x140008000',kind:'EXTERNAL',source:'entry-point'},
+  {from:'0x'+entry,to:'0x140008000',kind:'DATA',function:{address:'0x'+entry,name:'first'}}]);
+ malformed=true;assert.notEqual((await f.run(app,[...args,'--json'])).exitCode,0);
+});
 test('reconciled first open returns the public ready envelope and preserves its original scope',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let attempts=0;
  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{

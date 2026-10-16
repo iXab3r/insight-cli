@@ -241,8 +241,13 @@ export class Research {
       const page=pageResult(await backend.call(selected,'/get_xrefs_to',{address:at,limit,offset}),'references',limit,offset);
       const items=[];
       for(const item of page.items) {
-        const row=object(item),from=address(row.from_address);
+        const row=object(item);
         if(typeof row.type!=='string'||!row.type)fail('partial','Reference result lacks its kind.');
+        // Ghidra's external-entry reference is metadata, not a navigable address.
+        if(row.from_address==='Entry Point'&&row.type==='EXTERNAL') {
+          items.push({from:null,to:publicAddress(at),kind:row.type,source:'entry-point'});continue;
+        }
+        const from=address(row.from_address);
         let containing;
         if(row.from_function!==undefined) {
           const found=functionResult(await backend.call(selected,'/get_functions',{functions:from,fields:'entry_point',include_call_context:false}),from);
