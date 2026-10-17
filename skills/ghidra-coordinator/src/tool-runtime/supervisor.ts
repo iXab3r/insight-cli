@@ -21,6 +21,23 @@ const owned=new Map<string,Owned>();
 const ownedKey=(directory:string,id:string)=>resolve(directory)+'\0'+id;
 export interface TrackedChild extends ChildProcess {toolProcessId:string;toolClosed:Promise<void>}
 export type OwnershipVerifier=(record:ProcessRecord)=>Promise<boolean|undefined>;
+/** Receipts report pending lifetime only; they never authorize a signal to another PID. */
+async function nativeChildren(record:ProcessRecord){
+ if(record.metadata?.nativeChildDeadlines!==true)return [];
+ let names:string[];try{names=await readdir(join(record.root,'native-deadlines'));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return [];throw e;}
+ if(names.length>100)throw new CliError('Native helper receipt count exceeds its bound.',{code:'tool.process.unverified'});
+ return Promise.all(names.map(async name=>{
+  const value=await readJson<{protocol:number;pid:number;parentPid:number;birthSeconds:number;birthMicroseconds:number;deadlineUnixSeconds:number}>(join(record.root,'native-deadlines',name));
+  if(!/^\d+\.json$/.test(name)||!value||value.protocol!==1||!Number.isSafeInteger(value.pid)||value.pid<1||value.pid>2147483647||name!==value.pid+'.json'||!Number.isSafeInteger(value.parentPid)||value.parentPid<1||!Number.isSafeInteger(value.birthSeconds)||value.birthSeconds<1||!Number.isSafeInteger(value.birthMicroseconds)||value.birthMicroseconds<0||value.birthMicroseconds>=1000000||!Number.isSafeInteger(value.deadlineUnixSeconds)||value.deadlineUnixSeconds<=0)throw new CliError('Native helper receipt is invalid; no cleanup was assumed.',{code:'tool.process.unverified'});
+  const receiptDigest=digest(value),acknowledgment=join(record.root,'native-deadline-exits',name),previous=await readJson<{receiptDigest:string}>(acknowledgment);
+  if(previous?.receiptDigest===receiptDigest)return {...value,state:'exited'};
+  const identity=await processIdentity(value.pid),seconds=identity&&process.platform==='darwin'?Date.parse(identity.birth+' GMT')/1000:NaN;
+  // A different observable birth proves reuse, without granting permission to signal that PID.
+  const exited=!identity||Number.isFinite(seconds)&&seconds!==value.birthSeconds;
+  if(exited)await atomicWrite(acknowledgment,{receiptDigest,observedAt:new Date().toISOString()});
+  return {...value,state:exited?'exited':'pending'};
+ }));
+}
 export async function launchProcess(directory:string,spec:ProcessSpec,executable:string,args:string[],options:SpawnOptions={},control:{id?:string;finalize?:boolean;onSpawn?:(child:TrackedChild)=>void|Promise<void>;signal?:AbortSignal}={}):Promise<TrackedChild>{
  return withToolLock(directory,spec.tool,async()=>{
   control.signal?.throwIfAborted();toolRoot(directory,spec.tool);if(!isAbsolute(executable))throw new CliError('Tool executable must be absolute.',{code:'tool.configuration'});
@@ -70,16 +87,18 @@ export async function processStatus(directory:string,id:string,verify?:Ownership
  const record=await readJson<ProcessRecord>(join(directory,'runtime/processes',id+'.json'));if(!record||record.id!==id)throw new CliError('Unknown tool process.',{code:'tool.process.missing'});
  if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory)))return {...record,state:'unverified',phase:'profile_binding_changed'};
  const finishing=owned.get(ownedKey(directory,id));if(finishing&&(finishing.child.exitCode!==null||finishing.child.signalCode!==null)){await finishing.closed;return processStatus(directory,id,verify);}
- if(['exited','failed'].includes(record.state))return record;
+ const children=await nativeChildren(record),pending=children.some(c=>c.state==='pending');
+ const observed={...record,...(children.length?{nativeChildren:children}:{})};
+ if(['exited','failed'].includes(record.state))return pending?{...observed,state:'unverified',phase:'native_children_pending'}:observed;
  if(!record.pid){
   try{process.kill(record.ownerPid,0);return record;}catch{return {...record,state:record.gated?'failed':'unverified',phase:'owner_lost_before_pid'};}
  }
- const identity=await processIdentity(record.pid);if(!identity)return {...record,state:'exited',phase:'observed_exit',outcome:'unknown'};
+ const identity=await processIdentity(record.pid);if(!identity)return {...observed,state:pending?'unverified':'exited',phase:pending?'native_children_pending':'observed_exit',outcome:'unknown'};
  if(identity.birth!==record.identity)return {...record,state:'unverified',phase:'pid_identity_changed'};
  const current=owned.get(ownedKey(directory,id)),local=current?.child.pid===record.pid&&current.record.identity===record.identity&&current.child.exitCode===null&&current.child.signalCode===null;
  const proof=verify?await verify(record):undefined;
- if(local||proof===true||proof===undefined&&record.strongIdentity&&identity.strong)return {...record,state:'running'};
- return {...record,state:'unverified',phase:'tool_identity_required'};
+ if(local||proof===true||proof===undefined&&record.strongIdentity&&identity.strong)return {...observed,state:'running'};
+ return {...observed,state:'unverified',phase:'tool_identity_required'};
 }
 export async function listProcesses(directory:string,filter:{tool?:string;session?:string;target?:string}={},verify?:OwnershipVerifier){
  let names:string[];try{names=await readdir(join(directory,'runtime/processes'));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return [];throw e;}

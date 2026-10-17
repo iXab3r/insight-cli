@@ -41,8 +41,10 @@ export async function assertUnused(directory:string,tool:string){
  if(toolUseCount(directory,tool))fail('busy','Tool installation is reserved by an active operation.');
  let names:string[];const root=join(directory,'runtime/processes');try{names=await readdir(root);}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
  for(const name of names){if(!/^[a-f0-9-]{36}\.json$/.test(name))continue;
-  const record=await readJson<{tool:string;state:string;pid?:number;ownerPid?:number;gated?:boolean}>(join(root,name));
-  if(!record||record.tool!==tool||['exited','failed'].includes(record.state))continue;
+  const retained=await readJson<{tool:string}>(join(root,name));if(!retained||retained.tool!==tool)continue;
+  const {processStatus}=await import('./supervisor.js'),record=await processStatus(directory,name.slice(0,-5));
+  if(['exited','failed'].includes(record.state))continue;
+  if(record.phase==='native_children_pending')fail('busy','Tool has an active or unverified native helper; wait for its recorded deadline before changing installations.');
   if(!record.pid){
    if(record.gated&&record.ownerPid)try{process.kill(record.ownerPid,0);}catch(e){if((e as NodeJS.ErrnoException).code==='ESRCH')continue;throw e;}
    fail('busy','Tool has an unresolved process launch; inspect its process record.');

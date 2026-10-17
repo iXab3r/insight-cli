@@ -117,5 +117,7 @@
     "Decide and verify handling of bare-C CoreFoundation attach failure; do not silently mutate the target",
     "Public managed/external adapter and packaged skill",
     "Native public CLI and independent cold/prepared agent gate"
-  ]
+  ],
+  "currentState": "native_facade_collector_and_helper_lifetime_passed_model_pending",
+  "currentProof": "toolbox-frida.json"
 }

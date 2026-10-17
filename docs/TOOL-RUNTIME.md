@@ -212,3 +212,23 @@ require a new output directory. Existing output is never overwritten. These comm
 because they capture immutable input and start a tool. They perform static analysis; they do not
 execute the analyzed assembly. Tool update checks are disabled. Output remains ordinary files that
 agents may keep according to project conventions or explicitly save with `artifacts save`.
+
+### Native helper deadlines
+
+Reviewed adapters can opt into the packaged kernel deadline exec helper; a JavaScript timer
+in the owner alone cannot bound execution after owner SIGKILL. LLDB also sets its native
+kill-on-connection-loss policy. Frida SDK helpers create separate sessions, so its worker
+provides an inherited deadline constructor only to those owned helper execs. The first-party
+ARM64/ARM64e library arms the absolute deadline and records PID/birth/deadline before main.
+It is never placed in the external target's environment. Both native components ship source
+and reproducible build provenance; normal npm builds do not require a compiler.
+
+A terminal collector with a still-present native child is unverified/native_children_pending;
+selection/removal guards wait for the child. Per-receipt exit acknowledgments avoid later
+PID-reuse false positives. A changed observable birth establishes an old child has exited;
+ambiguous identities remain unverified. Child receipts grant no signaling authority.
+
+Maintainer distribution recipes also support a source-set companion: exact bounded upstream
+archives plus public origin/revision/hash metadata, without local build paths. Frida's Node
+composition retains npm runtime bytes and native binding unchanged, indexes full notices
+from its corresponding source set and runs no installation script.

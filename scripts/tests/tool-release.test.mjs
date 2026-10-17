@@ -100,3 +100,17 @@ test('reviewed subset library aliases must resolve to selected siblings',()=>{
  const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[{...a,name:'native.tgz',role:'binary',repack},a]};validateRecipe(recipe);
  for(const alias of [{path:'lib/alias',target:'../actual.dylib'},{path:'../escape',target:'actual.dylib'},{path:'lib/alias',target:'missing'},{path:'lib/actual.dylib',target:'actual.dylib'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...recipe.assets[0],repack:{...repack,aliases:[alias]}},a]}));
 });
+
+test('source-set recipes reject unpinned, recursive or vendor-only hidden inputs',()=>{
+ const input={...a,id:'source',revision:'synthetic'},source={...a,name:'sources.tgz',repack:{format:'source-set-v1',outputRoot:'source-set',inputs:[input]}};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[source]};validateRecipe(recipe);
+ for(const patch of [{id:'../escape'},{sha256:'bad'},{upstream:'http://example.invalid'},{repack:{}},{delivery:{kind:'vendor-direct'}},{size:2*1024**3}])assert.throws(()=>validateRecipe({...recipe,assets:[{...source,repack:{...source.repack,inputs:[{...input,...patch}]}}]}));
+ const runtime={...a,name:'runtime.tgz',role:'binary',repack:{format:'frida-node-runtime-v1',sha256:a.sha256,size:5,outputRoot:'frida-node-17.24.0',sourceAssets:['sources.tgz']}};validateRecipe({...recipe,assets:[runtime,source]});assert.throws(()=>validateRecipe({...recipe,assets:[runtime]}));
+});
+test('source-set assembly retains exact component bytes with public provenance and no local build paths',async t=>{
+ const {writeFile}=await import('node:fs/promises'),{execFileSync}=await import('node:child_process'),{fileURLToPath}=await import('node:url');const directory=await mkdtemp(join(tmpdir(),'source-set-'));t.after(()=>rm(directory,{recursive:true,force:true}));const file=join(directory,'private-source');await writeFile(file,'hello');
+ const input={...a,id:'component',file},recipe={format:'source-set-v1',outputRoot:'matching-source',inputs:[input]},helper=fileURLToPath(new URL('../tool-source-set.py',import.meta.url)),output=join(directory,'sources.tgz');execFileSync('python3',['-I',helper,output,JSON.stringify(recipe)]);
+ const contents=JSON.parse(execFileSync('python3',['-I','-c',`import tarfile,json,sys
+with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:a.extractfile(i).read().decode() for i in a}))`,output],{encoding:'utf8'}));assert.equal(contents['matching-source/inputs/component.tar.gz'],'hello');assert.ok(!contents['matching-source/SOURCE-MANIFEST.json'].includes(directory));assert.equal(JSON.parse(contents['matching-source/SOURCE-MANIFEST.json']).inputs[0].sha256,a.sha256);
+ const again=join(directory,'again.tgz');execFileSync('python3',['-I',helper,again,JSON.stringify(recipe)]);assert.deepEqual(await readFile(output),await readFile(again));await writeFile(file,'wrong');assert.throws(()=>execFileSync('python3',['-I',helper,join(directory,'bad.tgz'),JSON.stringify(recipe)],{stdio:'pipe'}));
+});

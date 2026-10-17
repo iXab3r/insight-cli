@@ -1,6 +1,14 @@
 import {fileURLToPath} from 'node:url';
 import {CliError} from '@eyeauras/cli-factory';
 import {fileSha256} from './archives.js';
+import {isAbsolute} from 'node:path';
+/** For reviewed native helper execs started inside an adapter worker, never an external target. */
+export async function inheritedDeadlineEnvironment(deadlineUnixSeconds:number,receipts:string){
+ if(process.platform!=='darwin'||process.arch!=='arm64'||!Number.isInteger(deadlineUnixSeconds)||deadlineUnixSeconds<=Date.now()/1000||deadlineUnixSeconds>Date.now()/1000+600||!isAbsolute(receipts))throw new CliError('Invalid inherited native deadline.',{code:'tool.configuration'});
+ const library=fileURLToPath(new URL('../../../runtime/native/deadline-alarm-darwin-universal.dylib',import.meta.url));
+ if(library.includes(':')||await fileSha256(library)!=='cd5ebd65aa419b79cb327f2ae872f98f3fd222b93049c909e409776eab65b8ef')throw new CliError('Inherited deadline library differs from its reviewed build or has an unsupported loader path.',{code:'tool.binding'});
+ return {DYLD_INSERT_LIBRARIES:library,INSIGHT_NATIVE_DEADLINE_UNIX_SECONDS:String(deadlineUnixSeconds),INSIGHT_NATIVE_DEADLINE_RECEIPTS:receipts};
+}
 /** Internal, first-party exec helper. No service or timer in the owner is needed after exec. */
 export async function deadlineLaunch(executable:string,args:string[],timeoutMs:number){
  if(process.platform!=='darwin'||process.arch!=='arm64')throw new CliError('This tool requires the packaged macOS ARM64 native deadline.',{code:'tool.unsupported'});

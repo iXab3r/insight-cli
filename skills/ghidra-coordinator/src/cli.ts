@@ -1,6 +1,7 @@
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {diagnosticsCommands} from './dotnet-diagnostics.js';
+import {fridaCommands} from './frida.js';
 import {lldbCommands} from './lldb.js';
 import {dieCommands} from './die.js';
 import {llvmCommands} from './llvm.js';
@@ -226,6 +227,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ...llvmCommands(c=>owner.selected(c).workspace),
       ...dieCommands(c=>owner.selected(c).workspace),
       ...lldbCommands(c=>owner.selected(c).workspace),
+      ...fridaCommands(c=>owner.selected(c).workspace),
       ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),
       ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),

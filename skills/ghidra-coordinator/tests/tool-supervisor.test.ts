@@ -69,3 +69,14 @@ test('adapter launch binding completes durably before execution is authorized',a
  for(let i=0;i<100;i++){try{await stat(marker);break;}catch{await delay(20);}}
  assert.equal(JSON.parse(await readFile(binding,'utf8')).pid,child.pid);assert.equal(await readFile(marker,'utf8'),'started');await terminateProcess(root,child.toolProcessId,true);
 });
+
+test('an exited collector does not permit removal while its native deadline children remain present',async t=>{
+ const root=await fixture(t),parent=await launchProcess(root,{tool:'fixture',role:'collector',installation:'fixture',metadata:{nativeChildDeadlines:true}},process.execPath,['-e','process.exit(0)'],{stdio:'ignore'});await parent.toolClosed;
+ const helper=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'}),closed=new Promise<void>(ok=>helper.once('close',()=>ok()));t.after(async()=>{if(helper.exitCode===null&&helper.signalCode===null)helper.kill('SIGKILL');await closed;});assert.ok(helper.pid);
+ const {processIdentity}=await import('../src/tool-runtime/identity.js'),birth=await processIdentity(helper.pid);const birthSeconds=process.platform==='darwin'?Date.parse(birth!.birth+' GMT')/1000:1;
+ const {mkdir}=await import('node:fs/promises'),directory=join(root,'runtime/runs',parent.toolProcessId,'native-deadlines');await mkdir(directory);
+ await atomicWrite(join(directory,helper.pid+'.json'),{protocol:1,pid:helper.pid,parentPid:parent.pid,birthSeconds,birthMicroseconds:0,deadlineUnixSeconds:Math.ceil(Date.now()/1000)+10});
+ const receiptPath=join(directory,helper.pid+'.json'),validReceipt=JSON.parse(await readFile(receiptPath,'utf8'));const invalidReceipt={...validReceipt};delete invalidReceipt.birthSeconds;await atomicWrite(receiptPath,invalidReceipt);await assert.rejects(processStatus(root,parent.toolProcessId),/receipt is invalid/);await assert.rejects(assertUnused(root,'fixture'),/receipt is invalid/);await atomicWrite(receiptPath,validReceipt);
+ const before=await processStatus(root,parent.toolProcessId);assert.equal(before.state,'unverified');assert.equal(before.phase,'native_children_pending');await assert.rejects(assertUnused(root,'fixture'),/active or unverified/);await assert.rejects(terminateProcess(root,parent.toolProcessId,true),/unverified/);assert.equal(helper.exitCode,null);
+ helper.kill('SIGTERM');await closed;assert.equal((await processStatus(root,parent.toolProcessId)).state,'exited');await assertUnused(root,'fixture');
+});

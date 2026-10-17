@@ -37,3 +37,13 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the installed debugger runner suffers controlled lifetime faults
     Then owned debugger processes exit and uncertain results are not replayed
+
+  Scenario: Corroborate native calls while preserving the original process
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI observes calls in the owned instrumented worker
+    Then hook evidence and checkpoints retain source identity and cleanup
+
+  Scenario: Remove temporary hooks after collector interruption or owner loss
+    Given an isolated globally installed toolbox candidate is selected
+    When the public instrumentation collector suffers controlled lifetime faults
+    Then the original target remains alive with its ordinary behavior restored

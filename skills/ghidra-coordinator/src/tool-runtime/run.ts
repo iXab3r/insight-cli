@@ -14,12 +14,16 @@ export interface RunSpec {
  timeoutMs?:number;maxOutputBytes?:number;outputFile?:string;acceptedCodes?:number[];session?:string;target?:string;
  /** Adapter opt-in only after verifying its native signal/child cleanup contract. */
  nativeDeadline?:boolean;
+ /** Adapter's native helper constructor persists per-exec deadline receipts in the run root. */
+ nativeChildDeadlines?:boolean;
+ metadata?:Record<string,unknown>;
 }
 export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string}
 export interface RunContext {appArguments:Pick<CommandContext['appArguments'],'AppDataDirectory'>;signal:AbortSignal;environment:CommandContext['environment']}
 export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  c.signal.throwIfAborted();const directory=c.appArguments.AppDataDirectory;toolRoot(directory,spec.tool);
  if(!isAbsolute(spec.executable))throw new CliError('Tool executable must be an absolute path.',{code:'tool.configuration'});
+ if(spec.nativeChildDeadlines&&!spec.nativeDeadline)throw new CliError('Native child deadlines require the native collector deadline.',{code:'tool.configuration'});
  const launch=spec.nativeDeadline?await deadlineLaunch(spec.executable,spec.arguments??[],spec.timeoutMs??120000):{executable:spec.executable,arguments:spec.arguments??[]};
  const id=randomUUID(),root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');
  const started=performance.now(),limit=spec.maxOutputBytes??4*1024**2;let child:ChildProcess|undefined,outcome:string|undefined,truncated=false,bytes=0;
@@ -37,7 +41,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  const aborted=()=>stop('cancelled');
  try{
   c.signal.throwIfAborted();
-  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target,...(spec.nativeDeadline?{metadata:{nativeDeadlineSeconds:Math.ceil((spec.timeoutMs??120000)/1000),nativeExecutable:spec.executable}}:{})},launch.executable,launch.arguments,
+  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target,...(spec.metadata||spec.nativeDeadline?{metadata:{...spec.metadata,...(spec.nativeDeadline?{nativeDeadlineSeconds:Math.ceil((spec.timeoutMs??120000)/1000),nativeExecutable:spec.executable,...(spec.nativeChildDeadlines?{nativeChildDeadlines:true}:{})}:{})}}:{})},launch.executable,launch.arguments,
    {cwd:spec.cwd??root,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']},
    {id,finalize:false,signal:c.signal,onSpawn:launched=>{
     child=launched;child.once('close',()=>{settled=true;});

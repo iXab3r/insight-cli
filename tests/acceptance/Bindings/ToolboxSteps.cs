@@ -58,6 +58,14 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the installed debugger runner suffers controlled lifetime faults")]
     public Task DebuggerFaults() => Execute("scripts/toolbox/fault-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
 
+    [When("the public CLI observes calls in the owned instrumented worker")]
+    public Task InstrumentNative() => Execute("scripts/toolbox/native-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"), Value("nativeWorker"));
+
+    [When("the public instrumentation collector suffers controlled lifetime faults")]
+    public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
+
+    [Then("hook evidence and checkpoints retain source identity and cleanup")]
+    [Then("the original target remains alive with its ordinary behavior restored")]
     [Then("runtime evidence and checkpoints survive debugger removal")]
     [Then("owned debugger processes exit and uncertain results are not replayed")]
     [Then("header and signature evidence retains scan uncertainty")]

@@ -39,7 +39,7 @@ insight-cli skill insight-die --json
 
 The catalog describes the adapters and their packaged skills before any runtime is downloaded.
 Use each tool's `status` to check the selected profile, then follow its skill and generated help.
-The toolbox includes Ghidra, ILSpy, 7-Zip, LLVM utilities, DiE, LLDB and .NET dump/stack/trace; platform
+The toolbox includes Ghidra, ILSpy, 7-Zip, LLVM utilities, DiE, LLDB, Frida and .NET dump/stack/trace; platform
 and capability limits are explicit per tool. A partial classification or a failed native process
 is not a complete finding. Preserve useful output in ordinary project files and checkpoint it
 with `artifacts save` when useful. Existing project RE instructions retain precedence.

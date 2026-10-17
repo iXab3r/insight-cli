@@ -26,7 +26,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT plus dependencies; package declares net8 with major roll-forward. Prove .NET 10 compatibility and actual owned dump/object workflow |
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
 | T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | MIT plus dependencies; retain conditions and actual trace interpretation |
-| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Spawn/attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | wxWindows Library Licence 3.1; complete dependency/source audit pending. Real Node hooks/detach passed on a CoreFoundation-loaded fixture; bare-C attach failed explicitly; no adapter admitted |
+| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Bounded attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | Frida-declared LGPL-2.0 WITH WxWindows-exception-3.1 and separate dependency terms; full notices and 69 exact source/component archives retained. Node facade/native proof delivered; independent model gate pending |
 | T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Owned-launch facade with explicit symbol companion, bounded breakpoint snapshot, registers, memory and backtrace; native macOS ARM64 CLI proof | Apache-2.0 with LLVM exceptions; immutable binary/source/license release, native snapshots and controller/owner-loss cleanup proof passed; independent model gate pending |
 | T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Embedded EULA prohibits redistribution. Explicit Microsoft delivery policy with pinned bytes/local cache; no mirror. Do not consume mutable auto-update appinstaller as the managed version |
 | T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. [Sysinternals terms](https://learn.microsoft.com/en-us/sysinternals/license-terms) prohibit our mirror. Actual driver/capture feasibility must be proven |
@@ -213,7 +213,7 @@ targets with an aliased `/tmp` root. Canonical relative targets fix relocation w
 escaping links; dedicated regression tests cover both. Independent cold/prepared model trials
 remain pending after the evaluator account usage limit; native proof is not agent acceptance.
 
-### Frida backend feasibility
+### Frida native admission
 
 The official Frida 17.24.0 Node NAPI-v8 addon worked on Node 24.19.0 without Python: the
 owned fixture yielded 15 argument/result observations, including count 10 → 130 and count
@@ -226,8 +226,32 @@ CoreFoundation-loaded attach. That is unsuitable for the existing pipe-based pro
 the Node binding provides an actual noninteractive route. [Feasibility evidence](verification/toolbox-frida-feasibility.json)
 records both failures and the useful observations. `scripts/toolbox/audit-frida.mjs` reproduces
 the native backend probe using `instrumented.c` compiled with/without
-`INSIGHT_WITH_CORE_FOUNDATION` and `-framework CoreFoundation`. Distribution/source/notices,
-public adapter, skill and independent agent gates remain open. This probe is not CLI acceptance.
+`INSIGHT_WITH_CORE_FOUNDATION` and `-framework CoreFoundation`. The early backend probe is not CLI acceptance. The later adapter provides `frida modules`,
+`exports` and bounded `observe --script FILE` through the existing Node runtime, without Python.
+Module/export records and event pages remain bounded; full snapshots are ordinary new files.
+Scripts are captured by hash and passed unchanged after a separate runtime-version preflight,
+so strict directives and source line numbers retain their meaning. Script errors remain partial
+even when unload/detach succeeds.
+
+The immutable Node runtime/source release retains the official NAPI-v8 addon, six exact npm
+components, full notices indexed to their original source files and all 69 matching Frida/SDK/
+nested-submodule/component archives. Assembly executes no vendor install script.
+
+The first fault probe found that default SIGTERM could leave the collector busy. Explicit
+unload/detach handling fixes graceful stop. A deeper tree audit then found that native
+`frida-helper` calls setsid and can outlive a killed collector. A first-party ARM64/ARM64e
+constructor now arms each owned helper with the same absolute kernel deadline and writes its
+PID/birth/deadline receipt before helper main. It is loaded only by the collector’s SDK helper
+execs; the external target gets no such loader environment. No guardian service or arbitrary
+PID adoption is added. Initial ARM64-only and UUID-less library probes failed explicitly;
+the verified Apple ABI universal build includes source, hashes and reproducibility metadata.
+
+Status exposes native children and remains unverified/native_children_pending until they exit;
+installation guards block removal meanwhile. Observed exits are durably acknowledged so old
+helper PIDs cannot later make a reused PID appear active. Receipts only describe lifetime and
+never authorize signals. [Frida acceptance](verification/toolbox-frida.json) records public
+CLI/native faults, including restored ordinary fixture output after hook loss, preserved
+target lifetime and independent helper absence. Model/complete-toolbox gates remain open.
 
 ### LLDB native admission
 

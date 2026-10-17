@@ -91,6 +91,12 @@
       "title": "Insight LLDB",
       "path": "skills/insight-lldb/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-frida",
+      "title": "Insight Frida",
+      "path": "skills/insight-frida/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -559,6 +565,58 @@
           "correct arguments and returns around boundary",
           "ordinary project evidence",
           "inferior termination independently verified",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "frida",
+      "namespace": "frida",
+      "kind": "analytical",
+      "skill": "insight-frida",
+      "purpose": "Corroborate static findings with concrete runtime call arguments/results, modules and exports",
+      "inputs": [
+        "explicit authorized local process PID",
+        "focused Frida JavaScript source"
+      ],
+      "tasks": [
+        "bounded runtime module/export inventory",
+        "bounded script messages and binary evidence",
+        "observed argument/return pairs"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private Frida Node 17.24.0 NAPI-v8 binding and JavaScript runtime dependencies",
+        "existing CLI Node runtime",
+        "macOS 14+ and native attach authorization"
+      ],
+      "workflowCommands": [
+        "frida modules",
+        "frida exports",
+        "frida observe"
+      ],
+      "limitations": [
+        "Collector owns no target lifetime; only collector stop/kill is exposed",
+        "Known pinned bare-C attach failure when CoreFoundation is absent",
+        "macOS PID birth identity is best effort; runtime addresses vary with ASLR",
+        "Script/application changes are not automatically rolled back by unload"
+      ],
+      "evaluationCase": {
+        "id": "native-call-instrumentation",
+        "inputFamily": "owned-native-boundary-worker",
+        "task": "Corroborate the supplied price calculation with concrete calls around its boundary in the authorized running worker. Retain argument/result evidence, establish the relevant module and explain observation limits while preserving the original process lifetime.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct observed arguments and returns",
+          "ordinary project evidence",
+          "script source retained by hash",
+          "original target lifetime preserved",
           "owned collector cleanup"
         ]
       }

@@ -71,6 +71,15 @@
     "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-diagnostics-10.0.750501-r1/dotnet-trace.10.0.750501.nupkg"
   },
+  "26e9e7b9a8d9c68c87cb3da879c328edd096d587720039095de6a522d2c8765e": {
+    "name": "frida-node-17.24.0-macos-arm64.tgz",
+    "sha256": "26e9e7b9a8d9c68c87cb3da879c328edd096d587720039095de6a522d2c8765e",
+    "size": 46957847,
+    "format": "tgz",
+    "root": "frida-node-17.24.0",
+    "license": "Frida LGPL-2.0 WITH WxWindows-exception-3.1; included full LGPL/third-party notices apply to dependencies",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-frida-node-17.24.0-r1/frida-node-17.24.0-macos-arm64.tgz"
+  },
   "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725": {
     "name": "ghidra-12.1.2-arm64_sonoma.tar.gz",
     "sha256": "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725",

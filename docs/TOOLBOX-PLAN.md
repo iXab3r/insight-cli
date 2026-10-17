@@ -38,6 +38,7 @@ Current verified inventory:
 | .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; dump cold/prepared agent proof reviewed; stack interrupted by model-account limit and trace agent gates pending | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
 | Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin passed; independent agent gate pending | Header and compiler/runtime/packer triage with explicit partial scan results |
 | LLDB | Owned-launch adapter/skill and pinned debugger/library/debugserver distribution; native snapshots and lifetime fault proof passed; independent model gate pending | Breakpoint arguments/returns, registers, memory and backtrace with kernel deadline after owner loss |
+| Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector and helper fault proof passed on the recorded candidate; independent model gate pending | Runtime argument/result corroboration while preserving the external target lifetime |
 | Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
