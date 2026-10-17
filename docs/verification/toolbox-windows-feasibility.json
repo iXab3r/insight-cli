@@ -66,7 +66,7 @@
   },
   "administrator": true,
   "fixtureSha256": "803b1ef5626bd05c3828b944993b018a49e4178f2daab5618042a014169e4719",
-  "currentState": "procmon_unreliable_not_accepted",
+  "currentState": "native_capture_feasible_with_explicit_filter_reset_adapter_pending",
   "historicalPassRun": 39029921856,
   "subsequentChecks": [
     {
@@ -95,5 +95,33 @@
       "idleExit": 0
     }
   ],
-  "interpretation": "Historical ReadFile evidence is real, but repeated missing owned events prevent declaring ProcMon stable. Neither WaitForIdle nor a two-second post-exit window fixed it. The next probe clears inherited capture/export filters using /NoFilter; no accepted fix is claimed."
+  "interpretation": "Both repeat runs observed the actual successful owned ReadFile after explicitly clearing capture/export filters with /NoFilter. Readiness and a post-exit window alone had failed. This supports inherited filter state as the capture gap. A product-side prefilter, public adapter, skill and independent agent acceptance remain required; these runner captures do not admit a general unscoped capture API.",
+  "confirmations": [
+    {
+      "run": 39039589569,
+      "attempt": 1,
+      "source": "353cb6a6a2e0cc37397eb48452d9d6f03a1168fd",
+      "ownedConfigReadObserved": true,
+      "matchingEvents": 1,
+      "fixturePidEvents": 654,
+      "anyProcessConfigEvents": 7,
+      "readinessMs": 145,
+      "totalEvents": 87918,
+      "noInheritedFilter": true
+    },
+    {
+      "run": 39039589569,
+      "attempt": 2,
+      "artifactId": 12104115153,
+      "source": "353cb6a6a2e0cc37397eb48452d9d6f03a1168fd",
+      "ownedConfigReadObserved": true,
+      "matchingEvents": 1,
+      "fixturePidEvents": 654,
+      "anyProcessConfigEvents": 7,
+      "readinessMs": 135,
+      "totalEvents": 84058,
+      "noInheritedFilter": true,
+      "receiptMatchesAttemptLog": true
+    }
+  ]
 }

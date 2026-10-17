@@ -27,7 +27,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
 | T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | MIT plus dependencies; retain conditions and actual trace interpretation |
 | T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Spawn/attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | wxWindows Library Licence 3.1; complete dependency/source audit pending. Real Node hooks/detach passed on a CoreFoundation-loaded fixture; bare-C attach failed explicitly; no adapter admitted |
-| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Selected LLVM debugger bundle; inspect existing Ghidra LLDB ownership hooks before adding a frontend | Apache-2.0 with LLVM exceptions; native owned-inferior proof and cleanup; no duplicate owner or arbitrary PID kill gateway |
+| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Pinned lldb/liblldb/debugserver subset passed breakpoint, registers, memory and backtrace on an owned macOS fixture; reuse existing Ghidra debugger ownership principles | Apache-2.0 with LLVM exceptions; normal inferior cleanup independently verified. Public adapter, complete distribution and crash/timeout/recovery ownership proof remain pending |
 | T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Embedded EULA prohibits redistribution. Explicit Microsoft delivery policy with pinned bytes/local cache; no mirror. Do not consume mutable auto-update appinstaller as the managed version |
 | T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. [Sysinternals terms](https://learn.microsoft.com/en-us/sysinternals/license-terms) prohibit our mirror. Actual driver/capture feasibility must be proven |
 | T13 | [strace 7.2](https://github.com/strace/strace/releases/tag/v7.2) | Scoped syscall/file/process capture, owned Linux fixture | LGPL-2.1-or-later for tool; test/UAPI notices retained. Build a pinned Linux artifact from exact source; ptrace host prerequisite |
@@ -97,8 +97,11 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
   runs repeatedly recorded zero owned events. Run 39038803051 still missed the owned read
   with `/WaitForIdle` exit 0: readiness alone did not fix it. The next probe retains a bounded
   post-exit capture window and adds owned-PID counters. Run 39039221126 still recorded
-  zero owned-PID/config events after that window. The next probe explicitly clears inherited
-  capture/export filters with the pinned binary's `/NoFilter` option; it is not an accepted fix. The
+  zero owned-PID/config events after that window. Explicitly clearing capture/export filters
+  with the pinned binary's `/NoFilter` then passed twice on commit 353cb6a (run 39039589569,
+  attempts 1/2): each observed one successful owned ReadFile and 654 fixture-PID events.
+  This supports inherited filter state as the missing-event cause; a product-side prefilter
+  and public adapter/agent gates are still required. The
   [Windows receipt](verification/toolbox-windows-feasibility.json) preserves both outcomes.
 * **Skills must be usable before install.** Existing Factory IPC routing is root-based and Core
   handlers resolve profiles. Shared [Factory #52](https://github.com/iXab3r/EyeAuras.CliFactory/issues/52)
@@ -225,3 +228,19 @@ records both failures and the useful observations. `scripts/toolbox/audit-frida.
 the native backend probe using `instrumented.c` compiled with/without
 `INSIGHT_WITH_CORE_FOUNDATION` and `-framework CoreFoundation`. Distribution/source/notices,
 public adapter, skill and independent agent gates remain open. This probe is not CLI acceptance.
+
+### LLDB backend feasibility
+
+The official LLVM 23.1.3 archive supplies lldb, liblldb and debugserver with system-library
+dependencies. Selecting that private debugserver via `LLDB_DEBUGSERVER_PATH`, disabling init
+files and using direct `process launch` passed a real named breakpoint, parameter/register
+inspection, a memory window and a backtrace on the owned C fixture. `process kill` ended the
+inferior and an independent PID probe confirmed absence. No separate Python setup was used.
+
+The first `run` alias required lldb-argdumper, missing from the trial subset. The explicit
+argv launch path avoids shell expansion. [LLDB feasibility](verification/toolbox-lldb-feasibility.json)
+and `scripts/toolbox/audit-lldb.mjs` retain the exact binary/fixture identities and limits.
+A normal batch exit is not proof of crash-safe ownership: timeout, debugger/helper failure,
+owner replacement and uncertain inferior lifetime remain required before public admission.
+Existing Ghidra debugger ownership rules remain authoritative; no arbitrary PID adoption or
+second shared debugger owner is introduced by this probe.
