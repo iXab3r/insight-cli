@@ -49,7 +49,9 @@ try{
  $probe=StartOwned @('/AcceptEula','/Quiet','/Minimized','/LoadConfig',$pmc,'/BackingFile',$pml,'/Runtime','3') 'Local\insight-cli-procmon-capture';$all+=$probe
  $clock=[Diagnostics.Stopwatch]::StartNew();while(!$probe.process.HasExited -and $clock.ElapsedMilliseconds -lt 20000){[void][IO.File]::ReadAllText($config);Start-Sleep -Milliseconds 100}
  $result=FinishOwned $probe
- if($result.childExitCode -ne 0){Write-Host ($result|ConvertTo-Json -Compress);Write-Host $probe.stdout.GetAwaiter().GetResult();Write-Host $probe.stderr.GetAwaiter().GetResult();throw ('Isolated ProcMon capture failed: 0x'+([uint32]$result.childExitCode).ToString('x8'))}
+ # /Runtime's actual exit semantics are established by verified PML readback below.
+ Write-Host ('Native timed capture exit: 0x'+([uint32]$result.childExitCode).ToString('x8'))
+ if(!(Test-Path $pml)){throw 'Timed capture retained no PML'}
  $export=StartOwned @('/AcceptEula','/Quiet','/NoConnect','/NoFilter','/OpenLog',$pml,'/SaveAs',$csv);$all+=$export;$exported=FinishOwned $export
  if($exported.childExitCode -ne 0){throw 'Isolated ProcMon export failed'}
  $rows=@(Import-Csv $csv);$matching=@($rows|Where-Object {$_.PID -eq [string]$PID -and $_.Path -eq $config -and $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS'})
