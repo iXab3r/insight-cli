@@ -66,13 +66,17 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $procmon=Join-Path $root 'procmon';Expand-Checked $zip $procmon
         $launcher=Join-Path $procmon 'Procmon64.exe';$pml=Join-Path $root 'owned.pml';$csv=Join-Path $root 'owned.csv'
         $capture=Launch $launcher @('/AcceptEula','/Quiet','/Minimized','/BackingFile',$pml)
-        Start-Sleep -Seconds 3
+        $idle=Finish (Launch $launcher @('/WaitForIdle'))
+        Start-Sleep -Seconds 2
+        $driverRunning=@(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -like 'PROCMON*' -and $_.State -eq 'Running' }).Count -gt 0
         $ran=Finish (Launch $exe @($config))
         $stop=Finish (Launch $launcher @('/Terminate'))
         if(!$capture.process.WaitForExit(20000)) { throw 'Owned capture did not stop' }
         $export=Finish (Launch $launcher @('/AcceptEula','/Quiet','/OpenLog',$pml,'/SaveAs',$csv))
-        $matches=0;if(Test-Path $csv){$matches=@(Import-Csv $csv | Where-Object { $_.'Process Name' -eq 'InsightOwnedProbe.exe' -and $_.Path -eq $config }).Count}
-        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
+        $rows=@();if(Test-Path $csv){$rows=@(Import-Csv $csv)}
+        $ownedRows=@($rows | Where-Object { $_.'Process Name' -eq 'InsightOwnedProbe.exe' })
+        $matches=@($ownedRows | Where-Object { $_.Path -eq $config -and $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS' }).Count
+        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
         # Raw process captures can include unrelated runner data: never upload them.
         Remove-Item $pml,$csv -Force -ErrorAction SilentlyContinue
     } catch { $result.tools.procmon=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }
@@ -83,7 +87,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $target=Launch $exe @($config,'wait')
         $gui=Launch $launcher @('--multiple','--settings-file',(Join-Path $root 'dnspy-settings.xml'),'--pid',[string]$target.process.Id,$dll)
         Start-Sleep -Seconds 10;$gui.process.Refresh()
-        $result.tools.dnspy=@{version='6.6.0';launchAlive=(!$gui.process.HasExited);windowHandlePresent=($gui.process.MainWindowHandle -ne 0);extensionContractsPresent=(Test-Path (Join-Path $dnspy 'dnSpy.Contracts.Debugger.dll'));debugEditAutomationProven=$false;adapterAccepted=$false}
+        $result.tools.dnspy=@{version='6.6.0';launchAlive=(!$gui.process.HasExited);windowHandlePresent=($gui.process.MainWindowHandle -ne 0);extensionContractsPresent=(@(Get-ChildItem $dnspy -Recurse -Filter '*Contracts*Debugger*.dll').Count -gt 0);debugEditAutomationProven=$false;adapterAccepted=$false}
         if(!$gui.process.HasExited) { [void]$gui.process.CloseMainWindow();[void]$gui.process.WaitForExit(5000) }
     } catch { $result.tools.dnspy=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }
 } finally {

@@ -127,7 +127,7 @@ existing artifact/hash catalogs continue to describe distribution bytes, not res
 
 ### Catalog and proposed CLI surface
 
-These additions are proposed, not existing commands:
+The foundation candidate now implements these commands; whole-toolbox acceptance is still pending:
 
 ```text
 insight-cli tools list --json
@@ -159,8 +159,9 @@ release path would leave later tool skills stale.
 Provide one explicit connection of the toolbox bundle to the supported host, with update and
 removal semantics scoped to owned entries. New admitted tool skills must become discoverable
 without a bespoke user procedure for each tool. npm installation does not silently edit agent
-settings. Select the concrete connection/export mechanism during TB-02 rather than implementing
-several competing installers. Verify actual startup metadata and implicit routing.
+settings. The selected mechanism is one explicit project-local link to the deterministic `skill-bundle`,
+whose path comes from `skill --json`. A stable global npm prefix carries upgrades; disconnect
+removes only that owned link. This avoids a second host configuration store or per-tool installers. Verify actual startup metadata and implicit routing.
 
 Factory owns generic help/discovery/bootstrap and IPC behavior. Its open
 [skill policy issue #29](https://github.com/iXab3r/EyeAuras.CliFactory/issues/29) already owns the
@@ -174,7 +175,8 @@ to stop another agent's owner. Grant no broad network access just to reach a loc
 
 ## Ordered work hierarchy
 
-TB-01 is in progress; TB-02–TB-09 remain pending their gates. The owner selected full inventory
+TB-01 is in progress. Required discovery/skill foundation work for TB-02–TB-05 is in draft PR #55;
+no phase exit is claimed. TB-06–TB-09 remain pending their gates. The owner selected full inventory
 scope and tool-specific applicability. Preliminary metadata and vendor probes do not complete
 the audit or the tool delivery.
 
