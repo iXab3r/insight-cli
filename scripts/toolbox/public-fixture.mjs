@@ -37,7 +37,7 @@ export async function createPublicFixture(packageRoot,directory){
   return allowFailure?{code,value}:value;
  };
  await call(['profile','create',profile]);await call(['profile','set-default',profile]);await call(['permissions','grant','Update']);
- await symlink(join(packageRoot,'skill-bundle'),join(project,'.agents/skills/insight-toolbox'),'dir');
+ await symlink(join(packageRoot,'skill-bundle'),join(project,'.agents/skills/insight-toolbox'),process.platform==='win32'?'junction':'dir');
  const holder=spawn(process.execPath,[cli,'--json-rpc'],{cwd:project,env:environment,stdio:['pipe','pipe','pipe']});holder.stdout.resume();holder.stderr.resume();holder.stdin.write('{"jsonrpc":"2.0","id":1,"method":"cli.execute","params":{"argv":["profile","show"]}}\n');
  const cleanup=async()=>{try{await call(['ipc-server','stop']);}finally{holder.stdin.end();holder.kill();}};
  return {packageRoot,project,profile,environment,cli,calls,call,cleanup,version:manifest.version,appdata};

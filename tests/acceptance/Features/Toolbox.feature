@@ -3,46 +3,55 @@ Feature: The installed toolbox supports a real investigation
   These checks establish host discovery, container recovery, native binary investigation and live managed diagnostics.
   Independent model findings are reviewed separately; native execution is not an agent pass.
 
+  @macos
   Scenario: Discover tools before installing their runtimes
     Given an isolated globally installed toolbox candidate is selected
     When Codex connects and disconnects the packaged skill bundle
     Then all shipped skills are visible and unrelated project skills survive
 
+  @macos
   Scenario: Recover useful input from a supplied container
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI recovers the owned container and retains its materials
     Then exact recovered bytes and configuration survive tool removal
 
+  @macos
   Scenario: Investigate native linkage and debug records
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI inspects native images and their debug records
     Then native linkage and focused debug evidence survive tool removal
 
+  @macos
   Scenario: Explain waiting managed work from stacks, heap and sampled time
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI investigates the owned managed worker
     Then the waiting stack and heap state have retained diagnostic evidence
 
+  @macos
   Scenario: Classify unknown binaries without hiding signature failures
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI classifies owned native and managed inputs
     Then header and signature evidence retains scan uncertainty
 
+  @macos
   Scenario: Corroborate a native boundary with concrete arguments and returns
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI observes owned native breakpoint snapshots
     Then runtime evidence and checkpoints survive debugger removal
 
+  @macos
   Scenario: Retain bounded debugger lifetime after interruption or owner loss
     Given an isolated globally installed toolbox candidate is selected
     When the installed debugger runner suffers controlled lifetime faults
     Then owned debugger processes exit and uncertain results are not replayed
 
+  @macos
   Scenario: Corroborate native calls while preserving the original process
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI observes calls in the owned instrumented worker
     Then hook evidence and checkpoints retain source identity and cleanup
 
+  @macos
   Scenario: Remove temporary hooks after collector interruption or owner loss
     Given an isolated globally installed toolbox candidate is selected
     When the public instrumentation collector suffers controlled lifetime faults

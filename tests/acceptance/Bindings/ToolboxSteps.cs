@@ -16,7 +16,14 @@ public sealed class ToolboxSteps(ScenarioContext context)
         is { Length: > 0 } value ? value : throw new InvalidOperationException($"Missing {name}.");
 
     [BeforeScenario("toolbox")]
-    public async Task Start() => scenario = (await AutomationRun.ConnectAsync()).CreateScenario();
+    public async Task Start()
+    {
+        var tags = context.ScenarioInfo.Tags;
+        if (tags.Contains("linux") && !OperatingSystem.IsLinux()) Assert.Ignore("Native Linux profile is evaluated in its own CI gate.");
+        if (tags.Contains("windows") && !OperatingSystem.IsWindows()) Assert.Ignore("Native Windows profile is evaluated in its own CI gate.");
+        if (tags.Contains("macos") && !OperatingSystem.IsMacOS()) Assert.Ignore("Native macOS profile is evaluated in its own gate.");
+        scenario = (await AutomationRun.ConnectAsync()).CreateScenario();
+    }
 
     [Given("an isolated globally installed toolbox candidate is selected")]
     public void Ready()

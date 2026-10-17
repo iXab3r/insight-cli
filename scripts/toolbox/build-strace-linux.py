@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory(prefix='insight-strace-build-') as temporary:
  assert marker.exists();pids=[int(x) for x in marker.read_text().split()];process.kill();process.wait(timeout=5)
  def alive(pid):
   try:return pathlib.Path('/proc/'+str(pid)+'/stat').read_text().split(') ',1)[1][0]!='Z'
-  except FileNotFoundError:return False
+  except (FileNotFoundError,ProcessLookupError):return False
  for _ in range(100):
   if not any(alive(pid) for pid in pids):break
   time.sleep(.05)

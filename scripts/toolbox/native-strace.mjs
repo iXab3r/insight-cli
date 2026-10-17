@@ -1,7 +1,7 @@
 // Native public CLI only; owned ELF fixtures and no arbitrary PID attachment.
 import assert from 'node:assert/strict';import {readFile,writeFile,copyFile,chmod,mkdir,stat} from 'node:fs/promises';import {join} from 'node:path';import {setTimeout as delay} from 'node:timers/promises';import {createPublicFixture,digest} from './public-fixture.mjs';
 const [packageRoot,directory,archive,fixture,settings]=process.argv.slice(2);assert.equal(process.platform,'linux');const f=await createPublicFixture(packageRoot,directory);let complete=false;
-const alive=async pid=>{try{return (await readFile('/proc/'+pid+'/stat','utf8')).split(') ')[1][0]!=='Z';}catch(e){if(e.code==='ENOENT')return false;throw e;}};
+const alive=async pid=>{try{return (await readFile('/proc/'+pid+'/stat','utf8')).split(') ')[1][0]!=='Z';}catch(e){if(['ENOENT','ESRCH'].includes(e.code))return false;throw e;}};
 try{
  const code=digest(await readFile(fixture)),data=digest(await readFile(settings));assert.equal((await f.call(['strace','status'])).state,'not_ready');await f.call(['strace','download']);await f.call(['strace','install','--archive',archive,'--offline']);await f.call(['strace','doctor']);
  const output=join(f.project,'research/read.json'),first=await f.call(['strace','trace',fixture,'--arg',settings,'--output',output]);const trace=JSON.parse(await readFile(output,'utf8'));assert.match(trace.programStdout,/owned-report Pending37/);assert.match(trace.lines.join('\n'),/read\([^\n]*owned settings[^\n]*owned-report Pending37/);assert.match(trace.lines.join('\n'),/openat\([^\n]*owned settings[^\n]*= [0-9]+/);

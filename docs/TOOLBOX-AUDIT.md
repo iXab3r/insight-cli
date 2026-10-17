@@ -324,3 +324,12 @@ in the isolated environment; JSON and receipt I/O moved into the small .NET exec
 PowerShell now loads the DLL and invokes it without profile, module, compiler or JSON
 cmdlet dependencies. The replacement DLL reproduced byte-for-byte in two builds.
 WinDbg public CLI acceptance remains a separate gate.
+
+The [strace public receipt](verification/toolbox-strace.json) now confirms a real Linux
+Gherkin pass from an isolated global installation: fresh mirror download, offline
+installation, actual config `openat`/`read` plus application value, bounded pages,
+public stop/kill and timeout cleanup, drift refusal and retained checkpoints. A
+separate source-build audit rerun hit `/proc` ESRCH after a process disappeared;
+its observer now treats that as absence. The passing CLI job and failing overall
+workflow are recorded separately. Platform tags keep unsupported profiles explicitly
+skipped rather than pretending that one host proved the entire toolbox.
