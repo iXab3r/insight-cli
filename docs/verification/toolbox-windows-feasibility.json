@@ -83,7 +83,17 @@
       "idleExit": 0,
       "readinessAttempts": 1,
       "readinessMs": 128
+    },
+    {
+      "run": 39039221126,
+      "source": "eac7f6f19975d4be285d2ddaf2c207a3871dc0d8",
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "fixturePidEvents": 0,
+      "anyProcessConfigEvents": 0,
+      "postExitObservationMs": 2000,
+      "idleExit": 0
     }
   ],
-  "interpretation": "Historical ReadFile evidence is real, but repeated missing owned events prevent declaring ProcMon stable. WaitForIdle alone did not fix the capture gap. A bounded post-exit observation window and owned-PID counters are the next probe, not an accepted fix."
+  "interpretation": "Historical ReadFile evidence is real, but repeated missing owned events prevent declaring ProcMon stable. Neither WaitForIdle nor a two-second post-exit window fixed it. The next probe clears inherited capture/export filters using /NoFilter; no accepted fix is claimed."
 }

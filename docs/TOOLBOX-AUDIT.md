@@ -26,7 +26,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT plus dependencies; package declares net8 with major roll-forward. Prove .NET 10 compatibility and actual owned dump/object workflow |
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
 | T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | MIT plus dependencies; retain conditions and actual trace interpretation |
-| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Spawn/attach/hooks on owned fixtures; private Python, pinned tools/core wheels and transitive dependencies | wxWindows Library Licence 3.1; preserve dependency licenses. Native attach/signing prerequisites require actual macOS proof |
+| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Spawn/attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | wxWindows Library Licence 3.1; complete dependency/source audit pending. Real Node hooks/detach passed on a CoreFoundation-loaded fixture; bare-C attach failed explicitly; no adapter admitted |
 | T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Selected LLVM debugger bundle; inspect existing Ghidra LLDB ownership hooks before adding a frontend | Apache-2.0 with LLVM exceptions; native owned-inferior proof and cleanup; no duplicate owner or arbitrary PID kill gateway |
 | T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Embedded EULA prohibits redistribution. Explicit Microsoft delivery policy with pinned bytes/local cache; no mirror. Do not consume mutable auto-update appinstaller as the managed version |
 | T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. [Sysinternals terms](https://learn.microsoft.com/en-us/sysinternals/license-terms) prohibit our mirror. Actual driver/capture feasibility must be proven |
@@ -96,7 +96,9 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
   dnSpyEx debug/edit automation still need their own adapter/agent evidence. Later ProcMon
   runs repeatedly recorded zero owned events. Run 39038803051 still missed the owned read
   with `/WaitForIdle` exit 0: readiness alone did not fix it. The next probe retains a bounded
-  post-exit capture window and adds owned-PID counters; it is not an accepted fix. The
+  post-exit capture window and adds owned-PID counters. Run 39039221126 still recorded
+  zero owned-PID/config events after that window. The next probe explicitly clears inherited
+  capture/export filters with the pinned binary's `/NoFilter` option; it is not an accepted fix. The
   [Windows receipt](verification/toolbox-windows-feasibility.json) preserves both outcomes.
 * **Skills must be usable before install.** Existing Factory IPC routing is root-based and Core
   handlers resolve profiles. Shared [Factory #52](https://github.com/iXab3r/EyeAuras.CliFactory/issues/52)
@@ -207,3 +209,19 @@ The first DiE doctor failed because generic installation fingerprints mixed cano
 targets with an aliased `/tmp` root. Canonical relative targets fix relocation without accepting
 escaping links; dedicated regression tests cover both. Independent cold/prepared model trials
 remain pending after the evaluator account usage limit; native proof is not agent acceptance.
+
+### Frida backend feasibility
+
+The official Frida 17.24.0 Node NAPI-v8 addon worked on Node 24.19.0 without Python: the
+owned fixture yielded 15 argument/result observations, including count 10 → 130 and count
+11 → 109, then the collector unloaded its script and detached while the target remained alive.
+The matching bare C fixture failed attach because CoreFoundation was not found. Retain this
+capability gap; do not inject a framework into an unrelated target as an implicit workaround.
+
+The standalone frida-inject executable also failed with piped stdin (`tcgetattr`) after the
+CoreFoundation-loaded attach. That is unsuitable for the existing pipe-based process runner;
+the Node binding provides an actual noninteractive route. [Feasibility evidence](verification/toolbox-frida-feasibility.json)
+records both failures and the useful observations. `scripts/toolbox/audit-frida.mjs` reproduces
+the native backend probe using `instrumented.c` compiled with/without
+`INSIGHT_WITH_CORE_FOUNDATION` and `-framework CoreFoundation`. Distribution/source/notices,
+public adapter, skill and independent agent gates remain open. This probe is not CLI acceptance.

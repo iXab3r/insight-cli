@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "scope": "Frida backend feasibility, not public CLI or agent acceptance",
+  "node": "v24.19.0",
+  "backend": "Official frida 17.24.0 Node NAPI v8",
+  "results": [
+    {
+      "fixture": "bare-c",
+      "sha256": "dcf3c1347199feb9c59f4d10a840e220c3a10657c9c24af99cff7f7191902a9f",
+      "state": "failed",
+      "error": "Error: Module not found at \"/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation\"",
+      "targetAlive": true
+    },
+    {
+      "fixture": "core-foundation",
+      "sha256": "71148cba91a025b8e82f6ada93a0c5e78fa49beab367c42f14b3f0806014889c",
+      "state": "observed",
+      "quotes": [
+        {
+          "kind": "quote",
+          "count": 4,
+          "result": 52
+        },
+        {
+          "kind": "quote",
+          "count": 5,
+          "result": 65
+        },
+        {
+          "kind": "quote",
+          "count": 6,
+          "result": 78
+        },
+        {
+          "kind": "quote",
+          "count": 7,
+          "result": 91
+        },
+        {
+          "kind": "quote",
+          "count": 8,
+          "result": 104
+        },
+        {
+          "kind": "quote",
+          "count": 9,
+          "result": 117
+        },
+        {
+          "kind": "quote",
+          "count": 10,
+          "result": 130
+        },
+        {
+          "kind": "quote",
+          "count": 11,
+          "result": 109
+        },
+        {
+          "kind": "quote",
+          "count": 12,
+          "result": 117
+        },
+        {
+          "kind": "quote",
+          "count": 13,
+          "result": 125
+        },
+        {
+          "kind": "quote",
+          "count": 14,
+          "result": 133
+        },
+        {
+          "kind": "quote",
+          "count": 15,
+          "result": 141
+        },
+        {
+          "kind": "quote",
+          "count": 1,
+          "result": 13
+        },
+        {
+          "kind": "quote",
+          "count": 2,
+          "result": 26
+        },
+        {
+          "kind": "quote",
+          "count": 3,
+          "result": 39
+        }
+      ],
+      "targetAlive": true,
+      "cleanDetach": true
+    }
+  ],
+  "adapterAccepted": false,
+  "date": "2026-10-17",
+  "sourceFixtureSha256": "bb525d73da5243777741035b0784785c76be8d9fb915579449ea38f99b6daa92",
+  "runtime": {
+    "version": "17.24.0",
+    "napiVersion": 8,
+    "nativeAddonArchiveSha256": "791513b6efa1ce82298e60a984e10574930eba33d13a15dc27d1344c4013d327",
+    "npmIntegrity": "sha512-7nxW3kFTGS4LzdYF7P3XJfiQcH+yRpDU+t+ob15Zn/hGjwugouVMYwtv6M93W0wUH7XrvD/7g/QHgRAgdImMeA==",
+    "pythonRequired": false
+  },
+  "earlierInjectorProbe": {
+    "xzSha256": "a757e1ec69cf17c7c952d8beb0ed34132a2dfb9210dd91c2a9042cea651df6a6",
+    "bareCError": "CoreFoundation module not found",
+    "coreFoundationTargetError": "tcgetattr failed with piped stdin",
+    "standalonePipeBackendAccepted": false
+  },
+  "outstanding": [
+    "Matching complete source/transitive notice distribution audit",
+    "Decide and verify handling of bare-C CoreFoundation attach failure; do not silently mutate the target",
+    "Public managed/external adapter and packaged skill",
+    "Native public CLI and independent cold/prepared agent gate"
+  ]
+}

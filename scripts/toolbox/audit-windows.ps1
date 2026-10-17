@@ -65,7 +65,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $zip=Acquire 'ProcessMonitor.zip' 'https://download.sysinternals.com/files/ProcessMonitor.zip' '477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10'
         $procmon=Join-Path $root 'procmon';Expand-Checked $zip $procmon
         $launcher=Join-Path $procmon 'Procmon64.exe';$pml=Join-Path $root 'owned.pml';$csv=Join-Path $root 'owned.csv'
-        $capture=Launch $launcher @('/AcceptEula','/Quiet','/Minimized','/BackingFile',$pml)
+        $capture=Launch $launcher @('/AcceptEula','/Quiet','/Minimized','/NoFilter','/BackingFile',$pml)
         # /WaitForIdle can return 1 before the first instance has registered its endpoint.
         # A fixed sleep cannot establish readiness before the short fixture starts.
         $readinessStarted=[System.Diagnostics.Stopwatch]::StartNew();$idle=$null;$readinessAttempts=0
@@ -85,7 +85,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         Start-Sleep -Seconds 2
         $stop=Finish (Launch $launcher @('/Terminate'))
         if(!$capture.process.WaitForExit(20000)) { throw 'Owned capture did not stop' }
-        $export=Finish (Launch $launcher @('/AcceptEula','/Quiet','/OpenLog',$pml,'/SaveAs',$csv))
+        $export=Finish (Launch $launcher @('/AcceptEula','/Quiet','/NoFilter','/OpenLog',$pml,'/SaveAs',$csv))
         $rows=@();if(Test-Path $csv){$rows=@(Import-Csv $csv)}
         $ownedRows=@($rows | Where-Object { $_.'Process Name' -eq 'InsightOwnedProbe.exe' })
         $configPath=[System.IO.Path]::GetFullPath($config)
@@ -94,7 +94,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $pidRows=@($rows | Where-Object { $_.PID -eq [string]$fixturePid })
         $anyConfigRows=@($rows | Where-Object { $_.Path.Replace('/','\') -eq $configPath })
         $configOperations=@($configRows | Group-Object Operation,Result | ForEach-Object { @{operation=$_.Group[0].Operation;result=$_.Group[0].Result;count=$_.Count} })
-        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;postExitObservationMs=2000;fixturePidEvents=$pidRows.Count;fixtureProcessNames=@($pidRows | Select-Object -ExpandProperty 'Process Name' -Unique);anyProcessConfigEvents=$anyConfigRows.Count;idleExit=$idle.code;readinessAttempts=$readinessAttempts;readinessMs=$readinessMs;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
+        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;noInheritedFilter=$true;postExitObservationMs=2000;fixturePidEvents=$pidRows.Count;fixtureProcessNames=@($pidRows | Select-Object -ExpandProperty 'Process Name' -Unique);anyProcessConfigEvents=$anyConfigRows.Count;idleExit=$idle.code;readinessAttempts=$readinessAttempts;readinessMs=$readinessMs;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
         # Raw process captures can include unrelated runner data: never upload them.
         Remove-Item $pml,$csv -Force -ErrorAction SilentlyContinue
     } catch { $result.tools.procmon=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }
