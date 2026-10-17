@@ -8,12 +8,14 @@
   "distribution": {
     "tag": "tool-diec-3.21-r1",
     "binarySha256": "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af",
-    "state": "prepared_reproducibly",
+    "state": "published_verified",
     "exactSourceCompanions": 4,
     "embeddedLicenseAndAttributionFiles": 306,
     "fullNoticesPreserved": true,
     "installerNeverExecuted": true,
-    "privateDynamicQtFrameworks": 5
+    "privateDynamicQtFrameworks": 5,
+    "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-diec-3.21-r1",
+    "allSixRemoteAssetsReadBackAndHashVerified": true
   },
   "native": {
     "schema": 1,
@@ -76,5 +78,13 @@
     "state": "pending",
     "reason": "The prior independent stack trial exhausted the model-account usage limit. No model trial was run or claimed for DiE."
   },
-  "wholeToolboxAccepted": false
+  "wholeToolboxAccepted": false,
+  "ownedReleaseConsumer": {
+    "state": "passed",
+    "freshProfileDownload": true,
+    "downloadedBytesIndependentlyHashVerified": true,
+    "offlineInstallFromDownloadedCache": true,
+    "doctorAndRealPEClassification": true,
+    "ownedCleanup": true
+  }
 }

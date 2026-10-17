@@ -79,7 +79,10 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         if($idle.code -ne 0) { throw 'Owned Process Monitor did not report capture readiness' }
         $readinessMs=$readinessStarted.ElapsedMilliseconds
         $driverRunning=@(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -like 'PROCMON*' -and $_.State -eq 'Running' }).Count -gt 0
-        $ran=Finish (Launch $exe @($config))
+        $fixtureExecution=Launch $exe @($config);$fixturePid=$fixtureExecution.process.Id
+        $ran=Finish $fixtureExecution
+        # Keep a bounded post-exit observation window for asynchronous event delivery.
+        Start-Sleep -Seconds 2
         $stop=Finish (Launch $launcher @('/Terminate'))
         if(!$capture.process.WaitForExit(20000)) { throw 'Owned capture did not stop' }
         $export=Finish (Launch $launcher @('/AcceptEula','/Quiet','/OpenLog',$pml,'/SaveAs',$csv))
@@ -88,8 +91,10 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $configPath=[System.IO.Path]::GetFullPath($config)
         $configRows=@($ownedRows | Where-Object { $_.Path.Replace('/','\') -eq $configPath })
         $matches=@($configRows | Where-Object { $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS' }).Count
+        $pidRows=@($rows | Where-Object { $_.PID -eq [string]$fixturePid })
+        $anyConfigRows=@($rows | Where-Object { $_.Path.Replace('/','\') -eq $configPath })
         $configOperations=@($configRows | Group-Object Operation,Result | ForEach-Object { @{operation=$_.Group[0].Operation;result=$_.Group[0].Result;count=$_.Count} })
-        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;readinessAttempts=$readinessAttempts;readinessMs=$readinessMs;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
+        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;postExitObservationMs=2000;fixturePidEvents=$pidRows.Count;fixtureProcessNames=@($pidRows | Select-Object -ExpandProperty 'Process Name' -Unique);anyProcessConfigEvents=$anyConfigRows.Count;idleExit=$idle.code;readinessAttempts=$readinessAttempts;readinessMs=$readinessMs;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
         # Raw process captures can include unrelated runner data: never upload them.
         Remove-Item $pml,$csv -Force -ErrorAction SilentlyContinue
     } catch { $result.tools.procmon=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }

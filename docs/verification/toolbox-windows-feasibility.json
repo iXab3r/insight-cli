@@ -65,5 +65,25 @@
     }
   },
   "administrator": true,
-  "fixtureSha256": "803b1ef5626bd05c3828b944993b018a49e4178f2daab5618042a014169e4719"
+  "fixtureSha256": "803b1ef5626bd05c3828b944993b018a49e4178f2daab5618042a014169e4719",
+  "currentState": "procmon_unreliable_not_accepted",
+  "historicalPassRun": 39029921856,
+  "subsequentChecks": [
+    {
+      "run": 39036574636,
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "idleExit": 1
+    },
+    {
+      "run": 39038803051,
+      "source": "dd7552187cb4131cf52e34c4d9e0b7b89c2bf506",
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "idleExit": 0,
+      "readinessAttempts": 1,
+      "readinessMs": 128
+    }
+  ],
+  "interpretation": "Historical ReadFile evidence is real, but repeated missing owned events prevent declaring ProcMon stable. WaitForIdle alone did not fix the capture gap. A bounded post-exit observation window and owned-PID counters are the next probe, not an accepted fix."
 }

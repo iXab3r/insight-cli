@@ -93,7 +93,11 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
   passed WinDbg console commands, ProcMon observation of a successful owned configuration
   ReadFile, and dnSpyEx GUI/extension-contract availability. ProcMon needed a normalized
   Windows path in the probe oracle. This proves host feasibility only; scoped capture and
-  dnSpyEx debug/edit automation still need their own adapter/agent evidence.
+  dnSpyEx debug/edit automation still need their own adapter/agent evidence. Later ProcMon
+  runs repeatedly recorded zero owned events. Run 39038803051 still missed the owned read
+  with `/WaitForIdle` exit 0: readiness alone did not fix it. The next probe retains a bounded
+  post-exit capture window and adds owned-PID counters; it is not an accepted fix. The
+  [Windows receipt](verification/toolbox-windows-feasibility.json) preserves both outcomes.
 * **Skills must be usable before install.** Existing Factory IPC routing is root-based and Core
   handlers resolve profiles. Shared [Factory #52](https://github.com/iXab3r/EyeAuras.CliFactory/issues/52)
   was delivered in [Factory PR #53](https://github.com/iXab3r/EyeAuras.CliFactory/pull/53).
