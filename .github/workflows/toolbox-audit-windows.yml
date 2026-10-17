@@ -26,16 +26,28 @@ permissions:
   contents: read
 jobs:
   native-feasibility:
-    runs-on: windows-latest
-    timeout-minutes: 20
+    # All three initial host probes are superseded by actual scoped native workflows.
+    # Keep the check name, but require every stronger native gate instead of recording
+    # an unrelated system-wide ProcMon capture through user-default vendor settings.
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [owned-job-lifetime, windbg-public-cli, procmon-pre-capture-scope, procmon-private-registry, procmon-public-cli, dnspy-debug-edit, dnspy-public-cli]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.303'
-      - name: Probe owned Windows automation surfaces
-        shell: pwsh
-        run: ./scripts/toolbox/audit-windows.ps1
+      - name: Require every real Windows native gate
+        env:
+          NATIVE_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          results = {name: value['result'] for name, value in json.loads(os.environ['NATIVE_RESULTS']).items()}
+          receipt = {'schema': 2, 'scope': 'Aggregate only; native Windows execution is proved by the seven named jobs', 'jobs': results}
+          with open('toolbox-audit-windows.json', 'w') as output:
+              json.dump(receipt, output, indent=2)
+          print(json.dumps(receipt, indent=2))
+          if len(results) != 7 or any(value != 'success' for value in results.values()):
+              sys.exit('One or more native Windows acceptance gates did not pass')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

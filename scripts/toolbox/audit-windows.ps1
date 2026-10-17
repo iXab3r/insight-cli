@@ -1,4 +1,6 @@
-# Native feasibility only: these probes do not establish adapter or agent acceptance.
+# Historical host probe, superseded in CI by the seven scoped native facade/lifetime jobs.
+# Its user-default unfiltered ProcMon path is not the product's private, prefiltered launcher.
+# Keep prior failed feasibility evidence; do not use this script as a toolbox acceptance gate.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $root = Join-Path $env:RUNNER_TEMP 'insight-toolbox-audit'
