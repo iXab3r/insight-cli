@@ -1,68 +1,57 @@
-# Make the tools visible to an agent
+# Connect the toolbox to an agent
 
-Installing a runtime makes it available to `insight-cli`; it does not add a tool to an
-agent's native tool list. The agent needs shell access, `insight-cli` on PATH, permission
-to access its profile storage, and the packaged skill in its host's skill discovery path.
-Downloading Ghidra or ILSpy alone supplies none of that agent context.
+npm installs the CLI and all declared skills. Native tool downloads are separate. A host needs
+shell access to `insight-cli`, skill discovery and execution access to the assigned profile.
+`insight-cli tools list --json` discovers shipped capabilities without profile configuration,
+native runtimes, credentials or IPC. `skill <name>` returns the instructions' ordinary path;
+it does not inject them into an agent automatically.
 
-For a one-off investigation, tell the agent to use `insight-cli` and read the file returned
-by `insight-cli skill insight-re --json`. It can discover applications with `--help`,
-inspect readiness with `ghidra status` or `ilspy status`, and read the linked references
-only when needed. The command returns a file location, not the instructions themselves.
+## Codex: one project-local bundle
 
-For recurring work, explicitly connect the packaged entry point to the agent host. Keep the
-project's existing RE rules and formats. Do not overwrite its `AGENTS.md` or other skills.
-The CLI never changes personal agent settings during npm or runtime installation.
+The package prepares `skill-bundle`, containing an independent folder for every registered
+skill. `insight-cli skill --json` returns its `bundlePath`. References stay inside each skill;
+link the whole bundle once rather than connecting each tool separately. npm installation
+never edits agent settings or project RE instructions.
 
-## Codex, project-local setup
-
-On macOS/POSIX with a global npm installation, run from the research project:
+With a global npm installation, run from the research project:
 
 ```sh
 mkdir -p .agents/skills
-ln -s "$(npm root -g)/@eyeauras/insight-cli" .agents/skills/insight-cli
+ln -s "$(npm root -g)/@eyeauras/insight-cli/skill-bundle" .agents/skills/insight-toolbox
 ```
 
-These commands create links without replacing existing entries. The links belong to this
-machine; they are not portable files to commit into a shared project. Start a new agent
-session and check that `insight-cli` appears in its available skills. Its linked RE skill
-and references remain inside the same package tree. Do not separately symlink the nested
-`skills/insight-re` directory: that changes the base for its `../../` references. An agent
-can also load the RE skill using the absolute path returned by `insight-cli skill insight-re`.
-Codex supports skill directory symlinks and supplies their names/descriptions before
-loading the selected instructions. See [official skill discovery documentation](https://learn.chatgpt.com/docs/build-skills).
+`ln` refuses an existing destination: inspect it instead of overwriting another skill or
+connection. Local npm installations use the `bundlePath` from their actual CLI receipt.
+These machine-local links are not portable files to commit to a shared project. Start a fresh
+agent and verify all registered names/descriptions appear. The [official discovery contract](https://learn.chatgpt.com/docs/build-skills)
+supports project skills and symlinked directories; our actual host gate must still establish
+recursive discovery for this packaged bundle.
 
-The links follow the globally installed package through upgrades. If npm's global prefix
-changes, reconnect them to the new package location. A local npm installation can be
-connected using its actual package path instead. Other agent hosts need their own skill
-registration mechanism; these Codex paths are not a universal agent integration.
+An npm upgrade at the same global prefix replaces the bundle at the same path, including newly
+registered tool skills. Check its manifest/version and start a fresh host session after upgrade.
+A changed npm prefix needs reconnection. To disconnect, inspect `readlink .agents/skills/insight-toolbox`
+and remove only that owned symlink with `unlink .agents/skills/insight-toolbox`; preserve other
+entries and the package. No copied skills, per-tool installer or second agent configuration
+store is maintained. Other hosts may register this ordinary bundle through their own mechanism;
+Codex is the first concrete supported-host gate.
 
-## Runtime access is a separate prerequisite
+## Execution access
 
-Connecting a skill does not grant filesystem or IPC permissions. In a restricted agent
-sandbox, allow access to the assigned profile's AppData and the CLI's `.runtime` directory,
-and allow its local IPC endpoint. On macOS the application directory is
-`~/Library/Application Support/insight-cli`; the Unix socket is `.runtime/host.sock`.
-Keep other research profiles outside the write scope. Use the assigned `--profile` on
-profile-scoped calls instead of changing another agent's default.
+A skill link does not grant filesystem or IPC permissions. Allow the assigned profile's AppData
+and the CLI's `.runtime` directory, plus its exact local IPC endpoint. On macOS the application
+root is `~/Library/Application Support/insight-cli`; its Unix socket is `.runtime/host.sock`.
+Keep unrelated profiles outside the write scope and pass the assigned `--profile` explicitly.
+Do not grant broad external network access merely to reach a local socket.
 
-The practical evaluation found that filesystem grants alone were insufficient: the CLI
-then reported an ownership error because the sandbox could not reach the existing owner.
-A separate command smoke test passed with a specific Unix-socket allowance and no external
-network access. The complete agent run under that restricted configuration has not passed;
-do not treat this discovery recipe as a finished sandbox integration. Do not stop a shared
-owner merely to work around a sandbox's denied connection.
+An inaccessible profile means readiness is unknown. Inspect access failures; stopping a shared
+owner does not grant access to it. Existing restricted-host evaluation has not established a
+complete facade workflow yet; a successful metadata call or filesystem grant alone is insufficient.
 
-## Check behavior, not just the path
+## Behavioral acceptance
 
-Give a fresh agent an input and a research question without command examples. Verify that it:
-
-1. Selects the relevant skill and discovers an appropriate application.
-2. Checks/uses its intended profile and tool installation.
-3. Produces evidence from actual decompilation or inspection, respecting project rules.
-4. Saves useful ordinary files; when Ghidra annotations are requested, merges them and
-   verifies the published state.
-
-A visible skill is an entry point, not a guarantee that every model completes every task.
-The repository's [practical discovery evaluation](https://github.com/iXab3r/insight-cli/blob/main/docs/AGENT-DISCOVERY.md)
-distinguishes installation, startup discovery and observed task completion.
+Give a fresh agent an input and business question without commands/tool names. Verify startup
+metadata, implicit skill selection, intended public-tool use, correct findings, saved ordinary
+project files and cleanup. Ghidra edits additionally require merge and independent readback.
+Repeat cold-runtime and prepared-runtime cases; retain failures and distinguish an external-tool
+fallback from acceptance of the intended adapter. Package/skill existence is structural evidence,
+not proof that a model completed research.

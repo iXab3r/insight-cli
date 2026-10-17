@@ -17,12 +17,16 @@ for multiple agents, Ghidra and ordinary external tools. Locate it with
 `insight-cli artifacts save ./research --json` retains a file or folder and returns a
 browsable saved path. It uses the profile's Update permission and needs no Ghidra/Java.
 The [save contract](skills/ghidra-coordinator/references/artifacts.md) covers stable folders,
-independent copies and receipts. Installing the package does not register either skill.
+independent copies and receipts. Installing the package does not register skills in an agent host.
 Downloading runtimes also does not advertise them to an agent. Follow the explicit
 [agent setup](skills/ghidra-coordinator/references/agent-setup.md) to connect the skills;
 [practical discovery checks](docs/AGENT-DISCOVERY.md) test startup visibility and actual research.
-The [full toolbox plan](docs/TOOLBOX-PLAN.md) records the next delivery: 16 tool/family
+The [full toolbox plan](docs/TOOLBOX-PLAN.md) tracks the ongoing delivery: 16 tool/family
 entries, their skills, library/cross-tool capabilities and per-tool agent acceptance.
+`insight-cli tools list` and `tools show <tool>` describe the capabilities already shipped;
+`skill <name>` locates their instructions without profile or IPC access. The packaged
+`skill-bundle` connects all admitted skills at once. Additional tools remain in progress;
+the [delivery audit](docs/TOOLBOX-AUDIT.md) records pinned candidates and feasibility checks.
 The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
 contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
 

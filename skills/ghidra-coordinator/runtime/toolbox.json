@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "skills": [
+    {
+      "name": "insight-cli",
+      "title": "insight-cli",
+      "path": "SKILL.md",
+      "resources": {}
+    },
+    {
+      "name": "insight-re",
+      "title": "Insight RE",
+      "path": "skills/insight-re/SKILL.md",
+      "resources": {
+        "references/recovery.md": "references/recovery.md",
+        "references/artifacts.md": "references/artifacts.md"
+      }
+    },
+    {
+      "name": "insight-ghidra",
+      "title": "Insight Ghidra",
+      "path": "skills/insight-ghidra/SKILL.md",
+      "resources": {
+        "references/setup.md": "references/setup.md",
+        "references/research.md": "references/research.md",
+        "references/query-semantics.md": "references/query-semantics.md",
+        "references/native-workflows.md": "references/native-workflows.md",
+        "references/recovery.md": "references/recovery.md",
+        "references/managed-runtime.md": "references/managed-runtime.md",
+        "references/administration.md": "references/administration.md",
+        "references/debugger.md": "references/debugger.md",
+        "references/archive.md": "references/archive.md",
+        "references/extensions-and-sync.md": "references/extensions-and-sync.md",
+        "references/artifacts.md": "references/artifacts.md"
+      }
+    },
+    {
+      "name": "insight-ilspy",
+      "title": "Insight ILSpy",
+      "path": "skills/insight-ilspy/SKILL.md",
+      "resources": {
+        "references/ilspy.md": "references/ilspy.md"
+      }
+    },
+    {
+      "name": "insight-artifacts",
+      "title": "Insight Artifacts",
+      "path": "skills/insight-artifacts/SKILL.md",
+      "resources": {
+        "references/artifacts.md": "references/artifacts.md"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "ghidra",
+      "namespace": "ghidra",
+      "kind": "analytical",
+      "skill": "insight-ghidra",
+      "purpose": "Investigate and edit native code in isolated shared analysis contexts",
+      "inputs": [
+        "PE",
+        "ELF",
+        "Mach-O",
+        "supported binary formats"
+      ],
+      "tasks": [
+        "strings and cross-references",
+        "functions and decompilation",
+        "types and program edits",
+        "multi-agent merge/refresh",
+        "managed server and GUI",
+        "native debugger and retained traces"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64",
+        "linux-x64",
+        "win32-x64"
+      ],
+      "dependencies": [
+        "private Ghidra",
+        "private JDK",
+        "packaged Ghidra bridge"
+      ],
+      "workflowCommands": [
+        "ghidra open",
+        "ghidra functions",
+        "ghidra strings",
+        "ghidra merge",
+        "ghidra refresh",
+        "ghidra debugger"
+      ],
+      "limitations": [
+        "GUI/debugger native acceptance is macOS-specific; imported Windows code is not executable on macOS",
+        "Publication is explicit; preserve uncertain journals",
+        "Archive exchange requires a separately configured service"
+      ],
+      "evaluationCase": {
+        "id": "native-shared-research",
+        "inputFamily": "native-branch",
+        "task": "Explain the requested branch in the supplied native input, retain inspectable evidence, publish a useful annotation and verify it from an independent context.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct branch explanation",
+          "ordinary project evidence",
+          "published annotation",
+          "independent fresh-context readback",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "ilspy",
+      "namespace": "ilspy",
+      "kind": "analytical",
+      "skill": "insight-ilspy",
+      "purpose": "Inspect managed .NET types, C#, IL, metadata and resources",
+      "inputs": [
+        "managed .NET assembly"
+      ],
+      "tasks": [
+        "bounded type inventory",
+        "selected type/member decompilation",
+        "IL and metadata inspection",
+        "resource extraction",
+        "project recovery"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64",
+        "linux-x64",
+        "win32-x64"
+      ],
+      "dependencies": [
+        "private ILSpy CLI",
+        "private .NET runtime"
+      ],
+      "workflowCommands": [
+        "ilspy types",
+        "ilspy decompile",
+        "ilspy il",
+        "ilspy metadata",
+        "ilspy resources",
+        "ilspy resource",
+        "ilspy project"
+      ],
+      "limitations": [
+        "Static analysis does not execute code",
+        "NativeAOT inputs need native analysis",
+        "No Ghidra context or merge is required"
+      ],
+      "evaluationCase": {
+        "id": "managed-static-research",
+        "inputFamily": "managed-policy",
+        "task": "Recover the requested managed behavior and embedded configuration from the supplied assembly. Explain the boundary cases and retain focused, inspectable supporting materials.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct behavior and resource findings",
+          "focused code or IL evidence",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "artifacts",
+      "namespace": "artifacts",
+      "kind": "supporting",
+      "skill": "insight-artifacts",
+      "purpose": "Retain an ordinary completed research file or directory",
+      "inputs": [
+        "regular file",
+        "stable directory"
+      ],
+      "tasks": [
+        "checkpoint any external-tool output",
+        "retain completed worker materials"
+      ],
+      "platforms": [
+        "any-node24"
+      ],
+      "dependencies": [],
+      "workflowCommands": [
+        "artifacts save"
+      ],
+      "limitations": [
+        "Every call creates a new checkpoint",
+        "Directory saves require a stable tree; links and special files are rejected",
+        "Saved copies do not replace project source of truth or publish Ghidra changes"
+      ],
+      "evaluationCase": {
+        "id": "ordinary-evidence-checkpoint",
+        "inputFamily": "ordinary-research-folder",
+        "task": "Retain the completed investigation folder as a checkpoint, then verify its saved bytes remain intact after the original is edited. Preserve the project evidence format.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct saved bytes and identity",
+          "source unchanged by save",
+          "checkpoint survives later source edit"
+        ]
+      }
+    }
+  ]
+}

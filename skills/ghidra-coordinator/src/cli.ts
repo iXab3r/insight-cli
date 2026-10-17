@@ -1,3 +1,4 @@
+import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {ilspyCommands} from './ilspy.js';
 import {toolProcessCommands} from './tool-runtime/commands.js';
@@ -7,7 +8,6 @@ import { command, createCli, Permission, CliError, ProfileStore, type CommandDef
 import { join, resolve } from 'node:path';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { Workspace } from './workspace.js';
 import { GhidraContexts, type ToolMode } from './contexts.js';
 import { nativeInputs } from './native-inputs.js';
@@ -214,16 +214,11 @@ export function createDefinition(options: Options = {}): CliDefinition {
         await c.secrets.delete('readerPassword');await c.secrets.delete('publisherPassword');
       },
     },
-    builtins:[command('skill [name]','Locate the installed insight-cli or insight-re skill',({args})=>{
-      const name=args.name===undefined?'insight-cli':text(args.name);
-      if(!['insight-cli','insight-re'].includes(name))fail('notFound','Unknown skill; choose insight-cli or insight-re.');
-      return {version:packageVersion,name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
-        skills:['insight-cli','insight-re']};
-    })],
+    builtins:[skillCommand()],
     commands:[
       ...artifactsCommands(),
       ...ilspyCommands(c=>owner.selected(c).workspace),
-      ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))}),
+      ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
         command('list','List known inputs',({options:o},c)=>{

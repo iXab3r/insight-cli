@@ -38,6 +38,25 @@ publication mechanisms, with its historical behavior recorded below. The agreed 
 are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
 [work items](WORK-ITEMS.md) retain the delivery contract and checkpoint history.
 
+### Toolbox discovery and packaged instructions
+
+The product keeps one capability/skill inventory in `runtime/toolbox.json`. `tools list` and
+`tools show <tool>` describe admitted analytical/supporting applications independently of native
+installation. They do not inspect a profile or claim readiness; a runtime's `status` does that.
+`skill [name]` retains the original entry/RE locators and adds dedicated tool instructions.
+Factory's `localCommand` and parser-owned IPC classification keep these metadata leaves local
+while `tools processes` remains in the owner. No argv dispatcher or replacement host is added.
+
+Build admission checks each tool's adapter namespace, advertised command paths, packaged skill,
+version and references. Each skill has self-contained resources generated from canonical files.
+The release versioner enumerates that same inventory. The deterministic `skill-bundle` contains
+all registered skills, ready for one explicit host connection; `skill` returns its `bundlePath`.
+The selected Codex project integration links that bundle under `.agents/skills/insight-toolbox`.
+Updates at a stable npm prefix replace its contents; disconnect removes only that owned link.
+npm installation does not register skills or rewrite project guidance. Other hosts decide how
+to register ordinary skill folders. This resource contract does not replace Factory's wider
+skill policy issue #29 or prove native/agent acceptance of newly planned tools.
+
 ### Full delivery scope agreed on 2026-10-14
 
 The owner chose one implementation pass covering the whole M0–M5 plan, with acceptance of the

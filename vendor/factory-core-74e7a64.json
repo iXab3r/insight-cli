@@ -7,5 +7,6 @@
   "commit": "74e7a64a7c026e85298dfc9bbbc8ad9c19b51998",
   "license": "MIT",
   "distribution": "Prepared official Factory package; immutable content pin, no registry publication",
-  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/53"
+  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/53",
+  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/73459aecc88da6f878988b64f71ab72b34a83c45/vendor/factory-core-74e7a64.tgz"
 }

@@ -13,6 +13,7 @@
     "dist/src",
     "SKILL.md",
     "skills",
+    "skill-bundle",
     "references",
     "runtime",
     "LICENSE",
@@ -23,8 +24,8 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@eyeauras/cli-factory": "0.4.1",
-    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/43f815a006711418bcffa47a7d99ef5c42424ca5/vendor/factory-ipc-a2094fb.tgz",
+    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/73459aecc88da6f878988b64f71ab72b34a83c45/vendor/factory-core-74e7a64.tgz",
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/73459aecc88da6f878988b64f71ab72b34a83c45/vendor/factory-ipc-74e7a64.tgz",
     "@modelcontextprotocol/sdk": "1.32.1",
     "tar": "7.5.22",
     "yauzl": "3.4.0"
