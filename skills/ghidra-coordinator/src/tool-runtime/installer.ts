@@ -62,7 +62,7 @@ export class ToolInstaller {
    if(execution&&!resolve(execution.executable).startsWith(resolve(stage)+sep))fail('binding','Prepared external execution must use owned staging.');
    for(const [name,body]of Object.entries(this.descriptor.noticeFiles??{})){archiveName(name);if(!name||Buffer.byteLength(body)>1024**2)fail('configuration','Invalid bundled license notice.');const destination=join(stage,name);await mkdir(dirname(destination),{recursive:true,mode:0o700});await writeFile(destination,body,{flag:'wx',mode:0o600});}
    const stageLaunch=external?{executable:external,arguments:[],environment:{}}:this.descriptor.launch(rootsAt(stage));
-   const lastProbe=await this.descriptor.probe(stageLaunch,this.c),launch=external?stageLaunch:this.descriptor.launch(rootsAt(installed));
+   const lastProbe=await this.descriptor.probe(execution??stageLaunch,this.c),launch=external?stageLaunch:this.descriptor.launch(rootsAt(installed));
    const fingerprint=external?await fileSha256(external,this.c.signal):await treeFingerprint(stage);
    if(external&&fingerprint!==externalDigest)fail('binding','External tool changed during installation.');
    if(externalInputs&&digest(await this.descriptor.externalInputs!(external!,this.c))!==digest(externalInputs))fail('binding','External tool family changed during installation.');
@@ -94,7 +94,7 @@ export class ToolInstaller {
   await this.verify(selected);return selected;
  }
  async doctor(){return withToolLock(this.directory,this.descriptor.id,async()=>{
-  const selected=await this.selected(),checks=await this.descriptor.probe(selected,this.c);
+  const selected=await this.selected(),checks=await this.descriptor.probe(selected.execution??selected,this.c);
   await atomicWrite(join(this.root,'last-check.json'),{fingerprint:selected.fingerprint,checkedAt:new Date().toISOString(),checks});
   return {tool:this.descriptor.id,state:'verified',installation:selected.id,checks};
  },this.c.signal);}

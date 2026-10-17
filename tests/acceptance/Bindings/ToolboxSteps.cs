@@ -148,6 +148,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the installed debugger runner suffers controlled lifetime faults")]
     public Task DebuggerFaults() => Execute("scripts/toolbox/fault-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
 
+    [When("the public CLI investigates the offline HTTP capture")]
+    public Task InspectCapture() => Execute("scripts/toolbox/native-tshark.mjs", Value("tsharkArchive"), Value("packetCapture"));
+
     [When("the public CLI traces the owned Linux worker")]
     public Task TraceLinux() => Execute("scripts/toolbox/native-strace.mjs", Value("straceArchive"), Value("nativeLinuxWorker"), Value("nativeLinuxSettings"));
 
@@ -157,6 +160,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("packet and stream evidence preserves input identity and bounded coverage")]
     [Then("managed runtime findings and copied edits preserve original inputs")]
     [Then("actual file evidence survives collector interruption and removal")]
     [Then("dump findings and checkpoints survive debugger removal")]

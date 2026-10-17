@@ -121,6 +121,12 @@
       "title": "Insight dnSpyEx",
       "path": "skills/insight-dnspy/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-tshark",
+      "title": "Insight TShark",
+      "path": "skills/insight-tshark/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -845,6 +851,56 @@
           "bounded evidence and explicit unknowns",
           "owned launch cleanup",
           "original inputs preserved"
+        ]
+      }
+    },
+    {
+      "id": "tshark",
+      "namespace": "tshark",
+      "kind": "analytical",
+      "skill": "insight-tshark",
+      "purpose": "Answer protocol questions from an immutable offline capture with packet and stream evidence",
+      "inputs": [
+        "PCAP",
+        "PCAPNG",
+        "immutable capture target"
+      ],
+      "tasks": [
+        "inspect protocol overview",
+        "locate HTTP/DNS/TLS packet evidence",
+        "read packet detail",
+        "follow reconstructed TCP/UDP streams"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+"
+      ],
+      "dependencies": [
+        "managed TShark 4.6.9 console subset or matching external Wireshark.app"
+      ],
+      "workflowCommands": [
+        "tshark inspect"
+      ],
+      "limitations": [
+        "Offline capture analysis only; no live acquisition, network changes or TLS decryption",
+        "Inventory, filters and follow inspect at most 10000 frames; partial prefixes do not prove absence",
+        "Up to 64 MiB input; bounded native output and owned process deadline",
+        "External selection uses a verified owned console copy, excluding unselected plugins"
+      ],
+      "evaluationCase": {
+        "id": "offline-protocol-investigation",
+        "inputFamily": "owned-public-http-capture",
+        "task": "Determine which HTTP methods and paths were observed, cite frame and native stream evidence, reconstruct relevant bytes and preserve the original capture and ordinary project evidence.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual method/path and frame evidence",
+          "native stream follow bytes",
+          "explicit prefix and encryption limits",
+          "original capture preserved",
+          "ordinary project evidence"
         ]
       }
     },

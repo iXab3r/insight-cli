@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-tshark-4.6.9-r1",
+  "title": "TShark 4.6.9 macOS console",
+  "redistribution": "Console-only unchanged Mach-O subset of the pinned official Wireshark 4.6.9 universal distribution. Excludes Qt, GUI, dumpcap, extcap, ChmodBPF and system installers. Retains 28 code files, 342 protocol data files, full source for Wireshark and every bundled library, 76 full notices and upstream build recipes. Source versions follow actual linked binaries and published Wireshark artifact bundle hashes. macOS system libraries remain host prerequisites. Offline PCAP analysis requires no system capture helper or privileges; native public CLI and independent agent receipts are recorded separately.",
+  "assets": [
+    {
+      "name": "tshark-4.6.9-macos-console.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-tshark-4.6.9-r1/tshark-4.6.9-macos-console.tgz",
+      "sha256": "90a4f106033c74eef38f52985fc168c99a293ae35c9d3d7d1b157558a94d5261",
+      "size": 71703877,
+      "role": "binary",
+      "license": "GPL-2.0-or-later Wireshark; LGPL-2.1+/LGPL-3+/GPL-2+ libraries and permissive notices retained",
+      "format": "tgz",
+      "root": "tshark-4.6.9",
+      "builtFrom": {
+        "url": "https://2.na.dl.wireshark.org/osx/Wireshark%204.6.9.dmg",
+        "sha256": "10bd54ccdc3f40457f6a1f0c517bc93703fcb327c4cd4b93002e7a623dacbf38",
+        "size": 147277050,
+        "subsetLayout": "tshark-runtime-layout.json",
+        "repackScript": "tool-repack-tshark.py",
+        "systemRequirement": "macOS 12+, ARM64; native proof macOS 26.6.2",
+        "bootstrap": "Mount the exact verified upstream DMG read-only. Reconstruct notice files from the 24 retained source inputs using component/sourcePath in tshark-runtime-layout.json, and pass those local file fields to the retained repack script. Place the verified subset asset beside this recipe before first publication; never mirror the GUI DMG. No Mach-O code is modified."
+      }
+    },
+    {
+      "name": "tshark-4.6.9-sources.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-tshark-4.6.9-r1/tshark-4.6.9-sources.tgz",
+      "sha256": "78811ce374016b52790373b4cd1bbfa6ceefdfab1417eaa002217fe47f23caed",
+      "size": 114479154,
+      "role": "source",
+      "license": "Exact Wireshark and 22 bundled library sources, plus MIT upstream build recipes; full corresponding licenses retained",
+      "repack": {
+        "format": "source-set-v2",
+        "outputRoot": "tshark-4.6.9-sources",
+        "inputs": [
+          {
+            "id": "glib",
+            "version": "2.88.0",
+            "name": "glib-2.88.0.tar.xz",
+            "upstream": "https://download.gnome.org/sources/glib/2.88/glib-2.88.0.tar.xz",
+            "sha256": "3546251ccbb3744d4bc4eb48354540e1f6200846572bab68e3a2b7b2b64dfd07",
+            "size": 5788396,
+            "license": "LGPL-2.1-or-later"
+          },
+          {
+            "id": "pcre2",
+            "version": "10.47",
+            "name": "pcre2-10.47.tar.bz2",
+            "upstream": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.tar.bz2",
+            "sha256": "47fe8c99461250d42f89e6e8fdaeba9da057855d06eb7fc08d9ca03fd08d7bc7",
+            "size": 2145789,
+            "license": "BSD-3-Clause"
+          },
+          {
+            "id": "gettext",
+            "version": "1.0",
+            "name": "gettext-1.0.tar.xz",
+            "upstream": "https://ftp.gnu.org/gnu/gettext/gettext-1.0.tar.xz",
+            "sha256": "71132a3fb71e68245b8f2ac4e9e97137d3e5c02f415636eb508ae607bc01add7",
+            "size": 10721600,
+            "license": "LGPL-2.1-or-later (libintl); retained full source notices"
+          },
+          {
+            "id": "libxml2",
+            "version": "2.15.3",
+            "name": "libxml2-2.15.3.tar.xz",
+            "upstream": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.3.tar.xz",
+            "sha256": "78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07",
+            "size": 3152452,
+            "license": "MIT"
+          },
+          {
+            "id": "gnutls",
+            "version": "3.8.13",
+            "name": "gnutls-3.8.13.tar.xz",
+            "upstream": "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.13.tar.xz",
+            "sha256": "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e",
+            "size": 7275324,
+            "license": "LGPL-2.1-or-later library; retained full source notices"
+          },
+          {
+            "id": "gmp",
+            "version": "6.3.0",
+            "name": "gmp-6.3.0.tar.xz",
+            "upstream": "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
+            "sha256": "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+            "size": 2094196,
+            "license": "LGPL-3.0-or-later OR GPL-2.0-or-later"
+          },
+          {
+            "id": "nettle",
+            "version": "3.10.2",
+            "name": "nettle-3.10.2.tar.gz",
+            "upstream": "https://ftp.gnu.org/gnu/nettle/nettle-3.10.2.tar.gz",
+            "sha256": "fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5",
+            "size": 2644644,
+            "license": "LGPL-3.0-or-later OR GPL-2.0-or-later"
+          },
+          {
+            "id": "libtasn1",
+            "version": "4.21.0",
+            "name": "libtasn1-4.21.0.tar.gz",
+            "upstream": "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.21.0.tar.gz",
+            "sha256": "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87",
+            "size": 1816537,
+            "license": "LGPL-2.1-or-later library; retained full source notices"
+          },
+          {
+            "id": "p11-kit",
+            "version": "0.26.2",
+            "name": "p11-kit-0.26.2.tar.xz",
+            "upstream": "https://github.com/p11-glue/p11-kit/releases/download/0.26.2/p11-kit-0.26.2.tar.xz",
+            "sha256": "09fd9f44da4813a3141e73d5e7cf7008e5660d0405f13d56c15e1da9dcecf828",
+            "size": 1069216,
+            "license": "BSD-3-Clause"
+          },
+          {
+            "id": "libgcrypt",
+            "version": "1.12.4",
+            "name": "libgcrypt-1.12.4.tar.bz2",
+            "upstream": "https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.12.4.tar.bz2",
+            "sha256": "d77f68f48879510e79a2f65977ccc68981781ea0923e5bdffac2a193ea3d660e",
+            "size": 4473329,
+            "license": "LGPL-2.1-or-later library; retained full source notices"
+          },
+          {
+            "id": "libgpg-error",
+            "version": "1.61",
+            "name": "libgpg-error-1.61.tar.bz2",
+            "upstream": "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.61.tar.bz2",
+            "sha256": "7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93",
+            "size": 1124751,
+            "license": "LGPL-2.1-or-later library; retained full source notices"
+          },
+          {
+            "id": "lua",
+            "version": "5.4.7",
+            "name": "lua-5.4.7.tar.gz",
+            "upstream": "https://www.lua.org/ftp/lua-5.4.7.tar.gz",
+            "sha256": "9fbf5e28ef86c69858f6d3d34eccc32e911c1a28b4120ff3e84aaa70cfbf1e30",
+            "size": 374097,
+            "license": "MIT"
+          },
+          {
+            "id": "brotli",
+            "version": "1.2.0",
+            "name": "brotli-1.2.0.tar.gz",
+            "upstream": "https://github.com/google/brotli/archive/v1.2.0.tar.gz",
+            "sha256": "816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec",
+            "size": 646315,
+            "license": "MIT"
+          },
+          {
+            "id": "c-ares",
+            "version": "1.34.8",
+            "name": "c-ares-1.34.8.tar.gz",
+            "upstream": "https://github.com/c-ares/c-ares/releases/download/v1.34.8/c-ares-1.34.8.tar.gz",
+            "sha256": "c222b6d681096f9444d2c4863d2c1174019e27cacca0a4a5c114d36dd7d7bf78",
+            "size": 1036098,
+            "license": "MIT"
+          },
+          {
+            "id": "nghttp2",
+            "version": "1.69.0",
+            "name": "nghttp2-1.69.0.tar.xz",
+            "upstream": "https://github.com/nghttp2/nghttp2/releases/download/v1.69.0/nghttp2-1.69.0.tar.xz",
+            "sha256": "1fb324b6ec2c56f6bde0658f4139ffd8209fa9e77ce98fd7a5f63af8d0e508ad",
+            "size": 1696336,
+            "license": "MIT"
+          },
+          {
+            "id": "nghttp3",
+            "version": "1.9.0",
+            "name": "nghttp3-1.9.0.tar.xz",
+            "upstream": "https://github.com/ngtcp2/nghttp3/releases/download/v1.9.0/nghttp3-1.9.0.tar.xz",
+            "sha256": "b1b531cf6ae5c9366abea2d3319e4ac932fd64c072c8aafd69cf6295733ce12a",
+            "size": 400208,
+            "license": "MIT"
+          },
+          {
+            "id": "snappy",
+            "version": "1.2.2",
+            "name": "snappy-1.2.2.tar.gz",
+            "upstream": "https://github.com/google/snappy/archive/refs/tags/1.2.2.tar.gz",
+            "sha256": "90f74bc1fbf78a6c56b3c4a082a05103b3a56bb17bca1a27e052ea11723292dc",
+            "size": 1108618,
+            "license": "BSD-3-Clause"
+          },
+          {
+            "id": "xxhash",
+            "version": "0.8.3",
+            "name": "xxhash-0.8.3.tar.gz",
+            "upstream": "https://github.com/Cyan4973/xxHash/archive/v0.8.3.tar.gz",
+            "sha256": "aae608dfe8213dfd05d909a57718ef82f30722c392344583d3f39050c7f29a80",
+            "size": 1147630,
+            "license": "BSD-2-Clause"
+          },
+          {
+            "id": "zlib-ng",
+            "version": "2.2.4",
+            "name": "zlib-ng-2.2.4.tar.gz",
+            "upstream": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.4.tar.gz",
+            "sha256": "a73343c3093e5cdc50d9377997c3815b878fd110bf6511c2c7759f2afb90f5a3",
+            "size": 2415754,
+            "license": "Zlib and retained BSD notices"
+          },
+          {
+            "id": "zstd",
+            "version": "1.5.7",
+            "name": "zstd-1.5.7.tar.gz",
+            "upstream": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
+            "sha256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
+            "size": 2434947,
+            "license": "BSD-3-Clause OR GPL-2.0-only"
+          },
+          {
+            "id": "lz4",
+            "version": "1.10.0",
+            "name": "lz4-1.10.0.tar.gz",
+            "upstream": "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz",
+            "sha256": "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+            "size": 387114,
+            "license": "BSD-2-Clause library; retained full source notices"
+          },
+          {
+            "id": "libsmi",
+            "version": "0.4.8",
+            "name": "libsmi-0.4.8.tar.gz",
+            "upstream": "https://www.ibr.cs.tu-bs.de/projects/libsmi/download/libsmi-0.4.8.tar.gz",
+            "sha256": "f048a5270f41bc88b0c3b0a8fe70ca4d716a46b531a0ecaaa87c462f49d74849",
+            "size": 4104111,
+            "license": "BSD-style notices retained"
+          },
+          {
+            "id": "wireshark",
+            "name": "wireshark-4.6.9.tar.xz",
+            "upstream": "https://2.na.dl.wireshark.org/src/wireshark-4.6.9.tar.xz",
+            "license": "GPL-2.0-or-later",
+            "sha256": "d062d416a1ab3a49975aafe3a671c882dde0562ccd71b078808ceb59d465fc0f",
+            "size": 56477044
+          },
+          {
+            "id": "build-recipes",
+            "name": "wireshark-vcpkg-scripts-5198349.tar.gz",
+            "upstream": "https://gitlab.com/api/v4/projects/wireshark%2Fwireshark-vcpkg-scripts/repository/archive.tar.gz?sha=5198349d7730aff25dfebcc34aca521f5e318a37",
+            "license": "MIT",
+            "sha256": "89d5322ffc818229a7eabc7e54f06db747a2577056110734101dfdf101a66989",
+            "size": 43043
+          }
+        ]
+      }
+    },
+    {
+      "name": "tshark-runtime-layout.json",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-tshark-4.6.9-r1/tshark-runtime-layout.json",
+      "sha256": "ba7592b47f2c3236dd52c0df22a0c52c310fcea606f6614604279249788d00d5",
+      "size": 90153,
+      "role": "build-provenance",
+      "license": "Relative original file hashes and corresponding source notice locations"
+    },
+    {
+      "name": "tool-repack-tshark.py",
+      "upstream": "https://raw.githubusercontent.com/iXab3r/insight-cli/14b62c12af93504348ae650a49cdc41a87d03b4c/scripts/tool-repack-tshark.py",
+      "sha256": "d78ca6053f8d4db81d1798af8e2441f67176ddedd4688f1ac3832bc45f3d9c16",
+      "size": 2575,
+      "role": "source",
+      "license": "MIT first-party console subset recipe"
+    },
+    {
+      "name": "INSIGHT-LICENSE.txt",
+      "upstream": "https://raw.githubusercontent.com/iXab3r/insight-cli/14b62c12af93504348ae650a49cdc41a87d03b4c/LICENSE",
+      "sha256": "350f3532c1d6ebde1bce8aa96c42d8725d545806eacad1ba3047af012250278c",
+      "size": 1081,
+      "role": "license-companion",
+      "license": "Full MIT first-party license"
+    }
+  ]
+}

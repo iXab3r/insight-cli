@@ -80,3 +80,9 @@ Feature: The installed toolbox supports a real investigation
     Given an owned Windows managed-research fixture is prepared
     When the public CLI debugs and edits the managed Windows inputs
     Then managed runtime findings and copied edits preserve original inputs
+
+  @tshark @macos
+  Scenario: Explain observed protocol behavior from retained packet and stream evidence
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI investigates the offline HTTP capture
+    Then packet and stream evidence preserves input identity and bounded coverage

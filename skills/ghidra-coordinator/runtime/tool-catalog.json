@@ -206,6 +206,15 @@
     "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-win32-x64.zip"
   },
+  "90a4f106033c74eef38f52985fc168c99a293ae35c9d3d7d1b157558a94d5261": {
+    "name": "tshark-4.6.9-macos-console.tgz",
+    "sha256": "90a4f106033c74eef38f52985fc168c99a293ae35c9d3d7d1b157558a94d5261",
+    "size": 71703877,
+    "format": "tgz",
+    "root": "tshark-4.6.9",
+    "license": "GPL-2.0-or-later Wireshark; LGPL-2.1+/LGPL-3+/GPL-2+ libraries and permissive notices retained",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-tshark-4.6.9-r1/tshark-4.6.9-macos-console.tgz"
+  },
   "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10": {
     "name": "ProcessMonitor-4.12.zip",
     "url": "https://download.sysinternals.com/files/ProcessMonitor.zip",
