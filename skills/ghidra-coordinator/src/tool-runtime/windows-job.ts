@@ -6,7 +6,7 @@ import {fileSha256} from './archives.js';
 import {atomicWrite,readJson} from './store.js';
 import {processIdentity} from './identity.js';
 /** Stock Windows PowerShell loads the packaged first-party Job Object executor; no runtime compiler. */
-export async function windowsJobLaunch(root:string,nonce:string,executable:string,args:string[],cwd:string,timeoutMs:number,options:{observedSubject?:{pid:number;birth:string};nativeMutex?:'procmon';nativeRegistry?:'procmon'}={}){
+export async function windowsJobLaunch(root:string,nonce:string,executable:string,args:string[],cwd:string,timeoutMs:number,options:{observedSubject?:{pid:number;birth:string};nativeMutex?:'procmon';nativeRegistry?:'procmon';nativeAsciiPath?:'dnspy'}={}){
  if(process.platform!=='win32'||!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>600000)throw new CliError('Owned Windows job deadline must be 1–600 seconds.',{code:'tool.configuration'});
  const native=fileURLToPath(new URL('../../../runtime/native/windows-job/',import.meta.url));
  const proof=await readJson<{sha256:string;launcherSha256:string}>(join(native,'provenance.json'));
@@ -16,7 +16,7 @@ export async function windowsJobLaunch(root:string,nonce:string,executable:strin
  if(options.observedSubject&&(!Number.isSafeInteger(options.observedSubject.pid)||options.observedSubject.pid<1||!/^\d+$/.test(options.observedSubject.birth)))throw new CliError('Borrowed Windows subject identity is invalid.',{code:'tool.process.unverified'});
  let registry:{}|{registryShim:string;registryShimSha256:string}={};
  if(options.nativeRegistry){const registryShim=join(native,'../insight-registry-win-x64.dll'),proof=await readJson<{sha256:string}>(join(native,'../windows-registry.provenance.json'));if(!proof||await fileSha256(registryShim)!==proof.sha256)throw new CliError('Private Windows registry helper is missing or differs from its reviewed build.',{code:'tool.binding'});registry={registryShim,registryShimSha256:proof.sha256};}
- const specification=join(root,'job-specification.json');await atomicWrite(specification,{schema:1,nonce,executable,arguments:args,cwd,timeoutMs,ownerPid:process.pid,ownerBirthTicks:identity.birth,...registry,...(options.observedSubject?{observedPid:options.observedSubject.pid,observedBirthTicks:options.observedSubject.birth}:{}),...(options.nativeMutex?{nativeMutex:'Local\\insight-cli-procmon-capture'}:{})});
+ const specification=join(root,'job-specification.json');await atomicWrite(specification,{schema:1,nonce,executable,arguments:args,cwd,timeoutMs,ownerPid:process.pid,ownerBirthTicks:identity.birth,...(options.nativeAsciiPath?{asciiExecutable:true}:{}),...registry,...(options.observedSubject?{observedPid:options.observedSubject.pid,observedBirthTicks:options.observedSubject.birth}:{}),...(options.nativeMutex?{nativeMutex:'Local\\insight-cli-procmon-capture'}:{})});
  return {executable:join(system,'System32/WindowsPowerShell/v1.0/powershell.exe'),arguments:['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',join(native,'windows-job.ps1'),'-Specification',specification]};
 }
 export async function windowsJobResult(root:string,nonce:string,launcherPid:number,registryExpected=false){

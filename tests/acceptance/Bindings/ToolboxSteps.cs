@@ -104,7 +104,8 @@ public sealed class ToolboxSteps(ScenarioContext context)
         foreach (var path in new[] { output, error })
         {
             if (!File.Exists(path)) continue;
-            using var reader = new StreamReader(path);
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var reader = new StreamReader(stream);
             var buffer = new char[4096];
             var length = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
             TestContext.Out.WriteLine(new string(buffer, 0, length));

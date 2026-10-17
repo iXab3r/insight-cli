@@ -24,6 +24,8 @@ export interface RunSpec {
  nativeMutex?:'procmon';
  /** Private process-local HKCU for the admitted ProcMon child. */
  nativeRegistry?:'procmon';
+ /** Owned temporary DOS path for a pinned vendor loader that still marshals ANSI filenames. */
+ nativeAsciiPath?:'dnspy';
  metadata?:Record<string,unknown>;
 }
 export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string}
@@ -31,7 +33,7 @@ export interface RunContext {appArguments:Pick<CommandContext['appArguments'],'A
 export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  c.signal.throwIfAborted();const directory=c.appArguments.AppDataDirectory;toolRoot(directory,spec.tool);
  if(!isAbsolute(spec.executable))throw new CliError('Tool executable must be an absolute path.',{code:'tool.configuration'});
- if((spec.observedSubject||spec.nativeMutex||spec.nativeRegistry)&&(!spec.nativeDeadline||process.platform!=='win32'))throw new CliError('Native subject/mutex/registry binding requires an owned Windows job.',{code:'tool.configuration'});
+ if((spec.observedSubject||spec.nativeMutex||spec.nativeRegistry||spec.nativeAsciiPath)&&(!spec.nativeDeadline||process.platform!=='win32'))throw new CliError('Native subject/mutex/registry binding requires an owned Windows job.',{code:'tool.configuration'});
  if(spec.nativeChildDeadlines&&!spec.nativeDeadline)throw new CliError('Native child deadlines require the native collector deadline.',{code:'tool.configuration'});
  let launch={executable:spec.executable,arguments:spec.arguments??[]};
  const id=randomUUID(),root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');
@@ -50,8 +52,8 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  const aborted=()=>stop('cancelled');
  try{
   c.signal.throwIfAborted();
-  if(spec.nativeDeadline)launch=process.platform==='win32'?await windowsJobLaunch(root,id,spec.executable,spec.arguments??[],spec.cwd??root,spec.timeoutMs??120000,{observedSubject:spec.observedSubject,nativeMutex:spec.nativeMutex,nativeRegistry:spec.nativeRegistry}):await deadlineLaunch(spec.executable,spec.arguments??[],spec.timeoutMs??120000);
-  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target,...(spec.metadata||spec.nativeDeadline?{metadata:{...spec.metadata,...(spec.observedSubject?{observedSubject:spec.observedSubject}:{}),...(spec.nativeMutex?{nativeMutex:spec.nativeMutex}:{}),...(spec.nativeRegistry?{nativeRegistry:spec.nativeRegistry}:{}),...(spec.nativeDeadline?{nativeDeadlineSeconds:Math.ceil((spec.timeoutMs??120000)/1000),nativeExecutable:spec.executable,...(spec.nativeChildDeadlines?{nativeChildDeadlines:true}:{})}:{})}}:{})},launch.executable,launch.arguments,
+  if(spec.nativeDeadline)launch=process.platform==='win32'?await windowsJobLaunch(root,id,spec.executable,spec.arguments??[],spec.cwd??root,spec.timeoutMs??120000,{observedSubject:spec.observedSubject,nativeMutex:spec.nativeMutex,nativeRegistry:spec.nativeRegistry,nativeAsciiPath:spec.nativeAsciiPath}):await deadlineLaunch(spec.executable,spec.arguments??[],spec.timeoutMs??120000);
+  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target,...(spec.metadata||spec.nativeDeadline?{metadata:{...spec.metadata,...(spec.observedSubject?{observedSubject:spec.observedSubject}:{}),...(spec.nativeMutex?{nativeMutex:spec.nativeMutex}:{}),...(spec.nativeRegistry?{nativeRegistry:spec.nativeRegistry,nativeAsciiPath:spec.nativeAsciiPath}:{}),...(spec.nativeDeadline?{nativeDeadlineSeconds:Math.ceil((spec.timeoutMs??120000)/1000),nativeExecutable:spec.executable,...(spec.nativeChildDeadlines?{nativeChildDeadlines:true}:{})}:{})}}:{})},launch.executable,launch.arguments,
    {cwd:spec.cwd??root,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']},
    {id,finalize:false,signal:c.signal,onSpawn:launched=>{
     child=launched;child.once('close',()=>{settled=true;});
