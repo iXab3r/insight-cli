@@ -33,7 +33,7 @@ async function exportDirectory(stage:string,output:string){
   if(info.isSymbolicLink()||!info.isFile()&&!info.isDirectory())fail('binding','Tool output contains an unsupported link or special file.');
   if(files.length>100000||(bytes+=info.isFile()?info.size:0)>256*1024**2)fail('limit','ILSpy export exceeds its 100000-file/256-MiB bound.');
   if(info.isDirectory())await walk(at);else files.push({name:relative(stage,at),size:info.size});
- }}await walk(stage);await mkdir(output,{mode:0o700});
+ }}await walk(stage);await mkdir(dirname(output),{recursive:true,mode:0o700});await mkdir(output,{mode:0o700});
  for(const file of files){const destination=join(output,file.name);await mkdir(dirname(destination),{recursive:true,mode:0o700});await copyFile(join(stage,file.name),destination,constants.COPYFILE_EXCL);}
  return {outputDirectory:output,files,bytes};
 }
@@ -60,7 +60,7 @@ export function ilspyCommands(workspace:(c:CommandContext)=>Workspace):CommandDe
    const result=await runTool(c,{tool:'ilspy',role:operation,installation:selected.id,executable:selected.executable,arguments:[...selected.arguments,...parameters],environment:selected.environment,timeoutMs:timeout*1000,target:target.id,session});
    const base={state:'completed',target:target.id,inputSha256:target.binarySha256,session,process:result.process,elapsedMs:result.elapsedMs,diagnostics:result.diagnostics,truncated:result.truncated};
    if(stage){const output=resolve(c.cwd,text(o.output,4096));if(output===stage||output.startsWith(stage+sep)||stage.startsWith(output+sep))fail('invalid','Output directory must be outside tool staging.');return {...base,...await exportDirectory(stage,output)};}
-   if(o.output){const output=resolve(c.cwd,text(o.output,4096));await writeFile(output,result.stdout,{flag:'wx',mode:0o600});return {...base,output,bytes:Buffer.byteLength(result.stdout)};}
+   if(o.output){const output=resolve(c.cwd,text(o.output,4096));await mkdir(dirname(output),{recursive:true,mode:0o700});await writeFile(output,result.stdout,{flag:'wx',mode:0o600});return {...base,output,bytes:Buffer.byteLength(result.stdout)};}
    return {...base,content:result.stdout};
   });
  },{permission:Permission.Update,options:[...common,...options]});

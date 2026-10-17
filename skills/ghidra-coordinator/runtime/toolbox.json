@@ -49,6 +49,12 @@
       "resources": {
         "references/artifacts.md": "references/artifacts.md"
       }
+    },
+    {
+      "name": "insight-sevenzip",
+      "title": "Insight 7-Zip",
+      "path": "skills/insight-sevenzip/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -166,6 +172,57 @@
           "intended public CLI execution",
           "correct behavior and resource findings",
           "focused code or IL evidence",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "sevenzip",
+      "namespace": "sevenzip",
+      "kind": "analytical",
+      "skill": "insight-sevenzip",
+      "purpose": "Inventory containers and recover configuration or binary inputs as ordinary files",
+      "inputs": [
+        "archives",
+        "supported 7-Zip containers"
+      ],
+      "tasks": [
+        "bounded container inventory",
+        "integrity check",
+        "selected regular-file recovery",
+        "handoff to managed/native analysis"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64"
+      ],
+      "dependencies": [
+        "private 7zz 26.04"
+      ],
+      "workflowCommands": [
+        "sevenzip list",
+        "sevenzip test",
+        "sevenzip extract"
+      ],
+      "limitations": [
+        "Managed distribution is macOS universal; external compatible executable is optional",
+        "Recovery requires a new output directory; encrypted, linked, colliding or ambiguous entries are unsupported",
+        "64-MiB per file, 256-MiB total and 512-entry recovery limits"
+      ],
+      "evaluationCase": {
+        "id": "container-research",
+        "inputFamily": "packaged-managed-configuration",
+        "task": "Identify which configuration and assembly are supplied by the container, recover the relevant files, explain their relationship and retain evidence using project conventions.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct container inventory",
+          "exact recovered bytes",
+          "useful handoff finding",
           "ordinary project evidence",
           "owned cleanup"
         ]

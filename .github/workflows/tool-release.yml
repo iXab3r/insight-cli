@@ -11,6 +11,7 @@ on:
           - temurin-21.0.11-10
           - ilspy-11.1.0.9782
           - dotnet-10.0.13
+          - sevenzip-26.04
       publish:
         description: Publish the exact distribution as an immutable non-latest release
         type: boolean

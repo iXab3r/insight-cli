@@ -1,5 +1,6 @@
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
+import {sevenzipCommands} from './sevenzip.js';
 import {ilspyCommands} from './ilspy.js';
 import {toolProcessCommands} from './tool-runtime/commands.js';
 import {ghidraProcessHooks} from './ghidra-processes.js';
@@ -217,6 +218,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     builtins:[skillCommand()],
     commands:[
       ...artifactsCommands(),
+      ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),
       ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),
       command('targets','Inspect immutable inputs',[

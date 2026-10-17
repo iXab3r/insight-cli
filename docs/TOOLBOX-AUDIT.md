@@ -1,7 +1,9 @@
 # Toolbox inventory and delivery audit
 
 Audit date: 2026-10-17. TB-01 is in progress. These are frozen upstream candidates,
-not newly delivered adapters or agent acceptance. Existing Ghidra/ILSpy runtime acceptance
+not full toolbox delivery or agent acceptance. 7-Zip now has a working adapter/skill and
+passed its isolated globally installed public CLI developer proof; its cold/prepared agent
+gates remain open. Existing Ghidra/ILSpy runtime acceptance
 remains separately identified in [tool runtime acceptance](TOOL-RUNTIME-ACCEPTANCE.md).
 The [toolbox plan](TOOLBOX-PLAN.md) owns the complete inventory and required native/agent gates.
 
@@ -84,12 +86,38 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
 * **Windows proof environment is not presumed.** The repository has hosted Windows CI and no
   self-hosted runner. Confirm ProcMon's driver/admin capture and dnSpyEx's actual automation in
   that environment before counting them feasible. A successful download or visible GUI is
-  insufficient. No native Windows proof has passed in this audit yet.
+  insufficient. [Windows run 39029921856](https://github.com/iXab3r/insight-cli/actions/runs/39029921856)
+  passed WinDbg console commands, ProcMon observation of a successful owned configuration
+  ReadFile, and dnSpyEx GUI/extension-contract availability. ProcMon needed a normalized
+  Windows path in the probe oracle. This proves host feasibility only; scoped capture and
+  dnSpyEx debug/edit automation still need their own adapter/agent evidence.
 * **Skills must be usable before install.** Existing Factory IPC routing is root-based and Core
   handlers resolve profiles. Shared [Factory #52](https://github.com/iXab3r/EyeAuras.CliFactory/issues/52)
-  adds parser-owned nested local metadata routing. This is required to combine local `tools list`
-  and owner-managed `tools processes` in one command tree without a product-specific host/parser.
+  was delivered in [Factory PR #53](https://github.com/iXab3r/EyeAuras.CliFactory/pull/53).
+  Core now owns local handlers/classification and IPC uses that same parser for nested routing.
+  [Factory PR #55](https://github.com/iXab3r/EyeAuras.CliFactory/pull/55) also distinguishes
+  denied access from a missing owner and cancels only an unready startup child. Both passed
+  independent review and their full platform CI. The consumer pins these prepared artifacts;
+  its `tools list/show` and skill locators are profile/transport independent.
 
 TB-01 remains open until the remaining distribution/dependency and native automation feasibility
 checks have concrete results. The audit does not waive TB-07 cold/prepared per-tool agent proof,
 TB-08 exact-artifact combined acceptance or the full delivery definition of done.
+
+## Current agent-host finding
+
+The actual Codex app-server discovers all packaged skills through one project bundle link;
+upgrade/disconnect metadata checks passed without touching unrelated skills. Two standalone
+cold model trials selected the correct ILSpy/artifacts skills but failed their runtime gate:
+commands were denied IPC access, and the agents used Mono instead. Their correct business
+answers are **not** toolbox passes. A no-model preflight succeeds with an explicit exact-socket
+CLI grant, but the named permission-profile socket rule did not reach this host execution path.
+Do not enable general network or stop a shared owner as a workaround. Use normal reviewed
+permission for the precise CLI execution and verify actual execution before counting a pass.
+
+The 7-Zip 26.04 adapter and its skill passed a globally installed isolated CLI developer
+workflow: local pinned installation/doctor, bounded inventory, archive test, exact DLL/config
+recovery, checkpoint, overwrite refusal, terminal process check and uninstall preserving
+materials. Binary stdout is exported without UTF-8 conversion. A maintainer-only xz→gzip
+repack preserves the original tar bytes and verifies both original and derived digests; matching
+source and full notices accompany the distribution. This is not yet its independent agent gate.

@@ -9,7 +9,7 @@ test('ILSpy uses shared lifecycle, immutable targets, literal argv and plain fil
  if(process.platform==='win32'){t.skip('Executable fixture uses a POSIX shebang; native Windows acceptance is separate.');return;}
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]}),app=f.createApplication(runtime=>createInsightCli({runtime,backend:()=>{throw Error('Ghidra must not start');}}));
  assert.equal((await f.json(app,['ilspy','status']) as any).state,'not_ready');const rpc=await f.rpc(app,[['ilspy','status'],['tools','processes']]);assert.equal((rpc[0] as any).result.state,'not_ready');assert.equal((rpc[1] as any).result.items.length,0);
- const input=join(f.root,'managed input ;.dll'),tool=join(f.root,'ilspy fixture'),output=join(f.root,'ordinary code.cs');await writeFile(input,'fixture PE bytes');
+ const input=join(f.root,'managed input ;.dll'),tool=join(f.root,'ilspy fixture'),output=join(f.root,'new evidence folder','ordinary code.cs');await writeFile(input,'fixture PE bytes');
  await writeFile(tool,'#!'+process.execPath+'\n'+`if(process.argv.includes('--version'))console.log('ilspycmd: 11.1.0.9782');else console.log(JSON.stringify(process.argv.slice(2)));\n`,{mode:0o755});
  const installed=await f.json(app,['ilspy','install','--executable',tool]) as any;assert.equal(installed.mode,'external');
  const types=await f.json(app,['ilspy','types',input]) as any;assert.match(types.content,/--disable-updatecheck/);assert.ok(JSON.parse(types.content).includes('cisde'));assert.equal(types.truncated,false);

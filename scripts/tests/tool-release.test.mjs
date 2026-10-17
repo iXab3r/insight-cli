@@ -40,3 +40,18 @@ test('draft/readback reconciliation tolerates delayed visibility with bounded re
  assert.equal(await waitFor(()=>++reads>=3?'visible':undefined,Boolean,4,1),'visible');assert.equal(reads,3);
  await assert.rejects(waitFor(()=>undefined,Boolean,2,1),/visibility is unresolved/);
 });
+test('xz recompression retains exact tar bytes and rejects modified upstream content',async t=>{
+ const {gunzipSync}=await import('node:zlib');const {createHash}=await import('node:crypto');
+ const {execFileSync}=await import('node:child_process');
+ const input=execFileSync('python3',['-I','-c','import lzma,sys;sys.stdout.buffer.write(lzma.compress(b"owned tar bytes"))']);
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const directory=await mkdtemp(join(tmpdir(),'recompress-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const {writeFile}=await import('node:fs/promises');const source=join(directory,'source.xz'),derived=join(directory,'expected.tgz');await writeFile(source,input);
+ const {fileURLToPath}=await import('node:url');
+ execFileSync('python3',['-I',fileURLToPath(new URL('../tool-recompress.py',import.meta.url)),source,derived]);const expected=await readFile(derived);
+ const asset={...a,name:'runtime.tgz',role:'binary',size:expected.length,sha256:hash(expected),recompress:{format:'xz-to-gzip',size:input.length,sha256:hash(input)}};
+ let calls=0;const fetcher=async()=>{calls++;return new Response(input);};
+ const path=await acquire(asset,directory,fetcher);assert.deepEqual(gunzipSync(await readFile(path)),Buffer.from('owned tar bytes'));
+ await acquire(asset,directory,fetcher);assert.equal(calls,1);
+ await assert.rejects(acquire({...asset,name:'bad.tgz',recompress:{...asset.recompress,sha256:'0'.repeat(64)}},directory,fetcher),/differs/);
+});

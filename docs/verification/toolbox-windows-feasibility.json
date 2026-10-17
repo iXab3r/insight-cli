@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "scope": "Windows host feasibility, not toolbox acceptance",
+  "tools": {
+    "windbg": {
+      "adapterAccepted": false,
+      "version": "1.2610.1001.0",
+      "consoleAutomation": true
+    },
+    "procmon": {
+      "fixtureOutputValid": true,
+      "stopExit": 0,
+      "driverRunning": false,
+      "fixtureExit": 0,
+      "exportExit": 0,
+      "version": "4.12",
+      "matchingEvents": 1,
+      "configOperations": [
+        {
+          "count": 1,
+          "operation": "CloseFile",
+          "result": "SUCCESS"
+        },
+        {
+          "count": 1,
+          "operation": "CreateFile",
+          "result": "SUCCESS"
+        },
+        {
+          "count": 1,
+          "operation": "ReadFile",
+          "result": "END OF FILE"
+        },
+        {
+          "count": 1,
+          "operation": "ReadFile",
+          "result": "SUCCESS"
+        }
+      ],
+      "totalEvents": 166919,
+      "captureExited": true,
+      "adapterAccepted": false,
+      "columns": [
+        "Time of Day",
+        "Process Name",
+        "PID",
+        "Operation",
+        "Path",
+        "Result",
+        "Detail"
+      ],
+      "idleExit": 0,
+      "ownedEvents": 579,
+      "configSuffixEvents": 4,
+      "ownedConfigReadObserved": true,
+      "captureScope": "disposable runner feasibility only; product-side prefilter still required"
+    },
+    "dnspy": {
+      "launchAlive": true,
+      "extensionContractsPresent": true,
+      "adapterAccepted": false,
+      "version": "6.6.0",
+      "debugEditAutomationProven": false,
+      "windowHandlePresent": true
+    }
+  },
+  "administrator": true,
+  "fixtureSha256": "803b1ef5626bd05c3828b944993b018a49e4178f2daab5618042a014169e4719"
+}

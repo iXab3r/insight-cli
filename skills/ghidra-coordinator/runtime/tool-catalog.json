@@ -89,6 +89,15 @@
     "license": "MIT and included dependency notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ilspy-11.1.0.9782-r1/ilspycmd.11.1.0.9782.zip"
   },
+  "7bb52641f2e0dc9b8f5b180be4b0ab46b6d3127361a4e817938175603850c714": {
+    "name": "7zip-26.04-macos-universal.tgz",
+    "sha256": "7bb52641f2e0dc9b8f5b180be4b0ab46b6d3127361a4e817938175603850c714",
+    "size": 2657149,
+    "format": "tgz",
+    "root": ".",
+    "license": "LGPL-2.1-or-later, BSD-3-Clause and unRAR restriction; included License.txt and manual",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-sevenzip-26.04-r1/7zip-26.04-macos-universal.tgz"
+  },
   "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201": {
     "name": "temurin-21.0.11+10-darwin-arm64.tar.gz",
     "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",

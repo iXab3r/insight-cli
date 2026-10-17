@@ -10,7 +10,7 @@ import type {ToolProcess} from './definition.js';
 export interface RunSpec {
  tool:string;role:string;installation?:string;executable:string;arguments?:string[];
  environment?:Record<string,string|undefined>;cwd?:string;input?:string;
- timeoutMs?:number;maxOutputBytes?:number;acceptedCodes?:number[];session?:string;target?:string;
+ timeoutMs?:number;maxOutputBytes?:number;outputFile?:string;acceptedCodes?:number[];session?:string;target?:string;
 }
 export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string}
 export interface RunContext {appArguments:Pick<CommandContext['appArguments'],'AppDataDirectory'>;signal:AbortSignal;environment:CommandContext['environment']}
@@ -50,6 +50,8 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
   await writeFile(join(root,'stdout.log'),result.stdout,{mode:0o600});await writeFile(join(root,'stderr.log'),result.stderr,{mode:0o600});
   Object.assign(record,{state:outcome?'failed':'exited',outcome:outcome??'completed',exitCode:result.exitCode,signal:result.signal,elapsedMs:result.elapsedMs,endedAt:new Date().toISOString()});await atomicWrite(path,record);
   if(outcome)throw new CliError('Tool execution did not complete successfully: '+outcome+'.',{code:'tool.'+outcome.replaceAll('_','.'),result});
+  if(spec.outputFile)try{await writeFile(spec.outputFile,Buffer.concat(stdout),{flag:'wx',mode:0o600});}
+  catch(error){throw new CliError('Tool completed, but its binary output could not be written to a new file.',{code:'tool.output',cause:error,result:{process:id,diagnostics:root}});}
   return result;
  }catch(error){
   if(child&&!settled&&record.state!=='unverified'){stop('failed');await new Promise<void>(ok=>{if(settled){ok();return;}child!.once('close',()=>ok());setTimeout(()=>{signal('SIGKILL');ok();},1500).unref();});}

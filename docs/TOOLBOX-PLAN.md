@@ -1,6 +1,6 @@
 # Agent toolbox: delivery plan
 
-Status: full delivery authorized and implementation started on 2026-10-17. TB-01 audit and its shared Factory dependency are in progress; no new analytical tool is accepted yet. The owner selected the product direction:
+Status: full delivery authorized and implementation started on 2026-10-17. TB-01 audit is in progress; the shared Factory local-discovery/access fixes are merged and pinned; 7-Zip has native CLI developer proof, but no new analytical tool has completed its whole toolbox gate yet. The owner selected the product direction:
 insight-cli supplies a toolbox with a discoverable skill for each analytical tool. The
 runtime-only delivery and two successful worker workflows do not establish toolbox readiness.
 The current [inventory audit](TOOLBOX-AUDIT.md) records pinned candidates, delivery exceptions and unresolved feasibility checks.
@@ -33,6 +33,7 @@ Current verified inventory:
 | artifacts | File/folder save implemented | Supporting application with concise workflow guidance; no artificial download/install lifecycle |
 | Ghidra Server/headless/GUI/debugger roles | Managed within Ghidra | Explicit capabilities/lifecycle under Ghidra; list separately only when independently useful to the agent |
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
+| 7-Zip | Public CLI adapter, dedicated skill and native developer proof; agent gate pending | Container inventory, integrity and bounded ordinary-file recovery |
 | Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.

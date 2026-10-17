@@ -2,6 +2,7 @@ import {readFile,mkdir,stat,rename,rm,open} from 'node:fs/promises';
 import {createReadStream} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {basename,join,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 
@@ -11,6 +12,7 @@ export function validateRecipe(recipe){
  if(!Array.isArray(recipe.assets)||!recipe.assets.length||!recipe.redistribution)throw Error('Incomplete distribution');
  for(const a of recipe.assets){
   if(!/^[a-zA-Z0-9_.+-]+$/.test(a.name)||names.has(a.name)||a.name==='manifest.json')throw Error('Invalid/duplicate asset name');names.add(a.name);
+  if(a.recompress&&(a.recompress.format!=='xz-to-gzip'||!(/^[a-f0-9]{64}$/.test(a.recompress.sha256))||!Number.isSafeInteger(a.recompress.size)||a.recompress.size<1||a.recompress.size>=2*1024**3))throw Error('Unpinned recompression input');
   if(new URL(a.upstream).protocol!=='https:'||!/^[a-f0-9]{64}$/.test(a.sha256)||!Number.isSafeInteger(a.size)||a.size<1||a.size>=2*1024**3||!a.license)throw Error('Unpinned distribution asset');
  }
  if(!recipe.assets.some(a=>a.role==='source'))throw Error('Distribution source companion is required');
@@ -20,7 +22,14 @@ export async function sha256(path){const hash=createHash('sha256');for await(con
 async function matches(path,a){try{return (await stat(path)).size===a.size&&await sha256(path)===a.sha256;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 export async function acquire(a,directory,fetcher=fetch){
  const file=join(directory,a.name);if(await matches(file,a))return file;
- const partial=file+'.partial';await rm(partial,{force:true});let headers={};
+ const partial=file+'.partial';await rm(partial,{force:true});
+ if(a.recompress){
+  const input=await acquire({...a,name:a.name+'.upstream.xz',...a.recompress,recompress:undefined},directory,fetcher);
+  execFileSync('python3',['-I',fileURLToPath(new URL('./tool-recompress.py',import.meta.url)),input,partial],{timeout:600000,stdio:['ignore','pipe','pipe']});
+  if(!await matches(partial,a)){await rm(partial,{force:true});throw Error('Recompressed asset differs from reviewed recipe: '+a.name);}
+  await rename(partial,file);return file;
+ }
+ let headers={};
  // Acquisition-only provider detail. Installed tool catalogs contain our release URLs only.
  if(a.upstream.startsWith('https://ghcr.io/v2/homebrew/core/ghidra/blobs/')){
   const r=await fetcher('https://ghcr.io/token?service=ghcr.io&scope=repository:homebrew/core/ghidra:pull');if(!r.ok)throw Error('Registry authorization failed');
