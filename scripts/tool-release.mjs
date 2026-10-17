@@ -13,7 +13,7 @@ export function validateRecipe(recipe){
  for(const a of recipe.assets){
   if(a.delivery?.kind==='vendor-direct')throw Error('Vendor-only distribution must never be mirrored');
   if(!/^[a-zA-Z0-9_.+-]+$/.test(a.name)||names.has(a.name)||a.name==='manifest.json')throw Error('Invalid/duplicate asset name');names.add(a.name);
-  if(a.repack?.format==='source-set-v1'){
+  if(['source-set-v1','source-set-v2'].includes(a.repack?.format)){
    const r=a.repack;if(a.recompress||a.role!=='source'||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.inputs)||!r.inputs.length||r.inputs.length>100||new Set(r.inputs.map(p=>p.id)).size!==r.inputs.length)throw Error('Invalid source set');
    let total=0;for(const input of r.inputs){const url=new URL(input.upstream);if(input.repack||input.recompress||input.delivery||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(input.id))||!(/^[a-zA-Z0-9_.+-]+$/.test(input.name))||url.protocol!=='https:'||url.username||url.password||!(/^[a-f0-9]{64}$/.test(input.sha256))||!Number.isSafeInteger(input.size)||input.size<1||input.size>=2*1024**3||(total+=input.size)>=2*1024**3||!input.license)throw Error('Unpinned source-set input');}
   }
@@ -34,7 +34,7 @@ async function matches(path,a){try{return (await stat(path)).size===a.size&&awai
 export async function acquire(a,directory,fetcher=fetch,companions=[]){
  const file=join(directory,a.name);if(await matches(file,a))return file;
  const partial=file+'.partial';await rm(partial,{force:true});
- if(a.repack?.format==='source-set-v1'){
+ if(['source-set-v1','source-set-v2'].includes(a.repack?.format)){
   const inputs=[];for(const input of a.repack.inputs)inputs.push({...input,file:await acquire({...input,name:a.name+'.input-'+input.id},directory,fetcher,companions)});
   execFileSync('python3',['-I',fileURLToPath(new URL('./tool-source-set.py',import.meta.url)),partial,JSON.stringify({...a.repack,inputs})],{timeout:600000,stdio:['ignore','pipe','pipe']});
   if(!await matches(partial,a)){await rm(partial,{force:true});throw Error('Source set differs from reviewed recipe: '+a.name);}await rename(partial,file);return file;
