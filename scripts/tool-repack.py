@@ -37,6 +37,18 @@ try:
                     entry.mtime = 0
                     archive.addfile(entry, original.extractfile(member))
                 extra_names = set()
+                for alias in recipe.get('aliases', []):
+                    name, target = alias['path'], alias['target']
+                    assert name not in seen and name not in extra_names
+                    assert name and not name.startswith('/') and '\\' not in name and all(x not in ('', '.', '..') for x in name.split('/'))
+                    assert target and '/' not in target and '\\' not in target and target not in ('.', '..')
+                    assert name.rsplit('/', 1)[0] + '/' + target in seen
+                    extra_names.add(name)
+                    entry = tarfile.TarInfo(recipe['outputRoot'] + '/' + name)
+                    entry.type = tarfile.SYMTYPE
+                    entry.linkname = target
+                    entry.mode = 0o777
+                    archive.addfile(entry)
                 for extra in recipe.get('appendFiles', []):
                     name = extra['path']
                     assert name and not name.startswith('/') and chr(92) not in name and all(x not in ('', '.', '..') for x in name.split('/'))

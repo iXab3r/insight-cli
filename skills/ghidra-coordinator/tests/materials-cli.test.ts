@@ -11,7 +11,7 @@ test('packaged entry and RE skills are discoverable without profile, authenticat
   const app=f.createApplication(runtime=>createInsightCli({runtime,backend:()=>{throw Error('Must not start Ghidra');}}));
   const original=await f.json(app,['skill']) as {name:string;path:string;version:string;skills:string[]};
   assert.equal(original.name,'insight-cli');assert.equal(original.version,packageVersion);
-  assert.deepEqual(original.skills,['insight-cli','insight-re','insight-ghidra','insight-ilspy','insight-artifacts','insight-sevenzip','insight-llvm','insight-dotnet-dump','insight-dotnet-stack','insight-dotnet-trace','insight-die']);
+  assert.deepEqual(original.skills,['insight-cli','insight-re','insight-ghidra','insight-ilspy','insight-artifacts','insight-sevenzip','insight-llvm','insight-dotnet-dump','insight-dotnet-stack','insight-dotnet-trace','insight-die','insight-lldb']);
   const research=await f.json(app,['skill','insight-re']) as {name:string;path:string;version:string};
   assert.equal(research.name,'insight-re');assert.equal(research.version,original.version);
   assert.match(await readFile(research.path,'utf8'),/name: insight-re/);

@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,readFile,writeFile,symlink} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
+import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -15,7 +16,10 @@ export async function createPublicFixture(packageRoot,directory){
  const project=join(directory,'project');await mkdir(join(project,'.agents/skills'),{recursive:true,mode:0o700});
  const cli=join(packageRoot,'dist/src/bin.js'),manifest=JSON.parse(await readFile(join(packageRoot,'package.json'),'utf8'));
  assert.equal(manifest.name,'@eyeauras/insight-cli');
- const factoryRoot=join(packageRoot,'node_modules/@eyeauras/cli-factory'),factory=JSON.parse(await readFile(join(factoryRoot,'package.json'),'utf8'));
+ // Honor normal Node resolution: npm may hoist this dependency in an isolated local install.
+ let factoryRoot,factory;
+ for(const base of createRequire(join(packageRoot,'package.json')).resolve.paths('@eyeauras/cli-factory')??[]){try{const candidate=join(base,'@eyeauras/cli-factory'),manifest=JSON.parse(await readFile(join(candidate,'package.json'),'utf8'));assert.equal(manifest.name,'@eyeauras/cli-factory');factoryRoot=candidate;factory=manifest;break;}catch(error){if(error.code!=='ENOENT')throw error;}}
+ assert.ok(factoryRoot&&factory,'Factory package root must resolve');
  // Keep the Unix endpoint below its native path-length limit, even under long runner paths.
  const preload=join(directory,'fixture-environment.mjs'),appdata=await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','it-'));
  await writeFile(preload,`import{AppArguments}from ${JSON.stringify(pathToFileURL(join(factoryRoot,factory.main)).href)};const original=AppArguments.CurrentEnvironment;AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:${JSON.stringify(appdata)},EnvironmentLocalAppData:${JSON.stringify(appdata)}});`,{flag:'wx',mode:0o600});

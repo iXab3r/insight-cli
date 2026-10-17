@@ -94,3 +94,9 @@ test('DiE console recipe requires four exact matching source companions and safe
  validateRecipe(recipe);
  for(const bad of [{...repack,sourceAssets:[]},{...repack,sourceAssets:[...repack.sourceAssets.slice(1),'absent.tar.xz']},{...repack,sourceAssets:Array(4).fill('engine.tar.gz')},{...repack,outputRoot:'../escape'},{...repack,sha256:'no'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...binary,repack:bad},...sources]}));
 });
+
+test('reviewed subset library aliases must resolve to selected siblings',()=>{
+ const repack={format:'tar-zstd-subset-v1',sha256:a.sha256,size:5,stripPrefix:'up/',outputRoot:'runtime',entries:['lib/actual.dylib'],aliases:[{path:'lib/alias.dylib',target:'actual.dylib'}]};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[{...a,name:'native.tgz',role:'binary',repack},a]};validateRecipe(recipe);
+ for(const alias of [{path:'lib/alias',target:'../actual.dylib'},{path:'../escape',target:'actual.dylib'},{path:'lib/alias',target:'missing'},{path:'lib/actual.dylib',target:'actual.dylib'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...recipe.assets[0],repack:{...repack,aliases:[alias]}},a]}));
+});

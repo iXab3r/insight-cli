@@ -74,7 +74,7 @@ export async function processStatus(directory:string,id:string,verify?:Ownership
  if(!record.pid){
   try{process.kill(record.ownerPid,0);return record;}catch{return {...record,state:record.gated?'failed':'unverified',phase:'owner_lost_before_pid'};}
  }
- const identity=await processIdentity(record.pid);if(!identity)return {...record,state:'exited',phase:'observed_exit'};
+ const identity=await processIdentity(record.pid);if(!identity)return {...record,state:'exited',phase:'observed_exit',outcome:'unknown'};
  if(identity.birth!==record.identity)return {...record,state:'unverified',phase:'pid_identity_changed'};
  const current=owned.get(ownedKey(directory,id)),local=current?.child.pid===record.pid&&current.record.identity===record.identity&&current.child.exitCode===null&&current.child.signalCode===null;
  const proof=verify?await verify(record):undefined;

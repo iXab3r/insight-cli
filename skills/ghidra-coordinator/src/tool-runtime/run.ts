@@ -7,16 +7,20 @@ import {CliError,type CommandContext} from '@eyeauras/cli-factory';
 import {atomicWrite,withToolUse,toolRoot,readJson} from './store.js';
 import {launchProcess,type TrackedChild} from './supervisor.js';
 import type {ToolProcess} from './definition.js';
+import {deadlineLaunch} from './deadline.js';
 export interface RunSpec {
  tool:string;role:string;installation?:string;executable:string;arguments?:string[];
  environment?:Record<string,string|undefined>;cwd?:string;input?:string;
  timeoutMs?:number;maxOutputBytes?:number;outputFile?:string;acceptedCodes?:number[];session?:string;target?:string;
+ /** Adapter opt-in only after verifying its native signal/child cleanup contract. */
+ nativeDeadline?:boolean;
 }
 export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string}
 export interface RunContext {appArguments:Pick<CommandContext['appArguments'],'AppDataDirectory'>;signal:AbortSignal;environment:CommandContext['environment']}
 export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  c.signal.throwIfAborted();const directory=c.appArguments.AppDataDirectory;toolRoot(directory,spec.tool);
  if(!isAbsolute(spec.executable))throw new CliError('Tool executable must be an absolute path.',{code:'tool.configuration'});
+ const launch=spec.nativeDeadline?await deadlineLaunch(spec.executable,spec.arguments??[],spec.timeoutMs??120000):{executable:spec.executable,arguments:spec.arguments??[]};
  const id=randomUUID(),root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');
  const started=performance.now(),limit=spec.maxOutputBytes??4*1024**2;let child:ChildProcess|undefined,outcome:string|undefined,truncated=false,bytes=0;
  const stdout:Buffer[]=[],stderr:Buffer[]=[],record:ToolProcess&{root:string;ownerPid:number;outcome?:string;terminationError?:string}={schema:1,id,tool:spec.tool,role:spec.role,installation:spec.installation??'probe',state:'starting',executable:spec.executable,createdAt:new Date().toISOString(),root,ownerPid:process.pid,...(spec.session?{session:spec.session}:{}),...(spec.target?{target:spec.target}:{})};
@@ -33,7 +37,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  const aborted=()=>stop('cancelled');
  try{
   c.signal.throwIfAborted();
-  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target},spec.executable,spec.arguments??[],
+  child=await launchProcess(directory,{tool:spec.tool,role:spec.role,installation:spec.installation??'probe',session:spec.session,target:spec.target,...(spec.nativeDeadline?{metadata:{nativeDeadlineSeconds:Math.ceil((spec.timeoutMs??120000)/1000),nativeExecutable:spec.executable}}:{})},launch.executable,launch.arguments,
    {cwd:spec.cwd??root,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']},
    {id,finalize:false,signal:c.signal,onSpawn:launched=>{
     child=launched;child.once('close',()=>{settled=true;});
@@ -45,6 +49,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
    }});
   await Promise.race([(child as TrackedChild).toolClosed,new Promise<never>((_ok,bad)=>{abandon=bad;})]);settled=true;Object.assign(record,await readJson(path));
   if((record as ToolProcess&{launchError?:string}).launchError)outcome='launch_failed';
+  if(!outcome&&spec.nativeDeadline&&child.signalCode==='SIGALRM')outcome='timeout';
   if(!outcome&&(child.exitCode===null||!(spec.acceptedCodes??[0]).includes(child.exitCode)))outcome='exit_code';
   const result:RunResult={process:id,stdout:redact(Buffer.concat(stdout).toString('utf8')),stderr:redact(Buffer.concat(stderr).toString('utf8')),exitCode:child.exitCode,signal:child.signalCode,elapsedMs:Math.round(performance.now()-started),truncated,diagnostics:root};
   await writeFile(join(root,'stdout.log'),result.stdout,{mode:0o600});await writeFile(join(root,'stderr.log'),result.stderr,{mode:0o600});

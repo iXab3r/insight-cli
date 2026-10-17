@@ -52,6 +52,14 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI classifies owned native and managed inputs")]
     public Task Classify() => Execute("scripts/toolbox/native-die.mjs", Value("dieArchive"), Value("nativeSubjects"), Value("managedWorker"));
 
+    [When("the public CLI observes owned native breakpoint snapshots")]
+    public Task ObserveNative() => Execute("scripts/toolbox/native-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
+
+    [When("the installed debugger runner suffers controlled lifetime faults")]
+    public Task DebuggerFaults() => Execute("scripts/toolbox/fault-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
+
+    [Then("runtime evidence and checkpoints survive debugger removal")]
+    [Then("owned debugger processes exit and uncertain results are not replayed")]
     [Then("header and signature evidence retains scan uncertainty")]
     [Then("the waiting stack and heap state have retained diagnostic evidence")]
     [Then("native linkage and focused debug evidence survive tool removal")]

@@ -27,7 +27,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
 | T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | MIT plus dependencies; retain conditions and actual trace interpretation |
 | T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Spawn/attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | wxWindows Library Licence 3.1; complete dependency/source audit pending. Real Node hooks/detach passed on a CoreFoundation-loaded fixture; bare-C attach failed explicitly; no adapter admitted |
-| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Pinned lldb/liblldb/debugserver subset passed breakpoint, registers, memory and backtrace on an owned macOS fixture; reuse existing Ghidra debugger ownership principles | Apache-2.0 with LLVM exceptions; normal inferior cleanup independently verified. Public adapter, complete distribution and crash/timeout/recovery ownership proof remain pending |
+| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Owned-launch facade with explicit symbol companion, bounded breakpoint snapshot, registers, memory and backtrace; native macOS ARM64 CLI proof | Apache-2.0 with LLVM exceptions; immutable binary/source/license release, native snapshots and controller/owner-loss cleanup proof passed; independent model gate pending |
 | T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Embedded EULA prohibits redistribution. Explicit Microsoft delivery policy with pinned bytes/local cache; no mirror. Do not consume mutable auto-update appinstaller as the managed version |
 | T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. [Sysinternals terms](https://learn.microsoft.com/en-us/sysinternals/license-terms) prohibit our mirror. Actual driver/capture feasibility must be proven |
 | T13 | [strace 7.2](https://github.com/strace/strace/releases/tag/v7.2) | Scoped syscall/file/process capture, owned Linux fixture | LGPL-2.1-or-later for tool; test/UAPI notices retained. Build a pinned Linux artifact from exact source; ptrace host prerequisite |
@@ -229,7 +229,7 @@ the native backend probe using `instrumented.c` compiled with/without
 `INSIGHT_WITH_CORE_FOUNDATION` and `-framework CoreFoundation`. Distribution/source/notices,
 public adapter, skill and independent agent gates remain open. This probe is not CLI acceptance.
 
-### LLDB backend feasibility
+### LLDB native admission
 
 The official LLVM 23.1.3 archive supplies lldb, liblldb and debugserver with system-library
 dependencies. Selecting that private debugserver via `LLDB_DEBUGSERVER_PATH`, disabling init
@@ -240,11 +240,25 @@ inferior and an independent PID probe confirmed absence. No separate Python setu
 The first `run` alias required lldb-argdumper, missing from the trial subset. The explicit
 argv launch path avoids shell expansion. [LLDB feasibility](verification/toolbox-lldb-feasibility.json)
 and `scripts/toolbox/audit-lldb.mjs` retain the exact binary/fixture identities and limits.
-A subsequent controller-loss probe killed the owned LLDB process group with SIGTERM and
-SIGKILL after a one-shot breakpoint/continue. In both cases its inferior remained alive. The
-bounded fixture later self-terminated; independent absence checks confirmed cleanup of the lab,
-but natural completion is not debugger cleanup. Generic process-group control is insufficient
-for admission. Verified inferior ownership/recovery, timeout/helper failure, owner replacement
-and explicit uncertain lifetime state remain required before the public adapter.
-Existing Ghidra debugger ownership rules remain authoritative; no arbitrary PID adoption or
-second shared debugger owner is introduced by this probe.
+The initial controller-loss probes left the inferior alive under both SIGTERM and SIGKILL.
+The native cause was `target.detach-on-error` defaulting to true. The facade explicitly sets
+it false before launch; repeated faults independently verified disappearance of debugger,
+debugserver and inferior. A small first-party POSIX exec helper arms a kernel alarm before
+exec, so the deadline survives loss of the owner. It keeps the tracked PID/process group;
+there is no new service or arbitrary PID adoption. The deterministic helper includes source,
+reviewed hash and build provenance; only libSystem is linked. Other adapters do not opt into
+this contract without proving their own signal/child behavior.
+
+`lldb inspect` uses literal argv, disables init files and inferior stdio, supports a selected
+hit, register/memory/backtrace capture and optional step-out, then kills its owned launch.
+It accepts native thin ARM64 Mach-O files on macOS 14+, rather than trying to execute an
+imported Windows PE. An adjacent dSYM is lost when the executable alone is copied: the initial
+installed CLI probe exposed that gap. `--symbols FILE` now captures a matching DWARF companion
+and LLDB checks its correspondence before launch. `--variables` requires usable debug info;
+registers/backtraces remain available without it. Ordinary output retains all native warnings.
+
+[LLDB acceptance](verification/toolbox-lldb.json) records installed public CLI results,
+source/release readback and fault tests. After owner loss, a live recovered macOS process
+remains unverified; observed exit records an unknown result. It does not replay execution or
+claim a completed snapshot. Cold/prepared independent model acceptance and the combined
+full-toolbox gate remain open; model quota does not block native implementation of other tools.

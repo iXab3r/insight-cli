@@ -27,3 +27,13 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI classifies owned native and managed inputs
     Then header and signature evidence retains scan uncertainty
+
+  Scenario: Corroborate a native boundary with concrete arguments and returns
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI observes owned native breakpoint snapshots
+    Then runtime evidence and checkpoints survive debugger removal
+
+  Scenario: Retain bounded debugger lifetime after interruption or owner loss
+    Given an isolated globally installed toolbox candidate is selected
+    When the installed debugger runner suffers controlled lifetime faults
+    Then owned debugger processes exit and uncertain results are not replayed

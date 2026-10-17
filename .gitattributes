@@ -1,0 +1,3 @@
+# Source/binary identity of the packaged first-party native exec helper is byte exact.
+skills/ghidra-coordinator/runtime/native/*.c text eol=lf
+skills/ghidra-coordinator/runtime/native/deadline-exec-darwin-arm64 -text

@@ -23,11 +23,10 @@
   "sourceCompanionSha256": "c44186a7762ed28954be72e5ff6df9808e0779d4f1bf014ecc4e7e211d31ee34",
   "retainedInitialFailure": "The run alias requested lldb-argdumper, absent from the initial three-file subset. Direct process launch avoids shell expansion and passed with explicit argv.",
   "outstanding": [
-    "Complete distribution recipe/notices and installed public CLI/skill",
-    "Reuse existing debugger ownership principles; test timeout, crash, lost owner and uncertain inferior lifetime before admission",
-    "Independent cold/prepared agent and combined toolbox gates"
+    "Independent cold/prepared model gate",
+    "Combined complete toolbox gate"
   ],
-  "currentState": "normal_debugging_passed_controller_loss_lifetime_gap",
+  "currentState": "native_facade_and_lifetime_passed_model_pending",
   "lifetimeFaults": [
     {
       "controllerGroupSignal": "SIGTERM",
@@ -40,6 +39,6 @@
       "eventualAbsenceAfterOwnedFixtureSelfTimeoutVerified": true
     }
   ],
-  "lifetimeInterpretation": "A process-group stop of the LLDB controller did not terminate its debugserver-launched inferior. Natural completion of the bounded fixture is not adapter cleanup. Public admission requires verified inferior ownership/recovery and explicit uncertain state, reusing existing debugger principles rather than assuming the generic runTool group covers it.",
+  "lifetimeInterpretation": "Retained default-setting failures. target.detach-on-error false fixes controller loss; the first-party kernel alarm exec helper bounds lifetime after owner loss. See toolbox-lldb.json for installed CLI and full fault evidence.",
   "retainedProbeSetupFailure": "The first controller-loss probe had no breakpoint and could not obtain the buffered launch PID. A one-shot named breakpoint made the origin/PID observable before continue and controller loss."
 }
