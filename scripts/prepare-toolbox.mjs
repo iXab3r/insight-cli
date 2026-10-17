@@ -45,6 +45,9 @@ export async function prepareToolbox(root){
   const commands=new Set();
   const walk=(items,parent='')=>{for(const item of items){const path=(parent+' '+item.name.split(' ')[0]).trim();assert.ok(!commands.has(path),'Duplicate command '+path);commands.add(path);walk(item.children??[],path);}};
   walk([...definition.commands,...(definition.builtins??[])]);
+  for(const app of definition.commands){const rootName=app.name.split(' ')[0],leaves=new Set((app.children??[]).map(child=>child.name.split(' ')[0]));
+   if(['download','install','uninstall','doctor','status'].every(name=>leaves.has(name)))assert.ok(inventory.tools.some(tool=>tool.namespace===rootName),'Managed tool has no packaged admission: '+rootName);
+  }
   const ids=new Set();
   for(const tool of inventory.tools){
    assert.match(tool.id,/^[a-z][a-z0-9-]*$/);assert.ok(!ids.has(tool.id),'Duplicate tool');ids.add(tool.id);

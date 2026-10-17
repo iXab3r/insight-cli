@@ -160,18 +160,23 @@ packed/global-installed macOS candidate and all named research/recovery/removal 
 
 ## Toolbox development gates
 
-`Toolbox.feature` adds two separately selected native scenarios: actual Codex bundle
-metadata connect/disconnect and a globally installed public 7-Zip container workflow. Run
+`Toolbox.feature` adds three separately selected native scenarios: actual Codex bundle
+metadata connect/disconnect, a globally installed public 7-Zip container workflow, and
+LLVM investigation of owned PE/PDB, ELF and Mach-O images. Run
 
 ```sh
 INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
   --suite acceptance --tag toolbox --property RestoreLockedMode=true --timeout-seconds 1200
 ```
 The private JSON manifest supplies `packageRoot`, `sevenzipArchive`, `sevenzipExecutable` and `container` for the
-owned two-entry fixture. The driver creates a separate profile and test-only short temporary
+owned two-entry fixture; `llvmArchive` and `nativeSubjects` select the LLVM archive and
+owned image directory. Prepare those images with `scripts/toolbox/prepare-native-inputs.mjs`
+and explicit Clang/lld-link/ld.lld paths (a maintainer fixture prerequisite, not a user SDK).
+The driver creates a separate profile and test-only short temporary
 AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
-No ordinary user profile or installed tool is reset. Both scenarios passed in the initial
-connection (2/2); an earlier runner-path failure was corrected in the fixture setup.
+No ordinary user profile or installed tool is reset. All three scenarios passed together (3/3); an earlier runner-path failure was corrected
+in the fixture setup. LLVM verifies each advertised family, the hexadecimal type index,
+output limits/overwrite refusal and external sibling drift/preservation.
 
 These are native developer gates, not independent model acceptance. The
 [managed agent evidence](verification/toolbox-agent-managed.json) separately records cold

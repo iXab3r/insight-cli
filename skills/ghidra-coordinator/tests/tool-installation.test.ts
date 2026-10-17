@@ -45,3 +45,15 @@ test('cancelling an acquisition already in progress cannot leak an installation 
  await entered;controller.abort(new Error('cancel during verification'));release();await assert.rejects(acquisition,/cancel during verification/);
  assert.equal(toolUseCount('cancelled-acquisition','fixture'),0);assert.equal(toolProfileBusy('cancelled-acquisition'),false);
 });
+
+test('external family binding detects sibling changes and selects a new identity without deleting external files',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile,readFile}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {ToolInstaller}=await import('../src/tool-runtime/installer.js');const {fileSha256}=await import('../src/tool-runtime/archives.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-family-'));t.after(()=>rm(root,{recursive:true,force:true}));const executable=join(root,'primary'),sibling=join(root,'sibling');await writeFile(executable,'stable primary');await writeFile(sibling,'version one');
+ const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal} as unknown as import('@eyeauras/cli-factory').CommandContext;
+ const descriptor={id:'family',primary:'family',components:()=>{throw Error('External selection must not download');},launch:()=>({executable,arguments:[],environment:{}}),probe:async()=>({version:'fixture'}),externalInputs:async()=>({sibling:await fileSha256(sibling)})};
+ const installer=new ToolInstaller(context,descriptor),first=await installer.install({executable});await installer.selected();
+ await writeFile(sibling,'version two');await assert.rejects(installer.use(async()=>assert.fail('Changed external family must not run')),/family differs/);
+ const second=await installer.install({executable});assert.notEqual(second.installation,first.installation);await installer.selected();
+ await installer.uninstall();assert.equal(await readFile(executable,'utf8'),'stable primary');assert.equal(await readFile(sibling,'utf8'),'version two');
+});

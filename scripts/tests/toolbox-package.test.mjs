@@ -33,3 +33,8 @@ test('admission rejects stale versions and escaping standalone references',async
  root=await fixture(t);await writeFile(join(root,'skills/insight-probe/SKILL.md'),'---\nname: insight-probe\n---\n# Probe 1.0.0\n[Outside](../../SKILL.md)\n');
  await assert.rejects(prepareToolbox(root),/escapes its own directory/);
 });
+
+test('a newly added managed tool cannot ship without discovery and skill admission',async t=>{
+ const root=await fixture(t);await writeFile(join(root,'dist/src/cli.js'),`export const createDefinition=()=>({commands:[{name:'probe',children:[{name:'inspect'}]},{name:'forgotten',children:['download','install','uninstall','doctor','status'].map(name=>({name}))}]});`);
+ await assert.rejects(prepareToolbox(root),/Managed tool has no packaged admission: forgotten/);
+});

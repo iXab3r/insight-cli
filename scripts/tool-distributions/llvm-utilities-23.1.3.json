@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-llvm-utilities-23.1.3-r1",
+  "title": "LLVM utilities 23.1.3 macOS ARM64",
+  "redistribution": "Unmodified llvm-readobj, llvm-nm, llvm-objdump and llvm-pdbutil from the official LLVM 23.1.3 macOS ARM64 distribution, selected without filesystem extraction and repacked into gzip tar. Requires macOS 14 or newer. Apache-2.0 WITH LLVM-exception and included notices apply; the exact corresponding full LLVM source is included. Only system libSystem/libz/libc++ are dynamically required by these four executables.",
+  "assets": [
+    {
+      "name": "llvm-utilities-23.1.3-macos-arm64.tgz",
+      "upstream": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.3/LLVM-23.1.3-macOS-ARM64.tar.zst",
+      "repack": {
+        "format": "tar-zstd-subset-v1",
+        "sha256": "a3f181b1176406893c097443e21b2a54b85afeac2d10eca3b6d251e6dca32eb3",
+        "size": 871033366,
+        "stripPrefix": "LLVM-23.1.3-macOS-ARM64/",
+        "outputRoot": "llvm-utilities-23.1.3",
+        "entries": [
+          "bin/llvm-readobj",
+          "bin/llvm-objdump",
+          "bin/llvm-nm",
+          "bin/llvm-pdbutil",
+          "include/llvm/Support/LICENSE.TXT"
+        ],
+        "appendAssets": [
+          {
+            "asset": "llvm-23.1.3-LICENSE.TXT",
+            "path": "LICENSE.TXT"
+          }
+        ]
+      },
+      "sha256": "2599cb40282085a61a3d8b50003d75d556010d764c05a9bf30e45a7c7b5b7861",
+      "size": 23318992,
+      "format": "tgz",
+      "root": "llvm-utilities-23.1.3",
+      "role": "binary",
+      "license": "Apache-2.0 WITH LLVM-exception and included LLVM notices"
+    },
+    {
+      "name": "llvm-project-23.1.3.src.tar.xz",
+      "upstream": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.3/llvm-project-23.1.3.src.tar.xz",
+      "sha256": "c44186a7762ed28954be72e5ff6df9808e0779d4f1bf014ecc4e7e211d31ee34",
+      "size": 179220548,
+      "role": "source",
+      "license": "Exact corresponding LLVM source with all component licenses and notices"
+    },
+    {
+      "name": "llvm-23.1.3-LICENSE.TXT",
+      "upstream": "https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-23.1.3/LICENSE.TXT",
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "size": 15141,
+      "role": "license-companion",
+      "license": "Full matching Apache-2.0 WITH LLVM-exception license, also embedded in the binary subset"
+    }
+  ]
+}

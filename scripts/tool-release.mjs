@@ -12,17 +12,26 @@ export function validateRecipe(recipe){
  if(!Array.isArray(recipe.assets)||!recipe.assets.length||!recipe.redistribution)throw Error('Incomplete distribution');
  for(const a of recipe.assets){
   if(!/^[a-zA-Z0-9_.+-]+$/.test(a.name)||names.has(a.name)||a.name==='manifest.json')throw Error('Invalid/duplicate asset name');names.add(a.name);
+  if(a.repack){const r=a.repack;if(a.recompress||r.format!=='tar-zstd-subset-v1'||!(/^[a-f0-9]{64}$/.test(r.sha256))||!Number.isSafeInteger(r.size)||r.size<1||r.size>=2*1024**3||!(/^[a-zA-Z0-9][a-zA-Z0-9_.+-]*\/$/.test(r.stripPrefix))||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.entries)||!r.entries.length||r.entries.length>100||new Set(r.entries).size!==r.entries.length||r.entries.some(p=>typeof p!=='string'||p.startsWith('/')||p.includes('\\')||p.split('/').some(s=>!s||s==='.'||s==='..')))throw Error('Unpinned or unsafe subset recipe');}
   if(a.recompress&&(a.recompress.format!=='xz-to-gzip'||!(/^[a-f0-9]{64}$/.test(a.recompress.sha256))||!Number.isSafeInteger(a.recompress.size)||a.recompress.size<1||a.recompress.size>=2*1024**3))throw Error('Unpinned recompression input');
   if(new URL(a.upstream).protocol!=='https:'||!/^[a-f0-9]{64}$/.test(a.sha256)||!Number.isSafeInteger(a.size)||a.size<1||a.size>=2*1024**3||!a.license)throw Error('Unpinned distribution asset');
  }
+ for(const a of recipe.assets)for(const extra of a.repack?.appendAssets??[]){const other=recipe.assets.find(v=>v.name===extra.asset);if(!other||other.repack||other.recompress||other.role!=='license-companion'||other.size>1024**2||typeof extra.path!=='string'||extra.path.startsWith('/')||extra.path.includes('\\')||extra.path.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Subset notice companion is absent or unsafe');}
  if(!recipe.assets.some(a=>a.role==='source'))throw Error('Distribution source companion is required');
  return recipe;
 }
 export async function sha256(path){const hash=createHash('sha256');for await(const b of createReadStream(path))hash.update(b);return hash.digest('hex');}
 async function matches(path,a){try{return (await stat(path)).size===a.size&&await sha256(path)===a.sha256;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
-export async function acquire(a,directory,fetcher=fetch){
+export async function acquire(a,directory,fetcher=fetch,companions=[]){
  const file=join(directory,a.name);if(await matches(file,a))return file;
  const partial=file+'.partial';await rm(partial,{force:true});
+ if(a.repack){
+  const input=await acquire({...a,name:a.name+'.upstream.zst',sha256:a.repack.sha256,size:a.repack.size,repack:undefined},directory,fetcher);
+  const appendFiles=[];for(const extra of a.repack.appendAssets??[]){const companion=companions.find(v=>v.name===extra.asset);if(!companion)throw Error('Missing subset notice companion');appendFiles.push({file:await acquire(companion,directory,fetcher,companions),path:extra.path});}
+  execFileSync('python3',['-I',fileURLToPath(new URL('./tool-repack.py',import.meta.url)),input,partial,JSON.stringify({...a.repack,appendFiles})],{timeout:600000,stdio:['ignore','pipe','pipe']});
+  if(!await matches(partial,a)){await rm(partial,{force:true});throw Error('Subset asset differs from reviewed recipe: '+a.name);}
+  await rename(partial,file);return file;
+ }
  if(a.recompress){
   const input=await acquire({...a,name:a.name+'.upstream.xz',...a.recompress,recompress:undefined},directory,fetcher);
   execFileSync('python3',['-I',fileURLToPath(new URL('./tool-recompress.py',import.meta.url)),input,partial],{timeout:600000,stdio:['ignore','pipe','pipe']});
@@ -77,7 +86,7 @@ export async function mirror(recipe,directory,publish=false){
  const manifestAsset={name:'manifest.json',size:manifest.length,sha256:createHash('sha256').update(manifest).digest('hex')};
  const file=await open(join(directory,'manifest.json'),'w',0o600);try{await file.writeFile(manifest);}finally{await file.close();}
  const assets=[...recipe.assets,manifestAsset];
- if(!publish){for(const a of recipe.assets)await acquire(a,directory);return {state:'prepared',tag:recipe.tag,assets:assets.length};}
+ if(!publish){for(const a of recipe.assets)await acquire(a,directory,fetch,recipe.assets);return {state:'prepared',tag:recipe.tag,assets:assets.length};}
  if(process.env.GITHUB_ACTIONS==='true'){
   if(process.env.TOOL_RELEASE_IMMUTABLE_READY!=='true')throw Error('Repository immutability setup is not confirmed');
  }else if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
@@ -87,7 +96,7 @@ export async function mirror(recipe,directory,publish=false){
   if(current.immutable!==true)throw Error('Existing release is not immutable');
   return {state:'published_verified',tag:recipe.tag,url:current.html_url,assets:assets.length};
  }
- for(const a of recipe.assets)await acquire(a,directory);
+ for(const a of recipe.assets)await acquire(a,directory,fetch,recipe.assets);
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
   gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);

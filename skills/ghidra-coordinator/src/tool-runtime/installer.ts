@@ -7,11 +7,13 @@ import type {ToolArtifact,ToolInstallation} from './definition.js';
 import {listProcesses} from './supervisor.js';
 import {digest,fail,text} from '../model.js';
 export interface ToolLaunch {executable:string;arguments:string[];environment:Record<string,string>}
-export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>}
+export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>;externalInputs?:Record<string,string>}
 export interface InstallDescriptor {
  id:string;primary:string;components:()=>Record<string,ToolArtifact>;
  launch:(roots:Record<string,string>)=>ToolLaunch;
  probe:(launch:ToolLaunch,c:CommandContext)=>Promise<Record<string,unknown>>;
+ /** Known sibling executables/data files needed by an external tool family. */
+ externalInputs?:(executable:string,c:CommandContext)=>Promise<Record<string,string>>;
 }
 /** Standard archive-based tools supply layout and a real probe; exceptional tools reuse the stage primitives. */
 export class ToolInstaller {
@@ -42,7 +44,8 @@ export class ToolInstaller {
   }
   const components=Object.fromEntries(Object.entries(consumed).map(([id,v])=>[id,v.artifact.sha256]));
   const externalDigest=external?await fileSha256(external,this.c.signal):undefined;
-  const id=digest({tool:this.descriptor.id,schema:1,platform:process.platform,architecture:process.arch,external,externalDigest,components});
+  const externalInputs=external&&this.descriptor.externalInputs?await this.descriptor.externalInputs(external,this.c):undefined;
+  const id=digest({tool:this.descriptor.id,schema:1,platform:process.platform,architecture:process.arch,external,externalDigest,components,...(externalInputs?{externalInputs}:{})});
   const rootsAt=(directory:string)=>Object.fromEntries(Object.entries(consumed).map(([part,v])=>{archiveName(v.artifact.root);return [part,join(directory,part,v.artifact.root)];}));
   const selected=await installationStage<SelectedTool>(this.root,id,async(stage,installed)=>{
    for(const [part,v]of Object.entries(consumed))await extractArchive(v.path,join(stage,part),v.artifact.format,this.c.signal);
@@ -50,7 +53,8 @@ export class ToolInstaller {
    const lastProbe=await this.descriptor.probe(stageLaunch,this.c),launch=external?stageLaunch:this.descriptor.launch(rootsAt(installed));
    const fingerprint=external?await fileSha256(external,this.c.signal):await treeFingerprint(stage);
    if(external&&fingerprint!==externalDigest)fail('binding','External tool changed during installation.');
-   return {schema:1,tool:this.descriptor.id,id,mode:external?'external':'managed',root:installed,...launch,roots:rootsAt(installed),components,fingerprint,lastProbe,selectedAt:new Date().toISOString()};
+   if(externalInputs&&digest(await this.descriptor.externalInputs!(external!,this.c))!==digest(externalInputs))fail('binding','External tool family changed during installation.');
+   return {schema:1,tool:this.descriptor.id,id,mode:external?'external':'managed',root:installed,...launch,roots:rootsAt(installed),components,fingerprint,lastProbe,...(externalInputs?{externalInputs}:{}),selectedAt:new Date().toISOString()};
   },value=>this.verify(value),this.c.signal);
   await atomicWrite(join(this.root,'selection.json'),{...selected,selectedAt:new Date().toISOString()});
   return {tool:this.descriptor.id,state:'installed',mode:selected.mode,installation:id,executable:selected.executable,components,checks:selected.lastProbe};
@@ -64,6 +68,7 @@ export class ToolInstaller {
   if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Selected tool receipt differs from its verified installation.');
   const actual=selected.mode==='external'?await fileSha256(selected.executable,this.c.signal):await treeFingerprint(root);
   if(actual!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
+  if(selected.mode==='external'&&this.descriptor.externalInputs&&(!selected.externalInputs||digest(await this.descriptor.externalInputs(selected.executable,this.c))!==digest(selected.externalInputs)))fail('binding','External tool family differs from its verified installation.');
  }
  async use<T>(action:(selection:SelectedTool)=>Promise<T>):Promise<T>{
   const lease=await withToolUse(this.directory,this.descriptor.id,()=>this.selected(),this.c.signal);

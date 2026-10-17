@@ -43,6 +43,10 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI recovers the owned container and retains its materials")]
     public Task Recover() => Execute("scripts/toolbox/native-sevenzip.mjs", Value("sevenzipArchive"), Value("container"), Value("sevenzipExecutable"));
 
+    [When("the public CLI inspects native images and their debug records")]
+    public Task InspectNative() => Execute("scripts/toolbox/native-llvm.mjs", Value("llvmArchive"), Value("nativeSubjects"));
+
+    [Then("native linkage and focused debug evidence survive tool removal")]
     [Then("all shipped skills are visible and unrelated project skills survive")]
     [Then("exact recovered bytes and configuration survive tool removal")]
     public void Passed()

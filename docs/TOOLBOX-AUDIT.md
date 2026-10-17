@@ -2,8 +2,10 @@
 
 Audit date: 2026-10-17. TB-01 is in progress. These are frozen upstream candidates,
 not full toolbox delivery or agent acceptance. 7-Zip now has a working adapter/skill and
-passed its isolated globally installed public CLI developer proof; its cold/prepared agent
-gates remain open. Existing Ghidra/ILSpy runtime acceptance
+passed its isolated globally installed public CLI developer proof and independently reviewed
+cold/prepared business trials on the frozen package recorded in
+[host evidence](verification/toolbox-agent-host.json). This does not pass the remaining tools
+or the combined full-toolbox gate. Existing Ghidra/ILSpy runtime acceptance
 remains separately identified in [tool runtime acceptance](TOOL-RUNTIME-ACCEPTANCE.md).
 The [toolbox plan](TOOLBOX-PLAN.md) owns the complete inventory and required native/agent gates.
 
@@ -19,7 +21,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T01 | [Ghidra 12.1.2](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.2_build), GhidraMCP 7.0.0, Temurin 21.0.11+10 | Existing facade: isolated static contexts, server, GUI and debugger; bundled JDK/native/bridge | Existing immutable release recipes and licenses; new dedicated skill and whole-toolbox agent gates required |
 | T02 | [ILSpy 11.1.0.9782](https://www.nuget.org/packages/ilspycmd/11.1.0.9782), .NET 10.0.13 | Existing facade: types/C#/IL/resources/project; private runtime | Existing immutable release recipes and MIT/dependency companions; new dedicated skill and toolbox agent gates required |
 | T03 | [DiE 3.21](https://github.com/horsicq/DIE-engine/releases/tag/3.21) | `diec` console, signature database, Qt frameworks; macOS ARM64 package can be extracted without installer execution | MIT engine plus Qt and dependency terms; derive console bundle preserving dependency closure and matching source/notices. Real PE probe found mixed JSON/diagnostics; see below |
-| T04 | [LLVM 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | readobj/objdump/nm/pdbutil, selected dylibs; macOS ARM64 official bundle | Apache-2.0 with LLVM exceptions. Retain notices and selected dependency closure; avoid making a full compiler toolchain a prerequisite |
+| T04 | [LLVM 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | readobj/objdump/nm/pdbutil, no non-system dylibs; macOS 14+ ARM64 | Derived 23 MB subset retains exact executables, full matching license and source companions. Native CLI/agent admission in progress; no compiler required by users |
 | T05 | [7-Zip 26.04](https://github.com/ip7z/7zip/releases/tag/26.04) | `7zz` list/test/extract into new output directory; macOS native bundle | LGPL/BSD/unRAR terms and matching source; immutable binary/source release companions |
 | T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT plus dependencies; package declares net8 with major roll-forward. Prove .NET 10 compatibility and actual owned dump/object workflow |
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
@@ -49,7 +51,8 @@ it is not accepted by updating the hash at runtime.
 | Input | Bytes | SHA256 |
 | --- | ---: | --- |
 | `die_mac_qt6_3.21_arm64.pkg` | 41179549 | `9b6411f4976593988fbcdc8d1ed2fd8123996e4b9f4a43df6a841460c229794b` |
-| `LLVM-23.1.3-macOS-ARM64.tar.xz` (release metadata; not yet independently downloaded) | 1569721928 | `3dcfd88aec10be204a24037bcb0dc0ad777882e9dbe8ac60e2639060d8a794b1` |
+| `LLVM-23.1.3-macOS-ARM64.tar.zst` (independently downloaded) | 871033366 | `a3f181b1176406893c097443e21b2a54b85afeac2d10eca3b6d251e6dca32eb3` |
+| `llvm-utilities-23.1.3-macos-arm64.tgz` (reviewed derived subset) | 23318992 | `2599cb40282085a61a3d8b50003d75d556010d764c05a9bf30e45a7c7b5b7861` |
 | `7z2604-mac.tar.xz` (release metadata) | 1861928 | `bee04358cbcbc7106273cee0e8d72916db2696c48067a3538c34d8cd6fd16578` |
 | `dotnet-dump.10.0.750501.nupkg` | 10482522 | `ae70c9f37548e1e006467893e21ae41a005fefaf2270e29642b415df053324a7` |
 | `windbg.msixbundle`, exact `1-2610-1001-0` vendor path | 1203512387 | `4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20` |
@@ -133,3 +136,12 @@ research just to switch an operator terminal runtime. Reviewed receipts are reco
 from model exit status. `scripts/toolbox/run-agent.mjs` retains a real opt-in trial as
 `needs_review`; useful findings, checkpoint bytes and tool-specific cleanup require independent
 review before acceptance.
+
+### Repeated Windows feasibility
+
+The initial Windows feasibility receipt remains historical, not adapter acceptance. Subsequent
+runs 39031889515 and 39032790185 failed the ProcMon owned-file observation: the fixture
+read its file successfully but no corresponding captured rows were found. WinDbg console
+and dnSpy launch checks continued to pass. ProcMon capture readiness remains unresolved;
+do not treat one earlier successful capture as a stable product workflow. The owner confirmed
+explicit Microsoft download, pinned hash and local cache for its non-redistributable payload.

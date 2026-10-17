@@ -55,3 +55,33 @@ test('xz recompression retains exact tar bytes and rejects modified upstream con
  await acquire(asset,directory,fetcher);assert.equal(calls,1);
  await assert.rejects(acquire({...asset,name:'bad.tgz',recompress:{...asset.recompress,sha256:'0'.repeat(64)}},directory,fetcher),/differs/);
 });
+
+test('subset repack retains exact selected bytes and full license, rejecting links and missing members',async t=>{
+ const {execFileSync}=await import('node:child_process');
+ try{execFileSync('zstd',['--version'],{stdio:'ignore'});}catch{t.skip('Maintainer zstd prerequisite is not installed');return;}
+ const {writeFile}=await import('node:fs/promises'),{fileURLToPath}=await import('node:url'),{createHash}=await import('node:crypto');
+ const directory=await mkdtemp(join(tmpdir(),'subset-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const input=execFileSync('python3',['-I','-c',`import io,tarfile,sys
+b=io.BytesIO()
+with tarfile.open(fileobj=b,mode='w') as a:
+ for n,data in [('up/bin/run',b'\\x00\\xffnative'),('up/private/not-shipped',b'omit')]:
+  i=tarfile.TarInfo(n);i.size=len(data);a.addfile(i,io.BytesIO(data))
+ i=tarfile.TarInfo('up/bin/link');i.type=tarfile.SYMTYPE;i.linkname='outside';a.addfile(i)
+sys.stdout.buffer.write(b.getvalue())`]);
+ const compressed=execFileSync('zstd',['-q','-c'],{input});const source=join(directory,'input.zst');await writeFile(source,compressed);
+ const notice=Buffer.from('Full fixture license\n'),license={...a,name:'license.txt',role:'license-companion',size:notice.length,sha256:hash(notice)};
+ const repack={format:'tar-zstd-subset-v1',size:compressed.length,sha256:hash(compressed),stripPrefix:'up/',outputRoot:'subset',entries:['bin/run'],appendAssets:[{asset:license.name,path:'LICENSE.TXT'}]};
+ const helper=fileURLToPath(new URL('../tool-repack.py',import.meta.url)),noticeFile=join(directory,license.name);await writeFile(noticeFile,notice);
+ const expected=join(directory,'expected.tgz');execFileSync('python3',['-I',helper,source,expected,JSON.stringify({...repack,appendFiles:[{file:noticeFile,path:'LICENSE.TXT'}]})]);const bytes=await readFile(expected);
+ const asset={...a,name:'runtime.tgz',role:'binary',size:bytes.length,sha256:hash(bytes),repack};
+ const path=await acquire(asset,directory,async()=>new Response(compressed),[license]);
+ const archive=JSON.parse(execFileSync('python3',['-I','-c',`import tarfile,json,sys
+with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:list(a.extractfile(i).read()) for i in a}))`,path],{encoding:'utf8'}));
+ assert.deepEqual(archive,{'subset/bin/run':[0,255,...Buffer.from('native')],'subset/LICENSE.TXT':[...notice]});
+ await assert.rejects(acquire({...asset,name:'missing.tgz',repack:{...repack,entries:['bin/missing']}},directory,async()=>new Response(compressed),[license]),/Command failed/);
+ await assert.rejects(acquire({...asset,name:'link.tgz',repack:{...repack,entries:['bin/link']}},directory,async()=>new Response(compressed),[license]),/Command failed/);
+ await assert.rejects(acquire({...asset,name:'changed.tgz',sha256:'f'.repeat(64)},directory,async()=>new Response(compressed),[license]),/differs/);
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Synthetic',assets:[asset,license,a]};validateRecipe(recipe);
+ for(const bad of [{...repack,entries:['../escape']},{...repack,appendAssets:[{asset:license.name,path:'../escape'}]},{...repack,appendAssets:[{asset:'absent',path:'LICENSE'}]}])assert.throws(()=>validateRecipe({...recipe,assets:[{...asset,repack:bad},license,a]}));
+});
