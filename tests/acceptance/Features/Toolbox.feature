@@ -98,3 +98,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI compares managed metadata without executing targets
     Then managed metadata and normalized IL retain immutable input identity
+
+  @managed-heap @macos
+  Scenario: Explain queued work and a waiting thread from one retained managed dump
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI queries the captured managed heap and stacks
+    Then object field and waiting stack evidence preserve dump identity and runtime limits

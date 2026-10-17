@@ -157,6 +157,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI compares managed metadata without executing targets")]
     public Task QueryMetadata() => Execute("scripts/toolbox/native-managed-metadata.mjs", Value("managedMetadataFixture"));
 
+    [When("the public CLI queries the captured managed heap and stacks")]
+    public Task QueryHeap() => Execute("scripts/toolbox/native-managed-heap.mjs", Value("managedWorker"), Value("mismatchedDac"));
+
     [When("the public CLI traces the owned Linux worker")]
     public Task TraceLinux() => Execute("scripts/toolbox/native-strace.mjs", Value("straceArchive"), Value("nativeLinuxWorker"), Value("nativeLinuxSettings"));
 
@@ -166,6 +169,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("object field and waiting stack evidence preserve dump identity and runtime limits")]
     [Then("managed metadata and normalized IL retain immutable input identity")]
     [Then("HTTP evidence and explicit TLS failures survive interruption and removal")]
     [Then("packet and stream evidence preserves input identity and bounded coverage")]

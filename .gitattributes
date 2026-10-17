@@ -15,3 +15,6 @@ skills/ghidra-coordinator/runtime/native/mitmproxy/*.py text eol=lf
 skills/ghidra-coordinator/runtime/native/mitmproxy/*.json text eol=lf
 skills/ghidra-coordinator/runtime/managed/insight-managed/* text eol=lf
 skills/ghidra-coordinator/runtime/managed/insight-managed/*.dll -text
+skills/ghidra-coordinator/runtime/managed/insight-heap/* text eol=lf
+skills/ghidra-coordinator/runtime/managed/insight-heap/**/*.dll -text
+skills/ghidra-coordinator/runtime/managed/insight-heap/notices/* -text -whitespace

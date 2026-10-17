@@ -139,6 +139,12 @@
       "title": "Insight Managed Metadata",
       "path": "skills/insight-managed-metadata/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-managed-heap",
+      "title": "Insight Managed Heap",
+      "path": "skills/insight-managed-heap/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -469,6 +475,55 @@
           "ordinary project evidence",
           "original target lifetime preserved",
           "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "managed-heap",
+      "namespace": "dotnet-dump",
+      "kind": "capability",
+      "skill": "insight-managed-heap",
+      "purpose": "Query managed object fields and stacks in an immutable compatible dump without live attachment or automatic symbol lookup",
+      "inputs": [
+        "CoreCLR Heap or Full dump",
+        "immutable dump target"
+      ],
+      "tasks": [
+        "identify heap objects by exact type",
+        "read primitive object fields",
+        "inspect managed thread stacks"
+      ],
+      "platforms": [
+        "darwin-arm64 matching CoreCLR dump and DAC"
+      ],
+      "dependencies": [
+        "managed dotnet-dump private .NET 10 runtime",
+        "matching local CoreCLR DAC; default managed version 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-dump query"
+      ],
+      "limitations": [
+        "No live attach or target expression evaluation",
+        "Explicit native DAC must match dump runtime, OS and architecture; no downloaded symbols or ambient file lookup",
+        "Object addresses belong to this exact dump",
+        "At most one million scanned objects; reaching the bound remains partial, unreadable fields unknown"
+      ],
+      "evaluationCase": {
+        "id": "managed-dump-structured-queries",
+        "inputFamily": "owned-compatible-managed-heap-dump",
+        "task": "Determine the queued work state and waiting execution path from the supplied dump. Retain concrete object/field/stack evidence, immutable input identity and limitations.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual object address and primitive/string state",
+          "managed waiting stack",
+          "explicit matching runtime/DAC identity",
+          "ordinary saved evidence",
+          "immutable dump and owned cleanup"
         ]
       }
     },

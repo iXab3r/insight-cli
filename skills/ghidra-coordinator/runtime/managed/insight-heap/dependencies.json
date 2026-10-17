@@ -1,0 +1,436 @@
+{
+  "schema": 1,
+  "dependencies": {
+    "Microsoft.Diagnostics.Runtime": {
+      "version": "4.2.751201",
+      "nupkgSha256": "17c84b6aa5eacda66775f3550aebd99686c27099ebfe7ae78b37efa2ed6c8aea",
+      "nugetContentHash": "9rg4pJnc46e7QvUYC8Pxu5VqPJhKEO2ILGEZy1LOKrwurLC8iSAAzamDVLd/cYPb3zGbM9RE4Zo41Tis8OxCyA==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.diagnostics.runtime/4.2.751201/microsoft.diagnostics.runtime.4.2.751201.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/clrmd",
+        "commit": "2e7e5d74cddb2be0ac523aedead10b90a95e71c3"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Diagnostics.Runtime-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/Microsoft/clrmd/2e7e5d74cddb2be0ac523aedead10b90a95e71c3/LICENSE",
+          "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+        }
+      ]
+    },
+    "Azure.Core": {
+      "version": "1.53.0",
+      "nupkgSha256": "ce2a7001c04158d09bd6e577b5458e230c107d861eb84016bf53fc6a00b2a86f",
+      "nugetContentHash": "x9c/toFMOtRrlTdFuE7rlGCVAduQzWVfKmLz5juj41zJAXEhYD5hluiUyyAEzJ6OxpBnKtiaBztzwpZITAVjtg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/azure.core/1.53.0/azure.core.1.53.0.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Azure/azure-sdk-for-net",
+        "commit": "c94768fafa4dd93eef9f7c90c92522434fcedb32"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Azure.Core-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/Azure/azure-sdk-for-net/c94768fafa4dd93eef9f7c90c92522434fcedb32/LICENSE.txt",
+          "sha256": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa"
+        }
+      ]
+    },
+    "Azure.Identity": {
+      "version": "1.21.0",
+      "nupkgSha256": "47712e11f5016aa55617b4330b8943e4ef1fb1f9875bbb5857ae9fcaeee57a0d",
+      "nugetContentHash": "GeFv8sGwRKvDKwI2WFy8r0mhmlxEVZg24Sit2NogTjiSO8RVjllWM65OT6e1sKjOvG8V74y7hAbaELUUPjZQSw==",
+      "url": "https://api.nuget.org/v3-flatcontainer/azure.identity/1.21.0/azure.identity.1.21.0.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Azure/azure-sdk-for-net",
+        "commit": "f7400e4471111bf7f2154834022786119acbdd77"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Azure.Identity-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/Azure/azure-sdk-for-net/f7400e4471111bf7f2154834022786119acbdd77/LICENSE.txt",
+          "sha256": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa"
+        }
+      ]
+    },
+    "Microsoft.Bcl.AsyncInterfaces": {
+      "version": "10.0.3",
+      "nupkgSha256": "fb04dc99ccd40f5a929e7599d668a28ebeb6fe095c45b35646911987f3815368",
+      "nugetContentHash": "TV62UsrJZPX6gbt3c4WrtXh7bmaDIcMqf9uft1cc4L6gJXOU07hDGEh+bFQh/L2Az0R1WVOkiT66lFqS6G2NmA==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.bcl.asyncinterfaces/10.0.3/microsoft.bcl.asyncinterfaces.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Bcl.AsyncInterfaces-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Bcl.AsyncInterfaces-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Diagnostics.NETCore.Client": {
+      "version": "0.2.661903",
+      "nupkgSha256": "ccd047e3e2fef5c08cfa93086850d4872f5a08930f38b6a61aaaeb46bb8ec86d",
+      "nugetContentHash": "3ISv5jXar4dHBt/7Rz3YdnR3VpnC94BhSdSvuq8ZuKgCOcVuTdmgRnq0hUzJyL/z8Ge4VekFjhui2aufUXPdvg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.diagnostics.netcore.client/0.2.661903/microsoft.diagnostics.netcore.client.0.2.661903.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/diagnostics",
+        "commit": "d7b455b46332b31fd9ba3a3f3e020387984c511a"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Diagnostics.NETCore.Client-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/diagnostics/d7b455b46332b31fd9ba3a3f3e020387984c511a/LICENSE.TXT",
+          "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Configuration.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "39f70f783bfb449befbfb9ecfb008c01009d1bf1ded8ab7157a311970be9df92",
+      "nugetContentHash": "xVDHL0+SIgemfh95fTO9cGLe17TWv/ZP0n7m01z8X6pzt2DmQpucioWR/mYZA1sRlkWnkXzfl0JweLNWmE9WMg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.abstractions/10.0.3/microsoft.extensions.configuration.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Configuration.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Configuration.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "4a107de2312db2ae57e6beb10d943ec28b59606dce3ca3821cd1b2e01ecd545b",
+      "nugetContentHash": "bwGMrRcAMWx2s/RDgja97p27rxSz2pEQW0+rX5cWAUWVETVJ/eyxGfjAl8vuG5a+lckWmPIE+vcuaZNVB5YDdw==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection.abstractions/10.0.3/microsoft.extensions.dependencyinjection.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.DependencyInjection.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.DependencyInjection.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "26094ab42ebe8df8a0811514e405c2ea6474716d6ddccdf7c11ed65cac898c1b",
+      "nugetContentHash": "mQiTzAj7PIJ2A9YXR5QhgulS1fTWhmQc3ckd1Mrf3hKW07d03fBDqx8vVaFw+cRTebDOeB6pNqdWdnRxsi1hBA==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.diagnostics.abstractions/10.0.3/microsoft.extensions.diagnostics.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Diagnostics.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Diagnostics.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "b9601987f45d3048b04ccdb7d752a50ca2b62c1a3cd6d2185cf4d4cc95db71e0",
+      "nugetContentHash": "4TD9AXDRsipTmaemwnjt/DM5Ri0de2JzHQhvZ4woBTjUtL4XrPNsMrOk5oiLJAx1gTrE6pOIhxv+lEde5F6CZA==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.fileproviders.abstractions/10.0.3/microsoft.extensions.fileproviders.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.FileProviders.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.FileProviders.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Hosting.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "77ccd7c937e055da24f82820e440b4e031f888f42d2f1954f42b06cb9f9dafab",
+      "nugetContentHash": "GdMpC10Jf6poxSvUJ4lgYpJ5F/kJeaAoJmrPufjBoPYyCTKKY5Dyl0rZA+LBNvFqTq1cZa/lhlptlUhNvU6xrg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.hosting.abstractions/10.0.3/microsoft.extensions.hosting.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Hosting.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Hosting.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions": {
+      "version": "10.0.3",
+      "nupkgSha256": "9484ad4883d3c5aa024685011ec04f5d96ee563e62a34db7f745a4c9ea727e5c",
+      "nugetContentHash": "lxl0WLk7ROgBFAsjcOYjQ8/DVK+VMszxGBzUhgtQmAsTNldLL5pk9NG/cWTsXHq0lUhUEAtZkEE7jOGOA8bGKQ==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/10.0.3/microsoft.extensions.logging.abstractions.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Logging.Abstractions-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Logging.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Options": {
+      "version": "10.0.3",
+      "nupkgSha256": "28361a54149d344ba1b37535eb8455d27db4723c2ba62eee23bd41d23fd416c0",
+      "nugetContentHash": "hU6WzGTPvPoLA2ng1ILvWQb3g0qORdlHNsxI8IcPLumJb3suimYUl+bbDzdo1V4KFsvVhnMWzysHpKbZaoDQPQ==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/10.0.3/microsoft.extensions.options.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Options-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Options-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Extensions.Primitives": {
+      "version": "10.0.3",
+      "nupkgSha256": "c341be216f64cfbd2e835044b894de4b537bc1ead0866b3781097a383ccd2294",
+      "nugetContentHash": "GEcpTwo7sUoLGGNTqV1FZEuL+tTD9m81NX/mh099dqGNna07/UGZShKQNZRw4hv6nlliSUwYQgSYc7OR99Jufg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.primitives/10.0.3/microsoft.extensions.primitives.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Extensions.Primitives-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/Microsoft.Extensions.Primitives-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "Microsoft.Identity.Client": {
+      "version": "4.83.1",
+      "nupkgSha256": "583b75c602b985dc52620e9c20ae705ed638fcf07e05a4f7f7780d2dac3313c0",
+      "nugetContentHash": "jOLIrZ3cynoqHLLO1cXplFFabrhrMEYs/EuKHvmCyrOm1axqiVFT6nCSnHxk7w5+d2BeQfCdM12Yf/0X7OeS1g==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.identity.client/4.83.1/microsoft.identity.client.4.83.1.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
+        "commit": "d5d7de6b103f0d9dd7bca9bf13cbb9f3da37bc9f"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Identity.Client-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-dotnet/d5d7de6b103f0d9dd7bca9bf13cbb9f3da37bc9f/LICENSE",
+          "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+        }
+      ]
+    },
+    "Microsoft.Identity.Client.Extensions.Msal": {
+      "version": "4.83.1",
+      "nupkgSha256": "b78846e4a4b37c17e17d9edd243052db0afbbf69e70f04633ecefc67388cfdbf",
+      "nugetContentHash": "I3k4J4Hj4KbLEFanjeUzzDOVecukETaTgEkJ7h2pP/Yazs6SLp6TVUTo/Eo+ptPXMwvc+iX7rBFtMSUrA7R+Mg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.identity.client.extensions.msal/4.83.1/microsoft.identity.client.extensions.msal.4.83.1.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
+        "commit": "d5d7de6b103f0d9dd7bca9bf13cbb9f3da37bc9f"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Identity.Client.Extensions.Msal-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-dotnet/d5d7de6b103f0d9dd7bca9bf13cbb9f3da37bc9f/LICENSE",
+          "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+        }
+      ]
+    },
+    "Microsoft.IdentityModel.Abstractions": {
+      "version": "8.14.0",
+      "nupkgSha256": "6e40aecf55a3e7a37e2c758bbc728b702b4846a04afb7939bc3daa7c1ef15ca9",
+      "nugetContentHash": "iwbCpSjD3ehfTwBhtSNEtKPK0ICun6ov7Ibx6ISNA9bfwIyzI2Siwyi9eJFCJBwxowK9xcA1mj+jBWiigeqgcQ==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.identitymodel.abstractions/8.14.0/microsoft.identitymodel.abstractions.8.14.0.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+        "commit": "c8f7d87bcda35557a68f6cb9c55856a2ee733856"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.IdentityModel.Abstractions-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/c8f7d87bcda35557a68f6cb9c55856a2ee733856/LICENSE.txt",
+          "sha256": "cba03f5387b05405e56b688376421acae396136af4b5116738dc6e5160f87ddd"
+        }
+      ]
+    },
+    "Microsoft.Security.AntiSSRF": {
+      "version": "1.0.0",
+      "nupkgSha256": "b936dfa86c59a1a5d6b9b5c83531035b0e84e8c51d5664f9c3de5254946bf5aa",
+      "nugetContentHash": "V0AJQt8FC5HXkvFhBqB0WgMADVL+vG+qiMK9p39OHdqfNwYOh1durk8j9rKPklWasBxpk8ifVdzoJmEgUWVoeg==",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.security.antissrf/1.0.0/microsoft.security.antissrf.1.0.0.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/AntiSSRF",
+        "commit": "8366ff53e9c75a52d1edcc06fde7b1620243928c"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/Microsoft.Security.AntiSSRF-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/Microsoft/AntiSSRF/8366ff53e9c75a52d1edcc06fde7b1620243928c/LICENSE",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ]
+    },
+    "System.ClientModel": {
+      "version": "1.10.0",
+      "nupkgSha256": "4d5adfc7f21a8268991dddc722b93094817ff6b6db20e3547aa3a96a623af15b",
+      "nugetContentHash": "lBEWs54F5Y5pZ9hC+8z4S/X76957ex+DPk7WecRHlbIHtrPfbRMMlOgI3iDn4Jpb3bSxvBnKaaHoD59auFjlBA==",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.clientmodel/1.10.0/system.clientmodel.1.10.0.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Azure/azure-sdk-for-net",
+        "commit": "6b41983be6c45a7439db0b25f0c0874d7c867ed9"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/System.ClientModel-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/Azure/azure-sdk-for-net/6b41983be6c45a7439db0b25f0c0874d7c867ed9/LICENSE.txt",
+          "sha256": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa"
+        }
+      ]
+    },
+    "System.Memory.Data": {
+      "version": "10.0.3",
+      "nupkgSha256": "1de7cac82b8d27b6ce34e56a1a2d9649c1ba5c8a05c9f192c1340cf4e974ebe5",
+      "nugetContentHash": "MaGhRfGunmrj/nHjtsi9XkhlYJ/ERGWrbA+BiSKNtGnAjc9XlG5EhAvak6VRcX5LYzPF6pBO8nJ613dTgzabig==",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.memory.data/10.0.3/system.memory.data.10.0.3.nupkg",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dotnet/dotnet",
+        "commit": "c2435c3e0f46de784341ac3ed62863ce77e117b4"
+      },
+      "license": "MIT",
+      "notices": [
+        {
+          "path": "notices/System.Memory.Data-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "path": "notices/System.Memory.Data-LICENSE.txt",
+          "origin": "https://raw.githubusercontent.com/dotnet/dotnet/c2435c3e0f46de784341ac3ed62863ce77e117b4/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        }
+      ]
+    },
+    "System.Security.Cryptography.ProtectedData": {
+      "version": "4.5.0",
+      "nupkgSha256": "67e5f5676944acb2fb627b768c5b3392eebf220ae780edd5d5b49f6530621487",
+      "nugetContentHash": "wLBKzFnDCxP12VL9ANydSYhk59fC4cvOr9ypYQLPnAj48NQIhqnjdD2yhP8yEKyBJEjERWS9DisKL7rX5eU25Q==",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.security.cryptography.protecteddata/4.5.0/system.security.cryptography.protecteddata.4.5.0.nupkg",
+      "repository": {},
+      "license": "Retained original package license",
+      "notices": [
+        {
+          "path": "notices/System.Security.Cryptography.ProtectedData-LICENSE.TXT",
+          "origin": "nupkg:LICENSE.TXT",
+          "sha256": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b"
+        },
+        {
+          "path": "notices/System.Security.Cryptography.ProtectedData-THIRD-PARTY-NOTICES.TXT",
+          "origin": "nupkg:THIRD-PARTY-NOTICES.TXT",
+          "sha256": "7864a01e2fdef7e8fdf81b906efb1466f083206affea7ba7e6dadea429754765"
+        }
+      ]
+    }
+  }
+}

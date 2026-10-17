@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native ClrMD proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "workerSha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb",
+  "dumpSha256": "b2aa2000f4c8e1e20bfeae7d8d28df65679e90bd47134bb2ed5c89bf4d02c5f1",
+  "dacSha256": "935f7a8105983a82c93601de251e0fe692ce418d37e1fd413cc414c2bdcfdff6",
+  "checks": {
+    "privateRuntimeAndMatchingDac": true,
+    "actualOwnedHeapDump": true,
+    "knownObjectType": true,
+    "actualPrimitiveAndStringFields": true,
+    "boundedFields": true,
+    "scanBoundRemainsPartial": true,
+    "actualWaitingStack": true,
+    "focusedThread": true,
+    "invalidObjectAndExpectedTypeRefused": true,
+    "runtimeSelectionRefused": true,
+    "mismatchedDacRefused": true,
+    "outputOverwriteRefused": true,
+    "immutableDump": true,
+    "subjectLifetimePreserved": true,
+    "evidenceSurvivesUninstall": true,
+    "terminalOwnedProcesses": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "27bb6d3f95470053103bfe9e5ea11802e89077b880bb1b46d93890f1d1ce79df"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "151295f",
+  "candidate": "Working-tree capability candidate; package SHA/build identify the tested bytes",
+  "packageSha256": "b2b93ce263197903376ec723c29b203cb88e17c7866526d61ed1d96947c8eef8",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "de6c1700829346cf988d9cb66763e39d",
+    "passed": 1,
+    "failed": 0
+  }
+}

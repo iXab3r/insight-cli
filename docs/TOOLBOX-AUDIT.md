@@ -519,3 +519,23 @@ pagination, invalid selections, immutable input hashes and checkpoint retention 
 An execution witness remained absent throughout: queries never ran the target code.
 Structural comparison does not establish behavioral equivalence. Independent model
 and combined full-inventory gates remain open.
+
+### Structured managed dump queries
+
+`dotnet-dump query` packages a reproducibly built first-party helper over
+[ClrMD 4.2.751201](https://www.nuget.org/packages/Microsoft.Diagnostics.Runtime/4.2.751201).
+All 20 locked packages have exact hashes, source repository commits where published,
+full original license/third-party notices and binary/source manifest checks. Existing
+diagnostics delivery supplies the private .NET runtime; no SDK or new tool install is
+required. A custom no-files locator disables automatic external image/symbol lookup.
+The explicitly selected native DAC is loaded with version mismatch checks enabled.
+
+The [global public CLI Gherkin proof](verification/toolbox-managed-heap.json) captured a
+real owned Heap dump, found `BusinessState.Pending = 37` and `Job = owned-report`, then
+identified `WaitForRelease`/`Thread.Sleep` in an actual dump thread. Exact object/type
+and thread drilldown, field pagination, scan-bound partial coverage, wrong DAC/runtime/
+object/type rejection, input immutability, subject lifetime and evidence retention
+passed. Native support is matching macOS ARM64 CoreCLR dumps; the managed default DAC
+is 10.0.13, and a different trusted matching DAC must be selected explicitly. There is
+no live attachment, expression evaluation or automatic symbol acquisition in this API.
+Independent model and full combined gates remain open.

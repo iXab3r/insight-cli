@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "sdk": "10.0.303",
+  "target": "net10.0",
+  "sourceLicense": "MIT",
+  "inputs": {
+    "Program.cs": "8f7dd1bc74fdcba44a132afc4b20532c10d3bd50f4e448e86bfae8f45b54585a",
+    "Insight.Heap.csproj": "f970aa235083f2a18e00d022be6ecf0d4353fa13b89e2263f9559861790927e4",
+    "NuGet.Config": "7a77c63a438cdf0524dc336da4bf2191d3f259645de430f5a4c61b3edd52fa9f",
+    "packages.lock.json": "de1342450087305db91c77d36058eb239f31fa8154c88b8fbe735438f74ab9c4",
+    "dependencies.json": "48d55a9a448d0e71da750ca7bdfc1620c911df9266bb7f1005fbced24f29a8ad",
+    "notices/Microsoft.Diagnostics.Runtime-LICENSE.txt": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+    "notices/Azure.Core-LICENSE.txt": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa",
+    "notices/Azure.Identity-LICENSE.txt": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa",
+    "notices/Microsoft.Bcl.AsyncInterfaces-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Bcl.AsyncInterfaces-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Diagnostics.NETCore.Client-LICENSE.txt": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+    "notices/Microsoft.Extensions.Configuration.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Configuration.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.DependencyInjection.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.DependencyInjection.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.Diagnostics.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Diagnostics.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.FileProviders.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.FileProviders.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.Hosting.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Hosting.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.Logging.Abstractions-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Logging.Abstractions-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.Options-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Options-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Extensions.Primitives-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/Microsoft.Extensions.Primitives-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/Microsoft.Identity.Client-LICENSE.txt": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+    "notices/Microsoft.Identity.Client.Extensions.Msal-LICENSE.txt": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+    "notices/Microsoft.IdentityModel.Abstractions-LICENSE.txt": "cba03f5387b05405e56b688376421acae396136af4b5116738dc6e5160f87ddd",
+    "notices/Microsoft.Security.AntiSSRF-LICENSE.txt": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+    "notices/System.ClientModel-LICENSE.txt": "9b45236978bb5cd5de992021769e1eeaa79f0116d3b02cf8ba065a1ed603d5fa",
+    "notices/System.Memory.Data-THIRD-PARTY-NOTICES.TXT": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+    "notices/System.Memory.Data-LICENSE.txt": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b",
+    "notices/System.Security.Cryptography.ProtectedData-LICENSE.TXT": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b",
+    "notices/System.Security.Cryptography.ProtectedData-THIRD-PARTY-NOTICES.TXT": "7864a01e2fdef7e8fdf81b906efb1466f083206affea7ba7e6dadea429754765"
+  },
+  "files": {
+    "Azure.Core.dll": {
+      "sha256": "1d6df436afdc73c30d476be938f6513c90ef8fc884a7bae280091a9bed0a5490",
+      "size": 879688
+    },
+    "Azure.Identity.dll": {
+      "sha256": "31574a3d35ffeb0e25a00ebb317937222fe5283b91af608613f2e3bf0f26c50a",
+      "size": 17952
+    },
+    "Insight.Heap.deps.json": {
+      "sha256": "e619122e98a3261a1a12b495e22719e0e2ed0ec17f25eb65a0b7725479dba6d3",
+      "size": 15347
+    },
+    "Insight.Heap.dll": {
+      "sha256": "8f6e76b811313df87a8a414bd0bd7f5261ac150c181dc6589878ad93c9851608",
+      "size": 33792
+    },
+    "Insight.Heap.runtimeconfig.json": {
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "size": 330
+    },
+    "Microsoft.Bcl.AsyncInterfaces.dll": {
+      "sha256": "f1e1d6e1a2990071b450bdf6c9618408ac0e3f24a3c7a3bef1f50508ba732ca5",
+      "size": 20280
+    },
+    "Microsoft.Diagnostics.NETCore.Client.dll": {
+      "sha256": "e2cc9e1f6c97b3c4ee45ebabaa92408eb9b2fc81cb08ceeb342fe48bf79db15f",
+      "size": 151064
+    },
+    "Microsoft.Diagnostics.Runtime.dll": {
+      "sha256": "1c2223e0ede12d7b75dd74c2f0fe5104903d1a19b4405d3a8a04726e5a064004",
+      "size": 843576
+    },
+    "Microsoft.Extensions.Configuration.Abstractions.dll": {
+      "sha256": "da2203cd85e701598210999e6714e4cc83d20b833b4afa923e3b84196d6f72aa",
+      "size": 28936
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+      "sha256": "5fd164a8313b3255fe51a74e5d30ff41c5d6bff8eb3aff5155d2f036d7c66df4",
+      "size": 66360
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+      "sha256": "4d20c015406a7bf1a6478f1b6af567d972fa2ba4727de6134ff2c641f90ab36c",
+      "size": 31504
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions.dll": {
+      "sha256": "39e7fcd41d10abeffcf2b224237bed64ae98f99d94e329bd19f447451eda3abc",
+      "size": 23864
+    },
+    "Microsoft.Extensions.Hosting.Abstractions.dll": {
+      "sha256": "fb21feb2c6aafe2607a8b1d500c2b86535cd1b48b67ef878139dc7818c70ce4d",
+      "size": 54584
+    },
+    "Microsoft.Extensions.Logging.Abstractions.dll": {
+      "sha256": "691c9db1f9603c09b16c3ea8cd4d7756ff3489b3209d16203584426dd62e7829",
+      "size": 67336
+    },
+    "Microsoft.Extensions.Options.dll": {
+      "sha256": "1cf29273a44b434ea207206cb217cad896c48cbf4bbe947383785536ee89418b",
+      "size": 65848
+    },
+    "Microsoft.Extensions.Primitives.dll": {
+      "sha256": "302d1f1cc4586a0f96016352595ed5ffeeeb18e99ea63bf54a8d5fe044c9642e",
+      "size": 45320
+    },
+    "Microsoft.Identity.Client.Extensions.Msal.dll": {
+      "sha256": "07109a2f30df782300077a567ade47cbd0a0502c75cd7c8a62192f7d64bb004e",
+      "size": 66592
+    },
+    "Microsoft.Identity.Client.dll": {
+      "sha256": "5795027e9ae95eececb310a4fed3c502bb368039d186ab0884f64b7792b84717",
+      "size": 1168416
+    },
+    "Microsoft.IdentityModel.Abstractions.dll": {
+      "sha256": "24e97b54b6b5c234a124a336757e3116617ac6c30b655cdae74517dc2ecb5746",
+      "size": 19504
+    },
+    "Microsoft.Security.AntiSSRF.dll": {
+      "sha256": "09e1df6acd37b72a4f2e8ef68780a62cecdf0f4e21895f92f1929cfd4aafd587",
+      "size": 40760
+    },
+    "System.ClientModel.dll": {
+      "sha256": "dec5e22b71a1685c5e6e97cd28b629f0aa6703fb87b6950df28e79fc1804290c",
+      "size": 256584
+    },
+    "System.Memory.Data.dll": {
+      "sha256": "2c1035b0106dbb2de7913d151e06071ed617bb58bbb3d6cd46a2dd0f6a03617b",
+      "size": 33544
+    },
+    "System.Security.Cryptography.ProtectedData.dll": {
+      "sha256": "80566f0839ece5946e66bf9f00d723e59e371ba1341a18e00c7c7a7c49298e1d",
+      "size": 25232
+    },
+    "runtimes/win/lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll": {
+      "sha256": "7f2b633eed63bf20d558a25ed9686d2f1ef6c6e3fef5c0b19c2c1258d90acabd",
+      "size": 32912
+    }
+  },
+  "reproducible": true,
+  "liveAttachment": false,
+  "automaticSymbolLookup": false,
+  "dependencies": "dependencies.json"
+}
