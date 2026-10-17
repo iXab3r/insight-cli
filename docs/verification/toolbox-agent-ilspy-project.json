@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "state": "research_passed_evidence_gaps",
+  "scope": "ILSpy project/resource family selected business findings passed; initial cold evidence/handoff quality remains unaccepted",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "fixtureSources": [
+    "tests/acceptance/fixtures/managed/ResearchFixture.csproj",
+    "tests/acceptance/fixtures/managed/Research.cs",
+    "tests/acceptance/fixtures/managed/settings.json"
+  ],
+  "trials": {
+    "cold": {
+      "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+      "packageBuild": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e",
+      "skillBundleSha256": "5d1796d4e7f6e5fbe045ef5e3c8c85957d0c12a99c2be89d2fb95fcfd1d80620",
+      "elapsedMs": 77366,
+      "candidateInvocations": 17,
+      "inputs": [
+        {
+          "path": "input/ResearchFixture.dll",
+          "sha256": "b833672452f9d80ebfbb7c5e3392e938b4ad33df32392d13f764c5d5b0ed5958"
+        }
+      ],
+      "recoveredProjectSourceAndResourceVerified": true,
+      "actualResourceBytes": 64,
+      "actualResourceSha256": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+      "checkpointFilesIndependentlyMatched": 4,
+      "exactCheckpointLocatorInFinal": false,
+      "agentReadbackVerified": false,
+      "inputsUnchanged": true,
+      "ownedJobsTerminal": true
+    },
+    "prepared": {
+      "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+      "packageBuild": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e",
+      "skillBundleSha256": "5d1796d4e7f6e5fbe045ef5e3c8c85957d0c12a99c2be89d2fb95fcfd1d80620",
+      "elapsedMs": 68323,
+      "candidateInvocations": 18,
+      "inputs": [
+        {
+          "path": "input/ResearchFixture.dll",
+          "sha256": "b833672452f9d80ebfbb7c5e3392e938b4ad33df32392d13f764c5d5b0ed5958"
+        }
+      ],
+      "recoveredProjectSourceAndResourceVerified": true,
+      "actualResourceBytes": 64,
+      "actualResourceSha256": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+      "checkpointFilesIndependentlyMatched": 6,
+      "exactCheckpointLocatorInFinal": true,
+      "agentReadbackVerified": true,
+      "inputsUnchanged": true,
+      "ownedJobsTerminal": true
+    }
+  },
+  "verifiedFindings": {
+    "cost9": 108,
+    "cost10": 107,
+    "decoded0x13": "0x49",
+    "declaredEndpoint": "https://example.invalid/telemetry",
+    "retryLimit": 7,
+    "declaredNativeImport": "kernel32.dll!GetTickCount",
+    "noTargetExecutionOrCompilationObserved": true
+  },
+  "remainingGaps": [
+    "Cold agent confused the 30-character resource-list text digest with the actual extracted 64-byte JSON digest in prose. Actual recovered JSON was independently verified.",
+    "Cold saved only the recovered source project, did not read the saved copy and omitted its exact final locator. Prepared saved all findings, independently verified copies and provided its locator."
+  ],
+  "correctiveGuidance": "The ILSpy skill now distinguishes extracted-file hashes from listing-text hashes and requires actual saved-path readback/final handoff when checkpointing."
+}

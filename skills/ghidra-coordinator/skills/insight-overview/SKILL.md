@@ -73,3 +73,7 @@ because their target binary is the same.
 Preserve `complete`, `truncated`, scan bounds and unknown/missing values in findings.
 A filtered page or incomplete parser output cannot establish global absence. Static reads
 do not observe execution; choosing a debugger or collector is an explicit runtime decision.
+
+When a checkpoint is requested, save after the evidence files are complete, read back the
+returned saved path, and copy that exact path into the final handoff. A successful save or
+links to the mutable project files alone do not give the next agent the checkpoint locator.

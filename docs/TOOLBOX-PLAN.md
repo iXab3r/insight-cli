@@ -7,7 +7,8 @@ managed profile-alias correction. Windows now requires all seven scoped native j
 Windows, Linux and offline CI passed at `5f1f471`. Reviewed cold/prepared unit gates cover
 7-Zip, LLVM, dump, stack, trace, DiE, LLDB, Frida, TShark, mitmproxy and C01/C02/C03/C05.
 C04 static interop publication/readback and autonomous cleanup passed cold/prepared;
-bounded large-assembly discovery has fresh trials in progress.
+bounded large-assembly research passed both modes with a retained cold checkpoint-locator
+handoff gap. The final native rerun is in progress.
 Remaining family coverage and the exact-artifact combined agent gate stay open. The
 [inventory audit](TOOLBOX-AUDIT.md) preserves failed histories and package identities.
 Factory discovery/access fixes are merged and pinned. Native success is not
@@ -55,7 +56,7 @@ Current verified inventory:
 | Structured binaries | LIEF API/skill, immutable source mirror, native Gherkin and cold/prepared copy-edit model unit proof passed | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
 | Managed/native correspondence | Public API composition, dedicated skill, real Ghidra Gherkin and reviewed cold/prepared static publication/readback/cleanup unit proof passed | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
 | Owned process capture | Capture API/skill, execution/fault Gherkin and cold/prepared retained-report model unit proof passed | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
-| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows and native ILSpy/Ghidra Gherkin passed; independent model gates pending | Small metadata/index queries and focused source-bound evidence pages |
+| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research passed with a cold final-checkpoint-locator gap | Small metadata/index queries and focused source-bound evidence pages |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -325,8 +326,9 @@ with merge/refresh and independent readback (`verification/toolbox-interop.json`
 exact native capture and owner-loss/no-replay faults (`verification/toolbox-capture.json`).
 C06 passed actual ILSpy/Ghidra text windows (`verification/toolbox-overview.json`).
 The complete implementation inventory now contains 16 analytical families, six capabilities
-and 25 skills. Offline verification: 206 tests, 204 passed and two explicitly opt-in skipped;
+and 25 skills. Offline verification: 208 tests, 206 passed and two explicitly opt-in skipped;
 release/admission checks 29/29 passed. Combined exact-artifact native acceptance and all
 remaining inference-agent gates retain separate status; implementation is not a milestone pass.
-Account inference quota only
-defers the independent model gates.
+Historical quota interruptions are retained in receipts; inference was available for the
+subsequent reviewed tasks. Missing native agent hosts, broader family coverage and actual
+review findings retain their own open gates.

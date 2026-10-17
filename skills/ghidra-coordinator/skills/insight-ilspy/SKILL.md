@@ -38,3 +38,8 @@ Execution and preparation need Factory Update permission. `ilspy --help` supplie
 commands/options; the [workflow reference](references/ilspy.md) covers inputs, outputs,
 resource/project export and continuation. Save a completed project file/folder through
 `insight-cli artifacts save` when a checkpoint is useful; it is independent of Ghidra merge.
+
+Hash extracted resource bytes themselves; the resource-list text has a different digest
+and is not the extracted file. For a requested checkpoint, finish the notes/recovered files,
+save their chosen containing folder, and read back the returned saved path. Include that
+exact path in the final handoff; do not substitute the ordinary export path or an inferred UUID.

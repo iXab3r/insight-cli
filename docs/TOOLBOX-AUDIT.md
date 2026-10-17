@@ -1,13 +1,14 @@
 # Toolbox inventory and delivery audit
 
-Audit date: 2026-10-17. TB-01 is in progress. These are frozen upstream candidates,
-not full toolbox delivery or agent acceptance. 7-Zip now has a working adapter/skill and
-passed its isolated globally installed public CLI developer proof and independently reviewed
-cold/prepared business trials on the frozen package recorded in
-[host evidence](verification/toolbox-agent-host.json). This does not pass the remaining tools
-or the combined full-toolbox gate. Existing Ghidra/ILSpy runtime acceptance
-remains separately identified in [tool runtime acceptance](TOOL-RUNTIME-ACCEPTANCE.md).
-The [toolbox plan](TOOLBOX-PLAN.md) owns the complete inventory and required native/agent gates.
+Audit date: 2026-10-18. All sixteen analytical families and six capabilities have
+implemented facades, packaged guidance and real native proofs. The
+[toolbox plan](TOOLBOX-PLAN.md) provides the current acceptance matrix; sections below
+retain the investigation history, including failed candidates. Native and independent
+agent acceptance are separate. Reviewed cold/prepared units now cover container, LLVM,
+dump/stack/trace, DiE, LLDB, Frida, packets/HTTP and C01–C05 on their recorded artifacts.
+The final whole-toolbox agent gate and some broader family/host workflows remain open.
+Existing Ghidra/ILSpy runtime acceptance is separately identified in
+[tool runtime acceptance](TOOL-RUNTIME-ACCEPTANCE.md).
 
 ## Inventory
 
@@ -677,7 +678,7 @@ The unchanged-package repeat completed successfully: macOS run
 Windows/Linux cases skipped locally and separately green in their native CI. The
 [combined receipt](verification/toolbox-combined-native.json) retains the original six
 failures alongside this result. No deadline was enlarged and no unknown operation was
-replayed. The final package's new Frida event summary is undergoing another whole native run.
+replayed. The subsequent Frida-summary run passed; its exact result is recorded below.
 
 [LLDB cold/prepared unit review](verification/toolbox-agent-lldb.json) now proves the actual
 10→130 / 11→109 boundary, register/stack observations and owned-inferior absence without
@@ -703,7 +704,7 @@ A send message is not universally a function call; skills require selecting the 
 payload. Native and offline checks distinguish these counts from inventory records and
 service receipts. Common permission guidance also distinguishes a definite "no command was
 sent" refusal, which can use the approved execution route, from an unknown mutation outcome.
-Cold/prepared Frida, heap, packet and triage trials continue independently of native work.
+Those subsequent cold/prepared Frida, heap, packet and triage trials passed and are recorded below.
 
 ### Managed profile aliases and expanded independent research
 
@@ -792,3 +793,39 @@ stopped with no Ghidra processes. The prepared agent's manually transcribed seco
 status JSON was malformed and is explicitly excluded: complete actual merge events and
 fresh-context responses establish the result. All saved bytes still matched the project;
 that byte check alone does not certify the contents of every manually copied evidence file.
+
+### Bounded method discovery: current result and retained handoff gap
+
+[C06 independent review](verification/toolbox-agent-overview.json) confirms both direct-query
+agents used case-insensitive method-name discovery and the exact MethodDef member. Both
+answered 20→217 and 27→253 correctly without whole-class decompilation. Maximum completed
+command stdout was 11437 bytes cold and 10515 prepared; these figures are not billed token
+or actual model-input measurements. Every saved file matched its ordinary source bytes.
+The cold agent omitted the exact checkpoint locator in final prose, although it had saved
+and read back that checkpoint. Prepared included its locator. The receipt therefore records
+`research_passed_handoff_gap`, not an unqualified whole-workflow pass. Earlier false-absence
+and broad-read trials remain rejected.
+
+The short-name API native refinement passed Gherkin run
+`555c98b4f99444e8bd925a6bb99a77af`. The first C06 extension passed its native assertions but
+the Gherkin summary reader rejected a numeric value in its Boolean checks map; that
+maintainer receipt-shape error was corrected. The final candidate's complete native rerun
+also checks the fixed summary shape. The clean source at `bac359c` reproduces the frozen
+candidate byte-for-byte (`f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99`).
+Offline regression passed 206/208 tests with two explicit opt-in skips, release checks
+29/29, all 25 skill validators and the offline relocated-package proof. An initially empty
+isolated npm cache was populated from the lockfile before the offline relocation retry;
+no user npm configuration or global install was modified.
+
+[Initial ILSpy project/resource family review](verification/toolbox-agent-ilspy-project.json)
+confirmed both agents recovered the actual source project/configuration, cost 9→108 and
+10→107, XOR decoding 0x13→0x49 and the declared Windows import without target execution.
+Cold prose incorrectly assigned the resource-list digest to the extracted file and did not
+read back or locate its saved project checkpoint. Prepared independently extracted the
+resource, compared both copies and handed off a verified complete findings checkpoint.
+The cold evidence/handoff gap remains explicit. ILSpy guidance now requires hashing actual
+extracted bytes and reading/returning the exact saved path; overview guidance has the same
+checkpoint handoff rule. Fresh trials run on that guide-only refinement. Its 382 executable,
+runtime and reference files are byte-identical to the frozen combined-native candidate.
+The refined package passed all 29 release checks, all 25 source skill validators and the
+offline relocated-package proof. Broader model gates are not closed by that native identity.

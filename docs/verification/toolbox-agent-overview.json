@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "state": "research_passed_handoff_gap",
+  "scope": "C06 independent bounded discovery and correct source/IL research passed cold/prepared; full handoff gate remains open",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "fixtureProducer": "scripts/toolbox/prepare-overview-agent-fixture.mjs",
+  "trials": {
+    "cold": {
+      "elapsedMs": 81920,
+      "candidateInvocations": 14,
+      "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+      "skillBundleSha256": "5d1796d4e7f6e5fbe045ef5e3c8c85957d0c12a99c2be89d2fb95fcfd1d80620",
+      "packageBuild": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e",
+      "prompt": "The large supplied assembly contains many helper methods. Explain how it computes an invoice amount and what it returns for counts 20 and 27, using static evidence without executing the assembly. Keep the agent context small: discover bounded metadata first, then retain a focused source-bound excerpt of the relevant recovered method and its exact identity instead of dumping the whole assembly/class into context. Save large material as ordinary project files if needed, distinguish complete evidence from a page or truncated prefix, and retain a verified checkpoint.",
+      "promptSha256": "1af2ad9f0bd0d61c9861be0740517f1e33e4ad37dbbd12e060161c3a0cfc873b",
+      "inputs": [
+        {
+          "path": "input/ReviewPolicy.dll",
+          "sha256": "c268d1541e89d0d72b62d309a3772ef4a43aa132940349049ede2fbffd84d46e"
+        }
+      ],
+      "checkpointFiles": 4,
+      "checkpointBytes": 6604,
+      "checkpointSha256": "ecfb792880805a84e663130d4ee690b0426cdbfb56e29f6f9b15df1d4114b0c6",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": false,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 5,
+      "observedResults": {
+        "20": 217,
+        "27": 253
+      },
+      "methodToken": "0x06000242",
+      "shortNameQueryAndExactMemberUsed": true,
+      "noWholeClassDecompilation": true,
+      "maxCompletedCommandStdoutBytes": 11437,
+      "stdoutIsNotBilledModelInputMeasurement": true
+    },
+    "prepared": {
+      "elapsedMs": 72679,
+      "candidateInvocations": 12,
+      "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+      "skillBundleSha256": "5d1796d4e7f6e5fbe045ef5e3c8c85957d0c12a99c2be89d2fb95fcfd1d80620",
+      "packageBuild": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e",
+      "prompt": "The large supplied assembly contains many helper methods. Explain how it computes an invoice amount and what it returns for counts 20 and 27, using static evidence without executing the assembly. Keep the agent context small: discover bounded metadata first, then retain a focused source-bound excerpt of the relevant recovered method and its exact identity instead of dumping the whole assembly/class into context. Save large material as ordinary project files if needed, distinguish complete evidence from a page or truncated prefix, and retain a verified checkpoint.",
+      "promptSha256": "1af2ad9f0bd0d61c9861be0740517f1e33e4ad37dbbd12e060161c3a0cfc873b",
+      "inputs": [
+        {
+          "path": "input/ReviewPolicy.dll",
+          "sha256": "c268d1541e89d0d72b62d309a3772ef4a43aa132940349049ede2fbffd84d46e"
+        }
+      ],
+      "checkpointFiles": 3,
+      "checkpointBytes": 5398,
+      "checkpointSha256": "edd7d8aa324fb75449358df1558f276071b47605d43e75939a727f26531775d5",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 5,
+      "observedResults": {
+        "20": 217,
+        "27": 253
+      },
+      "methodToken": "0x06000242",
+      "shortNameQueryAndExactMemberUsed": true,
+      "noWholeClassDecompilation": true,
+      "maxCompletedCommandStdoutBytes": 10515,
+      "stdoutIsNotBilledModelInputMeasurement": true
+    }
+  },
+  "remainingGap": "Cold agent saved and read back the completed checkpoint, whose every file independently matched, but omitted its exact locator from final prose. Prepared final prose includes its exact returned locator. Do not relabel the cold handoff as passed.",
+  "retainedHistory": [
+    "Original prepared large-index trial emitted 149713 bytes of terminal stdout.",
+    "A subsequent guide-only prepared trial and the first short-name cold trial falsely claimed absence despite actual metadata and complete decompiled C# containing the method.",
+    "Those broad/index-read failures remain excluded. Direct-query guide trials used short-name query plus exact member and produced correct answers within bounded completed command stdout."
+  ]
+}
