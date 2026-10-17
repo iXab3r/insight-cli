@@ -6,8 +6,10 @@ description: Debug a managed Windows EXE at an IL breakpoint and read primitive 
 # Insight dnSpyEx 0.2.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
-with the agent host's normal permission escalation. Keep HOME, profile and owner state;
-see [host execution permissions](references/agent-execution.md). Unknown mutations need
+with the agent host's normal permission escalation, then use that route for later authorized
+CLI calls too. An explicit **no command was sent** denial is known undispatched and can be
+retried through that route. Keep HOME, profile and owner state; see
+[host execution permissions](references/agent-execution.md). A lost mutation reply needs
 request/status recovery, never blind retry.
 
 Keep the project's RE and evidence format. Debugging executes the supplied application

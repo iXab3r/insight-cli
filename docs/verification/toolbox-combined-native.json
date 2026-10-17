@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "state": "passed_exact_candidate_final_revision_pending",
+  "scope": "Combined native public-CLI toolbox suite, not independent model or complete-product acceptance",
+  "platform": "darwin-arm64",
+  "node": "v24.19.0",
+  "sourceCommit": "4027416c20e02d1104597bf75df02d93b59c0920",
+  "artifactSha256": "d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61",
+  "sourcePackByteIdentical": true,
+  "runner": "EyeAuras.Automation",
+  "runId": "ca1bf9b1f40744c7845c1ecd207f829f",
+  "passed": 17,
+  "failed": 0,
+  "skippedOtherOperatingSystems": 4,
+  "duration": "15m45s",
+  "scenarios": [
+    {
+      "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+      "outcome": "NotExecuted",
+      "duration": "00:00:00.0035920"
+    },
+    {
+      "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
+      "outcome": "Passed",
+      "duration": "00:01:17.3928150"
+    },
+    {
+      "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
+      "outcome": "NotExecuted",
+      "duration": "00:00:00.0130000"
+    },
+    {
+      "name": "RemoveTemporaryHooksAfterCollectorInterruptionOrOwnerLoss",
+      "outcome": "Passed",
+      "duration": "00:01:01.1436200"
+    },
+    {
+      "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
+      "outcome": "NotExecuted",
+      "duration": "00:00:00.0015460"
+    },
+    {
+      "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
+      "outcome": "Passed",
+      "duration": "00:00:44.7545710"
+    },
+    {
+      "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
+      "outcome": "Passed",
+      "duration": "00:00:27.7676500"
+    },
+    {
+      "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
+      "outcome": "Passed",
+      "duration": "00:01:10.4002420"
+    },
+    {
+      "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+      "outcome": "Passed",
+      "duration": "00:00:40.5339790"
+    },
+    {
+      "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
+      "outcome": "Passed",
+      "duration": "00:00:47.0862180"
+    },
+    {
+      "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
+      "outcome": "Passed",
+      "duration": "00:00:36.0740700"
+    },
+    {
+      "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+      "outcome": "Passed",
+      "duration": "00:04:11.2232240"
+    },
+    {
+      "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
+      "outcome": "Passed",
+      "duration": "00:00:37.0284700"
+    },
+    {
+      "name": "RecoverUsefulInputFromASuppliedContainer",
+      "outcome": "Passed",
+      "duration": "00:00:24.7194960"
+    },
+    {
+      "name": "ExplainWaitingManagedWorkFromStacksHeapAndSampledTime",
+      "outcome": "Passed",
+      "duration": "00:01:41.7950550"
+    },
+    {
+      "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
+      "outcome": "NotExecuted",
+      "duration": "00:00:00.0049020"
+    },
+    {
+      "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
+      "outcome": "Passed",
+      "duration": "00:00:31.6295470"
+    },
+    {
+      "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
+      "outcome": "Passed",
+      "duration": "00:00:28.2604530"
+    },
+    {
+      "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
+      "outcome": "Passed",
+      "duration": "00:00:21.0315270"
+    },
+    {
+      "name": "InvestigateNativeLinkageAndDebugRecords",
+      "outcome": "Passed",
+      "duration": "00:00:44.4619560"
+    },
+    {
+      "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
+      "outcome": "Passed",
+      "duration": "00:00:00.4381100"
+    }
+  ],
+  "retainedFirstRun": {
+    "runId": "e63c150ff2f9411ab4cbe8d76481e1bf",
+    "passed": 11,
+    "failed": 6,
+    "skipped": 4,
+    "emptyVersionProbeTimeouts": 5,
+    "fridaAttachCancellation": 1,
+    "state": "not_reproduced_not_claimed_fixed",
+    "noAutomaticMutationReplay": true,
+    "deadlinesNotIncreased": true
+  },
+  "otherNativeProfiles": {
+    "windows": "https://github.com/iXab3r/insight-cli/actions/runs/39072836419",
+    "linux": "https://github.com/iXab3r/insight-cli/actions/runs/39072836451",
+    "sourceCommit": "a24db28fbd99cad8848b3e94474e3748eac54275",
+    "allJobs": "success"
+  },
+  "finalRevision": "The separately frozen package with Frida event summary and refined skills is being verified in another complete native run."
+}

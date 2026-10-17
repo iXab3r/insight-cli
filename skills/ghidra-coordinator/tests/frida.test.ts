@@ -7,3 +7,7 @@ test('Frida source errors remain partial independently of successful native clea
 test('Frida does not acknowledge a collector with malformed output or no cleanup receipt',()=>{
  for(const output of ['','not-json',JSON.stringify(runtime),JSON.stringify({kind:'completed'})])assert.throws(()=>fridaEvents(output));
 });
+test('Frida summary distinguishes script messages from protocol events and inventory records',()=>{
+ const result=fridaEvents([runtime,{kind:'loaded'},{kind:'message',message:{type:'send',payload:{items:[1,2,3]}}},{kind:'message',message:{type:'send',payload:{count:10,result:130}}},{kind:'message',message:{type:'error',description:'partial'}},{kind:'message',message:{type:'log',payload:'diagnostic'}},{...end,complete:false}].map(v=>JSON.stringify(v)).join('\n'));
+ assert.deepEqual(result.summary,{totalEvents:7,sendMessages:2,scriptErrors:1,logMessages:1});assert.equal(result.complete,false);
+});

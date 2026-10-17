@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent LLDB argument/return and cleanup unit proof without author source; combined toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 321179,
+      "candidateInvocations": 36,
+      "artifactSha256": "cc95bf32d2ea5f62e04c2e99ec5002ceabe4db81ad5ba7931d7937548bea05d6",
+      "skillBundleSha256": "fd0ef1363819442d16e093e7791067fe62ee83407a4223c793d487864efcfe87",
+      "packageBuild": "e7239041e4ac95784e07d0d03701b30abbe94bfd24da4484a83751d98ba737c3",
+      "prompt": "The owned native subject repeatedly calculates totals, and a larger count unexpectedly yields a smaller total at a boundary. Use owned debugger launches through the connected toolbox to explain the discontinuity with actual argument/return observations on both sides, and retain a useful stack/register snapshot. Infer only what the observed calls establish; do not patch the program. Keep the project evidence and a verified checkpoint, and finish with the observed result, uncertainty and cleanup state.",
+      "promptSha256": "0c3203220f8e68523165fa8cad197d67b73148bcfdd89e87322d257148d9f20c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "33080b28ab67f00becd3822e028bcf1796e2af2b1dc956544e70df67a6e57af9"
+        },
+        {
+          "path": "input/subject.dSYM/Contents/Resources/DWARF/subject",
+          "sha256": "c8f672d3232af96ff7039ff7166daf3b9f5a90c72f04e24c8e8dea90d344d211"
+        }
+      ],
+      "checkpointFiles": 13,
+      "checkpointBytes": 53159,
+      "checkpointSha256": "ec0b1b148e2747e02d02c7afef86700065f66b2864db8bd9e70767225e7dca27",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": false,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 20,
+      "observedBoundary": [
+        [
+          10,
+          130
+        ],
+        [
+          11,
+          109
+        ]
+      ],
+      "ownedInferiorsAbsent": 11,
+      "authorSourceUnavailable": true
+    },
+    "prepared": {
+      "elapsedMs": 65173,
+      "candidateInvocations": 14,
+      "artifactSha256": "cc95bf32d2ea5f62e04c2e99ec5002ceabe4db81ad5ba7931d7937548bea05d6",
+      "skillBundleSha256": "fd0ef1363819442d16e093e7791067fe62ee83407a4223c793d487864efcfe87",
+      "packageBuild": "e7239041e4ac95784e07d0d03701b30abbe94bfd24da4484a83751d98ba737c3",
+      "prompt": "The owned native subject repeatedly calculates totals, and a larger count unexpectedly yields a smaller total at a boundary. Use owned debugger launches through the connected toolbox to explain the discontinuity with actual argument/return observations on both sides, and retain a useful stack/register snapshot. Infer only what the observed calls establish; do not patch the program. Keep the project evidence and a verified checkpoint, and finish with the observed result, uncertainty and cleanup state.",
+      "promptSha256": "0c3203220f8e68523165fa8cad197d67b73148bcfdd89e87322d257148d9f20c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "33080b28ab67f00becd3822e028bcf1796e2af2b1dc956544e70df67a6e57af9"
+        },
+        {
+          "path": "input/subject.dSYM/Contents/Resources/DWARF/subject",
+          "sha256": "c8f672d3232af96ff7039ff7166daf3b9f5a90c72f04e24c8e8dea90d344d211"
+        }
+      ],
+      "checkpointFiles": 3,
+      "checkpointBytes": 12742,
+      "checkpointSha256": "5dd29c5b59806416549c7de59f8f0c999ead3dd9603c431743ff80be4d5a1fe8",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 3,
+      "observedBoundary": [
+        [
+          10,
+          130
+        ],
+        [
+          11,
+          109
+        ]
+      ],
+      "ownedInferiorsAbsent": 2,
+      "authorSourceUnavailable": true
+    }
+  },
+  "fixtureProducer": "scripts/toolbox/prepare-native-agent-fixture.mjs",
+  "retainedHistory": [
+    "Initial cold/prepared observations were real but debug paths exposed author C source; not counted as the blind gate.",
+    "Cold source-blind agent correctly reported its saved checkpoint unverified under the conservative project outside-read rule. Maintainer independently matched all 13 files and the exact final path. Future test projects explicitly allow their own returned checkpoint paths.",
+    "Expected source-unavailable checksum warnings remain in native diagnostics; machine-code and runtime observations establish the result."
+  ]
+}

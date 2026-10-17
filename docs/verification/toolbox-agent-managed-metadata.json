@@ -93,6 +93,18 @@
       "inputHashesUnchanged": true,
       "ownerStopped": true
     },
-    "scope": "C01 unit cold/prepared proof only; complete toolbox agent gate remains open."
+    "scope": "C01 unit cold/prepared proof only; complete toolbox agent gate remains open.",
+    "prompt": "Compare input/before.dll and input/after.dll. Identify the actual changed behavior and native boundary, distinguishing added methods from methods whose identity numbers merely shifted. Retain a concise reviewable finding with supporting raw material and a checkpoint using the project conventions. This is static analysis; do not execute either assembly. Use the connected toolbox where useful. Finish with verified changes, unchanged controls and remaining uncertainty.",
+    "promptSha256": "3f41f3ed1e8ee07fd519c12f34b579b38fb7dbb987de10fcb2a3a44fc2488924",
+    "inputs": [
+      {
+        "path": "input/before.dll",
+        "sha256": "c219e10f32f4982c40f879e10598f97e2f823dc7ae325e6714ac95d6349eab63"
+      },
+      {
+        "path": "input/after.dll",
+        "sha256": "aaabd9d32fb38efaaa6e65a784f1878ccaf2e254fbb27db78758729153fbb1cb"
+      }
+    ]
   }
 }

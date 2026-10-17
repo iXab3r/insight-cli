@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "C05 independently reviewed captured-run unit proof, not combined toolbox acceptance",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 91995,
+      "candidateInvocations": 17,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The owned native subject reads settings.txt from its working directory, prints a calculated quote and writes result.txt. Execution of this fixture is authorized. Compare controlled runs with the two supplied settings files. Retain the exact output, exit state and declared file changes of each run, then compare the retained reports without executing the subject again for comparison. Explain what changed and what remains unobserved, keep the original executable/configurations unchanged, stop only owned processes, and retain a verified checkpoint using the project conventions. Use the connected toolbox where useful.",
+      "promptSha256": "143222ff13eb1b6ccef65a4ebb5895909fca3474c52960a5b0cd0ad31758b326",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "5f6b83fe8e615a1793b83466445c76783a0d229f0471de67568286d78c77ec8e"
+        },
+        {
+          "path": "input/first/settings.txt",
+          "sha256": "2e6d31a5983a91251bfae5aefa1c0a19d8ba3cf601d0e8a706b4cfa9661a6b8a"
+        },
+        {
+          "path": "input/second/settings.txt",
+          "sha256": "a1fb50e6c86fae1679ef3351296fd6713411a08cf8dd1790a4fd05fae8688164"
+        }
+      ],
+      "checkpointFiles": 4,
+      "checkpointBytes": 11433,
+      "checkpointSha256": "1524b16b96d2780f9538a28e9d88b98b8a7f645c506c8b96994b68da2a7a94b4",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 2,
+      "actualExecutions": 2,
+      "comparisonAddedExecutions": 0,
+      "observedStdout": [
+        "quote=109\n",
+        "quote=142\n"
+      ],
+      "resultFileContentsClaimed": false
+    },
+    "prepared": {
+      "elapsedMs": 74278,
+      "candidateInvocations": 13,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The owned native subject reads settings.txt from its working directory, prints a calculated quote and writes result.txt. Execution of this fixture is authorized. Compare controlled runs with the two supplied settings files. Retain the exact output, exit state and declared file changes of each run, then compare the retained reports without executing the subject again for comparison. Explain what changed and what remains unobserved, keep the original executable/configurations unchanged, stop only owned processes, and retain a verified checkpoint using the project conventions. Use the connected toolbox where useful.",
+      "promptSha256": "143222ff13eb1b6ccef65a4ebb5895909fca3474c52960a5b0cd0ad31758b326",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "5f6b83fe8e615a1793b83466445c76783a0d229f0471de67568286d78c77ec8e"
+        },
+        {
+          "path": "input/first/settings.txt",
+          "sha256": "2e6d31a5983a91251bfae5aefa1c0a19d8ba3cf601d0e8a706b4cfa9661a6b8a"
+        },
+        {
+          "path": "input/second/settings.txt",
+          "sha256": "a1fb50e6c86fae1679ef3351296fd6713411a08cf8dd1790a4fd05fae8688164"
+        }
+      ],
+      "checkpointFiles": 3,
+      "checkpointBytes": 9952,
+      "checkpointSha256": "08a988917bfebc2078397bdab4b85b6901a1c94dff022649671d3cc0ce6e91b9",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 2,
+      "actualExecutions": 2,
+      "comparisonAddedExecutions": 0,
+      "observedStdout": [
+        "quote=109\n",
+        "quote=142\n"
+      ],
+      "resultFileContentsClaimed": false
+    }
+  },
+  "retainedSetupFailure": "Initial prepared setup tried to parse generated plain help as JSON; no model started. Fresh setup uses the JSON process overview."
+}

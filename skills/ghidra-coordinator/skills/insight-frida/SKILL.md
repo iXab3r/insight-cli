@@ -6,8 +6,10 @@ description: Observe native call arguments/results or inspect runtime modules an
 # Insight Frida 0.2.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
-with the agent host's normal permission escalation. Keep HOME, profile and owner state;
-see [host execution permissions](references/agent-execution.md). Unknown mutations need
+with the agent host's normal permission escalation, then use that route for later authorized
+CLI calls too. An explicit **no command was sent** denial is known undispatched and can be
+retried through that route. Keep HOME, profile and owner state; see
+[host execution permissions](references/agent-execution.md). A lost mutation reply needs
 request/status recovery, never blind retry.
 
 Follow existing project RE and evidence conventions. Frida instruments a running process;
@@ -46,6 +48,10 @@ with its original owner. Stopping the collector never signals that target.
    `send`/console/error messages and optional binary payloads are retained. `--limit`/`--offset`
    page event messages; `--output` saves the full bounded envelope to a new ordinary file and
    creates parents. Use `artifacts save` for a checkpoint when useful.
+   Both the response and saved envelope include `summary`: total protocol events and counts
+   of script send/error/log messages. A send message is not universally a call. Derive call
+   counts from the retained payload type selected by your hook; do not count runtime,
+   loaded or completed receipts as calls or estimate counts by reading a long event list.
 5. The observation window is 1–120 seconds; collector execution has a separate finite deadline
    that survives owner loss. Native SDK helpers have their own inherited deadlines; status
    remains `native_children_pending` and uninstall is blocked until they exit. Native output is bounded to 4 MiB and 10000 messages. Arbitrary

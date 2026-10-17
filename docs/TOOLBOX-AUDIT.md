@@ -668,3 +668,39 @@ behavior changes. All 17 cold and 11 prepared checkpoint files matched their pro
 both final paths were the exact saved receipts and both owners stopped. Timings were
 106.3s/110.1s, not a speedup claim. The receipt binds the exact package/skill hashes and retains
 all prior failures. This closes the C01 unit model gate only.
+
+
+### Combined native rerun and further business-unit proof
+
+The unchanged-package repeat completed successfully: macOS run
+`ca1bf9b1f40744c7845c1ecd207f829f` passed all 17 applicable scenarios in 15m45s, with four
+Windows/Linux cases skipped locally and separately green in their native CI. The
+[combined receipt](verification/toolbox-combined-native.json) retains the original six
+failures alongside this result. No deadline was enlarged and no unknown operation was
+replayed. The final package's new Frida event summary is undergoing another whole native run.
+
+[LLDB cold/prepared unit review](verification/toolbox-agent-lldb.json) now proves the actual
+10→130 / 11→109 boundary, register/stack observations and owned-inferior absence without
+available author source. Earlier source-assisted histories are explicitly excluded. The new
+maintainer fixture producer maps DWARF paths to an unavailable virtual source root while
+preserving parameter metadata; both model runs recovered the branch from machine code.
+The cold agent conservatively left its own checkpoint readback unverified under the test
+project's outside-read rule; maintainer review independently matched all 13 saved files.
+Future trial rules explicitly permit the selected profile's returned checkpoint/diagnostic paths.
+
+[C03 unit review](verification/toolbox-agent-binary.json) passed both modes: correct PE
+import/export and ELF dependency controls, thin Mach-O identification and independently
+verified console→GUI PE copies whose other bytes were identical. [C05 unit review](verification/toolbox-agent-capture.json)
+passed both modes: exactly two executions, 109/142 stdout, known exits and declared file
+hash changes; comparing retained reports added no execution. Both agents correctly limited
+their claims to file metadata rather than inventing result-file contents. All saved files,
+final paths, original input hashes and terminal owned jobs were independently checked.
+
+A Frida prepared agent manually counted 28 calls while its retained output held 29; the
+boundary findings and hook cleanup were correct. The facade now provides a bounded protocol
+summary (total events, script send/error/log counts) in both returned and saved envelopes.
+A send message is not universally a function call; skills require selecting the actual hook
+payload. Native and offline checks distinguish these counts from inventory records and
+service receipts. Common permission guidance also distinguishes a definite "no command was
+sent" refusal, which can use the approved execution route, from an unknown mutation outcome.
+Cold/prepared Frida, heap, packet and triage trials continue independently of native work.

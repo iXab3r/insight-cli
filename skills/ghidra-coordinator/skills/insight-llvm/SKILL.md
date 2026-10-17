@@ -6,8 +6,10 @@ description: Inspect PE, ELF and Mach-O headers, dependencies, exports and symbo
 # Insight LLVM 0.2.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
-with the agent host's normal permission escalation. Keep HOME, profile and owner state;
-see [host execution permissions](references/agent-execution.md). Unknown mutations need
+with the agent host's normal permission escalation, then use that route for later authorized
+CLI calls too. An explicit **no command was sent** denial is known undispatched and can be
+retried through that route. Keep HOME, profile and owner state; see
+[host execution permissions](references/agent-execution.md). A lost mutation reply needs
 request/status recovery, never blind retry.
 
 Use existing project RE rules and evidence paths. These are static reads; no Ghidra project,

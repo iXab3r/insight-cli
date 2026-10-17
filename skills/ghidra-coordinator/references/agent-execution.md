@@ -13,7 +13,11 @@ review or the user decides that request; do not disable the sandbox or approval 
 Do not work around this by changing HOME/AppData/profile paths, creating another host,
 deleting owner/endpoint files, killing unrelated processes or claiming a missing runtime.
 After the read-only probe succeeds, use the approved execution route for the intended
-public CLI commands. Downloads still require their explicit network access.
+public CLI commands. An access refusal explicitly stating **no command was sent** is
+known not dispatched; it is safe to submit that authorized command through the approved
+route. This includes a mutation refused before dispatch. Do not mistake that definite
+pre-dispatch refusal for an unknown execution outcome. Downloads still require their explicit
+network access.
 
 A lost mutation response is different from a denied startup probe: inspect retained
 request/status/recovery evidence and use its request ID when supported. Never blindly

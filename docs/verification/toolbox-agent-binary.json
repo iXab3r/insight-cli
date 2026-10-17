@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "C03 independently reviewed binary unit proof, not combined toolbox acceptance",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 89952,
+      "candidateInvocations": 26,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Inspect the four input binaries without executing them. Establish the Windows program\u2019s actual imported policy entry and the matching DLL export, and identify the ELF policy dependency and Mach-O format as controls. Produce a GUI-subsystem copy of the Windows console program while preserving the original, and independently verify that the two-byte subsystem field is the only permitted change. Retain useful source-bound structural evidence, the edited copy and a verified checkpoint. Use the connected toolbox where useful; state static limits and do not claim the edited program was executed.",
+      "promptSha256": "0e04e400b9e32c28ce0da1c640ab41ffaec96b1f3edfa4ddd625230e02ea2cb1",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        }
+      ],
+      "checkpointFiles": 10,
+      "checkpointBytes": 15260,
+      "checkpointSha256": "d4ee37f5ab6ab4fd3ecc8cc7461117f451b624482418918dd0765f83557f6903",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 17,
+      "copiedEdit": {
+        "length": 2560,
+        "subsystemFieldOffset": "0xd4",
+        "before": 3,
+        "after": 2,
+        "everyOtherByteIdentical": true,
+        "sha256": "b8f5facd929f3714d7781cb4cae28bdd11b8cdcb942249e194a0610927776ce3"
+      }
+    },
+    "prepared": {
+      "elapsedMs": 91647,
+      "candidateInvocations": 29,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Inspect the four input binaries without executing them. Establish the Windows program\u2019s actual imported policy entry and the matching DLL export, and identify the ELF policy dependency and Mach-O format as controls. Produce a GUI-subsystem copy of the Windows console program while preserving the original, and independently verify that the two-byte subsystem field is the only permitted change. Retain useful source-bound structural evidence, the edited copy and a verified checkpoint. Use the connected toolbox where useful; state static limits and do not claim the edited program was executed.",
+      "promptSha256": "0e04e400b9e32c28ce0da1c640ab41ffaec96b1f3edfa4ddd625230e02ea2cb1",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        }
+      ],
+      "checkpointFiles": 10,
+      "checkpointBytes": 15659,
+      "checkpointSha256": "3465970494d93f1798fe4dcc58b7052fcb6e174623d4bcca49c3b533ac2693bd",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 15,
+      "copiedEdit": {
+        "length": 2560,
+        "subsystemFieldOffset": "0xd4",
+        "before": 3,
+        "after": 2,
+        "everyOtherByteIdentical": true,
+        "sha256": "b8f5facd929f3714d7781cb4cae28bdd11b8cdcb942249e194a0610927776ce3"
+      }
+    }
+  },
+  "verifiedFindings": {
+    "peImport": "PolicyNative.dll!upstream_adjust",
+    "matchingDllExport": "upstream_adjust",
+    "elfDependency": "libpolicy.so",
+    "machoControl": "thin arm64",
+    "originalsUnchanged": true,
+    "noTargetExecutionObserved": true
+  }
+}
