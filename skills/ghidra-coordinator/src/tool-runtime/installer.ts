@@ -29,8 +29,8 @@ export class ToolInstaller {
   const processes=(await listProcesses(this.directory,{tool:this.descriptor.id})).filter(r=>!['exited','failed'].includes(r.state));
   return {retainedStages:stages.slice(0,100),processes,tool:this.descriptor.id,state:present?'installed':'not_ready',mode:selected?.mode??'unconfigured',installation:selected?.id,executable:selected?.executable,components:selected?.components??{},lastProbe:selected?.lastProbe,recommended:'managed'};
  }
- async download(offline=false){
-  const items=[];for(const [component,a]of Object.entries(this.descriptor.components()))items.push({component,path:await cacheArtifact(a,this.cache,this.c.fetch,this.c.signal,offline),sha256:a.sha256,license:a.license});
+ async download(offline=false,vendorDirect=false){
+  const items=[];for(const [component,a]of Object.entries(this.descriptor.components()))items.push({component,path:await cacheArtifact(a,this.cache,this.c.fetch,this.c.signal,offline,vendorDirect),sha256:a.sha256,license:a.license,url:a.url,delivery:a.delivery??{kind:'owned-release'}});
   return {tool:this.descriptor.id,state:'downloaded',items};
  }
  async install(o:Record<string,unknown>){return withToolLock(this.directory,this.descriptor.id,async()=>{
@@ -40,7 +40,7 @@ export class ToolInstaller {
   for(const [id,artifact]of Object.entries(parts)){
    const key=id===this.descriptor.primary?'archive':id+'Archive',checksum=id===this.descriptor.primary?'archiveSha256':id+'ArchiveSha256';
    if(o[checksum]&&!o[key])fail('invalid','Archive checksum requires its archive path.');
-   consumed[id]=o[key]?await consumeArchive(resolve(this.c.cwd,text(o[key],4096)),this.cache,artifact,o[checksum]===undefined?undefined:text(o[checksum],64),this.c.signal):{path:await cacheArtifact(artifact,this.cache,this.c.fetch,this.c.signal,Boolean(o.offline)),artifact};
+   consumed[id]=o[key]?await consumeArchive(resolve(this.c.cwd,text(o[key],4096)),this.cache,artifact,o[checksum]===undefined?undefined:text(o[checksum],64),this.c.signal):{path:await cacheArtifact(artifact,this.cache,this.c.fetch,this.c.signal,Boolean(o.offline),Boolean(o.vendorDirect)),artifact};
   }
   const components=Object.fromEntries(Object.entries(consumed).map(([id,v])=>[id,v.artifact.sha256]));
   const externalDigest=external?await fileSha256(external,this.c.signal):undefined;

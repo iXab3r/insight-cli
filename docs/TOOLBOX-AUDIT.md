@@ -145,3 +145,8 @@ read its file successfully but no corresponding captured rows were found. WinDbg
 and dnSpy launch checks continued to pass. ProcMon capture readiness remains unresolved;
 do not treat one earlier successful capture as a stable product workflow. The owner confirmed
 explicit Microsoft download, pinned hash and local cache for its non-redistributable payload.
+
+The shared installer now implements this Microsoft-only exception: explicit vendor opt-in
+before network access, exact size/hash checks, verified offline cache reuse, and no implicit
+mirror fallback. The mirror publisher rejects vendor-only assets. This source policy is
+implemented independently of the still-unaccepted Windows adapters.

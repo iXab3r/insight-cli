@@ -119,3 +119,17 @@ test('portable zip extraction preserves native executable modes and refuses link
  for(const [name,mode]of [['../escape',0o100644],['sdk/link',0o120777]] as const){await writeFile(file,zipFile(name,'../../escape',mode));await assert.rejects(extractArchive(file,join(root,'invalid-'+mode),'zip'));}
  await assert.rejects(stat(join(root,'escape')));
 });
+
+test('vendor-only acquisition is explicit, pinned and cacheable without an implicit mirror fallback',async t=>{
+ const {createHash}=await import('node:crypto');const {catalogArtifact}=await import('../src/tool-runtime/catalog.js');
+ const root=await mkdtemp(join(tmpdir(),'vendor-cache-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const bytes=Buffer.from('owned vendor fixture'),artifact={...catalogArtifact('477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10'),size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+ assert.equal(artifact.delivery?.publisher,'Microsoft');assert.equal(artifact.url,'https://download.sysinternals.com/files/ProcessMonitor.zip');
+ let requests=0;const fetcher=(async(url:string)=>{requests++;assert.equal(url,artifact.url);return new Response(bytes);}) as typeof fetch,signal=new AbortController().signal;
+ await assert.rejects(cacheArtifact(artifact,root,fetcher,signal),/explicit vendor download/);assert.equal(requests,0);
+ const path=await cacheArtifact(artifact,root,fetcher,signal,false,true);assert.equal(requests,1);assert.equal(await fileSha256(path),artifact.sha256);
+ assert.equal(await cacheArtifact(artifact,root,fetcher,signal,true),path);assert.equal(requests,1);
+ await writeFile(path,'corrupt');await assert.rejects(cacheArtifact(artifact,root,fetcher,signal,false,true),/Cached runtime archive/);assert.equal(requests,1);
+ const other=await mkdtemp(join(tmpdir(),'vendor-mismatch-'));t.after(()=>rm(other,{recursive:true,force:true}));
+ await assert.rejects(cacheArtifact({...artifact,sha256:'f'.repeat(64)},other,fetcher,signal,false,true),/pinned SHA256/);assert.equal(requests,2);
+});

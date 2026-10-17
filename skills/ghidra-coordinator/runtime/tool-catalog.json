@@ -142,5 +142,35 @@
     "root": "jdk-21.0.11+10",
     "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-win32-x64.zip"
+  },
+  "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10": {
+    "name": "ProcessMonitor-4.12.zip",
+    "url": "https://download.sysinternals.com/files/ProcessMonitor.zip",
+    "sha256": "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10",
+    "size": 3202206,
+    "format": "zip",
+    "root": ".",
+    "license": "Microsoft Sysinternals license terms; no redistribution by insight-cli",
+    "delivery": {
+      "kind": "vendor-direct",
+      "publisher": "Microsoft",
+      "termsUrl": "https://learn.microsoft.com/en-us/sysinternals/license-terms",
+      "reason": "Redistribution is prohibited. Explicit vendor acquisition with a pinned SHA256 and local cache was selected by the owner."
+    }
+  },
+  "4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20": {
+    "name": "WinDbg-1.2610.1001.0.msixbundle",
+    "url": "https://windbg.download.prss.microsoft.com/dbazure/prod/1-2610-1001-0/windbg.msixbundle",
+    "sha256": "4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20",
+    "size": 1203512387,
+    "format": "zip",
+    "root": ".",
+    "license": "Microsoft WinDbg license terms embedded in the inspected bundle; no redistribution by insight-cli",
+    "delivery": {
+      "kind": "vendor-direct",
+      "publisher": "Microsoft",
+      "termsUrl": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/",
+      "reason": "The inspected bundled EULA prohibits redistribution. Use the exact vendor-version URL, pinned SHA256 and local cache."
+    }
   }
 }

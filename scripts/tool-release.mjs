@@ -11,6 +11,7 @@ export function validateRecipe(recipe){
  const names=new Set();
  if(!Array.isArray(recipe.assets)||!recipe.assets.length||!recipe.redistribution)throw Error('Incomplete distribution');
  for(const a of recipe.assets){
+  if(a.delivery?.kind==='vendor-direct')throw Error('Vendor-only distribution must never be mirrored');
   if(!/^[a-zA-Z0-9_.+-]+$/.test(a.name)||names.has(a.name)||a.name==='manifest.json')throw Error('Invalid/duplicate asset name');names.add(a.name);
   if(a.repack){const r=a.repack;if(a.recompress||r.format!=='tar-zstd-subset-v1'||!(/^[a-f0-9]{64}$/.test(r.sha256))||!Number.isSafeInteger(r.size)||r.size<1||r.size>=2*1024**3||!(/^[a-zA-Z0-9][a-zA-Z0-9_.+-]*\/$/.test(r.stripPrefix))||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.entries)||!r.entries.length||r.entries.length>100||new Set(r.entries).size!==r.entries.length||r.entries.some(p=>typeof p!=='string'||p.startsWith('/')||p.includes('\\')||p.split('/').some(s=>!s||s==='.'||s==='..')))throw Error('Unpinned or unsafe subset recipe');}
   if(a.recompress&&(a.recompress.format!=='xz-to-gzip'||!(/^[a-f0-9]{64}$/.test(a.recompress.sha256))||!Number.isSafeInteger(a.recompress.size)||a.recompress.size<1||a.recompress.size>=2*1024**3))throw Error('Unpinned recompression input');

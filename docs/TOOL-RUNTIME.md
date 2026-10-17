@@ -71,7 +71,7 @@ exit as successful save, merge or completion of an arbitrary research operation.
 
 ## Distributions retained in our releases
 
-Runtime delivery reads exact assets from public releases in `iXab3r/insight-cli`. CLI/npm versions
+Default runtime delivery reads exact assets from public releases in `iXab3r/insight-cli`. CLI/npm versions
 and tool-distribution versions are independent. Example tag: `tool-ghidra-12.1.2-r1`; the revision
 changes if packaging or any retained byte changes. Ghidra, JDK and .NET component releases can be
 reused across compatible tool definitions without copying them into every CLI release.
@@ -82,6 +82,16 @@ manifest describing this same inventory and upstream provenance. Installed CLI d
 not trust a replacement manifest fetched from the same release to redefine their expected hashes.
 No `latest` resolution or automatic upstream fallback occurs during installation. Upstream URLs
 are acquisition provenance for the release workflow, not runtime dependencies.
+
+Microsoft-only exception: ProcMon and WinDbg prohibit our redistribution. Their exact vendor
+URLs, sizes, SHA256 values, terms and delivery reason are retained in
+`scripts/vendor-tool-sources.json` and compiled into the installed catalog. They never enter
+`tool-release.mjs`: the mirror publisher rejects a `vendor-direct` asset. A consuming adapter
+must expose `--vendor-direct` for explicit network acquisition; normal installation cannot
+silently fall back to Microsoft if a mirror fails. Already verified cache bytes work offline
+without another download opt-in. A local archive or explicit external executable remains possible.
+The shared runtime verifies size/hash before cache selection and refuses a corrupt cached entry.
+These source-policy entries alone do not advertise an implemented/accepted ProcMon or WinDbg adapter.
 
 The release workflow performs this sequence:
 

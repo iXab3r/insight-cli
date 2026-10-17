@@ -7,7 +7,7 @@ import {validateRecipe,acquire} from '../tool-release.mjs';
 const a={name:'fixture.zip',upstream:'https://example.invalid/file',sha256:'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',size:5,license:'Synthetic',role:'source'};
 test('mirror admits only reviewed exact assets with source companions',()=>{
  const r={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',assets:[a],redistribution:'Fixture'};validateRecipe(r);
- for(const patch of [{assets:[{...a,name:'../escape'}]},{assets:[a,a]},{assets:[{...a,role:'binary'}]},{tag:'latest'},{assets:[{...a,size:2*1024**3}]}])assert.throws(()=>validateRecipe({...r,...patch}));
+ for(const patch of [{assets:[{...a,name:'../escape'}]},{assets:[a,a]},{assets:[{...a,delivery:{kind:'vendor-direct'}}]},{assets:[{...a,role:'binary'}]},{tag:'latest'},{assets:[{...a,size:2*1024**3}]}])assert.throws(()=>validateRecipe({...r,...patch}));
 });
 test('mirror acquisition verifies size and hash and reuses exact retained bytes',async t=>{
  const dir=await mkdtemp(join(tmpdir(),'mirror-'));t.after(()=>rm(dir,{recursive:true,force:true}));let count=0;
