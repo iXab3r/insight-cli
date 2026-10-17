@@ -1,0 +1,11 @@
+{
+  "package": "@eyeauras/cli-factory-ipc",
+  "version": "0.1.0",
+  "file": "factory-ipc-74e7a64.tgz",
+  "sha256": "e5b7d51994e6a039ad63300b440186ebb8ba613dd3595a6586446a98768169c3",
+  "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
+  "commit": "74e7a64a7c026e85298dfc9bbbc8ad9c19b51998",
+  "license": "MIT",
+  "distribution": "Prepared official Factory package; immutable content pin, no registry publication",
+  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/53"
+}

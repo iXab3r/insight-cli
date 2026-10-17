@@ -5,7 +5,7 @@ The owner selected one combined M0–M5 delivery and closed the product decision
 Items produce code, fixtures or exact-revision evidence inside the
 existing product; they do not add separate CLIs, a generic plugin framework or agent-visible jobs.
 
-## Agent toolbox backlog — planned
+## Agent toolbox — in progress
 
 The owner selected the complete tool/skill/agent-acceptance scope on 2026-10-17.
 [TB-01–TB-09](TOOLBOX-PLAN.md#ordered-work-hierarchy) define the next delivery, including

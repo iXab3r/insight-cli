@@ -1,12 +1,12 @@
 # Agent toolbox: delivery plan
 
-Status: full delivery scope selected on 2026-10-17; detailed plan proposed, planning only. The owner selected the product direction:
+Status: full delivery authorized and implementation started on 2026-10-17. TB-01 audit and its shared Factory dependency are in progress; no new analytical tool is accepted yet. The owner selected the product direction:
 insight-cli supplies a toolbox with a discoverable skill for each analytical tool. The
 runtime-only delivery and two successful worker workflows do not establish toolbox readiness.
-This document does not start implementation or mark future tools delivered.
+The current [inventory audit](TOOLBOX-AUDIT.md) records pinned candidates, delivery exceptions and unresolved feasibility checks.
 
 Execution tracker: [epic #23](https://github.com/iXab3r/insight-cli/issues/23), with nine native stage sub-issues
-and 22 tool/capability sub-issues under TB-07. All remain planned/open.
+and 22 tool/capability sub-issues under TB-07. All remain open; completion requires the evidence below.
 
 ## Outcome and scope
 
@@ -99,7 +99,9 @@ runner is not assumed to provide it. TB-01 verifies this before that tool is imp
 
 These sources inform investigation; they do not establish that our adapters or redistribution
 rights are already verified. Check exact distribution terms, prerequisites and automation before
-promising a mirror or admitting a platform. If a source cannot be mirrored, record that obstacle
+promising a mirror or admitting a platform. ProcMon uses the owner-selected exception: explicit Microsoft download, local cache and pinned
+SHA256. WinDbg has the same verified redistribution restriction and uses a separate explicit
+Microsoft delivery policy. If another source cannot be mirrored, record that obstacle
 and decide a permitted delivery path explicitly; never silently fall back to arbitrary upstream.
 
 ## Agreed design direction
@@ -172,9 +174,9 @@ to stop another agent's owner. Grant no broad network access just to reach a loc
 
 ## Ordered work hierarchy
 
-Statuses below are planned, not completed. Technical inspection/design of TB-01 has started;
-the owner has selected full inventory scope and tool-specific applicability. This planning
-turn does not start implementation or count the preliminary inventory as a completed audit.
+TB-01 is in progress; TB-02–TB-09 remain pending their gates. The owner selected full inventory
+scope and tool-specific applicability. Preliminary metadata and vendor probes do not complete
+the audit or the tool delivery.
 
 | ID | Deliverable | Depends on | Acceptance / exit condition |
 | --- | --- | --- | --- |
