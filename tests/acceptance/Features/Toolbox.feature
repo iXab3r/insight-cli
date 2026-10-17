@@ -110,3 +110,21 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI queries binary structure and guards a copied PE edit
     Then binary linkage and exact copy-only edits retain original bytes
+
+  @interop @macos
+  Scenario: Trace a declared managed boundary to a concrete native function and shared evidence
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI traces managed metadata through a native export into shared analysis
+    Then qualified static correspondence survives merge and independent readback
+
+  @capture @macos
+  Scenario: Compare actual owned executions and preserve interrupted or unknown observations
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI captures controlled native runs and interrupted outcomes
+    Then exact observations and unknown intents survive without automatic execution replay
+
+  @overview @macos
+  Scenario: Narrow a research question to bounded metadata and stable decompiled text windows
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI narrows managed and native code to stable text windows
+    Then bounded evidence retains source hashes and explicit native truncation

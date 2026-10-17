@@ -163,6 +163,15 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI queries binary structure and guards a copied PE edit")]
     public Task QueryBinary() => Execute("scripts/toolbox/native-binary.mjs", Value("nativeSubjects"));
 
+    [When("the public CLI traces managed metadata through a native export into shared analysis")]
+    public Task LinkInterop() => Execute("scripts/toolbox/native-interop.mjs", Value("interopFixture"), Value("ghidraHome"), Value("java"));
+
+    [When("the public CLI captures controlled native runs and interrupted outcomes")]
+    public Task CaptureRuns() => Execute("scripts/toolbox/native-capture.mjs", Value("captureFixture"));
+
+    [When("the public CLI narrows managed and native code to stable text windows")]
+    public Task OverviewPages() => Execute("scripts/toolbox/native-overview.mjs", Value("managedMetadataFixture"), Value("interopFixture"), Value("ghidraHome"), Value("java"));
+
     [When("the public CLI traces the owned Linux worker")]
     public Task TraceLinux() => Execute("scripts/toolbox/native-strace.mjs", Value("straceArchive"), Value("nativeLinuxWorker"), Value("nativeLinuxSettings"));
 
@@ -172,6 +181,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("bounded evidence retains source hashes and explicit native truncation")]
+    [Then("exact observations and unknown intents survive without automatic execution replay")]
+    [Then("qualified static correspondence survives merge and independent readback")]
     [Then("binary linkage and exact copy-only edits retain original bytes")]
     [Then("object field and waiting stack evidence preserve dump identity and runtime limits")]
     [Then("managed metadata and normalized IL retain immutable input identity")]

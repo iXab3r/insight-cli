@@ -12,10 +12,12 @@ import {deadlineLaunch} from './deadline.js';
 import {windowsJobLaunch,windowsJobResult} from './windows-job.js';
 export interface RunSpec {
  tool:string;role:string;installation?:string;executable:string;arguments?:string[];
- environment?:Record<string,string|undefined>;cwd?:string;input?:string;
+ environment?:Record<string,string|undefined>;cwd?:string;input?:string|Uint8Array;
  timeoutMs?:number;maxOutputBytes?:number;outputFile?:string;acceptedCodes?:number[];session?:string;target?:string;
  /** Adapter opt-in only after verifying its native signal/child cleanup contract. */
  nativeDeadline?:boolean;
+ /** Adapter opt-in for exact bounded stdout/stderr bytes, including failure prefixes. */
+ retainRawOutput?:boolean;
  /** Adapter's native helper constructor persists per-exec deadline receipts in the run root. */
  nativeChildDeadlines?:boolean;
  /** Hold an authenticated borrowed Windows subject handle; never assign it to the owned job. */
@@ -26,7 +28,7 @@ export interface RunSpec {
  nativeRegistry?:'procmon';
  metadata?:Record<string,unknown>;
 }
-export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string}
+export interface RunResult {process:string;stdout:string;stderr:string;exitCode:number|null;signal:string|null;elapsedMs:number;truncated:boolean;diagnostics:string;rawStdout?:string;rawStderr?:string}
 export interface RunContext {appArguments:Pick<CommandContext['appArguments'],'AppDataDirectory'>;signal:AbortSignal;environment:CommandContext['environment']}
 export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  c.signal.throwIfAborted();const directory=c.appArguments.AppDataDirectory;toolRoot(directory,spec.tool);
@@ -70,6 +72,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
   if(!outcome&&spec.nativeDeadline&&child.signalCode==='SIGALRM')outcome='timeout';
   if(!outcome&&(exitCode===null||!(spec.acceptedCodes??[0]).includes(exitCode)))outcome='exit_code';
   const result:RunResult={process:id,stdout:redact(Buffer.concat(stdout).toString('utf8')),stderr:redact(Buffer.concat(stderr).toString('utf8')),exitCode,signal:child.signalCode,elapsedMs:Math.round(performance.now()-started),truncated,diagnostics:root};
+  if(spec.retainRawOutput){result.rawStdout=join(root,'stdout.bin');result.rawStderr=join(root,'stderr.bin');await writeFile(result.rawStdout,Buffer.concat(stdout),{mode:0o600});await writeFile(result.rawStderr,Buffer.concat(stderr),{mode:0o600});}
   await writeFile(join(root,'stdout.log'),result.stdout,{mode:0o600});await writeFile(join(root,'stderr.log'),result.stderr,{mode:0o600});
   Object.assign(record,{state:outcome?'failed':'exited',outcome:outcome??'completed',exitCode:result.exitCode,signal:result.signal,elapsedMs:result.elapsedMs,endedAt:new Date().toISOString()});await atomicWrite(path,record);
   if(outcome)throw new CliError('Tool execution did not complete successfully: '+outcome+'.',{code:'tool.'+outcome.replaceAll('_','.'),result});

@@ -1,3 +1,5 @@
+import {textWindow} from './text-window.js';
+import {number} from './research.js';
 import {managedMetadataCommands} from './managed-metadata.js';
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {join,resolve,dirname,relative,sep} from 'node:path';
@@ -34,10 +36,11 @@ async function exportDirectory(stage:string,output:string){
 }
 export function ilspyCommands(workspace:(c:CommandContext)=>Workspace):CommandDefinition[]{
  const installer=(c:CommandContext)=>ilspyInstaller(c);
- const common=[{flags:'--target <id>',description:'Reuse an immutable research target'},{flags:'--session <id>',description:'Associate an existing research session'},
+ const common=[{flags:'--limit-chars <count>',description:'Returned Unicode text window (1–32768); file export retains the full bounded native text',defaultValue:16000},{flags:'--offset-chars <count>',description:'Skip Unicode characters in returned text',defaultValue:0},{flags:'--target <id>',description:'Reuse an immutable research target'},{flags:'--session <id>',description:'Associate an existing research session'},
   {flags:'--output <path>',description:'Write a new ordinary file (directory for project/resource)'},
   {flags:'--timeout-seconds <seconds>',description:'Execution deadline, from 1 to 1800 seconds',defaultValue:120}];
  const run=(operation:string,options:CommandDefinition['options']=[])=>command(operation+' [input]','Static .NET '+operation,async({args,options:o},c)=>{
+  const limitChars=number(o.limitChars??16000,32768,1),offsetChars=number(o.offsetChars??0,4*1024**2);
   if(Boolean(args.input)===Boolean(o.target))fail('invalid','Supply exactly one input path or --target.');
   if(o.type&&o.member)fail('invalid','Choose --type or --member.');
   const timeout=Number(o.timeoutSeconds);if(!Number.isSafeInteger(timeout)||timeout<1||timeout>1800)fail('invalid','timeout-seconds must be from 1 to 1800.');
@@ -56,7 +59,7 @@ export function ilspyCommands(workspace:(c:CommandContext)=>Workspace):CommandDe
    const base={state:'completed',target:target.id,inputSha256:target.binarySha256,session,process:result.process,elapsedMs:result.elapsedMs,diagnostics:result.diagnostics,truncated:result.truncated};
    if(stage){const output=resolve(c.cwd,text(o.output,4096));if(output===stage||output.startsWith(stage+sep)||stage.startsWith(output+sep))fail('invalid','Output directory must be outside tool staging.');return {...base,...await exportDirectory(stage,output)};}
    if(o.output){const output=resolve(c.cwd,text(o.output,4096));await mkdir(dirname(output),{recursive:true,mode:0o700});await writeFile(output,result.stdout,{flag:'wx',mode:0o600});return {...base,output,bytes:Buffer.byteLength(result.stdout)};}
-   return {...base,content:result.stdout};
+   return {...base,...textWindow(result.stdout,limitChars,offsetChars,result.truncated)};
   });
  },{permission:Permission.Update,options:[...common,...options]});
  const type={flags:'--type <name>',description:'Fully qualified type name'},member={flags:'--member <id>',description:'XML member ID or metadata token'};

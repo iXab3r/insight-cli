@@ -5,7 +5,7 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
-The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, ProcMon, strace and .NET diagnostics with pinned
+The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, ProcMon, dnSpyEx, TShark, mitmproxy, strace and .NET diagnostics with pinned
 distributions (GitHub mirrors or explicit Microsoft-only acquisition), private runtime dependencies, common lifecycle and owned process controls.
 Toolbox additions remain under development in [draft PR #55](https://github.com/iXab3r/insight-cli/pull/55);
 the registry package has not been updated by these source commits.
@@ -27,8 +27,12 @@ The [full toolbox plan](docs/TOOLBOX-PLAN.md) tracks the ongoing delivery: 16 to
 entries, their skills, library/cross-tool capabilities and per-tool agent acceptance.
 `insight-cli tools list` and `tools show <tool>` describe the capabilities already shipped;
 `skill <name>` locates their instructions without profile or IPC access. The packaged
-`skill-bundle` connects all admitted skills at once. Additional tools remain in progress;
-the [delivery audit](docs/TOOLBOX-AUDIT.md) records pinned candidates and feasibility checks.
+`skill-bundle` connects all 25 admitted skills at once. The six library/workflow capabilities
+cover managed metadata/comparison, structured dump queries, binary structure/copy edits,
+managed/native correspondence, owned execution capture and bounded overview/drilldown.
+They reuse existing runtimes or packaged helpers, with no fake library installation.
+[Native proof and remaining independent agent gates](docs/TOOLBOX-AUDIT.md) retain exact
+artifact identities; a passing native script is not an independent agent pass.
 The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
 contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
 

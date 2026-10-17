@@ -151,6 +151,24 @@
       "title": "Insight Binary",
       "path": "skills/insight-binary/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-interop",
+      "title": "Insight Interop",
+      "path": "skills/insight-interop/SKILL.md",
+      "resources": {}
+    },
+    {
+      "name": "insight-capture",
+      "title": "Insight Capture",
+      "path": "skills/insight-capture/SKILL.md",
+      "resources": {}
+    },
+    {
+      "name": "insight-overview",
+      "title": "Insight Overview",
+      "path": "skills/insight-overview/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -322,6 +340,57 @@
           "no false change from metadata token renumbering alone",
           "bounded drilldown and original inputs preserved",
           "ordinary project evidence"
+        ]
+      }
+    },
+    {
+      "id": "managed-native-linkage",
+      "namespace": "ilspy",
+      "kind": "capability",
+      "skill": "insight-interop",
+      "purpose": "Trace a managed P/Invoke declaration through a supplied native export into a scoped Ghidra function using the existing public APIs",
+      "inputs": [
+        "managed assembly",
+        "explicit native library candidate",
+        "Ghidra native session/target"
+      ],
+      "tasks": [
+        "identify exact managed import metadata",
+        "verify supplied native export and scoped address",
+        "inspect native function and publish qualified correspondence evidence"
+      ],
+      "platforms": [
+        "darwin-arm64 native workflow; static Windows PE/.NET pair; existing per-tool profiles apply"
+      ],
+      "dependencies": [
+        "managed metadata query capability and ILSpy private runtime",
+        "packaged binary query capability",
+        "managed or external Ghidra and Java runtime"
+      ],
+      "workflowCommands": [
+        "ilspy query"
+      ],
+      "limitations": [
+        "Composition of ilspy query, binary query and scoped Ghidra APIs; no additional installation or universal resolver",
+        "A matching filename/export is a static candidate, not proof that the runtime loaded or invoked that file",
+        "Forwarded, ordinal-only, ambiguous decorated/charset names and incompatible architectures require explicit further evidence",
+        "Addresses, tokens and annotations must retain their respective immutable target identities"
+      ],
+      "evaluationCase": {
+        "id": "managed-native-static-correspondence",
+        "inputFamily": "owned-managed-pinvoke-and-native-export-pair",
+        "task": "Explain the supplied managed-to-native boundary, identify the concrete native implementation candidate, inspect its behavior and retain a reviewable shared finding. Distinguish static correspondence from an observed invocation.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "exact P/Invoke module/entrypoint/signature",
+          "candidate native export and immutable address identity",
+          "Ghidra function and useful behavior evidence",
+          "qualified ordinary evidence and verified merge",
+          "no invented runtime invocation"
         ]
       }
     },
@@ -1132,6 +1201,111 @@
           "useful comparison with bounded uncertainty",
           "ordinary project evidence",
           "owned proxy cleanup and original service preserved"
+        ]
+      }
+    },
+    {
+      "id": "capture",
+      "namespace": "capture",
+      "kind": "capability",
+      "skill": "insight-capture",
+      "purpose": "Record and compare bounded owned native executions, exact output bytes and explicitly declared file snapshots",
+      "inputs": [
+        "authorized thin ARM64 Mach-O executable",
+        "selected ordinary input files and optional stdin file",
+        "explicit relative watch paths",
+        "retained capture reports"
+      ],
+      "tasks": [
+        "capture one owned program execution",
+        "inspect retained output and selected file changes",
+        "compare literal retained observations without re-execution",
+        "retain unknown owner-loss intent without replay"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+"
+      ],
+      "dependencies": [
+        "packaged common owned-process/deadline helpers; no additional runtime or compiler"
+      ],
+      "workflowCommands": [
+        "capture run",
+        "capture show",
+        "capture compare"
+      ],
+      "limitations": [
+        "Explicit program copy and literal argv; no shell expansion or command string gateway",
+        "Not an OS sandbox or a trace of undeclared filesystem/network effects",
+        "Native alarm survives ordinary owner loss; a subject can deliberately replace its inherited alarm",
+        "64 MiB program/selected files, 16 MiB per selected/watched file, 1 MiB stdin and 4 MiB aggregate output",
+        "Interrupted/overflow/unavailable output stays partial; owner-loss intent without a durable outcome remains unknown and is never rerun automatically",
+        "Retained report comparison is literal data comparison, not execution authenticity, causal equivalence or a speedup benchmark"
+      ],
+      "evaluationCase": {
+        "id": "owned-execution-retained-comparison",
+        "inputFamily": "owned-native-program-input-output-and-file-fixtures",
+        "task": "Explain how the supplied owned program responds to two controlled inputs, retain exact output/exit and declared file effects, compare observations and preserve uncertainty after an interrupted run.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "explicit captured program/input identities",
+          "actual output/exit and declared file changes",
+          "useful comparison without rerunning reports",
+          "ordinary retained evidence",
+          "original inputs preserved and owned cleanup",
+          "interrupted or unknown intent not blindly replayed"
+        ]
+      }
+    },
+    {
+      "id": "overview-drilldown",
+      "namespace": "tools",
+      "kind": "capability",
+      "skill": "insight-overview",
+      "purpose": "Choose a bounded overview, preserve source identity and retrieve only the needed code, object, event or output window",
+      "inputs": [
+        "research question",
+        "known immutable target or retained observation"
+      ],
+      "tasks": [
+        "discover relevant tool guidance before installation",
+        "inspect bounded metadata before expensive decompilation",
+        "page focused evidence and preserve partial scope"
+      ],
+      "platforms": [
+        "existing tool-specific native profiles; discovery works on any Node24 host"
+      ],
+      "dependencies": [
+        "existing analytical APIs and their declared runtimes; no additional tool or install"
+      ],
+      "workflowCommands": [
+        "tools list",
+        "tools show"
+      ],
+      "limitations": [
+        "Workflow across existing namespaces, not a universal analysis database",
+        "Each command declares its own byte/row/character coordinate system",
+        "A page at EOF cannot establish full coverage if the native source is truncated or a scan is partial",
+        "Text pages must retain the same source hash to be combined; different runtime snapshots are separate observations"
+      ],
+      "evaluationCase": {
+        "id": "bounded-overview-focused-evidence",
+        "inputFamily": "owned-multi-tool-inputs-with-focused-code-and-observation-oracles",
+        "task": "Answer the supplied narrow research question using concise overviews and focused evidence. Avoid whole-program output in context, retain exact input/page identity and preserve incomplete scan uncertainty.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "useful bounded overview before focused analysis",
+          "focused code/object/event evidence",
+          "stable source identity across pages",
+          "explicit native partial/truncation scope",
+          "ordinary saved evidence without whole-program context dump"
         ]
       }
     },

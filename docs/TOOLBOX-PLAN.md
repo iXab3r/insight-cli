@@ -45,7 +45,9 @@ Current verified inventory:
 | Managed metadata | Packaged dnlib-backed query/compare API and native public CLI Gherkin passed; independent model gates pending | Exact-token IL, P/Invoke and structural assembly comparison |
 | Managed heap queries | ClrMD-backed dump API/skill, full dependency notices and native public CLI Gherkin passed; independent model gates pending | Bounded object fields and managed stacks with matching explicit DAC |
 | Structured binaries | LIEF-backed packaged API/skill, immutable source mirror and native public CLI Gherkin passed; independent model gates pending | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
-| Remaining capabilities | C04–C06 remain in progress below | No implicit acceptance from implemented tool families |
+| Managed/native correspondence | Public API composition, dedicated skill and real Ghidra Gherkin passed; independent model gates pending | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
+| Owned process capture | Capture API/skill and real execution/fault Gherkin passed; independent model gates pending | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
+| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows and native ILSpy/Ghidra Gherkin passed; independent model gates pending | Small metadata/index queries and focused source-bound evidence pages |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -310,7 +312,13 @@ interruption/recovery and external-copy Gherkin proof (`verification/toolbox-mit
 C01 passed real static assembly comparison (`verification/toolbox-managed-metadata.json`);
 C02 passed actual structured object/stack queries and wrong DAC refusal
 (`verification/toolbox-managed-heap.json`); C03 passed native structured binary queries and exact copied field verification
-(`verification/toolbox-binary.json`); C04–C06 remain in progress. Offline verification at this checkpoint: 204 tests,
-202 passed and two explicitly opt-in skipped; release/admission checks 29/29 passed.
+(`verification/toolbox-binary.json`). C04 passed concrete metadata/export/Ghidra correspondence
+with merge/refresh and independent readback (`verification/toolbox-interop.json`). C05 passed
+exact native capture and owner-loss/no-replay faults (`verification/toolbox-capture.json`).
+C06 passed actual ILSpy/Ghidra text windows (`verification/toolbox-overview.json`).
+The complete implementation inventory now contains 16 analytical families, six capabilities
+and 25 skills. Offline verification: 206 tests, 204 passed and two explicitly opt-in skipped;
+release/admission checks 29/29 passed. Combined exact-artifact native acceptance and all
+remaining inference-agent gates retain separate status; implementation is not a milestone pass.
 Account inference quota only
 defers the independent model gates.

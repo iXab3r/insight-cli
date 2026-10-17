@@ -27,7 +27,9 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 2. Open the input with `ghidra open <input> --session new`. Retain the returned session and target.
    Another agent chooses `new` independently; one session can open several inputs.
 3. Pass both `--session` and `--target` on research calls. Follow strings to xrefs and their
-   function addresses, then inspect/decompile. See [research](references/research.md).
+   function addresses, then inspect/decompile. Decompilation defaults to a 16000-character
+   window; page with `--limit-chars`/`--offset-chars` and retain `textSha256`. Native
+   truncation remains explicit even at the end of the observed text. See [research](references/research.md).
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
 5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.

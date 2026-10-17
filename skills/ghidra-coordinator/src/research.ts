@@ -1,3 +1,4 @@
+import {textWindow} from './text-window.js';
 import type { Artifact } from './artifacts.js';
 import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
 import { Workspace } from './workspace.js';
@@ -223,7 +224,7 @@ export class Research {
     return {...selected,items,offset,limit,total:page.total,truncated:object(value).truncated===true||offset+items.length<page.total,
       ...(object(value).scan?{scan:object(value).scan,totalKnown:object(value).total_known!==false}:{})};
   }
-  async function(selected: Scope, at: string, decompile=false) {
+  async function(selected: Scope, at: string, decompile=false,page?:{limit:number;offset:number}) {
     return this.ordered(selected,async()=>{
       const backend=await this.backend();await backend.open(selected);
       const value=await backend.call(selected,'/get_functions',{functions:at,fields:decompile?'entry_point,signature,decompiled_code':'entry_point,signature',include_call_context:false});
@@ -231,8 +232,9 @@ export class Research {
       if(typeof result.signature!=='string')fail('partial','Function result lacks its signature.');
       if(decompile&&typeof result.decompiled_code!=='string')fail('partial','Function decompilation did not produce text.');
       const listing=object(await backend.call(selected,'/get_comment',{address:result.entry_point}));
-      return {...selected,address:publicAddress(result.entry_point),name:result.name,signature:result.signature,comments:comments(listing),
-        ...(decompile?{code:result.decompiled_code,truncated:Boolean(object(result.truncation??{}).decompiled_code)}:{})};
+      const window=decompile?textWindow(String(result.decompiled_code),page?.limit??16000,page?.offset??0,Boolean(object(result.truncation??{}).decompiled_code)):undefined;
+      const {content,...paging}=window??{content:undefined};
+      return {...selected,address:publicAddress(result.entry_point),name:result.name,signature:result.signature,comments:comments(listing),...(window?{code:content,...paging}:{})};
     });
   }
   async xrefs(selected: Scope, at: string, limit: number, offset: number) {

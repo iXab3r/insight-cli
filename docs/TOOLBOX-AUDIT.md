@@ -559,3 +559,57 @@ and ordinary evidence remained intact. Native parser diagnostics are partial. Un
 Mach-O requires an explicit slice; ELF/Mach-O exports cover functions, not every data
 symbol. Copy editing does not execute a target or recompute checksums/signatures.
 Native host profile is macOS14+ ARM64. Independent model/combined gates remain open.
+
+### Managed/native correspondence workflow
+
+C04 composes existing `ilspy query`, `binary query` and scoped Ghidra APIs; it does not
+add a speculative universal loader/resolver or another runtime. The dedicated interop
+skill requires exact declaration/spelling/ABI metadata, an explicitly supplied native
+candidate, immutable identities, a real export and native function readback. Forwarders,
+ordinals, decoration/charset ambiguity and runtime file selection stay explicit.
+
+[Real Ghidra Gherkin](verification/toolbox-interop.json) followed a concrete exact-spelling
+Cdecl P/Invoke to `PolicyNative.dll!quote_total`, verified the implementation's
+`count * 9 + 10`, and retained qualified static correspondence. Two isolated contexts
+proved unchanged views until refresh, preservation of the second local annotation,
+both explicit merges and independent published readback. The local server is stopped
+explicitly: stopping only the CLI owner intentionally preserves that server's lifecycle.
+No observed Windows execution/invocation or inference-model run is claimed.
+
+### Repeatable owned process observations
+
+C05 adds `capture run/show/compare`, a dedicated skill and no installation step. Runs
+copy the selected thin native program and ordinary inputs into a separate working
+directory, use literal argv/byte stdin and snapshot only declared relative files. The
+common process runner optionally retains exact bounded stdout/stderr bytes; existing
+adapters keep their original defaults. Portable reports retain base64 and byte hashes,
+while normal responses are small previews. Known nonzero subject exits are captured
+outcomes; timeouts, signals, overflow and unknown observations are partial.
+
+[Native fault proof](verification/toolbox-capture.json) verified controlled inputs with
+109/142 outputs and resulting files, non-UTF8 bytes, binary stdin, exit 17, literal
+arguments, copied-input mutation, paging, comparison without rerun, duplicate/different
+request identity, timeout/overflow and stop/kill prefix retention. Killing the isolated
+Factory owner left the intent unknown, preserved working files and did not replay the
+program. Existing SQLite request identity is reused rather than adding another host or
+request service. This is not an OS sandbox or global file/network trace; the native alarm
+survives ordinary owner loss but a subject can deliberately replace its inherited alarm.
+
+### Bounded overview and drilldown
+
+C06 is a discoverable navigation skill across the existing tool APIs. Every admitted
+analytical workflow has an index/overview and focused bounded follow-up; tools retain
+their own row/byte/frame/instruction/line coordinates. ILSpy text and Ghidra function
+decompilation now default to 16000 Unicode-character windows, with explicit offsets,
+observed-text SHA256 and native source truncation. Pages from changed text cannot be
+silently combined. Full bounded ILSpy text can still be written to an ordinary file.
+Managed assembly reference/resource previews also expose their individual truncation.
+
+[Native global CLI proof](verification/toolbox-overview.json) selected managed methods,
+paged actual ILSpy and Ghidra text, independently checked full-file hashes and retained
+scope/identity through the final page. Offline regressions cover supplementary Unicode
+characters and a native truncated prefix that remains partial even at page EOF. Other
+applications' packet/event/object/stack/symbol bounds retain their dedicated native
+receipts. Inventory is 16 analytical families, six capabilities and 25 skills. All
+independent cold/prepared and combined inference-agent gates remain separately tracked;
+account quota does not stop native implementation or acceptance.

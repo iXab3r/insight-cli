@@ -773,3 +773,13 @@ or extend the combined native acceptance, and do not authorize npm publication.
 
 [sdk-GhidraApplicationLayout]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Utility/src/main/java/ghidra/GhidraApplicationLayout.java
 [sdk-ExtensionUtils]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Generic/src/main/java/ghidra/util/extensions/ExtensionUtils.java
+
+## Toolbox bounded text follow-up
+
+`ghidra functions decompile` now returns a bounded Unicode-character window (default
+16000, maximum 32768), retaining the session, target, function address, `textSha256`,
+`sourceTruncated`, offset and observed text size. It changes no upstream Ghidra/MCP API.
+Pages with different text hashes are separate observations; reaching the final page
+does not clear upstream truncation. [Native proof](verification/toolbox-overview.json)
+uses actual Ghidra and ILSpy text. This supplements rather than replaces the original
+P0–P3/full-facade artifact identities recorded above.

@@ -38,7 +38,8 @@ question. `insight-cli tools list --json` lists shipped capabilities before nati
 `tools show <tool>` locates its instructions. File utilities, format readers, scripts, decompilers, other CLIs and MCP tools
 may all help. Use existing tools directly; save useful output in the project's evidence
 location, including the command/version when needed to reproduce it. Inspect only relevant
-parts of large results. For static .NET research through the facade, see
+parts of large results; `skill insight-overview` describes bounded metadata and focused
+follow-ups across the toolbox. For static .NET research through the facade, see
 the tool skill returned by `insight-cli skill insight-ilspy`; it reuses immutable targets without requiring a
 Ghidra session. `tools processes` exposes owned executions and their diagnostic paths.
 

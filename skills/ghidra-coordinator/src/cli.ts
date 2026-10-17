@@ -1,3 +1,4 @@
+import {captureCommands} from './capture.js';
 import {binaryCommands} from './binary.js';
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
@@ -244,6 +245,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),
       ...binaryCommands(c=>owner.selected(c).workspace),
+      ...captureCommands(c=>owner.selected(c).workspace),
       ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
@@ -344,7 +346,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
           },{permission:Permission.Update,options:[...scoped,at,{flags:'--prototype <signature>',description:'Complete C prototype',required:true},
             {flags:'--calling-convention <name>',description:'Explicit convention supported by the selected compiler specification'},request]}),
           command('get','Read a function and entry comments',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address)),{permission:Permission.ReadOnly,options:[...scoped,at]}),
-          command('decompile','Read decompiled function text',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true),{permission:Permission.ReadOnly,options:[...scoped,at]}),
+          command('decompile','Read a bounded Unicode window of one decompiled function',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true,{limit:number(o.limitChars??16000,32768,1),offset:number(o.offsetChars??0,4*1024**2)}),{permission:Permission.ReadOnly,options:[...scoped,at,{flags:'--limit-chars <count>',description:'Return 1–32768 Unicode characters',defaultValue:16000},{flags:'--offset-chars <count>',description:'Skip Unicode characters in the returned native text',defaultValue:0}]}),
           command('rename','Record a saved private name',({options:o},c)=>{
             const name=text(o.name,512);if(name!==name.trim())fail('invalid','Function name may not have leading or trailing whitespace.');
             return owner.selected(c).research.edit(scope(o),address(o.address),'function.name',name,o.requestId===undefined?undefined:id(o.requestId),resolution(o));

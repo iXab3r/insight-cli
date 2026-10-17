@@ -13,10 +13,13 @@ or establish runtime behavior from pseudocode alone.
    `insight-cli ilspy install` prepares the pinned ILSpy and private .NET runtime.
    No machine-wide SDK is required. Use generated install help for local archives,
    offline cache or an external executable; see [workflows](references/ilspy.md).
-2. Start with `ilspy types <input> --json`, then decompile one relevant type/member,
+2. Start with `ilspy query <input> --json` and `--view types`, then decompile one relevant type/member,
    inspect its IL or metadata, or enumerate resources. Use returned target identity
    across calls/tools. `--target` reuses immutable bytes without opening Ghidra.
-3. Save useful text or extract a selected resource into new ordinary output paths.
+3. Text responses default to a 16000-character window. Page with `--limit-chars` and
+   `--offset-chars`; combine only pages with the same `textSha256`. The hash covers observed
+   native text, which may itself be incomplete. Save full bounded text with `--output`,
+   or extract a selected resource into new ordinary output paths.
    Recover a full project only when the question calls for it. Distinguish recovered
    code/names from source truth. Record commands/input identity alongside findings
    according to project rules.

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Native installed public CLI bounded overview/drilldown proof; other tool-specific pages retain their separate receipts, independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "checks": {
+    "sixDiscoverableCapabilityUnits": true,
+    "sixteenAnalyticalFamilies": true,
+    "boundedManagedOverview": true,
+    "pagedMethodSelection": true,
+    "actualIlspyCharacterWindows": true,
+    "fullOrdinaryFileIndependentHash": true,
+    "actualGhidraCharacterWindows": true,
+    "stableTextHashAndScopedIdentity": true,
+    "endOfObservedTextExplicit": true,
+    "nativeSourceTruncationFlagExplicit": true,
+    "invalidWindowBoundRefused": true,
+    "usefulFocusedCode": true,
+    "ordinaryCheckpoint": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "aab1f7636e0bdd131ce2e9c55246c4b5607b632a287ff94133a5e8dfd5ba0031"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "6f2697a",
+  "candidate": "Working-tree full capability candidate; exact package SHA/build bind native-tested bytes",
+  "packageSha256": "d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "929e399f8d3549dbb39ecef390c98877",
+    "passed": 1,
+    "failed": 0
+  },
+  "unicodeAndNativePrefixPolicy": {
+    "offlineRegressionTests": 2,
+    "supplementaryCharactersPreserved": true,
+    "nativeTruncationSurvivesEndOfPage": true
+  }
+}
