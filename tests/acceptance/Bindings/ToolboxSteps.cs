@@ -46,6 +46,10 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI inspects native images and their debug records")]
     public Task InspectNative() => Execute("scripts/toolbox/native-llvm.mjs", Value("llvmArchive"), Value("nativeSubjects"));
 
+    [When("the public CLI investigates the owned managed worker")]
+    public Task InspectManaged() => Execute("scripts/toolbox/native-diagnostics.mjs", Value("diagnosticsArchives"), Value("dotnetArchive"), Value("managedWorker"));
+
+    [Then("the waiting stack and heap state have retained diagnostic evidence")]
     [Then("native linkage and focused debug evidence survive tool removal")]
     [Then("all shipped skills are visible and unrelated project skills survive")]
     [Then("exact recovered bytes and configuration survive tool removal")]

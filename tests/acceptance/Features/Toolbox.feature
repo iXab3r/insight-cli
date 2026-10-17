@@ -1,6 +1,6 @@
 @toolbox @native
 Feature: The installed toolbox supports a real investigation
-  These checks establish host discovery, container recovery and native binary investigation.
+  These checks establish host discovery, container recovery, native binary investigation and live managed diagnostics.
   Independent model findings are reviewed separately; native execution is not an agent pass.
 
   Scenario: Discover tools before installing their runtimes
@@ -17,3 +17,8 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI inspects native images and their debug records
     Then native linkage and focused debug evidence survive tool removal
+
+  Scenario: Explain waiting managed work from stacks, heap and sampled time
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI investigates the owned managed worker
+    Then the waiting stack and heap state have retained diagnostic evidence

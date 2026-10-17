@@ -35,6 +35,7 @@ Current verified inventory:
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
 | 7-Zip | Public CLI adapter, dedicated skill, native Gherkin and independent cold/prepared host trials passed for the recorded package | Container inventory, integrity and bounded ordinary-file recovery |
 | LLVM utilities | Adapter/skill and pinned four-utility distribution implemented; native/Gherkin and reviewed cold/prepared medium-reasoning unit gates passed on the recorded package | Headers, linkage, symbols, instruction windows and PDB records |
+| .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; independent agent gates pending | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
 | Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.

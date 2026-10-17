@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "state": "native_passed_agent_pending",
+  "scope": "Diagnostics unit native developer proof, not independent model or complete toolbox acceptance",
+  "artifactSha256": "387419f7054f01d339ae04bd12978b1f9de987a89386d03b40a2b730d2323bcd",
+  "packageBuild": "6cf4d7a1b5e8d271a2b6f60bf98a239f2eb9fdf5f9e554af7c17fbb02386aa93",
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Owned native public CLI diagnostics proof; independent agent gates remain separate",
+    "version": "0.2.0",
+    "workerSha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb",
+    "checks": {
+      "privateRuntimeAllThreeTools": true,
+      "fullInstalledLicenseNotices": true,
+      "liveWaitingStack": true,
+      "realHeapCapture": true,
+      "matchingSOSStacksObjectsFieldsAndRoots": true,
+      "immutableDumpUnchanged": true,
+      "queryChainingRefused": true,
+      "boundedThreadTimeTrace": true,
+      "usefulWallClockRanking": true,
+      "readableSpeedscopeExport": true,
+      "outputOverwriteRefused": true,
+      "externalTargetLifetimePreserved": true,
+      "terminalOwnedCollectors": true,
+      "evidenceSurvivesUninstall": true
+    },
+    "cleanupComplete": true
+  },
+  "gherkin": {
+    "executed": 4,
+    "passed": 4,
+    "scope": "Host discovery, 7-Zip, LLVM and managed diagnostics"
+  },
+  "offline": {
+    "tests": 181,
+    "passed": 179,
+    "optInSkipped": 2,
+    "releaseTestsPassed": 23,
+    "isolatedPackageProof": true
+  },
+  "retainedFailure": "Acceptance build initially included nested fixture obj/assembly attributes. Excluding fixtures/**/*.cs from the acceptance project fixed the actual build failure.",
+  "independentAgentGate": "pending",
+  "wholeToolboxAccepted": false
+}

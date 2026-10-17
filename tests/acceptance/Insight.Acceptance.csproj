@@ -10,6 +10,7 @@
     <RestoreLockedMode Condition="'$(RestoreLockedMode)' == ''">true</RestoreLockedMode>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="fixtures/**/*.cs" />
     <ProjectReference Include="../vendor/EyeAuras.Automation/src/EyeAuras.Automation/EyeAuras.Automation.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageReference Include="NUnit" Version="4.6.1" />

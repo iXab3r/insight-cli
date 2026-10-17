@@ -26,10 +26,10 @@ test('standard archive installer verifies reuse, external selection, tampering a
  const archive=join(root,'fixture.tgz');await tar.c({cwd:source,file:archive,gzip:true},['bundle']);
  const artifact={name:'fixture',url:'https://example.invalid/not-used',sha256:await fileSha256(archive),size:(await stat(archive)).size,format:'tgz' as const,root:'bundle',license:'Synthetic'};
  const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal,fetch:async()=>{throw Error('Offline fixture must not use network');}} as unknown as import('@eyeauras/cli-factory').CommandContext;
- let probes=0;const descriptor={id:'fixture',primary:'tool',components:()=>({tool:artifact}),launch:(roots:Record<string,string>)=>({executable:join(roots.tool!,'run'),arguments:[],environment:{}}),probe:async(launch:{executable:string})=>{probes++;assert.equal(await readFile(launch.executable,'utf8'),'fixture tool');return {version:'fixture'};}};
+ let probes=0;const descriptor={noticeFiles:{'notices/LICENSE.TXT':'Full owned fixture license'},id:'fixture',primary:'tool',components:()=>({tool:artifact}),launch:(roots:Record<string,string>)=>({executable:join(roots.tool!,'run'),arguments:[],environment:{}}),probe:async(launch:{executable:string})=>{probes++;assert.equal(await readFile(launch.executable,'utf8'),'fixture tool');return {version:'fixture'};}};
  const installer=new ToolInstaller(context,descriptor);assert.equal((await installer.status()).state,'not_ready');
  const installed=await installer.install({archive,offline:true});assert.equal(installed.state,'installed');assert.equal(probes,1);
- await installer.install({offline:true});assert.equal(probes,1);const selected=await installer.selected();assert.equal(selected.mode,'managed');
+ await installer.install({offline:true});assert.equal(probes,1);const selected=await installer.selected();assert.equal(selected.mode,'managed');assert.equal(await readFile(join(selected.root,'notices/LICENSE.TXT'),'utf8'),'Full owned fixture license');
  await writeFile(selected.executable,'tampered');await assert.rejects(installer.selected(),/differs/);await installer.uninstall();assert.equal((await installer.status()).state,'not_ready');
  const external=join(root,'external');await writeFile(external,'fixture tool');await installer.install({executable:external,offline:true});await installer.uninstall(true);assert.equal(await readFile(external,'utf8'),'fixture tool');
  // Replacing an owned directory with a link cannot turn uninstall into external deletion.

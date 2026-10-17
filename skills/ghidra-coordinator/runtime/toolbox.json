@@ -61,6 +61,24 @@
       "title": "Insight LLVM",
       "path": "skills/insight-llvm/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-dotnet-dump",
+      "title": "Insight .NET Dump",
+      "path": "skills/insight-dotnet-dump/SKILL.md",
+      "resources": {}
+    },
+    {
+      "name": "insight-dotnet-stack",
+      "title": "Insight .NET Stack",
+      "path": "skills/insight-dotnet-stack/SKILL.md",
+      "resources": {}
+    },
+    {
+      "name": "insight-dotnet-trace",
+      "title": "Insight .NET Trace",
+      "path": "skills/insight-dotnet-trace/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -292,6 +310,146 @@
           "focused instruction evidence",
           "ordinary project evidence",
           "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-dump",
+      "namespace": "dotnet-dump",
+      "kind": "analytical",
+      "skill": "insight-dotnet-dump",
+      "purpose": "Capture a managed heap dump or inspect compatible .NET dumps with SOS to recover waiting stacks, objects, fields and retention evidence.",
+      "inputs": [
+        "explicit live .NET process PID",
+        "compatible managed dump"
+      ],
+      "tasks": [
+        "collect",
+        "analyze"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-dump 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-dump collect",
+        "dotnet-dump analyze"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "Compatible native runtime/DAC required for dump inspection"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-dump-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, explain where it is waiting and identify the held job and pending item count from a retained compatible snapshot. Keep focused evidence and a checkpoint.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-stack",
+      "namespace": "dotnet-stack",
+      "kind": "analytical",
+      "skill": "insight-dotnet-stack",
+      "purpose": "Inspect live managed thread stacks to identify active or waiting work in an explicitly selected .NET process without taking a dump.",
+      "inputs": [
+        "explicit live .NET process PID"
+      ],
+      "tasks": [
+        "report"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-stack 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-stack report"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "One stack is a point-in-time observation"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-stack-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, quickly identify the managed waiting call chain without creating a heap dump or a time-series recording. Retain the relevant snapshot and explain its limits.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-trace",
+      "namespace": "dotnet-trace",
+      "kind": "analytical",
+      "skill": "insight-dotnet-trace",
+      "purpose": "Collect and inspect bounded .NET EventPipe traces to identify sampled thread work, waits or runtime activity; distinguish wall-clock samples from CPU consumption.",
+      "inputs": [
+        "explicit live .NET process PID",
+        "EventPipe trace"
+      ],
+      "tasks": [
+        "collect",
+        "report",
+        "convert"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-trace 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-trace collect",
+        "dotnet-trace report",
+        "dotnet-trace convert"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "Sampled thread time is not kernel CPU consumption"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-trace-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, retain a short observation over time and a portable viewer export. Identify where sampled thread time went and explain whether that establishes CPU consumption.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
         ]
       }
     },

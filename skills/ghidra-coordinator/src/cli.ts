@@ -1,5 +1,6 @@
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
+import {diagnosticsCommands} from './dotnet-diagnostics.js';
 import {llvmCommands} from './llvm.js';
 import {sevenzipCommands} from './sevenzip.js';
 import {ilspyCommands} from './ilspy.js';
@@ -219,6 +220,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     builtins:[skillCommand()],
     commands:[
       ...artifactsCommands(),
+      ...diagnosticsCommands(c=>owner.selected(c).workspace),
       ...llvmCommands(c=>owner.selected(c).workspace),
       ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),

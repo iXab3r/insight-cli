@@ -74,3 +74,9 @@ skips these host-dependent checks.
 Before native acceptance, verify the global installation against the exact tarball with
 `node scripts/verify-global-package.mjs <tarball> <installed-package-root-or-POSIX-executable> <receipt.json>`.
 It compares every packaged file, retaining only the count, package SHA256 and build identity.
+
+For managed helpers, reuse `dotnetArtifact` and `dotnetLaunch` from `tool-runtime/dotnet.ts`;
+do not introduce another runtime resolver. `InstallDescriptor.noticeFiles` copies full
+retained notice text from packaged resources into owned installation storage. Its digest is
+part of the installation identity and its installed text is checked before use, including
+external selections. This complements upstream embedded notices and release companions.

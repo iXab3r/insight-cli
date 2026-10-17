@@ -11,7 +11,7 @@ test('toolbox discovery and all skills need no profile, native state or transpor
  const forbidden=new Proxy({}, {get(){return ()=>{throw Error('Profile, secret or native state must not be accessed');};}});
  const app=f.createApplication(runtime=>createInsightCli({runtime:{...runtime,profileStore:forbidden as never,secretStore:forbidden as never,fetch:async()=>{throw Error('No network');}},backend:()=>{throw Error('No native tool');}}));
  const list=await f.json(app,['tools','list','--profile','missing']) as {version:string;items:{id:string;kind:string;skill:string}[]};
- assert.equal(list.version,packageVersion);assert.deepEqual(list.items.map(x=>x.id),['ghidra','ilspy','sevenzip','llvm','artifacts']);
+ assert.equal(list.version,packageVersion);assert.deepEqual(list.items.map(x=>x.id),['ghidra','ilspy','sevenzip','llvm','dotnet-dump','dotnet-stack','dotnet-trace','artifacts']);
  for(const tool of list.items){
   const shown=await f.json(app,['tools','show',tool.id]) as {skill:{name:string;path:string};runtime:{readiness?:string;required:boolean}};
   assert.equal(shown.skill.name,tool.skill);assert.equal(shown.runtime.required,tool.kind==='analytical');

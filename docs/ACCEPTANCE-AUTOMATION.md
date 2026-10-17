@@ -160,9 +160,10 @@ packed/global-installed macOS candidate and all named research/recovery/removal 
 
 ## Toolbox development gates
 
-`Toolbox.feature` adds three separately selected native scenarios: actual Codex bundle
+`Toolbox.feature` adds four separately selected native scenarios: actual Codex bundle
 metadata connect/disconnect, a globally installed public 7-Zip container workflow, and
-LLVM investigation of owned PE/PDB, ELF and Mach-O images. Run
+LLVM investigation of owned PE/PDB, ELF and Mach-O images, plus live managed
+stack/heap/trace research. Run
 
 ```sh
 INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
@@ -172,11 +173,17 @@ The private JSON manifest supplies `packageRoot`, `sevenzipArchive`, `sevenzipEx
 owned two-entry fixture; `llvmArchive` and `nativeSubjects` select the LLVM archive and
 owned image directory. Prepare those images with `scripts/toolbox/prepare-native-inputs.mjs`
 and explicit Clang/lld-link/ld.lld paths (a maintainer fixture prerequisite, not a user SDK).
+`diagnosticsArchives`, `dotnetArchive` and `managedWorker` select the three retained NuGet
+archives, the private runtime archive and a maintainer-built owned console fixture. Build
+`tests/acceptance/fixtures/diagnostics/Probe.csproj` into a disposable output directory.
+The acceptance project excludes fixture source and nested build output from its own assembly.
 The driver creates a separate profile and test-only short temporary
 AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
-No ordinary user profile or installed tool is reset. All three scenarios passed together (3/3); an earlier runner-path failure was corrected
+No ordinary user profile or installed tool is reset. All four scenarios passed together (4/4); an earlier runner-path failure was corrected
 in the fixture setup. LLVM verifies each advertised family, the hexadecimal type index,
-output limits/overwrite refusal and external sibling drift/preservation.
+output limits/overwrite refusal and external sibling drift/preservation. Managed diagnostics
+verify the waiting stack, real heap/object/field/root evidence, a two-second thread-time
+trace, readable Speedscope export, preserved external target lifetime and retained licenses.
 
 These are native developer gates, not independent model acceptance. The
 [managed agent evidence](verification/toolbox-agent-managed.json) separately records cold
