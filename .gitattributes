@@ -10,3 +10,4 @@ skills/ghidra-coordinator/runtime/native/*.dll -text
 skills/ghidra-coordinator/runtime/native/*.def text eol=lf
 skills/ghidra-coordinator/runtime/native/dnspy-extension/* text eol=lf
 skills/ghidra-coordinator/runtime/native/dnspy-extension/*.dll -text
+skills/ghidra-coordinator/runtime/native/dnspy-extension/*.snk -text

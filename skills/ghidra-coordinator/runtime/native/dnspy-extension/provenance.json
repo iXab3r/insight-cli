@@ -4,7 +4,7 @@
   "target": "net10.0-windows",
   "sourceLicense": "MIT",
   "inputs": {
-    "Bridge.cs": "ffec46ba2190c48f1a1c56bba9add6cf3f19931863fcc79b98fe691c2951ce41",
+    "Bridge.cs": "09b58439dc85dfdc15a1c0d578e133d8a43383929b39ee29f1c83937fcb4b1cb",
     "Insight.DnSpy.csproj": "006adc7b2b8090d6a7273a00805aab82b1d496f33542d8cdf6216412018801e9",
     "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
     "packages.lock.json": "3ea8c3864c8f23b39364f9f40beb868ce4d8ecb62c5a25188dca037417beed3b",
@@ -21,7 +21,7 @@
     "dnlib.dll": "3b88e0948e2a6c49e5372c7e7d27817f5d2fb7ffed949b40cc98a2e5037b73ef",
     "System.ComponentModel.Composition.dll": "b2365dd9e0ced7cfa274d44ff668b8b0df28d4417b8e5e660e1c82df1239d7d8"
   },
-  "sha256": "5fe6facdedc6beda85fab6aa7b92104e01bd4fbc887d123f6a365aabebcc4742",
-  "size": 36352,
+  "sha256": "99bb8ddb2c771d68d6d95beb0b90bc69188a22d42556663929bf9d24b5dc61b8",
+  "size": 37376,
   "reproducible": true
 }

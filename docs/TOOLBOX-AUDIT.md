@@ -424,3 +424,30 @@ argument, stack, copied IL edit and changed-behavior gate on source `ef28f51`
 matched the packaged extension SHA256. Public CLI installation separately exposed private
 plan path validation; its gate remains open while normalized comparisons and field-specific
 errors are tested. No model acceptance is inferred from this native API proof.
+
+### TShark console delivery and offline protocol evidence
+
+The source-complete [immutable runtime release](https://github.com/iXab3r/insight-cli/releases/tag/tool-tshark-4.6.9-r1)
+contains an unchanged 4.6.9 console subset: 28 linked code files, 342 native protocol data
+files, full sources for Wireshark and all 22 bundled libraries, matching upstream build
+recipes and 76 full notices. Qt, GUI, dumpcap, extcap and system installers are excluded;
+macOS system libraries remain explicit host prerequisites. The recipe and relative file
+hash layout retain the exact original DMG identity and reproducible subset procedure.
+No system helper, root capture or trust/configuration change is performed.
+
+The new `tshark inspect` facade provides overview, filtered packet rows, one-frame detail,
+stream identities and typed TCP/UDP raw follow chunks. It captures immutable PCAP/PCAPNG
+inputs, disables external name/GeoIP lookup, uses private settings and bounds native
+output/lifetime. Inventory/filter/follow have a 10000-frame read boundary; row pagination
+is applied after filtering. A prefix cannot claim whole-file absence. The packaged
+`insight-tshark` skill explains those limits and links ordinary packet/stream evidence to
+capture identity. External selection prepares only the pinned known console files in an
+owned, separately fingerprinted copy. Native public CLI and Gherkin receipts are separate
+from the still-open quota-limited independent model gate.
+
+The next public CLI attempt completed managed preparation and doctor, then correctly
+refused to invent a breakpoint frame: the debugger reported the long Windows module
+path while the captured plan used its 8.3 alias. Matching now authenticates both existing
+files through `GetFinalPathNameByHandleW`, rather than comparing path spellings. The
+captured module token and input SHA remain required. Its native public CLI gate is rerun;
+the existing successful API receipt is not relabeled as public adapter acceptance.
