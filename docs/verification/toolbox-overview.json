@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "state": "passed",
-  "scope": "Native installed public CLI bounded overview/drilldown proof; other tool-specific pages retain their separate receipts, independent model gates pending",
+  "scope": "Native installed public CLI overview/drilldown and 1001-method short-name search proof; independent model receipts are separate",
   "platform": "darwin",
   "architecture": "arm64",
   "node": "v24.19.0",
@@ -10,6 +10,10 @@
     "sixteenAnalyticalFamilies": true,
     "boundedManagedOverview": true,
     "pagedMethodSelection": true,
+    "largeAssemblyHas1001Methods": true,
+    "caseInsensitiveShortMemberSearch": true,
+    "namespaceFilterCollisionExplicit": true,
+    "exactMemberWithoutWholeClass": true,
     "actualIlspyCharacterWindows": true,
     "fullOrdinaryFileIndependentHash": true,
     "actualGhidraCharacterWindows": true,
@@ -23,21 +27,9 @@
   },
   "build": {
     "version": 1,
-    "artifact": "aab1f7636e0bdd131ce2e9c55246c4b5607b632a287ff94133a5e8dfd5ba0031"
+    "artifact": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e"
   },
   "cleanupComplete": true,
-  "sourceBaseCommit": "6f2697a",
-  "candidate": "Working-tree full capability candidate; exact package SHA/build bind native-tested bytes",
-  "packageSha256": "d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61",
-  "nativeGherkin": {
-    "runner": "EyeAuras.Automation",
-    "runId": "929e399f8d3549dbb39ecef390c98877",
-    "passed": 1,
-    "failed": 0
-  },
-  "unicodeAndNativePrefixPolicy": {
-    "offlineRegressionTests": 2,
-    "supplementaryCharactersPreserved": true,
-    "nativeTruncationSurvivesEndOfPage": true
-  }
+  "runId": "05ba05150f7641e28b55753420524383",
+  "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99"
 }

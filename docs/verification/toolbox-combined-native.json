@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "state": "native_passed",
-  "scope": "Combined native public-CLI toolbox suite, not independent model or complete-product acceptance",
+  "scope": "Recorded combined native public-CLI candidate runs, not independent model or complete-product acceptance; latestImplementationRevision identifies the final native-tested implementation",
   "platform": "darwin-arm64",
   "node": "v24.19.0",
   "sourceCommit": "4027416c20e02d1104597bf75df02d93b59c0920",
@@ -132,9 +132,10 @@
     "deadlinesNotIncreased": true
   },
   "otherNativeProfiles": {
-    "windows": "https://github.com/iXab3r/insight-cli/actions/runs/39072836419",
-    "linux": "https://github.com/iXab3r/insight-cli/actions/runs/39072836451",
-    "sourceCommit": "a24db28fbd99cad8848b3e94474e3748eac54275",
+    "windows": "https://github.com/iXab3r/insight-cli/actions/runs/39077664218",
+    "linux": "https://github.com/iXab3r/insight-cli/actions/runs/39077664171",
+    "offline": "https://github.com/iXab3r/insight-cli/actions/runs/39077664196",
+    "sourceCommit": "75cca82f937acf70e5110feabdda773492b8e42a",
     "allJobs": "success"
   },
   "finalRevision": {
@@ -163,5 +164,135 @@
     "skippedOtherOperatingSystems": 4,
     "duration": "16m03s",
     "packageSha256": "fd7d40ab8873d0792a656e5d01d6039ed0f5d09c144c1e98f1983afb6c3a8ff7"
+  },
+  "latestImplementationRevision": {
+    "sourceCommit": "bac359cbdb23dcc42d10dba9fe3c23fe936cb49f",
+    "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+    "sourcePackByteIdentical": true,
+    "runId": "05ba05150f7641e28b55753420524383",
+    "passed": 17,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "16m07s",
+    "scenarios": [
+      {
+        "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+        "outcome": "Passed",
+        "duration": "00:03:47.9972170"
+      },
+      {
+        "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
+        "outcome": "Passed",
+        "duration": "00:00:54.5781740"
+      },
+      {
+        "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0034400"
+      },
+      {
+        "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0034990"
+      },
+      {
+        "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
+        "outcome": "Passed",
+        "duration": "00:00:16.8618300"
+      },
+      {
+        "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
+        "outcome": "Passed",
+        "duration": "00:00:42.7157150"
+      },
+      {
+        "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
+        "outcome": "Passed",
+        "duration": "00:00:00.4889540"
+      },
+      {
+        "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0091790"
+      },
+      {
+        "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
+        "outcome": "Passed",
+        "duration": "00:00:48.6262370"
+      },
+      {
+        "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
+        "outcome": "Passed",
+        "duration": "00:00:34.2130490"
+      },
+      {
+        "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+        "outcome": "Passed",
+        "duration": "00:00:43.5835730"
+      },
+      {
+        "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0012780"
+      },
+      {
+        "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
+        "outcome": "Passed",
+        "duration": "00:00:37.2765100"
+      },
+      {
+        "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
+        "outcome": "Passed",
+        "duration": "00:01:17.3208049"
+      },
+      {
+        "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
+        "outcome": "Passed",
+        "duration": "00:01:47.7573360"
+      },
+      {
+        "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
+        "outcome": "Passed",
+        "duration": "00:00:48.4470630"
+      },
+      {
+        "name": "InvestigateNativeLinkageAndDebugRecords",
+        "outcome": "Passed",
+        "duration": "00:00:31.6169270"
+      },
+      {
+        "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
+        "outcome": "Passed",
+        "duration": "00:01:13.3158820"
+      },
+      {
+        "name": "RemoveTemporaryHooksAfterCollectorInterruptionOrOwnerLoss",
+        "outcome": "Passed",
+        "duration": "00:00:56.6858510"
+      },
+      {
+        "name": "RecoverUsefulInputFromASuppliedContainer",
+        "outcome": "Passed",
+        "duration": "00:00:18.1477260"
+      },
+      {
+        "name": "ExplainWaitingManagedWorkFromStacksHeapAndSampledTime",
+        "outcome": "Passed",
+        "duration": "00:00:48.2540200"
+      }
+    ]
+  },
+  "finalGuidanceRevision": {
+    "receipt": "toolbox-skill-handoff-refinement.json",
+    "sourceCommit": "75cca82f937acf70e5110feabdda773492b8e42a",
+    "artifactSha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+    "nativeImplementationFilesByteIdentical": 382,
+    "notRelabeledAsExactNativeTestArtifact": true
+  },
+  "previousNativeProfiles": {
+    "windows": "https://github.com/iXab3r/insight-cli/actions/runs/39072836419",
+    "linux": "https://github.com/iXab3r/insight-cli/actions/runs/39072836451",
+    "sourceCommit": "a24db28fbd99cad8848b3e94474e3748eac54275",
+    "allJobs": "success"
   }
 }

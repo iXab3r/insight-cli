@@ -1,14 +1,16 @@
 # Agent toolbox: delivery plan
 
 Status: all sixteen analytical families and six capabilities have implemented public
-surfaces, packaged guidance (25 skills) and recorded native proofs. Three subsequent
+surfaces, packaged guidance (25 skills) and recorded native proofs. Four subsequent
 combined macOS candidates passed 17 cases with four OS-specific skips, including the
 managed profile-alias correction. Windows now requires all seven scoped native jobs;
-Windows, Linux and offline CI passed at `5f1f471`. Reviewed cold/prepared unit gates cover
+Reviewed cold/prepared unit gates cover
 7-Zip, LLVM, dump, stack, trace, DiE, LLDB, Frida, TShark, mitmproxy and C01/C02/C03/C05.
 C04 static interop publication/readback and autonomous cleanup passed cold/prepared;
-bounded large-assembly research passed both modes with a retained cold checkpoint-locator
-handoff gap. The final native rerun is in progress.
+bounded large-assembly research and final saved-path handoff passed both modes, with a
+retained cold snapshot-report metadata difference. ILSpy project/resource agents now also
+passed fresh cold/prepared checks. The final implementation native rerun passed 17 cases,
+zero failures and four OS skips (16m07s); Windows/Linux and offline CI passed on `75cca82`.
 Remaining family coverage and the exact-artifact combined agent gate stay open. The
 [inventory audit](TOOLBOX-AUDIT.md) preserves failed histories and package identities.
 Factory discovery/access fixes are merged and pinned. Native success is not
@@ -38,7 +40,7 @@ Current verified inventory:
 | Item | Current state | Role in toolbox |
 | --- | --- | --- |
 | Ghidra | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
-| ILSpy | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
+| ILSpy | Runtime/API implemented; reviewed cold/prepared project/resource and metadata units passed | Analytical tool with its own skill; combined/final-family gate remains separate |
 | artifacts | File/folder save implemented | Supporting application with concise workflow guidance; no artificial download/install lifecycle |
 | Ghidra Server/headless/GUI/debugger roles | Managed within Ghidra | Explicit capabilities/lifecycle under Ghidra; list separately only when independently useful to the agent |
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
@@ -56,7 +58,7 @@ Current verified inventory:
 | Structured binaries | LIEF API/skill, immutable source mirror, native Gherkin and cold/prepared copy-edit model unit proof passed | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
 | Managed/native correspondence | Public API composition, dedicated skill, real Ghidra Gherkin and reviewed cold/prepared static publication/readback/cleanup unit proof passed | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
 | Owned process capture | Capture API/skill, execution/fault Gherkin and cold/prepared retained-report model unit proof passed | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
-| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research passed with a cold final-checkpoint-locator gap | Small metadata/index queries and focused source-bound evidence pages |
+| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research and final locators passed; cold saved report retains a pending checkpoint footer | Small metadata/index queries and focused source-bound evidence pages |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -64,6 +66,26 @@ unsupported result elsewhere. Do not make every tool run on every OS, add emulat
 a complete tool-by-all-OS test matrix. Native proof runs in an appropriate environment for that
 tool; an unavailable environment leaves the row unverified, never implicitly passed. Codex is
 the first actual agent-host gate, not the universal definition of an agent.
+
+## Remaining acceptance gates
+
+The implementation inventory is complete; the following checks remain distinct from it:
+
+- The C06 cold saved snapshot contains all research and identical raw evidence, but its
+  report still says checkpoint pending; the agent updated that footer only in its ordinary
+  report after saving. Prepared all-file checkpoint bytes and both final locators passed.
+  This is recorded as a snapshot-metadata gap, not byte-identical final-project acceptance.
+- Ghidra's complete GUI/debugger family and the final multi-client whole-toolbox agent
+  workflow require their own recorded acceptance. Static interop publication/readback is
+  a selected unit, not proof of every exposed operation.
+- WinDbg, ProcMon, dnSpyEx and strace have actual native CI, but no independently reviewed
+  cold/prepared model trials in their respective native hosts. A native script cannot
+  substitute for those trials; an authenticated model runner is not provisioned there.
+- The first combined native attempt's empty version-probe/Frida startup failures remain
+  unexplained historical observations. Subsequent passing runs do not claim a diagnosed
+  fix, longer deadlines or permission to replay unknown effects.
+- Final exact-artifact, cross-tool/host acceptance and release review remain open. No npm
+  publication or merge of draft PR #55 follows from individual unit success.
 
 ## Complete tool and capability inventory
 

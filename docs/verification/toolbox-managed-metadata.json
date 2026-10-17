@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "state": "passed",
-  "scope": "Native installed public CLI metadata refinement proof; independent model units are recorded separately",
+  "scope": "Native installed public CLI metadata refinement proof; independent model receipts are separate",
   "platform": "darwin",
   "architecture": "arm64",
   "node": "v24.19.0",
@@ -30,9 +30,9 @@
   },
   "build": {
     "version": 1,
-    "artifact": "ef05561db453a7994f4e25f5a7ffb168f71e28ed74f6942f63f9caf5e45af2b3"
+    "artifact": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e"
   },
   "cleanupComplete": true,
-  "runId": "555c98b4f99444e8bd925a6bb99a77af",
-  "artifactSha256": "6319b918ddc6cd4bb7c4f2b19eb2c1019852c0fc3dabd5016935fb87fff640ec"
+  "runId": "05ba05150f7641e28b55753420524383",
+  "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99"
 }

@@ -829,3 +829,42 @@ checkpoint handoff rule. Fresh trials run on that guide-only refinement. Its 382
 runtime and reference files are byte-identical to the frozen combined-native candidate.
 The refined package passed all 29 release checks, all 25 source skill validators and the
 offline relocated-package proof. Broader model gates are not closed by that native identity.
+
+### Final source-blind project/resource and handoff refinement
+
+Fresh [ILSpy project/resource agents](verification/toolbox-agent-ilspy-project.json)
+passed cold/prepared after the guide correction: both recovered an inspectable source
+project and a separate resource, independently matched its 64 bytes/hash against the
+project copy, retained correct findings and handed off a byte-verified saved findings folder.
+No supplied target was executed or compiled. Prior cold errors remain in the same receipt.
+
+The later [bounded discovery tasks](verification/toolbox-agent-overview.json) also returned
+both exact saved locators and correct method results with no whole-class decompilation.
+Maximum completed command stdout was 10015/12079 bytes. The cold saved report still has its
+pending-checkpoint footer: only that footer was updated in the ordinary report after save.
+All raw evidence and the analytical report body matched; the record deliberately does not
+claim every final project byte equals the checkpoint. Prepared passed the full byte check.
+The earlier locator gap is resolved in these trials, while this snapshot-metadata difference
+remains explicit. No additional analytical evidence was missing from the cold saved copy.
+
+[The package delta receipt](verification/toolbox-skill-handoff-refinement.json) binds the
+new guide-only artifact to the combined-native implementation: only the two skills, their
+bundle copies and build manifest differ. All 382 executable/runtime/reference files match.
+This does not silently relabel a different whole package as the exact native-tested artifact.
+
+### Final combined native implementation acceptance
+
+Run `05ba05150f7641e28b55753420524383` passed **17 macOS native scenarios, zero failures,
+four OS-specific skips**, in 16m07s on the frozen `bac359c` implementation package. It
+includes actual LLDB lifetime/owner-loss and Frida collector/hook faults, the extended
+1001-method C06 proof and C04 publication/readback. The [combined receipt](verification/toolbox-combined-native.json)
+retains every prior failed/pass candidate separately. The later `75cca82` handoff-guide
+package has the same 382 executable/runtime/reference files, a clean byte-identical pack,
+its own package/release checks and fresh ILSpy/C06 model receipts.
+
+Windows [39077664218](https://github.com/iXab3r/insight-cli/actions/runs/39077664218) passed
+all seven actual native jobs plus their aggregate on `75cca82`. Linux
+[39077664171](https://github.com/iXab3r/insight-cli/actions/runs/39077664171) and offline
+[39077664196](https://github.com/iXab3r/insight-cli/actions/runs/39077664196) also passed.
+The separate prepared Ghidra GUI/debugger model investigation is still under review;
+neither static interop nor this native suite silently completes that agent-family gate.

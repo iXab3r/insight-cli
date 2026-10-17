@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "state": "research_passed_evidence_gaps",
-  "scope": "ILSpy project/resource family selected business findings passed; initial cold evidence/handoff quality remains unaccepted",
+  "state": "cold_prepared_passed",
+  "scope": "Independently reviewed ILSpy project/resource family unit, including correct extracted-file hash and exact saved handoff; broader and combined toolbox gates remain separate",
   "model": "gpt-6-luna",
   "reasoningEffort": "medium",
   "fixtureSources": [
@@ -9,7 +9,17 @@
     "tests/acceptance/fixtures/managed/Research.cs",
     "tests/acceptance/fixtures/managed/settings.json"
   ],
-  "trials": {
+  "verifiedFindings": {
+    "cost9": 108,
+    "cost10": 107,
+    "decoded0x13": "0x49",
+    "declaredEndpoint": "https://example.invalid/telemetry",
+    "retryLimit": 7,
+    "declaredNativeImport": "kernel32.dll!GetTickCount",
+    "noTargetExecutionOrCompilationObserved": true
+  },
+  "correctiveGuidance": "The ILSpy skill now distinguishes extracted-file hashes from listing-text hashes and requires actual saved-path readback/final handoff when checkpointing.",
+  "priorGuideTrials": {
     "cold": {
       "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
       "packageBuild": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e",
@@ -53,18 +63,70 @@
       "ownedJobsTerminal": true
     }
   },
-  "verifiedFindings": {
-    "cost9": 108,
-    "cost10": 107,
-    "decoded0x13": "0x49",
-    "declaredEndpoint": "https://example.invalid/telemetry",
-    "retryLimit": 7,
-    "declaredNativeImport": "kernel32.dll!GetTickCount",
-    "noTargetExecutionOrCompilationObserved": true
-  },
-  "remainingGaps": [
+  "retainedPriorGaps": [
     "Cold agent confused the 30-character resource-list text digest with the actual extracted 64-byte JSON digest in prose. Actual recovered JSON was independently verified.",
     "Cold saved only the recovered source project, did not read the saved copy and omitted its exact final locator. Prepared saved all findings, independently verified copies and provided its locator."
   ],
-  "correctiveGuidance": "The ILSpy skill now distinguishes extracted-file hashes from listing-text hashes and requires actual saved-path readback/final handoff when checkpointing."
+  "trials": {
+    "cold": {
+      "elapsedMs": 92722,
+      "candidateInvocations": 17,
+      "artifactSha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+      "skillBundleSha256": "2f3f032c5702b546464d8aad0d99ec5c5d4453b40911f3073a6352c319eb1a17",
+      "packageBuild": "199c1421e0e17eeb6f9018947ff8fcbce3ac3e47dafbc1e8b132a4b1db44c6e4",
+      "prompt": "Recover an inspectable source project from the supplied managed library without executing or compiling target code. Explain its cost calculation for counts 9 and 10 and its byte decoding operation for encoded byte 0x13. Recover the embedded configuration as an ordinary file, establish the declared endpoint and retry setting, and distinguish those declarations from observed network behavior. Identify any native linkage declaration and its applicability. Keep concise useful findings, exact input identity, ordinary recovered files and a verified completed checkpoint. No author source or SDK is supplied to the investigation.",
+      "promptSha256": "f1d5dbb9aba852e7f6abcbfa30b214e91bc2a08c8feac6acbd78d5b43a5fdeac",
+      "inputs": [
+        {
+          "path": "input/ResearchFixture.dll",
+          "sha256": "b833672452f9d80ebfbb7c5e3392e938b4ad33df32392d13f764c5d5b0ed5958"
+        }
+      ],
+      "checkpointFiles": 6,
+      "checkpointBytes": 4706,
+      "checkpointSha256": "7bb5c71141682edea22b0dad978838c6fcaa7f27e00a517e26e1665445502e39",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 8,
+      "recoveredProjectAndSeparateResourceExport": true,
+      "sourceAndExtractedResourceCopiesMatched": true,
+      "actualResourceBytes": 64,
+      "actualResourceSha256": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+      "resourceFileHashCorrectlyReported": true,
+      "noTargetExecutionOrCompilationObserved": true
+    },
+    "prepared": {
+      "elapsedMs": 52852,
+      "candidateInvocations": 13,
+      "artifactSha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+      "skillBundleSha256": "2f3f032c5702b546464d8aad0d99ec5c5d4453b40911f3073a6352c319eb1a17",
+      "packageBuild": "199c1421e0e17eeb6f9018947ff8fcbce3ac3e47dafbc1e8b132a4b1db44c6e4",
+      "prompt": "Recover an inspectable source project from the supplied managed library without executing or compiling target code. Explain its cost calculation for counts 9 and 10 and its byte decoding operation for encoded byte 0x13. Recover the embedded configuration as an ordinary file, establish the declared endpoint and retry setting, and distinguish those declarations from observed network behavior. Identify any native linkage declaration and its applicability. Keep concise useful findings, exact input identity, ordinary recovered files and a verified completed checkpoint. No author source or SDK is supplied to the investigation.",
+      "promptSha256": "f1d5dbb9aba852e7f6abcbfa30b214e91bc2a08c8feac6acbd78d5b43a5fdeac",
+      "inputs": [
+        {
+          "path": "input/ResearchFixture.dll",
+          "sha256": "b833672452f9d80ebfbb7c5e3392e938b4ad33df32392d13f764c5d5b0ed5958"
+        }
+      ],
+      "checkpointFiles": 7,
+      "checkpointBytes": 5386,
+      "checkpointSha256": "b80d31a6bd5b8c7b43328e7c5d7f0b0ce5867b65e708576f6f2ce4ad921a52d0",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 9,
+      "recoveredProjectAndSeparateResourceExport": true,
+      "sourceAndExtractedResourceCopiesMatched": true,
+      "actualResourceBytes": 64,
+      "actualResourceSha256": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+      "resourceFileHashCorrectlyReported": true,
+      "noTargetExecutionOrCompilationObserved": true
+    }
+  }
 }
