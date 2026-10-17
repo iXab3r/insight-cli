@@ -24,7 +24,7 @@ function StartOwned([string[]]$arguments,[string]$mutex=$null){
 function FinishOwned($execution){
  if(!$execution.process.WaitForExit(35000)){$execution.process.Kill($true);throw 'Owned isolated controller timed out'}
  $text=$execution.stdout.GetAwaiter().GetResult();$errorText=$execution.stderr.GetAwaiter().GetResult()
- if($execution.process.ExitCode -ne 0){throw ('Owned isolated controller failed: '+$errorText+$text)}
+ if($execution.process.ExitCode -ne 0){$started=Join-Path $execution.directory 'job-started.json';if(Test-Path $started){Write-Host ([IO.File]::ReadAllText($started))};throw ('Owned isolated controller failed: '+$errorText+$text)}
  $receipt=Get-Content (Join-Path $execution.directory 'job-result.json') -Raw|ConvertFrom-Json
  if($receipt.phase -ne 'completed'){throw ('Owned isolated controller outcome: '+$receipt.phase)}
  return $receipt

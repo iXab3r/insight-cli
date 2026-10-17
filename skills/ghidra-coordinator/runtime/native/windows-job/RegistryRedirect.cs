@@ -10,6 +10,7 @@ namespace Insight.WindowsJob {
   [DllImport("kernel32.dll",CharSet=CharSet.Ansi,SetLastError=true)] static extern IntPtr GetProcAddress(IntPtr module,string name);
   [DllImport("kernel32.dll")] static extern bool FreeLibrary(IntPtr module);
   [UnmanagedFunctionPointer(CallingConvention.Winapi)] delegate bool PrepareProcess(IntPtr process);
+  [DllImport("kernel32.dll")] static extern bool GetExitCodeProcess(IntPtr process,out uint code);
   IntPtr hive,user,module;FileStream held;PrepareProcess prepare;readonly string shim,ack,nonce;
   static void Check(int code){if(code!=0)throw new Win32Exception(code);}
   public RegistryRedirect(string root,string source,string expected,string nonce){
@@ -28,10 +29,11 @@ namespace Insight.WindowsJob {
    }catch{Dispose();throw;}
   }
   public void Prepare(IntPtr process,uint pid){if(!prepare(process))throw new Win32Exception(Marshal.GetLastWin32Error());}
-  public void Verify(uint pid){
+  public void Verify(IntPtr process,uint pid){
    for(int i=0;i<100;i++){
     byte[] proof=null;try{proof=File.ReadAllBytes(ack);}catch(IOException){}
     if(proof!=null&&proof.Length==48){if(BitConverter.ToUInt32(proof,0)!=0x49484b31||BitConverter.ToUInt32(proof,4)!=pid||Encoding.ASCII.GetString(proof,12,36)!=nonce)throw new InvalidOperationException("Owned registry initialization receipt is invalid");Check((int)BitConverter.ToUInt32(proof,8));return;}
+    uint code;if(GetExitCodeProcess(process,out code)&&code!=259)throw new InvalidOperationException("Owned tool exited before registry initialization (0x"+code.ToString("x8")+")");
     System.Threading.Thread.Sleep(50);
    }
    throw new InvalidOperationException("Owned registry initialization receipt is missing after its deadline");
