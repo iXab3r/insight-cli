@@ -74,3 +74,9 @@ Feature: The installed toolbox supports a real investigation
     Given an owned Windows file-observation fixture is prepared
     When the public CLI observes and reopens the Windows file capture
     Then actual file evidence survives collector interruption and removal
+
+  @dnspy @windows
+  Scenario: Observe managed arguments and verify a separately patched assembly
+    Given an owned Windows managed-research fixture is prepared
+    When the public CLI debugs and edits the managed Windows inputs
+    Then managed runtime findings and copied edits preserve original inputs

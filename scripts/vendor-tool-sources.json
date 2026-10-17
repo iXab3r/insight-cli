@@ -30,6 +30,21 @@
         "termsUrl": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/",
         "reason": "The inspected bundled EULA prohibits redistribution. Use the exact vendor-version URL, pinned SHA256 and local cache."
       }
+    },
+    {
+      "name": "dnSpyEx-6.6.0-net-win64.zip",
+      "url": "https://github.com/dnSpyEx/dnSpy/releases/download/v6.6.0/dnSpy-net-win64.zip",
+      "sha256": "8ed48f165dc355e869f3a0037ad4f9216147f995a5ae0258b296eeef1f73aab0",
+      "size": 99558585,
+      "format": "zip",
+      "root": ".",
+      "license": "GPL-3.0-or-later application plus retained component notices; six VS 2017 NuGet runtime DLLs have Microsoft terms forbidding our redistribution",
+      "delivery": {
+        "kind": "vendor-direct",
+        "publisher": "dnSpyEx",
+        "termsUrl": "https://visualstudio.microsoft.com/license-terms/mlt552233/",
+        "reason": "The original pinned dnSpyEx bundle contains Microsoft.VisualStudio.CoreUtility, Language.Intellisense and Text.Data/Logic/UI/UI.Wpf 15.5.27130 with the Microsoft VS 2017 tools/add-ons terms (NuGet licenseUrl aka.ms/pexunj), which prohibit sharing/publishing. Acquire the unmodified upstream bundle explicitly; do not mirror it or those DLLs."
+      }
     }
   ]
 }

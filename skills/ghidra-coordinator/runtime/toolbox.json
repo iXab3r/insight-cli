@@ -115,6 +115,12 @@
       "title": "Insight ProcMon",
       "path": "skills/insight-procmon/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-dnspy",
+      "title": "Insight dnSpyEx",
+      "path": "skills/insight-dnspy/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -737,6 +743,61 @@
           "global preferences unchanged",
           "owned capture cleanup",
           "retained observation reuse"
+        ]
+      }
+    },
+    {
+      "id": "dnspy",
+      "namespace": "dnspy",
+      "kind": "analytical",
+      "skill": "insight-dnspy",
+      "purpose": "Observe managed breakpoint parameters and make a controlled IL constant edit in a new assembly copy",
+      "inputs": [
+        "authorized Windows Framework EXE",
+        "Core apphost EXE with explicit managed module/companions",
+        "managed EXE or DLL for static copy editing"
+      ],
+      "tasks": [
+        "read actual primitive parameters and managed stack at a selected IL breakpoint",
+        "replace one expected Int32 IL constant in a new assembly copy"
+      ],
+      "platforms": [
+        "win32-x64-desktop"
+      ],
+      "dependencies": [
+        "dnSpyEx 6.6.0 with bundled debugger .NET 10.0.9",
+        "private .NET 10.0.13 for managed Core target setup",
+        "interactive Windows desktop"
+      ],
+      "workflowCommands": [
+        "dnspy inspect",
+        "dnspy edit-constant"
+      ],
+      "limitations": [
+        "Original upstream bundle contains separately licensed Microsoft DLLs; explicit upstream-only download, local cache and pinned SHA256; no insight-cli mirror",
+        "Breakpoint tokens/IL offsets belong to one exact managed module",
+        "Debugging launches a new owned process; original application side effects need authorization",
+        "Explicit input companions; no guessed startup dependencies",
+        "Primitive parameters only; no arbitrary C# evaluation or existing PID attachment",
+        "One expected Int32 IL load per static edit; signatures and output behavior require independent verification",
+        "No automatic replay of uncertain executions or edits"
+      ],
+      "evaluationCase": {
+        "id": "windows-managed-breakpoint-and-copy-edit",
+        "inputFamily": "owned-managed-calculation",
+        "task": "Determine which actual managed argument reaches the supplied calculation and how a selected configuration constant affects the result. Retain runtime and IL evidence, make and verify a separate changed copy, preserve original inputs and project notes, and verify owned debugger cleanup.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "real managed breakpoint and argument",
+          "correct module/IL evidence",
+          "separate patched copy with independently verified behavior",
+          "original inputs preserved",
+          "ordinary project evidence",
+          "owned debugger and debuggee cleanup"
         ]
       }
     },

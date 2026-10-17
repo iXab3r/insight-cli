@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "sdk": "10.0.303",
+  "target": "net10.0-windows",
+  "sourceLicense": "MIT",
+  "inputs": {
+    "Bridge.cs": "478e4af7b1c1412f9e2ffb1aff5cff9c7ff05c683da0778ede20b2552bee6e75",
+    "Insight.DnSpy.csproj": "006adc7b2b8090d6a7273a00805aab82b1d496f33542d8cdf6216412018801e9",
+    "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
+    "packages.lock.json": "3ea8c3864c8f23b39364f9f40beb868ce4d8ecb62c5a25188dca037417beed3b"
+  },
+  "contracts": {
+    "dnSpy.Contracts.DnSpy.dll": "1b883b87bb52dad1b1ef677ad7e80e288df2cdf913c791f7bd3072a36e2839e2",
+    "dnSpy.Contracts.Logic.dll": "871b92de3f8dbde673c2a97a0644711acc200b36f5047479e379cc1b2877e56d",
+    "dnSpy.Contracts.Debugger.dll": "ae4959c879de0542a3da9fc41038799ab8b3f5a49a9b196aa93592f6a170121d",
+    "dnSpy.Contracts.Debugger.DotNet.dll": "d646e9daa14f6013bbdcaa3527b14e71da5a046e03a50cfd067d77f493bc0637",
+    "dnSpy.Contracts.Debugger.DotNet.CorDebug.dll": "a719d08143b03e327eb98618e209efdfd790ec611a91f89429d85e647f36e755",
+    "dnSpy.Debugger.DotNet.Metadata.dll": "360ef98e9d0c222d6c52c2c4573ea09098dad147f59208e60a9eb94267959f57",
+    "dnlib.dll": "3b88e0948e2a6c49e5372c7e7d27817f5d2fb7ffed949b40cc98a2e5037b73ef",
+    "System.ComponentModel.Composition.dll": "b2365dd9e0ced7cfa274d44ff668b8b0df28d4417b8e5e660e1c82df1239d7d8"
+  },
+  "sha256": "6e18c9b902767f864230791e4788441e0a6c0f98903f1d90924a82835a23254d",
+  "size": 28160,
+  "reproducible": true
+}

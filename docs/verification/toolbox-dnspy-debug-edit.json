@@ -1,0 +1,18 @@
+{
+  "observedArgument11": true,
+  "schema": 1,
+  "scope": "Actual dnSpyEx debugger and editor document API feasibility; public adapter/model gates pending",
+  "editorDocumentLoaded": true,
+  "originalSha256": "b3b01d35f73284fedd532358e117ee91d461cdcf50354c3e75e5bfbb7b0e64c5",
+  "managedBreakpointHit": true,
+  "patchedSha256": "804108d3adcf92249969ffa94625a382746cc9d53a8761ac57a560474a6b2e6a",
+  "passed": true,
+  "ownedDebuggerExited": true,
+  "managedStackPresent": true,
+  "extensionSha256": "cd87e27830ec42a30319de8697af263a2be45ca543832a6659618896de7dba16",
+  "actualPatchedBehavior": true,
+  "version": "6.6.0",
+  "originalPreserved": true,
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39058531975",
+  "sourceCommit": "7675d20"
+}

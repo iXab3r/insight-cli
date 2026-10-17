@@ -2,6 +2,7 @@ import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {diagnosticsCommands} from './dotnet-diagnostics.js';
 import {fridaCommands} from './frida.js';
+import {dnspyCommands} from './dnspy.js';
 import {procmonCommands} from './procmon.js';
 import {straceCommands} from './strace.js';
 import {windbgCommands} from './windbg.js';
@@ -232,6 +233,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ...lldbCommands(c=>owner.selected(c).workspace),
       ...windbgCommands(c=>owner.selected(c).workspace),
       ...procmonCommands(),
+      ...dnspyCommands(c=>owner.selected(c).workspace),
       ...straceCommands(c=>owner.selected(c).workspace),
       ...fridaCommands(c=>owner.selected(c).workspace),
       ...sevenzipCommands(c=>owner.selected(c).workspace),

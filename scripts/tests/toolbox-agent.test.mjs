@@ -22,7 +22,7 @@ test('synthetic evaluator transport outcomes never become semantic acceptance',a
   await writeFile(codexExecutable,'#!'+process.execPath+'\n'+program+'\n',{mode:0o755});
   const manifest={packageRoot,project,preload,artifact,codexExecutable,outputDirectory:join(root,'result'),inputs:['input.bin'],prompt:'Synthetic fixture. No model request is made.',model:'synthetic-do-not-infer',timeoutSeconds:name==='deadline'?1:30};
   const path=join(root,'manifest.json');await writeFile(path,JSON.stringify(manifest));let failure;
-  try{await execute(process.execPath,[runner,path],{env:{...process.env,INSIGHT_NATIVE_DISPOSABLE:'1',INSIGHT_RUN_AGENT_EVAL:'1'},timeout:10000});}catch(error){failure=error;}
+  try{await execute(process.execPath,[runner,path],{env:{...process.env,INSIGHT_NATIVE_DISPOSABLE:'1',INSIGHT_RUN_AGENT_EVAL:'1'},timeout:(manifest.timeoutSeconds+35)*1000});}catch(error){failure=error;}
   const result=JSON.parse(await readFile(join(root,'result/result.json'),'utf8'));assert.equal(result.state,expected,name);assert.equal(result.semanticReviewRequired,true);assert.equal(result.toolSpecificCleanupReviewRequired,true);assert.ok(result.promptSha256&&result.artifactSha256&&result.skillBundleSha256);
   if(expected==='failed')assert.ok(failure,name);else assert.equal(failure,undefined);
   if(name==='input-changed')assert.equal(result.inputsUnchanged,false);if(name==='deadline')assert.equal(result.timedOut,true);

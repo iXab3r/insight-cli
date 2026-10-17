@@ -385,3 +385,25 @@ TShark and mitmproxy, plus the six planned capabilities. dnSpyEx has a typed ext
 compiled against its pinned actual contracts; its debugger/editor native gate is running.
 Independent cold/prepared model and combined full-inventory gates remain open; inference
 quota does not block implementation or native checks.
+
+
+### dnSpyEx debugger/editor API proof and distribution audit
+
+The [native API receipt](verification/toolbox-dnspy-debug-edit.json) confirms that the
+first-party MEF extension actually read argument 11 at a managed IL breakpoint, retained
+stack frames, edited an expected IL constant through dnSpy's loaded document and verified
+the changed copy's behavior (37) while preserving the original. Opening a GUI alone is
+not this gate. The Framework proof passed; Core apphost and globally installed public CLI
+scenarios are being checked separately on the new adapter/skill artifact.
+
+[Component audit](verification/toolbox-dnspy-components.json) found 39 NuGet dependencies
+and the self-contained .NET/WindowsDesktop 10.0.9 runtime. Six VS 2017 SDK packages use
+[separate Microsoft terms](https://visualstudio.microsoft.com/license-terms/mlt552233/)
+that prohibit sharing/publishing. The main application's GPL declaration is not a grant
+to mirror those separately licensed DLLs. The exact unmodified dnSpyEx bundle therefore
+uses explicit upstream GitHub acquisition (`--vendor-direct`), SHA256, local cache and
+local-archive/external setup through the existing delivery path. It never enters our mirror
+publisher. The first-party MIT bridge's sources, contracts hashes, prebuilt managed DLL
+and two-build provenance are packaged; no third-party reference DLLs or consumer compiler
+are included. Managed Core target setup additionally delivers the existing private .NET
+10.0.13 component; other target runtime versions require a compatible explicit host.

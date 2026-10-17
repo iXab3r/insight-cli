@@ -1,0 +1,920 @@
+{
+  "schema": 1,
+  "bundleVersion": "6.6.0",
+  "bundleSha256": "8ed48f165dc355e869f3a0037ad4f9216147f995a5ae0258b296eeef1f73aab0",
+  "scope": "Dependency/licensing audit of the unmodified upstream bundle, not a redistribution grant or public CLI acceptance",
+  "sourceCommit": "e2bada24b1c63683f41bdc0ae2b0119c686ce88a",
+  "packagedRuntime": "Microsoft.NETCore.App/WindowsDesktop.App win-x64 10.0.9",
+  "delivery": "explicit vendor-direct from original dnSpyEx GitHub release, pinned SHA256 and local cache; no insight-cli mirror",
+  "restrictedComponents": [
+    "Microsoft.VisualStudio.CoreUtility/15.5.27130",
+    "Microsoft.VisualStudio.Language.Intellisense/15.5.27130",
+    "Microsoft.VisualStudio.Text.Data/15.5.27130",
+    "Microsoft.VisualStudio.Text.Logic/15.5.27130",
+    "Microsoft.VisualStudio.Text.UI/15.5.27130",
+    "Microsoft.VisualStudio.Text.UI.Wpf/15.5.27130"
+  ],
+  "licenseEvidence": {
+    "nugetLicenseUrl": "https://aka.ms/pexunj",
+    "resolvedPage": "https://visualstudio.microsoft.com/license-terms/mlt552233/",
+    "document": "https://visualstudio.microsoft.com/wp-content/uploads/2018/03/VS_2017_Tools_AddOns_C_RTW_ENU_Eula.1033.docx",
+    "documentSha256": "d6a607da4bb74068bd6a80fc1addc4aaaae673b530a085864fb718bf20a66f8c",
+    "finding": "The scope clause prohibits sharing/publishing; installation/use of any number of copies is permitted. The bundle is acquired directly by the consumer rather than redistributed by insight-cli."
+  },
+  "packages": [
+    {
+      "name": "dnlib",
+      "version": "4.5.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/dnlib/4.5.0/dnlib.4.5.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/0xd4d/dnlib",
+          "commit": "c78d296c522aae0520df2afd825d48266321cf36"
+        }
+      },
+      "sha256": "63bc2f9579568204cc8b30fa9f6700a231bcf868a8032e09118887af3eafee58",
+      "size": 2375358
+    },
+    {
+      "name": "Humanizer.Core",
+      "version": "2.14.1",
+      "url": "https://api.nuget.org/v3-flatcontainer/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/Humanizr/Humanizer",
+          "commit": "3ebc38de585fc641a04b0e78ed69468453b0f8a1"
+        }
+      },
+      "sha256": "117be88dd74fbbef492a0386f4d4908144df5aad51a4e630eda7710cf28327aa",
+      "size": 538179
+    },
+    {
+      "name": "Iced",
+      "version": "1.21.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/iced/1.21.0/iced.1.21.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/icedland/iced",
+          "commit": "601c40570d6c986c8e1a6a2e483dd2fdf5ade552"
+        }
+      },
+      "sha256": "d31613617e3ddf91239bbc94a8c587849b4236e8f8a2a2ba59ea2397a1487c7a",
+      "size": 2127279
+    },
+    {
+      "name": "MessagePack",
+      "version": "2.5.192",
+      "url": "https://api.nuget.org/v3-flatcontainer/messagepack/2.5.192/messagepack.2.5.192.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/MessagePack-CSharp/MessagePack-CSharp",
+          "commit": "d3d435b96cf09b9b0afc313bdea4257de6481c9f"
+        }
+      },
+      "sha256": "33d41410021e4a84a03b7c215643a8bb417c91b282349ec71c0bd3660cad90f5",
+      "size": 493411
+    },
+    {
+      "name": "MessagePack.Annotations",
+      "version": "2.5.192",
+      "url": "https://api.nuget.org/v3-flatcontainer/messagepack.annotations/2.5.192/messagepack.annotations.2.5.192.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/MessagePack-CSharp/MessagePack-CSharp",
+          "commit": "d3d435b96cf09b9b0afc313bdea4257de6481c9f"
+        }
+      },
+      "sha256": "0cbb67727690f52a796265a6f3dfb6c3722785d535650c672606e89c0abfd5a3",
+      "size": 20900
+    },
+    {
+      "name": "Microsoft.Bcl.AsyncInterfaces",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.bcl.asyncinterfaces/9.0.0/microsoft.bcl.asyncinterfaces.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "06c5cd3961207c5ab7633ed54ed2ba9bfa2fe3f7ab46ac81ce2796488a667355",
+      "size": 97963
+    },
+    {
+      "name": "Microsoft.CodeAnalysis",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis/5.3.0/microsoft.codeanalysis.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "ea8612702698b09153895b3f1732865ec2ebc3752f7e53db1668ad2bedbb7202",
+      "size": 31687
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.Common",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.common/5.3.0/microsoft.codeanalysis.common.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "3b94556ea0165cbd8570236d9fe74f01527fe5a89ac5cf27416a23252b31eb5c",
+      "size": 9288749
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.CSharp",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.csharp/5.3.0/microsoft.codeanalysis.csharp.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "0378f19591327e0127f6e9e1a10a9b3ac034c1dfe603c69a93a75196ee661c85",
+      "size": 23920664
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.CSharp.Features",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.csharp.features/5.3.0/microsoft.codeanalysis.csharp.features.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "ce752e10591076799b7937b0837c29fff3429f21fcfb8afdb7ff6a34d062e99f",
+      "size": 6144488
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.CSharp.Workspaces",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.csharp.workspaces/5.3.0/microsoft.codeanalysis.csharp.workspaces.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "a568e1303679943ce76a907632a1d1141c7b7c0ebe8c0e3f1e3baed52325a797",
+      "size": 2805113
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.Elfie",
+      "version": "1.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.elfie/1.0.0/microsoft.codeanalysis.elfie.1.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "sha256": "13ff8f95e82f599e7d7b94e2dd3bca2412dadea0a70ca9a2efe0dc9cea35b9f8",
+      "size": 155504
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.Features",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.features/5.3.0/microsoft.codeanalysis.features.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "778e9113190563232f34c10e330e59abeb6c2c703e7b2327c566778363c93f68",
+      "size": 14373030
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.Scripting.Common",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.scripting.common/5.3.0/microsoft.codeanalysis.scripting.common.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "3ff2b19db3dbff5708118182b8d79387fd5f47a0948b1280ba5f4606262a0ab8",
+      "size": 1034532
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.VisualBasic",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.visualbasic/5.3.0/microsoft.codeanalysis.visualbasic.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "6e62202d41a151379057d1a29edd1125b2e70babf1b9fa5a73143f7277051540",
+      "size": 16771351
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.VisualBasic.Features",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.visualbasic.features/5.3.0/microsoft.codeanalysis.visualbasic.features.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "1676122c58976670a849c722a2eca154ac228368138e0a43b33815fdfdf4bd87",
+      "size": 4142817
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.VisualBasic.Workspaces",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.visualbasic.workspaces/5.3.0/microsoft.codeanalysis.visualbasic.workspaces.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "751fd3ffd3005aad9c5015d5bd5b61d0c9a46e9571565e350d410881169695f4",
+      "size": 2559658
+    },
+    {
+      "name": "Microsoft.CodeAnalysis.Workspaces.Common",
+      "version": "5.3.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.codeanalysis.workspaces.common/5.3.0/microsoft.codeanalysis.workspaces.common.5.3.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/roslyn",
+          "branch": "release/dev18.3",
+          "commit": "16f9bd284cd49604ac82998bfe778a8eb16d4347"
+        }
+      },
+      "sha256": "1ea7dad038bfcbddd7d934de269d98a58880542236bf68714d94c0dab273cbf8",
+      "size": 11129151
+    },
+    {
+      "name": "Microsoft.DiaSymReader",
+      "version": "2.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.diasymreader/2.0.0/microsoft.diasymreader.2.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/symreader",
+          "commit": "27e584661980ee6d82c419a2a471ae505b7d122e"
+        }
+      },
+      "sha256": "f21a2d66687c45be90ea80fd31e6fbe12bc075b0e8dfd63fd66f21e371c78e3c",
+      "size": 93176
+    },
+    {
+      "name": "Microsoft.NET.StringTools",
+      "version": "17.6.3",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.stringtools/17.6.3/microsoft.net.stringtools.17.6.3.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/msbuild",
+          "commit": "07e2947214f1a9f28a3517762c939d5bebb5f525"
+        }
+      },
+      "sha256": "1f6430f31e3b5b214e77f56681198631cfae5f24a052febc5084a02bc16bb23c",
+      "size": 172754
+    },
+    {
+      "name": "Microsoft.VisualStudio.Composition",
+      "version": "17.13.41",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.composition/17.13.41/microsoft.visualstudio.composition.17.13.41.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/microsoft/vs-mef",
+          "commit": "8a5081b13569752a131f1ec616c39518ffe14f70"
+        }
+      },
+      "sha256": "db67d2a2bf22b4e7c91d4c969d046f429536e04b710ad1848b9a092254826fd8",
+      "size": 1148268
+    },
+    {
+      "name": "Microsoft.VisualStudio.CoreUtility",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.coreutility/15.5.27130/microsoft.visualstudio.coreutility.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "99bd57cfe35ce4bd8317ff5d403cc4c4ee958496d3d7b8c240c6b540668bc5b3",
+      "size": 42516
+    },
+    {
+      "name": "Microsoft.VisualStudio.Language.Intellisense",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.language.intellisense/15.5.27130/microsoft.visualstudio.language.intellisense.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "079d2fa107a03273d45d5e0c64a8ec435b2f3e8faec182ee82d0fad2a4273b4d",
+      "size": 100135
+    },
+    {
+      "name": "Microsoft.VisualStudio.Text.Data",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.text.data/15.5.27130/microsoft.visualstudio.text.data.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "a75f69b7afe888e55c414276bddeee6aff9e7f813fd8bdecfd7511090eac3cd8",
+      "size": 121710
+    },
+    {
+      "name": "Microsoft.VisualStudio.Text.Logic",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.text.logic/15.5.27130/microsoft.visualstudio.text.logic.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "3bd2af764a57d6290fe5f64a7c518bf9f714166d6a3d7bfe66d9a6b70983c5a1",
+      "size": 79413
+    },
+    {
+      "name": "Microsoft.VisualStudio.Text.UI",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.text.ui/15.5.27130/microsoft.visualstudio.text.ui.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "44d71257331f960b1348704edaaaedca641db1027dff5290f997bea88557ca2a",
+      "size": 118897
+    },
+    {
+      "name": "Microsoft.VisualStudio.Text.UI.Wpf",
+      "version": "15.5.27130",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.text.ui.wpf/15.5.27130/microsoft.visualstudio.text.ui.wpf.15.5.27130.nupkg",
+      "licenseUrl": {
+        "text": "https://aka.ms/pexunj",
+        "attributes": {}
+      },
+      "sha256": "5b178ddef710bb7994881fe14ee0753e6e3d6d4c7e1594376f890629f81d5101",
+      "size": 94515
+    },
+    {
+      "name": "Microsoft.VisualStudio.Validation",
+      "version": "17.8.8",
+      "url": "https://api.nuget.org/v3-flatcontainer/microsoft.visualstudio.validation/17.8.8/microsoft.visualstudio.validation.17.8.8.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/microsoft/vs-validation",
+          "commit": "3c615964c53e7b7a909ca5feb38fc9adbe08754f"
+        }
+      },
+      "sha256": "b01f062d18891d7dcfcbba9e0549d400d8835a1c8fb484a89fa1d0b3ef302a6b",
+      "size": 334546
+    },
+    {
+      "name": "NuGet.Common",
+      "version": "7.6.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/nuget.common/7.6.0/nuget.common.7.6.0.nupkg",
+      "license": {
+        "text": "Apache-2.0",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/Apache-2.0",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/NuGet/NuGet.Client",
+          "commit": "f333d9ade72a3409b54795f649efcac8f362054d"
+        }
+      },
+      "sha256": "6a63224471302a9999d2d5e3b0b0463b3f694da81bb81626ccdda85251608d60",
+      "size": 206018
+    },
+    {
+      "name": "NuGet.Configuration",
+      "version": "7.6.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/nuget.configuration/7.6.0/nuget.configuration.7.6.0.nupkg",
+      "license": {
+        "text": "Apache-2.0",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/Apache-2.0",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/NuGet/NuGet.Client",
+          "commit": "f333d9ade72a3409b54795f649efcac8f362054d"
+        }
+      },
+      "sha256": "ca0eb4591b8eb0078ee75031d3a15d79a8088ef0352b8398aa7574ca847a50c0",
+      "size": 243752
+    },
+    {
+      "name": "NuGet.Frameworks",
+      "version": "7.6.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/nuget.frameworks/7.6.0/nuget.frameworks.7.6.0.nupkg",
+      "license": {
+        "text": "Apache-2.0",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/Apache-2.0",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/NuGet/NuGet.Client",
+          "commit": "f333d9ade72a3409b54795f649efcac8f362054d"
+        }
+      },
+      "sha256": "04d8305f234b6616be44e9eacc391eecbd8d46048755f87a5c87356e406b84ff",
+      "size": 200240
+    },
+    {
+      "name": "Ookii.Dialogs.Wpf",
+      "version": "5.0.1",
+      "url": "https://api.nuget.org/v3-flatcontainer/ookii.dialogs.wpf/5.0.1/ookii.dialogs.wpf.5.0.1.nupkg",
+      "license": {
+        "text": "BSD-3-Clause",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/BSD-3-Clause",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/ookii-dialogs/ookii-dialogs-wpf.git",
+          "commit": "edf9e7a07044ba72d69da9f41b52dd7964e79125"
+        }
+      },
+      "sha256": "bf0aefc5e436da7b05b5ec7681c1b28538bf5ea666dae215d72ff83f2beb7589",
+      "size": 363344
+    },
+    {
+      "name": "System.ComponentModel.Composition",
+      "version": "10.0.9",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.componentmodel.composition/10.0.9/system.componentmodel.composition.10.0.9.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/dotnet",
+          "commit": "901ca941248413c79832d2fdbd709da0c4386353"
+        }
+      },
+      "sha256": "b1aaf7d1917e4363cf5d96e212e54a58a2b5ee6ee1fb8bad2489bd3830d0125f",
+      "size": 533932
+    },
+    {
+      "name": "System.Composition",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition/9.0.0/system.composition.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "15e84e910daed69f26434ff09f7719fb6e078e14cb75c93c55961603509c81b3",
+      "size": 46104
+    },
+    {
+      "name": "System.Composition.AttributedModel",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition.attributedmodel/9.0.0/system.composition.attributedmodel.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "6bbcbb1face3fa499892594d1c0e34d83a157d8f486aa0b73a8cacf15ce5db83",
+      "size": 102149
+    },
+    {
+      "name": "System.Composition.Convention",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition.convention/9.0.0/system.composition.convention.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "b70e2f13925143ad2e6d36416f1a0c3e1b63390082dd7a031541fb3473bba3c5",
+      "size": 159143
+    },
+    {
+      "name": "System.Composition.Hosting",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition.hosting/9.0.0/system.composition.hosting.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "a0ec54f833c411f302b8d2e05bac12919a74258e6062de381493675adfbdebbb",
+      "size": 170564
+    },
+    {
+      "name": "System.Composition.Runtime",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition.runtime/9.0.0/system.composition.runtime.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "03221ef9d8b54eac1405b489fec27c43cb73b274cdf9505d270e0af31673e37b",
+      "size": 116629
+    },
+    {
+      "name": "System.Composition.TypedParts",
+      "version": "9.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.composition.typedparts/9.0.0/system.composition.typedparts.9.0.0.nupkg",
+      "license": {
+        "text": "MIT",
+        "attributes": {
+          "type": "expression"
+        }
+      },
+      "licenseUrl": {
+        "text": "https://licenses.nuget.org/MIT",
+        "attributes": {}
+      },
+      "repository": {
+        "text": null,
+        "attributes": {
+          "type": "git",
+          "url": "https://github.com/dotnet/runtime",
+          "commit": "9d5a6a9aa463d6d10b0b0ba6d5982cc82f363dc3"
+        }
+      },
+      "sha256": "1797e94d4b3746bef23ff372233afe5e7e4d7535d7a7caeb8c19c5f540415288",
+      "size": 179565
+    }
+  ]
+}

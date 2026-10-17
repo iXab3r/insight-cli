@@ -13,6 +13,8 @@ on:
       - 'skills/ghidra-coordinator/src/procmon*.ts'
       - 'scripts/toolbox/build-windows-registry.ps1'
       - 'scripts/toolbox/audit-dnspy-debug-edit.ps1'
+      - 'scripts/toolbox/*dnspy*'
+      - 'skills/ghidra-coordinator/src/dnspy.ts'
       - 'skills/ghidra-coordinator/runtime/native/dnspy-extension/**'
       - 'skills/ghidra-coordinator/runtime/native/windows-registry.c'
       - 'skills/ghidra-coordinator/src/procmon-config.ts'
@@ -211,4 +213,43 @@ jobs:
         with:
           name: toolbox-dnspy-debug-edit
           path: toolbox-dnspy-debug-edit.json
+          if-no-files-found: error
+
+  dnspy-public-cli:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout the pinned private Automation dependency with read-only access
+        uses: actions/checkout@v4
+        with:
+          repository: iXab3r/EyeAuras.Automation
+          ref: b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033
+          path: tests/vendor/EyeAuras.Automation
+          ssh-key: ${{ secrets.AUTOMATION_READ_KEY }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Prepare owned Framework and Core research fixtures
+        shell: pwsh
+        run: ./scripts/toolbox/prepare-dnspy-fixture.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - name: Install globally in isolation and investigate through the public CLI
+        run: node scripts/run-automation.mjs test --suite acceptance --tag dnspy --property RestoreLockedMode=true --timeout-seconds 900
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-dnspy
+          path: toolbox-dnspy.json
           if-no-files-found: error

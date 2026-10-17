@@ -22,7 +22,7 @@ $compiler=Join-Path $env:SystemRoot 'Microsoft.NET/Framework64/v4.0.30319/csc.ex
 $assembly=[Reflection.Assembly]::LoadFile($researchInput);$type=$assembly.GetType('OwnedResearch');$method=$type.GetMethod('QuoteTotal');$settings=$type.GetMethod('Settings');$code=$settings.GetMethodBody().GetILAsByteArray();if($code[0] -ne 0x1d){throw 'Owned Settings fixture did not start with ldc.i4.7'}
 $before=(Get-FileHash $researchInput -Algorithm SHA256).Hash.ToLowerInvariant()
 function InvokePlan([hashtable]$values){
- $directory=Join-Path $root ([Guid]::NewGuid().ToString());New-Item -ItemType Directory $directory|Out-Null;$plan=Join-Path $directory 'plan.json';$result=Join-Path $directory 'result.json';$nonce=[Guid]::NewGuid().ToString();$values.Schema=1;$values.Nonce=$nonce;$values.Input=$researchInput;$values.Result=$result
+ $directory=Join-Path $root ([Guid]::NewGuid().ToString());New-Item -ItemType Directory $directory|Out-Null;$plan=Join-Path $directory 'plan.json';$result=Join-Path $directory 'result.json';$nonce=[Guid]::NewGuid().ToString();$values.Schema=1;$values.Nonce=$nonce;if(!$values.ContainsKey('Input')){$values.Input=$researchInput};$values.Result=$result
  [IO.File]::WriteAllText($plan,($values|ConvertTo-Json -Depth 5 -Compress));$ownerBirth=[string]([Diagnostics.Process]::GetCurrentProcess().StartTime.ToUniversalTime().Ticks)
  $arguments=@('--multiple','--no-activate','--settings-file',(Join-Path $directory 'settings.xml'),'--extension-directory',$extension,('--insight-plan:'+$plan))
  $spec=@{schema=1;nonce=$nonce;ownerPid=$PID;ownerBirthTicks=$ownerBirth;executable=(Join-Path $tool 'dnSpy.exe');arguments=$arguments;cwd=$directory;timeoutMs=60000};$specFile=Join-Path $directory 'job-specification.json';[IO.File]::WriteAllText($specFile,($spec|ConvertTo-Json -Depth 5 -Compress))
@@ -33,7 +33,15 @@ function InvokePlan([hashtable]$values){
 }
 $debug=InvokePlan @{Mode='debug';Runtime='framework';Token=$method.MetadataToken;Offset=0;Parameters=@(0);Arguments=@()}
 if($debug.parameters.Count -ne 1 -or $debug.parameters[0].value -ne '11' -or $debug.frames.Count -lt 1){throw 'Actual managed parameter and stack were not observed'}
+$core=Join-Path $root 'core';New-Item -ItemType Directory $core|Out-Null
+'<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType><AssemblyName>OwnedCoreProbe</AssemblyName></PropertyGroup></Project>'|Set-Content -Encoding utf8 (Join-Path $core 'Core.csproj')
+Copy-Item (Join-Path $root 'OwnedResearch.cs') (Join-Path $core 'Program.cs')
+& dotnet build (Join-Path $core 'Core.csproj') --configuration Release --output (Join-Path $core 'out') --nologo
+if($LASTEXITCODE){throw 'Owned Core fixture build failed'}
+$coreModule=Join-Path $core 'out/OwnedCoreProbe.dll';$coreAssembly=[Reflection.Assembly]::LoadFile($coreModule);$coreMethod=$coreAssembly.GetType('OwnedResearch').GetMethod('QuoteTotal')
+$coreDebug=InvokePlan @{Mode='debug';Runtime='core';Input=(Join-Path $core 'out/OwnedCoreProbe.exe');Module=$coreModule;Token=$coreMethod.MetadataToken;Offset=0;Parameters=@(0);Arguments=@()}
+if($coreDebug.parameters.Count -ne 1 -or $coreDebug.parameters[0].value -ne '11'){throw 'Core managed parameter was not observed'}
 $patched=Join-Path $root 'OwnedResearch-patched.exe';$edit=InvokePlan @{Mode='edit-constant';Token=$settings.MetadataToken;Offset=0;ExpectedConstant=7;ReplacementConstant=37;Output=$patched}
 $output=& $patched;if($LASTEXITCODE -ne 0 -or $output -ne 'quote=109;setting=37'){throw 'Patched managed behavior was not verified'}
 if((Get-FileHash $researchInput -Algorithm SHA256).Hash.ToLowerInvariant() -ne $before){throw 'Original fixture changed'}
-@{schema=1;passed=$true;scope='Actual dnSpyEx debugger and editor document API feasibility; public adapter/model gates pending';version='6.6.0';managedBreakpointHit=$true;observedArgument11=$true;managedStackPresent=$true;editorDocumentLoaded=$edit.editorDocumentLoaded;actualPatchedBehavior=$true;originalPreserved=$true;ownedDebuggerExited=$true;originalSha256=$before;patchedSha256=(Get-FileHash $patched -Algorithm SHA256).Hash.ToLowerInvariant();extensionSha256=(Get-FileHash (Join-Path $extension 'Insight.DnSpy.x.dll') -Algorithm SHA256).Hash.ToLowerInvariant()}|ConvertTo-Json|Set-Content -Encoding utf8 'toolbox-dnspy-debug-edit.json'
+@{schema=1;passed=$true;scope='Actual dnSpyEx debugger and editor document API feasibility; public adapter/model gates pending';version='6.6.0';managedBreakpointHit=$true;observedArgument11=$true;coreManagedArgument11=$true;managedStackPresent=$true;editorDocumentLoaded=$edit.editorDocumentLoaded;actualPatchedBehavior=$true;originalPreserved=$true;ownedDebuggerExited=$true;originalSha256=$before;patchedSha256=(Get-FileHash $patched -Algorithm SHA256).Hash.ToLowerInvariant();extensionSha256=(Get-FileHash (Join-Path $extension 'Insight.DnSpy.x.dll') -Algorithm SHA256).Hash.ToLowerInvariant()}|ConvertTo-Json|Set-Content -Encoding utf8 'toolbox-dnspy-debug-edit.json'
