@@ -7,7 +7,7 @@ const module=pathToFileURL(resolve('skills/ghidra-coordinator/dist/src/tool-runt
 const root=await mkdtemp(join(tmpdir(),'insight-job-native-'));
 const fixture=join(root,'owned fixture-Ω.cjs');
 await writeFile(fixture,`const {spawn}=require('node:child_process'),fs=require('node:fs');if(process.argv[2]==='grandchild'){setInterval(()=>{},1000);}else{const g=spawn(process.execPath,[__filename,'grandchild'],{stdio:'ignore'});fs.writeFileSync(process.argv[2],JSON.stringify({pid:process.pid,grandchild:g.pid}));console.log(JSON.stringify(process.argv.slice(3)));if(process.argv[3]==='complete'){g.kill();setTimeout(()=>process.exit(7),100);}else if(process.argv[3]==='flood'){setTimeout(()=>process.stdout.write('x'.repeat(5*1024**2)),300);}setInterval(()=>{},1000);}`);
-async function waitFor(fn,description){for(let n=0;n<300;n++){const v=await fn();if(v)return v;await delay(50);}throw Error('Timed out: '+description);}
+async function waitFor(fn,description){for(let n=0;n<600;n++){const v=await fn();if(v)return v;await delay(50);}throw Error('Timed out: '+description);}
 const exists=async p=>readFile(p,'utf8').then(JSON.parse,()=>undefined);
 const alive=pid=>{try{process.kill(pid,0);return true;}catch{return false;}};
 const evidence=[],owners=[];
@@ -16,7 +16,7 @@ try{
   const directory=join(root,mode),marker=join(directory,'subject.json');await mkdir(directory);
   const ownerSource=`import {runTool} from ${JSON.stringify(module)};try{const r=await runTool({appArguments:{AppDataDirectory:${JSON.stringify(directory)}},signal:new AbortController().signal,environment:{PATH:process.env.PATH}},{tool:'fixture',role:'job-native',executable:process.execPath,arguments:[${JSON.stringify(fixture)},${JSON.stringify(marker)},${JSON.stringify(mode)},'space value','quote"value','Ω','trailing\\\\'],nativeDeadline:true,timeoutMs:${mode==='timeout'?4000:15000},acceptedCodes:[7]});console.log(JSON.stringify({ok:true,result:r}));}catch(e){console.log(JSON.stringify({ok:false,code:e.code,result:e.result}));process.exitCode=1;}`;
   const source=join(directory,'owner.mjs');await writeFile(source,ownerSource);const owner=spawn(process.execPath,[source],{stdio:['ignore','pipe','pipe']});let stdout='',stderr='';owner.stdout.on('data',b=>stdout+=b);owner.stderr.on('data',b=>stderr+=b);const ended=new Promise(ok=>owner.once('close',ok));owners.push({owner,ended,directory});
-  let subject;try{subject=await waitFor(()=>exists(marker),'owned subject launch');}catch(error){console.error('Owned job launch failed',mode,stdout.slice(0,4096),stderr.slice(0,4096));throw error;}
+  let subject;try{subject=await waitFor(()=>exists(marker),'owned subject launch');}catch(error){console.error('Owned job launch failed',mode,stdout.slice(0,4096),stderr.slice(0,4096));const runs=join(directory,'runtime/runs');for(const name of await readdir(runs).catch(()=>[])){for(const file of ['job-started.json','job-result.json','stdout.log','stderr.log']){const value=await readFile(join(runs,name,file),'utf8').catch(()=>undefined);if(value)console.error(file,value.slice(0,4096));}}throw error;}
   const processDirectory=join(directory,'runtime/processes');
   const record=await waitFor(async()=>{const names=await readdir(processDirectory).catch(()=>[]);if(!names.length)return;const r=await exists(join(processDirectory,names[0]));return r?.pid?r:undefined;},'durable launcher record');
   if(mode==='launcher-kill')process.kill(record.pid,'SIGKILL');

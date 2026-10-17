@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$Specification)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 try {
-    $spec=Get-Content -LiteralPath $Specification -Raw | ConvertFrom-Json
+    $spec=Get-Content -LiteralPath $Specification -Raw -Encoding UTF8 | ConvertFrom-Json
     if($spec.schema -ne 1 -or !$spec.nonce -or $spec.timeoutMs -lt 1000 -or $spec.timeoutMs -gt 600000) { throw 'Invalid owned job specification' }
     $root=[IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Specification))
     $env:TEMP=$root;$env:TMP=$root

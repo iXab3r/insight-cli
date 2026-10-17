@@ -9,6 +9,6 @@
   },
   "sha256": "41e985887c9746f44e3f97fd9c6f5e0baefd46b7cc2872dd7ecced6795f083b6",
   "size": 8192,
-  "launcherSha256": "ef5d9f2117daca4159669fa87376c7f8b7f7ecc48d12b4d96e2477ff40dfa7d2",
+  "launcherSha256": "85adc3137747a868b58f388d658282604db25be5a44f31f66a07193ff4035253",
   "reproducibility": "Two independent temporary-directory builds produced identical bytes; Windows native acceptance is recorded separately."
 }
