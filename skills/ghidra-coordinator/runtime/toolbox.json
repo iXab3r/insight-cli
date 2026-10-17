@@ -145,6 +145,12 @@
       "title": "Insight Managed Heap",
       "path": "skills/insight-managed-heap/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-binary",
+      "title": "Insight Binary",
+      "path": "skills/insight-binary/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -428,6 +434,57 @@
           "focused instruction evidence",
           "ordinary project evidence",
           "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "binary",
+      "namespace": "binary",
+      "kind": "capability",
+      "skill": "insight-binary",
+      "purpose": "Read structured PE/ELF/Mach-O metadata and guard a selected copy-only PE header edit",
+      "inputs": [
+        "PE",
+        "ELF",
+        "thin Mach-O",
+        "immutable binary target"
+      ],
+      "tasks": [
+        "bounded structure and linkage queries",
+        "exact guarded PE subsystem edit on a new copy"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+ host; PE/ELF/thin Mach-O inputs"
+      ],
+      "dependencies": [
+        "packaged first-party helper statically linked to pinned LIEF 1.0.0; no separate install or compiler"
+      ],
+      "workflowCommands": [
+        "binary query",
+        "binary edit-subsystem"
+      ],
+      "limitations": [
+        "No target execution or implicit universal Mach-O slice selection",
+        "Export queries cover PE export entries and ELF/Mach-O exported functions, not a complete data-symbol analysis",
+        "Native parser diagnostics remain partial; omitted malformed tables never prove absence",
+        "Copy edit supports only expected gui/console subsystem; checksums/signatures are not recomputed",
+        "At most 64 MiB input, 100000 scanned records and 500 returned rows"
+      ],
+      "evaluationCase": {
+        "id": "structured-binary-copy-edit",
+        "inputFamily": "owned-native-multi-format-and-pe-header-fixtures",
+        "task": "Determine input format and concrete native linkage from the supplied binaries, retain bounded structure evidence and create a separately verified requested header edit without changing the original.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual structure and import/export identity",
+          "scoped address and immutable bytes",
+          "expected-value copy-only edit verified independently",
+          "ordinary saved evidence",
+          "no target execution or original mutation"
         ]
       }
     },

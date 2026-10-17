@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-lief-1.0.0-r1",
+  "title": "LIEF 1.0.0 library source, SDK and reproducible first-party binary helper",
+  "redistribution": "Unmodified pinned Apache-2.0 LIEF SDK and full original source, including published vendored sources. Full available component notices and declared attribution are retained, with explicit build/test source superset. The helper is first-party MIT code, compiled twice identically and statically linked against the unmodified library; only system libc++ and libSystem remain dynamic. It is packaged behind insight-cli binary query/edit-subsystem, not a standalone application requiring another install. Native/independent agent gates are recorded separately. No compiler or SDK is needed by consumers.",
+  "assets": [
+    {
+      "name": "LIEF-1.0.0-Darwin-arm64.tar.gz",
+      "upstream": "https://github.com/lief-project/LIEF/releases/download/1.0.0/LIEF-1.0.0-Darwin-arm64.tar.gz",
+      "sha256": "c7bedf2e2acab9bced1c8701b06261fc6f4eba1957f80cbf86323a3f5e172167",
+      "size": 25324596,
+      "role": "build-sdk",
+      "license": "Apache-2.0 LIEF and retained component notices"
+    },
+    {
+      "name": "lief-1.0.0-source.tar.gz",
+      "upstream": "https://codeload.github.com/lief-project/LIEF/tar.gz/refs/tags/1.0.0",
+      "sha256": "2cf412695ff739d82e129db441e5c2025f3bb4873a3d3a1d3dd4cf300b682abd",
+      "size": 20009137,
+      "role": "source",
+      "license": "Apache-2.0 LIEF with full vendored source/build/test dependency superset"
+    },
+    {
+      "name": "insight-binary-darwin-arm64",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/insight-binary-darwin-arm64",
+      "sha256": "ffbe5f37ec336a96fe4e885247e321b63cbd5b8f5d7809d8fa00f812ac0d25b9",
+      "size": 3038984,
+      "role": "helper",
+      "license": "MIT first-party source; statically linked Apache-2.0 LIEF and full dependency notices"
+    },
+    {
+      "name": "insight-binary-helper-1.0.0-source.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/insight-binary-helper-1.0.0-source.tgz",
+      "sha256": "7cb00cfb6102645a80401326bb4e0a93d399d02a0578e43ee6da13a368c03ef5",
+      "size": 41534,
+      "role": "source",
+      "license": "MIT first-party source, full retained original dependency notices"
+    },
+    {
+      "name": "lief-1.0.0-notices.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/lief-1.0.0-notices.tgz",
+      "sha256": "f6189ab91d439950292dfe55c1b2b39281a63c912c46af297fd9d6565473cc99",
+      "size": 31769,
+      "role": "license-companion",
+      "license": "Verbatim original available dependency licenses and attributions; explicit standard Boost reference"
+    }
+  ]
+}

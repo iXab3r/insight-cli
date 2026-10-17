@@ -104,3 +104,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI queries the captured managed heap and stacks
     Then object field and waiting stack evidence preserve dump identity and runtime limits
+
+  @binary @macos
+  Scenario: Inspect native linkage and verify one guarded field on a new PE copy
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI queries binary structure and guards a copied PE edit
+    Then binary linkage and exact copy-only edits retain original bytes

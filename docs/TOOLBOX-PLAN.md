@@ -44,7 +44,8 @@ Current verified inventory:
 | TShark / mitmproxy | Source-complete mirrored runtimes, dedicated skills and native public CLI Gherkin passed; independent model gates pending | Offline packet/stream research and explicit bounded HTTP observation/comparison |
 | Managed metadata | Packaged dnlib-backed query/compare API and native public CLI Gherkin passed; independent model gates pending | Exact-token IL, P/Invoke and structural assembly comparison |
 | Managed heap queries | ClrMD-backed dump API/skill, full dependency notices and native public CLI Gherkin passed; independent model gates pending | Bounded object fields and managed stacks with matching explicit DAC |
-| Remaining capabilities | C03–C06 remain in progress below | No implicit acceptance from implemented tool families |
+| Structured binaries | LIEF-backed packaged API/skill, immutable source mirror and native public CLI Gherkin passed; independent model gates pending | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
+| Remaining capabilities | C04–C06 remain in progress below | No implicit acceptance from implemented tool families |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -308,7 +309,8 @@ Framework/Core breakpoints, copied edits, stop/kill and external preservation
 interruption/recovery and external-copy Gherkin proof (`verification/toolbox-mitmproxy.json`).
 C01 passed real static assembly comparison (`verification/toolbox-managed-metadata.json`);
 C02 passed actual structured object/stack queries and wrong DAC refusal
-(`verification/toolbox-managed-heap.json`); C03–C06 remain in progress. Offline verification at this checkpoint: 204 tests,
+(`verification/toolbox-managed-heap.json`); C03 passed native structured binary queries and exact copied field verification
+(`verification/toolbox-binary.json`); C04–C06 remain in progress. Offline verification at this checkpoint: 204 tests,
 202 passed and two explicitly opt-in skipped; release/admission checks 29/29 passed.
 Account inference quota only
 defers the independent model gates.

@@ -539,3 +539,23 @@ passed. Native support is matching macOS ARM64 CoreCLR dumps; the managed defaul
 is 10.0.13, and a different trusted matching DAC must be selected explicitly. There is
 no live attachment, expression evaluation or automatic symbol acquisition in this API.
 Independent model and full combined gates remain open.
+
+### Structured binary capability
+
+`binary query` and `binary edit-subsystem` package a first-party native C++ helper
+statically linked to unmodified LIEF 1.0.0. Two independent canonical builds matched.
+Only system libc++/libSystem are dynamic; consumers need no SDK/compiler or another
+installation namespace. Full original SDK/source, vendored dependency source/build/test
+superset, available full notices and first-party helper source/binary are hash-verified
+in an [immutable release](https://github.com/iXab3r/insight-cli/releases/tag/tool-lief-1.0.0-r1).
+The old span short revision no longer resolves upstream; its complete bundled header,
+original attribution and explicitly referenced official Boost license are retained.
+
+The [global public CLI Gherkin proof](verification/toolbox-binary.json) read actual PE
+imports/exports with scoped RVA/VA, ELF linkage and thin Mach-O structure. It created a
+new PE GUI-subsystem copy, independently compared all other bytes and read back the
+changed header. Wrong expectation/format, overwrite and bounds were refused; originals
+and ordinary evidence remained intact. Native parser diagnostics are partial. Universal
+Mach-O requires an explicit slice; ELF/Mach-O exports cover functions, not every data
+symbol. Copy editing does not execute a target or recompute checksums/signatures.
+Native host profile is macOS14+ ARM64. Independent model/combined gates remain open.

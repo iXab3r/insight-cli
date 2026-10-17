@@ -1,3 +1,4 @@
+import {binaryCommands} from './binary.js';
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {diagnosticsCommands} from './dotnet-diagnostics.js';
@@ -242,6 +243,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ...fridaCommands(c=>owner.selected(c).workspace),
       ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),
+      ...binaryCommands(c=>owner.selected(c).workspace),
       ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),

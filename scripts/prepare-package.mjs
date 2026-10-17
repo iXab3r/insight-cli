@@ -25,6 +25,11 @@ for(const helper of ['insight-managed','insight-heap']){
  for(const [name,expected]of Object.entries(proof.inputs))assert.equal(await sha(new URL(name,root)),expected,'Managed helper source differs: '+helper+'/'+name);
  for(const [name,expected]of Object.entries(proof.files))assert.equal(await sha(new URL(name,root)),expected.sha256,'Managed helper binary differs: '+helper+'/'+name);
 }
+const binaryRoot=new URL('../skills/ghidra-coordinator/runtime/native/binary/',import.meta.url);
+const binary=JSON.parse(await readFile(new URL('provenance.json',binaryRoot),'utf8'));
+for(const [name,expected]of Object.entries(binary.inputs))assert.equal(await sha(new URL(name,binaryRoot)),expected,'Binary helper source differs: '+name);
+for(const [name,expected]of Object.entries(binary.files))assert.equal(await sha(new URL(name,binaryRoot)),expected.sha256,'Binary helper differs: '+name);
+await chmod(new URL('insight-binary-darwin-arm64',binaryRoot),0o755);
 // TypeScript's output mode otherwise depends on whether the file already existed.
 await chmod('dist/src/bin.js',0o755);
 await prepareToolbox(process.cwd());

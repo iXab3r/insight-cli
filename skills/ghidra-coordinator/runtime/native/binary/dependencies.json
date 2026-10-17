@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "library": {
+    "name": "LIEF",
+    "version": "1.0.0",
+    "sdk": {
+      "name": "LIEF-1.0.0-Darwin-arm64.tar.gz",
+      "sha256": "c7bedf2e2acab9bced1c8701b06261fc6f4eba1957f80cbf86323a3f5e172167",
+      "url": "https://github.com/lief-project/LIEF/releases/download/1.0.0/LIEF-1.0.0-Darwin-arm64.tar.gz",
+      "mirror": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/LIEF-1.0.0-Darwin-arm64.tar.gz"
+    },
+    "source": {
+      "name": "lief-1.0.0-source.tar.gz",
+      "sha256": "2cf412695ff739d82e129db441e5c2025f3bb4873a3d3a1d3dd4cf300b682abd",
+      "url": "https://codeload.github.com/lief-project/LIEF/tar.gz/refs/tags/1.0.0",
+      "mirror": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/lief-1.0.0-source.tar.gz"
+    },
+    "license": "Apache-2.0"
+  },
+  "thirdPartySources": [
+    {
+      "name": "Catch2-3.12.0.zip",
+      "sha256": "e1e1592dbc971d9196b379aef1882f7d427ceaf0ecf6cae40b575d580dd83648",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "Melkor_ELF_Fuzzer-ac2495b.zip",
+      "sha256": "8cccc4ca5e05e305215cc74761413746b660b76f5869a563f52cec1f23d79f2e",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "expected-1.3.1.zip",
+      "sha256": "68bbfd81a6d312c4518b5a1831f465fa03811355af9aa9c7403348545d1d2a56",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "frozen-61dce5a.zip",
+      "sha256": "c94ba33d5369749e8d8ba12fb87d60de02ddac981051383a8d321968abb6a314",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "json-3.12.0.zip",
+      "sha256": "6a2249e5d61c2a8351abfac218e08e9a43426dddb493950d30f3b8acfbbc648d",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "mbedtls-4.0.0.r0.gec4044008d.zip",
+      "sha256": "01aec4471547dec5308853ff0d797611a68a521a10496898b626035dfdc07183",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "nanobind-2.13.0.r18.g4db9ed3f.zip",
+      "sha256": "e5a4617f3d0df623c84cdc7d56361ccc61e73d83029a1e006a82e283caf57c01",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "spdlog-1.17.0.zip",
+      "sha256": "b11912a82d149792fef33fabd0503b13d54aeac25c1464755461d4108ea71fc2",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "tcb-span-b70b0ff.zip",
+      "sha256": "f3d47ed83507fce94245a9f3cf97bc433cd1116f94d11ac0dca1a6f53bbeb239",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    },
+    {
+      "name": "utfcpp-4.0.9.zip",
+      "sha256": "73802895d0cf7b000cdf8e6ee5d69b963a829d4ea419562afd8f190adef87d5f",
+      "scope": "Published source/build/test superset; not a claim that every component is compiled"
+    }
+  ],
+  "notices": [
+    {
+      "path": "notices/LIEF-LICENSE.txt",
+      "sha256": "998dc6a9d251b4d9d4274d8a7e121fe20c33b1dfd4300bca276e87da23dc582e",
+      "origin": "LIEF-1.0.0/LICENSE"
+    },
+    {
+      "path": "notices/LIEF-attribution.txt",
+      "sha256": "14353f94305648fa88cf28a78fe92ea24420e7851802b8f01930b3f09eee2656",
+      "origin": "Original LIEF version header copyright and Apache license declaration"
+    },
+    {
+      "path": "notices/Catch2-3.12.0--Catch2-3.12.0__LICENSE.txt",
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "origin": "LIEF third-party/Catch2-3.12.0.zip:Catch2-3.12.0/LICENSE.txt"
+    },
+    {
+      "path": "notices/Melkor_ELF_Fuzzer-ac2495b--elf_fuzzer-master__LICENSE.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "origin": "LIEF third-party/Melkor_ELF_Fuzzer-ac2495b.zip:elf_fuzzer-master/LICENSE.txt"
+    },
+    {
+      "path": "notices/expected-1.3.1--expected-1.3.1__COPYING",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "origin": "LIEF third-party/expected-1.3.1.zip:expected-1.3.1/COPYING"
+    },
+    {
+      "path": "notices/frozen-61dce5a--frozen-61dce5ae18ca59931e27675c468e64118aba8744__AUTHORS",
+      "sha256": "e87cb6aaac199b412d4a0c85b3507891dfa5054a5b80169b07e39142a9226264",
+      "origin": "LIEF third-party/frozen-61dce5a.zip:frozen-61dce5ae18ca59931e27675c468e64118aba8744/AUTHORS"
+    },
+    {
+      "path": "notices/frozen-61dce5a--frozen-61dce5ae18ca59931e27675c468e64118aba8744__LICENSE",
+      "sha256": "f6099ed23682840ae60a76fce378faae9b5c75f7d162188883e13b790ca18b98",
+      "origin": "LIEF third-party/frozen-61dce5a.zip:frozen-61dce5ae18ca59931e27675c468e64118aba8744/LICENSE"
+    },
+    {
+      "path": "notices/mbedtls-4.0.0.r0.gec4044008d--LICENSE",
+      "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+      "origin": "LIEF third-party/mbedtls-4.0.0.r0.gec4044008d.zip:LICENSE"
+    },
+    {
+      "path": "notices/mbedtls-4.0.0.r0.gec4044008d--framework__LICENSE",
+      "sha256": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490",
+      "origin": "LIEF third-party/mbedtls-4.0.0.r0.gec4044008d.zip:framework/LICENSE"
+    },
+    {
+      "path": "notices/mbedtls-4.0.0.r0.gec4044008d--tf-psa-crypto__framework__LICENSE",
+      "sha256": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490",
+      "origin": "LIEF third-party/mbedtls-4.0.0.r0.gec4044008d.zip:tf-psa-crypto/framework/LICENSE"
+    },
+    {
+      "path": "notices/mbedtls-4.0.0.r0.gec4044008d--tf-psa-crypto__LICENSE",
+      "sha256": "da8c58f05f135a9d15e9ffad4ecf854cfcc1f014c8abfd75ba05f62630ccc118",
+      "origin": "LIEF third-party/mbedtls-4.0.0.r0.gec4044008d.zip:tf-psa-crypto/LICENSE"
+    },
+    {
+      "path": "notices/nanobind-2.13.0.r18.g4db9ed3f--LICENSE",
+      "sha256": "f305091a4e57805870b217a28ea4b1f16610eece8457d2370f822a9696b75836",
+      "origin": "LIEF third-party/nanobind-2.13.0.r18.g4db9ed3f.zip:LICENSE"
+    },
+    {
+      "path": "notices/nanobind-2.13.0.r18.g4db9ed3f--ext__robin_map__LICENSE",
+      "sha256": "11f2c685ba565a31aef1219f63a7a8845602c97bff70016b9e3278dfe51a2ec5",
+      "origin": "LIEF third-party/nanobind-2.13.0.r18.g4db9ed3f.zip:ext/robin_map/LICENSE"
+    },
+    {
+      "path": "notices/spdlog-1.17.0--spdlog-1.17.0__LICENSE",
+      "sha256": "d678c20826e1392578508e1c78649a1e3c31bda05ef4388d967dbd654461b140",
+      "origin": "LIEF third-party/spdlog-1.17.0.zip:spdlog-1.17.0/LICENSE"
+    },
+    {
+      "path": "notices/span-attribution.txt",
+      "sha256": "2bb98c5155725644491fe894aa468d0b76f17b90d378d0990d723b36e17cab85",
+      "origin": "LIEF third-party/tcb-span-b70b0ff.zip:span.hpp original attribution and license declaration"
+    },
+    {
+      "path": "notices/utfcpp-4.0.9--utfcpp-4.0.9__LICENSE",
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "origin": "LIEF third-party/utfcpp-4.0.9.zip:utfcpp-4.0.9/LICENSE"
+    },
+    {
+      "path": "notices/json-LICENSE.MIT",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+      "origin": "https://raw.githubusercontent.com/nlohmann/json/v3.12.0/LICENSE.MIT"
+    },
+    {
+      "path": "notices/span-LICENSE_1_0.txt",
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "origin": "https://www.boost.org/LICENSE_1_0.txt (license reference supplied by original span header)"
+    }
+  ],
+  "extendedFeatures": false,
+  "unmodifiedLibrary": true
+}
