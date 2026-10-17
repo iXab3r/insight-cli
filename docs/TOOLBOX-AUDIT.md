@@ -21,7 +21,7 @@ only after its archive, dependency closure, license companions and real workflow
 | T01 | [Ghidra 12.1.2](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.2_build), GhidraMCP 7.0.0, Temurin 21.0.11+10 | Existing facade: isolated static contexts, server, GUI and debugger; bundled JDK/native/bridge | Existing immutable release recipes and licenses; new dedicated skill and whole-toolbox agent gates required |
 | T02 | [ILSpy 11.1.0.9782](https://www.nuget.org/packages/ilspycmd/11.1.0.9782), .NET 10.0.13 | Existing facade: types/C#/IL/resources/project; private runtime | Existing immutable release recipes and MIT/dependency companions; new dedicated skill and toolbox agent gates required |
 | T03 | [DiE 3.21](https://github.com/horsicq/DIE-engine/releases/tag/3.21) | `diec` console, signature database, Qt frameworks; macOS ARM64 package can be extracted without installer execution | MIT engine plus Qt and dependency terms; derive console bundle preserving dependency closure and matching source/notices. Real PE probe found mixed JSON/diagnostics; see below |
-| T04 | [LLVM 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | readobj/objdump/nm/pdbutil, no non-system dylibs; macOS 14+ ARM64 | Derived 23 MB subset retains exact executables, full matching license and source companions. Native CLI/agent admission in progress; no compiler required by users |
+| T04 | [LLVM 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | readobj/objdump/nm/pdbutil, no non-system dylibs; macOS 14+ ARM64 | Derived 23 MB subset retains exact executables, full matching license and source companions. Real CLI/Gherkin checks passed; independent model correctness gate remains open; no compiler required by users |
 | T05 | [7-Zip 26.04](https://github.com/ip7z/7zip/releases/tag/26.04) | `7zz` list/test/extract into new output directory; macOS native bundle | LGPL/BSD/unRAR terms and matching source; immutable binary/source release companions |
 | T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT plus dependencies; package declares net8 with major roll-forward. Prove .NET 10 compatibility and actual owned dump/object workflow |
 | T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
@@ -150,3 +150,14 @@ The shared installer now implements this Microsoft-only exception: explicit vend
 before network access, exact size/hash checks, verified offline cache reuse, and no implicit
 mirror fallback. The mirror publisher rejects vendor-only assets. This source policy is
 implemented independently of the still-unaccepted Windows adapters.
+
+### LLVM native and agent evidence
+
+The four utilities are published as a 23 MB immutable subset with exact corresponding source
+and the full matching license. Real globally installed CLI/Gherkin proof covers PE/PDB, ELF,
+Mach-O, section bytes, instruction ranges, PDB type indices and external sibling drift/removal.
+[LLVM evidence](verification/toolbox-llvm.json) separates this native proof from model quality.
+Initial low-reasoning trials were incomplete: first the concrete pricing constants were absent;
+a section-data query fixed that usability gap, but later reports still contained address or
+symbol-table mistakes. Saved bytes and process exit do not override those semantic failures.
+Further independent trials remain under review.

@@ -17,6 +17,8 @@ control flow, decompilation or persistent annotations.
 2. Use `llvm headers INPUT`, `sections`, `imports`, `exports` or `symbols` for focused
    inventories. Reuse `--target` instead of INPUT for the same immutable bytes. Stripped
    images can have no ordinary symbols; that does not prove there are no functions.
+   `symbols` includes local/static definitions; these are not automatically exported APIs.
+   For ELF, `exports` uses the dynamic symbol table while `symbols` uses ordinary symbols.
 3. For a supplied PDB, start with `llvm pdb FILE --view summary` and `--view modules`.
    Use `--view globals --symbol NAME` for a named global, `--view publics` for public
    addresses, or `--view symbols --module INDEX` for procedure/local records. `--view types`
@@ -26,7 +28,11 @@ control flow, decompilation or persistent annotations.
    section:offset numbers are decimal (an explicit `0x` elsewhere means hexadecimal).
 4. `llvm disassemble IMAGE --address 0xVIRTUAL_ADDRESS --bytes 128` returns a bounded
    instruction interval. Distinguish static virtual addresses, RVAs and file offsets;
-   runtime load bias is not established by these static commands.
+   runtime load bias is not established by these static commands. If the instructions load
+   constants from a section, use `llvm section-data IMAGE --section NAME` and the section
+   address/endianness to inspect their actual values. The complete section must fit the
+   4-MiB native-output bound; oversized sections fail explicitly and need another focused
+   binary-reading tool rather than an assumed complete result.
 5. Keep useful output in the project's format. Text views page with `--limit`/`--offset`;
    `--filter` selects matching native lines and can omit surrounding context. `--output`
    writes full bounded native text to a new file, creating missing parent directories.

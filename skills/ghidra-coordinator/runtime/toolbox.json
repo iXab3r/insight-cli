@@ -248,7 +248,7 @@
         "PDB"
       ],
       "tasks": [
-        "headers and sections",
+        "headers, sections and bounded section bytes",
         "import/export linkage",
         "llvm-nm symbol inventory",
         "llvm-objdump bounded disassembly",
@@ -264,6 +264,7 @@
       "workflowCommands": [
         "llvm headers",
         "llvm sections",
+        "llvm section-data",
         "llvm imports",
         "llvm exports",
         "llvm symbols",

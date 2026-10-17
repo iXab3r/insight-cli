@@ -9,6 +9,7 @@ try{
  const pe=join(f.project,'program.exe'),pdb=join(f.project,'program.pdb');
  const headers=await f.call(['llvm','headers',pe]);assert.match(headers.content,/COFF-x86-64/);assert.match(headers.content,/ImageBase: 0x140000000/);
  const sections=await f.call(['llvm','sections','--target',headers.target]);assert.match(sections.content,/VirtualAddress: 0x1000/);
+ const data=await f.call(['llvm','section-data',pe,'--section','.rdata']);assert.match(data.content,/0D000000 08000000 15000000/i);
  const imports=await f.call(['llvm','imports',pe]);assert.match(imports.content,/PolicyNative.dll/);assert.match(imports.content,/upstream_adjust/);
  const exports=await f.call(['llvm','exports',pe]);assert.match(exports.content,/quote_total/);assert.match(exports.content,/RVA: 0x1000/);
  const instructions=await f.call(['llvm','disassemble',pe,'--address','0x140001040','--bytes','72']);assert.match(instructions.content,/\b(imul|cmpl|cmp)\b/);
@@ -38,5 +39,5 @@ try{
  for(const input of identities)assert.equal(digest(await readFile(join(f.project,input.name))),input.sha256);
  assert.ok((await f.call(['tools','processes','--tool','llvm','--all'])).items.every(p=>['exited','failed'].includes(p.state)));
  await f.cleanup();complete=true;
- await writeFile(join(directory,'result.json'),JSON.stringify({schema:1,state:'passed',scope:'Real public CLI developer proof; independent cold/prepared model gate separate',version:f.version,inputs:identities,checks:{peLinkage:true,machoLinkage:true,elfLinkage:true,pdbSummaryModulesGlobalsPublicsProceduresTypes:true,hexTypeIndexCorrect:true,boundedDisassembly:true,pagedOutput:true,outputParentsAndNoOverwrite:true,externalFamilyDriftRefused:true,externalFamilyPreserved:true,inputsUnchanged:true,checkpointSurvivesRemoval:true,terminalOwnedProcesses:true},cleanupComplete:true},null,2)+'\n',{mode:0o600});console.log('LLVM public CLI native proof PASS:',directory);
+ await writeFile(join(directory,'result.json'),JSON.stringify({schema:1,state:'passed',scope:'Real public CLI developer proof; independent cold/prepared model gate separate',version:f.version,inputs:identities,checks:{peLinkage:true,sectionConstants:true,machoLinkage:true,elfLinkage:true,pdbSummaryModulesGlobalsPublicsProceduresTypes:true,hexTypeIndexCorrect:true,boundedDisassembly:true,pagedOutput:true,outputParentsAndNoOverwrite:true,externalFamilyDriftRefused:true,externalFamilyPreserved:true,inputsUnchanged:true,checkpointSurvivesRemoval:true,terminalOwnedProcesses:true},cleanupComplete:true},null,2)+'\n',{mode:0o600});console.log('LLVM public CLI native proof PASS:',directory);
 }finally{if(!complete)await f.cleanup();}
