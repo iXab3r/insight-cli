@@ -6,6 +6,9 @@ description: Research several executable inputs through durable independent sess
 # insight-cli 0.2.0
 
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
+For static .NET type/C#/IL/resource research, read [ILSpy](references/ilspy.md).
+For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while
+`kill` explicitly interrupts verified owned work and preserves its journals.
 For archives, external launchers, server lifecycle or removal, read [managed runtime](references/managed-runtime.md).
 
 This skill and its executable helper are one npm package. Run `insight-cli skill` to locate

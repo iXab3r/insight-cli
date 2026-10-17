@@ -1,9 +1,13 @@
 # Shared tool runtime: contract and delivery plan
 
-Status: planned. The owner requested a shared CORE, a task hierarchy and sequential
-implementation, with tool distributions retained in our GitHub Releases. This document
-does not claim that the shared runtime, mirrors or ILSpy integration are implemented.
-The existing [Ghidra runtime](MANAGED-GHIDRA-RUNTIME.md) remains the delivered baseline.
+Status: implemented and native-accepted on macOS ARM64 (2026-10-17). All TR-01–TR-10
+items are delivered. [Acceptance procedure/results](TOOL-RUNTIME-ACCEPTANCE.md) and the
+[receipt](verification/tool-runtime.json) record the exact
+packed/global-installed build and Gherkin result; [distribution acceptance](verification/tool-distributions.json)
+records four immutable mirror releases, 70 assets and independent readback. The previous
+[Ghidra runtime](MANAGED-GHIDRA-RUNTIME.md) remains historical evidence. Npm registry publication
+is separate from this implementation/acceptance. [Adding tools](ADDING-TOOLS.md) describes the
+minimal adapter and release recipe workflow.
 
 ## Ownership and first consumers
 
@@ -37,7 +41,7 @@ Do not introduce an ecosystem-wide package solver.
 
 ## Agent-facing lifecycle
 
-These are planned shared commands, inherited under each tool namespace:
+These shared lifecycle commands are delivered under each tool namespace:
 
 ```text
 insight-cli <tool> download [--offline]
@@ -163,8 +167,8 @@ item. Each implementation PR references its issue and records exact tested sourc
 | [TR-10](https://github.com/iXab3r/insight-cli/issues/16) | Combined global-install gate and author guide | Exact packed/global-installed build: real EXE plus .NET assembly, several CLI clients, process inventory/stop/kill, failures, offline/local/external delivery and uninstall preserving research. Add the minimal new-tool recipe/hooks guide and timings. Keep portable CI and macOS native evidence distinct; unsupported Windows/Linux capabilities remain explicit. |
 
 TR-01 through TR-10 execute in listed order. TR-02 gathers both consumer inventories before CORE
-is expanded for them; it does not require the research API to exist yet. Per-tool API choices in
-TR-09 are bounded by these concrete capabilities and must be documented before implementation.
+is expanded for them; it does not require the research API to exist yet. The TR-09 command
+contract below was fixed before its implementation.
 The first completed slice ends after TR-10; additional candidate tools receive separate tasks.
 
 ## Sources
@@ -172,3 +176,29 @@ The first completed slice ends after TR-10; additional candidate tools receive s
 - [GitHub release limits](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 - [Immutable releases and draft-first publication](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
 - [Ghidra distribution notices](https://github.com/NationalSecurityAgency/ghidra/blob/master/NOTICE).
+
+## ILSpy command contract (TR-09)
+
+ILSpy consumes the same immutable targets as Ghidra. It does not create a Ghidra context,
+require a session or merge a decompilation. Supply exactly one file or `--target ID`.
+An optional `--session ID` validates and associates an existing research session with the run.
+The selected managed distribution supplies ILSpy 11.1.0.9782 and private .NET 10.0.13;
+`--dotnet-archive PATH` supplies the runtime archive during offline installation.
+An external `--executable PATH` must expose the same pinned ilspycmd CLI version.
+
+```text
+insight-cli ilspy types [input] [--target ID] [--kind c,i,s,d,e]
+insight-cli ilspy decompile [input] [--target ID] [--type FULL_NAME | --member XML_ID_OR_TOKEN]
+insight-cli ilspy il [input] [--target ID] [--type FULL_NAME]
+insight-cli ilspy resources [input] [--target ID]
+insight-cli ilspy resource [input] --name NAME --output DIRECTORY
+insight-cli ilspy project [input] --output DIRECTORY
+insight-cli ilspy metadata [input] --table NAME_OR_NUMBER
+```
+
+Text operations return content with immutable target SHA, process identity, elapsed time and
+diagnostics. `--output PATH` on text operations writes one new ordinary file; directory operations
+require a new output directory. Existing output is never overwritten. These commands use Update
+because they capture immutable input and start a tool. They perform static analysis; they do not
+execute the analyzed assembly. Tool update checks are disabled. Output remains ordinary files that
+agents may keep according to project conventions or explicitly save with `artifacts save`.

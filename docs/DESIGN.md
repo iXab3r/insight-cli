@@ -78,9 +78,11 @@ than being ordinary program-DB edits awaiting merge.
 ### Shared targets and sessions
 
 The owner requested shared delivery/execution helpers for additional RE tools and retained tool
-distributions in our GitHub Releases. [Tool runtime](TOOL-RUNTIME.md) specifies the planned CORE,
-ownership boundaries, mirror policy and sequential backlog. It is not implemented acceptance;
-the delivered Ghidra lifecycle and its historical receipts remain the current baseline.
+distributions in our GitHub Releases. [Tool runtime](TOOL-RUNTIME.md) now records the delivered
+CORE, mirror policy and completed TR-01–TR-10 slice. Ghidra retains its research/publication
+semantics; ILSpy consumes shared immutable targets without requiring a Ghidra context or merge.
+[Combined acceptance](verification/tool-runtime.json) uses the globally installed packed candidate.
+Factory still owns parsing, permissions, profiles, secrets and IPC; CORE adds no second host.
 
 | Entity | Responsibility |
 | --- | --- |

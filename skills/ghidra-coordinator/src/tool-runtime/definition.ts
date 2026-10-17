@@ -1,5 +1,6 @@
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {fail} from '../model.js';
+import type {ToolProcessHooks} from './commands.js';
 
 export interface ToolArtifact {
   name:string; url:string; sha256:string; size?:number; format:'zip'|'tgz'; root:string; license:string;
@@ -29,6 +30,7 @@ export interface ToolDefinition {
   id:string; description:string; components:ToolComponent[]; lifecycle:ToolLifecycle;
   installOptions?:NonNullable<CommandDefinition['options']>;
   commands?:CommandDefinition[];
+  processes?:ToolProcessHooks;
 }
 /** Definitions are data/hooks. Factory remains the only parser, permission and output owner. */
 export function defineTool(value:ToolDefinition):ToolDefinition {

@@ -1,3 +1,4 @@
+import {runTool,type RunContext} from './tool-runtime/run.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, readdir, mkdir, open, rename, rm, realpath, stat } from 'node:fs/promises';
 import { basename, delimiter, dirname, isAbsolute, join,relative,sep } from 'node:path';
@@ -67,7 +68,7 @@ export async function nativeRuntimeFingerprint(ghidraVersion:string,files:Native
   const hashes=[];for(const file of files)hashes.push({name:file.name,sha256:await sha(file.path)});
   return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
 }
-export async function nativeInputs(values: Record<string, unknown>,directory?:string): Promise<NativeInputs> {
+export async function nativeInputs(values: Record<string, unknown>,directory?:string,c?:RunContext): Promise<NativeInputs> {
   if(directory)values=runtimeValues(dirname(directory),values);
   if(!values.java||!values.ghidraHome)fail('configuration','Ghidra is not installed. Run insight-cli ghidra install, or supply external runtime paths.');
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
@@ -80,7 +81,7 @@ export async function nativeInputs(values: Record<string, unknown>,directory?:st
   const ghidraVersion = /^application.version=(.+)$/m.exec(properties)?.[1]?.trim();
   if (ghidraVersion !== '12.1.2') fail('configuration', 'This build requires the verified Ghidra 12.1.2 runtime.');
   let jdk;
-  try { jdk = await run(java, ['--version'], {timeout: 10000, maxBuffer: 16384}); }
+  try { jdk = c?await runTool(c,{tool:'ghidra',role:'java-version',executable:java,arguments:['--version'],timeoutMs:10000,maxOutputBytes:16384}):await run(java,['--version'],{timeout:10000,maxBuffer:16384}); }
   catch { fail('configuration', 'Configured Java executable could not be verified.'); }
   if (!/^(?:openjdk|java) 21(?:[.\s-]|$)/m.test(jdk.stdout + '\n' + jdk.stderr))
     fail('configuration', 'A Java 21 JDK is required.');
@@ -104,7 +105,7 @@ export async function nativeInputs(values: Record<string, unknown>,directory?:st
 }
 
 /** Compile packaged helper sources against the selected installation, never an author checkout. */
-export async function nativeHelpers(directory: string, inputs: NativeInputs): Promise<string> {
+export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:RunContext): Promise<string> {
   const sources = fileURLToPath(new URL('../../references/native/', import.meta.url));
   const names = [...(await readdir(sources)).filter(name => name.endsWith('.java')), '../InsightRepositoryProbe.java'].sort();
   if (!names.length) fail('configuration', 'Installed package omitted its native helper sources.');
@@ -117,9 +118,9 @@ export async function nativeHelpers(directory: string, inputs: NativeInputs): Pr
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   const temporary = join(parent, 'compiling-' + randomUUID()); await mkdir(temporary, {mode: 0o700});
   try {
-    await run(join(dirname(inputs.java), 'javac' + (process.platform === 'win32' ? '.exe' : '')),
-      ['-proc:none', '-cp', inputs.classpath, '-d', temporary, ...names.map(name => join(sources, name))],
-      {timeout: 60000, maxBuffer: 262144});
+    const executable=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':'')),args=['-proc:none','-cp',inputs.classpath,'-d',temporary,...names.map(name=>join(sources,name))];
+    if(c)await runTool(c,{tool:'ghidra',role:'compile-helpers',installation:inputs.fingerprint,executable,arguments:args,timeoutMs:60000,maxOutputBytes:262144});
+    else await run(executable,args,{timeout:60000,maxBuffer:262144});
     const complete = await open(join(temporary, 'complete'), 'wx', 0o600);
     try { await complete.writeFile(key); await complete.sync(); } finally { await complete.close(); }
     try { await rename(temporary, classes); }

@@ -19,6 +19,9 @@ The pinned Factory IPC runtime is a normal npm dependency fetched from an immuta
 GitHub tarball URL; installation therefore needs npm registry and GitHub access.
 Use `insight-cli ghidra install` to deliver the pinned Ghidra/JDK/native/server runtime.
 External Ghidra launchers and Java paths are also supported.
+`insight-cli ilspy install` delivers ILSpy and its private .NET runtime for managed-code
+research. Tool downloads use pinned assets retained in our GitHub Releases.
+Use `insight-cli tools processes` to inspect owned executions across tools.
 Help, skill discovery and saving ordinary files do not need Ghidra or Java.
 
 ## Start
@@ -59,3 +62,5 @@ License: MIT. The bundled GhidraMCP bridge has its own Apache-2.0 license and no
 
 Runtime management, local archives and external paths: [managed runtime](references/managed-runtime.md).
 The host debugger and OS permissions are checked separately by `ghidra doctor`.
+
+Static .NET commands and ordinary output files: [ILSpy](references/ilspy.md).

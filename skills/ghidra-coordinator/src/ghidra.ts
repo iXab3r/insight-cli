@@ -1,6 +1,7 @@
-import { promisify } from 'node:util';
+import {runTool} from './tool-runtime/run.js';
+import {launchProcess} from './tool-runtime/supervisor.js';
 import { fileURLToPath } from 'node:url';
-import { spawn, execFile, type ChildProcess } from 'node:child_process';
+import {type ChildProcess } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, readdir, cp, realpath, stat } from 'node:fs/promises';
 import { join, delimiter, resolve, isAbsolute, sep } from 'node:path';
@@ -52,7 +53,7 @@ export class GhidraRuntime implements Publisher {
     const bridgeToken = bridgeSecret ? randomUUID() + randomUUID() : undefined;
     if (bridgeSecret && bridgeToken) await this.context.secrets.set(bridgeSecret, bridgeToken);
     const log = await open(join(root, 'process.log'), 'a', 0o600);
-    const child = spawn(java, ['-Xmx768m', '-Djava.awt.headless=true', '-Dghidra.home=' + home, '-Dapplication.name=GhidraMCP', '-Duser.home=' + root, '-Djava.io.tmpdir=' + root, '-cp', jars.join(delimiter), 'com.xebyte.headless.GhidraMCPHeadlessServer', '--bind', '127.0.0.1', '--port', String(port)], {
+    const child = await launchProcess(this.context.appArguments.AppDataDirectory,{tool:'ghidra',role:'prototype-'+role,installation:expected},java, ['-Xmx768m', '-Djava.awt.headless=true', '-Dghidra.home=' + home, '-Dapplication.name=GhidraMCP', '-Duser.home=' + root, '-Djava.io.tmpdir=' + root, '-cp', jars.join(delimiter), 'com.xebyte.headless.GhidraMCPHeadlessServer', '--bind', '127.0.0.1', '--port', String(port)], {
       cwd: root, detached: true, stdio: ['ignore', log.fd, log.fd], windowsHide: true,
       env: { PATH: this.context.environment.PATH ?? process.env.PATH, HOME: root, TMPDIR: root, XDG_RUNTIME_DIR: this.directory,
         GHIDRA_SERVER_HOST: url.hostname, GHIDRA_SERVER_PORT: url.port || '13100', GHIDRA_SERVER_USER: user, GHIDRA_SERVER_PASSWORD: password,
@@ -201,9 +202,9 @@ export class GhidraRuntime implements Publisher {
     const password=await this.context.secrets.require(role==='reader'?'readerPassword':'publisherPassword');
     const script=fileURLToPath(new URL('../../references/InsightRepositoryProbe.java',import.meta.url));
     let stdout: string;
-    try { ({stdout}=await promisify(execFile)(java,['-Djava.awt.headless=true','-Dghidra.home='+home,'-Duser.home='+root,'-Djava.io.tmpdir='+root,'-cp',jars.join(delimiter),'--source','21',script,t.repository,t.programPath,role], {
-      cwd:root,timeout:30000,maxBuffer:262144,signal:this.context.signal,
-      env:{PATH:process.env.PATH,HOME:root,TMPDIR:root,GHIDRA_SERVER_HOST:url.hostname,GHIDRA_SERVER_PORT:url.port||'13100',GHIDRA_SERVER_USER:text(values[role==='reader'?'readerUser':'publisherUser']),GHIDRA_SERVER_PASSWORD:password}
+    try { ({stdout}=await runTool(this.context,{tool:'ghidra',role:'prototype-authority',executable:java,arguments:['-Djava.awt.headless=true','-Dghidra.home='+home,'-Duser.home='+root,'-Djava.io.tmpdir='+root,'-cp',jars.join(delimiter),'--source','21',script,t.repository,t.programPath,role],
+      cwd:root,timeoutMs:30000,maxOutputBytes:262144,
+      environment:{PATH:process.env.PATH,HOME:root,TMPDIR:root,GHIDRA_SERVER_HOST:url.hostname,GHIDRA_SERVER_PORT:url.port||'13100',GHIDRA_SERVER_USER:text(values[role==='reader'?'readerUser':'publisherUser']),GHIDRA_SERVER_PASSWORD:password}
     })); } catch { fail('authorization','Authoritative repository probe failed; access and checkout state remain unverified.'); }
     let result: Record<string,unknown>;
     try { result=object(JSON.parse(stdout.trim())); } catch { fail('malformed','Authoritative repository probe returned malformed content.'); }

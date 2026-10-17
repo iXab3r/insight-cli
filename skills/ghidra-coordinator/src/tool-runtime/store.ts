@@ -20,30 +20,33 @@ const key=(directory:string,tool:string)=>resolve(directory)+'\0'+tool;
 export async function withToolLock<T>(directory:string,tool:string,action:()=>Promise<T>,signal?:AbortSignal):Promise<T>{
  signal?.throwIfAborted();const k=key(directory,tool);if(held.getStore()?.has(k))return action();
  const previous=queues.get(k)??Promise.resolve();
- const execution=previous.then(()=>{signal?.throwIfAborted();return held.run(new Set([...(held.getStore()??[]),k]),action);});
+ let started=false;const execution=previous.then(()=>{signal?.throwIfAborted();started=true;return held.run(new Set([...(held.getStore()??[]),k]),action);});
  const tail=execution.then(()=>{},()=>{});queues.set(k,tail);void tail.then(()=>{if(queues.get(k)===tail)queues.delete(k);});
  if(!signal)return execution;
  return new Promise<T>((ok,bad)=>{
-  const aborted=()=>bad(signal.reason);signal.addEventListener('abort',aborted,{once:true});
+  const aborted=()=>{if(!started)bad(signal.reason);};signal.addEventListener('abort',aborted,{once:true});
   if(signal.aborted)aborted();
   execution.then(ok,bad).finally(()=>signal.removeEventListener('abort',aborted));
  });
 }
+export function toolProfileBusy(directory:string){const prefix=resolve(directory)+'\0';return [...queues.keys(),...uses.keys()].some(k=>k.startsWith(prefix));}
 export function toolUseCount(directory:string,tool:string){return uses.get(key(directory,tool))??0;}
-export async function withToolUse<T>(directory:string,tool:string,acquire:()=>Promise<T>):Promise<{value:T;release:()=>void}>{
+export async function withToolUse<T>(directory:string,tool:string,acquire:()=>Promise<T>,signal?:AbortSignal):Promise<{value:T;release:()=>void}>{
  return withToolLock(directory,tool,async()=>{
-  const value=await acquire(),k=key(directory,tool);uses.set(k,(uses.get(k)??0)+1);let released=false;
+  const value=await acquire();signal?.throwIfAborted();const k=key(directory,tool);uses.set(k,(uses.get(k)??0)+1);let released=false;
   return {value,release(){if(released)return;released=true;const n=(uses.get(k)??1)-1;if(n)uses.set(k,n);else uses.delete(k);}};
- });
+ },signal);
 }
 export async function assertUnused(directory:string,tool:string){
  if(toolUseCount(directory,tool))fail('busy','Tool installation is reserved by an active operation.');
  let names:string[];const root=join(directory,'runtime/processes');try{names=await readdir(root);}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
  for(const name of names){if(!/^[a-f0-9-]{36}\.json$/.test(name))continue;
-  const record=await readJson<{tool:string;state:string;pid?:number}>(join(root,name));
+  const record=await readJson<{tool:string;state:string;pid?:number;ownerPid?:number;gated?:boolean}>(join(root,name));
   if(!record||record.tool!==tool||['exited','failed'].includes(record.state))continue;
-  if(record.state==='unverified')fail('busy','Tool has an unverified process outcome; reconcile it before changing installations.');
-  if(!record.pid)fail('busy','Tool has an unresolved process launch; inspect its process record.');
+  if(!record.pid){
+   if(record.gated&&record.ownerPid)try{process.kill(record.ownerPid,0);}catch(e){if((e as NodeJS.ErrnoException).code==='ESRCH')continue;throw e;}
+   fail('busy','Tool has an unresolved process launch; inspect its process record.');
+  }
   try{process.kill(record.pid,0);fail('busy','Tool has an active or unverified process; stop it before changing installations.');}
   catch(e){if((e as NodeJS.ErrnoException).code!=='ESRCH')throw e;}
  }

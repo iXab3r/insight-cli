@@ -23,10 +23,10 @@ async function call(args,{selected=profile,global=false,success=true}={}){
  return JSON.parse(success?result.stdout:result.stderr);
 }
 const scoped=(s,args,options={})=>call(['ghidra',...args,'--session',s.session,'--target',s.target],options);
-const report={schema:1,state:'running',package:'@eyeauras/insight-cli',version:'0.2.0',scope:'global public CLI; fresh managed install and external launcher; real 7zr research and publication',inputSha256:inputSha,runnerNode:process.version,cliNode:(await exec('/usr/bin/env',['node','--version'],{env:environment})).stdout.trim(),platform:process.platform,architecture:process.arch,checks:{},calls};
+const report={schema:1,state:'running',package:'@eyeauras/insight-cli',version:undefined,scope:'global public CLI; fresh managed install and external launcher; real 7zr research and publication',inputSha256:inputSha,runnerNode:process.version,cliNode:(await exec('/usr/bin/env',['node','--version'],{env:environment})).stdout.trim(),platform:process.platform,architecture:process.arch,checks:{},calls};
 async function stopOwned(selected){for(const s of scopes.filter(s=>s.profile===selected).reverse())await scoped(s,['close'],{selected});await call(['ghidra','server','stop'],{selected});}
 try{
- const skill=await call(['skill'],{global:true});const packageRoot=dirname(skill.path);const metadata=JSON.parse(await readFile(join(packageRoot,'package.json'),'utf8'));assert.equal(metadata.version,'0.2.0');report.installedBuild=JSON.parse(await readFile(join(packageRoot,'.cli-package-build.json'),'utf8'));
+ const skill=await call(['skill'],{global:true});const packageRoot=dirname(skill.path);const metadata=JSON.parse(await readFile(join(packageRoot,'package.json'),'utf8'));assert.equal(metadata.name,'@eyeauras/insight-cli');assert.equal(typeof metadata.version,'string');report.version=metadata.version;report.installedBuild=JSON.parse(await readFile(join(packageRoot,'.cli-package-build.json'),'utf8'));
  for(const name of [profile,externalProfile]){await call(['profile','create',name],{global:true});await call(['permissions','grant','Update'],{selected:name});await call(['permissions','grant','Destructive'],{selected:name});}
  const initial=await call(['ghidra','status']);assert.equal(initial.mode,'unconfigured');assert.deepEqual(initial.missing,['jdk','ghidra']);assert.equal((await call(['ghidra','server','status'])).state,'runtime_not_ready');
  report.checks.freshProfileWithoutRuntimePaths=true;

@@ -107,6 +107,29 @@ public sealed class IntegrationSteps(ScenarioContext context)
             Assert.That(receipt.RootElement.GetProperty("checks").GetProperty(check).GetBoolean(), Is.True, check);
     }
 
+    [When("global CLI shared tool runtime acceptance runs")]
+    public Task SharedTools() => Execute("shared-tool-runtime",
+        ["scripts/proof-tool-runtime.mjs", Required("INSIGHT_GLOBAL_CLI"),
+         Required("INSIGHT_RUNTIME_EXE"), Required("INSIGHT_MANAGED_ASSEMBLY"),
+         Path.Combine(scenario.ArtifactDirectory, "tool-runtime-result.json"),
+         Required("INSIGHT_EXTERNAL_GHIDRA"), Required("INSIGHT_GHIDRA_ARCHIVE"),
+         Required("INSIGHT_ILSPY_ARCHIVE"), Required("INSIGHT_DOTNET_ARCHIVE")], TimeSpan.FromMinutes(60));
+
+    [Then("both tools satisfy delivery research recovery and removal acceptance")]
+    public void SharedToolsPassed()
+    {
+        Passed();
+        var line = result.StandardOutput.Split('\n').Last(x => x.TrimStart().StartsWith('{'));
+        using var receipt = JsonDocument.Parse(line);
+        Assert.That(receipt.RootElement.GetProperty("state").GetString(), Is.EqualTo("passed"));
+        foreach (var check in new[] { "parallelPublicClients", "atomicConflictAndRefresh", "saveAwareProcessStop",
+            "guiForceKillRetainsSavedWork", "authenticatedOwnerCrashRecovery", "contextKillRetainsAcknowledgedWork", "serverKillRetainsLocalWork",
+            "privateDotnetMirroredDelivery", "usefulManagedResearchAndPlainSavedFiles", "multiToolTargetAndRunInventory",
+            "failedToolRetainsDiagnostics", "uninstallRetainsBothToolsResearch", "offlineLocalArchiveReinstall",
+            "externalIlspyAndSafeUninstall", "noLiveOwnedToolProcesses", "unchangedInputs" })
+            Assert.That(receipt.RootElement.GetProperty("checks").GetProperty(check).GetBoolean(), Is.True, check);
+    }
+
     [Then("the complete native gate succeeds")]
     public void FullPassed()
     {

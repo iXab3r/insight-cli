@@ -18,7 +18,8 @@ older technical bridge features remain a separate supporting layer.
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
 rejection of an empty selection on macOS ARM64. The full 33-group bridge was discovered
 but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. Current discovery
-finds 30 scenarios: 25 business workflows, four technical bridges and the managed runtime delivery scenario.
+finds 31 scenarios: 25 business workflows, four technical bridges, managed runtime delivery
+and the combined shared tool runtime scenario.
 
 ## Setup and commands
 
@@ -133,3 +134,26 @@ It requires `INSIGHT_GLOBAL_CLI`, `INSIGHT_RUNTIME_EXE` (the exact static 7zr fi
 12.1.2 zip, to verify macOS native supplementation and GUI/debugger operation). The installed CLI must match the built
 candidate; installation itself is an explicit development/release step. This scenario downloads
 public runtime artifacts and is not part of offline CI or the historical 25 business IDs.
+
+## Shared tool runtime gate
+
+`SharedToolRuntime.feature` adds `@tool-runtime`, separate from the historical business IDs.
+Its runner `scripts/proof-tool-runtime.mjs` first runs the complete existing managed-Ghidra
+public global-CLI gate, then verifies parallel clients, atomic conflicts/refresh, authenticated
+owner replacement, generic process stop/kill and server failure with saved private work.
+The same profile then performs real ILSpy C#/IL/type/resource/project/metadata research,
+parallel CLI reads, ordinary-file saving, offline/local archive reinstall, external executable
+selection and uninstall while retaining both tools' targets and evidence.
+
+In addition to the managed runtime variables above, supply `INSIGHT_MANAGED_ASSEMBLY`,
+`INSIGHT_ILSPY_ARCHIVE` and `INSIGHT_DOTNET_ARCHIVE`. Build the versioned fixture with
+`dotnet build tests/acceptance/fixtures/managed/ResearchFixture.csproj -c Release -o /absolute/output`.
+Use a disposable output path outside the source tree. This SDK is required only to prepare
+acceptance input; installed ILSpy supplies its own runtime and does not require an SDK.
+The native runner clears global Java/Ghidra/.NET selectors and uses a PATH without a global
+`dotnet`. Run the selection with `npm run automation -- test --suite acceptance --tag tool-runtime
+--property RestoreLockedMode=true --timeout-seconds 3600`. Every named assertion must pass;
+a successful process exit without completed research/cleanup is insufficient.
+
+[Shared tool runtime acceptance](verification/tool-runtime.json) records the passing exact
+packed/global-installed macOS candidate and all named research/recovery/removal checks.

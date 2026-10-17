@@ -14,9 +14,9 @@ test('shared installation staging preserves selection on failure and reserves ac
  await removeInstallation(root,id);assert.equal(JSON.parse(await readFile(join(root,'selection.json'),'utf8')).selected,'old');
 });
 test('queued lifecycle cancellation does not bypass the current owner operation',async()=>{
- const {withToolLock}=await import('../src/tool-runtime/store.js');let release!:()=>void;const gate=new Promise<void>(ok=>release=ok),controller=new AbortController();let mutated=false;
+ const {withToolLock,toolProfileBusy}=await import('../src/tool-runtime/store.js');let release!:()=>void;const gate=new Promise<void>(ok=>release=ok),controller=new AbortController();let mutated=false;
  const first=withToolLock('synthetic-profile','fixture',()=>gate);const cancelled=withToolLock('synthetic-profile','fixture',async()=>{mutated=true;},controller.signal);
- controller.abort(new Error('cancelled fixture'));await assert.rejects(cancelled,/cancelled fixture/);assert.equal(mutated,false);release();await first;
+ assert.equal(toolProfileBusy('synthetic-profile'),true);assert.equal(toolProfileBusy('another-profile'),false);controller.abort(new Error('cancelled fixture'));await assert.rejects(cancelled,/cancelled fixture/);assert.equal(mutated,false);release();await first;
  await withToolLock('synthetic-profile','fixture',async()=>{});assert.equal(mutated,false);
 });
 test('standard archive installer verifies reuse, external selection, tampering and safe uninstall',async t=>{
@@ -36,4 +36,12 @@ test('standard archive installer verifies reuse, external selection, tampering a
  const value=await installer.install({archive,offline:true}),{removeInstallation}=await import('../src/tool-runtime/store.js');
  const owned=join(installer.root,'installations',value.installation);await rm(owned,{recursive:true});await symlink(source,owned,process.platform==='win32'?'junction':'dir');
  await assert.rejects(removeInstallation(installer.root,value.installation),/external link/);assert.equal(await readFile(join(source,'bundle/run'),'utf8'),'fixture tool');
+});
+
+test('cancelling an acquisition already in progress cannot leak an installation reservation',async()=>{
+ const {withToolUse,toolUseCount,toolProfileBusy}=await import('../src/tool-runtime/store.js');
+ let ready!:()=>void,release!:()=>void;const entered=new Promise<void>(ok=>ready=ok),gate=new Promise<void>(ok=>release=ok),controller=new AbortController();
+ const acquisition=withToolUse('cancelled-acquisition','fixture',async()=>{ready();await gate;return 'selected';},controller.signal);
+ await entered;controller.abort(new Error('cancel during verification'));release();await assert.rejects(acquisition,/cancel during verification/);
+ assert.equal(toolUseCount('cancelled-acquisition','fixture'),0);assert.equal(toolProfileBusy('cancelled-acquisition'),false);
 });

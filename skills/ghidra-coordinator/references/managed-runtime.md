@@ -58,7 +58,9 @@ extraction so later source edits cannot change the installed bytes. Optional `--
 identity. `--offline` prohibits network acquisition: provide/cache every required archive. On macOS,
 an official Ghidra zip also needs the pinned prebuilt native archive in cache. The managed macOS
 distribution already includes these natives. Executable modes are preserved; paths, links and
-expanded sizes are checked during portable Node extraction. Downloads use pinned SHA256 values.
+expanded sizes are checked during portable Node extraction. Downloads use exact assets retained
+in `iXab3r/insight-cli` GitHub Releases, with hashes and sizes pinned in the installed package.
+There is no runtime upstream/latest fallback; supplied archives and verified cache support offline use.
 No external unzip, tar or Python executable is needed for extraction.
 
 ## Server, process and data ownership
@@ -95,16 +97,39 @@ insight-cli --profile local ghidra uninstall --purge-cache
 
 Uninstall removes only selected owned installation files. It preserves the selection as an
 uninstalled receipt, so later research reports a missing runtime instead of changing bindings.
-Archives remain reusable unless `--purge-cache` is selected. Reinstalling the same archives restores
+Archives remain reusable unless `--purge-cache` is selected. It removes recorded archives for
+this installation, preserving other tools' cache and unrecorded legacy entries. Reinstalling the same archives restores
 the same runtime identity. Sessions, private snapshots, unresolved publication journals, server
 repositories and artifacts survive. Uninstall does not resolve an uncertain merge or replay it.
+
+## Process inventory and recovery
+
+```sh
+insight-cli --profile local tools processes --tool ghidra
+insight-cli --profile local tools processes show <process-id>
+insight-cli --profile local tools processes stop <process-id>
+insight-cli --profile local tools processes kill <process-id>
+```
+
+These IDs describe executions, not new research selectors. Context records include the existing
+session/target; server, GUI, debugger and helper roles remain separate. `stop` saves a selected
+Ghidra context through its ordinary close path. Stopping a server requires closed contexts.
+`kill` requires Destructive and explicitly interrupts verified owned work; it does not prove a
+merge/save completed. Live debugger cleanup goes through the owning GUI so inferior termination
+can be verified. Research and unknown journals are retained.
+
+After an owner crash, inventory reconnects to authenticated owned endpoints without re-executing
+research. macOS process birth times alone cannot prove recovered ownership; an ambiguous process
+stays `unverified` and is not signalled. Original child handles and authenticated tool identities
+provide the supported stop/kill authority. This is lifecycle management, not an OS security sandbox.
 
 ## Sources and host boundary
 
 The catalog pins Ghidra 12.1.2 and Temurin JDK 21.0.11+10. macOS uses public Homebrew-built Ghidra
 bottles with native components (macOS 14+, ARM64 or x64); no installed Homebrew is used. Linux x64
-and Windows x64 use the official Ghidra zip and Temurin archive. All source URLs, hashes and license
-identities are in `src/runtime-catalog.ts`; downloaded distributions retain their license files.
+and Windows x64 use the official Ghidra zip and Temurin archive. The installed `runtime/tool-catalog.json` pins mirror assets; repository
+`scripts/tool-distributions/` recipes retain upstream provenance. Published tool releases include
+original licenses/notices and required source/build companions, independent of CLI releases.
 Unsupported platforms fail explicitly and may use compatible external profile paths. Native
 acceptance for this delivery is macOS ARM64; catalog availability is not Windows/Linux native proof.
 
