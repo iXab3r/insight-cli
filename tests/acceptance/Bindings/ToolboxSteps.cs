@@ -47,6 +47,11 @@ public sealed class ToolboxSteps(ScenarioContext context)
         var root = Required("INSIGHT_REPOSITORY_ROOT");
         var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
             .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-windbg.mjs" }), TimeSpan.FromMinutes(10));
+        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        {
+            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
+            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+        }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-windbg.json")));
     }
@@ -58,6 +63,11 @@ public sealed class ToolboxSteps(ScenarioContext context)
             .WithWorkingDirectory(Required("INSIGHT_REPOSITORY_ROOT"))
             .WithArguments(new[] { script, Value("packageRoot"), scenario.ArtifactDirectory }.Concat(inputs)),
             TimeSpan.FromMinutes(10));
+        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        {
+            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
+            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+        }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(scenario.ArtifactDirectory, "result.json")));
     }

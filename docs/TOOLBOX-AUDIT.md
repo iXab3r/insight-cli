@@ -333,3 +333,17 @@ separate source-build audit rerun hit `/proc` ESRCH after a process disappeared;
 its observer now treats that as absence. The passing CLI job and failing overall
 workflow are recorded separately. Platform tags keep unsupported profiles explicitly
 skipped rather than pretending that one host proved the entire toolbox.
+
+WinDbg's [public native receipt](verification/toolbox-windbg.json) confirms a Windows
+Gherkin pass using a globally installed artifact, with `quote_total`, registers and
+actual value 109 in dump memory, bounded pagination, unreadable-memory uncertainty,
+external runtime drift refusal and preserved PDB/dump/checkpoint bytes. The CDB version
+probe accepts its real console product banner; startup command echoes are not accepted
+as snapshot result markers. Independent model and full-inventory gates remain open.
+
+ProcMon's next native probe uses a first-party PMC serializer based on the pinned
+[original format research](https://github.com/eronnen/procmon-parser/blob/96080961e51745ddc6e83490c24e540553c44c71/docs/PMC%20Format.md).
+It loads PID/path include rules and destructive filtering before two owned workers
+read the same configuration, then exports the retained PML with display filtering
+disabled. This checks actual capture scope rather than hiding unrelated rows during
+export. Public ProcMon admission remains pending; no broad raw capture is uploaded.

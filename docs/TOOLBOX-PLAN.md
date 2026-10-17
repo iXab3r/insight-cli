@@ -285,3 +285,14 @@ report an actual blocker rather than inventing support or silently removing a to
 Host mechanics, reference packaging, admission checks, test bindings and scoped IPC diagnostics
 are engineering tasks within the selected direction. Publishing a new npm version remains a
 separate release action, not implied by planning.
+
+Native delivery checkpoint: LLDB and Frida have managed runtimes, public facades,
+packaged guidance and real macOS fault/CLI proof. WinDbg now has a Windows x64
+read-only dump facade and native Gherkin proof; strace has a source-built mirrored
+Linux x64 runtime and native Gherkin proof. Exact artifacts and limitations are in
+`verification/toolbox-{lldb,frida,windbg,strace}.json`. Windows common Job Object
+lifetime also passed real completion, timeout, kill, owner-loss and overflow cases.
+These checkpoints do not close independent agent or combined full-inventory gates.
+ProcMon pre-capture scope, dnSpyEx debug/edit, TShark, mitmproxy and the six capability
+units remain in the ordered implementation list. Account inference quota only
+defers the independent model gates.

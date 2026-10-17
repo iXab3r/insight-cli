@@ -7,6 +7,8 @@ on:
       - 'scripts/toolbox/audit-windows.ps1'
       - 'scripts/toolbox/native-windows-job.mjs'
       - 'scripts/toolbox/*windbg*'
+      - 'scripts/toolbox/audit-procmon-scoped.ps1'
+      - 'skills/ghidra-coordinator/src/procmon-config.ts'
       - 'skills/ghidra-coordinator/src/windbg.ts'
       - 'scripts/prepare-toolbox.mjs'
       - 'skills/ghidra-coordinator/src/tool-runtime/**'
@@ -89,4 +91,29 @@ jobs:
         with:
           name: toolbox-windbg
           path: toolbox-windbg.json
+          if-no-files-found: error
+
+  procmon-pre-capture-scope:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Prove destructive PID and path filtering before owned workers run
+        shell: pwsh
+        run: ./scripts/toolbox/audit-procmon-scoped.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-procmon-scoped
+          path: toolbox-procmon-scoped.json
           if-no-files-found: error
