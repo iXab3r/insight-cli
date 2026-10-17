@@ -3,13 +3,14 @@
   "target": "netstandard2.0",
   "inputs": {
     "OwnedJob.cs": "396b15ff5ac0931bec5f8a1d4f8f5175f6ffa0cb20a8b775eb07fd4c773a1542",
-    "RegistryRedirect.cs": "75776a19fe61b4a313941c6cfc0aa561b1ff1c7cbdd5719120be18d30bae5e1e",
+    "RegistryRedirect.cs": "b1ae1b2c0ea5190245fe898296526c01eb6e83500f7be89929b221358eff905d",
+    "DirectoryAlias.cs": "3bf0b3ce5117faa3b6b5fb0e8b1de0bc317a1631c0d9b4cc3361e2a490cf85a1",
     "Insight.WindowsJob.csproj": "90217b0c46f3eaeeecce73e9b8daaf47d14f07fd51f85c94395959f6ec4be114",
     "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
     "packages.lock.json": "00d9e92c7bc1e7939bc82114d870ab6657841901237cab1daa8ed01cac976e5e"
   },
-  "sha256": "0235e037c2f80e3d6d46b9954acc3eba7f190b4341e2ff60c6d051d1f63d75d4",
-  "size": 16384,
+  "sha256": "a911a603979efa6b75d3d7e90c8eb5313ef9ad8e94bd948f0a28800ece0b1c45",
+  "size": 17408,
   "launcherSha256": "d600cdbc701d3ec652d32d4518b5b0737f193770e81fe44106bfbacf73e4f0c9",
-  "reproducibility": "Two independent temporary-directory builds produced identical bytes; private-registry prototype remains pending native acceptance."
+  "reproducibility": "Two independent temporary-directory builds produced identical bytes; private registry prototype remains pending native validation."
 }
