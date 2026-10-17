@@ -1,9 +1,13 @@
 # Shared tool runtime: contract and delivery plan
 
-Status: planned. The owner requested a shared CORE, a task hierarchy and sequential
-implementation, with tool distributions retained in our GitHub Releases. This document
-does not claim that the shared runtime, mirrors or ILSpy integration are implemented.
-The existing [Ghidra runtime](MANAGED-GHIDRA-RUNTIME.md) remains the delivered baseline.
+Status: implemented and native-accepted on macOS ARM64 (2026-10-17). All TR-01–TR-10
+items are delivered. [Acceptance procedure/results](TOOL-RUNTIME-ACCEPTANCE.md) and the
+[receipt](verification/tool-runtime.json) record the exact
+packed/global-installed build and Gherkin result; [distribution acceptance](verification/tool-distributions.json)
+records four immutable mirror releases, 70 assets and independent readback. The previous
+[Ghidra runtime](MANAGED-GHIDRA-RUNTIME.md) remains historical evidence. Npm registry publication
+is separate from this implementation/acceptance. [Adding tools](ADDING-TOOLS.md) describes the
+minimal adapter and release recipe workflow.
 
 ## Ownership and first consumers
 
@@ -37,7 +41,7 @@ Do not introduce an ecosystem-wide package solver.
 
 ## Agent-facing lifecycle
 
-These are planned shared commands, inherited under each tool namespace:
+These shared lifecycle commands are delivered under each tool namespace:
 
 ```text
 insight-cli <tool> download [--offline]
@@ -163,8 +167,8 @@ item. Each implementation PR references its issue and records exact tested sourc
 | [TR-10](https://github.com/iXab3r/insight-cli/issues/16) | Combined global-install gate and author guide | Exact packed/global-installed build: real EXE plus .NET assembly, several CLI clients, process inventory/stop/kill, failures, offline/local/external delivery and uninstall preserving research. Add the minimal new-tool recipe/hooks guide and timings. Keep portable CI and macOS native evidence distinct; unsupported Windows/Linux capabilities remain explicit. |
 
 TR-01 through TR-10 execute in listed order. TR-02 gathers both consumer inventories before CORE
-is expanded for them; it does not require the research API to exist yet. Per-tool API choices in
-TR-09 are bounded by these concrete capabilities and must be documented before implementation.
+is expanded for them; it does not require the research API to exist yet. The TR-09 command
+contract below was fixed before its implementation.
 The first completed slice ends after TR-10; additional candidate tools receive separate tasks.
 
 ## Sources

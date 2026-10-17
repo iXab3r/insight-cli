@@ -7,9 +7,13 @@ existing product; they do not add separate CLIs, a generic plugin framework or a
 
 ## Current combined acceptance
 
-New work is tracked in the [shared tool runtime backlog](TOOL-RUNTIME.md#ordered-work-and-acceptance),
-TR-01–TR-10: CORE, mirrored distribution, execution/supervision, Ghidra migration, ILSpy and
-combined acceptance. Those items are planned; the delivered acceptance below does not close them.
+The [shared tool runtime backlog](TOOL-RUNTIME.md#ordered-work-and-acceptance) TR-01–TR-10
+is complete: CORE, mirrored distributions, execution/supervision, Ghidra migration, ILSpy and
+[combined installed acceptance](verification/tool-runtime.json). Its new gate includes 172
+application tests, 15 release tests, two opt-in real LLDB startup fault checks, isolated package
+installation, two offline Gherkin scenarios
+and one real macOS global-CLI tool-runtime Gherkin scenario. Historical gates below keep their
+original evidence and do not stand in for this new acceptance.
 
 The full M0–M5 and selected P0–P3 slice passes one current-build gate: 118 offline tests, 33
 native groups, installed CLI/IPC/keyring, two agents/two EXEs/four contexts and nine actual

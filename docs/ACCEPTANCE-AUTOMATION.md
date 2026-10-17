@@ -18,7 +18,8 @@ older technical bridge features remain a separate supporting layer.
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
 rejection of an empty selection on macOS ARM64. The full 33-group bridge was discovered
 but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. Current discovery
-finds 30 scenarios: 25 business workflows, four technical bridges and the managed runtime delivery scenario.
+finds 31 scenarios: 25 business workflows, four technical bridges, managed runtime delivery
+and the combined shared tool runtime scenario.
 
 ## Setup and commands
 
@@ -153,3 +154,6 @@ The native runner clears global Java/Ghidra/.NET selectors and uses a PATH witho
 `dotnet`. Run the selection with `npm run automation -- test --suite acceptance --tag tool-runtime
 --property RestoreLockedMode=true --timeout-seconds 3600`. Every named assertion must pass;
 a successful process exit without completed research/cleanup is insufficient.
+
+[Shared tool runtime acceptance](verification/tool-runtime.json) records the passing exact
+packed/global-installed macOS candidate and all named research/recovery/removal checks.

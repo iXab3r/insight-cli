@@ -8,10 +8,11 @@ publication remains excluded.
 
 ## Business acceptance follow-up
 
-The next planned infrastructure slice is [shared tool runtime](TOOL-RUNTIME.md): CORE helpers,
-retained GitHub tool distributions, Ghidra migration and ILSpy as the second consumer, followed
-by combined installed acceptance. TR-01–TR-10 execute sequentially and remain separate from
-the completed M0–M5 and business gates below.
+The [shared tool runtime](TOOL-RUNTIME.md) TR-01–TR-10 slice is implemented and passes its
+[combined global-install Gherkin/native gate](verification/tool-runtime.json): CORE helpers,
+immutable retained tool distributions, Ghidra migration, ILSpy/private .NET and recovery.
+It remains separate from the historical M0–M5 and business/throughput gates below. Native
+acceptance is macOS ARM64; native Windows/Linux and additional tool adapters remain future work.
 
 On 2026-10-16 the owner agreed the [25 business scenarios](BUSINESS-SCENARIOS.md) in five
 branches and requested documentation before implementation. BS-23 requires demonstrable

@@ -1,0 +1,830 @@
+{
+  "debuggerStartupFaults": {
+    "passed": 2,
+    "failed": 0,
+    "reportSha256": "6df8f046511b0782656c4f4e0c735f2bdacf3f836053bd6a758c4d64c76a36d5",
+    "scope": "Real LLDB with a fixture identity endpoint; early exit and stop during startup; no target execution"
+  },
+  "globalPackageFilesVerified": 200,
+  "schema": 1,
+  "state": "passed",
+  "date": "2026-10-17T00:10:47.227Z",
+  "sourceCommit": "b28ec62a2bd86b93f1050a22c9bf4a17b35f8bae",
+  "scope": "global installed CLI; mirrored delivery, Ghidra and ILSpy, recovery and safe removal",
+  "installedVersion": "0.2.0",
+  "installedBuild": {
+    "version": 1,
+    "artifact": "13738de9d5993d769d2f34c4ad7e0cf90fd59f9aaf03c7ca6d0d50c7e04238d2"
+  },
+  "packageSha256": "90ad871601e0a391ac9d7273223be918730498dac15595f02aa401e8fc1d7ab5",
+  "automation": {
+    "scenario": "Independent clients research real native and managed inputs with safe recovery",
+    "passed": 1,
+    "failed": 0,
+    "trxSha256": "fed51b7d970bd2d1d1330bdeb50d3e2a7dd62c33ad5901f419634b80de540d26"
+  },
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v26.4.0",
+  "inputSha256": {
+    "exe": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "assembly": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb"
+  },
+  "ghidra": {
+    "version": "12.1.2",
+    "jdk": "21.0.11+10",
+    "build": {
+      "version": 1,
+      "artifact": "13738de9d5993d769d2f34c4ad7e0cf90fd59f9aaf03c7ca6d0d50c7e04238d2"
+    },
+    "runtimeFingerprint": "b7e9152830c9caf3123bcacc17ed9506f8b7a3cb6dca8f8c5b065bfcf6ce534e",
+    "checks": {
+      "freshProfileWithoutRuntimePaths": true,
+      "pinnedDownloadsAndOfflineCache": true,
+      "nativeInstallAndDoctor": true,
+      "explicitOwnedServerLifecycle": true,
+      "multiClientRealExeResearchMergeRefresh": true,
+      "busyRuntimeAndServerProtected": true,
+      "uninstallPreservesResearchAndArtifacts": true,
+      "localArchivesAndResearchContinuation": true,
+      "officialZipWithManagedMacNatives": true,
+      "managedGuiAndLiveDebugger": true,
+      "managedBaseAndIsolatedExtension": true,
+      "externalLauncherRealExeMergeAndSafeUninstall": true,
+      "unchangedInput": true
+    },
+    "calls": [
+      {
+        "code": 0,
+        "seconds": 0.448732042,
+        "command": "skill"
+      },
+      {
+        "code": 0,
+        "seconds": 1.80797275,
+        "command": "profile create runtime-proof-<id>"
+      },
+      {
+        "code": 0,
+        "seconds": 0.429849416,
+        "command": "permissions grant Update"
+      },
+      {
+        "code": 0,
+        "seconds": 0.486552042,
+        "command": "permissions grant Destructive"
+      },
+      {
+        "code": 0,
+        "seconds": 0.503607375,
+        "command": "profile create runtime-proof-<id>xternal"
+      },
+      {
+        "code": 0,
+        "seconds": 0.501150208,
+        "command": "permissions grant Update"
+      },
+      {
+        "code": 0,
+        "seconds": 0.491232166,
+        "command": "permissions grant Destructive"
+      },
+      {
+        "code": 0,
+        "seconds": 0.504280584,
+        "command": "ghidra status"
+      },
+      {
+        "code": 0,
+        "seconds": 0.38827725,
+        "command": "ghidra server status"
+      },
+      {
+        "code": 0,
+        "seconds": 26.759677083,
+        "command": "ghidra download"
+      },
+      {
+        "code": 0,
+        "seconds": 0.684495792,
+        "command": "ghidra download --offline"
+      },
+      {
+        "code": 0,
+        "seconds": 18.959952459,
+        "command": "ghidra install --offline"
+      },
+      {
+        "code": 0,
+        "seconds": 12.639150125,
+        "command": "ghidra doctor"
+      },
+      {
+        "code": 0,
+        "seconds": 7.03146925,
+        "command": "ghidra server start"
+      },
+      {
+        "code": 0,
+        "seconds": 2.968601208,
+        "command": "ghidra server status"
+      },
+      {
+        "code": 0,
+        "seconds": 53.181311083,
+        "command": "ghidra open <path>"
+      },
+      {
+        "code": 0,
+        "seconds": 12.027375,
+        "command": "ghidra open <path>"
+      },
+      {
+        "code": 0,
+        "seconds": 1.398221,
+        "command": "ghidra strings search"
+      },
+      {
+        "code": 0,
+        "seconds": 0.4219335,
+        "command": "ghidra xrefs to"
+      },
+      {
+        "code": 0,
+        "seconds": 0.437203834,
+        "command": "ghidra xrefs to"
+      },
+      {
+        "code": 0,
+        "seconds": 0.7048795,
+        "command": "ghidra functions decompile"
+      },
+      {
+        "code": 0,
+        "seconds": 2.553742041,
+        "command": "ghidra comments set"
+      },
+      {
+        "code": 0,
+        "seconds": 2.509376958,
+        "command": "ghidra comments set"
+      },
+      {
+        "code": 0,
+        "seconds": 16.224358958,
+        "command": "ghidra merge --session"
+      },
+      {
+        "code": 0,
+        "seconds": 18.365455625,
+        "command": "ghidra refresh --session"
+      },
+      {
+        "code": 0,
+        "seconds": 3.979267583,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 0.472425167,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 17.116580083,
+        "command": "ghidra merge --session"
+      },
+      {
+        "code": 1,
+        "seconds": 0.888627708,
+        "command": "ghidra uninstall"
+      },
+      {
+        "code": 1,
+        "seconds": 0.498904167,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 0.577395291,
+        "command": "artifacts save <path>"
+      },
+      {
+        "code": 0,
+        "seconds": 4.896878625,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 4.761951208,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.93931225,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 0.785881417,
+        "command": "ghidra uninstall"
+      },
+      {
+        "code": 0,
+        "seconds": 0.409322625,
+        "command": "ghidra status"
+      },
+      {
+        "code": 0,
+        "seconds": 0.382571833,
+        "command": "targets list"
+      },
+      {
+        "code": 0,
+        "seconds": 20.187830125,
+        "command": "ghidra install --archive"
+      },
+      {
+        "code": 0,
+        "seconds": 3.8811985,
+        "command": "ghidra open --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.414545375,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 1.225699125,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.390186209,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 18.17587625,
+        "command": "ghidra install --archive"
+      },
+      {
+        "code": 0,
+        "seconds": 5.915493208,
+        "command": "ghidra open --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.422912209,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 1.292260292,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.394316709,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 29.47259625,
+        "command": "ghidra open <path>"
+      },
+      {
+        "code": 0,
+        "seconds": 10.913338375,
+        "command": "ghidra debugger launch-offers"
+      },
+      {
+        "code": 0,
+        "seconds": 27.352878792,
+        "command": "ghidra debugger launch"
+      },
+      {
+        "code": 0,
+        "seconds": 8.642347,
+        "command": "ghidra debugger interrupt"
+      },
+      {
+        "code": 0,
+        "seconds": 6.104358834,
+        "command": "ghidra debugger registers"
+      },
+      {
+        "code": 0,
+        "seconds": 6.498766708,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.996533709,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 0.404589,
+        "command": "ghidra extensions inspect"
+      },
+      {
+        "code": 0,
+        "seconds": 0.408055292,
+        "command": "ghidra extensions install"
+      },
+      {
+        "code": 0,
+        "seconds": 0.152584084,
+        "command": "ipc-server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 7.509895459,
+        "command": "ghidra open --session"
+      },
+      {
+        "code": 0,
+        "seconds": 3.162890875,
+        "command": "ghidra scripts run"
+      },
+      {
+        "code": 0,
+        "seconds": 0.456890209,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 1.3169445,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 0.412426792,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 16.035169625,
+        "command": "ghidra install --executable"
+      },
+      {
+        "code": 0,
+        "seconds": 57.430839542,
+        "command": "ghidra open <path>"
+      },
+      {
+        "code": 0,
+        "seconds": 1.24217325,
+        "command": "ghidra functions decompile"
+      },
+      {
+        "code": 0,
+        "seconds": 2.537794292,
+        "command": "ghidra comments set"
+      },
+      {
+        "code": 0,
+        "seconds": 15.811464292,
+        "command": "ghidra merge --session"
+      },
+      {
+        "code": 0,
+        "seconds": 10.86074775,
+        "command": "ghidra open --target"
+      },
+      {
+        "code": 0,
+        "seconds": 0.476931416,
+        "command": "ghidra comments get"
+      },
+      {
+        "code": 0,
+        "seconds": 1.247141166,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 4.499988958,
+        "command": "ghidra close --session"
+      },
+      {
+        "code": 0,
+        "seconds": 1.019159292,
+        "command": "ghidra server stop"
+      },
+      {
+        "code": 0,
+        "seconds": 0.437557292,
+        "command": "ghidra uninstall --purge-cache"
+      }
+    ],
+    "seconds": 486.447993041
+  },
+  "ilspy": {
+    "version": "11.1.0.9782",
+    "runtime": "10.0.13"
+  },
+  "checks": {
+    "parallelPublicClients": true,
+    "atomicConflictAndRefresh": true,
+    "saveAwareProcessStop": true,
+    "guiForceKillRetainsSavedWork": true,
+    "authenticatedOwnerCrashRecovery": true,
+    "contextKillRetainsAcknowledgedWork": true,
+    "serverKillRetainsLocalWork": true,
+    "privateDotnetMirroredDelivery": true,
+    "usefulManagedResearchAndPlainSavedFiles": true,
+    "multiToolTargetAndRunInventory": true,
+    "failedToolRetainsDiagnostics": true,
+    "uninstallRetainsBothToolsResearch": true,
+    "offlineLocalArchiveReinstall": true,
+    "externalIlspyAndSafeUninstall": true,
+    "noLiveOwnedToolProcesses": true,
+    "unchangedInputs": true
+  },
+  "calls": [
+    {
+      "code": 0,
+      "seconds": 0.09530433299997822,
+      "command": "skill"
+    },
+    {
+      "code": 0,
+      "seconds": 17.199025459000026,
+      "command": "ghidra open <path>"
+    },
+    {
+      "code": 0,
+      "seconds": 13.431134208000032,
+      "command": "ghidra open <path>"
+    },
+    {
+      "code": 0,
+      "seconds": 1.456609208000009,
+      "command": "ghidra functions decompile"
+    },
+    {
+      "code": 0,
+      "seconds": 1.4576971669999765,
+      "command": "ghidra functions decompile"
+    },
+    {
+      "code": 0,
+      "seconds": 2.8056375409999745,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 2.7863757500000066,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 2.7541255409999867,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 17.55244287499995,
+      "command": "ghidra merge --session"
+    },
+    {
+      "code": 1,
+      "seconds": 12.130761500000022,
+      "command": "ghidra merge --session"
+    },
+    {
+      "code": 0,
+      "seconds": 12.119165916999918,
+      "command": "ghidra open --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4745255829999223,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 0.40813320899999234,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 17.921811666999943,
+      "command": "ghidra refresh --session"
+    },
+    {
+      "code": 0,
+      "seconds": 4.234211541999946,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 0.41925645900005476,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 10.730844708999967,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 16.610333667000056,
+      "command": "ghidra merge --session"
+    },
+    {
+      "code": 0,
+      "seconds": 1.3742348749999655,
+      "command": "ghidra close --session"
+    },
+    {
+      "code": 0,
+      "seconds": 0.45900916600006164,
+      "command": "tools processes --tool"
+    },
+    {
+      "code": 0,
+      "seconds": 5.143137083000038,
+      "command": "tools processes stop"
+    },
+    {
+      "code": 0,
+      "seconds": 0.45168845800007695,
+      "command": "sessions status s_<id>"
+    },
+    {
+      "code": 0,
+      "seconds": 9.995628583000041,
+      "command": "ghidra open --session"
+    },
+    {
+      "code": 0,
+      "seconds": 2.624489999999991,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 0.5145369579999242,
+      "command": "tools processes --tool"
+    },
+    {
+      "code": 0,
+      "seconds": 0.5316035419999389,
+      "command": "tools processes kill"
+    },
+    {
+      "code": 0,
+      "seconds": 3.8682553749999498,
+      "command": "ghidra open --session"
+    },
+    {
+      "code": 0,
+      "seconds": 0.5106777089999524,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 1.2641841249999124,
+      "command": "ghidra close --session"
+    },
+    {
+      "code": 0,
+      "seconds": 6.506401416999986,
+      "command": "ghidra comments set"
+    },
+    {
+      "code": 0,
+      "seconds": 0.5045626249999041,
+      "command": "tools processes --tool"
+    },
+    {
+      "code": 0,
+      "seconds": 0.09877724999992643,
+      "command": "ipc-server status"
+    },
+    {
+      "code": 0,
+      "seconds": 9.799980582999996,
+      "command": "tools processes show"
+    },
+    {
+      "code": 0,
+      "seconds": 1.8263841249999824,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 0.49868479199998544,
+      "command": "tools processes kill"
+    },
+    {
+      "code": 0,
+      "seconds": 3.4259944580000594,
+      "command": "ghidra open --session"
+    },
+    {
+      "code": 0,
+      "seconds": 0.47915520799998196,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 0.44425941699999383,
+      "command": "tools processes --tool"
+    },
+    {
+      "code": 0,
+      "seconds": 0.49054662500007545,
+      "command": "tools processes kill"
+    },
+    {
+      "code": 0,
+      "seconds": 4.484182750000036,
+      "command": "ghidra server start"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4492562499999767,
+      "command": "ghidra comments get"
+    },
+    {
+      "code": 0,
+      "seconds": 16.68297241600009,
+      "command": "ghidra merge --session"
+    },
+    {
+      "code": 0,
+      "seconds": 5.488542999999947,
+      "command": "ghidra close --session"
+    },
+    {
+      "code": 0,
+      "seconds": 0.9821272919999902,
+      "command": "ghidra server stop"
+    },
+    {
+      "code": 0,
+      "seconds": 2.2148327500000597,
+      "command": "ilspy download"
+    },
+    {
+      "code": 0,
+      "seconds": 0.43929658299998847,
+      "command": "ilspy download --offline"
+    },
+    {
+      "code": 0,
+      "seconds": 1.5165028750000056,
+      "command": "ilspy install --offline"
+    },
+    {
+      "code": 0,
+      "seconds": 0.7835789580000564,
+      "command": "ilspy doctor"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4126024999999208,
+      "command": "targets add <path>"
+    },
+    {
+      "code": 0,
+      "seconds": 0.6900307090000715,
+      "command": "ilspy types --target"
+    },
+    {
+      "code": 0,
+      "seconds": 34.56594679199997,
+      "command": "ghidra open --target"
+    },
+    {
+      "code": 0,
+      "seconds": 1.450420250000083,
+      "command": "ghidra close --session"
+    },
+    {
+      "code": 0,
+      "seconds": 0.9354596250000177,
+      "command": "ghidra server stop"
+    },
+    {
+      "code": 0,
+      "seconds": 0.837433583999984,
+      "command": "ilspy decompile --target"
+    },
+    {
+      "code": 0,
+      "seconds": 1.0859630409999517,
+      "command": "ilspy resources --target"
+    },
+    {
+      "code": 0,
+      "seconds": 1.4362695420000235,
+      "command": "ilspy il --target"
+    },
+    {
+      "code": 0,
+      "seconds": 1.5084616249999963,
+      "command": "ilspy decompile --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.853531750000082,
+      "command": "ilspy decompile --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.7712169160000049,
+      "command": "ilspy resource --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.9126543750000419,
+      "command": "ilspy project --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.6904807499999879,
+      "command": "ilspy metadata --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4197449999999953,
+      "command": "artifacts save <path>"
+    },
+    {
+      "code": 0,
+      "seconds": 0.48129579100001135,
+      "command": "tools processes --tool"
+    },
+    {
+      "code": 1,
+      "seconds": 0.7225760000000009,
+      "command": "ilspy types <path>"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4442540000000736,
+      "command": "ilspy uninstall"
+    },
+    {
+      "code": 0,
+      "seconds": 0.42582487500004934,
+      "command": "targets show t_895554ad73d759e7c94aea3963dc1003"
+    },
+    {
+      "code": 0,
+      "seconds": 1.51981808300002,
+      "command": "ilspy install --archive"
+    },
+    {
+      "code": 0,
+      "seconds": 0.722830125000095,
+      "command": "ilspy types --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4275289159999229,
+      "command": "ilspy uninstall"
+    },
+    {
+      "code": 0,
+      "seconds": 1.3640390830000397,
+      "command": "ilspy install --executable"
+    },
+    {
+      "code": 0,
+      "seconds": 0.8625917090000584,
+      "command": "ilspy decompile --target"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4586531670000404,
+      "command": "ilspy uninstall --purge-cache"
+    },
+    {
+      "code": 0,
+      "seconds": 0.4835032920000376,
+      "command": "tools processes"
+    }
+  ],
+  "findings": {
+    "native": "CRC error selector in real 7zr.exe with merged annotations",
+    "managed": [
+      "Tiered CalculateCost arithmetic",
+      "Byte XOR decoding with 0x5a",
+      "PInvoke kernel32!GetTickCount",
+      "Embedded retryLimit=7 and telemetry endpoint"
+    ]
+  },
+  "limits": [
+    "Native macOS ARM64 acceptance; native Windows/Linux deferred.",
+    "Process ownership is not an OS security sandbox; detached descendants need adapter-specific cleanup.",
+    "macOS recovered ownership uses authenticated tool identity; ambiguous processes are not signalled.",
+    "System LLDB/developer tools and debugger authorization remain host prerequisites.",
+    "npm registry publication is not part of this delivery."
+  ]
+}
