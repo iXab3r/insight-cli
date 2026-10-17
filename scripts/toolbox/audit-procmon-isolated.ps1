@@ -26,6 +26,7 @@ function FinishOwned($execution){
  $text=$execution.stdout.GetAwaiter().GetResult();$errorText=$execution.stderr.GetAwaiter().GetResult()
  if($execution.process.ExitCode -ne 0){$started=Join-Path $execution.directory 'job-started.json';if(Test-Path $started){Write-Host ([IO.File]::ReadAllText($started))};throw ('Owned isolated controller failed: '+$errorText+$text)}
  $receipt=Get-Content (Join-Path $execution.directory 'job-result.json') -Raw|ConvertFrom-Json
+ @{receipt=$receipt;stdout=$text;stderr=$errorText;constructorReceiptPresent=(Test-Path (Join-Path $execution.directory 'registry-isolated.bin'))} | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 'toolbox-procmon-controller.json'
  if($receipt.phase -ne 'completed'){throw ('Owned isolated controller outcome: '+$receipt.phase)}
  return $receipt
 }
@@ -48,7 +49,7 @@ try{
  $probe=StartOwned @('/AcceptEula','/Quiet','/Minimized','/LoadConfig',$pmc,'/BackingFile',$pml,'/Runtime','3') 'Local\insight-cli-procmon-capture';$all+=$probe
  $clock=[Diagnostics.Stopwatch]::StartNew();while(!$probe.process.HasExited -and $clock.ElapsedMilliseconds -lt 20000){[void][IO.File]::ReadAllText($config);Start-Sleep -Milliseconds 100}
  $result=FinishOwned $probe
- if($result.childExitCode -ne 0){throw 'Isolated ProcMon capture failed'}
+ if($result.childExitCode -ne 0){Write-Host ($result|ConvertTo-Json -Compress);Write-Host $probe.stdout.GetAwaiter().GetResult();Write-Host $probe.stderr.GetAwaiter().GetResult();throw ('Isolated ProcMon capture failed: 0x'+([uint32]$result.childExitCode).ToString('x8'))}
  $export=StartOwned @('/AcceptEula','/Quiet','/NoConnect','/NoFilter','/OpenLog',$pml,'/SaveAs',$csv);$all+=$export;$exported=FinishOwned $export
  if($exported.childExitCode -ne 0){throw 'Isolated ProcMon export failed'}
  $rows=@(Import-Csv $csv);$matching=@($rows|Where-Object {$_.PID -eq [string]$PID -and $_.Path -eq $config -and $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS'})

@@ -145,6 +145,7 @@ jobs:
           name: toolbox-procmon-isolated
           path: |
             toolbox-procmon-isolated.json
+            toolbox-procmon-controller.json
             ${{ runner.temp }}/insight-registry-build/insight-registry-win-x64.dll
             ${{ runner.temp }}/insight-registry-build/registry-provenance.json
           if-no-files-found: error
