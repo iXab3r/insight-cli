@@ -249,3 +249,17 @@ the existing direct-child-only contract.
 
 Unreadable native helper receipts leave the affected process unverified and block
 removal, while keeping the process list readable for recovery.
+
+### Linux tracer deadline
+
+The reviewed Linux x64 launcher uses its own kernel alarm and authenticates its
+original parent before launching a native child. Both launcher and native child
+set `PR_SET_PDEATHSIG` to `SIGKILL`; this closes owner-loss and launcher-loss paths.
+It intentionally keeps the alarm in its parent, because strace replaces SIGALRM.
+An adapter must still prove native descendant cleanup: strace supplies that contract
+with `--kill-on-exit` and `PTRACE_O_EXITKILL`. This is not a general guarantee for
+arbitrary grandchildren. The packaged first-party source, ELF and provenance are
+checked during package preparation and launch. The Linux source-build receipt
+records actual owned-file observation and timeout/kill/owner-loss tests; public
+CLI and independent-model gates remain separate. Native startup failures also
+retain a private structured `error.json`, with configured secrets redacted.

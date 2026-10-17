@@ -161,6 +161,15 @@
     "license": "LGPL-2.1-or-later, BSD-3-Clause and unRAR restriction; included License.txt and manual",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-sevenzip-26.04-r1/7zip-26.04-macos-universal.tgz"
   },
+  "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3": {
+    "name": "strace-7.2-linux-x64.tgz",
+    "sha256": "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3",
+    "size": 612329,
+    "format": "tgz",
+    "root": "strace-7.2",
+    "license": "LGPL-2.1-or-later (strace), MIT (first-party launcher), retained source/UAPI notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-strace-7.2-r1/strace-7.2-linux-x64.tgz"
+  },
   "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201": {
     "name": "temurin-21.0.11+10-darwin-arm64.tar.gz",
     "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",

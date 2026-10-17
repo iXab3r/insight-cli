@@ -12,6 +12,9 @@ for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['dead
 }
 const job=JSON.parse(await readFile(native+'windows-job/provenance.json','utf8'));
 for(const [name,expected]of Object.entries({...job.inputs,'Insight.WindowsJob.dll':job.sha256,'windows-job.ps1':job.launcherSha256}))assert.equal(await sha(native+'windows-job/'+name),expected,'Windows job source/binary differs from its provenance: '+name);
+const linux=JSON.parse(await readFile(native+'child-deadline-linux.provenance.json','utf8'));
+assert.equal(await sha(native+'child-deadline-linux.c'),linux.sourceSha256,'Linux launcher source differs from its reviewed build');
+assert.equal(await sha(native+'child-deadline-linux-x64'),linux.sha256,'Linux launcher binary differs from its reviewed build');
 // TypeScript's output mode otherwise depends on whether the file already existed.
 await chmod('dist/src/bin.js',0o755);
 await prepareToolbox(process.cwd());

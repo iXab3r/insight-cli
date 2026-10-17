@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "scope": "Native source build and Linux ptrace feasibility; adapter/model gates pending",
+  "sourceSha256": "4bde6246926890dcee824f6e6ac42a06752f47d77e5097d86e3c0d6d4b709fe5",
+  "buildScriptSha256": "545e06bef2b8a73eed226fcaff99a8a7f0b6c8e9d654bac5a75e6eacfc33027f",
+  "deadlineSourceSha256": "bc2a95954cdd1d1bb4851228ea93ca2719bc3be84b1a7eaba2e3127a9db0bd15",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.35",
+  "compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "libc": "glibc 2.35",
+  "version": "strace -- version 7.2\nCopyright (c) 1991-2026 The strace developers <https://strace.io>.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\nOptional features enabled: no-m32-mpers no-mx32-mpers\n",
+  "reproducibleBinary": true,
+  "binarySha256": "0886a1b32a5dda665b79da372a80f0d22553272c0ae9902e5477b74e728192a7",
+  "deadlineSha256": "e070e2de9a21aea78f224062877cdc0264be11229af314d3b88ff3b6bd77e26f",
+  "archiveSha256": "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3",
+  "archiveSize": 612329,
+  "checks": {
+    "actualOwnedConfigRead": true,
+    "killOnExitTerminatesDescendants": true,
+    "systemLibcOnly": true,
+    "launcherKillBounded": true,
+    "timeoutBounded": true,
+    "ownerLossBounded": true
+  },
+  "dependencies": "\tlinux-vdso.so.1 (0x00007ffcba9ef000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fab42400000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fab42ae3000)\n"
+}

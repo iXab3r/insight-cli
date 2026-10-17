@@ -69,6 +69,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
   catch(error){throw new CliError('Tool completed, but its binary output could not be written to a new file.',{code:'tool.output',cause:error,result:{process:id,diagnostics:root}});}
   return result;
  }catch(error){
+  const failure=error as Error&{code?:string;cause?:Error};await atomicWrite(join(root,'error.json'),{name:failure.name,code:failure.code,message:redact(failure.message??String(error)),...(failure.cause?{cause:{name:failure.cause.name,message:redact(failure.cause.message)}}:{})});
   if(child&&!settled&&record.state!=='unverified'){stop('failed');await new Promise<void>(ok=>{if(settled){ok();return;}child!.once('close',()=>ok());setTimeout(()=>{signal('SIGKILL');ok();},1500).unref();});}
   Object.assign(record,await readJson(path));if(c.signal.aborted&&!outcome)outcome='cancelled';
   if(record.state==='starting'||record.state==='running'||record.state==='failed'){Object.assign(record,{state:'failed',outcome:outcome??'launch_failed',endedAt:new Date().toISOString(),elapsedMs:Math.round(performance.now()-started)});await atomicWrite(path,record);}

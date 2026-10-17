@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "sourceSha256": "bc2a95954cdd1d1bb4851228ea93ca2719bc3be84b1a7eaba2e3127a9db0bd15",
+  "sha256": "e070e2de9a21aea78f224062877cdc0264be11229af314d3b88ff3b6bd77e26f",
+  "size": 16720,
+  "compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "libc": "glibc 2.35",
+  "nativeVerification": "https://github.com/iXab3r/insight-cli/actions/runs/39050776071",
+  "checks": {
+    "actualOwnedConfigRead": true,
+    "killOnExitTerminatesDescendants": true,
+    "systemLibcOnly": true,
+    "launcherKillBounded": true,
+    "timeoutBounded": true,
+    "ownerLossBounded": true
+  }
+}

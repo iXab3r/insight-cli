@@ -31,6 +31,7 @@ export async function createPublicFixture(packageRoot,directory){
   try{result=await execute(process.execPath,[cli,...argv,'--json'],{cwd:project,env:environment,timeout,maxBuffer:16*1024**2});}catch(error){result=error;code=error.code;}
   await writeFile(join(directory,id+'.stdout'),result.stdout??'',{mode:0o600});await writeFile(join(directory,id+'.stderr'),result.stderr??'',{mode:0o600});
   calls.push({id,argv,code,elapsedMs:Math.round(performance.now()-start)});await writeFile(join(directory,'commands.json'),JSON.stringify(calls,null,2)+'\n',{mode:0o600});
+  if(code!==0&&process.env.INSIGHT_NATIVE_PROGRESS==='1')console.error('[public-cli failure]',id,(result.stderr??'').slice(0,4096),(result.stdout??'').slice(0,4096));
   if(!allowFailure)assert.equal(code,0,'Public CLI failed; inspect private transcript '+id);
   let value;try{value=JSON.parse(result.stdout);}catch{if(!allowFailure)throw Error('Public CLI did not return JSON; transcript '+id);}
   return allowFailure?{code,value}:value;

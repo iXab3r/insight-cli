@@ -4,3 +4,4 @@ skills/ghidra-coordinator/runtime/native/deadline-exec-darwin-arm64 -text
 skills/ghidra-coordinator/runtime/native/*.dylib -text
 skills/ghidra-coordinator/runtime/native/windows-job/* text eol=lf
 skills/ghidra-coordinator/runtime/native/windows-job/*.dll -text
+skills/ghidra-coordinator/runtime/native/child-deadline-linux-x64 -text
