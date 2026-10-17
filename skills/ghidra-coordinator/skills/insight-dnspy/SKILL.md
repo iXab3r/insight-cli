@@ -25,7 +25,7 @@ for a MethodDef token breakpoint and indexed primitive parameter read.
    and exact decimal IL instruction offset. `dnspy inspect app.exe --method 0x06000002
    --il-offset 0 --parameters 0 --json` launches a private Framework debugger, stops at that
    location, reads selected zero-based primitive parameter indices and records a bounded
-   managed stack. It then terminates only its owned debuggee and closes its private GUI.
+   managed stack. After flushing the snapshot, its one-shot GUI exits and the owned Windows Job Object terminates the debuggee; it does not resume the program or rely on UI teardown.
    A token belongs to one exact module; it is not a native address or stable cross-build ID.
 3. For a Core application, select its apphost EXE and paired DLL:
    `dnspy inspect app.exe --runtime core --module app.dll --companion app.runtimeconfig.json

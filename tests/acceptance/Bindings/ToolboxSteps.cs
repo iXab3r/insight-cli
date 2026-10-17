@@ -47,10 +47,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
         var root = Required("INSIGHT_REPOSITORY_ROOT");
         var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
             .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-windbg.mjs" }), TimeSpan.FromMinutes(10));
-        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        if (result.ExitCode != 0)
         {
-            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
-            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+            await NativeFailure(result.StandardOutputPath, result.StandardErrorPath);
         }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-windbg.json")));
@@ -70,10 +69,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
         var root = Required("INSIGHT_REPOSITORY_ROOT");
         var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
             .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-procmon.mjs" }), TimeSpan.FromMinutes(10));
-        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        if (result.ExitCode != 0)
         {
-            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
-            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+            await NativeFailure(result.StandardOutputPath, result.StandardErrorPath);
         }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-procmon.json")));
@@ -93,13 +91,24 @@ public sealed class ToolboxSteps(ScenarioContext context)
         var root = Required("INSIGHT_REPOSITORY_ROOT");
         var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
             .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-dnspy.mjs" }), TimeSpan.FromMinutes(10));
-        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        if (result.ExitCode != 0)
         {
-            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
-            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+            await NativeFailure(result.StandardOutputPath, result.StandardErrorPath);
         }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-dnspy.json")));
+    }
+
+    private static async Task NativeFailure(string output, string error)
+    {
+        foreach (var path in new[] { output, error })
+        {
+            if (!File.Exists(path)) continue;
+            using var reader = new StreamReader(path);
+            var buffer = new char[4096];
+            var length = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
+            TestContext.Out.WriteLine(new string(buffer, 0, length));
+        }
     }
 
     private string Value(string name) => manifest!.RootElement.GetProperty(name).GetString()!;
@@ -109,10 +118,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
             .WithWorkingDirectory(Required("INSIGHT_REPOSITORY_ROOT"))
             .WithArguments(new[] { script, Value("packageRoot"), scenario.ArtifactDirectory }.Concat(inputs)),
             TimeSpan.FromMinutes(10));
-        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        if (result.ExitCode != 0)
         {
-            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
-            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+            await NativeFailure(result.StandardOutputPath, result.StandardErrorPath);
         }
         Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(scenario.ArtifactDirectory, "result.json")));

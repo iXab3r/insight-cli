@@ -25,11 +25,13 @@ sealed class Bridge:IAppCommandLineArgsHandler {
  }
  void Snapshot(DbgThread thread){var p=plan!;var frames=thread.GetFrames(64);try{var frame=frames.FirstOrDefault(f=>f.FunctionToken==p.Token&&string.Equals(f.Module?.Filename,p.Module,StringComparison.OrdinalIgnoreCase))??throw new InvalidOperationException("Selected breakpoint frame is unavailable");var runtime=frame.Runtime.GetDotNetRuntime();var values=runtime.Dispatcher.Invoke(()=>{
    var context=languages.Value.GetCurrentLanguage(frame.Runtime.RuntimeKindGuid).CreateContext(frame);try{var info=new DbgEvaluationInfo(context,frame);return p.Parameters.Select(index=>{var value=runtime.GetParameterValue(info,index);if(!value.IsNormalResult||value.Value==null)throw new InvalidOperationException(value.ErrorMessage??"Parameter unavailable");using(value.Value){var raw=value.Value.GetRawValue();if(!raw.HasRawValue)throw new InvalidOperationException("Parameter has no primitive raw value");var text=Convert.ToString(raw.RawValue,CultureInfo.InvariantCulture)??"";if(text.Length>4096)throw new InvalidOperationException("Parameter value exceeds its bound");return new{index,type=value.Value.Type.FullName,value=text};}}).ToArray();}finally{context.Close();}});
-   Save(new{state="completed",mode=p.Mode,pid=thread.Process.Id,thread=thread.Id,token=p.Token,offset=frame.FunctionOffset,parameters=values,frames=frames.Select(f=>new{token=f.FunctionToken,offset=f.FunctionOffset,module=f.Module?.Filename}).ToArray()});manager.Value.TerminateAll();
+   Save(new{state="completed",mode=p.Mode,pid=thread.Process.Id,thread=thread.Id,token=p.Token,offset=frame.FunctionOffset,parameters=values,frames=frames.Select(f=>new{token=f.FunctionToken,offset=f.FunctionOffset,module=f.Module?.Filename}).ToArray()});Quit(0);
   }finally{foreach(var frame in frames)frame.Close();}}
  void Save(object data){if(done)return;using(var file=new FileStream(plan!.Result,FileMode.CreateNew,FileAccess.Write,FileShare.Read)){JsonSerializer.Serialize(file,new{schema=1,nonce=plan.Nonce,data});file.Flush(true);}done=true;deadline?.Dispose();}
- void Fail(Exception error){if(done)return;try{if(plan!=null)Save(new{state="failed",error=error.Message});}finally{if(started&&manager.Value.IsDebugging)manager.Value.TerminateAll();else Quit(70);}}
- static void Quit(int code)=>Application.Current.Dispatcher.BeginInvoke(new Action(()=>Application.Current.Shutdown(code)));
+ void Fail(Exception error){if(done)return;try{if(plan!=null)Save(new{state="failed",error=error.Message});}finally{Quit(70);}}
+ // One-shot results are flushed first. The native owned Job Object terminates remaining debuggees.
+ // Avoid upstream asynchronous UI teardown reading metadata after the engine has disposed it.
+ static void Quit(int code)=>Environment.Exit(code);
 }
 [dnSpy.Contracts.Extension.ExportExtension]
 sealed class ExtensionEntry:dnSpy.Contracts.Extension.IExtension {
