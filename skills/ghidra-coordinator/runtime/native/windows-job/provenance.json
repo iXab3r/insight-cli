@@ -2,13 +2,13 @@
   "sdk": "10.0.303",
   "target": "netstandard2.0",
   "inputs": {
-    "OwnedJob.cs": "34c44788d93ff4cdae8cc0a0b3deae9fef776678b68dad75bf7be87e8e8cc06e",
+    "OwnedJob.cs": "7e883b5f4bc70acd321fa20be07e75d83cff3d95bbcb888bd822ea87ad75cdb6",
     "Insight.WindowsJob.csproj": "90217b0c46f3eaeeecce73e9b8daaf47d14f07fd51f85c94395959f6ec4be114",
     "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
     "packages.lock.json": "00d9e92c7bc1e7939bc82114d870ab6657841901237cab1daa8ed01cac976e5e"
   },
-  "sha256": "41e985887c9746f44e3f97fd9c6f5e0baefd46b7cc2872dd7ecced6795f083b6",
-  "size": 8192,
-  "launcherSha256": "b532290bae8cacb63f0e229b3894b33a8988535b46fed41734105ec4d85a30cc",
-  "reproducibility": "Two independent temporary-directory builds produced identical bytes; Windows native acceptance is recorded separately."
+  "sha256": "d1b1f72ef574984ae6ebb1dbe022baa5047bc2ea24b5318a15c1b0da11ae91ad",
+  "size": 10240,
+  "launcherSha256": "d600cdbc701d3ec652d32d4518b5b0737f193770e81fe44106bfbacf73e4f0c9",
+  "reproducibility": "Two independent temporary-directory builds produced identical bytes; native Windows acceptance is recorded separately."
 }

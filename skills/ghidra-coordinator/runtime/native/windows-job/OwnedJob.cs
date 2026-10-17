@@ -4,10 +4,29 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 namespace Insight.WindowsJob {
  public sealed class Started { public int LauncherPid; public uint ChildPid; public long ChildBirthTicks; }
  public sealed class Result { public string Kind; public uint ExitCode; public Started Started; }
+ [DataContract] public sealed class Specification {
+  [DataMember] public int schema;[DataMember] public string nonce,executable,cwd,ownerBirthTicks;[DataMember] public string[] arguments;[DataMember] public int ownerPid,timeoutMs;
+ }
+ [DataContract] public sealed class Receipt {
+  [DataMember] public int schema=1;[DataMember] public string nonce,phase,childBirthTicks;[DataMember] public int launcherPid;[DataMember] public uint childPid,childExitCode;
+ }
  public static class OwnedJob {
+  static void Save(string path,Receipt value){using(var file=new FileStream(path,FileMode.CreateNew,FileAccess.Write,FileShare.Read)){new DataContractJsonSerializer(typeof(Receipt)).WriteObject(file,value);file.Flush(true);}}
+  public static void RunSpecification(string path){
+   path=Path.GetFullPath(path);var root=Path.GetDirectoryName(path);Specification spec;
+   using(var file=File.OpenRead(path))spec=(Specification)new DataContractJsonSerializer(typeof(Specification)).ReadObject(file);
+   long birth;Guid nonce;if(spec.schema!=1||!Guid.TryParse(spec.nonce,out nonce)||!long.TryParse(spec.ownerBirthTicks,out birth)||spec.arguments==null||spec.arguments.Length>256)throw new ArgumentException("Invalid owned job specification");
+   Environment.SetEnvironmentVariable("TEMP",root);Environment.SetEnvironmentVariable("TMP",root);
+   var result=Run(spec.executable,spec.arguments,spec.cwd,spec.ownerPid,birth,spec.timeoutMs,origin=>Save(Path.Combine(root,"job-started.json"),new Receipt{nonce=spec.nonce,launcherPid=origin.LauncherPid,childPid=origin.ChildPid,childBirthTicks=origin.ChildBirthTicks.ToString(),phase="assigned_suspended"}));
+   Save(Path.Combine(root,"job-result.json"),new Receipt{nonce=spec.nonce,launcherPid=Process.GetCurrentProcess().Id,childPid=result.Started.ChildPid,childBirthTicks=result.Started.ChildBirthTicks.ToString(),phase=result.Kind,childExitCode=result.ExitCode});
+  }
+
   [StructLayout(LayoutKind.Sequential)] struct Limits { public long ProcessTime,JobTime;public uint Flags;public UIntPtr MinWorkingSet,MaxWorkingSet;public uint ActiveProcesses;public UIntPtr Affinity;public uint Priority,Scheduling; }
   [StructLayout(LayoutKind.Sequential)] struct IO { public ulong ReadOps,WriteOps,OtherOps,ReadBytes,WriteBytes,OtherBytes; }
   [StructLayout(LayoutKind.Sequential)] struct Extended { public Limits Basic;public IO Io;public UIntPtr ProcessMemory,JobMemory,PeakProcessMemory,PeakJobMemory; }
