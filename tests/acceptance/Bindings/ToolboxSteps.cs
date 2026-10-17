@@ -1,0 +1,64 @@
+using System.Text.Json;
+using CliWrap;
+using EyeAuras.Automation;
+using NUnit.Framework;
+using Reqnroll;
+
+namespace Insight.Acceptance;
+
+[Binding, Scope(Tag = "toolbox")]
+public sealed class ToolboxSteps(ScenarioContext context)
+{
+    private AutomationScenario scenario = null!;
+    private JsonDocument? manifest;
+    private JsonDocument? receipt;
+    private static string Required(string name) => Environment.GetEnvironmentVariable(name)
+        is { Length: > 0 } value ? value : throw new InvalidOperationException($"Missing {name}.");
+
+    [BeforeScenario("toolbox")]
+    public async Task Start() => scenario = (await AutomationRun.ConnectAsync()).CreateScenario();
+
+    [Given("an isolated globally installed toolbox candidate is selected")]
+    public void Ready()
+    {
+        Assert.That(Environment.GetEnvironmentVariable("INSIGHT_NATIVE_DISPOSABLE"), Is.EqualTo("1"));
+        manifest = JsonDocument.Parse(File.ReadAllText(Required("INSIGHT_TOOLBOX_MANIFEST")));
+        Assert.That(File.Exists(Path.Combine(Value("packageRoot"), "package.json")), Is.True);
+    }
+
+    private string Value(string name) => manifest!.RootElement.GetProperty(name).GetString()!;
+    private async Task Execute(string script, params string[] inputs)
+    {
+        var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
+            .WithWorkingDirectory(Required("INSIGHT_REPOSITORY_ROOT"))
+            .WithArguments(new[] { script, Value("packageRoot"), scenario.ArtifactDirectory }.Concat(inputs)),
+            TimeSpan.FromMinutes(10));
+        Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
+        receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(scenario.ArtifactDirectory, "result.json")));
+    }
+
+    [When("Codex connects and disconnects the packaged skill bundle")]
+    public Task Discover() => Execute("scripts/toolbox/host-discovery.mjs");
+
+    [When("the public CLI recovers the owned container and retains its materials")]
+    public Task Recover() => Execute("scripts/toolbox/native-sevenzip.mjs", Value("sevenzipArchive"), Value("container"), Value("sevenzipExecutable"));
+
+    [Then("all shipped skills are visible and unrelated project skills survive")]
+    [Then("exact recovered bytes and configuration survive tool removal")]
+    public void Passed()
+    {
+        Assert.That(receipt, Is.Not.Null);
+        Assert.That(receipt!.RootElement.GetProperty("state").GetString(), Is.EqualTo("passed"));
+        Assert.That(receipt.RootElement.GetProperty("cleanupComplete").GetBoolean(), Is.True);
+        var checks = receipt.RootElement.GetProperty("checks").EnumerateObject().ToArray();
+        Assert.That(checks.Length, Is.GreaterThan(0));
+        foreach (var check in checks) Assert.That(check.Value.GetBoolean(), Is.True, check.Name);
+    }
+
+    [AfterScenario("toolbox")]
+    public async Task Finish()
+    {
+        try { if (scenario is not null) await scenario.FinishAsync(context.TestError); }
+        finally { manifest?.Dispose(); receipt?.Dispose(); }
+    }
+}

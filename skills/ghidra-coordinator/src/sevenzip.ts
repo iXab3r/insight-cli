@@ -55,7 +55,7 @@ export function sevenzipCommands(workspace:(c:CommandContext)=>Workspace):Comman
     if(entry.size>64*1024**2||(bytes+=entry.size)>256*1024**2)fail('limit','Recovery exceeds its 64-MiB per-file/256-MiB total bound.');
     if(/(?:^|\s)[bclps][rwx-]{9}/.test(entry.attributes))fail('unsupported','Only ordinary archive files and directories can be recovered.');
    }
-   const output=resolve(c.cwd,text(o.output,4096));await mkdir(output,{mode:0o700});const files=[];
+   const output=resolve(c.cwd,text(o.output,4096));await mkdir(dirname(output),{recursive:true,mode:0o700});await mkdir(output,{mode:0o700});const files=[];
    for(const entry of chosen){const destination=join(output,entry.path);if(entry.directory){await mkdir(destination,{recursive:true,mode:0o700});continue;}
     await mkdir(dirname(destination),{recursive:true,mode:0o700});
     const result=await invoke('recover',['x','-so','-spd','-bd','-y','-p','--',input,entry.path],{maxOutputBytes:Math.max(65536,entry.size+65536),outputFile:destination});

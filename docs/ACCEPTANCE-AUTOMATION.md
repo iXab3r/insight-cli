@@ -157,3 +157,26 @@ a successful process exit without completed research/cleanup is insufficient.
 
 [Shared tool runtime acceptance](verification/tool-runtime.json) records the passing exact
 packed/global-installed macOS candidate and all named research/recovery/removal checks.
+
+## Toolbox development gates
+
+`Toolbox.feature` adds two separately selected native scenarios: actual Codex bundle
+metadata connect/disconnect and a globally installed public 7-Zip container workflow. Run
+
+```sh
+INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
+  --suite acceptance --tag toolbox --property RestoreLockedMode=true --timeout-seconds 1200
+```
+The private JSON manifest supplies `packageRoot`, `sevenzipArchive`, `sevenzipExecutable` and `container` for the
+owned two-entry fixture. The driver creates a separate profile and test-only short temporary
+AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
+No ordinary user profile or installed tool is reset. Both scenarios passed in the initial
+connection (2/2); an earlier runner-path failure was corrected in the fixture setup.
+
+These are native developer gates, not independent model acceptance. The
+[managed agent evidence](verification/toolbox-agent-managed.json) separately records cold
+and prepared independent cheap-model static research, exact resource/checkpoint readback,
+and the earlier IPC-blocked trials that were rejected. Per-tool family coverage and the
+final exact-artifact whole-toolbox gate remain open. A successful model exit or plausible
+report does not count without evidence review: the first container trial omitted a real
+configuration field despite correct recovered bytes, and required a correction pass.

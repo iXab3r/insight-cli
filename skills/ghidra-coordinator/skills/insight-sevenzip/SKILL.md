@@ -17,7 +17,8 @@ it does not publish analysis or require a Ghidra session.
 3. Recover one exact file with `sevenzip extract INPUT --entry path/from/inventory
    --output NEW_DIRECTORY --json`. Omit `--entry` only for small, trusted container trees.
    The output directory must be new; choose a different directory after a partial failure.
-4. Inspect recovered configuration directly. For DLLs use the managed/native skill that
+4. Read recovered configuration bytes before summarizing values; the inventory gives paths
+   and sizes, not configuration contents. For DLLs use the managed/native skill that
    matches their format; do not execute a recovered program to identify it. Preserve the
    parent archive identity and recovered path in your notes. `artifacts save` can retain
    the completed folder using the project's format.

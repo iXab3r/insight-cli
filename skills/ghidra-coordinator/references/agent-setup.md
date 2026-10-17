@@ -55,3 +55,7 @@ project files and cleanup. Ghidra edits additionally require merge and independe
 Repeat cold-runtime and prepared-runtime cases; retain failures and distinguish an external-tool
 fallback from acceptance of the intended adapter. Package/skill existence is structural evidence,
 not proof that a model completed research.
+
+The project bundle is a symlink. A plain `find` does not follow it and can misleadingly
+show no files. Use the host skill inventory, a named `.../<skill>/SKILL.md` path, or
+`insight-cli skill <name>` to check availability; `find -L` follows the link if needed.
