@@ -9,12 +9,12 @@ namespace Insight.WindowsJob {
   [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr LoadLibrary(string file);
   [DllImport("kernel32.dll",CharSet=CharSet.Ansi,SetLastError=true)] static extern IntPtr GetProcAddress(IntPtr module,string name);
   [DllImport("kernel32.dll")] static extern bool FreeLibrary(IntPtr module);
-  [UnmanagedFunctionPointer(CallingConvention.Winapi)] delegate bool PrepareProcess(IntPtr process);
+  [UnmanagedFunctionPointer(CallingConvention.Winapi,SetLastError=true)] delegate bool PrepareProcess(IntPtr process,[MarshalAs(UnmanagedType.LPStr)] string name);
   [DllImport("kernel32.dll")] static extern bool GetExitCodeProcess(IntPtr process,out uint code);
-  IntPtr hive,user,module;FileStream held;PrepareProcess prepare;readonly string shim,ack,nonce;
+  IntPtr hive,user,module;FileStream held;PrepareProcess prepare;readonly string shim,ack,nonce,originalPath;bool pathChanged;
   static void Check(int code){if(code!=0)throw new Win32Exception(code);}
   public RegistryRedirect(string root,string source,string expected,string nonce){
-   this.nonce=nonce;shim=Path.Combine(root,"registry-shim.dll");ack=Path.Combine(root,"registry-isolated.bin");
+   this.nonce=nonce;originalPath=Environment.GetEnvironmentVariable("PATH");if(root.IndexOf(';')>=0)throw new ArgumentException("Private registry directory contains an unsupported PATH separator");shim=Path.Combine(root,"insight-registry-"+nonce+".dll");ack=Path.Combine(root,"registry-isolated.bin");
    try{
     if(expected==null||expected.Length!=64)throw new ArgumentException("Registry shim identity is missing");
     using(var original=new FileStream(source,FileMode.Open,FileAccess.Read,FileShare.Read)){
@@ -25,10 +25,11 @@ namespace Insight.WindowsJob {
     module=LoadLibrary(shim);if(module==IntPtr.Zero)throw new Win32Exception(Marshal.GetLastWin32Error());var entry=GetProcAddress(module,"InsightPrepareProcess");if(entry==IntPtr.Zero)throw new InvalidOperationException("Owned registry loader entry is unavailable");prepare=Marshal.GetDelegateForFunctionPointer<PrepareProcess>(entry);
     Check(RegLoadAppKey(Path.Combine(root,"user-settings.hive"),out hive,0xf003f,0,0));
     var security=new Security{Size=Marshal.SizeOf(typeof(Security)),Inherit=1};int disposition;Check(RegCreateKeyEx(hive,"user",0,null,0,0xf003f,ref security,out user,out disposition));
+    Environment.SetEnvironmentVariable("PATH",root+";"+(originalPath??string.Empty));pathChanged=true;
     Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_HANDLE",user.ToInt64().ToString("X"));Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_ACK",ack);Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_NONCE",nonce);
    }catch{Dispose();throw;}
   }
-  public void Prepare(IntPtr process,uint pid){if(!prepare(process))throw new Win32Exception(Marshal.GetLastWin32Error());}
+  public void Prepare(IntPtr process,uint pid){if(!prepare(process,Path.GetFileName(shim)))throw new Win32Exception(Marshal.GetLastWin32Error());}
   public void Verify(IntPtr process,uint pid){
    for(int i=0;i<100;i++){
     byte[] proof=null;try{proof=File.ReadAllBytes(ack);}catch(IOException){}
@@ -38,6 +39,6 @@ namespace Insight.WindowsJob {
    }
    throw new InvalidOperationException("Owned registry initialization receipt is missing after its deadline");
   }
-  public void Dispose(){Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_HANDLE",null);Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_ACK",null);Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_NONCE",null);if(user!=IntPtr.Zero){RegCloseKey(user);user=IntPtr.Zero;}if(hive!=IntPtr.Zero){RegCloseKey(hive);hive=IntPtr.Zero;}if(module!=IntPtr.Zero){FreeLibrary(module);module=IntPtr.Zero;}if(held!=null){held.Dispose();held=null;}}
+  public void Dispose(){if(pathChanged){Environment.SetEnvironmentVariable("PATH",originalPath);pathChanged=false;}Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_HANDLE",null);Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_ACK",null);Environment.SetEnvironmentVariable("INSIGHT_PRIVATE_HKCU_NONCE",null);if(user!=IntPtr.Zero){RegCloseKey(user);user=IntPtr.Zero;}if(hive!=IntPtr.Zero){RegCloseKey(hive);hive=IntPtr.Zero;}if(module!=IntPtr.Zero){FreeLibrary(module);module=IntPtr.Zero;}if(held!=null){held.Dispose();held=null;}}
  }
 }

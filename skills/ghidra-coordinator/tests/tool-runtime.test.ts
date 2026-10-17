@@ -46,3 +46,11 @@ test('installation fingerprints survive staging relocation and an aliased parent
  await writeFile(join(installed,'Framework/Versions/A/runtime'),'modified');assert.notEqual(await treeFingerprint(installed),expected);
  await symlink(root,join(installed,'escape'),'dir');await assert.rejects(treeFingerprint(installed),/escapes/);
 });
+
+test('native preflight failure retains a readable terminal record without freezing tool removal',async t=>{
+ const {mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {runTool}=await import('../src/tool-runtime/run.js'),{listProcesses}=await import('../src/tool-runtime/supervisor.js'),{assertUnused}=await import('../src/tool-runtime/store.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-native-preflight-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ await assert.rejects(runTool({appArguments:{AppDataDirectory:root},environment:{PATH:process.env.PATH},signal:new AbortController().signal},{tool:'fixture',role:'invalid-native-deadline',executable:process.execPath,nativeDeadline:true,timeoutMs:0}));
+ const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');await assertUnused(root,'fixture');
+});

@@ -2,7 +2,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "detours.h"
-extern "C" __declspec(dllexport) BOOL WINAPI InsightPrepareProcess(HANDLE process){LPCSTR name=".\\registry-shim.dll";return DetourUpdateProcessWithDll(process,&name,1);}
+extern "C" __declspec(dllexport) BOOL WINAPI InsightPrepareProcess(HANDLE process,LPCSTR name){return DetourUpdateProcessWithDll(process,&name,1);}
 static void store(BYTE *at,DWORD value){at[0]=(BYTE)value;at[1]=(BYTE)(value>>8);at[2]=(BYTE)(value>>16);at[3]=(BYTE)(value>>24);}
 extern "C" BOOL WINAPI DllMain(HINSTANCE instance,DWORD reason,LPVOID reserved){
  (void)reserved;if(reason!=DLL_PROCESS_ATTACH)return TRUE;DisableThreadLibraryCalls(instance);if(DetourIsHelperProcess())return TRUE;DetourRestoreAfterWith();

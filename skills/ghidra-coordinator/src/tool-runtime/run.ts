@@ -1,11 +1,12 @@
 import {type ChildProcess} from 'node:child_process';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {join,isAbsolute} from 'node:path';
+import {join,isAbsolute,resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 import {CliError,type CommandContext} from '@eyeauras/cli-factory';
 import {atomicWrite,withToolUse,toolRoot,readJson} from './store.js';
-import {launchProcess,type TrackedChild} from './supervisor.js';
+import {launchProcess,type TrackedChild,type ProcessRecord} from './supervisor.js';
+import {digest} from '../model.js';
 import type {ToolProcess} from './definition.js';
 import {deadlineLaunch} from './deadline.js';
 import {windowsJobLaunch,windowsJobResult} from './windows-job.js';
@@ -33,7 +34,7 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  let launch={executable:spec.executable,arguments:spec.arguments??[]};
  const id=randomUUID(),root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');
  const started=performance.now(),limit=spec.maxOutputBytes??4*1024**2;let child:ChildProcess|undefined,outcome:string|undefined,truncated=false,bytes=0;
- const stdout:Buffer[]=[],stderr:Buffer[]=[],record:ToolProcess&{root:string;ownerPid:number;outcome?:string;terminationError?:string}={schema:1,id,tool:spec.tool,role:spec.role,installation:spec.installation??'probe',state:'starting',executable:spec.executable,createdAt:new Date().toISOString(),root,ownerPid:process.pid,...(spec.session?{session:spec.session}:{}),...(spec.target?{target:spec.target}:{})};
+ const stdout:Buffer[]=[],stderr:Buffer[]=[],record:ProcessRecord&{terminationError?:string}={schema:1,id,tool:spec.tool,role:spec.role,installation:spec.installation??'probe',state:'starting',executable:spec.executable,createdAt:new Date().toISOString(),root,ownerPid:process.pid,profileBinding:digest(resolve(directory)),gated:process.platform!=='win32'&&typeof process.execve==='function',phase:'reserved',...(spec.session?{session:spec.session}:{}),...(spec.target?{target:spec.target}:{})};
  const lease=await withToolUse(directory,spec.tool,async()=>{await mkdir(root,{recursive:true,mode:0o700});},c.signal);
  const environment={PATH:c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,...(process.platform==='win32'?{SystemRoot:process.env.SystemRoot,WINDIR:process.env.WINDIR,ComSpec:process.env.ComSpec,TEMP:root,TMP:root,USERPROFILE:root,LOCALAPPDATA:root,APPDATA:root}:{}),...spec.environment};
  const secrets=Object.entries(environment).filter(([key,value])=>/TOKEN|PASSWORD|SECRET|KEY/i.test(key)&&value&&value.length>=4).map(([,v])=>v!);

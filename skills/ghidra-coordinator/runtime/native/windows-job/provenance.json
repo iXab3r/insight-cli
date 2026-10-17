@@ -3,13 +3,13 @@
   "target": "netstandard2.0",
   "inputs": {
     "OwnedJob.cs": "396b15ff5ac0931bec5f8a1d4f8f5175f6ffa0cb20a8b775eb07fd4c773a1542",
-    "RegistryRedirect.cs": "1fba717e0b491e310f18923c5323f16f944b5d15739abddee5b8c3892ee53fc5",
+    "RegistryRedirect.cs": "75776a19fe61b4a313941c6cfc0aa561b1ff1c7cbdd5719120be18d30bae5e1e",
     "Insight.WindowsJob.csproj": "90217b0c46f3eaeeecce73e9b8daaf47d14f07fd51f85c94395959f6ec4be114",
     "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
     "packages.lock.json": "00d9e92c7bc1e7939bc82114d870ab6657841901237cab1daa8ed01cac976e5e"
   },
-  "sha256": "94bc0c0fae06fdb31c4e3d7efac02369488b4cb4e914a506a6fd742ca221ffee",
-  "size": 15872,
+  "sha256": "0235e037c2f80e3d6d46b9954acc3eba7f190b4341e2ff60c6d051d1f63d75d4",
+  "size": 16384,
   "launcherSha256": "d600cdbc701d3ec652d32d4518b5b0737f193770e81fe44106bfbacf73e4f0c9",
   "reproducibility": "Two independent temporary-directory builds produced identical bytes; private-registry prototype remains pending native acceptance."
 }
