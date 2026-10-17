@@ -172,9 +172,12 @@ The pinned 10.0.750501 NuGet family passed real globally installed CLI checks wi
 .NET 10.0.13 on macOS ARM64: waiting stacks, a real Heap dump, SOS object/field/root queries,
 a two-second EventPipe trace, method ranking and readable Speedscope export. Full matching
 MIT text is shipped in the npm resources and copied into each owned installation; NuGet
-third-party notices are preserved. Exact source/license release companions are prepared.
+third-party notices are preserved. Exact source/license release companions are published in the immutable tool release.
 [Diagnostics evidence](verification/toolbox-diagnostics.json) records the native candidate;
-independent cold/prepared agent gates remain pending. The native `cpu-sampling` profile is
+dump cold/prepared agent trials passed independent field/stack and byte checks. Stack cold was
+interrupted by the model-account usage limit after collection; its incomplete report also
+miscounted raw lines. Stack prepared and trace trials remain pending, with no acceptance
+credit from the native tests. The native `cpu-sampling` profile is
 Linux collect-linux only in this pinned version; our default is `dotnet-sampled-thread-time`,
 which measures thread wall-clock samples and can rank a sleep at 100% without proving CPU use.
 Collectors do not take ownership of the explicitly selected external target process.
