@@ -17,13 +17,13 @@ with tempfile.TemporaryDirectory(prefix='insight-strace-build-') as temporary:
   with tarfile.open(source) as archive:archive.extractall(location,filter='data')
   directory=location/'strace-7.2';directories.append(directory)
   flags='-O2 -g0 -ffile-prefix-map='+str(directory)+'=/_/strace'
-  subprocess.run(['./configure','--enable-mpers=no','--with-libdw=no','--with-libunwind=no'],cwd=directory,env={**env,'CFLAGS':flags},stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT,check=True)
+  subprocess.run(['./configure','--enable-mpers=no','--with-libdw=no','--with-libunwind=no','--with-libselinux=no','--with-libiberty=no'],cwd=directory,env={**env,'CFLAGS':flags,'ac_cv_header_termcap_h':'no'},stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT,check=True)
   subprocess.run(['make','-j2'],cwd=directory,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT,check=True)
   binary=directory/'src/strace';subprocess.run(['strip','--strip-unneeded',str(binary)],check=True);binaries.append(binary)
  assert sha(binaries[0])==sha(binaries[1]),'Independent source build binaries differ'
  package=root/'strace-7.2';(package/'bin').mkdir(parents=True)
  shutil.copyfile(binaries[0],package/'bin/strace');(package/'bin/strace').chmod(0o755)
- run(['cc','-O2','-g0','-Wl,--build-id=sha1',str(repository/'skills/ghidra-coordinator/runtime/native/deadline-exec.c'),'-o',str(package/'bin/deadline-exec')])
+ run(['cc','-O2','-g0','-Wl,--build-id=sha1',str(repository/'skills/ghidra-coordinator/runtime/native/child-deadline-linux.c'),'-o',str(package/'bin/child-deadline')])
  for name in ['COPYING','LGPL-2.1-or-later']:
   shutil.copyfile(directories[0]/name,package/name)
  dependency=run(['ldd',str(package/'bin/strace')]).decode()
@@ -46,6 +46,27 @@ with tempfile.TemporaryDirectory(prefix='insight-strace-build-') as temporary:
   if not any(alive(pid) for pid in pids):break
   time.sleep(.05)
  assert not any(alive(pid) for pid in pids),'strace left its owned tracees alive'
+ # strace replaces SIGALRM itself, so an exec-only alarm cannot bound it. The
+ # first-party parent has its own alarm and authenticates its original owner.
+ for mode in ['launcher-kill','timeout','owner-kill']:
+  marker=root/('pids-'+mode)
+  arguments=[str(package/'bin/child-deadline'),'1' if mode=='timeout' else '30',str(os.getpid()),str(binaries[0]),'--kill-on-exit','-f',str(executable),str(data),str(marker)]
+  if mode=='owner-kill':
+   ownerSource='import subprocess,os,time,json;args=json.loads('+repr(json.dumps(arguments))+');args[2]=str(os.getpid());p=subprocess.Popen(args,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);open('+repr(str(root/'launcher-pid'))+',"w").write(str(p.pid));time.sleep(60)'
+   execution=subprocess.Popen([sys.executable,'-c',ownerSource])
+  else:execution=subprocess.Popen(arguments,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  for _ in range(200):
+   if marker.exists():break
+   time.sleep(.05)
+  assert marker.exists(),mode
+  descendants=[int(x) for x in marker.read_text().split()]
+  if mode!='timeout':execution.kill()
+  execution.wait(timeout=5)
+  for _ in range(100):
+   if not any(alive(pid) for pid in descendants):break
+   time.sleep(.05)
+  assert not any(alive(pid) for pid in descendants),mode+' left a live tracee'
+
  archive=output/'strace-7.2-linux-x64.tgz'
  with open(archive,'wb') as file,gzip.GzipFile(fileobj=file,mode='wb',mtime=0,filename='') as compressed,tarfile.open(fileobj=compressed,mode='w') as packed:
   for path in sorted(package.rglob('*')):
@@ -53,5 +74,6 @@ with tempfile.TemporaryDirectory(prefix='insight-strace-build-') as temporary:
    if path.is_file():
     with open(path,'rb') as handle:packed.addfile(info,handle)
    else:packed.addfile(info)
- receipt={'schema':1,'scope':'Native source build and Linux ptrace feasibility; adapter/model gates pending','sourceSha256':sha(source),'buildScriptSha256':sha(__file__),'deadlineSourceSha256':sha(repository/'skills/ghidra-coordinator/runtime/native/deadline-exec.c'),'platform':platform.platform(),'compiler':run(['cc','--version']).decode().splitlines()[0],'libc':run(['getconf','GNU_LIBC_VERSION']).decode().strip(),'version':run([str(binaries[0]),'-V']).decode(),'reproducibleBinary':True,'binarySha256':sha(binaries[0]),'deadlineSha256':sha(package/'bin/deadline-exec'),'archiveSha256':sha(archive),'archiveSize':archive.stat().st_size,'checks':{'actualOwnedConfigRead':True,'killOnExitTerminatesDescendants':True,'systemLibcOnly':True},'dependencies':dependency}
+ receipt={'schema':1,'scope':'Native source build and Linux ptrace feasibility; adapter/model gates pending','sourceSha256':sha(source),'buildScriptSha256':sha(__file__),'deadlineSourceSha256':sha(repository/'skills/ghidra-coordinator/runtime/native/child-deadline-linux.c'),'platform':platform.platform(),'compiler':run(['cc','--version']).decode().splitlines()[0],'libc':run(['getconf','GNU_LIBC_VERSION']).decode().strip(),'version':run([str(binaries[0]),'-V']).decode(),'reproducibleBinary':True,'binarySha256':sha(binaries[0]),'deadlineSha256':sha(package/'bin/child-deadline'),'archiveSha256':sha(archive),'archiveSize':archive.stat().st_size,'checks':{'actualOwnedConfigRead':True,'killOnExitTerminatesDescendants':True,'systemLibcOnly':True,'launcherKillBounded':True,'timeoutBounded':True,'ownerLossBounded':True},'dependencies':dependency}
+ shutil.copyfile(package/'bin/child-deadline',output/'child-deadline-linux-x64')
  (output/'strace-build.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt,indent=2))

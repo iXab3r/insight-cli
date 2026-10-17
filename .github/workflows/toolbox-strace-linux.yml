@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/toolbox-strace-linux.yml'
       - 'scripts/toolbox/build-strace-linux.py'
+      - 'skills/ghidra-coordinator/runtime/native/child-deadline-linux.c'
 permissions:
   contents: read
 jobs:

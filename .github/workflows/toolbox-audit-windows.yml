@@ -46,6 +46,7 @@ jobs:
         run: node scripts/toolbox/native-windows-job.mjs
         env:
           INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -70,6 +71,7 @@ jobs:
         run: node scripts/toolbox/native-windbg.mjs
         env:
           INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -25,8 +25,9 @@ export async function createPublicFixture(packageRoot,directory){
  await writeFile(preload,`import{AppArguments}from ${JSON.stringify(pathToFileURL(join(factoryRoot,factory.main)).href)};const original=AppArguments.CurrentEnvironment;AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:${JSON.stringify(appdata)},EnvironmentLocalAppData:${JSON.stringify(appdata)}});`,{flag:'wx',mode:0o600});
  const environment={...process.env,NODE_OPTIONS:'--import '+pathToFileURL(preload).href};
  const profile='toolbox-'+randomUUID();let sequence=0;const calls=[];
- const call=async(argv,{allowFailure=false,timeout=600000}={})=>{
+ const call=async(argv,{allowFailure=false,timeout=process.platform==='win32'?120000:600000}={})=>{
   const id=++sequence,start=performance.now();let result,code=0;
+  if(process.env.INSIGHT_NATIVE_PROGRESS==='1')console.log('[public-cli]',id,argv.slice(0,2).join(' '));
   try{result=await execute(process.execPath,[cli,...argv,'--json'],{cwd:project,env:environment,timeout,maxBuffer:16*1024**2});}catch(error){result=error;code=error.code;}
   await writeFile(join(directory,id+'.stdout'),result.stdout??'',{mode:0o600});await writeFile(join(directory,id+'.stderr'),result.stderr??'',{mode:0o600});
   calls.push({id,argv,code,elapsedMs:Math.round(performance.now()-start)});await writeFile(join(directory,'commands.json'),JSON.stringify(calls,null,2)+'\n',{mode:0o600});
