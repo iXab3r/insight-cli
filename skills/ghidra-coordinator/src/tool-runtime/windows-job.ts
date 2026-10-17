@@ -5,14 +5,15 @@ import {fileSha256} from './archives.js';
 import {atomicWrite,readJson} from './store.js';
 import {processIdentity} from './identity.js';
 /** Stock Windows PowerShell loads the packaged first-party Job Object executor; no runtime compiler. */
-export async function windowsJobLaunch(root:string,nonce:string,executable:string,args:string[],cwd:string,timeoutMs:number){
+export async function windowsJobLaunch(root:string,nonce:string,executable:string,args:string[],cwd:string,timeoutMs:number,options:{observedSubject?:{pid:number;birth:string};nativeMutex?:'procmon'}={}){
  if(process.platform!=='win32'||!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>600000)throw new CliError('Owned Windows job deadline must be 1–600 seconds.',{code:'tool.configuration'});
  const native=fileURLToPath(new URL('../../../runtime/native/windows-job/',import.meta.url));
  const proof=await readJson<{sha256:string;launcherSha256:string}>(join(native,'provenance.json'));
  if(!proof||await fileSha256(join(native,'Insight.WindowsJob.dll'))!==proof.sha256||await fileSha256(join(native,'windows-job.ps1'))!==proof.launcherSha256)throw new CliError('Packaged Windows job differs from its reviewed build.',{code:'tool.binding'});
  const identity=await processIdentity(process.pid),system=process.env.SystemRoot??process.env.WINDIR;
  if(!identity?.strong||!/^\d+$/.test(identity.birth)||!system||!isAbsolute(system))throw new CliError('Windows owner birth identity or system directory is unavailable.',{code:'tool.process.unverified'});
- const specification=join(root,'job-specification.json');await atomicWrite(specification,{schema:1,nonce,executable,arguments:args,cwd,timeoutMs,ownerPid:process.pid,ownerBirthTicks:identity.birth});
+ if(options.observedSubject&&(!Number.isSafeInteger(options.observedSubject.pid)||options.observedSubject.pid<1||!/^\d+$/.test(options.observedSubject.birth)))throw new CliError('Borrowed Windows subject identity is invalid.',{code:'tool.process.unverified'});
+ const specification=join(root,'job-specification.json');await atomicWrite(specification,{schema:1,nonce,executable,arguments:args,cwd,timeoutMs,ownerPid:process.pid,ownerBirthTicks:identity.birth,...(options.observedSubject?{observedPid:options.observedSubject.pid,observedBirthTicks:options.observedSubject.birth}:{}),...(options.nativeMutex?{nativeMutex:'Local\\insight-cli-procmon-capture'}:{})});
  return {executable:join(system,'System32/WindowsPowerShell/v1.0/powershell.exe'),arguments:['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',join(native,'windows-job.ps1'),'-Specification',specification]};
 }
 export async function windowsJobResult(root:string,nonce:string,launcherPid:number){

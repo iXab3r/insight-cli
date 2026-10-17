@@ -263,3 +263,13 @@ checked during package preparation and launch. The Linux source-build receipt
 records actual owned-file observation and timeout/kill/owner-loss tests; public
 CLI and independent-model gates remain separate. Native startup failures also
 retain a private structured `error.json`, with configured secrets redacted.
+
+For Windows collectors observing an existing process, the job executor can hold
+an authenticated subject handle for the capture lifetime. That subject is never
+assigned to the owned job or signaled during collector cleanup. An optional
+native ProcMon mutex serializes its upstream singleton across profiles and
+refuses existing native instances before launching a collector. Native tests
+cover borrowed-subject preservation and exclusion separately from the earlier
+five lifetime cases. File-version probes use a minimal .NET property reader,
+with no PowerShell module autoload. ProcMon preference isolation is still a
+separate pending admission check.

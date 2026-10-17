@@ -7,11 +7,12 @@ using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Threading;
 namespace Insight.WindowsJob {
  public sealed class Started { public int LauncherPid; public uint ChildPid; public long ChildBirthTicks; }
  public sealed class Result { public string Kind; public uint ExitCode; public Started Started; }
  [DataContract] public sealed class Specification {
-  [DataMember] public int schema;[DataMember] public string nonce,executable,cwd,ownerBirthTicks;[DataMember] public string[] arguments;[DataMember] public int ownerPid,timeoutMs;
+  [DataMember] public int schema;[DataMember] public string nonce,executable,cwd,ownerBirthTicks,observedBirthTicks,nativeMutex;[DataMember] public string[] arguments;[DataMember] public int ownerPid,timeoutMs,observedPid;
  }
  [DataContract] public sealed class Receipt {
   [DataMember] public int schema=1;[DataMember] public string nonce,phase,childBirthTicks;[DataMember] public int launcherPid;[DataMember] public uint childPid,childExitCode;
@@ -23,8 +24,13 @@ namespace Insight.WindowsJob {
    using(var file=File.OpenRead(path))spec=(Specification)new DataContractJsonSerializer(typeof(Specification)).ReadObject(file);
    long birth;Guid nonce;if(spec.schema!=1||!Guid.TryParse(spec.nonce,out nonce)||!long.TryParse(spec.ownerBirthTicks,out birth)||spec.arguments==null||spec.arguments.Length>256)throw new ArgumentException("Invalid owned job specification");
    Environment.SetEnvironmentVariable("TEMP",root);Environment.SetEnvironmentVariable("TMP",root);
+   Process observed=null;Mutex mutex=null;bool held=false;
+   try{
+    if(spec.observedPid!=0){long expected;if(!long.TryParse(spec.observedBirthTicks,out expected))throw new ArgumentException("Observed process birth identity is missing");observed=Process.GetProcessById(spec.observedPid);var handle=observed.Handle;if(observed.StartTime.ToUniversalTime().Ticks!=expected||WaitForSingleObject(handle,0)!=258)throw new InvalidOperationException("Observed process identity changed or exited");}
+    if(spec.nativeMutex!=null){if(spec.nativeMutex!=@"Local\insight-cli-procmon-capture")throw new ArgumentException("Invalid native capture mutex");mutex=new Mutex(false,spec.nativeMutex);try{held=mutex.WaitOne(0);}catch(AbandonedMutexException){held=true;}if(!held)throw new InvalidOperationException("Another owned Process Monitor capture is active");foreach(var name in new[]{"Procmon","Procmon64","Procmon64a"}){var foreign=Process.GetProcessesByName(name);try{if(foreign.Length!=0)throw new InvalidOperationException("An existing Process Monitor instance is not owned by this capture");}finally{foreach(var process in foreign)process.Dispose();}}}
    var result=Run(spec.executable,spec.arguments,spec.cwd,spec.ownerPid,birth,spec.timeoutMs,origin=>Save(Path.Combine(root,"job-started.json"),new Receipt{nonce=spec.nonce,launcherPid=origin.LauncherPid,childPid=origin.ChildPid,childBirthTicks=origin.ChildBirthTicks.ToString(),phase="assigned_suspended"}));
    Save(Path.Combine(root,"job-result.json"),new Receipt{nonce=spec.nonce,launcherPid=Process.GetCurrentProcess().Id,childPid=result.Started.ChildPid,childBirthTicks=result.Started.ChildBirthTicks.ToString(),phase=result.Kind,childExitCode=result.ExitCode});
+   }finally{if(held)mutex.ReleaseMutex();if(mutex!=null)mutex.Dispose();if(observed!=null)observed.Dispose();}
   }
 
   [StructLayout(LayoutKind.Sequential)] struct Limits { public long ProcessTime,JobTime;public uint Flags;public UIntPtr MinWorkingSet,MaxWorkingSet;public uint ActiveProcesses;public UIntPtr Affinity;public uint Priority,Scheduling; }
