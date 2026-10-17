@@ -121,3 +121,15 @@ recovery, checkpoint, overwrite refusal, terminal process check and uninstall pr
 materials. Binary stdout is exported without UTF-8 conversion. A maintainer-only xz→gzip
 repack preserves the original tar bytes and verifies both original and derived digests; matching
 source and full notices accompany the distribution. This is not yet its independent agent gate.
+
+The actual standalone Codex host subsequently passed the same container business question
+in cold and prepared contexts with no skill/tool list or command sequence in the task prompt.
+The project bundle supplied startup metadata. Exact CLI execution used ordinary automatic
+permission review; no broad filesystem/network grant or proxy exception was added. An earlier
+test helper prestarted an incompatible owner; the corrected trial lets the requested public
+CLI start its own owner. Factory compatibility includes Node as well as deployed code and
+dependencies, so callers sharing one owner must align their runtime. Do not stop unrelated
+research just to switch an operator terminal runtime. Reviewed receipts are recorded separately
+from model exit status. `scripts/toolbox/run-agent.mjs` retains a real opt-in trial as
+`needs_review`; useful findings, checkpoint bytes and tool-specific cleanup require independent
+review before acceptance.

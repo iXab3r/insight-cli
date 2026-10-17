@@ -19,7 +19,7 @@ export async function createPublicFixture(packageRoot,directory){
  // Keep the Unix endpoint below its native path-length limit, even under long runner paths.
  const preload=join(directory,'fixture-environment.mjs'),appdata=await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','it-'));
  await writeFile(preload,`import{AppArguments}from ${JSON.stringify(pathToFileURL(join(factoryRoot,factory.main)).href)};const original=AppArguments.CurrentEnvironment;AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:${JSON.stringify(appdata)},EnvironmentLocalAppData:${JSON.stringify(appdata)}});`,{flag:'wx',mode:0o600});
- const environment={...process.env,NODE_OPTIONS:'--import '+preload};
+ const environment={...process.env,NODE_OPTIONS:'--import '+pathToFileURL(preload).href};
  const profile='toolbox-'+randomUUID();let sequence=0;const calls=[];
  const call=async(argv,{allowFailure=false,timeout=600000}={})=>{
   const id=++sequence,start=performance.now();let result,code=0;

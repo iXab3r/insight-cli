@@ -180,3 +180,25 @@ and the earlier IPC-blocked trials that were rejected. Per-tool family coverage 
 final exact-artifact whole-toolbox gate remain open. A successful model exit or plausible
 report does not count without evidence review: the first container trial omitted a real
 configuration field despite correct recovered bytes, and required a correction pass.
+
+The actual standalone [Codex host trials](verification/toolbox-agent-host.json) also passed
+cold/prepared container research with the same business-only prompt. Project startup metadata
+supplied the skill list; the prompt did not identify a tool or a command sequence. Keep the
+runtime selected by that CLI consistent with its shared owner. Prestarting an owner from an
+operator's different Node can create a deliberate compatibility rejection.
+
+For new tool cases, `scripts/toolbox/run-agent.mjs MANIFEST` launches the real opt-in model
+trial with `INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_RUN_AGENT_EVAL=1`. The private manifest supplies
+absolute `packageRoot`, `project`, `preload`, `outputDirectory` and frozen package `artifact`,
+project-relative `inputs`, a business-only `prompt`, and the explicitly chosen `model` and
+`reasoningEffort`. `path` may select the candidate global prefix. Prepare only disposable
+profile storage and a project bundle link, using `public-fixture.mjs` as the test-side seam;
+existing project instructions remain authoritative. Use a new output directory per attempt.
+
+The runner records package/build/skill/input/prompt identities, raw private events, final
+answer, time/exit state and owned-owner shutdown. Its successful terminal state is
+`needs_review`. Independently verify the useful answer, recovered bytes, saved checkpoint
+and tool-specific process cleanup before writing an acceptance receipt. It does not make
+model calls in default CI or turn a zero exit code into a business verdict. The actual
+source-runner smoke was reviewed against the owned oracle and exact saved bytes; its final
+prose omitted checkpoint locators, so that small handoff limitation is retained in the receipt.
