@@ -7,7 +7,7 @@ const rule=(column:number,value:string,numeric=0)=>{const bytes=Buffer.from(valu
 /** Must be verified with the pinned ProcMon before an adapter admits active capture. */
 export function procmonConfiguration(pid:number,path?:string){
  if(!Number.isSafeInteger(pid)||pid<1||pid>0xffffffff)fail('invalid','A positive owned Windows PID is required.');
- if(path!==undefined&&(!/^[A-Za-z]:[\\/]/.test(path)||/[\x00-\x1f]/.test(path)||path.length>4096))fail('invalid','ProcMon path must be an absolute Windows path without control characters.');
+ if(path!==undefined&&(!path||/[\x00-\x1f]/.test(path)||path.length>4096))fail('invalid','ProcMon path must be a bounded literal native path without control characters.');
  const rules=[rule(40054,String(pid),pid),...(path?[rule(40071,path)]:[])];
  return Buffer.concat([record('FilterRules',Buffer.concat([Buffer.from([1]),u32(rules.length),...rules])),record('DestructiveFilter',u32(1)),record('Profiling',u32(0)),record('ResolveAddresses',u32(0)),record('Autoscroll',u32(0)),record('HistoryDepth',u32(1)),record('AdvancedMode',u32(0))]);
 }

@@ -109,6 +109,12 @@
       "title": "Insight strace",
       "path": "skills/insight-strace/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-procmon",
+      "title": "Insight ProcMon",
+      "path": "skills/insight-procmon/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -676,6 +682,61 @@
           "ordinary project evidence",
           "input and symbol companions preserved",
           "owned debugger cleanup"
+        ]
+      }
+    },
+    {
+      "id": "procmon",
+      "namespace": "procmon",
+      "kind": "analytical",
+      "skill": "insight-procmon",
+      "purpose": "Observe which files and registry paths an explicit existing Windows process actually accesses",
+      "inputs": [
+        "authorized running Windows PID",
+        "retained owned ProcMon capture"
+      ],
+      "tasks": [
+        "bounded file and registry observation",
+        "inspect retained native events without collecting again"
+      ],
+      "platforms": [
+        "win32-x64-administrator"
+      ],
+      "dependencies": [
+        "Windows 11 or Windows Server 2019+",
+        "elevated authorized insight-cli owner",
+        "Microsoft Process Monitor 4.12"
+      ],
+      "workflowCommands": [
+        "procmon observe",
+        "procmon inspect"
+      ],
+      "limitations": [
+        "Explicit vendor-direct acquisition; Microsoft distribution is not mirrored",
+        "Only existing explicit PID; child processes are excluded",
+        "Native driver needs administrator privileges; no automatic elevation",
+        "Global ProcMon singleton: existing instances block collection/export",
+        "Private process-local HKCU and profile-local capture/settings; no global preference edits",
+        "Bounded interval and destructive filtering exclude earlier and filtered activity; an empty window does not prove absence",
+        "No Ghidra merge or automatic replay; lost/interrupted captures remain partial"
+      ],
+      "evaluationCase": {
+        "id": "windows-existing-file-observation",
+        "inputFamily": "owned-existing-windows-worker",
+        "task": "Determine which configuration the supplied running Windows worker actually reads. Retain concrete read evidence and ordinary project notes; preserve the worker, inputs and user ProcMon settings. Inspect the saved observation again without collecting another interval.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual successful configuration ReadFile",
+          "ordinary project evidence",
+          "bounded evidence and explicit unknowns",
+          "existing subject preserved",
+          "global preferences unchanged",
+          "owned capture cleanup",
+          "retained observation reuse"
         ]
       }
     },

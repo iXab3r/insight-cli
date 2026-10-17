@@ -6,3 +6,5 @@ skills/ghidra-coordinator/runtime/native/windows-job/* text eol=lf
 skills/ghidra-coordinator/runtime/native/windows-job/*.dll -text
 skills/ghidra-coordinator/runtime/native/child-deadline-linux-x64 -text
 skills/ghidra-coordinator/runtime/native/sources/*.tar.gz -text
+skills/ghidra-coordinator/runtime/native/*.dll -text
+skills/ghidra-coordinator/runtime/native/*.def text eol=lf

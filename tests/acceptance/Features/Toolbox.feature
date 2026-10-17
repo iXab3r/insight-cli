@@ -68,3 +68,9 @@ Feature: The installed toolbox supports a real investigation
     Given an owned Windows native dump fixture is prepared
     When the public CLI investigates the native Windows dump
     Then dump findings and checkpoints survive debugger removal
+
+  @procmon @windows
+  Scenario: Explain actual file access without taking ownership of the running application
+    Given an owned Windows file-observation fixture is prepared
+    When the public CLI observes and reopens the Windows file capture
+    Then actual file evidence survives collector interruption and removal

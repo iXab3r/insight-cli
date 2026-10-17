@@ -56,6 +56,29 @@ public sealed class ToolboxSteps(ScenarioContext context)
         receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-windbg.json")));
     }
 
+    [Given("an owned Windows file-observation fixture is prepared")]
+    public void ProcmonReady()
+    {
+        Assert.That(OperatingSystem.IsWindows(), Is.True);
+        Assert.That(Environment.GetEnvironmentVariable("INSIGHT_NATIVE_DISPOSABLE"), Is.EqualTo("1"));
+        Assert.That(File.Exists(Required("INSIGHT_PROCMON_FIXTURE")), Is.True);
+    }
+
+    [When("the public CLI observes and reopens the Windows file capture")]
+    public async Task ObserveWindowsFiles()
+    {
+        var root = Required("INSIGHT_REPOSITORY_ROOT");
+        var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
+            .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-procmon.mjs" }), TimeSpan.FromMinutes(10));
+        if (result.ExitCode != 0 && Environment.GetEnvironmentVariable("INSIGHT_NATIVE_PROGRESS") == "1")
+        {
+            var diagnostics = result.StandardOutput + "\n" + result.StandardError;
+            TestContext.Progress.WriteLine(diagnostics[..Math.Min(diagnostics.Length, 8192)]);
+        }
+        Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
+        receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-procmon.json")));
+    }
+
     private string Value(string name) => manifest!.RootElement.GetProperty(name).GetString()!;
     private async Task Execute(string script, params string[] inputs)
     {
@@ -102,6 +125,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("actual file evidence survives collector interruption and removal")]
     [Then("dump findings and checkpoints survive debugger removal")]
     [Then("syscall evidence and checkpoints survive tracer removal")]
     [Then("hook evidence and checkpoints retain source identity and cleanup")]

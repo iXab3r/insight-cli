@@ -12,6 +12,8 @@ for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['dead
 }
 const job=JSON.parse(await readFile(native+'windows-job/provenance.json','utf8'));
 for(const [name,expected]of Object.entries({...job.inputs,'Insight.WindowsJob.dll':job.sha256,'windows-job.ps1':job.launcherSha256}))assert.equal(await sha(native+'windows-job/'+name),expected,'Windows job source/binary differs from its provenance: '+name);
+const registry=JSON.parse(await readFile(native+'windows-registry.provenance.json','utf8'));
+for(const [file,expected] of Object.entries({'windows-registry.c':registry.sourceSha256,'windows-registry.def':registry.definitionCanonicalSha256,'insight-registry-win-x64.dll':registry.sha256,'sources/detours-e4bfd6b.tar.gz':registry.detoursSha256}))assert.equal(await sha(native+file),expected,'Private registry source/binary differs from its reviewed build: '+file);
 const linux=JSON.parse(await readFile(native+'child-deadline-linux.provenance.json','utf8'));
 assert.equal(await sha(native+'child-deadline-linux.c'),linux.sourceSha256,'Linux launcher source differs from its reviewed build');
 assert.equal(await sha(native+'child-deadline-linux-x64'),linux.sha256,'Linux launcher binary differs from its reviewed build');
