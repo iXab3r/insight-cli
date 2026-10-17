@@ -232,3 +232,20 @@ Maintainer distribution recipes also support a source-set companion: exact bound
 archives plus public origin/revision/hash metadata, without local build paths. Frida's Node
 composition retains npm runtime bytes and native binding unchanged, indexes full notices
 from its corresponding source set and runs no installation script.
+
+### Windows owned Job Object executor
+
+Adapters opting into `nativeDeadline` on Windows use the packaged first-party
+`Insight.WindowsJob.dll` through stock Windows PowerShell. The launcher creates
+a kill-on-close job, creates its native child suspended, assigns it before resume,
+and persists the child birth identity. It waits on an authenticated owner handle
+and terminates the job on timeout or owner exit. Killing the launcher closes the
+last job handle. Child exit codes come from the verified result receipt, rather
+than the PowerShell exit code. Missing receipts never mean success. The DLL has
+source, locked build dependencies and reproducible SDK provenance; installation
+does not compile code or change system policy. Native Windows acceptance is
+tracked separately in the Windows workflow; other direct Windows launches retain
+the existing direct-child-only contract.
+
+Unreadable native helper receipts leave the affected process unverified and block
+removal, while keeping the process list readable for recovery.

@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/toolbox-audit-windows.yml'
       - 'scripts/toolbox/audit-windows.ps1'
+      - 'scripts/toolbox/native-windows-job.mjs'
+      - 'skills/ghidra-coordinator/src/tool-runtime/**'
+      - 'skills/ghidra-coordinator/runtime/native/windows-job/**'
 permissions:
   contents: read
 jobs:
@@ -24,4 +27,25 @@ jobs:
         with:
           name: toolbox-windows-feasibility
           path: toolbox-audit-windows.json
+          if-no-files-found: error
+
+  owned-job-lifetime:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - name: Verify owned native descendants on completion, timeout and owner loss
+        run: node scripts/toolbox/native-windows-job.mjs
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-windows-job
+          path: toolbox-windows-job.json
           if-no-files-found: error

@@ -44,7 +44,7 @@ export async function assertUnused(directory:string,tool:string){
   const retained=await readJson<{tool:string}>(join(root,name));if(!retained||retained.tool!==tool)continue;
   const {processStatus}=await import('./supervisor.js'),record=await processStatus(directory,name.slice(0,-5));
   if(['exited','failed'].includes(record.state))continue;
-  if(record.phase==='native_children_pending')fail('busy','Tool has an active or unverified native helper; wait for its recorded deadline before changing installations.');
+  if(record.phase==='native_children_pending'||record.phase==='native_children_unverified')fail('busy','Tool has an active or unverified native helper; inspect its retained records before changing installations.');
   if(!record.pid){
    if(record.gated&&record.ownerPid)try{process.kill(record.ownerPid,0);}catch(e){if((e as NodeJS.ErrnoException).code==='ESRCH')continue;throw e;}
    fail('busy','Tool has an unresolved process launch; inspect its process record.');

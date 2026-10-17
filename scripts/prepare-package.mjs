@@ -10,6 +10,8 @@ for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['dead
  assert.equal(await sha(native+name+'.c'),proof.sourceSha256,'Native deadline source changed; rebuild and review its provenance');
  assert.equal(await sha(native+binary),proof.sha256,'Native deadline binary differs from its provenance');
 }
+const job=JSON.parse(await readFile(native+'windows-job/provenance.json','utf8'));
+for(const [name,expected]of Object.entries({...job.inputs,'Insight.WindowsJob.dll':job.sha256,'windows-job.ps1':job.launcherSha256}))assert.equal(await sha(native+'windows-job/'+name),expected,'Windows job source/binary differs from its provenance: '+name);
 // TypeScript's output mode otherwise depends on whether the file already existed.
 await chmod('dist/src/bin.js',0o755);
 await prepareToolbox(process.cwd());

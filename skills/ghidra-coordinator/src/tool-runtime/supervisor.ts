@@ -87,7 +87,9 @@ export async function processStatus(directory:string,id:string,verify?:Ownership
  const record=await readJson<ProcessRecord>(join(directory,'runtime/processes',id+'.json'));if(!record||record.id!==id)throw new CliError('Unknown tool process.',{code:'tool.process.missing'});
  if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory)))return {...record,state:'unverified',phase:'profile_binding_changed'};
  const finishing=owned.get(ownedKey(directory,id));if(finishing&&(finishing.child.exitCode!==null||finishing.child.signalCode!==null)){await finishing.closed;return processStatus(directory,id,verify);}
- const children=await nativeChildren(record),pending=children.some(c=>c.state==='pending');
+ let children:Awaited<ReturnType<typeof nativeChildren>>;
+ try{children=await nativeChildren(record);}catch{return {...record,state:'unverified',phase:'native_children_unverified'};}
+ const pending=children.some(c=>c.state==='pending');
  const observed={...record,...(children.length?{nativeChildren:children}:{})};
  if(['exited','failed'].includes(record.state))return pending?{...observed,state:'unverified',phase:'native_children_pending'}:observed;
  if(!record.pid){

@@ -1,0 +1,14 @@
+{
+  "sdk": "10.0.303",
+  "target": "netstandard2.0",
+  "inputs": {
+    "OwnedJob.cs": "34c44788d93ff4cdae8cc0a0b3deae9fef776678b68dad75bf7be87e8e8cc06e",
+    "Insight.WindowsJob.csproj": "90217b0c46f3eaeeecce73e9b8daaf47d14f07fd51f85c94395959f6ec4be114",
+    "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
+    "packages.lock.json": "00d9e92c7bc1e7939bc82114d870ab6657841901237cab1daa8ed01cac976e5e"
+  },
+  "sha256": "41e985887c9746f44e3f97fd9c6f5e0baefd46b7cc2872dd7ecced6795f083b6",
+  "size": 8192,
+  "launcherSha256": "ef5d9f2117daca4159669fa87376c7f8b7f7ecc48d12b4d96e2477ff40dfa7d2",
+  "reproducibility": "Two independent temporary-directory builds produced identical bytes; Windows native acceptance is recorded separately."
+}
