@@ -240,7 +240,11 @@ inferior and an independent PID probe confirmed absence. No separate Python setu
 The first `run` alias required lldb-argdumper, missing from the trial subset. The explicit
 argv launch path avoids shell expansion. [LLDB feasibility](verification/toolbox-lldb-feasibility.json)
 and `scripts/toolbox/audit-lldb.mjs` retain the exact binary/fixture identities and limits.
-A normal batch exit is not proof of crash-safe ownership: timeout, debugger/helper failure,
-owner replacement and uncertain inferior lifetime remain required before public admission.
+A subsequent controller-loss probe killed the owned LLDB process group with SIGTERM and
+SIGKILL after a one-shot breakpoint/continue. In both cases its inferior remained alive. The
+bounded fixture later self-terminated; independent absence checks confirmed cleanup of the lab,
+but natural completion is not debugger cleanup. Generic process-group control is insufficient
+for admission. Verified inferior ownership/recovery, timeout/helper failure, owner replacement
+and explicit uncertain lifetime state remain required before the public adapter.
 Existing Ghidra debugger ownership rules remain authoritative; no arbitrary PID adoption or
 second shared debugger owner is introduced by this probe.

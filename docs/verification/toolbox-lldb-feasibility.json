@@ -26,5 +26,20 @@
     "Complete distribution recipe/notices and installed public CLI/skill",
     "Reuse existing debugger ownership principles; test timeout, crash, lost owner and uncertain inferior lifetime before admission",
     "Independent cold/prepared agent and combined toolbox gates"
-  ]
+  ],
+  "currentState": "normal_debugging_passed_controller_loss_lifetime_gap",
+  "lifetimeFaults": [
+    {
+      "controllerGroupSignal": "SIGTERM",
+      "inferiorAliveAfterControllerExit": true,
+      "eventualAbsenceAfterOwnedFixtureSelfTimeoutVerified": true
+    },
+    {
+      "controllerGroupSignal": "SIGKILL",
+      "inferiorAliveAfterControllerExit": true,
+      "eventualAbsenceAfterOwnedFixtureSelfTimeoutVerified": true
+    }
+  ],
+  "lifetimeInterpretation": "A process-group stop of the LLDB controller did not terminate its debugserver-launched inferior. Natural completion of the bounded fixture is not adapter cleanup. Public admission requires verified inferior ownership/recovery and explicit uncertain state, reusing existing debugger principles rather than assuming the generic runTool group covers it.",
+  "retainedProbeSetupFailure": "The first controller-loss probe had no breakpoint and could not obtain the buffered launch PID. A one-shot named breakpoint made the origin/PID observable before continue and controller loss."
 }
