@@ -347,3 +347,9 @@ It loads PID/path include rules and destructive filtering before two owned worke
 read the same configuration, then exports the retained PML with display filtering
 disabled. This checks actual capture scope rather than hiding unrelated rows during
 export. Public ProcMon admission remains pending; no broad raw capture is uploaded.
+
+ProcMon [pre-capture scope passed](verification/toolbox-procmon-scope.json): two owned
+processes read the same file, while unfiltered export of the destructively filtered
+PML retained five events, all from the chosen PID/path, including one successful
+ReadFile. The next native observation checks whether capture and export alter
+ProcMon's user preferences before choosing their preservation mechanism.

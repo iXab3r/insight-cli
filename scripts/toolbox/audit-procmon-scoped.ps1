@@ -14,6 +14,12 @@ if($LASTEXITCODE){throw 'Owned fixture build failed'}
 function Launch($executable,[string[]]$arguments){$info=[Diagnostics.ProcessStartInfo]::new($executable);$info.UseShellExecute=$false;$info.RedirectStandardOutput=$true;$info.RedirectStandardError=$true;foreach($a in $arguments){$info.ArgumentList.Add($a)};$p=[Diagnostics.Process]::new();$p.StartInfo=$info;[void]$p.Start();return @{process=$p;stdout=$p.StandardOutput.ReadToEndAsync();stderr=$p.StandardError.ReadToEndAsync()}}
 function Finish($execution,$milliseconds=20000){if(!$execution.process.WaitForExit($milliseconds)){$execution.process.Kill($true);throw 'Owned probe timed out'};return @{code=$execution.process.ExitCode;stdout=$execution.stdout.GetAwaiter().GetResult();stderr=$execution.stderr.GetAwaiter().GetResult()}}
 $exe=Join-Path $fixture 'out/Probe.exe';$config=Join-Path $root 'owned-settings.txt';'owned-report Pending37' | Set-Content $config
+function SettingsSnapshot {
+ $key=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\Sysinternals\Process Monitor');$values=@{}
+ if($key){try{foreach($name in $key.GetValueNames()){$value=$key.GetValue($name,$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);$bytes=if($value -is [byte[]]){$value}else{[Text.Encoding]::UTF8.GetBytes(($value|ConvertTo-Json -Compress))};$values[$name]=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes))}}finally{$key.Dispose()}}
+ return $values
+}
+$settingsBefore=SettingsSnapshot
 $go=Join-Path $root 'go';$subject=Launch $exe @($config,$go,(Join-Path $root 'ready-subject'));$noise=Launch $exe @($config,$go,(Join-Path $root 'ready-noise'));$capture=$null
 try{
  $pmc=Join-Path $root 'scoped.pmc'
@@ -25,11 +31,15 @@ try{
  if($idle.code -ne 0){throw 'Filtered capture did not become ready'}
  [IO.File]::WriteAllText($go,'go');$ran=Finish $subject;$noiseRan=Finish $noise;Start-Sleep -Seconds 2
  $stopped=Finish (Launch $procmon @('/Terminate'));if(!$capture.process.WaitForExit(20000)){throw 'Owned capture did not exit'}
+ $settingsAfterCapture=SettingsSnapshot
  # Export with filtering disabled: this must expose only events retained by the pre-capture destructive filter.
  $export=Finish (Launch $procmon @('/AcceptEula','/Quiet','/NoFilter','/OpenLog',$pml,'/SaveAs',$csv))
+ $settingsAfterExport=SettingsSnapshot
+ $changedCapture=@(@($settingsBefore.Keys)+@($settingsAfterCapture.Keys)|Select-Object -Unique|Where-Object {$settingsBefore[$_] -ne $settingsAfterCapture[$_]})
+ $changedExport=@(@($settingsAfterCapture.Keys)+@($settingsAfterExport.Keys)|Select-Object -Unique|Where-Object {$settingsAfterCapture[$_] -ne $settingsAfterExport[$_]})
  $rows=@(Import-Csv $csv);$matching=@($rows|Where-Object {$_.PID -eq [string]$subject.process.Id -and $_.Path -eq $config -and $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS'})
  $foreign=@($rows|Where-Object {$_.PID -ne [string]$subject.process.Id -or $_.Path -ne $config})
  $passed=$ran.code -eq 0 -and $noiseRan.code -eq 0 -and $matching.Count -gt 0 -and $foreign.Count -eq 0 -and $rows.Count -gt 0 -and $export.code -eq 0
- @{schema=1;scope='Native pre-capture filter feasibility; public adapter and agent gates pending';version='4.12';passed=$passed;subjectReadObserved=$matching.Count -gt 0;allExportedRowsMatchOwnedPidAndPath=$foreign.Count -eq 0;noiseProcessReadSameFile=$noiseRan.stdout.Contains('owned-report Pending37');totalEvents=$rows.Count;matchingReads=$matching.Count;captureExited=$capture.process.HasExited;exportWithNoFilter=$true;configurationSha256=(Get-FileHash $pmc -Algorithm SHA256).Hash.ToLowerInvariant()} | ConvertTo-Json | Set-Content -Encoding utf8 'toolbox-procmon-scoped.json'
+ @{schema=1;scope='Native pre-capture filter feasibility; public adapter and agent gates pending';version='4.12';passed=$passed;subjectReadObserved=$matching.Count -gt 0;allExportedRowsMatchOwnedPidAndPath=$foreign.Count -eq 0;noiseProcessReadSameFile=$noiseRan.stdout.Contains('owned-report Pending37');totalEvents=$rows.Count;matchingReads=$matching.Count;captureExited=$capture.process.HasExited;captureChangedSettings=$changedCapture;exportChangedSettings=$changedExport;exportWithNoFilter=$true;configurationSha256=(Get-FileHash $pmc -Algorithm SHA256).Hash.ToLowerInvariant()} | ConvertTo-Json | Set-Content -Encoding utf8 'toolbox-procmon-scoped.json'
  if(!$passed){throw 'Destructive pre-capture PID/path scope was not established'}
 }finally{foreach($execution in @($subject,$noise,$capture)){if($execution -and !$execution.process.HasExited){$execution.process.Kill($true)}};Remove-Item (Join-Path $root 'owned.pml'),(Join-Path $root 'owned.csv') -Force -ErrorAction SilentlyContinue}
