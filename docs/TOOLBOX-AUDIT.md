@@ -380,8 +380,9 @@ private. The packaged helper imports only KERNEL32/ADVAPI32; two independent nat
 matched. No compiler or existing-process injection is needed at runtime.
 
 The current inventory contains 13 analytical families plus supporting artifacts, with 16
-packaged skills including entry and RE guidance. Remaining tool families are dnSpyEx,
-TShark and mitmproxy, plus the six planned capabilities. dnSpyEx has a typed extension
+packaged skills including entry and RE guidance. TShark now adds a fifteenth analytical family and an eighteenth packaged skill.
+Its native receipt is linked below. Remaining tool families are the final public dnSpyEx
+gate and mitmproxy, plus the six planned capabilities. dnSpyEx has a typed extension
 compiled against its pinned actual contracts; its debugger/editor native gate is running.
 Independent cold/prepared model and combined full-inventory gates remain open; inference
 quota does not block implementation or native checks.
@@ -451,3 +452,12 @@ path while the captured plan used its 8.3 alias. Matching now authenticates both
 files through `GetFinalPathNameByHandleW`, rather than comparing path spellings. The
 captured module token and input SHA remain required. Its native public CLI gate is rerun;
 the existing successful API receipt is not relabeled as public adapter acceptance.
+
+[Native TShark Gherkin proof](verification/toolbox-tshark.json) passed on a frozen global
+artifact from source `3840238` and a fixture reconstructed from our matching source mirror.
+It found PUT /1 at frame 4 and PUT /3 at frame 10, retained the TCP stream's reassembled
+application bytes and tested post-filter pagination, one-frame detail, missing frame/stream,
+invalid filters, conservative prefix coverage, original-input preservation, owned external
+copy/drift/preservation, checkpoints and terminal jobs. The scenario passed in 39 seconds.
+The full Node 24 offline suite passed 199/201 with two opt-in skips; all 29 release/admission
+tests passed. Independent model and combined full-inventory acceptance remain separate.

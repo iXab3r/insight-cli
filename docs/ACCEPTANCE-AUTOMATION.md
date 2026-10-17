@@ -225,3 +225,18 @@ submodule commit using the repository secret `AUTOMATION_READ_KEY`. Its deploy k
 grants read-only access to Automation, is not persisted into test runtime configuration,
 and is not available to fork pull requests. The framework remains private; it is not
 copied into this repository's package or tool Releases.
+
+
+The TShark native gate is independently selectable with `--tag tshark`. Prepare its
+private manifest with `INSIGHT_NATIVE_DISPOSABLE=1 node scripts/toolbox/prepare-tshark-fixture.mjs
+OUTPUT GLOBAL_PACKAGE_ROOT [SOURCE_BUNDLE] [RUNTIME_ARCHIVE]`. Without local archives it
+fetches the pinned assets from our immutable Release. It verifies the runtime/source hashes,
+extracts the public HTTP fixture only from the matching original Wireshark source and retains
+its GPL text. Set `INSIGHT_TOOLBOX_MANIFEST=OUTPUT/manifest.json` and run the ordinary
+Automation command above with `--tag tshark`. No live traffic or system capture settings
+are involved. [Receipt](verification/toolbox-tshark.json) records the final installed build.
+The current TShark addition passed this scenario on its committed globally installed
+artifact. The complete Node 24 offline suite is 201 tests (199 passed, two explicit
+opt-in skips), and release/admission checks are 29/29. Offline process fixtures require
+permission to authenticate their own PIDs/listen on their own loopback sockets; a denied
+native identity read remains unverified rather than being weakened into a pass.
