@@ -127,6 +127,12 @@
       "title": "Insight TShark",
       "path": "skills/insight-tshark/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-mitmproxy",
+      "title": "Insight mitmproxy",
+      "path": "skills/insight-mitmproxy/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -901,6 +907,61 @@
           "explicit prefix and encryption limits",
           "original capture preserved",
           "ordinary project evidence"
+        ]
+      }
+    },
+    {
+      "id": "mitmproxy",
+      "namespace": "mitmproxy",
+      "kind": "analytical",
+      "skill": "insight-mitmproxy",
+      "purpose": "Observe and compare bounded HTTP exchanges through an explicitly selected owned loopback proxy",
+      "inputs": [
+        "owned client using an explicit loopback HTTP proxy",
+        "native flow archive",
+        "HAR",
+        "immutable flow target"
+      ],
+      "tasks": [
+        "record an HTTP observation window",
+        "inspect request/response fields and bounded body evidence",
+        "compare retained HTTP captures without replay",
+        "recover a readable interrupted archive prefix"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS15+"
+      ],
+      "dependencies": [
+        "managed mitmproxy 12.2.3 standalone runtime or complete matching external bundle",
+        "explicit per-client proxy configuration",
+        "explicit per-client trust of the profile CA for HTTPS"
+      ],
+      "workflowCommands": [
+        "mitmproxy record",
+        "mitmproxy inspect",
+        "mitmproxy compare"
+      ],
+      "limitations": [
+        "No system proxy/trust/Network Extension setup; HTTPS requires explicit client trust",
+        "HTTP request/response only; no WebSocket payload or generic TCP/UDP claim",
+        "64 MiB archive/input, 8 MiB JSON, up to 1000 flows and bounded body prefixes; partial input never proves absence",
+        "Literal method/URL/occurrence comparison is not a causal request match; no traffic replay"
+      ],
+      "evaluationCase": {
+        "id": "owned-http-observation-comparison",
+        "inputFamily": "owned-loopback-http-service-and-client",
+        "task": "Determine which HTTP request produced the supplied application state, retain request/response evidence and compare two controlled observations. Preserve the original service and input bytes; describe scope, TLS prerequisites and incomplete observations.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual HTTP request and application response",
+          "saved native archive independently inspected",
+          "useful comparison with bounded uncertainty",
+          "ordinary project evidence",
+          "owned proxy cleanup and original service preserved"
         ]
       }
     },

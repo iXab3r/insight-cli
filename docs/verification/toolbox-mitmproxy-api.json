@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Native addon/FlowWriter/FlowReader feasibility; public adapter and independent model gates pending",
+  "version": "12.2.3",
+  "checks": {
+    "ownedLoopbackProxy": true,
+    "actualGetAndPost": true,
+    "actualResponseValue": true,
+    "nativeFlowArchiveReopened": true,
+    "partialArchivePrefixRetained": true,
+    "originalArchivePreserved": true,
+    "proxyExited": true,
+    "borrowedOriginPreserved": true
+  },
+  "flowCount": 2,
+  "archiveSha256": "964c0c6d620cf84983b40f267591a3e0333ff74b08914f4294c4ba38aacffe05",
+  "bridgeSha256": "6c6ccc930300101b8b104d314a82149737033159c3b1ba3480dcb3d83b3e2abd",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "runtimeArchiveSha256": "0a09ee3b82569e8985aff8186e4792618b8e5d0c766098db093d09a87d4b013a"
+}

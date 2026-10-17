@@ -471,3 +471,26 @@ refusal, checkpoints and terminal owned jobs. The separately rebuilt API proof a
 with the exact packaged extension SHA. The two concrete path defects and failed alias
 attempt remain documented above. Independent cold/prepared model and final combined gates
 remain open; this native success does not consume or replace those gates.
+
+### mitmproxy source closure and native HTTP API checkpoint
+
+The pinned 12.2.3 macOS ARM64 standalone runtime embeds Python 3.14.4 built for macOS 15,
+OpenSSL 3.6.2 in Python and 3.5.5 in cryptography, liblzma 5.8.3, libmpdec 4.0.1 and zstd
+1.5.7. All 77 native code files were inspected: imports are bundle-relative or macOS
+system libraries, without absolute Homebrew runtime dependencies. Original full sources
+and lockfiles, 525 checksum-verified Rust crates, pinned Git/Swift sources and verbatim
+published notices/declarations are retained. The Rust source set deliberately includes
+build/test/other-platform packages; it is not a claim they are all compiled into macOS.
+Where a crate omits a separate license file, its original declaration/attribution and
+available exact-VCS notices are preserved, with clearly identified standard SPDX references.
+No copyright statement is invented. The application archive itself is unchanged.
+
+[Native addon feasibility](verification/toolbox-mitmproxy-api.json) actually observed GET
+and POST, recovered the response value, wrote/reopened a native flow archive and retained
+two valid observations before a damaged tail as explicit partial data. Only the owned
+loopback proxy exited; the original service stayed alive. Its live process tree contained
+one mitmdump process, without a detached PyInstaller child. The public facade/skill now
+cover bounded record, readiness status, immutable archive/HAR inspection and selected-field
+comparison. HTTPS is explicit per-client trust with a private CA and optional public
+upstream root; no system trust/proxy/Network Extension setup is requested. Full global CLI,
+TLS, interruption and Gherkin verification are still pending, as is model acceptance.

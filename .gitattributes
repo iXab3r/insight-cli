@@ -11,3 +11,5 @@ skills/ghidra-coordinator/runtime/native/*.def text eol=lf
 skills/ghidra-coordinator/runtime/native/dnspy-extension/* text eol=lf
 skills/ghidra-coordinator/runtime/native/dnspy-extension/*.dll -text
 skills/ghidra-coordinator/runtime/native/dnspy-extension/*.snk -text
+skills/ghidra-coordinator/runtime/native/mitmproxy/*.py text eol=lf
+skills/ghidra-coordinator/runtime/native/mitmproxy/*.json text eol=lf

@@ -2,6 +2,7 @@ import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {diagnosticsCommands} from './dotnet-diagnostics.js';
 import {fridaCommands} from './frida.js';
+import {mitmproxyCommands} from './mitmproxy.js';
 import {tsharkCommands} from './tshark.js';
 import {dnspyCommands} from './dnspy.js';
 import {procmonCommands} from './procmon.js';
@@ -236,6 +237,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ...procmonCommands(),
       ...dnspyCommands(c=>owner.selected(c).workspace),
       ...tsharkCommands(c=>owner.selected(c).workspace),
+      ...mitmproxyCommands(c=>owner.selected(c).workspace),
       ...straceCommands(c=>owner.selected(c).workspace),
       ...fridaCommands(c=>owner.selected(c).workspace),
       ...sevenzipCommands(c=>owner.selected(c).workspace),
