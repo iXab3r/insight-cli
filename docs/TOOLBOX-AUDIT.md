@@ -286,3 +286,19 @@ source/release readback and fault tests. After owner loss, a live recovered macO
 remains unverified; observed exit records an unknown result. It does not replay execution or
 claim a completed snapshot. Cold/prepared independent model acceptance and the combined
 full-toolbox gate remain open; model quota does not block native implementation of other tools.
+
+### WinDbg adapter native gate in progress
+
+The Windows x64 adapter now exposes typed, read-only user-minidump queries, captures
+the dump and optional local PDB, and disables inherited initialization, shell commands
+and network symbol lookup. Microsoft's pinned bundle is acquired only through explicit
+vendor delivery or a supplied matching archive; nested x64 MSIX bytes are checked before
+extraction. External `amd64/cdb.exe` selections fingerprint their console runtime family.
+
+Windows CI prepares a native calculation stopped inside `quote_total`, creates its dump
+and PDB, installs the npm artifact globally in isolation, and checks stack, registers,
+the actual value 109 in dump memory, bounded output, unreadable-memory uncertainty,
+external dependency drift and checkpoint preservation. Native acceptance is pending this
+run; no agent or whole-toolbox acceptance is claimed. The first new Windows build exposed
+CRLF-sensitive skill metadata admission before native execution; parsing now accepts both
+line endings without rewriting source files.

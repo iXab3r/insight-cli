@@ -38,3 +38,7 @@ test('a newly added managed tool cannot ship without discovery and skill admissi
  const root=await fixture(t);await writeFile(join(root,'dist/src/cli.js'),`export const createDefinition=()=>({commands:[{name:'probe',children:[{name:'inspect'}]},{name:'forgotten',children:['download','install','uninstall','doctor','status'].map(name=>({name}))}]});`);
  await assert.rejects(prepareToolbox(root),/Managed tool has no packaged admission: forgotten/);
 });
+
+test('skill admission accepts CRLF checkouts without changing the packaged source',async t=>{
+ const root=await fixture(t),path=join(root,'SKILL.md'),bytes=(await readFile(path,'utf8')).replaceAll('\n','\r\n');await writeFile(path,bytes);await prepareToolbox(root);assert.equal(await readFile(path,'utf8'),bytes);
+});

@@ -97,6 +97,12 @@
       "title": "Insight Frida",
       "path": "skills/insight-frida/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-windbg",
+      "title": "Insight WinDbg",
+      "path": "skills/insight-windbg/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -618,6 +624,52 @@
           "script source retained by hash",
           "original target lifetime preserved",
           "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "windbg",
+      "namespace": "windbg",
+      "kind": "analytical",
+      "skill": "insight-windbg",
+      "purpose": "Inspect Windows native user-mode minidump stacks, registers, modules and bounded memory",
+      "inputs": [
+        "Windows user-mode minidump",
+        "optional matching local PDB"
+      ],
+      "tasks": [
+        "native crash or stopped-state investigation",
+        "bounded runtime address drilldown"
+      ],
+      "platforms": [
+        "win32-x64"
+      ],
+      "dependencies": [
+        "Microsoft WinDbg CDB 10.x console runtime",
+        "stock Windows PowerShell/.NET Framework"
+      ],
+      "workflowCommands": [
+        "windbg inspect"
+      ],
+      "limitations": [
+        "Read-only user-mode MDMP queries; no live attach or kernel debugging",
+        "Missing memory and symbols remain unknown",
+        "Microsoft distribution requires explicit vendor-direct download or local archive"
+      ],
+      "evaluationCase": {
+        "id": "windows-native-dump",
+        "inputFamily": "owned-native-user-dump",
+        "task": "Explain the stopped native calculation in the supplied Windows dump, establish its stack and relevant runtime state, and retain ordinary evidence without running the original application.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct native function and runtime state",
+          "ordinary project evidence",
+          "input and symbol companions preserved",
+          "owned debugger cleanup"
         ]
       }
     },

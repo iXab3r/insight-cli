@@ -12,6 +12,8 @@ export interface InstallDescriptor {
  id:string;primary:string;components:()=>Record<string,ToolArtifact>;
  launch:(roots:Record<string,string>)=>ToolLaunch;
  probe:(launch:ToolLaunch,c:CommandContext)=>Promise<Record<string,unknown>>;
+ /** Reviewed nested packaging preparation inside owned staging, before probe/fingerprint. */
+ prepare?:(roots:Record<string,string>,c:CommandContext)=>Promise<void>;
  /** Known sibling executables/data files needed by an external tool family. */
  externalInputs?:(executable:string,c:CommandContext)=>Promise<Record<string,string>>;
  /** Full retained notices copied into owned installation storage, including external selections. */
@@ -52,6 +54,7 @@ export class ToolInstaller {
   const rootsAt=(directory:string)=>Object.fromEntries(Object.entries(consumed).map(([part,v])=>{archiveName(v.artifact.root);return [part,join(directory,part,v.artifact.root)];}));
   const selected=await installationStage<SelectedTool>(this.root,id,async(stage,installed)=>{
    for(const [part,v]of Object.entries(consumed))await extractArchive(v.path,join(stage,part),v.artifact.format,this.c.signal);
+   if(!external)await this.descriptor.prepare?.(rootsAt(stage),this.c);
    for(const [name,body]of Object.entries(this.descriptor.noticeFiles??{})){archiveName(name);if(!name||Buffer.byteLength(body)>1024**2)fail('configuration','Invalid bundled license notice.');const destination=join(stage,name);await mkdir(dirname(destination),{recursive:true,mode:0o700});await writeFile(destination,body,{flag:'wx',mode:0o600});}
    const stageLaunch=external?{executable:external,arguments:[],environment:{}}:this.descriptor.launch(rootsAt(stage));
    const lastProbe=await this.descriptor.probe(stageLaunch,this.c),launch=external?stageLaunch:this.descriptor.launch(rootsAt(installed));

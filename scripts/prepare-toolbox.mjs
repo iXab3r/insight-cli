@@ -12,7 +12,7 @@ export async function prepareToolbox(root){
  for(const skill of inventory.skills){
   assert.match(skill.name,/^insight-[a-z][a-z0-9-]*$/);assert.ok(!skills.has(skill.name),'Duplicate skill');
   const entry=ownedPath(skill.path);assert.ok(!paths.has(entry),'Duplicate skill path');paths.add(entry);skills.set(skill.name,skill);
-  const body=await readFile(join(root,entry),'utf8');
+  const body=(await readFile(join(root,entry),'utf8')).replaceAll('\r\n','\n');
   assert.ok(body.startsWith('---\nname: '+skill.name+'\n'),'Skill metadata name differs: '+entry);
   assert.ok(body.split('\n').includes('# '+skill.title+' '+version),'Skill version differs: '+entry);
   // Generated resources are copies from one canonical source, not separately edited manuals.
