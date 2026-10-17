@@ -5,6 +5,11 @@ description: Recover C#, inspect IL/types/metadata, extract resources or export 
 
 # Insight ILSpy 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use the project's preferred tool and evidence conventions. Use ILSpy for static managed
 assemblies with CLR metadata. It does not execute the assembly, recover C# from NativeAOT,
 or establish runtime behavior from pseudocode alone.

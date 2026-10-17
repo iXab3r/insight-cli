@@ -5,6 +5,11 @@ description: Inventory, integrity-check and recover files from archives and supp
 
 # Insight 7-Zip 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use the project's existing evidence layout. Container recovery produces ordinary files;
 it does not publish analysis or require a Ghidra session.
 

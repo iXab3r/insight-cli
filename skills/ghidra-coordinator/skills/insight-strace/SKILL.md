@@ -5,6 +5,11 @@ description: Observe actual file reads, writes, process creation and network sys
 
 # Insight strace 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Respect the project's RE and evidence format. This tool runs the supplied application;
 its side effects must be authorized. It traces an owned native copy and its descendants.
 A trace may contain private paths, strings or network data: retain it under project rules.

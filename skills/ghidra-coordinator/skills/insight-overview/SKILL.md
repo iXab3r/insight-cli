@@ -5,6 +5,11 @@ description: Choose bounded tool overviews and focused drilldown through insight
 
 # Insight Overview 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow project tool and evidence conventions. This workflow uses existing APIs; it adds
 no runtime, analysis database or installation step. `tools list`/`tools show CAPABILITY`
 locate tasks and dedicated instructions before download. Discovery is not runtime readiness.

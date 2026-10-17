@@ -5,6 +5,11 @@ description: Query structured PE, ELF and thin Mach-O headers, sections, imports
 
 # Insight Binary 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep project RE/evidence conventions. LIEF is an internal packaged library. The native
 helper is included with insight-cli; no separate download/install, SDK or compiler is
 needed. The admitted host is macOS14+ ARM64; PE/ELF/Mach-O input formats do not imply

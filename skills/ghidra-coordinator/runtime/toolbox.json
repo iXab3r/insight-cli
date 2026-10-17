@@ -5,7 +5,9 @@
       "name": "insight-cli",
       "title": "insight-cli",
       "path": "SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-re",
@@ -13,7 +15,8 @@
       "path": "skills/insight-re/SKILL.md",
       "resources": {
         "references/recovery.md": "references/recovery.md",
-        "references/artifacts.md": "references/artifacts.md"
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
       }
     },
     {
@@ -31,7 +34,8 @@
         "references/debugger.md": "references/debugger.md",
         "references/archive.md": "references/archive.md",
         "references/extensions-and-sync.md": "references/extensions-and-sync.md",
-        "references/artifacts.md": "references/artifacts.md"
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
       }
     },
     {
@@ -39,7 +43,8 @@
       "title": "Insight ILSpy",
       "path": "skills/insight-ilspy/SKILL.md",
       "resources": {
-        "references/ilspy.md": "references/ilspy.md"
+        "references/ilspy.md": "references/ilspy.md",
+        "references/agent-execution.md": "references/agent-execution.md"
       }
     },
     {
@@ -47,128 +52,169 @@
       "title": "Insight Artifacts",
       "path": "skills/insight-artifacts/SKILL.md",
       "resources": {
-        "references/artifacts.md": "references/artifacts.md"
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
       }
     },
     {
       "name": "insight-sevenzip",
       "title": "Insight 7-Zip",
       "path": "skills/insight-sevenzip/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-llvm",
       "title": "Insight LLVM",
       "path": "skills/insight-llvm/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-dotnet-dump",
       "title": "Insight .NET Dump",
       "path": "skills/insight-dotnet-dump/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-dotnet-stack",
       "title": "Insight .NET Stack",
       "path": "skills/insight-dotnet-stack/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-dotnet-trace",
       "title": "Insight .NET Trace",
       "path": "skills/insight-dotnet-trace/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-die",
       "title": "Insight Detect It Easy",
       "path": "skills/insight-die/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-lldb",
       "title": "Insight LLDB",
       "path": "skills/insight-lldb/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-frida",
       "title": "Insight Frida",
       "path": "skills/insight-frida/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-windbg",
       "title": "Insight WinDbg",
       "path": "skills/insight-windbg/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-strace",
       "title": "Insight strace",
       "path": "skills/insight-strace/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-procmon",
       "title": "Insight ProcMon",
       "path": "skills/insight-procmon/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-dnspy",
       "title": "Insight dnSpyEx",
       "path": "skills/insight-dnspy/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-tshark",
       "title": "Insight TShark",
       "path": "skills/insight-tshark/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-mitmproxy",
       "title": "Insight mitmproxy",
       "path": "skills/insight-mitmproxy/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-managed-metadata",
       "title": "Insight Managed Metadata",
       "path": "skills/insight-managed-metadata/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-managed-heap",
       "title": "Insight Managed Heap",
       "path": "skills/insight-managed-heap/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-binary",
       "title": "Insight Binary",
       "path": "skills/insight-binary/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-interop",
       "title": "Insight Interop",
       "path": "skills/insight-interop/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-capture",
       "title": "Insight Capture",
       "path": "skills/insight-capture/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     },
     {
       "name": "insight-overview",
       "title": "Insight Overview",
       "path": "skills/insight-overview/SKILL.md",
-      "resources": {}
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
     }
   ],
   "tools": [

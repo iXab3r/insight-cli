@@ -5,6 +5,11 @@ description: Capture one explicitly authorized native program run, exact stdout/
 
 # Insight Capture 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow project RE and evidence conventions. Use this only for an authorized runtime
 observation. The current native host/input profile is macOS14+ ARM64 thin Mach-O
 executables. There is no extra install, compiler, shell string or implicit active target.

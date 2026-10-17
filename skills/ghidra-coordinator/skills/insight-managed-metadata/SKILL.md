@@ -5,6 +5,11 @@ description: Query managed assembly metadata, MethodDef tokens, P/Invoke declara
 
 # Insight Managed Metadata 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep the project's RE and evidence conventions. This capability parses assembly bytes;
 it never loads target code for execution, resolves ambient assemblies or loads PDBs.
 dnlib is a packaged implementation library, not another application to install.

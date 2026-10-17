@@ -5,6 +5,11 @@ description: Query structured .NET heap objects, primitive fields and managed st
 
 # Insight Managed Heap 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow project RE/evidence rules. ClrMD is an internal packaged library, not an application
 that needs another install. This API reads one immutable dump; it never attaches to a live
 process, evaluates target expressions or downloads symbols/dependencies.

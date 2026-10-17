@@ -5,6 +5,11 @@ description: Inspect PE, ELF and Mach-O headers, dependencies, exports and symbo
 
 # Insight LLVM 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use existing project RE rules and evidence paths. These are static reads; no Ghidra project,
 program execution or shared merge is needed. Use Ghidra when the question needs recovered
 control flow, decompilation or persistent annotations.

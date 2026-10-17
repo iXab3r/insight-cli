@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent cheap-model C01 static comparison trials, semantic and handoff review required independently of evaluator exit",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "artifactSha256": "d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61",
+  "skillBundleSha256": "e7007fafe72d5d3456a75fca853fa77fd9b5ea20734acff51efa4a5a97c4c34a",
+  "sourceCommit": "4027416c20e02d1104597bf75df02d93b59c0920",
+  "initialTrials": {
+    "cold": {
+      "elapsedMs": 86721,
+      "state": "failed_facade",
+      "correctStaticFindings": true,
+      "nativeInputsUnchanged": true,
+      "ownerStopped": true,
+      "reason": "Sandbox AppData/IPC denial; agent changed host storage and used Mono fallback instead of intended facade; no successful checkpoint."
+    },
+    "prepared": {
+      "elapsedMs": 75040,
+      "state": "failed_handoff",
+      "publicMetadataQueriesUsed": true,
+      "correctChangedFormulaAndAddedMethod": true,
+      "correctPInvokeEntryPointChange": true,
+      "normalizedIlControlsCorrect": true,
+      "checkpointFilesIndependentlyEqual": 15,
+      "checkpointFiles": 15,
+      "checkpointBytes": 25013,
+      "checkpointSha256": "89ffe03259a39b4361c99bc6e952b7fc98448a4d4b0747b90708bd50d1df003d",
+      "nativeInputsUnchanged": true,
+      "ownerStopped": true,
+      "reason": "Actual checkpoint is correct but the final answer reconstructed a different profile UUID; its checkpoint path does not exist."
+    }
+  },
+  "response": "Every skill now links scoped host-execution guidance; artifact and RE skills require verbatim receipt paths and saved-file readback. Fresh cold/prepared retests use new contexts, not replayed histories.",
+  "quota": "Earlier account quota failures remain historical; inference became available and these actual trials ran. No remaining gate is waived.",
+  "guidanceRetest": {
+    "artifactSha256": "79b423b820285870c4c63de720afa5b8a186ab753d5bcfea08f883739c354fcb",
+    "skillBundleSha256": "d47b66f1aa3d736d533a55cb6015b9ef9954bb00f53c71bacf0aae4fd303b00f",
+    "cold": {
+      "state": "invalid_environment",
+      "elapsedMs": 132838,
+      "reason": "Login shell replaced PATH and selected the unrelated user global CLI. Its temporary Update grant was revoked; an additive evidence checkpoint was retained. No native runtime was installed and no original input changed. This trial cannot attest the candidate."
+    },
+    "prepared": {
+      "state": "reviewed_semantics_handoff_correct_binding_retest_required",
+      "elapsedMs": 96659,
+      "correctFormulaAndImportChange": true,
+      "correctNormalizedIlControls": true,
+      "verbatimSavedPathReadback": true,
+      "candidateProfileObserved": true
+    },
+    "harnessFix": {
+      "allowLoginShell": false,
+      "explicitCandidateExecutable": true,
+      "explicitPrivatePreload": true,
+      "candidateInvocationJournal": true,
+      "normalApprovalPolicyPreserved": true,
+      "scope": "POSIX Codex trial launcher; native Windows proof is independent."
+    }
+  },
+  "acceptedRetest": {
+    "artifactSha256": "79b423b820285870c4c63de720afa5b8a186ab753d5bcfea08f883739c354fcb",
+    "skillBundleSha256": "d47b66f1aa3d736d533a55cb6015b9ef9954bb00f53c71bacf0aae4fd303b00f",
+    "executionBindingSchema": 2,
+    "model": "gpt-6-luna",
+    "reasoningEffort": "medium",
+    "cold": {
+      "elapsedMs": 106286,
+      "candidateInvocations": 29,
+      "managedDownloadAndInstallByAgent": true,
+      "checkpointFilesIndependentlyEqual": 17,
+      "checkpointBytes": 30011,
+      "checkpointSha256": "a155502f1976aada4e82a32eec339f5c1d6d42831f4912a7c1447fe6b24d01ec"
+    },
+    "prepared": {
+      "elapsedMs": 110071,
+      "candidateInvocations": 21,
+      "checkpointFilesIndependentlyEqual": 11,
+      "checkpointBytes": 17805,
+      "checkpointSha256": "04e229e12098e0a7a6a4d6b31c4ed193b439ca257b6ed31cfdb96fc8f5e9c090"
+    },
+    "independentChecks": {
+      "correctFormulaChange": "9*n+10 -> 11*n+10",
+      "correctAddedMethod": "AddedBeforeExistingMethods returns 123",
+      "correctEntryPointChange": "quote_total -> quote_total_v2",
+      "shiftedTokensNotChanges": true,
+      "unchangedMainAndUnchangedControl": true,
+      "staticCorrespondenceQualified": true,
+      "publicFacadeEvidenceReadback": true,
+      "allCheckpointFilesMatch": true,
+      "actualReceiptPathInFinalAnswer": true,
+      "inputHashesUnchanged": true,
+      "ownerStopped": true
+    },
+    "scope": "C01 unit cold/prepared proof only; complete toolbox agent gate remains open."
+  }
+}

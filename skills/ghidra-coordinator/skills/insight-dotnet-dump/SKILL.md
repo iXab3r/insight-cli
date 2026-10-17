@@ -5,6 +5,11 @@ description: Capture a managed heap dump or inspect compatible .NET dumps with S
 
 # Insight .NET Dump 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Start with `insight-cli dotnet-dump collect --pid PID --output research/worker.dmp`.
 The default Heap dump includes managed objects; Mini may lack required heap data. Collection
 has a deadline and accepts only a nonempty file below 4 GiB. It does not execute dump data.

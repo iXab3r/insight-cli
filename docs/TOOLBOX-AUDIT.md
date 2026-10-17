@@ -613,3 +613,58 @@ applications' packet/event/object/stack/symbol bounds retain their dedicated nat
 receipts. Inventory is 16 analytical families, six capabilities and 25 skills. All
 independent cold/prepared and combined inference-agent gates remain separately tracked;
 account quota does not stop native implementation or acceptance.
+
+### Combined candidate and renewed agent evaluation
+
+All sixteen analytical families and six capabilities now have public adapters/workflows and
+packaged skills (25 skills including the toolbox, RE and artifact guides). This describes
+implemented surfaces, not overall acceptance. On source `4027416`, the complete offline
+suite passed 204 tests with two explicit opt-in skips; release/admission checks passed 29/29.
+The exact globally installed package SHA-256 is
+`d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61`;
+a clean source pack reproduced those bytes. Windows run
+[39070879670](https://github.com/iXab3r/insight-cli/actions/runs/39070879670), Linux run
+[39070879669](https://github.com/iXab3r/insight-cli/actions/runs/39070879669) and offline CI
+[39070879735](https://github.com/iXab3r/insight-cli/actions/runs/39070879735) passed.
+
+The first combined macOS run `e63c150ff2f9411ab4cbe8d76481e1bf` failed: 11 passed,
+six failed and four OS-specific scenarios skipped. Five failures were empty-output native
+version-probe timeouts on newly extracted LLVM, private .NET or TShark; another was a Frida
+attach cancellation before its runtime acknowledgment. Individual earlier proofs remain
+valid for their exact artifacts; they do not erase this combined failure. One hundred
+subsequent launches of the retained LLVM executable and twelve fresh executable copies
+passed. A sampled delayed first execution was in dyld, not the JavaScript gate; this alone
+does not establish the cause of the 30-second timeouts. A repeat of the identical package
+is being evaluated without increasing deadlines or automatically replaying tool operations.
+
+Real model inference also became available again. Fresh C01 cold/prepared trials found
+correct useful static differences, but neither passed the full gate: cold used a Mono
+fallback after sandbox AppData/IPC denial, and prepared produced correct metadata evidence
+and a byte-verified 15-file checkpoint but reconstructed the wrong profile UUID in its final
+checkpoint link. [The reviewed receipt](verification/toolbox-agent-managed-metadata.json)
+retains these failures. Common skill guidance now explains the host's normal scoped
+permission escalation while preserving the selected profile; artifact/RE handoffs require
+saved-file readback and copying the returned path verbatim. Fresh trials, rather than a
+relabeling of these failed histories, must verify the change. Historical quota failures do
+not excuse these concrete issues or prevent native implementation and verification.
+
+The first guidance retest exposed an evaluator isolation defect: a login shell replaced PATH
+and selected the unrelated user global CLI. That cold trial is invalid, even though it found
+correct differences. It temporarily granted/revoked Update on the user default profile and
+left an additive checkpoint; it did not install a native runtime or change original inputs.
+The evaluator now disables login-shell semantics and provides an explicit candidate launcher
+that supplies the private preload as an argument, independently of inherited NODE_OPTIONS.
+A per-trial invocation journal makes actual candidate use reviewable; a synthetic regression
+proves execution with both PATH and NODE_OPTIONS removed. These are test harness controls,
+not changes to user host configuration or relaxed sandbox/approval policy. The guidance
+prepared trial corrected its final path/readback, but both modes are repeated with the fixed
+binding before C01 is accepted. The official [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+describes the non-login-shell setting used by this harness.
+
+With the fixed binding, new C01 cold/prepared trials passed independent review: the cold agent
+installed the managed runtime itself, both used actual public metadata/IL comparisons, found
+the formula, added-method and P/Invoke differences and kept shifted tokens distinct from
+behavior changes. All 17 cold and 11 prepared checkpoint files matched their project bytes;
+both final paths were the exact saved receipts and both owners stopped. Timings were
+106.3s/110.1s, not a speedup claim. The receipt binds the exact package/skill hashes and retains
+all prior failures. This closes the C01 unit model gate only.

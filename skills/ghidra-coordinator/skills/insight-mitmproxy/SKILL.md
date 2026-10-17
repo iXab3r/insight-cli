@@ -5,6 +5,11 @@ description: Record, inspect and compare HTTP request/response evidence with ins
 
 # Insight mitmproxy 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep the project's RE and evidence format. This facade uses a private HTTP proxy on
 macOS 15+ ARM64. A client must explicitly opt into its endpoint; installing the tool
 does not intercept traffic or install a system proxy, certificate or Network Extension.

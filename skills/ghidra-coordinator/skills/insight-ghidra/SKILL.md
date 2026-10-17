@@ -5,6 +5,11 @@ description: Inspect or edit native binaries with Ghidra through insight-cli; us
 
 # Insight Ghidra 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
 For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while

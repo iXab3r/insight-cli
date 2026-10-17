@@ -5,6 +5,11 @@ description: Inspect an offline PCAP or PCAPNG with insight-cli tshark to identi
 
 # Insight TShark 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep the project's evidence format. This tool reads an immutable capture; it does not
 start packet capture, install BPF helpers, change network settings or contact DNS servers.
 The delivered native profile is macOS ARM64, macOS 14+.

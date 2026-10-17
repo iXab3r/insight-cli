@@ -5,6 +5,11 @@ description: Inspect live managed thread stacks to identify active or waiting wo
 
 # Insight .NET Stack 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use `insight-cli dotnet-stack report --pid PID` for a lightweight live stack snapshot.
 Inspect the managed callers around native wait/sleep frames: a wait identifies where a
 thread was sampled, not by itself why an application is stalled. Keep PID/birth, capture

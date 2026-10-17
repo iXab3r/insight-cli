@@ -5,11 +5,20 @@ description: Retain a completed reverse-engineering evidence file or directory a
 
 # Insight Artifacts 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep evidence as ordinary files in the project's existing layout. This supporting application
 copies a completed file or stable directory; it has no native runtime to download or install.
 
 Run `insight-cli artifacts save <path> --json` using a profile with Update permission.
-Retain the returned ordinary `path`, file/byte counts and hash if the checkpoint matters.
+Retain the returned ordinary `path` verbatim, file/byte counts and hash if the checkpoint matters.
+Before reporting a saved checkpoint, read its returned path with ordinary file tools and
+confirm that the expected files are present. Copy that exact path into the handoff; never
+reconstruct profile UUIDs or storage directories from memory. If readback fails, report
+the saved receipt and the unresolved access problem instead of claiming a verified handoff.
 The original project records keep their canonical role. No Ghidra selectors, finding schema
 or evidence IDs are required; saving does not merge tool databases or attest interpretations.
 

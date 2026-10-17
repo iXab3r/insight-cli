@@ -5,6 +5,11 @@ description: Investigate shipped programs and binary artifacts with insight-cli 
 
 # Insight RE 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Answer the user's research question with inspectable materials. Agents choose the
 investigation; insight-cli supplies applications such as `ghidra` and `artifacts`.
 External tools need no insight-cli adapter. Installing this package does not register
@@ -105,7 +110,8 @@ evidence and read back published annotations; do not redo the whole investigatio
 to format a report. Report a partial answer plainly when necessary.
 
 If retaining a checkpoint through `artifacts save`, select the settled project files and
-check its receipt. Release only owned tool contexts, preserving unpublished work and
+check its receipt and read the saved files at the exact returned path. Copy the returned
+path verbatim into the handoff; do not reconstruct profile/storage identifiers. Release only owned tool contexts, preserving unpublished work and
 unresolved journals. Give the user the useful result, remaining limits, canonical evidence
 paths and any saved checkpoint. For continuation, read the existing records and reopen
 the same session/target rather than starting the investigation again.

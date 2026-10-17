@@ -5,6 +5,11 @@ description: Observe native runtime arguments, return values, registers, stacks 
 
 # Insight LLDB 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow the project's RE and evidence conventions. This debugger runs a native input; choose
 an input whose execution and application side effects are authorized. It launches a separate
 owned copy, captures one breakpoint observation and terminates that launch. It does not attach

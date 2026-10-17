@@ -5,6 +5,11 @@ description: Trace a .NET P/Invoke declaration to an explicitly supplied native 
 
 # Insight Interop 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Respect project RE/evidence rules. This workflow composes existing public APIs, without
 another runtime, global active binary or universal library resolver. Tokens and native
 addresses identify different immutable targets; preserve both hashes in the finding.

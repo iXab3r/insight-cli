@@ -5,6 +5,11 @@ description: Investigate Windows native user-mode minidumps using bounded stacks
 
 # Insight WinDbg 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep the project's RE and evidence conventions. This facade reads a captured Windows
 user-mode minidump; it does not run or attach the original application. Dump contents
 can include private memory. Store evidence under the project's normal rules.

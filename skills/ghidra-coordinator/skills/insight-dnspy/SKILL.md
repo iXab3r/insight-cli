@@ -5,6 +5,11 @@ description: Debug a managed Windows EXE at an IL breakpoint and read primitive 
 
 # Insight dnSpyEx 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Keep the project's RE and evidence format. Debugging executes the supplied application
 in a new owned process; its ordinary file/network side effects still apply. Use only
 inputs whose execution is authorized. The original process is not attached or reused.

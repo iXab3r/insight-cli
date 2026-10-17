@@ -5,6 +5,11 @@ description: Classify unknown executable or container inputs by format, architec
 
 # Insight Detect It Easy 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow the project's RE instructions and evidence format. DiE provides quick static triage;
 it does not execute, unpack or decompile the input. Use the classification to choose a focused
 next tool, then verify important claims with that tool.

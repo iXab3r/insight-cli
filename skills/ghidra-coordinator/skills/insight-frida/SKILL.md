@@ -5,6 +5,11 @@ description: Observe native call arguments/results or inspect runtime modules an
 
 # Insight Frida 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow existing project RE and evidence conventions. Frida instruments a running process;
 choose an explicitly authorized PID. This facade owns the collector, while the target stays
 with its original owner. Stopping the collector never signals that target.

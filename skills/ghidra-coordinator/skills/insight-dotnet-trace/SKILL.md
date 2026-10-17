@@ -5,6 +5,11 @@ description: Collect and inspect bounded .NET EventPipe traces to identify sampl
 
 # Insight .NET Trace 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Use `insight-cli dotnet-trace collect --pid PID --duration-seconds 5 --output research/worker.nettrace`.
 The default `dotnet-sampled-thread-time` profile measures sampled thread wall-clock time.
 A sleeping method can rank at 100% while consuming little CPU. This API does not use the

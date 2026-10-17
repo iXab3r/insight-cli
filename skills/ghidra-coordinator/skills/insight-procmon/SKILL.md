@@ -5,6 +5,11 @@ description: Observe actual file and registry access by an authorized running Wi
 
 # Insight ProcMon 0.2.0
 
+If local help/status reports AppData or IPC access denied, retry that **read-only probe**
+with the agent host's normal permission escalation. Keep HOME, profile and owner state;
+see [host execution permissions](references/agent-execution.md). Unknown mutations need
+request/status recovery, never blind retry.
+
 Follow the project's RE and evidence conventions. This Windows x64 facade observes an
 explicit existing PID. It preserves that process's lifetime and scopes collection to
 that PID before capturing; subprocesses are excluded. Administrator privileges are
