@@ -19,6 +19,10 @@ for(const [file,expected] of Object.entries({'windows-registry.c':registry.sourc
 const linux=JSON.parse(await readFile(native+'child-deadline-linux.provenance.json','utf8'));
 assert.equal(await sha(native+'child-deadline-linux.c'),linux.sourceSha256,'Linux launcher source differs from its reviewed build');
 assert.equal(await sha(native+'child-deadline-linux-x64'),linux.sha256,'Linux launcher binary differs from its reviewed build');
+const managedRoot=new URL('../skills/ghidra-coordinator/runtime/managed/insight-managed/',import.meta.url);
+const managed=JSON.parse(await readFile(new URL('provenance.json',managedRoot),'utf8'));
+for(const [name,expected]of Object.entries(managed.inputs))assert.equal(await sha(new URL(name,managedRoot)),expected,'Managed helper source differs: '+name);
+for(const [name,expected]of Object.entries(managed.files))assert.equal(await sha(new URL(name,managedRoot)),expected.sha256,'Managed helper binary differs: '+name);
 // TypeScript's output mode otherwise depends on whether the file already existed.
 await chmod('dist/src/bin.js',0o755);
 await prepareToolbox(process.cwd());

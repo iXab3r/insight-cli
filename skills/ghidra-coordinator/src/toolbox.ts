@@ -5,7 +5,7 @@ import {packageVersion} from './package-version.js';
 
 interface PackagedSkill {name:string;title:string;path:string;resources:Record<string,string>}
 interface Capability {
- id:string;namespace:string;kind:'analytical'|'supporting';skill:string;purpose:string;
+ id:string;namespace:string;kind:'analytical'|'supporting'|'capability';skill:string;purpose:string;
  evaluationCase:{id:string;inputFamily:string;task:string;modes:string[];requiredObservations:string[]};
  inputs:string[];tasks:string[];platforms:string[];dependencies:string[];workflowCommands:string[];limitations:string[];
 }
@@ -22,7 +22,7 @@ export function describeTool(id:string) {
  const tool=toolbox.tools.find(t=>t.id===id);
  if(!tool)throw new CliError(`Unknown tool '${id}'.`,{code:'toolbox.notFound',next:[['tools','list']]});
  return {...tool,status:'available',version:packageVersion,skill:locateSkill(tool.skill),
-  runtime:tool.kind==='supporting'?{required:false}:{required:true,readiness:'notChecked',statusCommand:['insight-cli',tool.namespace,'status','--json']}};
+  runtime:tool.kind!=='analytical'?{required:false,providedByNamespace:tool.namespace,dependencies:tool.dependencies}:{required:true,readiness:'notChecked',statusCommand:['insight-cli',tool.namespace,'status','--json']}};
 }
 export function skillCommand():CommandDefinition {
  return localCommand('skill [name]','Locate packaged tool instructions',({args})=>locateSkill(args.name===undefined?undefined:String(args.name)),{

@@ -151,6 +151,12 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI investigates the offline HTTP capture")]
     public Task InspectCapture() => Execute("scripts/toolbox/native-tshark.mjs", Value("tsharkArchive"), Value("packetCapture"));
 
+    [When("the public CLI records and compares the owned HTTP exchanges")]
+    public Task ObserveHttp() => Execute("scripts/toolbox/native-mitmproxy.mjs", Value("mitmproxyArchive"));
+
+    [When("the public CLI compares managed metadata without executing targets")]
+    public Task QueryMetadata() => Execute("scripts/toolbox/native-managed-metadata.mjs", Value("managedMetadataFixture"));
+
     [When("the public CLI traces the owned Linux worker")]
     public Task TraceLinux() => Execute("scripts/toolbox/native-strace.mjs", Value("straceArchive"), Value("nativeLinuxWorker"), Value("nativeLinuxSettings"));
 
@@ -160,6 +166,8 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("managed metadata and normalized IL retain immutable input identity")]
+    [Then("HTTP evidence and explicit TLS failures survive interruption and removal")]
     [Then("packet and stream evidence preserves input identity and bounded coverage")]
     [Then("managed runtime findings and copied edits preserve original inputs")]
     [Then("actual file evidence survives collector interruption and removal")]

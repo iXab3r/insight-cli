@@ -1,3 +1,4 @@
+import {managedMetadataCommands} from './managed-metadata.js';
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {join,resolve,dirname,relative,sep} from 'node:path';
 import {mkdir,writeFile,readdir,lstat,copyFile} from 'node:fs/promises';
@@ -63,5 +64,5 @@ export function ilspyCommands(workspace:(c:CommandContext)=>Workspace):CommandDe
   lifecycle:{download:(o,c)=>installer(c).download(Boolean(o.offline)),install:(o,c)=>installer(c).install(o),uninstall:(o,c)=>installer(c).uninstall(Boolean(o.purgeCache)),doctor:(_o,c)=>installer(c).doctor(),status:(_o,c)=>installer(c).status()},
   installOptions:[{flags:'--archive <path>',description:'Pinned ILSpy NuGet/zip archive'},{flags:'--archive-sha256 <sha256>',description:'Expected ILSpy archive SHA256'},{flags:'--dotnet-archive <path>',description:'Private .NET runtime tar.gz/zip'},{flags:'--dotnet-archive-sha256 <sha256>',description:'Expected .NET archive SHA256'},{flags:'--executable <path>',description:'External compatible ilspycmd executable; never removed'},{flags:'--offline',description:'Use only supplied archives and verified cache'}],
  });
- return [command('ilspy',definition.description,[...lifecycleCommands(definition),run('types',[{flags:'--kind <kinds>',description:'Comma-separated c,i,s,d,e'}]),run('decompile',[type,member]),run('il',[type]),run('resources'),run('resource',[{flags:'--name <name>',description:'Resource name',required:true}]),run('project'),run('metadata',[{flags:'--table <name>',description:'Metadata table name or number',required:true}])])];
+ return [command('ilspy',definition.description,[...lifecycleCommands(definition),...managedMetadataCommands(workspace,installer),run('types',[{flags:'--kind <kinds>',description:'Comma-separated c,i,s,d,e'}]),run('decompile',[type,member]),run('il',[type]),run('resources'),run('resource',[{flags:'--name <name>',description:'Resource name',required:true}]),run('project'),run('metadata',[{flags:'--table <name>',description:'Metadata table name or number',required:true}])])];
 }

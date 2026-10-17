@@ -39,7 +39,11 @@ Current verified inventory:
 | Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin passed; independent agent gate pending | Header and compiler/runtime/packer triage with explicit partial scan results |
 | LLDB | Owned-launch adapter/skill and pinned debugger/library/debugserver distribution; native snapshots and lifetime fault proof passed; independent model gate pending | Breakpoint arguments/returns, registers, memory and backtrace with kernel deadline after owner loss |
 | Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector and helper fault proof passed on the recorded candidate; independent model gate pending | Runtime argument/result corroboration while preserving the external target lifetime |
-| Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
+| WinDbg / ProcMon / dnSpyEx | Windows native public CLI Gherkin passed on recorded candidates; independent model gates pending | Dump research, scoped file observation, actual managed debug and copy-only edit |
+| strace | Linux x64 source-built runtime and native public CLI Gherkin passed; independent model gate pending | Owned execution and bounded syscall evidence |
+| TShark / mitmproxy | Source-complete mirrored runtimes, dedicated skills and native public CLI Gherkin passed; independent model gates pending | Offline packet/stream research and explicit bounded HTTP observation/comparison |
+| Managed metadata | Packaged dnlib-backed query/compare API and native public CLI Gherkin passed; independent model gates pending | Exact-token IL, P/Invoke and structural assembly comparison |
+| Remaining capabilities | C02–C06 remain in progress below | No implicit acceptance from implemented tool families |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -299,6 +303,10 @@ external drift and preserved original process/settings. TShark now has a source-
 console mirror, offline packet/stream facade, skill and real global CLI Gherkin proof
 (`verification/toolbox-tshark.json`). dnSpyEx now also passed the globally installed Windows public CLI Gherkin gate, including
 Framework/Core breakpoints, copied edits, stop/kill and external preservation
-(`verification/toolbox-dnspy.json`). mitmproxy and the six capability units
-remain in the ordered implementation list. Account inference quota only
+(`verification/toolbox-dnspy.json`). mitmproxy passed explicit TLS, HTTP comparison,
+interruption/recovery and external-copy Gherkin proof (`verification/toolbox-mitmproxy.json`).
+C01 passed real static assembly comparison (`verification/toolbox-managed-metadata.json`);
+C02–C06 remain in progress. Offline verification at this checkpoint: 204 tests,
+202 passed and two explicitly opt-in skipped; release/admission checks 29/29 passed.
+Account inference quota only
 defers the independent model gates.

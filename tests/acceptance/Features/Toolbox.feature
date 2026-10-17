@@ -86,3 +86,15 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI investigates the offline HTTP capture
     Then packet and stream evidence preserves input identity and bounded coverage
+
+  @mitmproxy @macos
+  Scenario: Compare observed HTTP behavior without system interception or replay
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI records and compares the owned HTTP exchanges
+    Then HTTP evidence and explicit TLS failures survive interruption and removal
+
+  @managed-metadata @macos
+  Scenario: Compare managed behavior structure without executing either revision
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI compares managed metadata without executing targets
+    Then managed metadata and normalized IL retain immutable input identity

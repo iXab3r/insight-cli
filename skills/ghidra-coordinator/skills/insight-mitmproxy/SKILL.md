@@ -13,7 +13,7 @@ does not intercept traffic or install a system proxy, certificate or Network Ext
    standalone runtime and full notices from our source-complete GitHub Release.
    `download` prepares its cache; `install --archive mitmproxy-12.2.3-macos-arm64.tgz
    --offline` uses matching local bytes. `install --executable
-   /path/mitmproxy.app/Contents/MacOS/mitmdump` selects a complete external bundle and
+   /path/mitmproxy.app/Contents/MacOS/mitmdump` selects a complete external bundle, creates an owned execution copy and
    fingerprints its adjacent runtime. `doctor` checks the pinned version.
 2. Start an observation window alongside the owned client:
    `mitmproxy record --listen-port 8877 --duration-seconds 15 --output research/window.mitm

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Native installed public CLI proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputs": [
+    "c219e10f32f4982c40f879e10598f97e2f823dc7ae325e6714ac95d6349eab63",
+    "aaabd9d32fb38efaaa6e65a784f1878ccaf2e254fbb27db78758729153fbb1cb"
+  ],
+  "checks": {
+    "managedPrivateRuntime": true,
+    "frameworkAndTypeOverview": true,
+    "methodTokenDrilldown": true,
+    "boundedPagination": true,
+    "actualIlConstant": true,
+    "pinvokeMetadata": true,
+    "normalizedMethodComparison": true,
+    "metadataRidShiftDoesNotChangeUnchangedMethods": true,
+    "invalidTokenAndBoundsRefused": true,
+    "existingOutputPreserved": true,
+    "noTargetExecution": true,
+    "immutableInputs": true,
+    "checkpointSurvivesUninstall": true,
+    "terminalOwnedProcesses": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "e36b9e91990a50e315a5cfa655a400b74711a85b5ba0c97b6502ce412eb7f502"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "84136ca",
+  "candidate": "Working-tree capability candidate; package SHA/build bind the actual bytes, not a clean source commit",
+  "packageSha256": "1aea61431a5a2d881d87cc77cd4c510e8ebb5d1a78a1fd499784164a03a5958e",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "6865c896c54c494582e455c26150f5b6",
+    "passed": 1,
+    "failed": 0
+  }
+}

@@ -483,7 +483,7 @@ published notices/declarations are retained. The Rust source set deliberately in
 build/test/other-platform packages; it is not a claim they are all compiled into macOS.
 Where a crate omits a separate license file, its original declaration/attribution and
 available exact-VCS notices are preserved, with clearly identified standard SPDX references.
-No copyright statement is invented. The application archive itself is unchanged.
+No copyright statement is invented. The R1 application archive is unchanged; R2 only reorders identical entries as described below.
 
 [Native addon feasibility](verification/toolbox-mitmproxy-api.json) actually observed GET
 and POST, recovered the response value, wrote/reopened a native flow archive and retained
@@ -492,8 +492,7 @@ loopback proxy exited; the original service stayed alive. Its live process tree 
 one mitmdump process, without a detached PyInstaller child. The public facade/skill now
 cover bounded record, readiness status, immutable archive/HAR inspection and selected-field
 comparison. HTTPS is explicit per-client trust with a private CA and optional public
-upstream root; no system trust/proxy/Network Extension setup is requested. Full global CLI,
-TLS, interruption and Gherkin verification are still pending, as is model acceptance.
+upstream root; no system trust/proxy/Network Extension setup is requested. The global public CLI Gherkin gate now passed native GET/POST response values, explicit client/upstream TLS trust, refused trust as partial empty evidence, archive/pagination/comparison without replay, stop/kill recovery, retained checkpoints, external drift and preserved originals ([receipt](verification/toolbox-mitmproxy.json)). Independent model acceptance remains pending.
 
 The first global install correctly rejected the upstream chained symlink targets under
 Node tar's traversal protections. R1 remains an immutable historical source/runtime
@@ -503,5 +502,20 @@ two independent repacks matched, and extraction through the unchanged safe helpe
 [Packaging proof](verification/toolbox-mitmproxy-packaging.json) records the logical tree
 and archive hashes. Both original and reordered app bundles fail strict deep bundle signature
 verification identically; publisher notarization is not asserted. Exact pinned bytes,
-logical-tree identity and actual runtime behavior are verified instead. Public CLI gates
-are being rerun on R2 rather than disabling extraction protection or retrying the bad archive.
+logical-tree identity and actual runtime behavior are verified instead. The passing public CLI gate uses R2 and unchanged extraction protection. External bundles are fingerprinted and cloned into a separately verified owned execution tree; the original bundle is never launched or modified.
+
+### Managed metadata capability checkpoint
+
+`ilspy query` and `ilspy compare` use a first-party prebuilt .NET 10 helper and
+[dnlib 4.5.0](https://github.com/0xd4d/dnlib/tree/v4.5.0), with locked dependency,
+full MIT notice and two independently identical builds. This is a library-backed
+capability, without another installation namespace. The existing ILSpy private runtime
+is reused; consumers need no SDK. PDB and ambient dependency loading are disabled.
+
+The [global public CLI Gherkin proof](verification/toolbox-managed-metadata.json)
+compared two real assembly revisions: changed IL constant, changed P/Invoke, one added
+method and unchanged methods whose metadata RIDs shifted. Overview, exact-token IL,
+pagination, invalid selections, immutable input hashes and checkpoint retention passed.
+An execution witness remained absent throughout: queries never ran the target code.
+Structural comparison does not establish behavioral equivalence. Independent model
+and combined full-inventory gates remain open.

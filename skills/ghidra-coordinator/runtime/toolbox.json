@@ -133,6 +133,12 @@
       "title": "Insight mitmproxy",
       "path": "skills/insight-mitmproxy/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-managed-metadata",
+      "title": "Insight Managed Metadata",
+      "path": "skills/insight-managed-metadata/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -252,6 +258,58 @@
           "focused code or IL evidence",
           "ordinary project evidence",
           "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "managed-metadata",
+      "namespace": "ilspy",
+      "kind": "capability",
+      "skill": "insight-managed-metadata",
+      "purpose": "Query managed metadata/IL and compare actual changed signatures, methods and P/Invoke declarations without target execution",
+      "inputs": [
+        "managed PE assembly",
+        "immutable managed target",
+        "two assembly revisions"
+      ],
+      "tasks": [
+        "overview managed identity and framework hints",
+        "query MethodDef tokens and normalized IL",
+        "inspect declared P/Invoke metadata",
+        "compare managed signatures, IL and imports across revisions"
+      ],
+      "platforms": [
+        "private .NET 10 provider profiles; native acceptance starts on macOS ARM64"
+      ],
+      "dependencies": [
+        "ilspy managed private .NET runtime, or an explicit compatible dotnet host for external ILSpy",
+        "packaged dnlib 4.5.0 library; no separate application/download"
+      ],
+      "workflowCommands": [
+        "ilspy query",
+        "ilspy compare"
+      ],
+      "limitations": [
+        "Static metadata only; no target execution, dependency resolution or PDB loading",
+        "Tokens are scoped to one exact input; structural equality is not semantic equivalence",
+        "64 MiB inputs; bounded rows/instructions; compare at most 100000 methods, narrowing large inputs explicitly",
+        "P/Invoke declarations do not establish the loaded native file or an observed call"
+      ],
+      "evaluationCase": {
+        "id": "managed-assembly-change-investigation",
+        "inputFamily": "two-owned-managed-assembly-revisions",
+        "task": "Determine which managed method and native import changed between the supplied revisions. Retain exact signature/token/IL evidence, preserve both inputs and distinguish static findings from execution.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual changed managed method and IL constant",
+          "actual changed P/Invoke metadata",
+          "no false change from metadata token renumbering alone",
+          "bounded drilldown and original inputs preserved",
+          "ordinary project evidence"
         ]
       }
     },

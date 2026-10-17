@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "checks": {
+    "ownedMirrorDownload": true,
+    "offlineInstall": true,
+    "doctor": true,
+    "publicReadiness": true,
+    "actualGetPostValue": true,
+    "nativeArchiveReadback": true,
+    "paginationAndBodyBounds": true,
+    "actualChangedResponseCompared": true,
+    "noTrafficReplay": true,
+    "partialArchivePrefixRetained": true,
+    "existingOutputPreserved": true,
+    "explicitClientAndUpstreamTlsTrust": true,
+    "untrustedTlsExplicitPartial": true,
+    "ownedStopKillCleanup": true,
+    "interruptedArchiveRecovered": true,
+    "borrowedOriginsPreserved": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "checkpointPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "inputSha256": "d6556c28799fd86823b471f54a84ff9a503b7797bee9f9724d229c3ac33019e8",
+  "build": {
+    "version": 1,
+    "artifact": "198bd04f0d8dfd67339c545d95d26db3c1fd89f585f31a45a1df2f9c8897b817"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "84136ca",
+  "candidate": "Working-tree candidate; exact tested package identified by SHA/build, not a clean commit",
+  "packageSha256": "6427a1a231ab3011d160d81450bec10a13d9583dc97a18c38aae8613a14f78d5",
+  "toolRelease": "https://github.com/iXab3r/insight-cli/releases/tag/tool-mitmproxy-12.2.3-r2",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "d65b04c5c096437e8b0370adc6127d30",
+    "passed": 1,
+    "failed": 0
+  }
+}
