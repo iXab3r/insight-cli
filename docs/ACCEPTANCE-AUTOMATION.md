@@ -219,3 +219,9 @@ and tool-specific process cleanup before writing an acceptance receipt. It does 
 model calls in default CI or turn a zero exit code into a business verdict. The actual
 source-runner smoke was reviewed against the owned oracle and exact saved bytes; its final
 prose omitted checkpoint locators, so that small handoff limitation is retained in the receipt.
+
+Native toolbox CI checks out the private Automation repository at the exact pinned
+submodule commit using the repository secret `AUTOMATION_READ_KEY`. Its deploy key
+grants read-only access to Automation, is not persisted into test runtime configuration,
+and is not available to fork pull requests. The framework remains private; it is not
+copied into this repository's package or tool Releases.

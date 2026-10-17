@@ -7,3 +7,7 @@ test('dump query accepts only bounded typed views and literal runtime addresses'
 test('dump warnings remain partial and incomplete query markers do not become success',()=>{
  const snapshot=windbgSnapshot('header\nINSIGHT_BEGIN_x\nrip=123\nMemory access error\nINSIGHT_END_x\nquit','x');assert.equal(snapshot.complete,false);assert.equal(snapshot.warnings.length,1);assert.throws(()=>windbgSnapshot('failed to open','x'),/did not complete/);
 });
+
+test('dump query markers inside echoed startup commands are not result evidence',()=>{
+ const snapshot=windbgSnapshot('initial command .echo INSIGHT_BEGIN_x; r; .echo INSIGHT_END_x; q\nINSIGHT_BEGIN_x\nrip=123\nINSIGHT_END_x\n','x');assert.deepEqual(snapshot.lines,['rip=123']);assert.throws(()=>windbgSnapshot('initial command .echo INSIGHT_BEGIN_x; r; .echo INSIGHT_END_x; q','x'),/did not complete/);
+});

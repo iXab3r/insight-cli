@@ -53,3 +53,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI traces the owned Linux worker
     Then syscall evidence and checkpoints survive tracer removal
+
+  @windbg @windows
+  Scenario: Explain a stopped native Windows calculation from its captured state
+    Given an owned Windows native dump fixture is prepared
+    When the public CLI investigates the native Windows dump
+    Then dump findings and checkpoints survive debugger removal

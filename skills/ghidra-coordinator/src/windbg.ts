@@ -11,7 +11,7 @@ export function windbgInstaller(c:CommandContext){return new ToolInstaller(c,{id
  },launch:roots=>({executable:join(roots.windbg!,'payload/amd64/cdb.exe'),arguments:[],environment:{}}),externalInputs:async executable=>{
  supported();if(basename(executable).toLowerCase()!=='cdb.exe')fail('configuration','Select the WinDbg bundle amd64/cdb.exe console executable.');
  const root=dirname(executable);for(const name of ['dbgeng.dll','dbghelp.dll','dbgmodel.dll'])await fileSha256(join(root,name));return {consoleFamily:await treeFingerprint(root)};
- },probe:async(launch,context)=>{supported();const r=await runTool(context,{tool:'windbg',role:'version',executable:launch.executable,arguments:['-version'],maxOutputBytes:65536,timeoutMs:15000,nativeDeadline:true});if(!/Debugger Version\s+10\./i.test(r.stdout+'\n'+r.stderr))fail('configuration','Select a compatible Microsoft CDB 10.x console debugger with its adjacent runtime.');return {packageVersion:'1.2610.1001.0',consoleVersion:(r.stdout+'\n'+r.stderr).trim(),ownedJob:true,mode:'read-only-user-minidump'};}});}
+ },probe:async(launch,context)=>{supported();const r=await runTool(context,{tool:'windbg',role:'version',executable:launch.executable,arguments:['-version'],maxOutputBytes:65536,timeoutMs:15000,nativeDeadline:true});if(!/\b(?:cdb(?:\.exe)?|debugger)\s+(?:version\s+)?10\.[0-9.]+/i.test(r.stdout+'\n'+r.stderr))fail('configuration','Select a compatible Microsoft CDB 10.x console debugger with its adjacent runtime.',{nativeVersion:(r.stdout+'\n'+r.stderr).trim(),diagnostics:r.diagnostics});return {packageVersion:'1.2610.1001.0',consoleVersion:(r.stdout+'\n'+r.stderr).trim(),ownedJob:true,mode:'read-only-user-minidump'};}});}
 export function windbgPlan(o:Record<string,unknown>,nonce:string){
  const view=text(o.view??'overview',32),commands:string[]=[];
  if(o.thread!==undefined)commands.push('~'+number(o.thread,65535)+'s');
@@ -23,9 +23,9 @@ export function windbgPlan(o:Record<string,unknown>,nonce:string){
  return {view,commands:['.echo INSIGHT_BEGIN_'+nonce,...commands,'.echo INSIGHT_END_'+nonce,'q'].join('; ')};
 }
 export function windbgSnapshot(stdout:string,nonce:string){
- const start=stdout.indexOf('INSIGHT_BEGIN_'+nonce),end=stdout.indexOf('INSIGHT_END_'+nonce,start+1);
+ const output=stdout.split(/\r?\n/),start=output.findIndex(line=>line.trim()==='INSIGHT_BEGIN_'+nonce),end=output.findIndex((line,index)=>index>start&&line.trim()==='INSIGHT_END_'+nonce);
  if(start<0||end<0)fail('partial','CDB did not complete the selected dump query; inspect retained diagnostics.');
- const lines=stdout.slice(start+('INSIGHT_BEGIN_'+nonce).length,end).trim().split(/\r?\n/);
+ const lines=output.slice(start+1,end);
  const diagnostics=stdout.split(/\r?\n/).filter(line=>/error|warning|unable to|could not|not found|couldn't|memory access|\?{4,}|syntax error|invalid thread/i.test(line));
  return {lines,complete:diagnostics.length===0,warnings:diagnostics.slice(0,100)};
 }

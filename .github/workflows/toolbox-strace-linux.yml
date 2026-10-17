@@ -27,12 +27,19 @@ jobs:
           if-no-files-found: error
 
   public-cli-gherkin:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout the pinned private Automation dependency with read-only access
+        uses: actions/checkout@v4
         with:
-          submodules: true
+          repository: iXab3r/EyeAuras.Automation
+          ref: b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033
+          path: tests/vendor/EyeAuras.Automation
+          ssh-key: ${{ secrets.AUTOMATION_READ_KEY }}
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'

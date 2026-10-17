@@ -26,6 +26,24 @@ public sealed class ToolboxSteps(ScenarioContext context)
         Assert.That(File.Exists(Path.Combine(Value("packageRoot"), "package.json")), Is.True);
     }
 
+    [Given("an owned Windows native dump fixture is prepared")]
+    public void WindowsReady()
+    {
+        Assert.That(OperatingSystem.IsWindows(), Is.True);
+        Assert.That(Environment.GetEnvironmentVariable("INSIGHT_NATIVE_DISPOSABLE"), Is.EqualTo("1"));
+        Assert.That(File.Exists(Required("INSIGHT_WINDBG_FIXTURE")), Is.True);
+    }
+
+    [When("the public CLI investigates the native Windows dump")]
+    public async Task InspectWindowsDump()
+    {
+        var root = Required("INSIGHT_REPOSITORY_ROOT");
+        var result = await scenario.ExecuteAsync(Cli.Wrap(Required("INSIGHT_NODE"))
+            .WithWorkingDirectory(root).WithArguments(new[] { "scripts/toolbox/native-windbg.mjs" }), TimeSpan.FromMinutes(10));
+        Assert.That(result.ExitCode, Is.Zero, $"Inspect {result.StandardOutputPath} and {result.StandardErrorPath}");
+        receipt = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "toolbox-windbg.json")));
+    }
+
     private string Value(string name) => manifest!.RootElement.GetProperty(name).GetString()!;
     private async Task Execute(string script, params string[] inputs)
     {
@@ -67,6 +85,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("dump findings and checkpoints survive debugger removal")]
     [Then("syscall evidence and checkpoints survive tracer removal")]
     [Then("hook evidence and checkpoints retain source identity and cleanup")]
     [Then("the original target remains alive with its ordinary behavior restored")]
