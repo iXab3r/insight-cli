@@ -1,7 +1,7 @@
 import {runTool} from './tool-runtime/run.js';
 import {type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {readFile,mkdir,rename,rm,realpath,readdir,stat,cp} from 'node:fs/promises';
-import {existsSync} from 'node:fs';
+import {existsSync,realpathSync} from 'node:fs';
 import {join,dirname,resolve,delimiter,basename} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {runtimeRoot,runtimeSelection,runtimeValues,type RuntimeSelection} from './runtime-selection.js';
@@ -43,8 +43,11 @@ async function findRoot(root:string,marker:string,depth=0):Promise<string|undefi
  for(const entry of await readdir(root,{withFileTypes:true}))if(entry.isDirectory()){const found=await findRoot(join(root,entry.name),marker,depth+1);if(found)return found;}
 }
 export class RuntimeManager {
- readonly directory:string;readonly root:string;
- constructor(private readonly c:CommandContext){this.directory=c.appArguments.AppDataDirectory;this.root=runtimeRoot(this.directory);}
+ readonly directory:string;
+ constructor(private readonly c:CommandContext){this.directory=c.appArguments.AppDataDirectory;}
+ // Canonicalize storage once the profile exists, without creating it for passive status.
+ // Keep the Factory directory for shared process/lock identity and existing run receipts.
+ get root(){return runtimeRoot(existsSync(this.directory)?realpathSync.native(this.directory):this.directory);}
  async status(){
   const selected=runtimeSelection(this.directory),values=selected?runtimeValuesForStatus(selected,this.c.profile.values):this.c.profile.values;
   const java=typeof values.java==='string'?values.java:undefined,home=typeof values.ghidraHome==='string'?values.ghidraHome:undefined;

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "state": "passed_exact_candidate_final_revision_pending",
+  "state": "two_passed_candidates_alias_fix_retest_pending",
   "scope": "Combined native public-CLI toolbox suite, not independent model or complete-product acceptance",
   "platform": "darwin-arm64",
   "node": "v24.19.0",
@@ -137,5 +137,26 @@
     "sourceCommit": "a24db28fbd99cad8848b3e94474e3748eac54275",
     "allJobs": "success"
   },
-  "finalRevision": "The separately frozen package with Frida event summary and refined skills is being verified in another complete native run."
+  "finalRevision": {
+    "runId": "b7c18ad481444e52982894ccea273389",
+    "passed": 17,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "14m51s",
+    "packageSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+    "sourceCommit": "ea54e0f1dc92abe7e4a0e971bc08f9b657eda053",
+    "sourcePackByteIdentical": true
+  },
+  "finalPackageSourceIdentity": {
+    "sourceCommit": "ea54e0f1dc92abe7e4a0e971bc08f9b657eda053",
+    "cleanAtPackStart": true,
+    "packageSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+    "byteIdenticalToNativeAndAgentCandidate": true
+  },
+  "subsequentManagedAliasFix": {
+    "scope": "Independent cold managed interop surfaced a real profile-alias validation defect after the external-path combined suite passed.",
+    "exactRetainedSessionRecovery": "toolbox-managed-profile-alias.json",
+    "combinedRerun": "efb2eb66f0ca47a8bb6368d3bcb12451",
+    "state": "running"
+  }
 }

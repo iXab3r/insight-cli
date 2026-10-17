@@ -704,3 +704,41 @@ payload. Native and offline checks distinguish these counts from inventory recor
 service receipts. Common permission guidance also distinguishes a definite "no command was
 sent" refusal, which can use the approved execution route, from an unknown mutation outcome.
 Cold/prepared Frida, heap, packet and triage trials continue independently of native work.
+
+### Managed profile aliases and expanded independent research
+
+The Frida-summary candidate completed native run `b7c18ad481444e52982894ccea273389`:
+17 passed, zero failed, four OS skips, 14m51s. A clean source pack reproduced its exact bytes.
+Independently reviewed cold/prepared business receipts now also cover
+[Frida](verification/toolbox-agent-frida.json), [ClrMD heap](verification/toolbox-agent-managed-heap.json),
+[TShark](verification/toolbox-agent-tshark.json), [DiE](verification/toolbox-agent-die.json) and
+[owned HTTP comparison](verification/toolbox-agent-mitmproxy.json). The cold heap/packet tests
+were repeated after correcting test policy that had accidentally prohibited their own runtime
+downloads; those honest incomplete histories remain recorded. DiE heuristic errors remain
+partial, and no packer absence is claimed. HTTP evidence keeps literal URL pairing separate
+from the documented version pairing and makes no TLS/cache-hit claim.
+
+A subsequent independent cold interop task exposed a real managed Ghidra defect missed by
+external-path acceptance: an install receipt retained `/tmp`, while Workspace resolved the
+same profile to `/private/tmp`. The ownership check incorrectly rejected that alias. Runtime
+selection now verifies that the recorded and caller profile roots resolve to the same directory,
+and rejects an inner installation symlink redirected outside it. Managed storage/probe paths
+are canonical once the profile exists; passive empty status still creates no directories.
+The exact original profile and first session were continued through the upgraded public CLI,
+reached R1 and decompiled the native function. Both old sessions and journals were preserved,
+the old selection bytes were unchanged, and their contexts/server stopped. Two consecutive
+managed doctor probes also passed. [The recovery receipt](verification/toolbox-managed-profile-alias.json)
+records those checks. The full alias-corrected native suite and fresh interop agents are running.
+
+The 1001-method fixture also distinguished API bounds from agent behavior: the first cold
+agent kept completed command stdout at 6002 bytes, but prepared requested a 149713-byte
+unfiltered saved-index read. That is terminal stdout, not a measurement of model input tokens.
+Overview guidance now calls for on-disk short-member filtering, explains full-signature
+namespace collisions and points to exact-member decompilation. Fresh bounded-context trials
+must verify this refinement rather than relabel the earlier broad read.
+
+Windows source `ea54e0f` passed all seven native facade/lifetime jobs, but its older feasibility
+probe failed: `/WaitForIdle` returned success while its own receipt showed the ProcMon driver
+not running before the short fixture. The original required owned-file-read assertion is retained;
+readiness now requires both the endpoint and kernel driver before starting that fixture.
+Native CI verifies this adjustment; no raw system capture is published.

@@ -19,6 +19,16 @@ locate tasks and dedicated instructions before download. Discovery is not runtim
 Start from the research question and exact input. Read metadata or an index, choose one
 function/type/object/event/stream, then request its evidence. Keep ordinary full files
 outside conversation when useful; `--output` does not mean paste the entire file into context.
+Do not `cat` a large saved index or class after writing it. Filter it on disk with `jq`/`rg`
+and print only the selected identity or excerpt. Size the next read from the overview counts.
+
+Managed method `--filter` matches the full displayed signature, including its namespace/type.
+A namespace keyword can therefore match every helper. If that happens, retain the index as
+a file and select by the short method name after `::` before printing any rows, for example:
+`jq '[.items[] | select(.name | split("::")[-1] | split("(")[0] | test("MEMBER_TERM"; "i")) | {name,token}]' index.json`.
+Inspect `complete`/`truncated` before treating that index as complete. Once the MethodDef token
+is known, `ilspy decompile --member TOKEN` recovers only that member; do not decompile or
+print its entire containing type to obtain a small method excerpt.
 
 | Surface | Useful overview | Focused follow-up |
 | --- | --- | --- |

@@ -68,17 +68,19 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $capture=Launch $launcher @('/AcceptEula','/Quiet','/Minimized','/NoFilter','/BackingFile',$pml)
         # /WaitForIdle can return 1 before the first instance has registered its endpoint.
         # A fixed sleep cannot establish readiness before the short fixture starts.
-        $readinessStarted=[System.Diagnostics.Stopwatch]::StartNew();$idle=$null;$readinessAttempts=0
+        $readinessStarted=[System.Diagnostics.Stopwatch]::StartNew();$idle=$null;$readinessAttempts=0;$driverRunning=$false
         do {
             if($capture.process.HasExited) { throw 'Owned Process Monitor exited before readiness' }
             $readinessAttempts++
             $idle=Finish (Launch $launcher @('/AcceptEula','/Quiet','/WaitForIdle')) 10000
-            if($idle.code -eq 0) { break }
+            # The endpoint can be idle before the kernel driver is running. Launching the
+            # short reader then loses all of its events, despite a later nonempty capture.
+            $driverRunning=@(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -like 'PROCMON*' -and $_.State -eq 'Running' }).Count -gt 0
+            if($idle.code -eq 0 -and $driverRunning) { break }
             Start-Sleep -Milliseconds 500
         } while($readinessStarted.ElapsedMilliseconds -lt 30000)
-        if($idle.code -ne 0) { throw 'Owned Process Monitor did not report capture readiness' }
+        if($idle.code -ne 0 -or !$driverRunning) { throw 'Owned Process Monitor endpoint and kernel driver did not both become ready' }
         $readinessMs=$readinessStarted.ElapsedMilliseconds
-        $driverRunning=@(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -like 'PROCMON*' -and $_.State -eq 'Running' }).Count -gt 0
         $fixtureExecution=Launch $exe @($config);$fixturePid=$fixtureExecution.process.Id
         $ran=Finish $fixtureExecution
         # Keep a bounded post-exit observation window for asynchronous event delivery.

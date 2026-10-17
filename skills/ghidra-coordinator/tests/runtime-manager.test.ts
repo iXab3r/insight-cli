@@ -86,6 +86,17 @@ test('runtime removal deletes owned components and preserves external code, rese
  assert.equal(await readFile(join(external,'ghidraRun'),'utf8'),'external code');assert.equal(await readFile(join(root,'workspace/workspace.sqlite'),'utf8'),'retained journal');assert.equal(await readFile(join(root,'materials/evidence.md'),'utf8'),'retained evidence');
  assert.throws(()=>runtimeValues(root,{}),/uninstalled/);
 });
+test('managed Ghidra accepts a retained profile alias but rejects an installation redirected outside it',async t=>{
+ const root=await temporary(t),profile=join(root,'profile'),alias=join(root,'profile-alias'),id='a'.repeat(64),home=join(profile,'runtime/installations',id,'ghidra');
+ await mkdir(home,{recursive:true});await symlink(profile,alias,process.platform==='win32'?'junction':'dir');
+ const selected={schema:1,mode:'managed',id,ghidraHome:join(alias,'runtime/installations',id,'ghidra'),java:join(alias,'runtime/installations',id,'jdk/bin/java'),fingerprint:'b'.repeat(64),selectedAt:'now'};
+ await runtimeWrite(join(profile,'runtime/selection.json'),selected);await runtimeWrite(join(profile,'runtime/installations',id,'ready.json'),{});
+ assert.deepEqual(runtimeSelection(profile),selected);assert.deepEqual(runtimeSelection(alias),selected);assert.equal(runtimeValues(profile,{}).ghidraHome,selected.ghidraHome);
+ const outside=join(root,'outside');await mkdir(outside);await rm(home,{recursive:true});await symlink(outside,home,process.platform==='win32'?'junction':'dir');
+ assert.throws(()=>runtimeSelection(profile),/outside/);await rm(home,{recursive:true});
+ await runtimeWrite(join(profile,'runtime/selection.json'),{...selected,uninstalledAt:'later'});assert.equal(runtimeSelection(profile)?.uninstalledAt,'later');assert.throws(()=>runtimeValues(profile,{}),/uninstalled/);
+});
+
 test('runtime replacement refuses a live context before acquisition and never signals its PID',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]}),app=f.createApplication(runtime=>createInsightCli({runtime}));
  await runtimeWrite(join(f.appArguments.AppDataDirectory,'workspace/ghidra-native/context/c/r/process.json'),{pid:process.pid,kind:'context',context:'c',target:'t',tokenSecret:'fixture'});

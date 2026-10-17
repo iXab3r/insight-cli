@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Public CLI recovery of the exact failed managed profile/session plus root-boundary regression; combined and agent retests remain separately tracked.",
+  "packageSha256": "fd7d40ab8873d0792a656e5d01d6039ed0f5d09c144c1e98f1983afb6c3a8ff7",
+  "checks": {
+    "retainedProfileValidatedBeforeMutation": true,
+    "originalSessionContinued": true,
+    "originalTargetRetained": true,
+    "statusBeforeHadNoUnresolvedOrUnknownPublication": true,
+    "initialOpenNowReadyAtR1": true,
+    "actualNativeFunctionDecompiled": true,
+    "legacyAliasedSelectionBytesUnchanged": true,
+    "bothRetainedSessionsPreservedAndClosed": true,
+    "managedServerAndContextsStopped": true,
+    "ownerStopped": true
+  },
+  "regressions": {
+    "runtimeTestsPassed": 17,
+    "fullOfflinePassed": 206,
+    "optInSkipped": 2,
+    "releaseAdmissionPassed": 29,
+    "sameProfileAliasAccepted": true,
+    "innerInstallationSymlinkEscapeRefused": true,
+    "uninstalledTombstoneReadable": true,
+    "twoConsecutiveRealManagedDoctorProbes": true
+  },
+  "retainedFailure": "Fresh independent interop cold agent acquired a managed Ghidra/JDK but first open failed because the receipt used /tmp and Workspace used /private/tmp. Both original sessions and all journals were retained."
+}

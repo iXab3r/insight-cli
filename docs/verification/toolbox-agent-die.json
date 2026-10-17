@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent binary triage and uncertainty business unit proof; complete-toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 132520,
+      "candidateInvocations": 25,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Triage both supplied Windows-format binaries without executing them. Establish their static file/machine properties and strongest compiler/runtime evidence, then choose a useful next analysis route for each. Explain uncertainty around packer/obfuscation signatures and avoid inferring runtime process bitness from a PE machine header alone. Retain the actual classifier evidence, concise useful findings and a verified checkpoint. Use the connected toolbox where useful.",
+      "promptSha256": "7b6c1e908e3634616e545af6b438abe49a320d7ec9f7bc2493eb32e593c3853a",
+      "inputs": [
+        {
+          "path": "input/app-A.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/app-B.dll",
+          "sha256": "c219e10f32f4982c40f879e10598f97e2f823dc7ae325e6714ac95d6349eab63"
+        }
+      ],
+      "checkpointFiles": 9,
+      "checkpointBytes": 16838,
+      "checkpointSha256": "91f0b5d0d03878054d86661a1417339d82e3691a04565cd9c605c88d7df237e4",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 12,
+      "partialNativeScansPreserved": 2,
+      "nativeAndManagedRoutesCorrect": true,
+      "noPackerAbsenceClaim": true,
+      "noTargetExecutionObserved": true
+    },
+    "prepared": {
+      "elapsedMs": 79061,
+      "candidateInvocations": 19,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Triage both supplied Windows-format binaries without executing them. Establish their static file/machine properties and strongest compiler/runtime evidence, then choose a useful next analysis route for each. Explain uncertainty around packer/obfuscation signatures and avoid inferring runtime process bitness from a PE machine header alone. Retain the actual classifier evidence, concise useful findings and a verified checkpoint. Use the connected toolbox where useful.",
+      "promptSha256": "7b6c1e908e3634616e545af6b438abe49a320d7ec9f7bc2493eb32e593c3853a",
+      "inputs": [
+        {
+          "path": "input/app-A.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/app-B.dll",
+          "sha256": "c219e10f32f4982c40f879e10598f97e2f823dc7ae325e6714ac95d6349eab63"
+        }
+      ],
+      "checkpointFiles": 9,
+      "checkpointBytes": 16531,
+      "checkpointSha256": "1520e9cad4ef3014f0fd1cc1abd419af98b6be0cc255a67e68125307a890ff8d",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 11,
+      "partialNativeScansPreserved": 2,
+      "nativeAndManagedRoutesCorrect": true,
+      "noPackerAbsenceClaim": true,
+      "noTargetExecutionObserved": true
+    }
+  },
+  "limits": [
+    "Pinned upstream heuristic scans reported TypeError/unimplemented diagnostics; the facade and reports preserve partial status.",
+    "A missing packer match in these scans does not establish absence; PE machine alone does not establish eventual managed process bitness."
+  ]
+}
