@@ -1,0 +1,268 @@
+# Agent toolbox: delivery plan
+
+Status: full delivery scope selected on 2026-10-17; detailed plan proposed, planning only. The owner selected the product direction:
+insight-cli supplies a toolbox with a discoverable skill for each analytical tool. The
+runtime-only delivery and two successful worker workflows do not establish toolbox readiness.
+This document does not start implementation or mark future tools delivered.
+
+## Outcome and scope
+
+A newly connected agent receives the toolbox entry point and a business question. It can
+identify the available analytical capabilities before their binaries are installed, load the
+relevant tool skill, prepare its runtime, research the input and retain a checkable result.
+The agent still supplies the intelligence and may use external tools directly. Existing
+project RE instructions, evidence formats and source-of-truth choices retain precedence.
+
+The owner explicitly selected the entire previously discussed tool set, its skills and agent
+acceptance, rather than an initial two-tool toolbox layer. The earlier candidate list was
+recovered from the 2026-10-16 discussion (research-tool selection turn), including its library
+and cross-tool capability candidates; it had not been recorded in the runtime epic. The finite
+inventory below now preserves that scope. Implementation proceeds one work item/tool at a
+time, using the existing shared runtime. No tool is silently dropped because it was outside
+the previous TR-01–TR-10 implementation.
+
+Current verified inventory:
+
+| Item | Current state | Role in toolbox |
+| --- | --- | --- |
+| Ghidra | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
+| ILSpy | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
+| artifacts | File/folder save implemented | Supporting application with concise workflow guidance; no artificial download/install lifecycle |
+| Ghidra Server/headless/GUI/debugger roles | Managed within Ghidra | Explicit capabilities/lifecycle under Ghidra; list separately only when independently useful to the agent |
+| JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
+| Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
+
+The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
+Each catalog/skill row declares where that tool and capability work and returns a clear
+unsupported result elsewhere. Do not make every tool run on every OS, add emulation, or create
+a complete tool-by-all-OS test matrix. Native proof runs in an appropriate environment for that
+tool; an unavailable environment leaves the row unverified, never implicitly passed. Codex is
+the first actual agent-host gate, not the universal definition of an agent.
+
+## Complete tool and capability inventory
+
+This is the recovered earlier list, now included by the owner's full-scope answer. Each row
+is a concrete child work item, not an interchangeable example. Versions, precise platform
+support and redistribution paths are verified at TB-01 before recipes are pinned.
+
+| Child | Tool/family | Planned native proof environment | Research outcome required for its own skill and agent acceptance |
+| --- | --- | --- | --- |
+| TB-T01 | Ghidra | macOS; exact prerequisites checked at TB-01 | Independent native research, useful edits, merge/refresh and conflicts; cover advertised static, server/context and debugger workflow families explicitly |
+| TB-T02 | ILSpy / ilspycmd | macOS; exact prerequisites checked at TB-01 | C#/IL inspection, types/members, resources and project recovery; choose native analysis for NativeAOT rather than promise C# recovery |
+| TB-T03 | Detect It Easy / diec | macOS; exact prerequisites checked at TB-01 | Classify input/architecture and compiler/packer evidence to choose a useful next analytical tool; retain uncertainty |
+| TB-T04 | LLVM utilities | macOS; exact prerequisites checked at TB-01 | Headers/sections/imports/exports/symbols, focused disassembly and PDB queries; inventory readobj/objdump/nm/pdbutil separately inside this family |
+| TB-T05 | 7-Zip | macOS; exact prerequisites checked at TB-01 | Inventory/extract supported containers, identify recovered DLL/configuration inputs and hand them to another tool |
+| TB-T06 | dotnet-dump + SOS | macOS; exact prerequisites checked at TB-01 | Capture/analyze an owned managed fixture dump and answer a concrete stack/object question with matching runtime support |
+| TB-T07 | dotnet-stack | macOS; exact prerequisites checked at TB-01 | Obtain actual threads/stacks from an owned managed process and identify the active/waiting work |
+| TB-T08 | dotnet-trace | macOS; exact prerequisites checked at TB-01 | Collect/read a bounded trace and identify a concrete execution/event finding, preserving collection conditions |
+| TB-T09 | Frida | macOS; exact prerequisites checked at TB-01 | Observe arguments/results at a selected native call on an owned fixture and distinguish observed execution from static inference |
+| TB-T10 | LLDB | macOS; exact prerequisites checked at TB-01 | Break/inspect registers, memory and stack on an owned native fixture; account for existing Ghidra debugger capabilities and host requirements |
+| TB-T11 | WinDbg | Windows | Useful Windows native/dump debugging through an actually automatable supported surface; prepare and test it on Windows |
+| TB-T12 | Process Monitor | Windows | Determine which configuration/file/registry/process action an owned Windows fixture performs from a scoped real capture |
+| TB-T13 | strace | Linux | Determine real file/process/syscall behavior of an owned Linux fixture; do not claim equivalence to ProcMon's Windows capabilities |
+| TB-T14 | dnSpyEx | Windows | Managed debug/edit workflow without source on Windows; prove an actual controllable workflow, not just GUI installation/launch |
+| TB-T15 | TShark | macOS; exact prerequisites checked at TB-01 | Answer a protocol question from an owned capture with inspectable packet/field evidence |
+| TB-T16 | mitmproxy | macOS; exact prerequisites checked at TB-01 | Observe and compare bounded test HTTP exchanges on an owned local service; make capture/certificate prerequisites explicit |
+
+The earlier three library candidates remain implementation dependencies behind our own APIs,
+not standalone applications the agent must install or learn. Their user-facing capabilities
+receive the same skill/routing/output and independent acceptance requirements:
+
+| Child | Capability and likely existing-library substrate | Required result |
+| --- | --- | --- |
+| TB-C01 | Managed metadata/IL queries and assembly comparison; dnlib | Compare two fixture versions and identify actual changed methods, signatures/IL or P/Invoke metadata with bounded drilldown |
+| TB-C02 | Programmable managed heap/dump queries; ClrMD | Find a known object/field/stack fact in a real compatible dump; report DAC/runtime/platform limitations |
+| TB-C03 | Structured PE/ELF/Mach-O queries and selected copy-only edits; LIEF | Inspect binary structure and verify a declared edit on a new copy without changing the original |
+| TB-C04 | Managed-to-native linkage | Trace a P/Invoke declaration to a concrete export/native function across metadata, binary tools and Ghidra; keep static correspondence distinct from observed invocation |
+| TB-C05 | Repeatable process capture/comparison | Record inputs, output, exit state and declared file changes from bounded owned-fixture runs; compare results without an arbitrary new shell gateway |
+| TB-C06 | Overview then drilldown | Every relevant application provides bounded overviews and focused follow-up without forcing complete decompilation/output into agent context |
+
+C01–C03 cover the recovered library candidates; C01/C04–C06 also preserve the earlier REA-inspired
+assembly comparison, interop, process-capture and bounded-output ideas. Concrete new namespace
+names are chosen at TB-02. Use existing `insight-cli <application> ...` namespaces rather than
+adding executables. Libraries do not need fake download commands or fake shared merges.
+
+Source entry points for the early platform/automation audit include
+[dnSpyEx's debugger/editor and scripting API](https://github.com/dnSpyEx/dnSpy),
+[Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon),
+[WinDbg installation](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/),
+[ClrMD](https://github.com/microsoft/clrmd) and
+[REA managed workflows](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md).
+The proof environment column selects a useful native gate, not a promise of upstream
+portability or an already passing test. If an exact release/capability is unavailable in that
+environment, record and use its supported environment without broadening the whole project.
+Windows GUI/kernel-dependent tooling requires a suitable actual environment; a generic hosted
+runner is not assumed to provide it. TB-01 verifies this before that tool is implemented.
+
+These sources inform investigation; they do not establish that our adapters or redistribution
+rights are already verified. Check exact distribution terms, prerequisites and automation before
+promising a mirror or admitting a platform. If a source cannot be mirrored, record that obstacle
+and decide a permitted delivery path explicitly; never silently fall back to arbitrary upstream.
+
+## Agreed design direction
+
+### Skills and admission contract
+
+* `insight-cli`: short toolbox entry point, capability selection and routing.
+* `insight-re`: research process, independent agents, ordinary materials, review and handoff.
+* `insight-<tool>`: each analytical tool's applicability, preparation and useful workflows.
+* Supporting applications such as artifacts receive guidance appropriate to their actual
+  behavior; a runtime dependency does not automatically need an analytical skill.
+
+Each tool skill explains when to choose the tool, supported inputs/tasks, installation and
+readiness checks, download/local-archive/external-executable paths, representative workflows,
+outputs and continuation, applicable cleanup and observed limitations. Generated help remains
+the syntax authority. Details load progressively; agents do not receive every manual at startup.
+
+All declared tool skills ship with the CLI before their runtimes are downloaded. A connected
+agent can discover their task descriptions even when none of the tool binaries are installed. Tool admission
+requires an adapter, current packaged skill, capability metadata and an agent evaluation case.
+Build/release checks reject missing mappings or resources. Keep one canonical metadata source;
+existing artifact/hash catalogs continue to describe distribution bytes, not research choices.
+
+### Catalog and proposed CLI surface
+
+These additions are proposed, not existing commands:
+
+```text
+insight-cli tools list --json
+insight-cli tools show <tool> --json
+insight-cli skill insight-<tool> --json
+```
+
+Keep existing `insight-cli skill`, `skill insight-re`, per-tool lifecycle and `tools processes`
+compatible. The catalog describes purpose, relevant tasks/inputs, command namespace, skill
+locator, declared platform support and dependencies. It distinguishes selectable analytical
+capabilities, supporting applications and runtime components. Do not label planned adapters as
+usable. Read-only catalog/skill discovery must work without a native installation, configured
+profile, credentials, downloads or a running IPC owner. Profile readiness remains explicit via
+the selected tool's status; an inaccessible profile means unknown, not not-installed.
+
+### Packaging and host connection
+
+Each registered skill must retain working references when installed or relocated independently.
+Remove dependence on fragile `../../` paths crossing another skill directory. Shared authoring
+sources may feed deterministic package resources; do not maintain diverging manual copies.
+Preserve existing locators while moving Ghidra instructions out of the generic entry point.
+
+Provide one explicit connection of the toolbox bundle to the supported host, with update and
+removal semantics scoped to owned entries. New admitted tool skills must become discoverable
+without a bespoke user procedure for each tool. npm installation does not silently edit agent
+settings. Select the concrete connection/export mechanism during TB-02 rather than implementing
+several competing installers. Verify actual startup metadata and implicit routing.
+
+Factory owns generic help/discovery/bootstrap and IPC behavior. Its open
+[skill policy issue #29](https://github.com/iXab3r/EyeAuras.CliFactory/issues/29) already owns the
+shared registration/distribution direction. Product-specific tool metadata and workflows stay
+here. A needed shared mechanism or IPC diagnostic fix goes into Factory with regression tests;
+insight-cli consumes a prepared version. Do not add a product-specific replacement host.
+
+Host connection and execution access are separate acceptance steps. Make the assigned profile,
+required storage and local IPC access explicit. An IPC denial must not masquerade as a reason
+to stop another agent's owner. Grant no broad network access just to reach a local socket.
+
+## Ordered work hierarchy
+
+Statuses below are planned, not completed. Technical inspection/design of TB-01 has started;
+the owner has selected full inventory scope and tool-specific applicability. This planning
+turn does not start implementation or count the preliminary inventory as a completed audit.
+
+| ID | Deliverable | Depends on | Acceptance / exit condition |
+| --- | --- | --- | --- |
+| TB-01 | Audit the recovered full inventory TB-T01–T16 / TB-C01–C06; freeze versions, automation surfaces, platforms, licensing and delivery | — | All listed tools/capabilities have concrete tasks and feasible distribution/host plans; dependencies are not counted as tools; no implicit scope reduction |
+| TB-02 | Record toolbox/skill admission, catalog and explicit host-connection contracts; resolve Factory ownership/dependencies | TB-01 | One versioned design, stable existing locators, one selected connection mechanism, specified update/remove behavior and concrete access prerequisites |
+| TB-03 | Add capability registry and side-effect-free catalog/skill discovery | TB-02 | Fresh CLI lists capabilities and resolves skills without profile/auth/runtime/IPC; missing adapter/skill/resource links fail admission checks |
+| TB-04 | Package self-contained entry-point, RE, Ghidra, ILSpy and supporting artifact guidance | TB-03 | Existing tools have task selection, preparation, workflows and output rules; isolated local/global/relocated installs preserve all references |
+| TB-05 | Deliver and verify host connection plus scoped runtime/IPC execution; improve misleading diagnostics at their owner | TB-02, TB-04 | A new real Codex session sees the intended skills and completes a small public-CLI operation with intended access; no manual skill path/CLI name hints, shared-owner shutdown or broad network workaround |
+| TB-06 | Deliver every TB-T01–T16 tool/family and TB-C01–C06 capability as complete adapter+distribution+skill+evaluation units | TB-01, TB-03, TB-05 | Each child passes its own cold/prepared workflow gate before it is counted; unsupported or blocked rows stay visibly incomplete, not silently deferred |
+| TB-07 | Add repeatable Gherkin/Automation toolbox and per-tool business acceptance, plus isolated-agent runner/scorer | TB-02; runs against TB-03 onward | Public installed CLI only, raw observed commands/outcomes, hidden oracle, finite deadline and owned cleanup; no injected solution; failures/fallbacks remain explicit |
+| TB-08 | Run combined exact-artifact delivery gate across the entire admitted inventory and cross-tool workflows | TB-04–TB-07 | Every inventory row passes on the delivered package; cold and prepared runs separate; real multi-agent Ghidra merge is independently read back |
+| TB-09 | Update author guide, coverage/evidence and release readiness | TB-08 | New-tool recipe requires skill/evaluation; no private artifacts in Git; source/package/skills/input identities recorded; selected release path verified |
+
+TB-07's runner/protocol is designed early so TB-04/TB-06 do not invent a different proof for
+each tool. Implement the items sequentially; begin the next only after affected checks pass.
+Do not wait until the end to discover that a tool's skill cannot perform its advertised task.
+
+For each additional tool, TB-06 expands into these concrete child tasks:
+
+1. Verify applicable platform, license/redistribution, pinned executable/runtime inputs and
+   exact supported task. Decide admission on evidence rather than presumed vendor support.
+2. Prepare immutable mirrored assets and required notices/sources with the existing release
+   workflow; verify download hashes and offline/local/external paths as applicable.
+3. Add the minimal shared-runtime adapter, target association, ordinary outputs and owned process
+   behavior needed by the task. Do not force stateless tools into Ghidra contexts/merge.
+4. Add the tool skill and registry entry in the same change; verify packed resources and links.
+5. Run deterministic CLI checks and independent blind agent cold/prepared tasks with actual
+   inputs. Retain exact receipts and gaps; complete the child only after its acceptance passes.
+
+## Acceptance matrix
+
+### Per analytical tool
+
+| Case | Agent receives | Required observation |
+| --- | --- | --- |
+| Cold runtime | Connected toolbox, business question, raw input, assigned profile and preauthorized normal actions | Chooses a suitable skill, notices missing runtime, installs declared dependencies, answers from actual tool output and saves useful evidence |
+| Prepared runtime | Same question/input contract, tool already installed | Discovers and uses the existing installation without redundant download/setup; produces correct findings |
+| Explicit alternate path | Local archive or external executable according to the tool's supported contract | Chooses documented setup, verifies readiness, completes a real task and preserves external files |
+| Interrupted/unavailable operation | Specific controlled failure relevant to this tool | Reports actual state, retains useful work, resumes where supported and does not invent output or blindly replay effects |
+| Host skill/package upgrade | New installed package plus previously connected toolbox | Current skills/resources are discovered consistently; stale versions and dangling references are detected; unrelated host entries are preserved |
+
+For each advertised workflow family in a skill, record the actual task, commands/results and
+acceptance coverage. A single successful decompile does not validate all Ghidra operations,
+all LLVM utilities or all runtime-diagnostics workflows. Reuse existing deterministic suites
+as regression support on the new artifact; older receipts do not validate a new skill package.
+
+During blind agent trials the evaluator does not provide the tool name, skill path, commands,
+addresses or expected findings. The task requires the selected capability, but an appropriate
+authorised alternative is not called a research failure. It does not prove the intended adapter
+was used, so record it separately from that adapter's passing gate. Remediation may adjust skill
+routing or adapter behavior; repeat with a fresh agent and preferably a held-out task/input.
+
+Deterministic Gherkin tests may call named CLI commands: they prove product behavior, not the
+agent's ability to choose tools. Label these layers separately. Offline CI verifies contracts,
+packaging and synthetic error boundaries; native/agent evaluations are opt-in, bounded and retain
+actual transcripts. Never replace real native proof with a mocked passing agent answer.
+
+### Combined workflows
+
+* Managed and native inputs: choose appropriate tools for decompilation, native behavior and
+  supporting format/resource work; associate outputs with exact immutable inputs.
+* Several tools on the same target: reuse its identity without creating unnecessary Ghidra state.
+* Two agents on one EXE: independent Ghidra contexts, useful annotations, explicit merge/refresh,
+  conflict retention and independent fresh-context verification.
+* External-tool output plus artifacts: preserve project evidence conventions and ordinary files;
+  no adapter requirement or imposed evidence schema for an external utility.
+* Resume after process/tool failure: preserve private work and journals, inspect actual state and
+  do not blindly repeat publication or scripts. Never stop a shared owner to mask IPC denial.
+* Host/access failure: skill selection can pass while execution fails; the combined workflow
+  remains failed until the intended facade and saved result work in the real host.
+
+Minimum per-tool evidence is one complete cold-runtime trial and one complete prepared-runtime
+trial on a representative real input. This is a smoke acceptance floor, not a statistical model
+reliability claim. Freeze model, permissions, prompts, inputs and scoring before each measured
+series; retain initial failures and all retries. Use held-out inputs for at least the combined
+verification to avoid accepting a skill tailored to one visible fixture.
+
+Useful-work correctness, intended public-tool execution, saved evidence and required cleanup
+must all pass. Report trial counts, first-attempt completion, wrong commands/tool choices,
+external fallback, human interventions and time by setup/research/save/merge/verification.
+Cold setup time is separate from prepared work. This delivery does not claim a new multi-agent
+speedup from the existence of a toolbox; any new acceleration claim needs a separate fixed-task
+paired experiment with useful results and merge verification.
+
+## Definition of done and resolved owner choices
+
+The toolbox is complete only when **every admitted analytical tool** has its adapter,
+mirrored/otherwise explicitly supported delivery, discoverable versioned skill and passing
+cold/prepared agent evidence, and the combined real-host workflow passes on the exact delivered
+package. No `SKILL.md exists`, `--help passed`, two-tool sample or externally completed fallback
+can substitute for the whole inventory's acceptance.
+
+The owner selected all TB-T01–T16 tools/families and recovered library/workflow capabilities,
+including skills and agent acceptance. Applicability is tool-specific; universal OS support is
+not a goal. Do not defer a required native proof and still claim that tool accepted. Environment
+availability and redistribution/automation feasibility are concrete TB-01 engineering checks;
+report an actual blocker rather than inventing support or silently removing a tool.
+Host mechanics, reference packaging, admission checks, test bindings and scoped IPC diagnostics
+are engineering tasks within the selected direction. Publishing a new npm version remains a
+separate release action, not implied by planning.

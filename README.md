@@ -21,6 +21,8 @@ independent copies and receipts. Installing the package does not register either
 Downloading runtimes also does not advertise them to an agent. Follow the explicit
 [agent setup](skills/ghidra-coordinator/references/agent-setup.md) to connect the skills;
 [practical discovery checks](docs/AGENT-DISCOVERY.md) test startup visibility and actual research.
+The [full toolbox plan](docs/TOOLBOX-PLAN.md) records the next delivery: 16 tool/family
+entries, their skills, library/cross-tool capabilities and per-tool agent acceptance.
 The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
 contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
 
