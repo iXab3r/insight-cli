@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "purpose": "Installed-tool discoverability and agent usability; not a speed or autonomous-installation gate",
+  "platform": "macOS arm64",
+  "requestedModel": "gpt-6-luna",
+  "codexVersion": "0.162.0-alpha.17.2",
+  "product": {
+    "version": "0.2.0",
+    "sourceBaseline": "ba96ff26f8bf90ec72d92d5e50fd83d524299585",
+    "testedTarballSha256": "90ad871601e0a391ac9d7273223be918730498dac15595f02aa401e8fc1d7ab5",
+    "build": {
+      "version": 1,
+      "artifact": "13738de9d5993d769d2f34c4ad7e0cf90fd59f9aaf03c7ca6d0d50c7e04238d2"
+    },
+    "skills": {
+      "SKILL.md": "f67cfec35e2f59e612e4800b028acad4ba981e5be81fbbf6833dc803c55a8ea0",
+      "skills/insight-re/SKILL.md": "f666ef1aafbc09adf3fafb2b54d1878d505d1f73c977ac3b6a5ba7a82426b269"
+    }
+  },
+  "inputs": {
+    "managedFixture": {
+      "filename": "client.dll",
+      "sha256": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb",
+      "bytes": 4096
+    },
+    "nativeExecutable": {
+      "filename": "7zr.exe",
+      "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+      "bytes": 602624
+    }
+  },
+  "design": {
+    "workerConversationInheritance": "none",
+    "workerCommandExamplesProvided": false,
+    "workerExpectedAnswersProvided": false,
+    "workerSourceAndPriorResearchAccess": "prohibited",
+    "targetsExecuted": false,
+    "toolsPreinstalled": true,
+    "updatePreauthorized": true,
+    "workerEscalatedPublicCliAuthorized": true,
+    "realCodexUserConfigIgnored": true,
+    "realCodexRulesIgnored": true,
+    "realCodexSessionsEphemeral": true,
+    "realCodexResearchPromptNamesCli": false
+  },
+  "observations": [
+    {
+      "id": "unregistered-startup",
+      "result": "not-visible",
+      "reportedSkills": [],
+      "shellCalls": 0
+    },
+    {
+      "id": "two-links-startup",
+      "result": "metadata-visible-layout-broken",
+      "reportedSkills": [
+        "insight-cli",
+        "insight-re"
+      ],
+      "shellCalls": 0,
+      "laterFailure": "nested skill ../../ reference resolved outside package"
+    },
+    {
+      "id": "cli-only-worker",
+      "result": "pass",
+      "applicationsUsed": [
+        "ilspy",
+        "artifacts"
+      ],
+      "correctManagedFindings": true
+    },
+    {
+      "id": "absolute-skill-worker",
+      "result": "pass",
+      "applicationsUsed": [
+        "ilspy",
+        "ghidra",
+        "artifacts"
+      ],
+      "correctManagedFindings": true,
+      "correctNativeFinding": true,
+      "mergeRevision": "R2",
+      "extraMergeOutcome": "empty",
+      "unknownOutcomeFaultInjected": false
+    },
+    {
+      "id": "real-codex-default-sandbox",
+      "skillSelectedImplicitly": "insight-re",
+      "cliWorkflowResult": "failed",
+      "error": "runtime storage access",
+      "fallback": "external Mono static tools and ordinary ZIP",
+      "projectLayoutRespected": true
+    },
+    {
+      "id": "real-codex-whole-package-scoped-filesystem",
+      "skillSelectedImplicitly": "insight-cli",
+      "nestedSkillRead": true,
+      "cliWorkflowResult": "failed",
+      "error": "could not acquire ownership",
+      "fallback": "external static tools",
+      "projectLayoutRespected": true,
+      "externalNetworkGrant": false
+    },
+    {
+      "id": "exact-unix-socket-command-smoke",
+      "result": "pass",
+      "command": "insight-cli --profile <test-profile> --help",
+      "sandbox": "profile/IPC-directory writes; one --allow-unix-socket; no external network grant",
+      "fullAgentRun": false
+    }
+  ],
+  "independentVerification": {
+    "managedOracle": "actual C#/IL and extracted resource bytes",
+    "savedCopies": {
+      "cli-only": {
+        "savedFiles": 7,
+        "matchedSourceFiles": 7,
+        "savedCopySha256": "8804eea9b86434600b2c9678fd4644d9c33f593dd4fa1e6b43e92108004ffff1"
+      },
+      "with-skill": {
+        "savedFiles": 39,
+        "matchedSourceFiles": 39,
+        "savedCopySha256": "ffa3306fc5f3d6a8e1a12a645feb24c3fda152a92753101d91cb62a1162ff7df"
+      }
+    },
+    "freshGhidraContext": {
+      "session": "s_c8cc9af8-4860-4860-b98d-5c2c0b55a372",
+      "target": "t_f3efdd2c6d434d518bd416885b501764",
+      "baseRevision": "R2",
+      "sharedRevision": "R2",
+      "address": "0x436fea",
+      "sharedState": "shared",
+      "text": "Formats status codes into ERROR text. For CRC error code 3, param_2 == 0 selects \"CRC Failed\"; param_2 != 0 selects \"CRC Failed in encrypted file. Wrong password?\". This is an encrypted-file warning branch, not proof that the password is wrong. See local evidence seven-crc-function.json.",
+      "closed": true,
+      "localServerStopped": true
+    }
+  },
+  "approvalReview": {
+    "rejectedNetworkEnabledRetries": 2,
+    "rejectedCommandsExecuted": false,
+    "broadNetworkEnabled": false,
+    "saferExactUnixSocketSmokePassed": true
+  },
+  "limits": [
+    "No automatic skill registration implemented",
+    "No passing full real-Codex workflow under the restricted socket configuration",
+    "No claim across other models or agent hosts",
+    "No runtime acquisition by evaluated workers",
+    "No performance comparison",
+    "No injected merge conflict/crash/lost-response recovery"
+  ],
+  "retainedEvidence": {
+    "location": "local-only evaluation directory insight-agent-discovery-20261017",
+    "sha256": {
+      "cli-only": {
+        "decompiled": "1bb8df09f6cf7a82d251d1b8e203d38ba13805575fdc3944bbf5ce7f8eebf267",
+        "client.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb",
+        "report.md": "4c6f28bec86cb3455b0823144b1b0d1a4867bbbfd13ebe1b40077f4109f930ef",
+        "7zr.exe": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+        "transcript.md": "0f496225fe96f99a80a11fd1d9dca3d9fff3992e35b4b0f5275c6239ebadfca8",
+        "settings.json/ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+        "resources/ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521"
+      },
+      "with-skill": {
+        "seven-xrefs-encrypted.json": "6d681eea732a1de2dcd8abb9e9929e2f33b19477d79db7e67144e5566e9cd500",
+        "seven-close.json": "c93bfac45063db2884e6ba074a2b72834df8cd0252cb54a8511ddceb4792f2b5",
+        "seven-comment-readback.json": "c6bd106781d5dea928627dfcd5531766880a4b893103c2f492f0bbf25adc44b9",
+        "seven-crc-function.json": "f3303d6158b9a6bbf786d4f08c19c9425244684feb31654ce5c59f3deb45ce23",
+        "seven-crc-callers.json": "88419f6fa917f6067f8a17a7ed122a59ff3bfa4eb787ed043eeb97a1d8868ca3",
+        "seven-xref-context.json": "be19ad0290734ac70553c5b28ffc6b27d182b9d3acc2d2ca70ac271b4fbce663",
+        "Policy.cs": "a64ae9a51b4aa6bdc8b30a9d1d804d00d180814ef1f64e3acbacd28967086f23",
+        "seven-function-at-ref2.json": "6ef44d3b65d37dae3e8d49647d017385f60ff11e9f9dd72267e99b1e541eef36",
+        "client.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb",
+        "seven-caller1-refs.json": "9335e2db8b7a63d729f1bc48b6c24006c0606ae9b75dc69e27773ce573bb4319",
+        "seven-crc-function-meta.json": "93efa2ea7a4898b2735ed4e12b617ca1af394a143fe827c9370d8c1b90bedd38",
+        "7zr.exe": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+        "input-hashes.txt": "06a622d9df43be7f7e27d1322ca18dc81ca1eed27ec275a3ade2b72a01c95094",
+        "seven-xrefs-crc.json": "2c510a3ef2d31033fce615d936fd8c0026ceecb8f43ea652ae4e1fbf1e8e195c",
+        "seven-caller1.json": "ec55a70e64109dc50d44c7f98ea317a033f31ddc5e14fcefeb83eab16acdbdab",
+        "seven-merge-retry.json": "b312cad2aa93bf8989c32a842bc2d2a4549f6c9291370faf7f22876dd0e9ea6c",
+        "seven-inspect-ref1.json": "6ef44d3b65d37dae3e8d49647d017385f60ff11e9f9dd72267e99b1e541eef36",
+        "seven-strings.json": "dd139d0a126b5ccbdb56db65f3f306dd13e19fb6d9cf81114bf14d39eaf4bbd6",
+        "client-resources.json": "cc0a739bde752c25ddc30c47f7a1b776e495519a8d0634ea10d247b83cbe8c24",
+        "client-policy.json": "0a93d82e8e4c913ffc48c427473a3fc8129acb5a3f9d1420bf3d68aa559e3b66",
+        "seven-upstream-at1.json": "6ef44d3b65d37dae3e8d49647d017385f60ff11e9f9dd72267e99b1e541eef36",
+        "seven-crc-inspect.json": "2a091932c5947469c1729c28c1cf9d116a0d4d8af628f49da6d2ae229fd5f5dc",
+        "seven-xrefs-stringptr1.json": "f561ff89a5b395d610e7d6502c708dcc944f936c555ef78fd693b26d8c37677d",
+        "seven-upstream-at2.json": "6ef44d3b65d37dae3e8d49647d017385f60ff11e9f9dd72267e99b1e541eef36",
+        "seven-xrefs-stringptr2.json": "1fa17d8ada873ebf2a95f239674921a4c87a9f4d7c71578f150fcb289161a64e",
+        "seven-caller2.json": "1a972486b91f6e196de386460242d717fea5ece8373dd822994981f66ca13925",
+        "client-resource.json": "c685059cbc3400c16c1eef394c0196ac1f6189e59d88d828b9067cd6c80d42a8",
+        "seven-comment-set.json": "58556ddb71e677f737f116f39571cfe792f897156926d57e54cc6b877b32277b",
+        "seven-merge.json": "6fedf971ddba7a1309c347a4daef5c1d2837797fb8d941d91dff6901245813cb",
+        "artifact-receipt-first-save.json": "a67dba94d364747489f2807b7dca4bebab7c171ae68a8e2a8a55890be419546a",
+        "transcript.md": "c1d305ca4a5a484b03f301b6f47561d216c55f78e7583f9fa5b000e391d26637",
+        "seven-comment-final.json": "3ab467132024d6611813d37bad24d6add4cc8a011b48c84ad5edc22ff95309c8",
+        "seven-session-status.json": "2c3b1f2a5d95dc063eac682fec727bb5fe9eb126fd31673d0ac1329bf5da63ef",
+        "findings.md": "f9259543a2b33fa330e2d01c69391cca697456eafe5bc8b4f51129aa2e7995ee",
+        "7zr-open.json": "f3f607989e78fb5e238ceab7434677b2a74db76cfdd47c15aa443d5393d881bc",
+        "seven-function-at-ref1.json": "6ef44d3b65d37dae3e8d49647d017385f60ff11e9f9dd72267e99b1e541eef36",
+        "client-types.json": "aeffe7148db4b3c722d5ff49efc59468ba145620345759dd959ab3c89e31a175",
+        "seven-caller2-refs.json": "9cb4991b7e44ae47dcaac5b7a2dbf9c3698e762959afaa1a3aeb1983fd929f81",
+        "extracted-settings/ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521"
+      },
+      "independent-readback": {
+        "function.json": "1929d9ef6bc3892e15666d82feab5c8646181be1646c6aaa2fe0b2b652097a69",
+        "server-stop.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "close.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "open.json": "628bf0733c84229313ead73b0fe66fcc71009b39a525bba86d1f49fe182a7d95",
+        "close.json": "b6f08688837394dd04e606ee3aa2cc876e2c2a5a661b0faa5c8067d9fba2e031",
+        "comment.json": "5405bf7c5dd3690beee3215ffeda66387b83cc104d760156a588f1471a8f6b77",
+        "open.stderr": "07f612cd77359356af5b1782c74d669eb7408f5c9e85358aa3b452f2b45f3ef7",
+        "function.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "server-stop.json": "10e53e8623111b60c3b6b60ffeaf9703254a37a979b9af9729adff5471f26e8c",
+        "open-matching-settings.json": "6522120a138694d1de071664019119d939483c668c614935fa4fe33ac6f2538b",
+        "comment.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "open-matching-settings.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "host-before": {
+        "jsonl": "ed90fca8e7e82e50ad09dfa4977d2b7f196fc29115564e0d71ddc9ced9e57c01",
+        "txt": "12b7221af276f81a12f8abcc609509901eaef3afe778836bfb89a6195e785321",
+        "stderr": "bde3e70b3c3964178e67ddbe822d8beabef63b508804445d6b09edc360059f8e"
+      },
+      "host-after": {
+        "jsonl": "7e9a9d2ee534afd7fb5bc43aecf1b32ca1685d65668722682a0c88db8f5e25ed",
+        "txt": "b8314353c22489288e00633ef10221ff56b56e90cbe76a49a20b998bfb38fd2b",
+        "stderr": "d7658b6749eb22243aee426bf530b6d9d6913bd3d0f2a651b5266ee609868c05"
+      },
+      "host-research": {
+        "jsonl": "7af66459a39e67be053a8f76a8954f361b36f3cfb3b1f361d84a0ff53695cf8e",
+        "txt": "f0d9817f7c24caac62fb7b0073b8cf3c15ae17f4d03259ed44cf65dae057037d",
+        "stderr": "5372b190872b31a748f492a3b8318f0136ce269adcfc1f5b2b355ff7ee3d0611"
+      },
+      "host-fixed": {
+        "jsonl": "eb941c8be5f0e853463c5b71ff79ff8a5c6abae10ba9ea6f37dcc06712627e1d",
+        "txt": "d2af25a6ec39fc2b9714fa4ecf433c693a98dc74608f8563c96f5dfd2c52c836",
+        "stderr": "88afdeaabdfab0b34217d5d49a645b17ebc5105f1121d6e11ba655aa2c7d7b2a"
+      },
+      "documentation-validation": {
+        "package-check.log": "d3652ceec2c49a56a1628b21969bd20a92f3b24cf1cd2eefd18cce1542584dd7",
+        "package-check-elevated.log": "10799086873db2dc773540d8823151abc72067b548a6225cf418462a46860808"
+      }
+    }
+  },
+  "documentationValidation": {
+    "build": "pass",
+    "isolatedNpmPackageInstall": "pass",
+    "changedMarkdownLocalLinks": "pass",
+    "diffWhitespace": "pass",
+    "runtimeCodeChanged": false
+  }
+}

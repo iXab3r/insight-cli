@@ -6,6 +6,16 @@ The owner subsequently selected one full M0–M5 implementation pass and answere
 decisions below. This plan records the delivery contract and completed acceptance. Npm
 publication remains excluded.
 
+## Agent toolbox follow-up — planned
+
+On 2026-10-17 the owner selected the full previously discussed tool set, corresponding
+skills and independent agent acceptance. The [toolbox delivery plan](TOOLBOX-PLAN.md)
+recovers 16 tool/family rows and six library/cross-tool capabilities, defines TB-01–TB-09,
+and separates catalog discovery, host connection, runtime preparation and useful research.
+This follow-up is planned, not delivered. The earlier two-tool runtime and selected agent
+smokes do not complete its per-tool cold/prepared or combined real-host gates. Native
+applicability is tool-specific; universal OS support is not a goal.
+
 ## Business acceptance follow-up
 
 The [shared tool runtime](TOOL-RUNTIME.md) TR-01–TR-10 slice is implemented and passes its

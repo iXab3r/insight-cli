@@ -5,6 +5,14 @@ The owner selected one combined M0–M5 delivery and closed the product decision
 Items produce code, fixtures or exact-revision evidence inside the
 existing product; they do not add separate CLIs, a generic plugin framework or agent-visible jobs.
 
+## Agent toolbox backlog — planned
+
+The owner selected the complete tool/skill/agent-acceptance scope on 2026-10-17.
+[TB-01–TB-09](TOOLBOX-PLAN.md#ordered-work-hierarchy) define the next delivery, including
+the recovered TB-T01–T16 tool inventory and TB-C01–C06 library/cross-tool capabilities.
+No implementation item is closed by the earlier two-tool agent evaluation. The new plan
+owns per-tool cold/prepared trials, exact-artifact proof and tool-specific platform applicability.
+
 ## Current combined acceptance
 
 The [shared tool runtime backlog](TOOL-RUNTIME.md#ordered-work-and-acceptance) TR-01–TR-10

@@ -24,6 +24,11 @@ research. Tool downloads use pinned assets retained in our GitHub Releases.
 Use `insight-cli tools processes` to inspect owned executions across tools.
 Help, skill discovery and saving ordinary files do not need Ghidra or Java.
 
+Downloading a tool does not expose it in an agent's tool list. Connect the packaged skills
+to your agent host, or explicitly give the agent the path returned by `insight-cli skill
+insight-re --json`. See [agent setup](references/agent-setup.md) for tested project-local
+Codex setup and a practical usability check. Installation leaves agent settings unchanged.
+
 ## Start
 
 ```sh
