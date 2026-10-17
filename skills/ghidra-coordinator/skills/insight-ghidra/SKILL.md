@@ -45,6 +45,12 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
+7. Finish by closing each context you own with scoped `ghidra close`, preserving private work.
+   If this profile's local server belongs exclusively to your investigation and all its contexts
+   are closed, use `ghidra server stop`, then verify `ghidra status` has no remaining processes.
+   `ipc-server stop` stops the CLI owner; it does **not** stop Ghidra's local server. Stop that
+   owner last when needed. For a shared profile/server, leave server shutdown to its coordinator;
+   an individual worker closes only its own contexts and never kills unrelated processes.
 
 The facade exposes the pinned static research/editing catalog, merge/refresh, project/server/GUI
 controls, debugger, archive exchange and supported recovery. Preserve private work

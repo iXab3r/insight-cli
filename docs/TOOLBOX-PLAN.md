@@ -1,14 +1,17 @@
 # Agent toolbox: delivery plan
 
 Status: all sixteen analytical families and six capabilities have implemented public
-surfaces, packaged guidance (25 skills) and recorded native proofs. The unchanged source
-`4027416` combined macOS suite passed 17 cases with four OS-specific skips; Windows/Linux
-native CI also passed. The final Frida event-summary/skill refinement has a separate combined
-native run in progress. Reviewed cold/prepared unit gates passed for 7-Zip, LLVM, dump, LLDB,
-C01 managed metadata, C03 binary structure/edit and C05 process capture. Remaining per-tool
-and combined agent gates stay open; failed histories and exact package identities are in the
-[inventory audit](TOOLBOX-AUDIT.md). Factory discovery/access fixes are merged and pinned.
-Native success is not interchangeable with independent agent acceptance.
+surfaces, packaged guidance (25 skills) and recorded native proofs. Three subsequent
+combined macOS candidates passed 17 cases with four OS-specific skips, including the
+managed profile-alias correction. Windows now requires all seven scoped native jobs;
+Windows, Linux and offline CI passed at `5f1f471`. Reviewed cold/prepared unit gates cover
+7-Zip, LLVM, dump, stack, trace, DiE, LLDB, Frida, TShark, mitmproxy and C01/C02/C03/C05.
+C04 static interop publication/readback and autonomous cleanup passed cold/prepared;
+bounded large-assembly discovery has fresh trials in progress.
+Remaining family coverage and the exact-artifact combined agent gate stay open. The
+[inventory audit](TOOLBOX-AUDIT.md) preserves failed histories and package identities.
+Factory discovery/access fixes are merged and pinned. Native success is not
+interchangeable with independent agent acceptance.
 
 Execution tracker: [epic #23](https://github.com/iXab3r/insight-cli/issues/23), with nine native stage sub-issues
 and 22 tool/capability sub-issues under TB-07. All remain open; completion requires the evidence below.
@@ -40,17 +43,17 @@ Current verified inventory:
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
 | 7-Zip | Public CLI adapter, dedicated skill, native Gherkin and independent cold/prepared host trials passed for the recorded package | Container inventory, integrity and bounded ordinary-file recovery |
 | LLVM utilities | Adapter/skill and pinned four-utility distribution implemented; native/Gherkin and reviewed cold/prepared medium-reasoning unit gates passed on the recorded package | Headers, linkage, symbols, instruction windows and PDB records |
-| .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; dump cold/prepared agent proof reviewed; stack/trace independent agent gates pending; earlier quota interruptions remain historical | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
-| Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin passed; independent agent gate pending | Header and compiler/runtime/packer triage with explicit partial scan results |
+| .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; dump/stack/trace cold/prepared agent proofs independently reviewed; earlier quota interruptions remain historical | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
+| Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin and cold/prepared agent proof passed with explicit heuristic errors | Header and compiler/runtime/packer triage with explicit partial scan results |
 | LLDB | Owned-launch adapter/skill and pinned debugger/library/debugserver distribution; native snapshots/lifetime faults and source-unavailable cold/prepared model unit proof passed | Breakpoint arguments/returns, registers, memory and backtrace with kernel deadline after owner loss |
-| Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector and helper fault proof passed on the recorded candidate; independent model gate pending | Runtime argument/result corroboration while preserving the external target lifetime |
+| Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector/helper fault and cold/prepared passive-hook model proof passed on recorded candidates | Runtime argument/result corroboration while preserving the external target lifetime |
 | WinDbg / ProcMon / dnSpyEx | Windows native public CLI Gherkin passed on recorded candidates; independent model gates pending | Dump research, scoped file observation, actual managed debug and copy-only edit |
 | strace | Linux x64 source-built runtime and native public CLI Gherkin passed; independent model gate pending | Owned execution and bounded syscall evidence |
-| TShark / mitmproxy | Source-complete mirrored runtimes, dedicated skills and native public CLI Gherkin passed; independent model gates pending | Offline packet/stream research and explicit bounded HTTP observation/comparison |
+| TShark / mitmproxy | Source-complete mirrored runtimes, dedicated skills and native public CLI Gherkin and reviewed cold/prepared model unit proofs passed | Offline packet/stream research and explicit bounded HTTP observation/comparison |
 | Managed metadata | Packaged dnlib-backed query/compare API, native Gherkin and cold/prepared model unit proof passed | Exact-token IL, P/Invoke and structural assembly comparison |
-| Managed heap queries | ClrMD-backed dump API/skill, full dependency notices and native public CLI Gherkin passed; independent model gates pending | Bounded object fields and managed stacks with matching explicit DAC |
+| Managed heap queries | ClrMD-backed dump API/skill, full dependency notices, native public CLI Gherkin and reviewed cold/prepared model unit proof passed | Bounded object fields and managed stacks with matching explicit DAC |
 | Structured binaries | LIEF API/skill, immutable source mirror, native Gherkin and cold/prepared copy-edit model unit proof passed | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
-| Managed/native correspondence | Public API composition, dedicated skill and real Ghidra Gherkin passed; independent model gates pending | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
+| Managed/native correspondence | Public API composition, dedicated skill, real Ghidra Gherkin and reviewed cold/prepared static publication/readback/cleanup unit proof passed | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
 | Owned process capture | Capture API/skill, execution/fault Gherkin and cold/prepared retained-report model unit proof passed | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
 | Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows and native ILSpy/Ghidra Gherkin passed; independent model gates pending | Small metadata/index queries and focused source-bound evidence pages |
 

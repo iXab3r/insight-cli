@@ -10,3 +10,7 @@ temporary directories, compares all four shipped artifacts and records source/bi
 hashes. Consumers require no SDK/compiler. PDB loading is disabled; target assemblies
 are parsed as metadata and are never loaded for execution. Comparisons use static
 structure, not semantic equivalence, and retain tokens scoped to each exact input.
+
+Method selection supports a case-insensitive short managed-name substring, independent of
+namespace, declaring type and signature. The existing full-name filter remains case-sensitive.
+Both filters apply before pagination; an overview/type query rejects a method-name filter.

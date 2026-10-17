@@ -170,7 +170,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     public Task CaptureRuns() => Execute("scripts/toolbox/native-capture.mjs", Value("captureFixture"));
 
     [When("the public CLI narrows managed and native code to stable text windows")]
-    public Task OverviewPages() => Execute("scripts/toolbox/native-overview.mjs", Value("managedMetadataFixture"), Value("interopFixture"), Value("ghidraHome"), Value("java"));
+    public Task OverviewPages() => Execute("scripts/toolbox/native-overview.mjs", Value("managedMetadataFixture"), Value("interopFixture"), Value("ghidraHome"), Value("java"), Value("largeManagedAssembly"));
 
     [When("the public CLI traces the owned Linux worker")]
     public Task TraceLinux() => Execute("scripts/toolbox/native-strace.mjs", Value("straceArchive"), Value("nativeLinuxWorker"), Value("nativeLinuxSettings"));

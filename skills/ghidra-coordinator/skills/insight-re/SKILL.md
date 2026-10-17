@@ -114,6 +114,8 @@ to format a report. Report a partial answer plainly when necessary.
 If retaining a checkpoint through `artifacts save`, select the settled project files and
 check its receipt and read the saved files at the exact returned path. Copy the returned
 path verbatim into the handoff; do not reconstruct profile/storage identifiers. Release only owned tool contexts, preserving unpublished work and
-unresolved journals. Give the user the useful result, remaining limits, canonical evidence
+unresolved journals. Follow each tool's lifecycle: Ghidra's local server is separate from the
+CLI owner. Only the coordinator of an exclusively owned profile stops that server after all
+its contexts close; a shared worker closes its own contexts. Give the user the useful result, remaining limits, canonical evidence
 paths and any saved checkpoint. For continuation, read the existing records and reopen
 the same session/target rather than starting the investigation again.

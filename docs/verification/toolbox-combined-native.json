@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "state": "two_passed_candidates_alias_fix_retest_pending",
+  "state": "native_passed",
   "scope": "Combined native public-CLI toolbox suite, not independent model or complete-product acceptance",
   "platform": "darwin-arm64",
   "node": "v24.19.0",
@@ -157,6 +157,11 @@
     "scope": "Independent cold managed interop surfaced a real profile-alias validation defect after the external-path combined suite passed.",
     "exactRetainedSessionRecovery": "toolbox-managed-profile-alias.json",
     "combinedRerun": "efb2eb66f0ca47a8bb6368d3bcb12451",
-    "state": "running"
+    "state": "passed",
+    "passed": 17,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "16m03s",
+    "packageSha256": "fd7d40ab8873d0792a656e5d01d6039ed0f5d09c144c1e98f1983afb6c3a8ff7"
   }
 }

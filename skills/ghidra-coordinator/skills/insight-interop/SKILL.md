@@ -44,6 +44,10 @@ addresses identify different immutable targets; preserve both hashes in the find
    and explicitly `ghidra merge --session S --target T`. Verify it from a new context;
    other workers refresh explicitly and retain their local changes. Metadata/binary reads
    have no independent merge. Checkpoint ordinary materials with `artifacts save` as useful.
+7. Close the contexts you own. If the profile's local server belongs exclusively to this
+   investigation, stop it with `ghidra server stop` and verify `ghidra status` before stopping
+   the CLI owner. `ipc-server stop` does not stop that Ghidra server. For shared work, leave
+   server shutdown to the coordinator; never stop another worker's contexts or server.
 
 Use each tool's dedicated packaged skill for install/status, bounds and generated help.
 MacOS native workflow acceptance uses static Windows PE/.NET fixtures; it does not claim

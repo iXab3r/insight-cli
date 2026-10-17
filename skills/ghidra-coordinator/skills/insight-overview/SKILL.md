@@ -22,13 +22,22 @@ outside conversation when useful; `--output` does not mean paste the entire file
 Do not `cat` a large saved index or class after writing it. Filter it on disk with `jq`/`rg`
 and print only the selected identity or excerpt. Size the next read from the overview counts.
 
-Managed method `--filter` matches the full displayed signature, including its namespace/type.
-A namespace keyword can therefore match every helper. If that happens, retain the index as
-a file and select by the short method name after `::` before printing any rows, for example:
-`jq '[.items[] | select(.name | split("::")[-1] | split("(")[0] | test("MEMBER_TERM"; "i")) | {name,token}]' index.json`.
-Inspect `complete`/`truncated` before treating that index as complete. Once the MethodDef token
-is known, `ilspy decompile --member TOKEN` recovers only that member; do not decompile or
-print its entire containing type to obtain a small method excerpt.
+For a managed-method question, use a short-name query before exporting a large index:
+
+```sh
+insight-cli ilspy query INPUT --view methods --name-filter KEYWORD --limit 10 --json
+insight-cli ilspy decompile --target TARGET --member METHODDEF_TOKEN --limit-chars 2000 --json
+```
+
+Choose KEYWORD from the research question; it matches the short method name
+case-insensitively, excluding namespaces/types/signatures. The response supplies the
+exact target and MethodDef token for the second call. If no method matches, broaden the
+term or inspect a bounded type/method page; that search alone does not prove global absence.
+`--filter` instead matches the case-sensitive full signature, so a namespace term may
+match every method. Do not replace a focused query with that broad match, a whole-class
+read or the first/last rows of a shell-truncated result. Refine the query when output is
+truncated before drawing conclusions. Metadata counts cover the queried scope, not
+code you have actually inspected.
 
 | Surface | Useful overview | Focused follow-up |
 | --- | --- | --- |

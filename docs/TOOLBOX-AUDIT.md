@@ -728,7 +728,7 @@ The exact original profile and first session were continued through the upgraded
 reached R1 and decompiled the native function. Both old sessions and journals were preserved,
 the old selection bytes were unchanged, and their contexts/server stopped. Two consecutive
 managed doctor probes also passed. [The recovery receipt](verification/toolbox-managed-profile-alias.json)
-records those checks. The full alias-corrected native suite and fresh interop agents are running.
+records those checks. The alias-corrected combined native run `efb2eb66f0ca47a8bb6368d3bcb12451` passed all 17 macOS cases with four OS skips (16m03s); fresh interop agents separately check autonomous cleanup.
 
 The 1001-method fixture also distinguished API bounds from agent behavior: the first cold
 agent kept completed command stdout at 6002 bytes, but prepared requested a 149713-byte
@@ -742,3 +742,53 @@ probe failed: `/WaitForIdle` returned success while its own receipt showed the P
 not running before the short fixture. The original required owned-file-read assertion is retained;
 readiness now requires both the endpoint and kernel driver before starting that fixture.
 Native CI verifies this adjustment; no raw system capture is published.
+
+
+The subsequent driver/CIM wait also failed in legacy native-feasibility run
+[39075613185](https://github.com/iXab3r/insight-cli/actions/runs/39075613185), while its scoped
+ProcMon registry/first-event/file workflows and dnSpy jobs passed. That legacy user-default,
+unfiltered startup path is superseded by the seven real native facade/lifetime jobs. The
+existing `native-feasibility` check is now an aggregate requiring success of all seven,
+with a receipt explicitly labeled aggregate-only; no actual observation assertion in those
+jobs is removed. The historical audit script and failed receipts remain available. Fork
+restrictions for private Automation access are preserved.
+
+Fresh alias-corrected interop cold research published and independently read its annotation,
+but reviewer status found an owned local server still running after the agent closed its
+contexts and IPC owner. That trial is not accepted for autonomous cleanup. The reviewer
+stopped only that profile's server via the public CLI and retained all work. Ghidra's short
+skill now gives the explicit context → exclusively-owned server → optional IPC-owner order;
+a shared worker leaves server shutdown to the coordinator. A fresh cold/prepared retest
+verifies the guide rather than erasing this failure.
+
+### Live diagnostics and current native CI
+
+Independently reviewed cold/prepared [stack](verification/toolbox-agent-stack.json) and
+[trace](verification/toolbox-agent-trace.json) agents found the actual release-wait path.
+The borrowed worker survived each investigation; the controller subsequently stopped only
+its own subject. Trace agents collected once and reused the retained trace for ranking and
+Speedscope export. Reports explicitly distinguish sampled thread time from CPU consumption
+and retain the weak macOS process-birth identity limitation. Every checkpoint file matched
+its ordinary project source bytes and the final handoff used the returned path.
+
+Windows run [39076493625](https://github.com/iXab3r/insight-cli/actions/runs/39076493625)
+at `5f1f471` passed all seven actual native jobs and the required aggregate. Linux
+[39076493599](https://github.com/iXab3r/insight-cli/actions/runs/39076493599) and offline
+[39076493608](https://github.com/iXab3r/insight-cli/actions/runs/39076493608) passed too.
+The aggregate itself performs no native observation; the seven prerequisite jobs do.
+This establishes native CI, not independent Windows/Linux model acceptance.
+
+A second bounded-discovery guide trial still returned a false absence after a large
+full-signature index read. That failure remains excluded. The API now adds optional
+`ilspy query/compare --name-filter` for case-insensitive short method names, excluding
+namespace/type/signature matches; the existing case-sensitive `--filter` contract remains.
+The locked managed helper was rebuilt twice with identical bytes. Native and fresh model
+checks must establish the actual behavior before accepting this refinement.
+
+The final [C04 cold/prepared interop proof](verification/toolbox-agent-interop.json)
+verified the exact declared import/export, native calculation, R2 publication and identical
+annotation from a separate context. Reviewer status confirmed both profiles' local server
+stopped with no Ghidra processes. The prepared agent's manually transcribed secondary
+status JSON was malformed and is explicitly excluded: complete actual merge events and
+fresh-context responses establish the result. All saved bytes still matched the project;
+that byte check alone does not certify the contents of every manually copied evidence file.

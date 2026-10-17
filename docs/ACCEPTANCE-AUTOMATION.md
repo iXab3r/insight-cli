@@ -240,3 +240,15 @@ artifact. The complete Node 24 offline suite is 201 tests (199 passed, two expli
 opt-in skips), and release/admission checks are 29/29. Offline process fixtures require
 permission to authenticate their own PIDs/listen on their own loopback sockets; a denied
 native identity read remains unverified rather than being weakened into a pass.
+
+### Large-assembly bounded discovery fixture
+
+The C06 `overview` native case also requires `largeManagedAssembly` in the private
+`INSIGHT_TOOLBOX_MANIFEST`. Produce that assembly with
+`scripts/toolbox/prepare-overview-agent-fixture.mjs` into disposable storage and pass its
+returned `assembly` path. The maintainer producer requires the pinned .NET SDK; the
+installed CLI needs only its managed runtime. The fixture contains 1001 methods, including
+one business method under a namespace shared by unrelated helpers. The public CLI test
+checks full-signature collisions, case-insensitive `--name-filter` selection, exact-token
+member decompilation without the whole class, and existing ILSpy/Ghidra text windows.
+Do not supply producer source or PDBs to independent research agents.

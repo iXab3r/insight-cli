@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "C04 selected static linkage, publication, fresh-context readback and cleanup proof; broader Ghidra family and combined agent gates remain separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 350998,
+      "candidateInvocations": 66,
+      "artifactSha256": "4966de0f5ae68a806ff65d3a8617db765e76e2e72d4cb65eb8e76385511ede58",
+      "skillBundleSha256": "777361010ab4e376ced4147518de2a13f68e076fe0505fd906a5c0d0c5dae7b6",
+      "packageBuild": "869ecd0eb0c0b62b2b889004029aaca4f49fa069b61cb9a2249e23f5c8bd183d",
+      "prompt": "Trace the native boundary declared by input/OwnedInterop.dll into the supplied PolicyNative.dll. Establish the exact managed declaration and native export/function correspondence, explain the native calculation from static evidence, and keep declared linkage distinct from observed execution. Publish a useful evidence-linked annotation in shared native analysis and verify it from a fresh independent analysis context. Retain concise findings, raw evidence and a verified checkpoint using the project conventions. Do not execute the DLLs; clean up only this exclusive profile\u2019s owned tool contexts/server.",
+      "promptSha256": "f5dbb17fa7d94884dad445bea78807644d6a86836bb144ca2f3d17f8b48c8e2c",
+      "inputs": [
+        {
+          "path": "input/OwnedInterop.dll",
+          "sha256": "8aabf417296818dcd83636c62798d3fe0deb9bea1b25ef10450ac2cc2125ad1d"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "b3603e68fbb9ed17b575913bae2abf95957f5da07df3657f267ed7fc9a5f067e"
+        }
+      ],
+      "checkpointFiles": 8,
+      "checkpointBytes": 10808,
+      "checkpointSha256": "bebd2714443c5a7a58853cd4a68009a46a851eefbffb808ec8793e6f1b1ddff7",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 68,
+      "staticDeclarationExportFunctionVerified": true,
+      "sharedRevision": "R2",
+      "appliedAnnotations": 1,
+      "freshIndependentContextReadbackExactlyMatched": true,
+      "agentStoppedExclusiveLocalServer": true,
+      "reviewStatusProcessesEmpty": true,
+      "managedRuntimeMode": "managed"
+    },
+    "prepared": {
+      "elapsedMs": 381304,
+      "candidateInvocations": 54,
+      "artifactSha256": "4966de0f5ae68a806ff65d3a8617db765e76e2e72d4cb65eb8e76385511ede58",
+      "skillBundleSha256": "777361010ab4e376ced4147518de2a13f68e076fe0505fd906a5c0d0c5dae7b6",
+      "packageBuild": "869ecd0eb0c0b62b2b889004029aaca4f49fa069b61cb9a2249e23f5c8bd183d",
+      "prompt": "Trace the native boundary declared by input/OwnedInterop.dll into the supplied PolicyNative.dll. Establish the exact managed declaration and native export/function correspondence, explain the native calculation from static evidence, and keep declared linkage distinct from observed execution. Publish a useful evidence-linked annotation in shared native analysis and verify it from a fresh independent analysis context. Retain concise findings, raw evidence and a verified checkpoint using the project conventions. Do not execute the DLLs; clean up only this exclusive profile\u2019s owned tool contexts/server.",
+      "promptSha256": "f5dbb17fa7d94884dad445bea78807644d6a86836bb144ca2f3d17f8b48c8e2c",
+      "inputs": [
+        {
+          "path": "input/OwnedInterop.dll",
+          "sha256": "8aabf417296818dcd83636c62798d3fe0deb9bea1b25ef10450ac2cc2125ad1d"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "b3603e68fbb9ed17b575913bae2abf95957f5da07df3657f267ed7fc9a5f067e"
+        }
+      ],
+      "checkpointFiles": 10,
+      "checkpointBytes": 12274,
+      "checkpointSha256": "88d2102e0326345f4f4ecdf3095a6823d67b770ea6303fb91544500d4a83e570",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 58,
+      "staticDeclarationExportFunctionVerified": true,
+      "sharedRevision": "R2",
+      "appliedAnnotations": 1,
+      "freshIndependentContextReadbackExactlyMatched": true,
+      "agentStoppedExclusiveLocalServer": true,
+      "reviewStatusProcessesEmpty": true,
+      "managedRuntimeMode": "external"
+    }
+  },
+  "retainedHistory": [
+    "Original managed install alias failure was fixed and the exact retained import continued; see toolbox-managed-profile-alias.json.",
+    "Earlier alias-fixed cold agent left its owned server alive; reviewer cleanup was not counted as agent acceptance.",
+    "Prepared agent retained a malformed manually transcribed publish-verification.json. It is excluded as machine-readable proof. Actual complete merge event and fresh-context annotation response independently establish publication; checkpoint byte verification does not certify semantic correctness of every copied file."
+  ],
+  "limitations": [
+    "Static file correspondence does not prove runtime library selection, marshaling or invocation.",
+    "This proof does not cover all Ghidra debugger/GUI or ILSpy project/resource workflow families."
+  ]
+}

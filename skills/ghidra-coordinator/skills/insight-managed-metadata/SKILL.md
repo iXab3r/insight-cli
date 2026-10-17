@@ -22,8 +22,15 @@ dnlib is a packaged implementation library, not another application to install.
 2. `ilspy query app.dll --json` gives assembly identity, metadata runtime/framework hints,
    type/method/import counts and bounded references/resources. Metadata runtime version
    is not the required execution runtime; the framework attribute may be absent or forged.
-3. `--view types`, then `--view methods --type FULLNAME` finds exact dnlib names and tokens.
-   `--filter TEXT` selects a literal fullname substring. Drill down with
+3. For a method question, start with
+   `ilspy query app.dll --view methods --name-filter TERM --limit 10 --json`.
+   This case-insensitive short-name search returns exact names/tokens and excludes
+   declaring namespaces, types and parameter/return signatures. It also selects managed
+   method names for imports, exact-method queries and compare. `--filter TEXT` retains its
+   case-sensitive full-name/signature substring behavior; a namespace term can match every
+   method. An unfiltered first/last page or shell-truncated match list cannot establish
+   absence: refine the short-name query before concluding. `--view types` and
+   `--view methods --type FULLNAME` provide bounded structural discovery. Drill down with
    `ilspy query --target TARGET --view method --method 0x06000002 --limit 50 --json`.
    Offsets are IL instruction offsets, not native addresses. Tokens belong to one exact
    module SHA and may change when unrelated methods are added.
