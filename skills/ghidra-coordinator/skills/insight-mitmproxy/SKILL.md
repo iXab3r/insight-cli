@@ -11,7 +11,7 @@ does not intercept traffic or install a system proxy, certificate or Network Ext
 
 1. Check `insight-cli mitmproxy status --json`. `mitmproxy install` delivers the pinned
    standalone runtime and full notices from our source-complete GitHub Release.
-   `download` prepares its cache; `install --archive mitmproxy-12.2.3-macos-arm64.tar.gz
+   `download` prepares its cache; `install --archive mitmproxy-12.2.3-macos-arm64.tgz
    --offline` uses matching local bytes. `install --executable
    /path/mitmproxy.app/Contents/MacOS/mitmdump` selects a complete external bundle and
    fingerprints its adjacent runtime. `doctor` checks the pinned version.

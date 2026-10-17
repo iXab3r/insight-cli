@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "originalArchiveSha256": "0a09ee3b82569e8985aff8186e4792618b8e5d0c766098db093d09a87d4b013a",
+  "canonicalArchiveSha256": "4bed6d0d2a0bcdc4afeb7408881c9b30e5f81b7c232c2ff9c987babcbed90125",
+  "logicalTreeSha256": "fe4626771d9479879def2ede7ebff8a51f1d6ece261a450b245cd0465def73b8",
+  "entries": 327,
+  "fileBytesModesAndLinkStringsIdentical": true,
+  "safeNodeTarExtractionPassed": true,
+  "reproducedIdenticalArchive": true,
+  "originalAndCanonicalStrictBundleSignatureCheck": "Both rejected by codesign --deep --strict; no publisher signature/notarization claim. Exact original logical tree and native file hashes are preserved."
+}

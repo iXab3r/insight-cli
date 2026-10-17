@@ -494,3 +494,14 @@ cover bounded record, readiness status, immutable archive/HAR inspection and sel
 comparison. HTTPS is explicit per-client trust with a private CA and optional public
 upstream root; no system trust/proxy/Network Extension setup is requested. Full global CLI,
 TLS, interruption and Gherkin verification are still pending, as is model acceptance.
+
+The first global install correctly rejected the upstream chained symlink targets under
+Node tar's traversal protections. R1 remains an immutable historical source/runtime
+artifact; the default R2 repack writes aliases before their link dependencies. It preserves
+all 327 original entry names/types/modes, regular file bytes and symlink strings exactly;
+two independent repacks matched, and extraction through the unchanged safe helper passed.
+[Packaging proof](verification/toolbox-mitmproxy-packaging.json) records the logical tree
+and archive hashes. Both original and reordered app bundles fail strict deep bundle signature
+verification identically; publisher notarization is not asserted. Exact pinned bytes,
+logical-tree identity and actual runtime behavior are verified instead. Public CLI gates
+are being rerun on R2 rather than disabling extraction protection or retrying the bad archive.

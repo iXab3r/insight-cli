@@ -152,6 +152,15 @@
     "license": "Apache-2.0 WITH LLVM-exception and included LLVM notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-llvm-utilities-23.1.3-r1/llvm-utilities-23.1.3-macos-arm64.tgz"
   },
+  "4bed6d0d2a0bcdc4afeb7408881c9b30e5f81b7c232c2ff9c987babcbed90125": {
+    "name": "mitmproxy-12.2.3-macos-arm64.tgz",
+    "sha256": "4bed6d0d2a0bcdc4afeb7408881c9b30e5f81b7c232c2ff9c987babcbed90125",
+    "size": 54210416,
+    "format": "tgz",
+    "root": ".",
+    "license": "MIT application; PSF Python; LGPL urwid; PyInstaller GPL with bootloader exception; full component notices retained",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-mitmproxy-12.2.3-r2/mitmproxy-12.2.3-macos-arm64.tgz"
+  },
   "0a09ee3b82569e8985aff8186e4792618b8e5d0c766098db093d09a87d4b013a": {
     "name": "mitmproxy-12.2.3-macos-arm64.tar.gz",
     "sha256": "0a09ee3b82569e8985aff8186e4792618b8e5d0c766098db093d09a87d4b013a",
