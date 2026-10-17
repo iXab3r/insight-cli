@@ -222,7 +222,112 @@
       "state": "incomplete",
       "reason": "Concrete constants and boundary totals recovered, but cold retained contradictory intermediate address arithmetic and both reports misstated parts of the symbol/export inventory",
       "modelExitWasNotAcceptance": true
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "89a93eaf0a0ec6bd3387cbe863a70242d4d2efee9cf152990b571f46d1d9d4b3",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "medium",
+      "elapsedMs": 139190,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "cold",
+      "state": "passed",
+      "acceptanceScope": "Required business questions: format/linkage, concrete pricing and boundary values, PDB addresses/layout, retained byte-verified evidence and owned cleanup",
+      "reportSha256": "818d3cc5f305f63c382dbda1b6ad0db2db3b569ff7973c131561101509ce6863",
+      "checkpointFiles": 31,
+      "checkpointBytesMatched": true,
+      "allOwnedToolProcessesTerminal": true,
+      "modelExitWasNotAcceptance": true,
+      "reviewNotes": [
+        "Cold did not inspect the supplied DLL adjustment body; its final phrasing overstates that uncertainty. The required Windows base-pricing result is independently supported."
+      ]
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "89a93eaf0a0ec6bd3387cbe863a70242d4d2efee9cf152990b571f46d1d9d4b3",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "medium",
+      "elapsedMs": 135439,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "prepared",
+      "state": "passed",
+      "acceptanceScope": "Required business questions: format/linkage, concrete pricing and boundary values, PDB addresses/layout, retained byte-verified evidence and owned cleanup",
+      "reportSha256": "277da96e8db24cfdf8bf15efece84ce914c4c9ab65a41799d80aa5c89cea4a01",
+      "checkpointFiles": 43,
+      "checkpointBytesMatched": true,
+      "allOwnedToolProcessesTerminal": true,
+      "modelExitWasNotAcceptance": true,
+      "reviewNotes": [
+        "The introductory prose miscounts the five image files as four; the inventory table identifies all five correctly."
+      ]
     }
   ],
-  "wholeToolboxAccepted": false
+  "wholeToolboxAccepted": false,
+  "controls": [
+    "Actual project startup skill metadata; business prompt contains no tool names, commands or answer hints",
+    "Fresh ephemeral cold/prepared contexts; ordinary project evidence rules",
+    "Earlier low-reasoning failures remain recorded; success is not inferred from process exit",
+    "Each accepted checkpoint was independently matched to the canonical project files; tool process ledger and owner shutdown checked"
+  ],
+  "interpretation": "LLVM unit business gate passed on the frozen package with gpt-6-luna medium. Four low-reasoning trials remained semantically incomplete. This is evidence of usable tooling and a reviewed workflow, not a guarantee that an unreviewed low-reasoning report is correct."
 }
