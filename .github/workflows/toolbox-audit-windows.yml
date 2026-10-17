@@ -8,6 +8,9 @@ on:
       - 'scripts/toolbox/native-windows-job.mjs'
       - 'scripts/toolbox/*windbg*'
       - 'scripts/toolbox/audit-procmon-scoped.ps1'
+      - 'scripts/toolbox/audit-procmon-isolated.ps1'
+      - 'scripts/toolbox/build-windows-registry.ps1'
+      - 'skills/ghidra-coordinator/runtime/native/windows-registry.c'
       - 'skills/ghidra-coordinator/src/procmon-config.ts'
       - 'skills/ghidra-coordinator/src/windbg.ts'
       - 'scripts/prepare-toolbox.mjs'
@@ -116,4 +119,32 @@ jobs:
         with:
           name: toolbox-procmon-scoped
           path: toolbox-procmon-scoped.json
+          if-no-files-found: error
+
+  procmon-private-registry:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - name: Build the first-party registry shim twice
+        shell: pwsh
+        run: ./scripts/toolbox/build-windows-registry.ps1 -Output "$env:RUNNER_TEMP/insight-registry-build"
+      - name: Verify ProcMon initializes with private HKCU and preserves global preferences
+        shell: pwsh
+        run: ./scripts/toolbox/audit-procmon-isolated.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-procmon-isolated
+          path: |
+            toolbox-procmon-isolated.json
+            ${{ runner.temp }}/insight-registry-build/insight-registry-win-x64.dll
+            ${{ runner.temp }}/insight-registry-build/registry-provenance.json
           if-no-files-found: error

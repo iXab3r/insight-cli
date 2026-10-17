@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/microsoft/Detours",
+  "commit": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+  "tag": "v4.0.1",
+  "upstream": "https://codeload.github.com/microsoft/Detours/tar.gz/e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+  "file": "detours-e4bfd6b.tar.gz",
+  "sha256": "d24f5dd1f977c33301ebd9f3be064e938a7908954df15b31235c9ca6691cb356",
+  "size": 346948,
+  "license": "MIT"
+}

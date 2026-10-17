@@ -353,3 +353,13 @@ processes read the same file, while unfiltered export of the destructively filte
 PML retained five events, all from the chosen PID/path, including one successful
 ReadFile. The next native observation checks whether capture and export alter
 ProcMon's user preferences before choosing their preservation mechanism.
+
+The preference observation found 26 ProcMon user settings written into the real
+HKCU key; export did not change them further. A new native-only prototype loads a
+first-party shim into the freshly created suspended ProcMon child using pinned MIT
+Microsoft Detours import preparation. The shim redirects HKCU to an application
+hive file under the owned run directory before the tool entry point. No existing
+process is injected or assigned to the job. The verifier requires an actual filtered
+read, saved private FilterRules, unchanged global settings, automatic runtime exit
+and Unicode directory support. Source, license and deterministic build provenance
+are retained; public admission stays blocked until those native checks pass.

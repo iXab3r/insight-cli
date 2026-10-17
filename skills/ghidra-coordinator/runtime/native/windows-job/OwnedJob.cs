@@ -12,7 +12,7 @@ namespace Insight.WindowsJob {
  public sealed class Started { public int LauncherPid; public uint ChildPid; public long ChildBirthTicks; }
  public sealed class Result { public string Kind; public uint ExitCode; public Started Started; }
  [DataContract] public sealed class Specification {
-  [DataMember] public int schema;[DataMember] public string nonce,executable,cwd,ownerBirthTicks,observedBirthTicks,nativeMutex;[DataMember] public string[] arguments;[DataMember] public int ownerPid,timeoutMs,observedPid;
+  [DataMember] public int schema;[DataMember] public string nonce,executable,cwd,ownerBirthTicks,observedBirthTicks,nativeMutex,registryShim,registryShimSha256;[DataMember] public string[] arguments;[DataMember] public int ownerPid,timeoutMs,observedPid;
  }
  [DataContract] public sealed class Receipt {
   [DataMember] public int schema=1;[DataMember] public string nonce,phase,childBirthTicks;[DataMember] public int launcherPid;[DataMember] public uint childPid,childExitCode;
@@ -24,13 +24,14 @@ namespace Insight.WindowsJob {
    using(var file=File.OpenRead(path))spec=(Specification)new DataContractJsonSerializer(typeof(Specification)).ReadObject(file);
    long birth;Guid nonce;if(spec.schema!=1||!Guid.TryParse(spec.nonce,out nonce)||!long.TryParse(spec.ownerBirthTicks,out birth)||spec.arguments==null||spec.arguments.Length>256)throw new ArgumentException("Invalid owned job specification");
    Environment.SetEnvironmentVariable("TEMP",root);Environment.SetEnvironmentVariable("TMP",root);
-   Process observed=null;Mutex mutex=null;bool held=false;
+   Process observed=null;Mutex mutex=null;RegistryRedirect registry=null;bool held=false;
    try{
     if(spec.observedPid!=0){long expected;if(!long.TryParse(spec.observedBirthTicks,out expected))throw new ArgumentException("Observed process birth identity is missing");observed=Process.GetProcessById(spec.observedPid);var handle=observed.Handle;if(observed.StartTime.ToUniversalTime().Ticks!=expected||WaitForSingleObject(handle,0)!=258)throw new InvalidOperationException("Observed process identity changed or exited");}
     if(spec.nativeMutex!=null){if(spec.nativeMutex!=@"Local\insight-cli-procmon-capture")throw new ArgumentException("Invalid native capture mutex");mutex=new Mutex(false,spec.nativeMutex);try{held=mutex.WaitOne(0);}catch(AbandonedMutexException){held=true;}if(!held)throw new InvalidOperationException("Another owned Process Monitor capture is active");foreach(var name in new[]{"Procmon","Procmon64","Procmon64a"}){var foreign=Process.GetProcessesByName(name);try{if(foreign.Length!=0)throw new InvalidOperationException("An existing Process Monitor instance is not owned by this capture");}finally{foreach(var process in foreign)process.Dispose();}}}
-   var result=Run(spec.executable,spec.arguments,spec.cwd,spec.ownerPid,birth,spec.timeoutMs,origin=>Save(Path.Combine(root,"job-started.json"),new Receipt{nonce=spec.nonce,launcherPid=origin.LauncherPid,childPid=origin.ChildPid,childBirthTicks=origin.ChildBirthTicks.ToString(),phase="assigned_suspended"}));
+   if(spec.registryShim!=null){if(!string.Equals(Path.GetFileName(spec.executable),"Procmon64.exe",StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Registry isolation is admitted only for the owned ProcMon child");if(!string.Equals(Path.GetFullPath(spec.cwd),root,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Owned registry loading requires its private run directory");registry=new RegistryRedirect(root,spec.registryShim,spec.registryShimSha256,spec.nonce);}
+   var result=Run(spec.executable,spec.arguments,spec.cwd,spec.ownerPid,birth,spec.timeoutMs,origin=>Save(Path.Combine(root,"job-started.json"),new Receipt{nonce=spec.nonce,launcherPid=origin.LauncherPid,childPid=origin.ChildPid,childBirthTicks=origin.ChildBirthTicks.ToString(),phase="assigned_suspended"}),registry==null?null:new Action<IntPtr,uint>(registry.Prepare),registry==null?null:new Action<uint>(registry.Verify));
    Save(Path.Combine(root,"job-result.json"),new Receipt{nonce=spec.nonce,launcherPid=Process.GetCurrentProcess().Id,childPid=result.Started.ChildPid,childBirthTicks=result.Started.ChildBirthTicks.ToString(),phase=result.Kind,childExitCode=result.ExitCode});
-   }finally{if(held)mutex.ReleaseMutex();if(mutex!=null)mutex.Dispose();if(observed!=null)observed.Dispose();}
+   }finally{if(registry!=null)registry.Dispose();if(held)mutex.ReleaseMutex();if(mutex!=null)mutex.Dispose();if(observed!=null)observed.Dispose();}
   }
 
   [StructLayout(LayoutKind.Sequential)] struct Limits { public long ProcessTime,JobTime;public uint Flags;public UIntPtr MinWorkingSet,MaxWorkingSet;public uint ActiveProcesses;public UIntPtr Affinity;public uint Priority,Scheduling; }
@@ -52,7 +53,7 @@ namespace Insight.WindowsJob {
   [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
   static void Check(bool ok){if(!ok)throw new Win32Exception(Marshal.GetLastWin32Error());}
   static string Quote(string text){var b=new StringBuilder("\"");int slashes=0;foreach(char c in text){if(c=='\\'){slashes++;continue;}if(c=='\"'){b.Append('\\',slashes*2+1);b.Append(c);}else{b.Append('\\',slashes);b.Append(c);}slashes=0;}b.Append('\\',slashes*2);return b.Append('"').ToString();}
-  public static Result Run(string executable,string[] arguments,string directory,int ownerPid,long ownerBirthTicks,int timeoutMs,Action<Started> started){
+  public static Result Run(string executable,string[] arguments,string directory,int ownerPid,long ownerBirthTicks,int timeoutMs,Action<Started> started,Action<IntPtr,uint> prepare=null,Action<uint> initialized=null){
    if(timeoutMs<1000||timeoutMs>600000||!System.IO.Path.IsPathRooted(executable))throw new ArgumentException("Invalid owned job specification");
    using(var owner=Process.GetProcessById(ownerPid)){
     if(owner.StartTime.ToUniversalTime().Ticks!=ownerBirthTicks)throw new InvalidOperationException("Owner birth identity changed");
@@ -64,9 +65,9 @@ namespace Insight.WindowsJob {
      var command=new StringBuilder(Quote(executable));foreach(var argument in arguments)command.Append(' ').Append(Quote(argument));if(command.Length>=32767)throw new ArgumentException("Windows command line exceeds its bound");
      Check(CreateProcess(executable,command,IntPtr.Zero,IntPtr.Zero,true,0x08000004,IntPtr.Zero,directory,ref startup,out child));Check(AssignProcessToJobObject(job,child.Process));assigned=true;
      long childBirth;using(var process=Process.GetProcessById((int)child.Pid))childBirth=process.StartTime.ToUniversalTime().Ticks;
-     var origin=new Started {LauncherPid=Process.GetCurrentProcess().Id,ChildPid=child.Pid,ChildBirthTicks=childBirth};started(origin);
+     var origin=new Started {LauncherPid=Process.GetCurrentProcess().Id,ChildPid=child.Pid,ChildBirthTicks=childBirth};started(origin);if(prepare!=null)prepare(child.Process,child.Pid);
      if(WaitForSingleObject(ownerHandle,0)!=258){Check(TerminateJobObject(job,130));return new Result {Kind="owner_lost",ExitCode=130,Started=origin};}
-     if(ResumeThread(child.Thread)==0xffffffff)throw new Win32Exception(Marshal.GetLastWin32Error());
+     if(ResumeThread(child.Thread)==0xffffffff)throw new Win32Exception(Marshal.GetLastWin32Error());if(initialized!=null)initialized(child.Pid);
      var outcome=WaitForMultipleObjects(2,new[]{child.Process,ownerHandle},false,(uint)timeoutMs);
      if(outcome==0){uint code;Check(GetExitCodeProcess(child.Process,out code));return new Result {Kind="completed",ExitCode=code,Started=origin};}
      if(outcome==1||outcome==258){uint code=outcome==1?130u:124u;Check(TerminateJobObject(job,code));WaitForSingleObject(child.Process,5000);return new Result {Kind=outcome==1?"owner_lost":"timeout",ExitCode=code,Started=origin};}
