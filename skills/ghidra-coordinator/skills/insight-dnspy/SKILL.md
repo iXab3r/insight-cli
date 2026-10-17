@@ -19,7 +19,10 @@ for a MethodDef token breakpoint and indexed primitive parameter read.
    `download --vendor-direct` prepares acquisition first. For offline setup use
    `install --archive dnSpy-net-win64.zip --dotnet-archive dotnet-runtime.zip --offline`.
    `install --executable C:\tools\dnSpy\dnSpy.exe` selects the complete pinned external
-   runtime; adjacent files are fingerprinted and preserved on uninstall. `doctor` checks
+   runtime; only its pinned vendor files are copied into owned execution storage. The
+   first setup starts a private GUI to prepare a Unicode-compatible Core loader there;
+   external originals remain unchanged. Both copies are fingerprinted, and uninstall
+   preserves the external distribution. `doctor` checks
    version and exact extension contracts without opening the GUI.
 2. Use ILSpy metadata/IL to identify the managed module's MethodDef token (`0x060000NN`)
    and exact decimal IL instruction offset. `dnspy inspect app.exe --method 0x06000002

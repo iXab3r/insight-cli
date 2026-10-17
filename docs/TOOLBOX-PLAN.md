@@ -297,7 +297,8 @@ ProcMon now has a vendor-direct lifecycle, scoped observe/retained inspect facad
 private HKCU, packaged skill and public Windows Gherkin proof, including stop/kill,
 external drift and preserved original process/settings. TShark now has a source-complete
 console mirror, offline packet/stream facade, skill and real global CLI Gherkin proof
-(`verification/toolbox-tshark.json`). dnSpyEx Framework/Core debugger/editor APIs passed;
-its public adapter is finishing native checks. mitmproxy and the six capability units
+(`verification/toolbox-tshark.json`). dnSpyEx now also passed the globally installed Windows public CLI Gherkin gate, including
+Framework/Core breakpoints, copied edits, stop/kill and external preservation
+(`verification/toolbox-dnspy.json`). mitmproxy and the six capability units
 remain in the ordered implementation list. Account inference quota only
 defers the independent model gates.

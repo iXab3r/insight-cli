@@ -381,8 +381,8 @@ matched. No compiler or existing-process injection is needed at runtime.
 
 The current inventory contains 13 analytical families plus supporting artifacts, with 16
 packaged skills including entry and RE guidance. TShark now adds a fifteenth analytical family and an eighteenth packaged skill.
-Its native receipt is linked below. Remaining tool families are the final public dnSpyEx
-gate and mitmproxy, plus the six planned capabilities. dnSpyEx has a typed extension
+Its native receipt is linked below. The final dnSpyEx native public gate subsequently passed (receipt below). Remaining tool
+families are mitmproxy and the six planned capabilities. dnSpyEx has a typed extension
 compiled against its pinned actual contracts; its debugger/editor native gate is running.
 Independent cold/prepared model and combined full-inventory gates remain open; inference
 quota does not block implementation or native checks.
@@ -461,3 +461,13 @@ invalid filters, conservative prefix coverage, original-input preservation, owne
 copy/drift/preservation, checkpoints and terminal jobs. The scenario passed in 39 seconds.
 The full Node 24 offline suite passed 199/201 with two opt-in skips; all 29 release/admission
 tests passed. Independent model and combined full-inventory acceptance remain separate.
+
+The [final dnSpyEx public CLI Gherkin receipt](verification/toolbox-dnspy.json) passed
+on Windows x64, Node 24, frozen source `fa2b03a`: explicit upstream acquisition, offline
+managed installation, Unicode loader preparation, Framework/Core argument 11, managed
+stack/pagination, real document edit and changed-copy execution, expected-value rejection,
+stop/kill without relaunch, immutable originals, owned external execution copy, drift
+refusal, checkpoints and terminal owned jobs. The separately rebuilt API proof also passed
+with the exact packaged extension SHA. The two concrete path defects and failed alias
+attempt remain documented above. Independent cold/prepared model and final combined gates
+remain open; this native success does not consume or replace those gates.
