@@ -1,0 +1,214 @@
+name: toolbox-windows-feasibility
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/toolbox-audit-windows.yml'
+      - 'scripts/toolbox/audit-windows.ps1'
+      - 'scripts/toolbox/native-windows-job.mjs'
+      - 'scripts/toolbox/*windbg*'
+      - 'scripts/toolbox/audit-procmon-scoped.ps1'
+      - 'scripts/toolbox/audit-procmon-isolated.ps1'
+      - 'scripts/toolbox/*procmon*'
+      - 'skills/ghidra-coordinator/src/procmon*.ts'
+      - 'scripts/toolbox/build-windows-registry.ps1'
+      - 'scripts/toolbox/audit-dnspy-debug-edit.ps1'
+      - 'skills/ghidra-coordinator/runtime/native/dnspy-extension/**'
+      - 'skills/ghidra-coordinator/runtime/native/windows-registry.c'
+      - 'skills/ghidra-coordinator/src/procmon-config.ts'
+      - 'skills/ghidra-coordinator/src/windbg.ts'
+      - 'scripts/prepare-toolbox.mjs'
+      - 'skills/ghidra-coordinator/src/tool-runtime/**'
+      - 'skills/ghidra-coordinator/runtime/native/windows-job/**'
+permissions:
+  contents: read
+jobs:
+  native-feasibility:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - name: Probe owned Windows automation surfaces
+        shell: pwsh
+        run: ./scripts/toolbox/audit-windows.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-windows-feasibility
+          path: toolbox-audit-windows.json
+          if-no-files-found: error
+
+  owned-job-lifetime:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - name: Verify owned native descendants on completion, timeout and owner loss
+        run: node scripts/toolbox/native-windows-job.mjs
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-windows-job
+          path: toolbox-windows-job.json
+          if-no-files-found: error
+
+  windbg-public-cli:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout the pinned private Automation dependency with read-only access
+        uses: actions/checkout@v4
+        with:
+          repository: iXab3r/EyeAuras.Automation
+          ref: b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033
+          path: tests/vendor/EyeAuras.Automation
+          ssh-key: ${{ secrets.AUTOMATION_READ_KEY }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Prepare an owned native calculation dump and local PDB
+        shell: pwsh
+        run: ./scripts/toolbox/prepare-windbg-fixture.ps1
+      - name: Install globally in isolation and investigate through the public CLI
+        run: node scripts/run-automation.mjs test --suite acceptance --tag windbg --property RestoreLockedMode=true --timeout-seconds 900
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-windbg
+          path: toolbox-windbg.json
+          if-no-files-found: error
+
+  procmon-pre-capture-scope:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Prove destructive PID and path filtering before owned workers run
+        shell: pwsh
+        run: ./scripts/toolbox/audit-procmon-scoped.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-procmon-scoped
+          path: toolbox-procmon-scoped.json
+          if-no-files-found: error
+
+  procmon-private-registry:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm run build
+      - name: Build the first-party registry shim twice
+        shell: pwsh
+        run: ./scripts/toolbox/build-windows-registry.ps1 -Output "$env:RUNNER_TEMP/insight-registry-build"
+      - name: Verify ProcMon initializes with private HKCU and preserves global preferences
+        shell: pwsh
+        run: ./scripts/toolbox/audit-procmon-isolated.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-procmon-isolated
+          path: |
+            toolbox-procmon-isolated.json
+            toolbox-procmon-controller.json
+            ${{ runner.temp }}/insight-registry-build/insight-registry-win-x64.dll
+            ${{ runner.temp }}/insight-registry-build/registry-provenance.json
+          if-no-files-found: error
+
+  procmon-public-cli:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout the pinned private Automation dependency with read-only access
+        uses: actions/checkout@v4
+        with:
+          repository: iXab3r/EyeAuras.Automation
+          ref: b9fdfd6ea11feb8d88fd4cbe6a98ab0f24aca033
+          path: tests/vendor/EyeAuras.Automation
+          ssh-key: ${{ secrets.AUTOMATION_READ_KEY }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Prepare an owned Windows file-observation fixture
+        shell: pwsh
+        run: ./scripts/toolbox/prepare-procmon-fixture.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - name: Install globally in isolation and investigate through the public CLI
+        run: node scripts/run-automation.mjs test --suite acceptance --tag procmon --property RestoreLockedMode=true --timeout-seconds 900
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-procmon
+          path: toolbox-procmon.json
+          if-no-files-found: error
+
+  dnspy-debug-edit:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - name: Verify actual managed breakpoint and copied assembly edit through dnSpyEx
+        shell: pwsh
+        run: ./scripts/toolbox/audit-dnspy-debug-edit.ps1
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toolbox-dnspy-debug-edit
+          path: toolbox-dnspy-debug-edit.json
+          if-no-files-found: error

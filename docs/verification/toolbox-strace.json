@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent model gates pending",
+  "checks": {
+    "freshOwnedMirrorDownload": true,
+    "offlineInstall": true,
+    "doctor": true,
+    "actualConfigurationRead": true,
+    "observedApplicationValue": true,
+    "immutableTargetReused": true,
+    "boundedPagination": true,
+    "publicStopAndKill": true,
+    "timeoutTerminatesDescendants": true,
+    "inputUnchanged": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "checkpointPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "inputSha256": "ec331d100917a6f911161f572ede5cba3e0ad4b306616089af921263e366e7e8",
+  "settingsSha256": "b6af4273f990867a93cbe5aa1ced2523e18234177848e331132829aeb48c1577",
+  "packageBuild": {
+    "version": 1,
+    "artifact": "afc5d0e130933a2350b0d5c1a0375e5378bcb3ce0a3347f281382a63691284a1"
+  },
+  "cleanupComplete": true,
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39051762221",
+  "sourceCommit": "3f383fc",
+  "nativeJobConclusion": "success",
+  "workflowConclusion": "failure in separate source-build procfs liveness observation race; corrected separately",
+  "distribution": "tool-strace-7.2-r1",
+  "nativeBuildEvidence": "toolbox-strace-build.json",
+  "independentAgentGate": "pending account quota",
+  "combinedToolboxGate": "pending full inventory"
+}

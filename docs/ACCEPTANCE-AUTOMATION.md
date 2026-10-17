@@ -157,3 +157,71 @@ a successful process exit without completed research/cleanup is insufficient.
 
 [Shared tool runtime acceptance](verification/tool-runtime.json) records the passing exact
 packed/global-installed macOS candidate and all named research/recovery/removal checks.
+
+## Toolbox development gates
+
+`Toolbox.feature` adds five separately selected native scenarios: actual Codex bundle
+metadata connect/disconnect, a globally installed public 7-Zip container workflow, and
+LLVM investigation of owned PE/PDB, ELF and Mach-O images, plus live managed
+stack/heap/trace research and DiE classification with explicit scan uncertainty. Run
+
+```sh
+INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
+  --suite acceptance --tag toolbox --property RestoreLockedMode=true --timeout-seconds 1200
+```
+The private JSON manifest supplies `packageRoot`, `sevenzipArchive`, `sevenzipExecutable` and `container` for the
+owned two-entry fixture; `llvmArchive` and `nativeSubjects` select the LLVM archive and
+owned image directory. Prepare those images with `scripts/toolbox/prepare-native-inputs.mjs`
+and explicit Clang/lld-link/ld.lld paths (a maintainer fixture prerequisite, not a user SDK).
+`diagnosticsArchives`, `dotnetArchive` and `managedWorker` select the three retained NuGet
+archives, the private runtime archive and a maintainer-built owned console fixture. Build
+`tests/acceptance/fixtures/diagnostics/Probe.csproj` into a disposable output directory.
+`dieArchive` selects the reviewed console/Qt archive for header and signature triage of those inputs.
+The acceptance project excludes fixture source and nested build output from its own assembly.
+The driver creates a separate profile and test-only short temporary
+AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
+No ordinary user profile or installed tool is reset. All five scenarios passed together (5/5) on the recorded DiE candidate; an earlier runner-path failure was corrected
+in the fixture setup. LLVM verifies each advertised family, the hexadecimal type index,
+output limits/overwrite refusal and external sibling drift/preservation. Managed diagnostics
+verify the waiting stack, real heap/object/field/root evidence, a two-second thread-time
+trace, readable Speedscope export, preserved external target lifetime and retained licenses.
+DiE verifies native/managed headers, .NET signatures, explicit partial results on actual upstream
+script errors, pagination, output preservation and external database drift. The first five-case
+run failed only DiE doctor: canonicalizing framework symlink targets fixed staging relocation.
+Its regression still rejects changed bytes and links escaping owned installation storage.
+
+These are native developer gates, not independent model acceptance. The
+[managed agent evidence](verification/toolbox-agent-managed.json) separately records cold
+and prepared independent cheap-model static research, exact resource/checkpoint readback,
+and the earlier IPC-blocked trials that were rejected. Per-tool family coverage and the
+final exact-artifact whole-toolbox gate remain open. A successful model exit or plausible
+report does not count without evidence review: the first container trial omitted a real
+configuration field despite correct recovered bytes, and required a correction pass.
+
+The actual standalone [Codex host trials](verification/toolbox-agent-host.json) also passed
+cold/prepared container research with the same business-only prompt. Project startup metadata
+supplied the skill list; the prompt did not identify a tool or a command sequence. Keep the
+runtime selected by that CLI consistent with its shared owner. Prestarting an owner from an
+operator's different Node can create a deliberate compatibility rejection.
+
+For new tool cases, `scripts/toolbox/run-agent.mjs MANIFEST` launches the real opt-in model
+trial with `INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_RUN_AGENT_EVAL=1`. The private manifest supplies
+absolute `packageRoot`, `project`, `preload`, `outputDirectory` and frozen package `artifact`,
+project-relative `inputs`, a business-only `prompt`, and the explicitly chosen `model` and
+`reasoningEffort`. `path` may select the candidate global prefix. Prepare only disposable
+profile storage and a project bundle link, using `public-fixture.mjs` as the test-side seam;
+existing project instructions remain authoritative. Use a new output directory per attempt.
+
+The runner records package/build/skill/input/prompt identities, raw private events, final
+answer, time/exit state and owned-owner shutdown. Its successful terminal state is
+`needs_review`. Independently verify the useful answer, recovered bytes, saved checkpoint
+and tool-specific process cleanup before writing an acceptance receipt. It does not make
+model calls in default CI or turn a zero exit code into a business verdict. The actual
+source-runner smoke was reviewed against the owned oracle and exact saved bytes; its final
+prose omitted checkpoint locators, so that small handoff limitation is retained in the receipt.
+
+Native toolbox CI checks out the private Automation repository at the exact pinned
+submodule commit using the repository secret `AUTOMATION_READ_KEY`. Its deploy key
+grants read-only access to Automation, is not persisted into test runtime configuration,
+and is not available to fork pull requests. The framework remains private; it is not
+copied into this repository's package or tool Releases.

@@ -8,7 +8,7 @@ export interface ToolProcessHooks {
  stop?:(record:ProcessRecord,c:CommandContext)=>Promise<void>;
  beforeKill?:(record:ProcessRecord,c:CommandContext)=>Promise<void>;
 }
-export function toolProcessCommands(hooks:Record<string,ToolProcessHooks>={}):CommandDefinition[]{
+export function toolProcessCommands(hooks:Record<string,ToolProcessHooks>={},metadata:readonly CommandDefinition[]=[]):CommandDefinition[]{
  const verifier=(c:CommandContext)=>(record:ProcessRecord)=>hooks[record.tool]?.verify?.(record,c)??Promise.resolve(undefined);
  const discover=async(c:CommandContext)=>{for(const h of Object.values(hooks))await h.discover?.(c);};
  const processes:CommandDefinition={
@@ -32,5 +32,5 @@ export function toolProcessCommands(hooks:Record<string,ToolProcessHooks>={}):Co
    },{permission:'Destructive'}),
   ],
  };
- return [command('tools','Inspect tool executions across research applications',[processes])];
+ return [command('tools','Inspect research tools and executions',[...metadata,processes])];
 }

@@ -33,3 +33,24 @@ test('shared cache validates cancellation and declared size without activating p
  const results=await Promise.all([cacheArtifact(a,root,fetcher,new AbortController().signal),cacheArtifact(a,root,fetcher,new AbortController().signal)]);
  assert.equal(results[0],results[1]);
 });
+
+test('installation fingerprints survive staging relocation and an aliased parent without admitting escaping links',async t=>{
+ if(process.platform==='win32'){t.skip('Symbolic-link privileges are not a Windows unit prerequisite');return;}
+ const {mkdtemp,rm,mkdir,writeFile,symlink,rename}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {treeFingerprint}=await import('../src/tool-runtime/store.js');
+ const root=await mkdtemp(join(tmpdir(),'linked-installation-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const actual=join(root,'actual'),alias=join(root,'alias');await mkdir(actual);await symlink(actual,alias,'dir');
+ const stage=join(alias,'stage');await mkdir(join(stage,'Framework/Versions/A'),{recursive:true});await writeFile(join(stage,'Framework/Versions/A/runtime'),'original');await symlink('A',join(stage,'Framework/Versions/Current'),'dir');await symlink('Versions/Current/runtime',join(stage,'Framework/runtime'));
+ const expected=await treeFingerprint(stage);const installed=join(alias,'installed');await rename(stage,installed);
+ assert.equal(await treeFingerprint(installed),expected);assert.equal(await treeFingerprint(join(actual,'installed')),expected);
+ await writeFile(join(installed,'Framework/Versions/A/runtime'),'modified');assert.notEqual(await treeFingerprint(installed),expected);
+ await symlink(root,join(installed,'escape'),'dir');await assert.rejects(treeFingerprint(installed),/escapes/);
+});
+
+test('native preflight failure retains a readable terminal record without freezing tool removal',async t=>{
+ const {mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {runTool}=await import('../src/tool-runtime/run.js'),{listProcesses}=await import('../src/tool-runtime/supervisor.js'),{assertUnused}=await import('../src/tool-runtime/store.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-native-preflight-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ await assert.rejects(runTool({appArguments:{AppDataDirectory:root},environment:{PATH:process.env.PATH},signal:new AbortController().signal},{tool:'fixture',role:'invalid-native-deadline',executable:process.execPath,nativeDeadline:true,timeoutMs:0}));
+ const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');await assertUnused(root,'fixture');
+});

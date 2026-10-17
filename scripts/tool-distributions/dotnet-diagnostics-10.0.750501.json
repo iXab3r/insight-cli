@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-dotnet-diagnostics-10.0.750501-r1",
+  "title": ".NET diagnostics 10.0.750501",
+  "redistribution": "Unmodified official NuGet dotnet-dump, dotnet-stack and dotnet-trace packages 10.0.750501; Microsoft MIT license and embedded third-party notices retained. Full corresponding dotnet/diagnostics source and license are supplied as companions. Private .NET runtime is delivered separately by the consuming tools. macOS ARM64 real collect/stack/trace probes passed with .NET 10.0.13; this does not establish complete adapter or agent acceptance.",
+  "assets": [
+    {
+      "name": "dotnet-dump.10.0.750501.nupkg",
+      "upstream": "https://api.nuget.org/v3-flatcontainer/dotnet-dump/10.0.750501/dotnet-dump.10.0.750501.nupkg",
+      "size": 10482522,
+      "sha256": "ae70c9f37548e1e006467893e21ae41a005fefaf2270e29642b415df053324a7",
+      "role": "binary",
+      "format": "zip",
+      "root": "tools/net8.0/any",
+      "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained"
+    },
+    {
+      "name": "dotnet-stack.10.0.750501.nupkg",
+      "upstream": "https://api.nuget.org/v3-flatcontainer/dotnet-stack/10.0.750501/dotnet-stack.10.0.750501.nupkg",
+      "size": 6025361,
+      "sha256": "cd35f399fe023f1793b528590a4d723a1f2f1d9b25696386d926a697bd24c0ca",
+      "role": "binary",
+      "format": "zip",
+      "root": "tools/net8.0/any",
+      "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained"
+    },
+    {
+      "name": "dotnet-trace.10.0.750501.nupkg",
+      "upstream": "https://api.nuget.org/v3-flatcontainer/dotnet-trace/10.0.750501/dotnet-trace.10.0.750501.nupkg",
+      "size": 12273543,
+      "sha256": "ef17f25724a55f9685bfaf8506a778ea87c2b62783eca2ca73263226128b0d4e",
+      "role": "binary",
+      "format": "zip",
+      "root": "tools/net8.0/any",
+      "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained"
+    },
+    {
+      "name": "diagnostics-ad724c4.tar.gz",
+      "upstream": "https://github.com/dotnet/diagnostics/archive/ad724c4b85e7ae775e42f393c6e95a7557a57954.tar.gz",
+      "size": 87152623,
+      "sha256": "e56d047cbd6b981ab3c66c0fe92f1741b66dcada81c0b0046402d0d196b01d2e",
+      "role": "source",
+      "license": "Exact corresponding dotnet/diagnostics source at ad724c4b85e7ae775e42f393c6e95a7557a57954, with dependency notices"
+    },
+    {
+      "name": "diagnostics-ad724c4-LICENSE.TXT",
+      "upstream": "https://raw.githubusercontent.com/dotnet/diagnostics/ad724c4b85e7ae775e42f393c6e95a7557a57954/LICENSE.TXT",
+      "size": 1116,
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "role": "license-companion",
+      "license": "Full matching Microsoft MIT license"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "state": "native_passed_dump_agent_passed_stack_trace_pending",
+  "scope": "Diagnostics native proof and independently reviewed dump cold/prepared unit trials; stack and trace model gates incomplete",
+  "artifactSha256": "387419f7054f01d339ae04bd12978b1f9de987a89386d03b40a2b730d2323bcd",
+  "packageBuild": "6cf4d7a1b5e8d271a2b6f60bf98a239f2eb9fdf5f9e554af7c17fbb02386aa93",
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Owned native public CLI diagnostics proof; independent agent gates remain separate",
+    "version": "0.2.0",
+    "workerSha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb",
+    "checks": {
+      "privateRuntimeAllThreeTools": true,
+      "fullInstalledLicenseNotices": true,
+      "liveWaitingStack": true,
+      "realHeapCapture": true,
+      "matchingSOSStacksObjectsFieldsAndRoots": true,
+      "immutableDumpUnchanged": true,
+      "queryChainingRefused": true,
+      "boundedThreadTimeTrace": true,
+      "usefulWallClockRanking": true,
+      "readableSpeedscopeExport": true,
+      "outputOverwriteRefused": true,
+      "externalTargetLifetimePreserved": true,
+      "terminalOwnedCollectors": true,
+      "evidenceSurvivesUninstall": true
+    },
+    "cleanupComplete": true
+  },
+  "gherkin": {
+    "executed": 4,
+    "passed": 4,
+    "scope": "Host discovery, 7-Zip, LLVM and managed diagnostics"
+  },
+  "offline": {
+    "tests": 181,
+    "passed": 179,
+    "optInSkipped": 2,
+    "releaseTestsPassed": 23,
+    "isolatedPackageProof": true
+  },
+  "retainedFailure": "Acceptance build initially included nested fixture obj/assembly attributes. Excluding fixtures/**/*.cs from the acceptance project fixed the actual build failure.",
+  "independentAgentGate": {
+    "model": "gpt-6-luna",
+    "reasoningEffort": "medium",
+    "dump": {
+      "state": "passed",
+      "promptSha256": "72e3c9c7d827f7e1206c9539ef6b7418e8bc5d45bdef0c28fe8371103139c1b8",
+      "cold": {
+        "elapsedMs": 108144,
+        "checkpointFiles": 7,
+        "checkpointBytes": 310585249,
+        "dumpSha256": "54d84413393a795bd606ae7b373605ef899708ed6513c757fc66273a0e5c4365"
+      },
+      "prepared": {
+        "elapsedMs": 95608,
+        "checkpointFiles": 6,
+        "checkpointBytes": 310584318,
+        "dumpSha256": "9bb344eecf3f12d9e04393c5edb24fd6bbb01e7a4eb9b73b1f6c5170d28f890f"
+      },
+      "review": {
+        "discoveredSkillWithoutToolNamePrompt": true,
+        "publicCLIUsed": true,
+        "waitingCallChainCorrect": true,
+        "heldJobAndPending37Correct": true,
+        "focusedSOSEvidenceAndDumpRetained": true,
+        "allCheckpointFilesIndependentlyByteVerified": true,
+        "all15OwnedCollectorsExitedZero": true,
+        "ownerStoppedBothTrials": true,
+        "targetAliveAfterDumpTrialsConfirmedByLaterStack": true,
+        "labParentAndTargetAbsentAtCleanupAudit": true
+      },
+      "reportCaveat": "Prepared report infers awaiting release from the WaitForRelease symbol; the stack alone proves a sleep call. The requested waiting stack and object fields are independently established."
+    },
+    "stack": {
+      "state": "incomplete",
+      "coldExitCode": 1,
+      "elapsedMs": 87216,
+      "promptSha256": "d4e581f80ae8b7a09fd1692f77c4a4d051e739861d70b7056b341e8c30fa69be",
+      "reason": "Codex account usage limit interrupted final verification; no final response. Tool output and a checkpoint existed but this is not a successful completed agent trial.",
+      "observed": "Agent selected dotnet-stack, obtained Thread.Sleep / WaitForRelease / Main, retained a two-file checkpoint; report incorrectly counts five nonempty lines as four.",
+      "ownerStopped": true,
+      "prepared": "not_run"
+    },
+    "trace": {
+      "state": "not_run",
+      "reason": "Same model account usage limit; do not consume retries or count native proof as independent acceptance."
+    }
+  },
+  "wholeToolboxAccepted": false,
+  "skillBundleSha256": "d31341596917186f45c2507cd247ca36578c8a4eea8698bea87326169e8ac5c4"
+}

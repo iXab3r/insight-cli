@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent cold/prepared model gates pending",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "packageSha256": "044f30c8575828b548a580b419a086fbcf29af093cde54206589f64f5f80fafa",
+  "build": {
+    "version": 1,
+    "artifact": "ef98be7042ff430a3b4a70a914596837fcb56fcbde8218a1a1d6d9b0aa816f40"
+  },
+  "dumpSha256": "d07fa1d495c69d2d942bec3e63e20eb210c6cc3e4f4fa58e4fa59a0643799ecc",
+  "symbolsSha256": "d75ab5de997fde3456203a67e6843b39a72583b0961b10fca88278201d049468",
+  "checks": {
+    "offlineManagedInstall": true,
+    "doctor": true,
+    "quoteTotalStack": true,
+    "registers": true,
+    "observedTotal109": true,
+    "boundedPagination": true,
+    "unreadableMemoryUnknown": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "inputsPreserved": true,
+    "checkpointPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "cleanupComplete": true,
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39051762216",
+  "sourceCommit": "3f383fc",
+  "gherkin": "native Windows profile passed",
+  "nativeLifetimeEvidence": "toolbox-windows-job.json",
+  "independentAgentGate": "pending account quota",
+  "combinedToolboxGate": "pending full inventory"
+}

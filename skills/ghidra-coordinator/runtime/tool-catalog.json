@@ -1,4 +1,13 @@
 {
+  "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af": {
+    "name": "diec-3.21-macos-arm64.tgz",
+    "sha256": "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af",
+    "size": 14343048,
+    "format": "tgz",
+    "root": "diec-3.21",
+    "license": "MIT engine/components; Qt LGPL-3.0 and full included third-party notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-diec-3.21-r1/diec-3.21-macos-arm64.tgz"
+  },
   "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77": {
     "name": "dotnet-runtime-10.0.13-linux-x64.tar.gz",
     "sha256": "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77",
@@ -34,6 +43,42 @@
     "root": ".",
     "license": "MIT and included LICENSE/ThirdPartyNotices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-10.0.13-r1/dotnet-runtime-10.0.13-win-x64.zip"
+  },
+  "ae70c9f37548e1e006467893e21ae41a005fefaf2270e29642b415df053324a7": {
+    "name": "dotnet-dump.10.0.750501.nupkg",
+    "sha256": "ae70c9f37548e1e006467893e21ae41a005fefaf2270e29642b415df053324a7",
+    "size": 10482522,
+    "format": "zip",
+    "root": "tools/net8.0/any",
+    "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-diagnostics-10.0.750501-r1/dotnet-dump.10.0.750501.nupkg"
+  },
+  "cd35f399fe023f1793b528590a4d723a1f2f1d9b25696386d926a697bd24c0ca": {
+    "name": "dotnet-stack.10.0.750501.nupkg",
+    "sha256": "cd35f399fe023f1793b528590a4d723a1f2f1d9b25696386d926a697bd24c0ca",
+    "size": 6025361,
+    "format": "zip",
+    "root": "tools/net8.0/any",
+    "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-diagnostics-10.0.750501-r1/dotnet-stack.10.0.750501.nupkg"
+  },
+  "ef17f25724a55f9685bfaf8506a778ea87c2b62783eca2ca73263226128b0d4e": {
+    "name": "dotnet-trace.10.0.750501.nupkg",
+    "sha256": "ef17f25724a55f9685bfaf8506a778ea87c2b62783eca2ca73263226128b0d4e",
+    "size": 12273543,
+    "format": "zip",
+    "root": "tools/net8.0/any",
+    "license": "MIT; full matching LICENSE.TXT companion and embedded THIRD-PARTY-NOTICES.txt retained",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-dotnet-diagnostics-10.0.750501-r1/dotnet-trace.10.0.750501.nupkg"
+  },
+  "26e9e7b9a8d9c68c87cb3da879c328edd096d587720039095de6a522d2c8765e": {
+    "name": "frida-node-17.24.0-macos-arm64.tgz",
+    "sha256": "26e9e7b9a8d9c68c87cb3da879c328edd096d587720039095de6a522d2c8765e",
+    "size": 46957847,
+    "format": "tgz",
+    "root": "frida-node-17.24.0",
+    "license": "Frida LGPL-2.0 WITH WxWindows-exception-3.1; included full LGPL/third-party notices apply to dependencies",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-frida-node-17.24.0-r1/frida-node-17.24.0-macos-arm64.tgz"
   },
   "40f68357d6b62a08429c36228907c995e3449283b6d2e08ba5a4e30b53a09725": {
     "name": "ghidra-12.1.2-arm64_sonoma.tar.gz",
@@ -89,6 +134,42 @@
     "license": "MIT and included dependency notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-ilspy-11.1.0.9782-r1/ilspycmd.11.1.0.9782.zip"
   },
+  "3df8fefb9f15fd80d250dc78517a659f4ec67159f73fdc5df71b7100709213d5": {
+    "name": "lldb-23.1.3-macos-arm64.tgz",
+    "sha256": "3df8fefb9f15fd80d250dc78517a659f4ec67159f73fdc5df71b7100709213d5",
+    "size": 56154665,
+    "format": "tgz",
+    "root": "lldb-23.1.3",
+    "license": "Apache-2.0 WITH LLVM-exception and included LLVM notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-23.1.3-r1/lldb-23.1.3-macos-arm64.tgz"
+  },
+  "2599cb40282085a61a3d8b50003d75d556010d764c05a9bf30e45a7c7b5b7861": {
+    "name": "llvm-utilities-23.1.3-macos-arm64.tgz",
+    "sha256": "2599cb40282085a61a3d8b50003d75d556010d764c05a9bf30e45a7c7b5b7861",
+    "size": 23318992,
+    "format": "tgz",
+    "root": "llvm-utilities-23.1.3",
+    "license": "Apache-2.0 WITH LLVM-exception and included LLVM notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-llvm-utilities-23.1.3-r1/llvm-utilities-23.1.3-macos-arm64.tgz"
+  },
+  "7bb52641f2e0dc9b8f5b180be4b0ab46b6d3127361a4e817938175603850c714": {
+    "name": "7zip-26.04-macos-universal.tgz",
+    "sha256": "7bb52641f2e0dc9b8f5b180be4b0ab46b6d3127361a4e817938175603850c714",
+    "size": 2657149,
+    "format": "tgz",
+    "root": ".",
+    "license": "LGPL-2.1-or-later, BSD-3-Clause and unRAR restriction; included License.txt and manual",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-sevenzip-26.04-r1/7zip-26.04-macos-universal.tgz"
+  },
+  "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3": {
+    "name": "strace-7.2-linux-x64.tgz",
+    "sha256": "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3",
+    "size": 612329,
+    "format": "tgz",
+    "root": "strace-7.2",
+    "license": "LGPL-2.1-or-later (strace), MIT (first-party launcher), retained source/UAPI notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-strace-7.2-r1/strace-7.2-linux-x64.tgz"
+  },
   "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201": {
     "name": "temurin-21.0.11+10-darwin-arm64.tar.gz",
     "sha256": "6ebcf221c9b41507b14c098e93c6ead6440b8d9bd154f8ec666c4c73abbdb201",
@@ -124,5 +205,35 @@
     "root": "jdk-21.0.11+10",
     "license": "GPL-2.0 WITH Classpath-exception-2.0; included legal notices",
     "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-temurin-21.0.11-10-r1/temurin-21.0.11+10-win32-x64.zip"
+  },
+  "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10": {
+    "name": "ProcessMonitor-4.12.zip",
+    "url": "https://download.sysinternals.com/files/ProcessMonitor.zip",
+    "sha256": "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10",
+    "size": 3202206,
+    "format": "zip",
+    "root": ".",
+    "license": "Microsoft Sysinternals license terms; no redistribution by insight-cli",
+    "delivery": {
+      "kind": "vendor-direct",
+      "publisher": "Microsoft",
+      "termsUrl": "https://learn.microsoft.com/en-us/sysinternals/license-terms",
+      "reason": "Redistribution is prohibited. Explicit vendor acquisition with a pinned SHA256 and local cache was selected by the owner."
+    }
+  },
+  "4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20": {
+    "name": "WinDbg-1.2610.1001.0.msixbundle",
+    "url": "https://windbg.download.prss.microsoft.com/dbazure/prod/1-2610-1001-0/windbg.msixbundle",
+    "sha256": "4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20",
+    "size": 1203512387,
+    "format": "zip",
+    "root": ".",
+    "license": "Microsoft WinDbg license terms embedded in the inspected bundle; no redistribution by insight-cli",
+    "delivery": {
+      "kind": "vendor-direct",
+      "publisher": "Microsoft",
+      "termsUrl": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/",
+      "reason": "The inspected bundled EULA prohibits redistribution. Use the exact vendor-version URL, pinned SHA256 and local cache."
+    }
   }
 }

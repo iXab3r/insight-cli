@@ -1,0 +1,22 @@
+{
+  "platform": "darwin-arm64-and-arm64e",
+  "compiler": "Apple clang version 17.0.0 (clang-1700.3.19.1)",
+  "sdk": "26.0",
+  "sourceSha256": "8c0673605c86736c2a694fbb344bcc1dee136ee68aa042ebd889eb84572bc635",
+  "sha256": "cd5ebd65aa419b79cb327f2ae872f98f3fd222b93049c909e409776eab65b8ef",
+  "size": 99648,
+  "flags": [
+    "-arch",
+    "arm64",
+    "-arch",
+    "arm64e",
+    "-mmacosx-version-min=13.0",
+    "-dynamiclib",
+    "-Oz",
+    "-g0",
+    "-fno-ident",
+    "-fno-stack-protector",
+    "-Wl,-install_name,@rpath/insight-deadline-alarm.dylib"
+  ],
+  "reproducibility": "Two independent builds in different temporary directories produced identical bytes. ARM64e requires the Apple ABI and LC_UUID; both slices only link system libSystem."
+}

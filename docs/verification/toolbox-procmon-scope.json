@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "exportWithNoFilter": true,
+  "subjectReadObserved": true,
+  "configurationSha256": "4f3aa16b7546acdf0d12fc8ac77854683d9c22166776100bdfb8d2669e9ffbc3",
+  "matchingReads": 1,
+  "scope": "Native pre-capture filter feasibility; public adapter and agent gates pending",
+  "version": "4.12",
+  "totalEvents": 5,
+  "passed": true,
+  "allExportedRowsMatchOwnedPidAndPath": true,
+  "captureExited": true,
+  "noiseProcessReadSameFile": true,
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39052406564",
+  "sourceCommit": "f42bdf1",
+  "publicAdapterGate": "pending",
+  "independentAgentGate": "pending account quota"
+}

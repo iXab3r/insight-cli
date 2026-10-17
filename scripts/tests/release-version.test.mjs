@@ -28,6 +28,8 @@ async function fixture(t){
     [versionFiles[3]]:'---\nname: insight-re\n---\n# Insight RE 0.2.0\n\nProject rules take precedence.\n',
     'untouched.txt':'original\n',
   };
+  const registry=JSON.parse(await readFile(new URL('../../skills/ghidra-coordinator/runtime/toolbox.json',import.meta.url),'utf8'));
+  for(const skill of registry.skills.slice(2))values['skills/ghidra-coordinator/'+skill.path]='---\nname: '+skill.name+'\n---\n# '+skill.title+' 0.2.0\n\nAdditional shipped tool.\n';
   for(const [path,text] of Object.entries(values)){await mkdir(dirname(join(root,path)),{recursive:true});await writeFile(join(root,path),text);}
   return root;
 }
@@ -62,6 +64,7 @@ test('version application changes only owned metadata/headings and preserves dep
   assert.equal(lock.packages['node_modules/external'].version,'0.2.0');assert.equal(lock.version,'0.1.0');
   assert.match(await readFile(join(root,versionFiles[2]),'utf8'),/# insight-cli 0.2.1\n\nExisting rules stay intact/);
   assert.match(await readFile(join(root,versionFiles[3]),'utf8'),/# Insight RE 0.2.1\n\nProject rules take precedence/);
+  for(const path of versionFiles.slice(4))assert.match(await readFile(join(root,path),'utf8'),/ 0\.2\.1\n\nAdditional shipped tool/);
   assert.equal(await readFile(join(root,'untouched.txt'),'utf8'),'original\n');
 });
 

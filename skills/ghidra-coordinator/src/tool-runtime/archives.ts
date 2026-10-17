@@ -42,11 +42,12 @@ export async function extractArchive(file:string,destination:string,format:'tgz'
   })().catch(failed);});archive.readEntry();
  });
 }
-export async function cacheArtifact(artifact:ToolArtifact,cache:string,fetcher:typeof fetch,signal:AbortSignal,offline=false){
+export async function cacheArtifact(artifact:ToolArtifact,cache:string,fetcher:typeof fetch,signal:AbortSignal,offline=false,vendorDirect=false){
  signal.throwIfAborted();await mkdir(cache,{recursive:true,mode:0o700});const path=join(cache,artifact.sha256+'.'+artifact.format);
  try{const cached=await lstat(path);if(cached.isFile()&&(artifact.size===undefined||cached.size===artifact.size)&&await fileSha256(path,signal)===artifact.sha256)return path;fail('binding','Cached runtime archive failed its SHA256 check; remove the corrupt cache entry before retrying.');}
  catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
  if(offline)fail('configuration','Required runtime archive is not cached; run the tool download command before using --offline.',{artifact:artifact.name,sha256:artifact.sha256});
+ if(artifact.delivery?.kind==='vendor-direct'&&!vendorDirect)fail('configuration','This non-redistributable runtime requires explicit vendor download; use --vendor-direct or supply a local archive.',{artifact:artifact.name,publisher:artifact.delivery.publisher,termsUrl:artifact.delivery.termsUrl});
  const temporary=path+'.partial-'+randomUUID();
  try{
   const response=await fetcher(artifact.url,{signal,cache:'no-store'});if(!response.ok||!response.body)fail('download','Pinned runtime download failed.',{artifact:artifact.name,status:response.status});

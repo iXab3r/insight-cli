@@ -29,6 +29,21 @@ to your agent host, or explicitly give the agent the path returned by `insight-c
 insight-re --json`. See [agent setup](references/agent-setup.md) for tested project-local
 Codex setup and a practical usability check. Installation leaves agent settings unchanged.
 
+## Discover the toolbox
+
+```sh
+insight-cli tools list --json
+insight-cli tools show die --json
+insight-cli skill insight-die --json
+```
+
+The catalog describes the adapters and their packaged skills before any runtime is downloaded.
+Use each tool's `status` to check the selected profile, then follow its skill and generated help.
+The toolbox includes Ghidra, ILSpy, 7-Zip, LLVM utilities, DiE, LLDB, Frida, WinDbg, strace and .NET dump/stack/trace; platform
+and capability limits are explicit per tool. A partial classification or a failed native process
+is not a complete finding. Preserve useful output in ordinary project files and checkpoint it
+with `artifacts save` when useful. Existing project RE instructions retain precedence.
+
 ## Start
 
 ```sh

@@ -1,12 +1,12 @@
 # Agent toolbox: delivery plan
 
-Status: full delivery scope selected on 2026-10-17; detailed plan proposed, planning only. The owner selected the product direction:
+Status: full delivery authorized and implementation started on 2026-10-17. TB-01 audit is in progress; the shared Factory local-discovery/access fixes are merged and pinned; 7-Zip has native CLI and independently reviewed cold/prepared agent proof on a frozen package; LLVM native/Gherkin and reviewed medium-reasoning cold/prepared unit proofs passed; low-reasoning semantic failures remain recorded. Combined full-toolbox acceptance remains open. The owner selected the product direction:
 insight-cli supplies a toolbox with a discoverable skill for each analytical tool. The
 runtime-only delivery and two successful worker workflows do not establish toolbox readiness.
-This document does not start implementation or mark future tools delivered.
+The current [inventory audit](TOOLBOX-AUDIT.md) records pinned candidates, delivery exceptions and unresolved feasibility checks.
 
 Execution tracker: [epic #23](https://github.com/iXab3r/insight-cli/issues/23), with nine native stage sub-issues
-and 22 tool/capability sub-issues under TB-07. All remain planned/open.
+and 22 tool/capability sub-issues under TB-07. All remain open; completion requires the evidence below.
 
 ## Outcome and scope
 
@@ -33,6 +33,12 @@ Current verified inventory:
 | artifacts | File/folder save implemented | Supporting application with concise workflow guidance; no artificial download/install lifecycle |
 | Ghidra Server/headless/GUI/debugger roles | Managed within Ghidra | Explicit capabilities/lifecycle under Ghidra; list separately only when independently useful to the agent |
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
+| 7-Zip | Public CLI adapter, dedicated skill, native Gherkin and independent cold/prepared host trials passed for the recorded package | Container inventory, integrity and bounded ordinary-file recovery |
+| LLVM utilities | Adapter/skill and pinned four-utility distribution implemented; native/Gherkin and reviewed cold/prepared medium-reasoning unit gates passed on the recorded package | Headers, linkage, symbols, instruction windows and PDB records |
+| .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; dump cold/prepared agent proof reviewed; stack interrupted by model-account limit and trace agent gates pending | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
+| Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin passed; independent agent gate pending | Header and compiler/runtime/packer triage with explicit partial scan results |
+| LLDB | Owned-launch adapter/skill and pinned debugger/library/debugserver distribution; native snapshots and lifetime fault proof passed; independent model gate pending | Breakpoint arguments/returns, registers, memory and backtrace with kernel deadline after owner loss |
+| Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector and helper fault proof passed on the recorded candidate; independent model gate pending | Runtime argument/result corroboration while preserving the external target lifetime |
 | Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
@@ -99,7 +105,9 @@ runner is not assumed to provide it. TB-01 verifies this before that tool is imp
 
 These sources inform investigation; they do not establish that our adapters or redistribution
 rights are already verified. Check exact distribution terms, prerequisites and automation before
-promising a mirror or admitting a platform. If a source cannot be mirrored, record that obstacle
+promising a mirror or admitting a platform. ProcMon uses the owner-selected exception: explicit Microsoft download, local cache and pinned
+SHA256. WinDbg has the same verified redistribution restriction and uses a separate explicit
+Microsoft delivery policy. If another source cannot be mirrored, record that obstacle
 and decide a permitted delivery path explicitly; never silently fall back to arbitrary upstream.
 
 ## Agreed design direction
@@ -125,7 +133,7 @@ existing artifact/hash catalogs continue to describe distribution bytes, not res
 
 ### Catalog and proposed CLI surface
 
-These additions are proposed, not existing commands:
+The foundation candidate now implements these commands; whole-toolbox acceptance is still pending:
 
 ```text
 insight-cli tools list --json
@@ -157,8 +165,9 @@ release path would leave later tool skills stale.
 Provide one explicit connection of the toolbox bundle to the supported host, with update and
 removal semantics scoped to owned entries. New admitted tool skills must become discoverable
 without a bespoke user procedure for each tool. npm installation does not silently edit agent
-settings. Select the concrete connection/export mechanism during TB-02 rather than implementing
-several competing installers. Verify actual startup metadata and implicit routing.
+settings. The selected mechanism is one explicit project-local link to the deterministic `skill-bundle`,
+whose path comes from `skill --json`. A stable global npm prefix carries upgrades; disconnect
+removes only that owned link. This avoids a second host configuration store or per-tool installers. Verify actual startup metadata and implicit routing.
 
 Factory owns generic help/discovery/bootstrap and IPC behavior. Its open
 [skill policy issue #29](https://github.com/iXab3r/EyeAuras.CliFactory/issues/29) already owns the
@@ -172,9 +181,10 @@ to stop another agent's owner. Grant no broad network access just to reach a loc
 
 ## Ordered work hierarchy
 
-Statuses below are planned, not completed. Technical inspection/design of TB-01 has started;
-the owner has selected full inventory scope and tool-specific applicability. This planning
-turn does not start implementation or count the preliminary inventory as a completed audit.
+TB-01 is in progress. Required discovery/skill foundation work for TB-02–TB-05 is in draft PR #55;
+no phase exit is claimed. TB-06–TB-09 remain pending their gates. The owner selected full inventory
+scope and tool-specific applicability. Preliminary metadata and vendor probes do not complete
+the audit or the tool delivery.
 
 | ID | Deliverable | Depends on | Acceptance / exit condition |
 | --- | --- | --- | --- |
@@ -275,3 +285,14 @@ report an actual blocker rather than inventing support or silently removing a to
 Host mechanics, reference packaging, admission checks, test bindings and scoped IPC diagnostics
 are engineering tasks within the selected direction. Publishing a new npm version remains a
 separate release action, not implied by planning.
+
+Native delivery checkpoint: LLDB and Frida have managed runtimes, public facades,
+packaged guidance and real macOS fault/CLI proof. WinDbg now has a Windows x64
+read-only dump facade and native Gherkin proof; strace has a source-built mirrored
+Linux x64 runtime and native Gherkin proof. Exact artifacts and limitations are in
+`verification/toolbox-{lldb,frida,windbg,strace}.json`. Windows common Job Object
+lifetime also passed real completion, timeout, kill, owner-loss and overflow cases.
+These checkpoints do not close independent agent or combined full-inventory gates.
+ProcMon pre-capture scope, dnSpyEx debug/edit, TShark, mitmproxy and the six capability
+units remain in the ordered implementation list. Account inference quota only
+defers the independent model gates.

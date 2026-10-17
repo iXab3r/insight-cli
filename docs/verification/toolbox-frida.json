@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "state": "native_passed_model_pending",
+  "platform": "darwin-arm64",
+  "version": "17.24.0",
+  "packageVersion": "0.2.0",
+  "artifactSha256": "f1d077a8e6356982f07979a96e04b2cf09f6406b9275dc87944bc697ca5aad0f",
+  "packageBuild": "6df17bb952fdf2754ff7ed63449128e63b1b6206abe8a9cce35679f3acea5f92",
+  "distribution": {
+    "release": "https://github.com/iXab3r/insight-cli/releases/tag/tool-frida-node-17.24.0-r1",
+    "immutable": true,
+    "runtimeSha256": "26e9e7b9a8d9c68c87cb3da879c328edd096d587720039095de6a522d2c8765e",
+    "sourceSetSha256": "f94e06be6fcb0672e1c84aedfbcaf4021722a152fda8f667c30afa1f89f4f9e6",
+    "upstreamNativeBindingArchiveSha256": "791513b6efa1ce82298e60a984e10574930eba33d13a15dc27d1344c4013d327",
+    "exactSourceAndComponentArchives": 69,
+    "runtimeNpmComponents": 6,
+    "vendorInstallScriptsExecuted": false,
+    "allThreeReleaseAssetsReadbackVerified": true,
+    "freshDownloadOfflineInstallAndNativeProbe": true
+  },
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Installed public CLI native proof; independent model gate pending",
+    "version": "0.2.0",
+    "fixtureSha256": "71148cba91a025b8e82f6ada93a0c5e78fa49beab367c42f14b3f0806014889c",
+    "observations": [
+      {
+        "kind": "quote",
+        "count": 4,
+        "result": 52
+      },
+      {
+        "kind": "quote",
+        "count": 5,
+        "result": 65
+      },
+      {
+        "kind": "quote",
+        "count": 6,
+        "result": 78
+      },
+      {
+        "kind": "quote",
+        "count": 7,
+        "result": 91
+      },
+      {
+        "kind": "quote",
+        "count": 8,
+        "result": 104
+      },
+      {
+        "kind": "quote",
+        "count": 9,
+        "result": 117
+      },
+      {
+        "kind": "quote",
+        "count": 10,
+        "result": 130
+      },
+      {
+        "kind": "quote",
+        "count": 11,
+        "result": 109
+      },
+      {
+        "kind": "quote",
+        "count": 12,
+        "result": 117
+      },
+      {
+        "kind": "quote",
+        "count": 13,
+        "result": 125
+      },
+      {
+        "kind": "quote",
+        "count": 14,
+        "result": 133
+      },
+      {
+        "kind": "quote",
+        "count": 15,
+        "result": 141
+      },
+      {
+        "kind": "quote",
+        "count": 1,
+        "result": 13
+      },
+      {
+        "kind": "quote",
+        "count": 2,
+        "result": 26
+      },
+      {
+        "kind": "quote",
+        "count": 3,
+        "result": 39
+      },
+      {
+        "kind": "quote",
+        "count": 4,
+        "result": 52
+      },
+      {
+        "kind": "quote",
+        "count": 5,
+        "result": 65
+      },
+      {
+        "kind": "quote",
+        "count": 6,
+        "result": 78
+      },
+      {
+        "kind": "quote",
+        "count": 7,
+        "result": 91
+      }
+    ],
+    "checks": {
+      "offlineManagedInstall": true,
+      "nativeBindingProbe": true,
+      "boundedRuntimeModules": true,
+      "selectedModuleExport": true,
+      "realArgumentReturnPairs": true,
+      "runtimeVersionChecked": true,
+      "scriptSourceHashed": true,
+      "explicitUnloadAndDetach": true,
+      "targetLifetimePreserved": true,
+      "scriptErrorsPartial": true,
+      "externalDependencyDriftRefused": true,
+      "externalFilesPreserved": true,
+      "wrongExternalExecutableRefused": true,
+      "knownBareAttachFailureExplicit": true,
+      "checkpointSurvivesRemoval": true,
+      "inputUnchanged": true,
+      "terminalOwnedCollectors": true,
+      "strictDirectivePreserved": true
+    },
+    "cleanupComplete": true
+  },
+  "faults": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Installed public CLI collector lifetime faults on owned worker",
+    "results": [
+      {
+        "action": "stop",
+        "helpersObserved": 1,
+        "nativeHelperDeadlinesAcknowledged": true,
+        "helpersAbsent": true,
+        "targetAlive": true,
+        "temporaryHookNoLongerActive": true,
+        "collectorState": "exited",
+        "outcome": "stopped"
+      },
+      {
+        "action": "kill",
+        "helpersObserved": 1,
+        "nativeHelperDeadlinesAcknowledged": true,
+        "helpersAbsent": true,
+        "targetAlive": true,
+        "temporaryHookNoLongerActive": true,
+        "collectorState": "exited",
+        "outcome": "killed"
+      },
+      {
+        "action": "owner_loss",
+        "helpersObserved": 1,
+        "nativeHelperDeadlinesAcknowledged": true,
+        "helpersAbsent": true,
+        "targetAlive": true,
+        "temporaryHookNoLongerActive": true,
+        "collectorState": "exited",
+        "outcome": "unknown"
+      }
+    ],
+    "checks": {
+      "publicStop": true,
+      "publicKill": true,
+      "ownerLoss": true,
+      "externalTargetAlive": true,
+      "hookRemovedAfterCollectorLoss": true,
+      "noReplayAfterOwnerLoss": true,
+      "terminalCollectors": true,
+      "allNativeHelpersAbsent": true,
+      "removalBlockedWhileHelperAlive": true,
+      "intentRetainedBeforeOwnerLoss": true
+    },
+    "cleanupComplete": true
+  },
+  "gherkin": [
+    {
+      "run": "bab73c6ddd9d4f38a559c7138608b7f7",
+      "node": "24.19.0",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "duration": "5m40s",
+      "sameGloballyInstalledArtifact": false,
+      "artifactSha256": "311eb4594b943b9a5e0c66b84071054cf6e28a5c127fef80ac8f26b068f823a6",
+      "scope": "All nine native toolbox scenarios on the preceding frozen candidate; final strict receipt-schema hardening is verified by the two scoped native cases."
+    }
+  ],
+  "offline": {
+    "tests": 189,
+    "passed": 187,
+    "skippedOptIn": 2,
+    "failed": 0,
+    "releaseTests": 27,
+    "releasePassed": 27,
+    "isolatedPackInstall": true,
+    "nativeDeadlineConstructorReproducibleBuilds": 2
+  },
+  "retainedFailures": [
+    "Pinned bare-C attach fails when CoreFoundation is absent; matched CoreFoundation-loaded worker succeeds. No implicit framework injection into the target.",
+    "Default Node/native collector SIGTERM did not stop within the public stop deadline. Explicit interrupted unload/detach fixes graceful stop.",
+    "Collector-only lifetime assertions missed orphan frida-helper processes after SIGKILL/owner loss. Independent process-tree inspection found them; all three original lab helpers were identified by their exact owned run paths and removed. Inherited native deadlines and child receipts now bound helper lifetime.",
+    "ARM64-only constructor could not load in the ARM64e helper. A UUID-less universal build was also rejected. Pinned Apple toolchain ARM64/ARM64e with LC_UUID passed loader/native deadline proof.",
+    "The old installation guard checked only retained terminal collector state. Shared status/guard now preserves native_children_pending until helper exit, with durable exit acknowledgments against PID reuse.",
+    "Automation bootstrap overwrote INSIGHT_NODE, so the first final nine-scenario run used Node 26.4.0. The override is now honored; the Node 24 run is recorded separately."
+  ],
+  "remaining": [
+    "Independent cold/prepared model gates blocked by evaluator account quota; no native test is counted as an independent model pass.",
+    "Combined complete 16-tool/6-capability acceptance."
+  ],
+  "earlierNativeRuns": [
+    {
+      "run": "830015741afc4a1bb2072b97ad75d8c4",
+      "node": "26.4.0",
+      "passed": 9,
+      "artifactSha256": "cf537370eb2de4c5dea0451a4216018805d98c686e220c86914f1d21c7839bed"
+    },
+    {
+      "run": "0169d3f856e24642a4ee97cb048c18dd",
+      "node": "24.19.0",
+      "passed": 9,
+      "artifactSha256": "cf537370eb2de4c5dea0451a4216018805d98c686e220c86914f1d21c7839bed"
+    }
+  ],
+  "additionalHardening": "Native child receipts now require complete PID/birth/deadline fields; malformed records cannot acknowledge cleanup. The isolated regression suite covers missing birth fields. Final scoped native verification is recorded against its new artifact.",
+  "priorCombinedArtifactSha256": "311eb4594b943b9a5e0c66b84071054cf6e28a5c127fef80ac8f26b068f823a6",
+  "scopedNativeFinal": {
+    "node": "24.19.0",
+    "checks": "Full Frida CLI plus stop/kill/owner-loss/native-children removal guards on this artifact",
+    "caseCount": 2,
+    "installation": "Isolated installed npm artifact (spaces/Unicode path), no source checkout runtime"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-sevenzip-26.04-r1",
+  "title": "7-Zip 26.04 macOS universal",
+  "redistribution": "Unmodified official 7-Zip 26.04 universal macOS tar archive, recompressed from xz to gzip for the managed runtime. Original tar bytes, manuals and all license notices are retained. LGPL/BSD/unRAR terms apply as specified in License.txt; the exact corresponding source is included. No vendor installer is executed.",
+  "assets": [
+    {
+      "name": "7zip-26.04-macos-universal.tgz",
+      "upstream": "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-mac.tar.xz",
+      "sha256": "7bb52641f2e0dc9b8f5b180be4b0ab46b6d3127361a4e817938175603850c714",
+      "size": 2657149,
+      "recompress": {
+        "format": "xz-to-gzip",
+        "sha256": "bee04358cbcbc7106273cee0e8d72916db2696c48067a3538c34d8cd6fd16578",
+        "size": 1861928
+      },
+      "format": "tgz",
+      "root": ".",
+      "role": "binary",
+      "license": "LGPL-2.1-or-later, BSD-3-Clause and unRAR restriction; included License.txt and manual"
+    },
+    {
+      "name": "7z2604-src.tar.xz",
+      "upstream": "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-src.tar.xz",
+      "sha256": "9691944c0fe0d01bb49373a704fb983fd33bc98b1738695179dfbf99ac1734f6",
+      "size": 1560440,
+      "role": "source",
+      "license": "Corresponding source and full LGPL/BSD/unRAR notices"
+    }
+  ]
+}
