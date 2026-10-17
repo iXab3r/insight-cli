@@ -79,6 +79,12 @@
       "title": "Insight .NET Trace",
       "path": "skills/insight-dotnet-trace/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-die",
+      "title": "Insight Detect It Easy",
+      "path": "skills/insight-die/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -450,6 +456,56 @@
           "ordinary project evidence",
           "original target lifetime preserved",
           "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "die",
+      "namespace": "die",
+      "kind": "analytical",
+      "skill": "insight-die",
+      "purpose": "Classify unknown binaries and containers by header and compiler/runtime/packer signature evidence before choosing a research tool",
+      "inputs": [
+        "unknown executable",
+        "binary image",
+        "supported container"
+      ],
+      "tasks": [
+        "static file and architecture triage",
+        "compiler/runtime/packer signatures",
+        "focused handoff to managed or native inspection"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private DiE console 3.21 and pinned database",
+        "five private dynamic Qt 6.11.0 frameworks",
+        "macOS 13+"
+      ],
+      "workflowCommands": [
+        "die classify"
+      ],
+      "limitations": [
+        "Heuristic signatures require corroboration; Unknown does not prove absence",
+        "Pinned upstream signature errors produce an explicit partial result even on native exit zero",
+        "Managed AnyCPU header architecture does not establish eventual process architecture"
+      ],
+      "evaluationCase": {
+        "id": "binary-triage-and-handoff",
+        "inputFamily": "native-and-managed-images",
+        "task": "Classify the supplied unknown binaries, select useful follow-up analysis for each, corroborate an important finding and retain evidence including any scan uncertainty.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct header and managed/native distinction",
+          "signature errors retained as partial",
+          "useful next-tool handoff",
+          "ordinary project evidence",
+          "owned cleanup"
         ]
       }
     },

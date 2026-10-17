@@ -13,10 +13,12 @@ export function validateRecipe(recipe){
  for(const a of recipe.assets){
   if(a.delivery?.kind==='vendor-direct')throw Error('Vendor-only distribution must never be mirrored');
   if(!/^[a-zA-Z0-9_.+-]+$/.test(a.name)||names.has(a.name)||a.name==='manifest.json')throw Error('Invalid/duplicate asset name');names.add(a.name);
-  if(a.repack){const r=a.repack;if(a.recompress||r.format!=='tar-zstd-subset-v1'||!(/^[a-f0-9]{64}$/.test(r.sha256))||!Number.isSafeInteger(r.size)||r.size<1||r.size>=2*1024**3||!(/^[a-zA-Z0-9][a-zA-Z0-9_.+-]*\/$/.test(r.stripPrefix))||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.entries)||!r.entries.length||r.entries.length>100||new Set(r.entries).size!==r.entries.length||r.entries.some(p=>typeof p!=='string'||p.startsWith('/')||p.includes('\\')||p.split('/').some(s=>!s||s==='.'||s==='..')))throw Error('Unpinned or unsafe subset recipe');}
+  if(a.repack?.format==='die-pkg-console-v1'){const r=a.repack;if(a.recompress||!(/^[a-f0-9]{64}$/.test(r.sha256))||!Number.isSafeInteger(r.size)||r.size<1||r.size>=2*1024**3||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.sourceAssets)||r.sourceAssets.length!==4||new Set(r.sourceAssets).size!==4)throw Error('Unpinned DiE console recipe');}
+  else if(a.repack){const r=a.repack;if(a.recompress||r.format!=='tar-zstd-subset-v1'||!(/^[a-f0-9]{64}$/.test(r.sha256))||!Number.isSafeInteger(r.size)||r.size<1||r.size>=2*1024**3||!(/^[a-zA-Z0-9][a-zA-Z0-9_.+-]*\/$/.test(r.stripPrefix))||!(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(r.outputRoot))||!Array.isArray(r.entries)||!r.entries.length||r.entries.length>100||new Set(r.entries).size!==r.entries.length||r.entries.some(p=>typeof p!=='string'||p.startsWith('/')||p.includes('\\')||p.split('/').some(s=>!s||s==='.'||s==='..')))throw Error('Unpinned or unsafe subset recipe');}
   if(a.recompress&&(a.recompress.format!=='xz-to-gzip'||!(/^[a-f0-9]{64}$/.test(a.recompress.sha256))||!Number.isSafeInteger(a.recompress.size)||a.recompress.size<1||a.recompress.size>=2*1024**3))throw Error('Unpinned recompression input');
   if(new URL(a.upstream).protocol!=='https:'||!/^[a-f0-9]{64}$/.test(a.sha256)||!Number.isSafeInteger(a.size)||a.size<1||a.size>=2*1024**3||!a.license)throw Error('Unpinned distribution asset');
  }
+ for(const a of recipe.assets)for(const name of a.repack?.sourceAssets??[]){if(!recipe.assets.some(v=>v.name===name&&v.role==='source'&&!v.repack&&!v.recompress))throw Error('Missing DiE source companion');}
  for(const a of recipe.assets)for(const extra of a.repack?.appendAssets??[]){const other=recipe.assets.find(v=>v.name===extra.asset);if(!other||other.repack||other.recompress||other.role!=='license-companion'||other.size>1024**2||typeof extra.path!=='string'||extra.path.startsWith('/')||extra.path.includes('\\')||extra.path.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Subset notice companion is absent or unsafe');}
  if(!recipe.assets.some(a=>a.role==='source'))throw Error('Distribution source companion is required');
  return recipe;
@@ -27,9 +29,11 @@ export async function acquire(a,directory,fetcher=fetch,companions=[]){
  const file=join(directory,a.name);if(await matches(file,a))return file;
  const partial=file+'.partial';await rm(partial,{force:true});
  if(a.repack){
-  const input=await acquire({...a,name:a.name+'.upstream.zst',sha256:a.repack.sha256,size:a.repack.size,repack:undefined},directory,fetcher);
+  const input=await acquire({...a,name:a.name+(a.repack.format==='die-pkg-console-v1'?'.upstream.pkg':'.upstream.zst'),sha256:a.repack.sha256,size:a.repack.size,repack:undefined},directory,fetcher);
   const appendFiles=[];for(const extra of a.repack.appendAssets??[]){const companion=companions.find(v=>v.name===extra.asset);if(!companion)throw Error('Missing subset notice companion');appendFiles.push({file:await acquire(companion,directory,fetcher,companions),path:extra.path});}
-  execFileSync('python3',['-I',fileURLToPath(new URL('./tool-repack.py',import.meta.url)),input,partial,JSON.stringify({...a.repack,appendFiles})],{timeout:600000,stdio:['ignore','pipe','pipe']});
+  const sourceFiles=[];for(const name of a.repack.sourceAssets??[]){const source=companions.find(v=>v.name===name);if(!source)throw Error('Missing DiE source companion');sourceFiles.push({asset:name,file:await acquire(source,directory,fetcher,companions)});}
+  const helper=a.repack.format==='die-pkg-console-v1'?'./tool-repack-die.py':'./tool-repack.py';
+  execFileSync('python3',['-I',fileURLToPath(new URL(helper,import.meta.url)),input,partial,JSON.stringify({...a.repack,appendFiles,sourceFiles})],{timeout:600000,stdio:['ignore','pipe','pipe']});
   if(!await matches(partial,a)){await rm(partial,{force:true});throw Error('Subset asset differs from reviewed recipe: '+a.name);}
   await rename(partial,file);return file;
  }

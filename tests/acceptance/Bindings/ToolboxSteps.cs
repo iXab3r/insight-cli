@@ -49,6 +49,10 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI investigates the owned managed worker")]
     public Task InspectManaged() => Execute("scripts/toolbox/native-diagnostics.mjs", Value("diagnosticsArchives"), Value("dotnetArchive"), Value("managedWorker"));
 
+    [When("the public CLI classifies owned native and managed inputs")]
+    public Task Classify() => Execute("scripts/toolbox/native-die.mjs", Value("dieArchive"), Value("nativeSubjects"), Value("managedWorker"));
+
+    [Then("header and signature evidence retains scan uncertainty")]
     [Then("the waiting stack and heap state have retained diagnostic evidence")]
     [Then("native linkage and focused debug evidence survive tool removal")]
     [Then("all shipped skills are visible and unrelated project skills survive")]

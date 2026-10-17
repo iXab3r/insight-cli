@@ -181,3 +181,25 @@ credit from the native tests. The native `cpu-sampling` profile is
 Linux collect-linux only in this pinned version; our default is `dotnet-sampled-thread-time`,
 which measures thread wall-clock samples and can rank a sleep at 100% without proving CPU use.
 Collectors do not take ownership of the explicitly selected external target process.
+
+### Detect It Easy native admission
+
+The 3.21 console subset retains its exact upstream executable/database and the five required
+dynamic Qt 6.11.0 frameworks. Its deterministic maintainer recipe uses `pkgutil --expand-full`
+on macOS, runs no installer, embeds full license/attribution files from the complete matching
+DiE source and three Qt source archives, and retains those archives as release companions.
+No system Qt installation is required. Copied external bundles can replace compatible Qt
+libraries and be reselected; managed integrity verification does not silently accept changes.
+
+`die classify` combines file information with compiler/runtime/packer signatures. Native PE
+probes exposed the pinned database's JavaScript TypeError after JSON despite exit zero; the
+facade retains useful data plus diagnostics with `state: partial` and `complete: false`.
+Unknown signatures never prove absence. The skill distinguishes AnyCPU PE header architecture
+from eventual process architecture and routes managed/native follow-up to the appropriate tool.
+
+[DiE evidence](verification/toolbox-die.json) records the installed package, unchanged inputs,
+external database drift refusal, preserved files/materials and all five native Gherkin scenarios.
+The first DiE doctor failed because generic installation fingerprints mixed canonical link
+targets with an aliased `/tmp` root. Canonical relative targets fix relocation without accepting
+escaping links; dedicated regression tests cover both. Independent cold/prepared model trials
+remain pending after the evaluator account usage limit; native proof is not agent acceptance.

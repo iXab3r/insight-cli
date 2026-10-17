@@ -85,3 +85,12 @@ with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:list(a.extr
  const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Synthetic',assets:[asset,license,a]};validateRecipe(recipe);
  for(const bad of [{...repack,entries:['../escape']},{...repack,appendAssets:[{asset:license.name,path:'../escape'}]},{...repack,appendAssets:[{asset:'absent',path:'LICENSE'}]}])assert.throws(()=>validateRecipe({...recipe,assets:[{...asset,repack:bad},license,a]}));
 });
+
+test('DiE console recipe requires four exact matching source companions and safe output identity',()=>{
+ const sources=['engine.tar.gz','qtbase.tar.xz','qtdeclarative.tar.xz','qt5compat.tar.xz'].map(name=>({...a,name}));
+ const repack={format:'die-pkg-console-v1',sha256:a.sha256,size:a.size,outputRoot:'diec-3.21',sourceAssets:sources.map(s=>s.name)};
+ const binary={...a,name:'diec.tgz',role:'binary',repack};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',assets:[binary,...sources],redistribution:'Synthetic'};
+ validateRecipe(recipe);
+ for(const bad of [{...repack,sourceAssets:[]},{...repack,sourceAssets:[...repack.sourceAssets.slice(1),'absent.tar.xz']},{...repack,sourceAssets:Array(4).fill('engine.tar.gz')},{...repack,outputRoot:'../escape'},{...repack,sha256:'no'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...binary,repack:bad},...sources]}));
+});

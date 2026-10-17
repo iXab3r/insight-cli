@@ -77,7 +77,7 @@ export async function removeInstallation(root:string,id:string){
  await rm(path,{recursive:true,force:true});
 }
 export async function treeFingerprint(root:string){
- const hash=createHash('sha256');let count=0;
+ const hash=createHash('sha256'),canonicalRoot=await realpath(root);let count=0;
  async function visit(path:string):Promise<void>{
   for(const name of (await readdir(path)).sort()){
    if(path===root&&name==='ready.json')continue;
@@ -85,8 +85,8 @@ export async function treeFingerprint(root:string){
    hash.update(relative(root,at).replaceAll('\\','/')+'\0');
    if(st.isDirectory())await visit(at);
    else if(st.isSymbolicLink()){
-    const destination=await realpath(at);if(!destination.startsWith((await realpath(root))+sep))fail('binding','Installed component link escapes its owned directory.');
-    hash.update('link:'+relative(root,destination));
+    const destination=await realpath(at);if(!destination.startsWith(canonicalRoot+sep))fail('binding','Installed component link escapes its owned directory.');
+    hash.update('link:'+relative(canonicalRoot,destination));
    }else if(st.isFile()){const leaf=createHash('sha256');for await(const b of createReadStream(at))leaf.update(b);hash.update('file:'+st.size+':'+leaf.digest('hex')+'\0');}
    else fail('binding','Unsupported tool installation entry.');
   }

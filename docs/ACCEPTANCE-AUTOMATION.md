@@ -160,10 +160,10 @@ packed/global-installed macOS candidate and all named research/recovery/removal 
 
 ## Toolbox development gates
 
-`Toolbox.feature` adds four separately selected native scenarios: actual Codex bundle
+`Toolbox.feature` adds five separately selected native scenarios: actual Codex bundle
 metadata connect/disconnect, a globally installed public 7-Zip container workflow, and
 LLVM investigation of owned PE/PDB, ELF and Mach-O images, plus live managed
-stack/heap/trace research. Run
+stack/heap/trace research and DiE classification with explicit scan uncertainty. Run
 
 ```sh
 INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
@@ -176,14 +176,19 @@ and explicit Clang/lld-link/ld.lld paths (a maintainer fixture prerequisite, not
 `diagnosticsArchives`, `dotnetArchive` and `managedWorker` select the three retained NuGet
 archives, the private runtime archive and a maintainer-built owned console fixture. Build
 `tests/acceptance/fixtures/diagnostics/Probe.csproj` into a disposable output directory.
+`dieArchive` selects the reviewed console/Qt archive for header and signature triage of those inputs.
 The acceptance project excludes fixture source and nested build output from its own assembly.
 The driver creates a separate profile and test-only short temporary
 AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
-No ordinary user profile or installed tool is reset. All four scenarios passed together (4/4); an earlier runner-path failure was corrected
+No ordinary user profile or installed tool is reset. All five scenarios passed together (5/5) on the recorded DiE candidate; an earlier runner-path failure was corrected
 in the fixture setup. LLVM verifies each advertised family, the hexadecimal type index,
 output limits/overwrite refusal and external sibling drift/preservation. Managed diagnostics
 verify the waiting stack, real heap/object/field/root evidence, a two-second thread-time
 trace, readable Speedscope export, preserved external target lifetime and retained licenses.
+DiE verifies native/managed headers, .NET signatures, explicit partial results on actual upstream
+script errors, pagination, output preservation and external database drift. The first five-case
+run failed only DiE doctor: canonicalizing framework symlink targets fixed staging relocation.
+Its regression still rejects changed bytes and links escaping owned installation storage.
 
 These are native developer gates, not independent model acceptance. The
 [managed agent evidence](verification/toolbox-agent-managed.json) separately records cold

@@ -1,4 +1,13 @@
 {
+  "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af": {
+    "name": "diec-3.21-macos-arm64.tgz",
+    "sha256": "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af",
+    "size": 14343048,
+    "format": "tgz",
+    "root": "diec-3.21",
+    "license": "MIT engine/components; Qt LGPL-3.0 and full included third-party notices",
+    "url": "https://github.com/iXab3r/insight-cli/releases/download/tool-diec-3.21-r1/diec-3.21-macos-arm64.tgz"
+  },
   "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77": {
     "name": "dotnet-runtime-10.0.13-linux-x64.tar.gz",
     "sha256": "958c952691d2c3f8ce21f717f4e911c02b5da0e21ead21bd576368c454b79c77",

@@ -22,3 +22,8 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI investigates the owned managed worker
     Then the waiting stack and heap state have retained diagnostic evidence
+
+  Scenario: Classify unknown binaries without hiding signature failures
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI classifies owned native and managed inputs
+    Then header and signature evidence retains scan uncertainty
