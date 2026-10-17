@@ -302,3 +302,25 @@ external dependency drift and checkpoint preservation. Native acceptance is pend
 run; no agent or whole-toolbox acceptance is claimed. The first new Windows build exposed
 CRLF-sensitive skill metadata admission before native execution; parsing now accepts both
 line endings without rewriting source files.
+
+### Verified Linux strace source build
+
+The [Linux build receipt](verification/toolbox-strace-build.json) records two identical
+stripped strace 7.2 builds with GCC 11.4.0 on glibc 2.35, actual owned configuration
+reads, `--kill-on-exit`, timeout, launcher-kill and owner-loss cleanup. Optional
+SELinux/termcap/unwinding/mpers dependencies are disabled; system libc and loader
+remain the only linked requirements. The exact runtime, full source, first-party
+launcher/build sources and MIT license are published as immutable
+`tool-strace-7.2-r1`; all six assets were downloaded and verified after upload.
+The public owned-launch facade and relocatable skill now join discovery; Linux
+Gherkin acceptance is pending its native run. Model quota does not block that work.
+
+### Verified Windows executor lifetime
+
+The [Windows native receipt](verification/toolbox-windows-job.json) proves completion,
+timeout, launcher kill, owner kill and output overflow leave no live owned child or
+grandchild on Windows x64/Node 24. PowerShell module autoload hung before child creation
+in the isolated environment; JSON and receipt I/O moved into the small .NET executor.
+PowerShell now loads the DLL and invokes it without profile, module, compiler or JSON
+cmdlet dependencies. The replacement DLL reproduced byte-for-byte in two builds.
+WinDbg public CLI acceptance remains a separate gate.

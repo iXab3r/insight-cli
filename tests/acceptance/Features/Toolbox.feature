@@ -47,3 +47,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public instrumentation collector suffers controlled lifetime faults
     Then the original target remains alive with its ordinary behavior restored
+
+  @strace @linux
+  Scenario: Explain real Linux file reads and bound owned process lifetime
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI traces the owned Linux worker
+    Then syscall evidence and checkpoints survive tracer removal

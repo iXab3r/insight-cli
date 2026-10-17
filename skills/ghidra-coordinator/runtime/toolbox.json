@@ -103,6 +103,12 @@
       "title": "Insight WinDbg",
       "path": "skills/insight-windbg/SKILL.md",
       "resources": {}
+    },
+    {
+      "name": "insight-strace",
+      "title": "Insight strace",
+      "path": "skills/insight-strace/SKILL.md",
+      "resources": {}
     }
   ],
   "tools": [
@@ -670,6 +676,53 @@
           "ordinary project evidence",
           "input and symbol companions preserved",
           "owned debugger cleanup"
+        ]
+      }
+    },
+    {
+      "id": "strace",
+      "namespace": "strace",
+      "kind": "analytical",
+      "skill": "insight-strace",
+      "purpose": "Observe actual file, process, I/O and network syscalls from an authorized owned Linux launch",
+      "inputs": [
+        "native x64 ELF executable",
+        "literal program arguments"
+      ],
+      "tasks": [
+        "explain real file reads and writes",
+        "corroborate process and syscall behavior"
+      ],
+      "platforms": [
+        "linux-x64"
+      ],
+      "dependencies": [
+        "Linux glibc 2.35+",
+        "ptrace permission for owned children"
+      ],
+      "workflowCommands": [
+        "strace trace"
+      ],
+      "limitations": [
+        "Only an owned new native launch; no arbitrary PID attach",
+        "Application side effects require authorization; adjacent executable sidecars are not copied",
+        "Native trace and program stderr share the stderr stream; bounded strings and filters leave unobserved operations unknown"
+      ],
+      "evaluationCase": {
+        "id": "linux-owned-file-observation",
+        "inputFamily": "owned-native-file-worker",
+        "task": "Determine which configuration the supplied Linux worker actually reads and what state it reports. Retain concrete path and read evidence, preserve original inputs and verify only owned captures are cleaned up.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual owned configuration read and value",
+          "ordinary project evidence",
+          "bounded evidence and explicit unknowns",
+          "owned launch cleanup",
+          "original inputs preserved"
         ]
       }
     },

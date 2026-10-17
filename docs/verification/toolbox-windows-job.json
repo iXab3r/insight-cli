@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "cases": [
+    {
+      "mode": "complete",
+      "subjectGone": true,
+      "grandchildGone": true,
+      "launcherGone": true
+    },
+    {
+      "mode": "timeout",
+      "subjectGone": true,
+      "grandchildGone": true,
+      "launcherGone": true
+    },
+    {
+      "mode": "launcher-kill",
+      "subjectGone": true,
+      "grandchildGone": true,
+      "launcherGone": true
+    },
+    {
+      "mode": "owner-kill",
+      "subjectGone": true,
+      "grandchildGone": true,
+      "launcherGone": true
+    },
+    {
+      "mode": "flood",
+      "subjectGone": true,
+      "grandchildGone": true,
+      "launcherGone": true
+    }
+  ],
+  "passed": true,
+  "scope": "Owned Windows executor native acceptance; tool-specific CLI and model gates remain separate",
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39051296627",
+  "sourceCommit": "e17b5b8",
+  "nativeHelper": {
+    "sdk": "10.0.303",
+    "target": "netstandard2.0",
+    "inputs": {
+      "OwnedJob.cs": "7e883b5f4bc70acd321fa20be07e75d83cff3d95bbcb888bd822ea87ad75cdb6",
+      "Insight.WindowsJob.csproj": "90217b0c46f3eaeeecce73e9b8daaf47d14f07fd51f85c94395959f6ec4be114",
+      "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
+      "packages.lock.json": "00d9e92c7bc1e7939bc82114d870ab6657841901237cab1daa8ed01cac976e5e"
+    },
+    "sha256": "d1b1f72ef574984ae6ebb1dbe022baa5047bc2ea24b5318a15c1b0da11ae91ad",
+    "size": 10240,
+    "launcherSha256": "d600cdbc701d3ec652d32d4518b5b0737f193770e81fe44106bfbacf73e4f0c9",
+    "reproducibility": "Two independent temporary-directory builds produced identical bytes; native Windows acceptance is recorded separately."
+  }
+}

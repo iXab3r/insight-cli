@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/toolbox-strace-linux.yml'
       - 'scripts/toolbox/build-strace-linux.py'
+      - 'scripts/toolbox/*strace*.mjs'
+      - 'skills/ghidra-coordinator/src/strace.ts'
       - 'skills/ghidra-coordinator/runtime/native/child-deadline-linux.c'
 permissions:
   contents: read
@@ -22,4 +24,45 @@ jobs:
         with:
           name: toolbox-strace-distribution
           path: ${{ runner.temp }}/insight-strace-distribution/*
+          if-no-files-found: error
+
+  public-cli-gherkin:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.303'
+      - run: npm ci
+      - run: npm run build
+      - name: Obtain the reviewed immutable runtime
+        run: gh release download tool-strace-7.2-r1 --pattern strace-7.2-linux-x64.tgz --dir "$RUNNER_TEMP"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Prepare owned inputs and install the npm candidate globally in isolation
+        run: node scripts/toolbox/prepare-strace-fixture.mjs
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_STRACE_ARCHIVE: ${{ runner.temp }}/strace-7.2-linux-x64.tgz
+      - name: Investigate and clean up through public CLI scenarios
+        run: node scripts/run-automation.mjs test --suite acceptance --tag strace --property RestoreLockedMode=true --timeout-seconds 600
+        env:
+          INSIGHT_NATIVE_DISPOSABLE: '1'
+          INSIGHT_NATIVE_PROGRESS: '1'
+      - name: Retain public native proof without raw process data
+        if: success()
+        shell: bash
+        run: |
+          find .automation -path '*/result.json' -exec cp {} "$RUNNER_TEMP/toolbox-strace-cli.json" \;
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: toolbox-strace-cli
+          path: ${{ runner.temp }}/toolbox-strace-cli.json
           if-no-files-found: error
