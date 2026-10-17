@@ -57,3 +57,11 @@ test('external family binding detects sibling changes and selects a new identity
  const second=await installer.install({executable});assert.notEqual(second.installation,first.installation);await installer.selected();
  await installer.uninstall();assert.equal(await readFile(executable,'utf8'),'stable primary');assert.equal(await readFile(sibling,'utf8'),'version two');
 });
+
+test('an adapted external runtime executes only its verified owned copy and uninstall preserves the original',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile,readFile,stat}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join,dirname}=await import('node:path');const {ToolInstaller}=await import('../src/tool-runtime/installer.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-external-copy-'));t.after(()=>rm(root,{recursive:true,force:true}));const original=join(root,'vendor');await writeFile(original,'original vendor bytes');const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal} as unknown as import('@eyeauras/cli-factory').CommandContext;
+ const installer=new ToolInstaller(context,{id:'adapted',primary:'adapted',preparationId:'v1',components:()=>{throw Error('No download');},launch:()=>{throw Error('Not managed');},probe:async()=>({version:'fixture'}),prepareExternal:async(_input,stage)=>{const executable=join(stage,'execution/tool');await mkdir(dirname(executable),{recursive:true});await writeFile(executable,'adapted owned bytes');return {executable,arguments:['typed'],environment:{}};}});
+ await installer.install({executable:original});const selected=await installer.selected();assert.equal(selected.executable,original);assert.ok(selected.execution);assert.ok(selected.execution.executable.startsWith(selected.root));await installer.use(async execution=>assert.equal(await readFile(execution.executable,'utf8'),'adapted owned bytes'));
+ await writeFile(selected.execution.executable,'corrupt copy');await assert.rejects(installer.use(async()=>assert.fail('Corrupt owned copy must not run')),/execution copy differs/);await installer.uninstall();assert.equal(await readFile(original,'utf8'),'original vendor bytes');await assert.rejects(stat(selected.root),{code:'ENOENT'});
+});

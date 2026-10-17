@@ -7,13 +7,16 @@ import type {ToolArtifact,ToolInstallation} from './definition.js';
 import {listProcesses} from './supervisor.js';
 import {digest,fail,text} from '../model.js';
 export interface ToolLaunch {executable:string;arguments:string[];environment:Record<string,string>}
-export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>;externalInputs?:Record<string,string>;noticeDigest?:string}
+export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>;externalInputs?:Record<string,string>;noticeDigest?:string;execution?:ToolLaunch;executionFingerprint?:string}
 export interface InstallDescriptor {
  id:string;primary:string;components:()=>Record<string,ToolArtifact>;
  launch:(roots:Record<string,string>)=>ToolLaunch;
  probe:(launch:ToolLaunch,c:CommandContext)=>Promise<Record<string,unknown>>;
  /** Reviewed nested packaging preparation inside owned staging, before probe/fingerprint. */
  prepare?:(roots:Record<string,string>,c:CommandContext)=>Promise<void>;
+ /** Exceptional upstream adaptation: prepare an owned execution copy, never rewrite external software. */
+ prepareExternal?:(executable:string,stage:string,c:CommandContext)=>Promise<ToolLaunch>;
+ preparationId?:string;
  /** Known sibling executables/data files needed by an external tool family. */
  externalInputs?:(executable:string,c:CommandContext)=>Promise<Record<string,string>>;
  /** Full retained notices copied into owned installation storage, including external selections. */
@@ -50,18 +53,21 @@ export class ToolInstaller {
   const externalDigest=external?await fileSha256(external,this.c.signal):undefined;
   const externalInputs=external&&this.descriptor.externalInputs?await this.descriptor.externalInputs(external,this.c):undefined;
   const noticeDigest=this.descriptor.noticeFiles?digest(this.descriptor.noticeFiles):undefined;
-  const id=digest({tool:this.descriptor.id,schema:1,platform:process.platform,architecture:process.arch,external,externalDigest,components,...(externalInputs?{externalInputs}:{}),...(noticeDigest?{noticeDigest}:{})});
+  const id=digest({tool:this.descriptor.id,schema:1,platform:process.platform,architecture:process.arch,external,externalDigest,components,...(externalInputs?{externalInputs}:{}),...(noticeDigest?{noticeDigest}:{}),...(this.descriptor.preparationId?{preparationId:this.descriptor.preparationId}:{})});
   const rootsAt=(directory:string)=>Object.fromEntries(Object.entries(consumed).map(([part,v])=>{archiveName(v.artifact.root);return [part,join(directory,part,v.artifact.root)];}));
   const selected=await installationStage<SelectedTool>(this.root,id,async(stage,installed)=>{
    for(const [part,v]of Object.entries(consumed))await extractArchive(v.path,join(stage,part),v.artifact.format,this.c.signal);
    if(!external)await this.descriptor.prepare?.(rootsAt(stage),this.c);
+   const execution=external?await this.descriptor.prepareExternal?.(external,stage,this.c):undefined;
+   if(execution&&!resolve(execution.executable).startsWith(resolve(stage)+sep))fail('binding','Prepared external execution must use owned staging.');
    for(const [name,body]of Object.entries(this.descriptor.noticeFiles??{})){archiveName(name);if(!name||Buffer.byteLength(body)>1024**2)fail('configuration','Invalid bundled license notice.');const destination=join(stage,name);await mkdir(dirname(destination),{recursive:true,mode:0o700});await writeFile(destination,body,{flag:'wx',mode:0o600});}
    const stageLaunch=external?{executable:external,arguments:[],environment:{}}:this.descriptor.launch(rootsAt(stage));
    const lastProbe=await this.descriptor.probe(stageLaunch,this.c),launch=external?stageLaunch:this.descriptor.launch(rootsAt(installed));
    const fingerprint=external?await fileSha256(external,this.c.signal):await treeFingerprint(stage);
    if(external&&fingerprint!==externalDigest)fail('binding','External tool changed during installation.');
    if(externalInputs&&digest(await this.descriptor.externalInputs!(external!,this.c))!==digest(externalInputs))fail('binding','External tool family changed during installation.');
-   return {schema:1,tool:this.descriptor.id,id,mode:external?'external':'managed',root:installed,...launch,roots:rootsAt(installed),components,fingerprint,lastProbe,...(externalInputs?{externalInputs}:{}),...(noticeDigest?{noticeDigest}:{}),selectedAt:new Date().toISOString()};
+   const installedExecution=execution?{...execution,executable:join(installed,execution.executable.slice(stage.length+1))}:undefined;
+   return {schema:1,tool:this.descriptor.id,id,mode:external?'external':'managed',root:installed,...launch,roots:rootsAt(installed),components,fingerprint,lastProbe,...(externalInputs?{externalInputs}:{}),...(noticeDigest?{noticeDigest}:{}),...(installedExecution?{execution:installedExecution,executionFingerprint:await treeFingerprint(stage)}:{}),selectedAt:new Date().toISOString()};
   },value=>this.verify(value),this.c.signal);
   await atomicWrite(join(this.root,'selection.json'),{...selected,selectedAt:new Date().toISOString()});
   return {tool:this.descriptor.id,state:'installed',mode:selected.mode,installation:id,executable:selected.executable,components,checks:selected.lastProbe};
@@ -76,11 +82,12 @@ export class ToolInstaller {
   if(this.descriptor.noticeFiles){if(selected.noticeDigest!==digest(this.descriptor.noticeFiles))fail('binding','Bundled license notices changed; reinstall the selected tool.');for(const [name,body]of Object.entries(this.descriptor.noticeFiles)){archiveName(name);try{if(await readFile(join(root,name),'utf8')!==body)fail('binding','Installed license notice differs from its retained text.');}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')fail('binding','Installed license notice is missing.');throw error;}}}
   const actual=selected.mode==='external'?await fileSha256(selected.executable,this.c.signal):await treeFingerprint(root);
   if(actual!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
+  if(selected.execution&&(!resolve(selected.execution.executable).startsWith(resolve(root)+sep)||await treeFingerprint(root)!==selected.executionFingerprint))fail('binding','Owned external-tool execution copy differs from its verified installation.');
   if(selected.mode==='external'&&this.descriptor.externalInputs&&(!selected.externalInputs||digest(await this.descriptor.externalInputs(selected.executable,this.c))!==digest(selected.externalInputs)))fail('binding','External tool family differs from its verified installation.');
  }
  async use<T>(action:(selection:SelectedTool)=>Promise<T>):Promise<T>{
   const lease=await withToolUse(this.directory,this.descriptor.id,()=>this.selected(),this.c.signal);
-  try{return await action(lease.value);}finally{lease.release();}
+  try{return await action({...lease.value,...lease.value.execution});}finally{lease.release();}
  }
  async selected(){
   const selected=await this.receipt();if(!selected||selected.uninstalledAt)fail('configuration','Tool is not installed; run insight-cli '+this.descriptor.id+' install.');

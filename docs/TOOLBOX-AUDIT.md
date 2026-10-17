@@ -407,3 +407,13 @@ publisher. The first-party MIT bridge's sources, contracts hashes, prebuilt mana
 and two-build provenance are packaged; no third-party reference DLLs or consumer compiler
 are included. Managed Core target setup additionally delivers the existing private .NET
 10.0.13 component; other target runtime versions require a compatible explicit host.
+
+The subsequent Core gate found an upstream ANSI `LoadLibraryEx` import: dbgshim was
+present and x64, but its Unicode installation path could not be loaded. An attempted
+executable device alias timed out and was removed. Preparation now corrects the exact
+pinned GPL engine import in owned staging, retaining metadata tokens and its original
+strong-name identity with the upstream deliberately public source build key. It never
+patches external files: an external selection gets a separately fingerprinted owned copy
+of the 867 exact vendor files. This preparation and the Core/public CLI flow still require
+native confirmation; the earlier Framework receipt remains scoped historical evidence.
+See [local loader correction](../skills/ghidra-coordinator/runtime/native/dnspy-extension/UNICODE-LOADER.md).

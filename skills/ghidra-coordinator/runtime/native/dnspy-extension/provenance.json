@@ -4,10 +4,12 @@
   "target": "net10.0-windows",
   "sourceLicense": "MIT",
   "inputs": {
-    "Bridge.cs": "d56e865b9e5dd729461c026d341080bd4ddddf43c110196c2970f84eb3e3a377",
+    "Bridge.cs": "6007a0234ebaaf082fb6c81668917d7632c2c36eeeaeeaf327bd6cc9fe422857",
     "Insight.DnSpy.csproj": "006adc7b2b8090d6a7273a00805aab82b1d496f33542d8cdf6216412018801e9",
     "NuGet.Config": "17f8588bd0874138a10e92eb9efee6e346a173591124ab57872f019475f8f81a",
-    "packages.lock.json": "3ea8c3864c8f23b39364f9f40beb868ce4d8ecb62c5a25188dca037417beed3b"
+    "packages.lock.json": "3ea8c3864c8f23b39364f9f40beb868ce4d8ecb62c5a25188dca037417beed3b",
+    "upstream-public-build.snk": "6f84725f0755f4428cc8c95c5d1d0997445a057266bf810dc090607d4a2d0ae6",
+    "vendor-files.json": "692277fde179ae44574ec115cdfdbb685fccbb1c2a489117d26993c413a90d1a"
   },
   "contracts": {
     "dnSpy.Contracts.DnSpy.dll": "1b883b87bb52dad1b1ef677ad7e80e288df2cdf913c791f7bd3072a36e2839e2",
@@ -19,7 +21,7 @@
     "dnlib.dll": "3b88e0948e2a6c49e5372c7e7d27817f5d2fb7ffed949b40cc98a2e5037b73ef",
     "System.ComponentModel.Composition.dll": "b2365dd9e0ced7cfa274d44ff668b8b0df28d4417b8e5e660e1c82df1239d7d8"
   },
-  "sha256": "36d115499817977f42316d7ea2f3fe86065ddbff8ebd2bec08be3394a418ee45",
-  "size": 30208,
+  "sha256": "a17deec2a84709d29324895fce1747e87d13ff36f0daf3e5128f45bf1f95e77e",
+  "size": 36352,
   "reproducible": true
 }
