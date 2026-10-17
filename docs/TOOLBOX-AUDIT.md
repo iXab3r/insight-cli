@@ -417,3 +417,10 @@ patches external files: an external selection gets a separately fingerprinted ow
 of the 867 exact vendor files. This preparation and the Core/public CLI flow still require
 native confirmation; the earlier Framework receipt remains scoped historical evidence.
 See [local loader correction](../skills/ghidra-coordinator/runtime/native/dnspy-extension/UNICODE-LOADER.md).
+
+The corrected loader subsequently passed the actual Framework **and Core** breakpoint,
+argument, stack, copied IL edit and changed-behavior gate on source `ef28f51`
+([receipt](verification/toolbox-dnspy-debug-edit.json)). The Windows source build also
+matched the packaged extension SHA256. Public CLI installation separately exposed private
+plan path validation; its gate remains open while normalized comparisons and field-specific
+errors are tested. No model acceptance is inferred from this native API proof.
