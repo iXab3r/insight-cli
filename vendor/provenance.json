@@ -1,12 +1,12 @@
 {
   "package": "@eyeauras/cli-factory-ipc",
   "version": "0.1.0",
-  "file": "factory-ipc-74e7a64.tgz",
-  "sha256": "e5b7d51994e6a039ad63300b440186ebb8ba613dd3595a6586446a98768169c3",
+  "file": "factory-ipc-7c403d8.tgz",
+  "sha256": "3dc8c4d5f510eea2e8232aec29690674d5451e58a2b94e6309bba1859b579c8e",
   "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
-  "commit": "74e7a64a7c026e85298dfc9bbbc8ad9c19b51998",
+  "commit": "7c403d88c4bd837eacd856d1eaa6ec4862748e1b",
   "license": "MIT",
   "distribution": "Prepared official Factory package; immutable content pin, no registry publication",
-  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/53",
-  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/73459aecc88da6f878988b64f71ab72b34a83c45/vendor/factory-ipc-74e7a64.tgz"
+  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/55",
+  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/f47f6d14e8aadc6b6778a6e3627bbb08909521d2/vendor/factory-ipc-7c403d8.tgz"
 }

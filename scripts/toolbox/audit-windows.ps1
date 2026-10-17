@@ -75,8 +75,11 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $export=Finish (Launch $launcher @('/AcceptEula','/Quiet','/OpenLog',$pml,'/SaveAs',$csv))
         $rows=@();if(Test-Path $csv){$rows=@(Import-Csv $csv)}
         $ownedRows=@($rows | Where-Object { $_.'Process Name' -eq 'InsightOwnedProbe.exe' })
-        $matches=@($ownedRows | Where-Object { $_.Path -eq $config -and $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS' }).Count
-        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
+        $configPath=[System.IO.Path]::GetFullPath($config)
+        $configRows=@($ownedRows | Where-Object { $_.Path.Replace('/','\') -eq $configPath })
+        $matches=@($configRows | Where-Object { $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS' }).Count
+        $configOperations=@($configRows | Group-Object Operation,Result | ForEach-Object { @{operation=$_.Group[0].Operation;result=$_.Group[0].Result;count=$_.Count} })
+        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
         # Raw process captures can include unrelated runner data: never upload them.
         Remove-Item $pml,$csv -Force -ErrorAction SilentlyContinue
     } catch { $result.tools.procmon=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }
