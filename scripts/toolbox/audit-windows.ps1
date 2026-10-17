@@ -66,8 +66,18 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $procmon=Join-Path $root 'procmon';Expand-Checked $zip $procmon
         $launcher=Join-Path $procmon 'Procmon64.exe';$pml=Join-Path $root 'owned.pml';$csv=Join-Path $root 'owned.csv'
         $capture=Launch $launcher @('/AcceptEula','/Quiet','/Minimized','/BackingFile',$pml)
-        $idle=Finish (Launch $launcher @('/WaitForIdle'))
-        Start-Sleep -Seconds 2
+        # /WaitForIdle can return 1 before the first instance has registered its endpoint.
+        # A fixed sleep cannot establish readiness before the short fixture starts.
+        $readinessStarted=[System.Diagnostics.Stopwatch]::StartNew();$idle=$null;$readinessAttempts=0
+        do {
+            if($capture.process.HasExited) { throw 'Owned Process Monitor exited before readiness' }
+            $readinessAttempts++
+            $idle=Finish (Launch $launcher @('/AcceptEula','/Quiet','/WaitForIdle')) 10000
+            if($idle.code -eq 0) { break }
+            Start-Sleep -Milliseconds 500
+        } while($readinessStarted.ElapsedMilliseconds -lt 30000)
+        if($idle.code -ne 0) { throw 'Owned Process Monitor did not report capture readiness' }
+        $readinessMs=$readinessStarted.ElapsedMilliseconds
         $driverRunning=@(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -like 'PROCMON*' -and $_.State -eq 'Running' }).Count -gt 0
         $ran=Finish (Launch $exe @($config))
         $stop=Finish (Launch $launcher @('/Terminate'))
@@ -79,7 +89,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
         $configRows=@($ownedRows | Where-Object { $_.Path.Replace('/','\') -eq $configPath })
         $matches=@($configRows | Where-Object { $_.Operation -eq 'ReadFile' -and $_.Result -eq 'SUCCESS' }).Count
         $configOperations=@($configRows | Group-Object Operation,Result | ForEach-Object { @{operation=$_.Group[0].Operation;result=$_.Group[0].Result;count=$_.Count} })
-        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
+        $result.tools.procmon=@{version='4.12';ownedConfigReadObserved=($ran.code -eq 0 -and $matches -gt 0);matchingEvents=$matches;configOperations=$configOperations;configSuffixEvents=@($ownedRows | Where-Object { $_.Path.EndsWith("owned-settings.txt") }).Count;totalEvents=$rows.Count;ownedEvents=$ownedRows.Count;columns=@(if($rows.Count){$rows[0].PSObject.Properties.Name});captureExited=$capture.process.HasExited;idleExit=$idle.code;readinessAttempts=$readinessAttempts;readinessMs=$readinessMs;fixtureExit=$ran.code;stopExit=$stop.code;exportExit=$export.code;driverRunning=$driverRunning;fixtureOutputValid=$ran.stdout.Contains('OWNED_CONFIG=fixture-value');captureScope='disposable runner feasibility only; product-side prefilter still required';adapterAccepted=$false}
         # Raw process captures can include unrelated runner data: never upload them.
         Remove-Item $pml,$csv -Force -ErrorAction SilentlyContinue
     } catch { $result.tools.procmon=@{feasible=$false;errorType=$_.Exception.GetType().Name;adapterAccepted=$false} }
