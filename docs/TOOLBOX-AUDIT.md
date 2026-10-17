@@ -363,3 +363,25 @@ process is injected or assigned to the job. The verifier requires an actual filt
 read, saved private FilterRules, unchanged global settings, automatic runtime exit
 and Unicode directory support. Source, license and deterministic build provenance
 are retained; public admission stays blocked until those native checks pass.
+
+
+### ProcMon private preferences and public native gate passed
+
+The [private HKCU receipt](verification/toolbox-procmon-isolation.json) supersedes the
+pending prototype check above: 25 successful scoped reads, private captured FilterRules,
+two constructor receipts/hives, unchanged global preferences and Unicode paths passed.
+The [globally installed CLI receipt](verification/toolbox-procmon.json) then passed
+Windows Gherkin: explicit Microsoft download, offline archive installation, 59 actual
+successful reads of the selected PID/path, bounded pagination, cached inspection without
+recollection, stop/kill uncertainty, preserved borrowed process/settings, external runtime
+drift refusal and retained checkpoints. Timed native capture returned 1 while its complete
+PML/readback was valid; exit code alone is not the research gate. Raw PML/CSV/hives remain
+private. The packaged helper imports only KERNEL32/ADVAPI32; two independent native builds
+matched. No compiler or existing-process injection is needed at runtime.
+
+The current inventory contains 13 analytical families plus supporting artifacts, with 16
+packaged skills including entry and RE guidance. Remaining tool families are dnSpyEx,
+TShark and mitmproxy, plus the six planned capabilities. dnSpyEx has a typed extension
+compiled against its pinned actual contracts; its debugger/editor native gate is running.
+Independent cold/prepared model and combined full-inventory gates remain open; inference
+quota does not block implementation or native checks.

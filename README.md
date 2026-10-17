@@ -5,8 +5,8 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
-The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, strace and .NET diagnostics with pinned
-GitHub Release assets, private runtime dependencies, common lifecycle and owned process controls.
+The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, ProcMon, strace and .NET diagnostics with pinned
+distributions (GitHub mirrors or explicit Microsoft-only acquisition), private runtime dependencies, common lifecycle and owned process controls.
 Toolbox additions remain under development in [draft PR #55](https://github.com/iXab3r/insight-cli/pull/55);
 the registry package has not been updated by these source commits.
 [Native acceptance](docs/TOOL-RUNTIME-ACCEPTANCE.md) covers the packed globally installed

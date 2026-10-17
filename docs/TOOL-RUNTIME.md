@@ -271,5 +271,29 @@ native ProcMon mutex serializes its upstream singleton across profiles and
 refuses existing native instances before launching a collector. Native tests
 cover borrowed-subject preservation and exclusion separately from the earlier
 five lifetime cases. File-version probes use a minimal .NET property reader,
-with no PowerShell module autoload. ProcMon preference isolation is still a
-separate pending admission check.
+with no PowerShell module autoload. The [seven native cases](verification/toolbox-windows-job.json)
+passed completion, timeout, launcher/owner loss, overflow, singleton exclusion and
+borrowed-subject birth mismatch.
+
+ProcMon's [private HKCU proof](verification/toolbox-procmon-isolation.json) and
+[public CLI Gherkin proof](verification/toolbox-procmon.json) passed on Windows x64.
+Its first-party native shim redirects HKCU to an application hive under the owned
+run directory before the new collector's entry point. Pinned MIT Detours source,
+license, reproducible native DLL and provenance are packaged; consumers need no compiler.
+A temporary process-owned NT directory alias supports Unicode profile paths without
+placing native DLLs outside AppData. Constructor nonce/PID/error receipts are required.
+The alias and hive handles close on process death; global user preferences are untouched.
+
+`procmon observe --pid PID [--path EXACT_NATIVE_PATH] --duration-seconds 5` loads
+PID/path rules and destructive filtering before collection. An elevated authorized
+owner is required; no automatic elevation occurs. The borrowed process is never
+terminated. A global native singleton guard rejects existing ProcMon instances.
+`procmon inspect PROCESS_ID` reads the retained PML/export without collecting again;
+export receipts bind PML/CSV hashes. Both collector and export use private HKCU.
+The native `/Runtime` capture returns 1 on the verified successful path; the facade
+requires a verified job/constructor receipt and complete scoped native readback as
+well. A lost/interrupted capture remains partial even if its PML can be read.
+Native PML queries are bounded to 64 MiB and CSV to 16 MiB/100000 events. Earlier,
+filtered or dropped activity is unknown; an empty interval does not establish absence.
+Uninstall retains captures/checkpoints and external executables. Microsoft's driver
+runs in the OS; this facade does not claim kernel isolation or remove shared drivers.

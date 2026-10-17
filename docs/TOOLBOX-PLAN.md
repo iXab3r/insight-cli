@@ -290,9 +290,11 @@ Native delivery checkpoint: LLDB and Frida have managed runtimes, public facades
 packaged guidance and real macOS fault/CLI proof. WinDbg now has a Windows x64
 read-only dump facade and native Gherkin proof; strace has a source-built mirrored
 Linux x64 runtime and native Gherkin proof. Exact artifacts and limitations are in
-`verification/toolbox-{lldb,frida,windbg,strace}.json`. Windows common Job Object
+`verification/toolbox-{lldb,frida,windbg,strace,procmon}.json`. Windows common Job Object
 lifetime also passed real completion, timeout, kill, owner-loss and overflow cases.
 These checkpoints do not close independent agent or combined full-inventory gates.
-ProcMon pre-capture scope, dnSpyEx debug/edit, TShark, mitmproxy and the six capability
-units remain in the ordered implementation list. Account inference quota only
+ProcMon now has a vendor-direct lifecycle, scoped observe/retained inspect facade,
+private HKCU, packaged skill and public Windows Gherkin proof, including stop/kill,
+external drift and preserved original process/settings. dnSpyEx debug/edit, TShark,
+mitmproxy and the six capability units remain in the ordered implementation list. Account inference quota only
 defers the independent model gates.
