@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent model gates pending",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "packageSha256": "c17c005cf6f73a959cafd74d590dc4156c5979b4d8d3991cbc1ba066744481d2",
+  "build": {
+    "version": 1,
+    "artifact": "82cd6b5bcec7de7f95c4490b6da3498910155666dc07525350bcef391f3516bf"
+  },
+  "checks": {
+    "explicitVendorDownload": true,
+    "offlineInstall": true,
+    "doctor": true,
+    "actualScopedRead": true,
+    "unicodePaths": true,
+    "boundedPagination": true,
+    "cachedInspectWithoutRecollection": true,
+    "stopAndKillPartial": true,
+    "borrowedSubjectPreserved": true,
+    "globalPreferencesPreserved": true,
+    "checkpointPreserved": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "matchingReads": 59,
+  "faults": [
+    "stop",
+    "kill"
+  ],
+  "cleanupComplete": true,
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39057789181",
+  "sourceCommit": "d2d00d8"
+}

@@ -1,0 +1,344 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_business_units_passed_on_recorded_artifacts",
+  "scope": "Independent source-unavailable Ghidra GUI/CPU family; static interop and standalone LLDB gates are separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "history": [
+    {
+      "trial": "prepared-r1",
+      "artifactSha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The static formula and independent published annotation readback were correct; the GUI supervisor rejected the actual /tmp alias before LLDB launch. The retained original profile was subsequently recovered by the maintainer without repeating its old unknown CPU intent."
+    },
+    {
+      "trial": "prepared-r2",
+      "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The agent misread host execution yields as empty CLI replies and opened another context; it left its own first context/server. Maintainer cleanup is recorded separately. An automatic approval rejection prevented an uncertain interrupt repeat."
+    },
+    {
+      "trial": "cold-r2",
+      "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "partial_not_accepted",
+      "review": "The agent observed a real paused quote argument and retained disconnected registers, but no actual return. Step-out failed; static publication/readback does not complete the CPU task."
+    },
+    {
+      "trial": "prepared-entry-r3",
+      "artifactSha256": "7dd8f9ee6a1f8fe645dfb4d674595582d8173c2cd5c4c74985dd646a8b9aa75e",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The agent used stopped entry but resumed the short-lived target without first setting its function breakpoint. No actual quote call/return or complete published finding was observed."
+    },
+    {
+      "trial": "cold-entry-r3",
+      "artifactSha256": "7dd8f9ee6a1f8fe645dfb4d674595582d8173c2cd5c4c74985dd646a8b9aa75e",
+      "transportState": "failed",
+      "timedOut": true,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The controller reached its 900-second deadline. Unknown CPU journals and local snapshots were retained; controller/maintainer cleanup is not an autonomous agent pass."
+    },
+    {
+      "trial": "cold-entry-r4",
+      "artifactSha256": "1ebc6c438f2b1582af0e1e42f7af95e2e11dda9f3bb9d49e2a3344a85b3a9b52",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "elapsedMs": 648694,
+      "candidateInvocations": 75,
+      "inputsUnchanged": true,
+      "reviewState": "partial_not_accepted",
+      "review": "The agent observed the actual count-10 argument at the quote breakpoint, retained a disconnected trace and published/read back the qualified static annotation from another context. It explicitly declined to claim an actual return or count-11 observation after the uncertain step. The complete CPU task did not pass."
+    },
+    {
+      "trial": "prepared-entry-r4",
+      "artifactSha256": "1ebc6c438f2b1582af0e1e42f7af95e2e11dda9f3bb9d49e2a3344a85b3a9b52",
+      "transportState": "failed",
+      "timedOut": true,
+      "elapsedMs": 901553,
+      "candidateInvocations": 93,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The controller reached its 900-second deadline after 93 candidate calls. Several retained traces and partial CPU work do not establish complete return evidence or autonomous cleanup. Journals and input bytes were preserved; maintainer cleanup is separate."
+    },
+    {
+      "trial": "cold-entry-r5",
+      "artifactSha256": "669cbf0dd002e01db8d2b7439e7b20d17806610d8ab5b3bec5593fae7cd7dd98",
+      "transportState": "failed",
+      "timedOut": true,
+      "elapsedMs": 901393,
+      "candidateInvocations": 107,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "reviewerCleanup": {
+        "agentPass": false,
+        "beforeProcessCount": 1,
+        "afterProcessesEmpty": true
+      },
+      "review": "The cold controller reached its 900-second deadline after 107 calls, without a final report or verified checkpoint. Input and package bytes were unchanged; retained CPU journals and maintainer cleanup do not establish complete research acceptance."
+    },
+    {
+      "trial": "prepared-entry-r5",
+      "artifactSha256": "669cbf0dd002e01db8d2b7439e7b20d17806610d8ab5b3bec5593fae7cd7dd98",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "elapsedMs": 743396,
+      "candidateInvocations": 101,
+      "inputsUnchanged": true,
+      "reviewState": "partial_not_accepted",
+      "reviewerCleanup": {
+        "agentPass": false,
+        "beforeProcessCount": 0,
+        "afterProcessesEmpty": true
+      },
+      "review": "Actual count 10 to return 130 was observed live and static annotation R2 was independently read back. Count 11 was not observed: the new launch was resumed without re-arming its function breakpoint. After two launches, explicit selection of the first disconnected trace returned entry coordinates instead of its final saved snap. The final checkpoint honestly records both limits. All agent contexts were already closed before reviewer cleanup; the full CPU task remains partial."
+    },
+    {
+      "artifactSha256": "d4a9eaae2ded6e679c132f55ce391320d01f40bce757d64056d185adb542a7ca",
+      "elapsedMs": 880845,
+      "candidateInvocations": 101,
+      "inputsUnchanged": true,
+      "trial": "prepared-entry-r6",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "reviewState": "research_completed_on_rejected_candidate",
+      "actualObservations": {
+        "10": 130,
+        "11": 109
+      },
+      "bothDisconnectedTracesReadBack": true,
+      "independentAnnotationReadback": "R2",
+      "savedReportSha256": "cd62f65981833e49463dcf7f8f2e12462445922d0540306d1e8173f108dc9d95",
+      "finalReportBytesMatchedSavedCopy": true,
+      "beforeReviewerProcessCount": 0,
+      "review": "The agent completed the research through the intended Ghidra CLI, retained the failed count-10 step without repeating it, recovered actual 130 from its disconnected trace, and intentionally used individual instruction steps for count 11 to observe 109. Both returns, saved report bytes, independent R2 annotation readback and autonomous cleanup were reviewed. This event-handler candidate was rejected by native regression: step-out was unstable, and some recorded stack/status fields lagged a refreshed PC register. It is not accepted as a stable facade or as proof of the selected committed artifact."
+    },
+    {
+      "artifactSha256": "b702eacbe01b776ea0a1fd18306f97e7fe20d9da403e8dad5d5eddaf412f22f5",
+      "timedOut": true,
+      "elapsedMs": 900254,
+      "candidateInvocations": 111,
+      "inputsUnchanged": true,
+      "trial": "cold-entry-r6",
+      "transportState": "failed",
+      "reviewState": "not_accepted",
+      "review": "The cold controller reached its unchanged 900-second deadline after 111 candidate calls. This is a deadline, not quota exhaustion. The selected candidate was independently found unstable by native caller validation; partial work and retained traces do not close the full research gate."
+    },
+    {
+      "artifactSha256": "b702eacbe01b776ea0a1fd18306f97e7fe20d9da403e8dad5d5eddaf412f22f5",
+      "elapsedMs": 794560,
+      "candidateInvocations": 100,
+      "inputsUnchanged": true,
+      "trial": "prepared-entry-r7",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "reviewState": "research_completed_step_out_unstable",
+      "beforeReviewerProcessCount": 0,
+      "savedReportBytesMatchedFinal": true,
+      "savedReportSha256": "bd43154928705b5c44922ea1f70aad0d703fdc792d8f5ede86a3e2251c785ba3",
+      "review": "The agent retained both count observations, disconnected traces and the count-11 caller-verification error, published R2 and independently read the annotation from another context. Final report bytes and autonomous cleanup were checked. Stable step-out acceptance remains failed on this unchanged candidate; this investigation is not a passing gate for the corrective package."
+    },
+    {
+      "trial": "prepared-frame-level-r8",
+      "mode": "prepared",
+      "artifactSha256": "5592153303f491494fafc90a23f0f058993edbd9383a8329f1f903291a707727",
+      "skillBundleSha256": "ff40ac86496209e19c90a8c7fd73b1c42841acaf91cc05798974481e2782279d",
+      "packageBuild": "1d69a89e15e33d0a751381da825958b2bc9866a365286edd4dc0fd0885882dda",
+      "promptSha256": "323dbdb22305ebfc74aa198413dc0325406df6bdf3853876b1761b5fa42b704c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "d808e73e9f3a24057d0ea14f9c12a7e3214f656f679a32d16d385e344171ac58"
+        }
+      ],
+      "elapsedMs": 765190,
+      "candidateInvocations": 90,
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "ownerStopped": true,
+      "reviewState": "research_completed_post_return_metadata_gap",
+      "finalReportSha256": "fc6157f212d568f8bc3a409900e4b21615e524bcf326965ea46b3b7131c9a314",
+      "checkpointBytes": 2536,
+      "autonomousCleanup": true,
+      "actualCalls": [
+        {
+          "count": 10,
+          "result": 130
+        },
+        {
+          "count": 11,
+          "result": 109
+        }
+      ],
+      "bothDisconnectedTracesVerified": true,
+      "sharedRevision": "R2",
+      "independentAnnotationReadback": true,
+      "finalProjectReportMatchesCheckpoint": true,
+      "reviewerCleanup": {
+        "beforeProcessCount": 0,
+        "afterProcessesEmpty": true,
+        "serverStopped": true
+      },
+      "review": "Actual call/return values, retained disconnected registers, publication/readback and saved report bytes verified. Prepared finished and independently cleaned up; cold timed out before final handoff/cleanup. Post-return thread text and ordinary stack depth were stale, so this artifact does not establish coherent full-facade acceptance."
+    },
+    {
+      "trial": "cold-frame-level-r7",
+      "mode": "cold",
+      "artifactSha256": "5592153303f491494fafc90a23f0f058993edbd9383a8329f1f903291a707727",
+      "skillBundleSha256": "ff40ac86496209e19c90a8c7fd73b1c42841acaf91cc05798974481e2782279d",
+      "packageBuild": "1d69a89e15e33d0a751381da825958b2bc9866a365286edd4dc0fd0885882dda",
+      "promptSha256": "323dbdb22305ebfc74aa198413dc0325406df6bdf3853876b1761b5fa42b704c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "d808e73e9f3a24057d0ea14f9c12a7e3214f656f679a32d16d385e344171ac58"
+        }
+      ],
+      "elapsedMs": 900278,
+      "candidateInvocations": 100,
+      "timedOut": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "ownerStopped": true,
+      "reviewState": "research_completed_deadline_before_cleanup",
+      "finalReportSha256": "9dc00a15ac72a4aa9f88e9914460fc835e73584a53682d5269a522afd30ace5b",
+      "checkpointBytes": 4307,
+      "autonomousCleanup": false,
+      "actualCalls": [
+        {
+          "count": 10,
+          "result": 130
+        },
+        {
+          "count": 11,
+          "result": 109
+        }
+      ],
+      "bothDisconnectedTracesVerified": true,
+      "sharedRevision": "R2",
+      "independentAnnotationReadback": true,
+      "finalProjectReportMatchesCheckpoint": true,
+      "reviewerCleanup": {
+        "beforeProcessCount": 1,
+        "afterProcessesEmpty": true,
+        "serverStopped": true
+      },
+      "review": "Actual call/return values, retained disconnected registers, publication/readback and saved report bytes verified. Prepared finished and independently cleaned up; cold timed out before final handoff/cleanup. Post-return thread text and ordinary stack depth were stale, so this artifact does not establish coherent full-facade acceptance."
+    },
+    {
+      "trial": "prepared-physical-stack-r9",
+      "mode": "prepared",
+      "artifactSha256": "404197380352c66d05077ebbef5115480dc491c69f13bb22b8f672988334723c",
+      "skillBundleSha256": "ff40ac86496209e19c90a8c7fd73b1c42841acaf91cc05798974481e2782279d",
+      "packageBuild": "712148076bba2df6442b717af3a65a74a19b905d601f6cd18f4e82bc25543986",
+      "promptSha256": "323dbdb22305ebfc74aa198413dc0325406df6bdf3853876b1761b5fa42b704c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "d808e73e9f3a24057d0ea14f9c12a7e3214f656f679a32d16d385e344171ac58"
+        }
+      ],
+      "elapsedMs": 746963,
+      "candidateInvocations": 76,
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "ownerStopped": true,
+      "reviewState": "reviewed_business_unit_passed_recursive_native_gate_separate",
+      "actualCalls": [
+        {
+          "count": 10,
+          "result": 130
+        },
+        {
+          "count": 11,
+          "result": 109
+        }
+      ],
+      "bothDisconnectedTracesVerified": true,
+      "sharedRevision": "R2",
+      "independentAnnotationReadback": true,
+      "checkpointBytes": 2098,
+      "finalReportSha256": "9980804d8607a35257aed808863fa14e9f340a2e06b4373b33672342fe5358c9",
+      "finalProjectReportMatchesCheckpoint": true,
+      "exactSavedPathInFinal": true,
+      "autonomousCleanup": true,
+      "reviewerVerification": {
+        "beforeProcessCount": 0,
+        "afterProcessesEmpty": true,
+        "serverStopped": true
+      },
+      "review": "Reviewed actual live return observations, retained disconnected traces, R2 publication/readback in another session, final checkpoint bytes and absence of owned live processes. This ordinary business unit passes; the separate recursive native caller-cache failure prevents full backend acceptance."
+    },
+    {
+      "trial": "cold-physical-stack-r8",
+      "mode": "cold",
+      "artifactSha256": "404197380352c66d05077ebbef5115480dc491c69f13bb22b8f672988334723c",
+      "skillBundleSha256": "ff40ac86496209e19c90a8c7fd73b1c42841acaf91cc05798974481e2782279d",
+      "packageBuild": "712148076bba2df6442b717af3a65a74a19b905d601f6cd18f4e82bc25543986",
+      "promptSha256": "323dbdb22305ebfc74aa198413dc0325406df6bdf3853876b1761b5fa42b704c",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "d808e73e9f3a24057d0ea14f9c12a7e3214f656f679a32d16d385e344171ac58"
+        }
+      ],
+      "elapsedMs": 868007,
+      "candidateInvocations": 92,
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "ownerStopped": true,
+      "reviewState": "reviewed_business_unit_passed_recursive_native_gate_separate",
+      "actualCalls": [
+        {
+          "count": 10,
+          "result": 130
+        },
+        {
+          "count": 11,
+          "result": 109
+        }
+      ],
+      "bothDisconnectedTracesVerified": true,
+      "sharedRevision": "R2",
+      "independentAnnotationReadback": true,
+      "checkpointBytes": 2366,
+      "finalReportSha256": "f3a54d3f2890e23308d2183629b1aef79432f5d2565abf5b3a08c68c06adc209",
+      "finalProjectReportMatchesCheckpoint": true,
+      "exactSavedPathInFinal": true,
+      "autonomousCleanup": true,
+      "reviewerVerification": {
+        "beforeProcessCount": 0,
+        "afterProcessesEmpty": true,
+        "serverStopped": true
+      },
+      "review": "Reviewed actual live return observations, retained disconnected traces, R2 publication/readback in another session, final checkpoint bytes and absence of owned live processes. This ordinary business unit passes; the separate recursive native caller-cache failure prevents full backend acceptance."
+    }
+  ],
+  "rules": {
+    "hostYieldIsNotEmptyCliResult": true,
+    "unknownCpuIntentsNotReplayed": true,
+    "maintainerCleanupNotAgentAcceptance": true,
+    "nativeProofNotModelAcceptance": true
+  },
+  "nativeFollowup": {
+    "receipt": "toolbox-ghidra-caller-native.json",
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+    "state": "managed_backend_native_passed",
+    "qualification": "Later native correction; the independent model trials in history used their explicitly recorded earlier packages."
+  }
+}

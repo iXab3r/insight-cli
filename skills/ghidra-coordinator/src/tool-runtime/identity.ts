@@ -19,8 +19,8 @@ export async function processIdentity(pid:number):Promise<ProcessIdentity|undefi
    return {birth:match[3]!,strong:false,group:Number(match[2])};
   }
   if(process.platform==='win32'){
-   const script='$p=Get-Process -Id '+pid+' -ErrorAction SilentlyContinue;if($p){$p.StartTime.ToUniversalTime().Ticks.ToString()}';
-   const r=await exec('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:5000,maxBuffer:4096});
+   const script='try{$p=[Diagnostics.Process]::GetProcessById('+pid+');try{$p.StartTime.ToUniversalTime().Ticks.ToString()}finally{$p.Dispose()}}catch [ArgumentException]{}';
+   const r=await exec('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{windowsHide:true,timeout:15000,maxBuffer:4096});
    return r.stdout.trim()?{birth:r.stdout.trim(),strong:true}:unavailable(pid);
   }
   try{process.kill(pid,0);return {birth:'unverified',strong:false};}catch{return;}

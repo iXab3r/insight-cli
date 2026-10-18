@@ -11,7 +11,7 @@ catch { throw Error('Initialize the pinned dependency: git submodule update --in
 const base=join(root,'.automation/bootstrap');await mkdir(base,{recursive:true});
 // Never rebuild a live sentinel host, including during concurrent invocations.
 const build=await mkdtemp(join(base,'run-'));
-const environment={...process.env,INSIGHT_REPOSITORY_ROOT:root,INSIGHT_NODE:process.execPath,DOTNET_CLI_TELEMETRY_OPTOUT:'1'};
+const environment={...process.env,INSIGHT_REPOSITORY_ROOT:root,INSIGHT_NODE:process.env.INSIGHT_NODE??process.execPath,DOTNET_CLI_TELEMETRY_OPTOUT:'1'};
 async function run(args){
   const child=spawn('dotnet',args,{cwd:root,env:environment,stdio:'inherit'});
   const forward=()=>child.kill('SIGINT');process.once('SIGINT',forward);process.once('SIGTERM',forward);

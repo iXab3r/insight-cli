@@ -26,10 +26,10 @@ test('standard archive installer verifies reuse, external selection, tampering a
  const archive=join(root,'fixture.tgz');await tar.c({cwd:source,file:archive,gzip:true},['bundle']);
  const artifact={name:'fixture',url:'https://example.invalid/not-used',sha256:await fileSha256(archive),size:(await stat(archive)).size,format:'tgz' as const,root:'bundle',license:'Synthetic'};
  const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal,fetch:async()=>{throw Error('Offline fixture must not use network');}} as unknown as import('@eyeauras/cli-factory').CommandContext;
- let probes=0;const descriptor={id:'fixture',primary:'tool',components:()=>({tool:artifact}),launch:(roots:Record<string,string>)=>({executable:join(roots.tool!,'run'),arguments:[],environment:{}}),probe:async(launch:{executable:string})=>{probes++;assert.equal(await readFile(launch.executable,'utf8'),'fixture tool');return {version:'fixture'};}};
+ let probes=0;const descriptor={noticeFiles:{'notices/LICENSE.TXT':'Full owned fixture license'},id:'fixture',primary:'tool',components:()=>({tool:artifact}),launch:(roots:Record<string,string>)=>({executable:join(roots.tool!,'run'),arguments:[],environment:{}}),probe:async(launch:{executable:string})=>{probes++;assert.equal(await readFile(launch.executable,'utf8'),'fixture tool');return {version:'fixture'};}};
  const installer=new ToolInstaller(context,descriptor);assert.equal((await installer.status()).state,'not_ready');
  const installed=await installer.install({archive,offline:true});assert.equal(installed.state,'installed');assert.equal(probes,1);
- await installer.install({offline:true});assert.equal(probes,1);const selected=await installer.selected();assert.equal(selected.mode,'managed');
+ await installer.install({offline:true});assert.equal(probes,1);const selected=await installer.selected();assert.equal(selected.mode,'managed');assert.equal(await readFile(join(selected.root,'notices/LICENSE.TXT'),'utf8'),'Full owned fixture license');
  await writeFile(selected.executable,'tampered');await assert.rejects(installer.selected(),/differs/);await installer.uninstall();assert.equal((await installer.status()).state,'not_ready');
  const external=join(root,'external');await writeFile(external,'fixture tool');await installer.install({executable:external,offline:true});await installer.uninstall(true);assert.equal(await readFile(external,'utf8'),'fixture tool');
  // Replacing an owned directory with a link cannot turn uninstall into external deletion.
@@ -44,4 +44,24 @@ test('cancelling an acquisition already in progress cannot leak an installation 
  const acquisition=withToolUse('cancelled-acquisition','fixture',async()=>{ready();await gate;return 'selected';},controller.signal);
  await entered;controller.abort(new Error('cancel during verification'));release();await assert.rejects(acquisition,/cancel during verification/);
  assert.equal(toolUseCount('cancelled-acquisition','fixture'),0);assert.equal(toolProfileBusy('cancelled-acquisition'),false);
+});
+
+test('external family binding detects sibling changes and selects a new identity without deleting external files',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile,readFile}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {ToolInstaller}=await import('../src/tool-runtime/installer.js');const {fileSha256}=await import('../src/tool-runtime/archives.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-family-'));t.after(()=>rm(root,{recursive:true,force:true}));const executable=join(root,'primary'),sibling=join(root,'sibling');await writeFile(executable,'stable primary');await writeFile(sibling,'version one');
+ const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal} as unknown as import('@eyeauras/cli-factory').CommandContext;
+ const descriptor={id:'family',primary:'family',components:()=>{throw Error('External selection must not download');},launch:()=>({executable,arguments:[],environment:{}}),probe:async()=>({version:'fixture'}),externalInputs:async()=>({sibling:await fileSha256(sibling)})};
+ const installer=new ToolInstaller(context,descriptor),first=await installer.install({executable});await installer.selected();
+ await writeFile(sibling,'version two');await assert.rejects(installer.use(async()=>assert.fail('Changed external family must not run')),/family differs/);
+ const second=await installer.install({executable});assert.notEqual(second.installation,first.installation);await installer.selected();
+ await installer.uninstall();assert.equal(await readFile(executable,'utf8'),'stable primary');assert.equal(await readFile(sibling,'utf8'),'version two');
+});
+
+test('an adapted external runtime executes only its verified owned copy and uninstall preserves the original',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile,readFile,stat}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join,dirname}=await import('node:path');const {ToolInstaller}=await import('../src/tool-runtime/installer.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-external-copy-'));t.after(()=>rm(root,{recursive:true,force:true}));const original=join(root,'vendor');await writeFile(original,'original vendor bytes');const context={appArguments:{AppDataDirectory:join(root,'profile')},cwd:root,signal:new AbortController().signal} as unknown as import('@eyeauras/cli-factory').CommandContext;
+ const installer=new ToolInstaller(context,{id:'adapted',primary:'adapted',preparationId:'v1',components:()=>{throw Error('No download');},launch:()=>{throw Error('Not managed');},probe:async()=>({version:'fixture'}),prepareExternal:async(_input,stage)=>{const executable=join(stage,'execution/tool');await mkdir(dirname(executable),{recursive:true});await writeFile(executable,'adapted owned bytes');return {executable,arguments:['typed'],environment:{}};}});
+ await installer.install({executable:original});const selected=await installer.selected();assert.equal(selected.executable,original);assert.ok(selected.execution);assert.ok(selected.execution.executable.startsWith(selected.root));await installer.use(async execution=>assert.equal(await readFile(execution.executable,'utf8'),'adapted owned bytes'));
+ await writeFile(selected.execution.executable,'corrupt copy');await assert.rejects(installer.use(async()=>assert.fail('Corrupt owned copy must not run')),/execution copy differs/);await installer.uninstall();assert.equal(await readFile(original,'utf8'),'original vendor bytes');await assert.rejects(stat(selected.root),{code:'ENOENT'});
 });

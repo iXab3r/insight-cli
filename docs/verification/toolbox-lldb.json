@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "state": "native_passed_reviewed_model_units_separate",
+  "platform": "darwin-arm64 macOS 14+",
+  "version": "23.1.3",
+  "packageVersion": "0.2.0",
+  "artifactSha256": "fbdd9bef3d648a7a7223baf888954ac4a18f1d9e7425b518e5b66119260c9535",
+  "packageBuild": "7898c8e6f49a8a4cc433192edb1f695820593321ae313ea105b29f0132607d65",
+  "fixtureSha256": "dcf3c1347199feb9c59f4d10a840e220c3a10657c9c24af99cff7f7191902a9f",
+  "distribution": {
+    "release": "https://github.com/iXab3r/insight-cli/releases/tag/tool-lldb-23.1.3-r1",
+    "immutable": true,
+    "assetSha256": "3df8fefb9f15fd80d250dc78517a659f4ec67159f73fdc5df71b7100709213d5",
+    "matchingSourceSha256": "c44186a7762ed28954be72e5ff6df9808e0779d4f1bf014ecc4e7e211d31ee34",
+    "fullLicenseSha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+    "allFourAssetsReadbackVerified": true,
+    "freshDownloadOfflineInstallInspectUninstall": true
+  },
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Installed public CLI native proof; later independent model unit review is recorded separately",
+    "version": "0.2.0",
+    "fixtureSha256": "dcf3c1347199feb9c59f4d10a840e220c3a10657c9c24af99cff7f7191902a9f",
+    "observations": [
+      {
+        "count": 10,
+        "total": 130
+      },
+      {
+        "count": 11,
+        "total": 109
+      }
+    ],
+    "checks": {
+      "offlineManagedInstall": true,
+      "doctor": true,
+      "immutableTargetReused": true,
+      "argumentsAndReturns": true,
+      "registerMemoryBacktrace": true,
+      "inferiorsAbsent": true,
+      "boundedPagination": true,
+      "missingBreakpointTimesOut": true,
+      "nativeCommandErrorFails": true,
+      "externalDependencyDriftRefused": true,
+      "externalPreserved": true,
+      "inputUnchanged": true,
+      "checkpointSurvivesRemoval": true,
+      "terminalOwnedProcesses": true,
+      "publicStopAndKill": true
+    },
+    "cleanupComplete": true
+  },
+  "faults": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Installed runner and real native debugger; no model inference",
+    "checks": {
+      "kernelAlarmAcrossExec": true,
+      "debuggerAndInferiorCleanup": true,
+      "ownerReplacementUnknownResult": true,
+      "outputLimitAndNativeFailure": true
+    },
+    "cleanupComplete": true,
+    "results": [
+      {
+        "fault": "SIGTERM",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": true,
+        "debugserverAbsent": true,
+        "state": "failed",
+        "outcome": "exit_code"
+      },
+      {
+        "fault": "SIGKILL",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": true,
+        "debugserverAbsent": true,
+        "state": "failed",
+        "outcome": "exit_code"
+      },
+      {
+        "fault": "owner_loss",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": true,
+        "debugserverAbsent": true,
+        "recoveredBefore": "unverified",
+        "state": "exited",
+        "outcome": "unknown"
+      },
+      {
+        "fault": "timeout",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": true,
+        "debugserverAbsent": true,
+        "state": "failed",
+        "outcome": "timeout"
+      },
+      {
+        "fault": "output_limit",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": false,
+        "debugserverAbsent": true,
+        "state": "failed",
+        "outcome": "output_limit"
+      },
+      {
+        "fault": "native_error",
+        "debuggerAbsent": true,
+        "inferiorAbsent": true,
+        "debugserverObserved": true,
+        "debugserverAbsent": true,
+        "state": "failed",
+        "outcome": "exit_code"
+      }
+    ]
+  },
+  "retainedFailures": [
+    "Default target.detach-on-error true left the inferior alive after debugger SIGTERM/SIGKILL; false fixed both.",
+    "LLDB rejected combined --no-stdio and --shell-expand-args; the facade uses target.disable-stdio instead.",
+    "The executable-only captured copy lost its adjacent dSYM. Explicit immutable --symbols DWARF loading restores local-variable correspondence.",
+    "The initial test harness assumed nested npm dependencies; it now follows npm resolution search paths for local hoisted and global installations."
+  ],
+  "offline": {
+    "tests": 186,
+    "passed": 184,
+    "skippedOptIn": 2,
+    "failed": 0,
+    "releaseTests": 25,
+    "releasePassed": 25,
+    "isolatedPackInstall": true,
+    "nativeHelperReproducibleBuilds": 2,
+    "targetedAfterReview": [
+      "literal argv and expression delimiter refusal",
+      "explicit cleanup acknowledgment",
+      "external debugserver/liblldb integrity"
+    ]
+  },
+  "remaining": [
+    "Combined complete 16-tool/6-capability whole-toolbox agent acceptance; reviewed cold/prepared model unit results retain their original package identities, and the native combined gate is recorded separately."
+  ],
+  "gherkin": {
+    "run": "b64e6dbca6b547a7ab8422d89bc91631",
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "duration": "4m12s",
+    "sameGloballyInstalledArtifact": true
+  },
+  "modelAcceptanceReceipt": "toolbox-agent-lldb.json",
+  "latestCombinedNativeProof": {
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+    "build": {
+      "version": 1,
+      "artifact": "eaae6812e63374a7b300648ee8ecb90d55f9b81719017733d5105c7b466db18c"
+    },
+    "runId": "07cdc39c00724feab3b0bc563fbbf9f0",
+    "passed": 20,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "21m35s",
+    "receipt": "toolbox-combined-native.json",
+    "qualification": "Native proof only; independent model receipts retain their original artifacts."
+  }
+}

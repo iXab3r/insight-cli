@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-diec-3.21-r1",
+  "title": "Detect It Easy 3.21 console macOS ARM64",
+  "redistribution": "Unmodified DiE 3.21 console/signature database and the five dynamically linked Qt 6.11.0 frameworks required by diec. MIT engine/component notices, Qt LGPL-3.0 and third-party terms are embedded; exact matching DiE source with its bundled submodules and all three relevant Qt source archives are retained in this release. Frameworks remain replaceable in a copied external installation; NOTICE.txt explains reselection. No GUI or installer is executed. Managed bundle requires macOS 13+ ARM64. Signature scan errors remain visible as partial classifications.",
+  "assets": [
+    {
+      "name": "diec-3.21-macos-arm64.tgz",
+      "upstream": "https://github.com/horsicq/DIE-engine/releases/download/3.21/die_mac_qt6_3.21_arm64.pkg",
+      "repack": {
+        "format": "die-pkg-console-v1",
+        "sha256": "9b6411f4976593988fbcdc8d1ed2fd8123996e4b9f4a43df6a841460c229794b",
+        "size": 41179549,
+        "outputRoot": "diec-3.21",
+        "sourceAssets": [
+          "die_sourcecode_3.21.tar.gz",
+          "qtbase-everywhere-src-6.11.0.tar.xz",
+          "qtdeclarative-everywhere-src-6.11.0.tar.xz",
+          "qt5compat-everywhere-src-6.11.0.tar.xz"
+        ]
+      },
+      "sha256": "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af",
+      "size": 14343048,
+      "format": "tgz",
+      "root": "diec-3.21",
+      "role": "binary",
+      "license": "MIT engine/components; Qt LGPL-3.0 and full included third-party notices"
+    },
+    {
+      "name": "die_sourcecode_3.21.tar.gz",
+      "upstream": "https://github.com/horsicq/DIE-engine/releases/download/3.21/die_sourcecode_3.21.tar.gz",
+      "sha256": "01bc8b06f21e25523b9bb871509e10bbbd00dcb5da25c6d713d5078311585a22",
+      "size": 36519616,
+      "role": "source",
+      "license": "Matching complete source with component license texts and notices"
+    },
+    {
+      "name": "qtbase-everywhere-src-6.11.0.tar.xz",
+      "upstream": "https://download.qt.io/archive/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz",
+      "sha256": "231ad85979864d914dc9568a1b71c91d6cf20d7b2021d059103bf0eb51cb755e",
+      "size": 50502456,
+      "role": "source",
+      "license": "Matching complete source with component license texts and notices"
+    },
+    {
+      "name": "qtdeclarative-everywhere-src-6.11.0.tar.xz",
+      "upstream": "https://download.qt.io/archive/qt/6.11/6.11.0/submodules/qtdeclarative-everywhere-src-6.11.0.tar.xz",
+      "sha256": "4eece569431ddf8324e7d322fa27001916570b23df535f8fb28aba445eedfde9",
+      "size": 38694812,
+      "role": "source",
+      "license": "Matching complete source with component license texts and notices"
+    },
+    {
+      "name": "qt5compat-everywhere-src-6.11.0.tar.xz",
+      "upstream": "https://download.qt.io/archive/qt/6.11/6.11.0/submodules/qt5compat-everywhere-src-6.11.0.tar.xz",
+      "sha256": "e62954646b2749723aa5c7db32faab407358734075590058a01e793382d4c63e",
+      "size": 14616240,
+      "role": "source",
+      "license": "Matching complete source with component license texts and notices"
+    }
+  ]
+}

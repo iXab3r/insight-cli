@@ -1,0 +1,7 @@
+// Maintainer-only. npm build/installation never requires a compiler.
+import assert from 'node:assert/strict';import {execFileSync} from 'node:child_process';import {mkdtemp,readFile,writeFile,mkdir,rm} from 'node:fs/promises';import {join,resolve,dirname} from 'node:path';import {createHash} from 'node:crypto';
+const [clang,lld,output]=process.argv.slice(2);assert.ok(output,'Arguments: clang-22.1.8 ld64.lld-22.1.8 output-binary');assert.equal(process.platform,'darwin');
+const version=path=>execFileSync(path,['--version'],{encoding:'utf8'});assert.match(version(clang),/22\.1\.8/);assert.match(version(lld),/22\.1\.8/);
+const source=resolve('skills/ghidra-coordinator/runtime/native/deadline-exec.c'),temporary=await mkdtemp('/tmp/insight-deadline-build-'),binary=join(temporary,'deadline-exec');
+const flags=['--target=arm64-apple-macos13.0','-Oz','-g0','-fno-ident','-fno-stack-protector','-fuse-ld='+resolve(lld),'-Wl,-no_uuid','-Wl,-platform_version,macos,13.0,13.0'];
+try{execFileSync(clang,[...flags,source,'-o',binary],{stdio:'pipe'});const bytes=await readFile(binary);await mkdir(dirname(resolve(output)),{recursive:true});await writeFile(output,bytes,{mode:0o755});console.log(JSON.stringify({platform:'darwin-arm64',compiler:'LLVM 22.1.8',sourceSha256:createHash('sha256').update(await readFile(source)).digest('hex'),sha256:createHash('sha256').update(bytes).digest('hex'),size:bytes.length,flags:flags.filter(f=>!f.startsWith('-fuse-ld='))},null,2));}finally{await rm(temporary,{recursive:true,force:true});}

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-strace-7.2-r1",
+  "title": "strace 7.2 Linux x64",
+  "redistribution": "Built from the exact unmodified strace 7.2 source on Ubuntu 22.04 GCC 11.4.0, targeting Linux x64 glibc 2.35+. Two independent builds produced identical stripped strace bytes. Optional mpers, stack unwinding, SELinux and termcap dependencies are disabled; only system libc and the loader are required. Full strace source, LGPL text, UAPI/test notices, exact first-party launcher/build sources and MIT license are retained. Native owned-file observation, kill-on-exit, timeout, launcher kill and owner-loss cleanup passed in the linked CI run. Public CLI and independent model acceptance are recorded separately.",
+  "assets": [
+    {
+      "name": "strace-7.2-linux-x64.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-strace-7.2-r1/strace-7.2-linux-x64.tgz",
+      "sha256": "3f01b360952f9c81dee07b640916115f937685df6d3004f5a3227cb0582d8ca3",
+      "size": 612329,
+      "role": "binary",
+      "license": "LGPL-2.1-or-later (strace), MIT (first-party launcher), retained source/UAPI notices",
+      "format": "tgz",
+      "root": "strace-7.2",
+      "builtFrom": {
+        "sourceSha256": "4bde6246926890dcee824f6e6ac42a06752f47d77e5097d86e3c0d6d4b709fe5",
+        "buildScriptSha256": "545e06bef2b8a73eed226fcaff99a8a7f0b6c8e9d654bac5a75e6eacfc33027f",
+        "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39050776071",
+        "compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+        "systemRequirement": "Linux x64 glibc 2.35+; native ptrace access",
+        "reproducibleStraceBinary": true,
+        "bootstrap": "Run the retained build script on the declared Linux toolchain and place its verified output beside this recipe before the first mirror publication."
+      }
+    },
+    {
+      "name": "strace-7.2.tar.xz",
+      "upstream": "https://github.com/strace/strace/releases/download/v7.2/strace-7.2.tar.xz",
+      "sha256": "4bde6246926890dcee824f6e6ac42a06752f47d77e5097d86e3c0d6d4b709fe5",
+      "size": 2810844,
+      "role": "source",
+      "license": "Exact corresponding LGPL-2.1-or-later source, GPL tests and Linux UAPI syscall-exception notices"
+    },
+    {
+      "name": "child-deadline-linux.c",
+      "upstream": "https://raw.githubusercontent.com/iXab3r/insight-cli/888965d/skills/ghidra-coordinator/runtime/native/child-deadline-linux.c",
+      "sha256": "bc2a95954cdd1d1bb4851228ea93ca2719bc3be84b1a7eaba2e3127a9db0bd15",
+      "size": 1379,
+      "role": "source",
+      "license": "MIT first-party launcher source"
+    },
+    {
+      "name": "build-strace-linux.py",
+      "upstream": "https://raw.githubusercontent.com/iXab3r/insight-cli/888965d/scripts/toolbox/build-strace-linux.py",
+      "sha256": "545e06bef2b8a73eed226fcaff99a8a7f0b6c8e9d654bac5a75e6eacfc33027f",
+      "size": 6952,
+      "role": "source",
+      "license": "MIT first-party build and native verification script"
+    },
+    {
+      "name": "INSIGHT-LICENSE.txt",
+      "upstream": "https://raw.githubusercontent.com/iXab3r/insight-cli/888965d/LICENSE",
+      "sha256": "350f3532c1d6ebde1bce8aa96c42d8725d545806eacad1ba3047af012250278c",
+      "size": 1081,
+      "role": "license-companion",
+      "license": "Full MIT license for first-party launcher and build scripts"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "repository": "iXab3r/insight-cli",
+  "tag": "tool-lldb-python-23.1.3-r2",
+  "title": "LLDB 23.1.3 with isolated Python 3.15 for Ghidra, macOS ARM64",
+  "redistribution": "Pinned Python-capable LLDB 23.1.3 Homebrew bottle closure, relocated inside owned distribution storage and ad-hoc-signed. Includes 99 native files, private CPython 3.15, full corresponding source for all bundled libraries, 68 source notices plus full Homebrew/core and SQLite public-domain notices, retained upstream build recipes and deterministic repacker/layout. No Homebrew install or Apple Python is used. Signed official LLVM 23.1.3 debugserver bytes are preserved. Requires macOS 15+ ARM64 and OS debugger authorization. Excludes Python readline/Tkinter/tests/IDLE, LLVM compilers/static archives, MLIR, sanitizers and unused CA data. Native acceptance is recorded separately. Revision 2 normalizes every symbolic link to its canonical internal target so the strict Node extractor never traverses a link chain. Revision 1 failed installation before native execution and is not selected.",
+  "assets": [
+    {
+      "name": "lldb-python-23.1.3-macos-arm64.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-python-23.1.3-r2/lldb-python-23.1.3-macos-arm64.tgz",
+      "sha256": "0f9e88490490fb2f487ad6f02d7aea774629a2839a10497fdcbaad9c6481c839",
+      "size": 105314583,
+      "role": "binary",
+      "license": "Apache-2.0 WITH LLVM-exception; Python-2.0, BSD, MIT and retained third-party notices",
+      "format": "tgz",
+      "root": "lldb-python-23.1.3",
+      "builtFrom": {
+        "subsetLayout": "lldb-python-runtime-layout.json",
+        "repackScript": "tool-repack-lldb-python.py",
+        "systemRequirement": "macOS 15+ ARM64, OS debugger authorization",
+        "bootstrap": "Acquire every exact input listed in the retained layout (anonymous GHCR bottle access is permitted), preserve its listed filename, then run python3 tool-repack-lldb-python.py INPUT_DIRECTORY OUTPUT_TGZ lldb-python-runtime-layout.json on macOS ARM64. Only owned copies are relocated/ad-hoc-signed; the official signed debugserver bytes remain unchanged. Place the pinned derived archive beside this recipe before first publication."
+      }
+    },
+    {
+      "name": "lldb-python-23.1.3-sources.tgz",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-python-23.1.3-r2/lldb-python-23.1.3-sources.tgz",
+      "sha256": "b32631adda29f32431b53ccdcaf7f6eeae968234d5f0410315d7929dc6cf3802",
+      "size": 295153765,
+      "role": "source",
+      "license": "Exact corresponding LLVM, CPython, z3, OpenSSL, SQLite, mpdecimal, xz, zstd and lz4 sources with full licenses",
+      "repack": {
+        "format": "source-set-v2",
+        "outputRoot": "lldb-python-23.1.3-sources",
+        "inputs": [
+          {
+            "id": "python-3.15",
+            "version": "3.15.0",
+            "name": "source-python-3.15-3.15.0.tgz",
+            "upstream": "https://www.python.org/ftp/python/3.15.0/Python-3.15.0.tgz",
+            "sha256": "438596cac081036d3c1d532ab7e7335eeb35567bc961749a0d5797176db0db68",
+            "license": "Python-2.0",
+            "size": 43686280
+          },
+          {
+            "id": "zstd",
+            "version": "1.5.7",
+            "name": "source-zstd-1.5.7.tgz",
+            "upstream": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
+            "sha256": "37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
+            "license": "(BSD-3-Clause OR GPL-2.0-only) AND BSD-2-Clause AND MIT",
+            "size": 2451884
+          },
+          {
+            "id": "xz",
+            "version": "5.8.4",
+            "name": "source-xz-5.8.4.tgz",
+            "upstream": "https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz",
+            "sha256": "0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9",
+            "license": "0BSD AND GPL-2.0-or-later",
+            "size": 2799797
+          },
+          {
+            "id": "lz4",
+            "version": "1.10.0",
+            "name": "source-lz4-1.10.0.tgz",
+            "upstream": "https://github.com/lz4/lz4/archive/refs/tags/v1.10.0.tar.gz",
+            "sha256": "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+            "license": "BSD-2-Clause",
+            "size": 387114
+          },
+          {
+            "id": "sqlite",
+            "version": "3.54.1",
+            "name": "source-sqlite-3.54.1.tgz",
+            "upstream": "https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz",
+            "sha256": "926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e",
+            "license": "blessing",
+            "size": 3332984
+          },
+          {
+            "id": "openssl-4",
+            "version": "4.0.3",
+            "name": "source-openssl-4-4.0.3.tgz",
+            "upstream": "https://github.com/openssl/openssl/releases/download/openssl-4.0.3/openssl-4.0.3.tar.gz",
+            "sha256": "325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9",
+            "license": "Apache-2.0",
+            "size": 55235667
+          },
+          {
+            "id": "mpdecimal",
+            "version": "4.0.1",
+            "name": "source-mpdecimal-4.0.1.tgz",
+            "upstream": "https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz",
+            "sha256": "96d33abb4bb0070c7be0fed4246cd38416188325f820468214471938545b1ac8",
+            "license": "BSD-2-Clause",
+            "size": 316268
+          },
+          {
+            "id": "llvm",
+            "version": "23.1.3",
+            "name": "source-llvm-23.1.3.tar.xz",
+            "upstream": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.3/llvm-project-23.1.3.src.tar.xz",
+            "sha256": "c44186a7762ed28954be72e5ff6df9808e0779d4f1bf014ecc4e7e211d31ee34",
+            "license": "Apache-2.0 WITH LLVM-exception",
+            "size": 179220548
+          },
+          {
+            "id": "z3",
+            "version": "5.3.1",
+            "name": "source-z3-5.3.1.tgz",
+            "upstream": "https://github.com/Z3Prover/z3/archive/refs/tags/z3-5.3.1.tar.gz",
+            "sha256": "c007089dd8d92298d2a7d14105b14e8dddfbb540062ce471c3111e0741edd8da",
+            "license": "MIT",
+            "size": 7868592
+          }
+        ]
+      }
+    },
+    {
+      "name": "lldb-python-runtime-layout.json",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-python-23.1.3-r2/lldb-python-runtime-layout.json",
+      "sha256": "650042f854a6510aacfc755bd8f4725ef056d8dec21a04a8dba68ccaebd96cd9",
+      "size": 9033,
+      "role": "build-recipe",
+      "license": "MIT insight-cli; pinned upstream metadata and license references"
+    },
+    {
+      "name": "tool-repack-lldb-python.py",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-python-23.1.3-r2/tool-repack-lldb-python.py",
+      "sha256": "704b8ea748e2f2708b24850441980513e788355a384634e53e36f513edf02cd6",
+      "size": 8263,
+      "role": "build-recipe",
+      "license": "MIT insight-cli"
+    },
+    {
+      "name": "insight-cli-LICENSE.txt",
+      "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-python-23.1.3-r2/insight-cli-LICENSE.txt",
+      "sha256": "350f3532c1d6ebde1bce8aa96c42d8725d545806eacad1ba3047af012250278c",
+      "size": 1081,
+      "role": "license-companion",
+      "license": "MIT insight-cli"
+    }
+  ]
+}

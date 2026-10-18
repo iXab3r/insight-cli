@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "sdk": "10.0.303",
+  "target": "net10.0",
+  "sourceLicense": "MIT",
+  "inputs": {
+    "Program.cs": "3cdfd46473dac5920cd23335cd3ae2c877ddf534714a22537e02a0af85618080",
+    "Insight.Managed.csproj": "7b7e0c1c36b99fe97920f5ad8fa760b37061e7ebb7ea53dfd3ef9db74b10eeb8",
+    "NuGet.Config": "7a77c63a438cdf0524dc336da4bf2191d3f259645de430f5a4c61b3edd52fa9f",
+    "packages.lock.json": "e01c42d403cd2dfaa4fead9496fb339c1c33e24c6c509a658d3ea7a8b4cba82e"
+  },
+  "files": {
+    "Insight.Managed.dll": {
+      "sha256": "5952a9a181d451954a380558dc1c988737e6246285f1f96f658425b32c967fec",
+      "size": 55808
+    },
+    "Insight.Managed.deps.json": {
+      "sha256": "d7fccba042e3b7b676a5dd392c480b4c509c6d5e222573b307907b4dee45bc88",
+      "size": 940
+    },
+    "Insight.Managed.runtimeconfig.json": {
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "size": 330
+    },
+    "dnlib.dll": {
+      "sha256": "3b88e0948e2a6c49e5372c7e7d27817f5d2fb7ffed949b40cc98a2e5037b73ef",
+      "size": 1182720
+    }
+  },
+  "reproducible": true,
+  "targetExecution": false,
+  "dependencies": {
+    "dnlib": {
+      "version": "4.5.0",
+      "nupkgSha256": "63bc2f9579568204cc8b30fa9f6700a231bcf868a8032e09118887af3eafee58",
+      "url": "https://api.nuget.org/v3-flatcontainer/dnlib/4.5.0/dnlib.4.5.0.nupkg",
+      "license": "MIT"
+    }
+  }
+}

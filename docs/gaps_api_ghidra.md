@@ -328,6 +328,49 @@ The installed CLI/IPC and P3-resource tests use the same accepted tarball.
 adapter. The earlier P2 report retains its separate selected headless Windows/Linux identity;
 this combined gate is native macOS and does not claim every GUI debugger on every OS.
 
+### Later debugger workflow hardening
+
+The toolbox acceptance extends the selected debugger contract without claiming whole-SDK
+coverage. In the 1:1:1 comparison, the native local LLDB TraceRmi launcher has an
+`OPT_START_CMD`; the pinned MCP launch schema does not expose arbitrary launcher parameters;
+our `ghidra debugger launch --stop-at-entry` provides one typed macOS/local-LLDB option.
+It rewrites only the exact pinned launch command and verifies a live stopped target before
+acknowledgment. Other offers reject the option before reserving a CPU intent. Existing
+immediate-run calls and their request identity remain unchanged.
+
+The macOS owned LLDB adapter dispatches one continue toward a one-shot caller
+breakpoint qualified by thread and caller stack pointer. The facade confirms a new stopped
+native process with matching PC/SP registers after the native action has returned. A private
+completion receipt correlates the launch, thread and intent; it never dispatches another CPU
+operation. An intervening stop/deadline remains uncertain. A breakpoint is deleted on dispatch
+failure, consumed on its verified hit, or released when the owned debugger context closes.
+
+The confirmed macOS regression is that LLDB's frame code address can remain at the callee
+while the PC register and return register already describe the caller. The top frame’s PC/function
+export therefore resolves the read native PC register; caller frames retain their unwound
+return addresses because their register aliases can refer to the live frame. The macOS
+frame view omits a prefix only when every omitted native frame is non-inline/non-artificial
+with both SP and CFA equal to the live SP, and an existing subsequent frame matches the live
+PC/SP. This also handles recursive stale prefixes sharing the caller PC, while preserving
+real recursive frames with distinct stack coordinates. Live volatile registers always come
+from native hardware frame 0; unwound caller banks cannot supply return values. Frame
+activation and lookup keep physical register identity separate from logical stack ordinals.
+Thread descriptions resolve the same current native PC rather than retaining the old callee. Automatic PC/SP memory capture avoids
+target expression evaluation; explicit agent expressions keep their normal behavior. The
+control breakpoint is excluded from trace breakpoint export so a CPU step cannot create
+static program bookmarks. Stack paths, register banks and native frame activation use frame
+ordinals rather than persistent frame IDs. Each retained trace restores its own saved
+snap/thread, with SDK navigation completion awaited.
+
+These changes apply to the owned extracted adapter, preserving the user's Ghidra installation.
+Trace checkpointing obtains an ordinary bounded lock so a live transaction cannot overlap
+packed-file save. Profile boundary checks accept canonical filesystem aliases while preserving
+the original Factory process binding. Native and independent-model results, including failed
+candidates, are recorded in the [toolbox audit](TOOLBOX-AUDIT.md); unknown CPU actions are
+retained without automatic replay. Implementation and native/model acceptance are separate;
+the [caller regression receipt](verification/toolbox-ghidra-caller-native.json) identifies the
+exact tested packages and repeat results.
+
 ## Appendix A — every pinned REST operation, 1:1:1
 
 Every one of the **210** catalog paths occurs once below. The native column names the relevant
@@ -773,3 +816,38 @@ or extend the combined native acceptance, and do not authorize npm publication.
 
 [sdk-GhidraApplicationLayout]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Utility/src/main/java/ghidra/GhidraApplicationLayout.java
 [sdk-ExtensionUtils]: https://github.com/NationalSecurityAgency/ghidra/blob/Ghidra_12.1.2_build/Ghidra/Framework/Generic/src/main/java/ghidra/util/extensions/ExtensionUtils.java
+
+## Toolbox bounded text follow-up
+
+`ghidra functions decompile` now returns a bounded Unicode-character window (default
+16000, maximum 32768), retaining the session, target, function address, `textSha256`,
+`sourceTruncated`, offset and observed text size. It changes no upstream Ghidra/MCP API.
+Pages with different text hashes are separate observations; reaching the final page
+does not clear upstream truncation. [Native proof](verification/toolbox-overview.json)
+uses actual Ghidra and ILSpy text. This supplements rather than replaces the original
+P0–P3/full-facade artifact identities recorded above.
+
+## Managed debugger runtime and process ownership
+
+This follow-up changes runtime delivery/verification, without changing the pinned Ghidra
+SDK or MCP function catalog. Real recursive caller checks exposed stale Apple LLDB 17 frame
+coordinates. The facade now delivers private LLDB 23.1.3/Python 3.15 on macOS 15+ ARM64
+through the common installer. `ghidra download/install/status/doctor/uninstall` manage this
+Ghidra dependency; `--debugger-archive` supports offline delivery and external Ghidra.
+The independent `insight-cli lldb` application keeps its selected runtime.
+
+GUI contexts pin the backend receipt; the owned supervisor verifies its files before launch.
+Public process records retain debugger session identity and authenticate native ownership
+through the canonical profile, including the standard macOS `/tmp` parent alias. Substituted
+child links remain rejected. Program snapshots, requests and merge journals retain their
+existing identities. The [caller/runtime receipt](verification/toolbox-ghidra-caller-native.json)
+records source/package identities, actual native comparisons and final acceptance status;
+the [model history](verification/toolbox-agent-ghidra-debugger.json) separately records the
+reviewed cold/prepared business units and their original artifacts.
+
+The final managed-backend native gate passed on `f3ea16f`: 20 macOS scenarios, zero failures,
+four declared host skips, plus a separate recursive public-CLI preflight on the identical
+package. It also corrects the pinned SDK client's wait-under-batch-mutex deadlock pattern,
+exception cleanup for trace/model transactions, and quiescence checks before caller trace
+checkpointing. Budgets and CPU replay rules are preserved. Native Windows seven-job, Linux
+and offline CI passed. Broader independent agent acceptance retains its separate scope.

@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType><UseAppHost>false</UseAppHost><AssemblyName>Insight.Managed</AssemblyName><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><Deterministic>true</Deterministic><DebugType>none</DebugType><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile></PropertyGroup>
+ <ItemGroup><PackageReference Include="dnlib" Version="4.5.0" /></ItemGroup>
+</Project>

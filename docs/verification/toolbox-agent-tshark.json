@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent offline packet/stream business unit proof; complete-toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 175488,
+      "candidateInvocations": 24,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Explain the actual HTTP requests in the supplied packet capture: methods, paths, endpoints and reconstructed application payload, with packet/stream evidence. TCP segments may arrive out of order, so distinguish individual packet fields from reassembled stream bytes. Analyze the retained capture only; do not capture or send target traffic. Pinned toolbox runtime preparation is authorized. Use bounded discovery then focused follow-up, state observation limits, and retain useful raw evidence and a verified checkpoint.",
+      "promptSha256": "28f3cf6e16818519cf894c195c77e255835375f70f427ebe4d9bb8737a7a5b7e",
+      "inputs": [
+        {
+          "path": "input/traffic.pcap",
+          "sha256": "75b515999c27187200d400810063a7ffb0404d4c966ccee731da9e5b3dc2e9ce"
+        }
+      ],
+      "checkpointFiles": 15,
+      "checkpointBytes": 65301,
+      "checkpointSha256": "de4cc58f7259ca951ea1eb8c40d610a1e961ba027accf37ebfc8fd702e26f419",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 17,
+      "reassembledRequests": [
+        {
+          "method": "PUT",
+          "path": "/1"
+        },
+        {
+          "method": "GET",
+          "path": "/2"
+        },
+        {
+          "method": "PUT",
+          "path": "/3"
+        },
+        {
+          "method": "PUT",
+          "path": "/4"
+        },
+        {
+          "method": "PUT",
+          "path": "/5"
+        }
+      ],
+      "httpPacketRows": 3,
+      "actualReassembledRequests": 5,
+      "payloadEvidenceVerified": true,
+      "headerUrlNotClaimedAsEndpoint": true
+    },
+    "prepared": {
+      "elapsedMs": 115864,
+      "candidateInvocations": 12,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Explain the actual HTTP requests in the supplied packet capture: methods, paths, endpoints and reconstructed application payload, with packet/stream evidence. TCP segments may arrive out of order, so distinguish individual packet fields from reassembled stream bytes. Work offline only; do not capture or send traffic. Use bounded discovery then focused follow-up, state observation limits, and retain useful raw evidence and a verified checkpoint.",
+      "promptSha256": "2351143e5f5f3decb98ed6ee4512a2e609a416526fa7e0a9488ee4f72711ad1e",
+      "inputs": [
+        {
+          "path": "input/traffic.pcap",
+          "sha256": "75b515999c27187200d400810063a7ffb0404d4c966ccee731da9e5b3dc2e9ce"
+        }
+      ],
+      "checkpointFiles": 7,
+      "checkpointBytes": 33459,
+      "checkpointSha256": "591aa5a8692d7766859f7f9a981abb2ee02412e843c985e68c52b789563af390",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 11,
+      "reassembledRequests": [
+        {
+          "method": "PUT",
+          "path": "/1"
+        },
+        {
+          "method": "GET",
+          "path": "/2"
+        },
+        {
+          "method": "PUT",
+          "path": "/3"
+        },
+        {
+          "method": "PUT",
+          "path": "/4"
+        },
+        {
+          "method": "PUT",
+          "path": "/5"
+        }
+      ],
+      "httpPacketRows": 3,
+      "actualReassembledRequests": 5,
+      "payloadEvidenceVerified": true,
+      "headerUrlNotClaimedAsEndpoint": true
+    }
+  },
+  "retainedHistory": [
+    "Initial cold offline-only test policy also prohibited runtime acquisition; it stopped honestly without packet findings. A fresh cold trial explicitly permitted pinned runtime delivery, preserving the no-target-traffic rule."
+  ],
+  "limits": [
+    "Packet filter rows do not enumerate every reconstructed application request.",
+    "No response-direction payload or hostname is established by this capture."
+  ]
+}

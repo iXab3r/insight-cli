@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "low",
+  "candidatePackageVersion": "0.2.0",
+  "candidateArtifactSha256": "026032d33d5ff22fd8777db44d3beec5e6d9d5cbb61c61e80d743dc11f2344fd",
+  "installedBuild": "f2d91e352d34fc1627981f8dd52a529e1bb035ece247f961f1d39aa277c056ae",
+  "inputSha256": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb",
+  "isolation": "Fresh independent agents, separate project folders, packaged skills, real global-prefix installation, owned disposable profile; scoped CLI execution permission through normal review",
+  "reviewMethod": "Primary reviewer compared focused C#/IL and exact extracted resource against the owned input oracle, then independently compared checkpoint file sets and hashes. Exit code alone was not the business verdict.",
+  "cases": [
+    {
+      "mode": "cold",
+      "state": "passed",
+      "scope": "Reviewed focused managed static research and ordinary checkpoint; project/metadata workflow families and exact final whole-toolbox gate remain open",
+      "files": {
+        "Policy.cs": "a64ae9a51b4aa6bdc8b30a9d1d804d00d180814ef1f64e3acbacd28967086f23",
+        "ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+        "cli-audit.md": "158fd0cf79932f2b52f266177c2a9be8888a400c87566480607a348231f1692d",
+        "Policy.il": "1c3272e1788f236f779ad742c97fcc2a8bf862c1471552aa3e7acc6d1bf15267",
+        "findings.md": "1664bc5803dd46ce8ec72992c74eb6008a848a1a7e8d8ac31abeaa8a8acf760d"
+      },
+      "checks": {
+        "pricingBoundaryAndUncheckedILCorrect": true,
+        "decoderCorrect": true,
+        "resourceAndConstantCorrect": true,
+        "staticVersusRuntimeDistinguished": true,
+        "checkpointMatchesSourceBytes": true,
+        "projectConventionPreserved": true,
+        "ownedOwnerStopped": true
+      },
+      "coldInstallPerformed": true
+    },
+    {
+      "mode": "prepared",
+      "state": "passed",
+      "scope": "Reviewed focused managed static research and ordinary checkpoint; project/metadata workflow families and exact final whole-toolbox gate remain open",
+      "files": {
+        "Policy.cs": "a64ae9a51b4aa6bdc8b30a9d1d804d00d180814ef1f64e3acbacd28967086f23",
+        "Policy.il": "1c3272e1788f236f779ad742c97fcc2a8bf862c1471552aa3e7acc6d1bf15267",
+        "findings.md": "8f56c1d66071e1759eafe6f929c16e9f7cf82ba79bf91eaf938390e66d2534e3",
+        "extracted/ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521"
+      },
+      "checks": {
+        "pricingBoundaryAndUncheckedILCorrect": true,
+        "decoderCorrect": true,
+        "resourceAndConstantCorrect": true,
+        "staticVersusRuntimeDistinguished": true,
+        "checkpointMatchesSourceBytes": true,
+        "projectConventionPreserved": true,
+        "ownedOwnerStopped": true
+      },
+      "coldInstallPerformed": false
+    }
+  ],
+  "earlierStandaloneHostTrials": {
+    "count": 2,
+    "state": "failed",
+    "reason": "Skills selected correctly, IPC denied, external Mono analysis substituted; not toolbox passes"
+  },
+  "wholeToolboxAccepted": false
+}

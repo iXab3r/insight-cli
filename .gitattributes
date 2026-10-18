@@ -1,0 +1,23 @@
+# Source/binary identity of the packaged first-party native exec helper is byte exact.
+skills/ghidra-coordinator/runtime/native/*.c text eol=lf
+skills/ghidra-coordinator/runtime/native/deadline-exec-darwin-arm64 -text
+skills/ghidra-coordinator/runtime/native/*.dylib -text
+skills/ghidra-coordinator/runtime/native/windows-job/* text eol=lf
+skills/ghidra-coordinator/runtime/native/windows-job/*.dll -text
+skills/ghidra-coordinator/runtime/native/child-deadline-linux-x64 -text
+skills/ghidra-coordinator/runtime/native/sources/*.tar.gz -text
+skills/ghidra-coordinator/runtime/native/*.dll -text
+skills/ghidra-coordinator/runtime/native/*.def text eol=lf
+skills/ghidra-coordinator/runtime/native/dnspy-extension/* text eol=lf
+skills/ghidra-coordinator/runtime/native/dnspy-extension/*.dll -text
+skills/ghidra-coordinator/runtime/native/dnspy-extension/*.snk -text
+skills/ghidra-coordinator/runtime/native/mitmproxy/*.py text eol=lf
+skills/ghidra-coordinator/runtime/native/mitmproxy/*.json text eol=lf
+skills/ghidra-coordinator/runtime/managed/insight-managed/* text eol=lf
+skills/ghidra-coordinator/runtime/managed/insight-managed/*.dll -text
+skills/ghidra-coordinator/runtime/managed/insight-heap/* text eol=lf
+skills/ghidra-coordinator/runtime/managed/insight-heap/**/*.dll -text
+skills/ghidra-coordinator/runtime/managed/insight-heap/notices/* -text -whitespace
+skills/ghidra-coordinator/runtime/native/binary/* text eol=lf
+skills/ghidra-coordinator/runtime/native/binary/insight-binary-* -text
+skills/ghidra-coordinator/runtime/native/binary/notices/* -text -whitespace

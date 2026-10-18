@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent Frida unit business proof on final event-summary candidate; combined toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 150479,
+      "candidateInvocations": 20,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The owned native subject repeatedly calculates totals, and a larger count unexpectedly yields a smaller total at a boundary. Observe actual calls in a running instance through the connected toolbox to explain the discontinuity using argument/return pairs on both sides. Establish the instrumented module/export identity and collect observations without replacing return values or changing behavior. Keep the project evidence and a verified checkpoint; finish with observations, uncertainty and cleanup state.",
+      "promptSha256": "2190f22cd8d3dcaea1602e838484f63fbfd092285254d622384e9659dfb41dd8",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "71148cba91a025b8e82f6ada93a0c5e78fa49beab367c42f14b3f0806014889c"
+        }
+      ],
+      "checkpointFiles": 6,
+      "checkpointBytes": 98872,
+      "checkpointSha256": "4c005d23598d0459b862ef83f4eba2ecf205b431df530fa9cbe11a1ad1030e55",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 4,
+      "observedBoundary": [
+        [
+          10,
+          130
+        ],
+        [
+          11,
+          109
+        ]
+      ],
+      "observedCalls": 40,
+      "moduleAndExportEstablished": true,
+      "passiveHookVerified": true,
+      "eventSummaryIndependentlyMatched": true,
+      "originalSubjectAbsent": true,
+      "nativeHelpersAbsent": 3
+    },
+    "prepared": {
+      "elapsedMs": 109201,
+      "candidateInvocations": 13,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The owned native subject repeatedly calculates totals, and a larger count unexpectedly yields a smaller total at a boundary. Observe actual calls in a running instance through the connected toolbox to explain the discontinuity using argument/return pairs on both sides. Establish the instrumented module/export identity and collect observations without replacing return values or changing behavior. Keep the project evidence and a verified checkpoint; finish with observations, uncertainty and cleanup state.",
+      "promptSha256": "2190f22cd8d3dcaea1602e838484f63fbfd092285254d622384e9659dfb41dd8",
+      "inputs": [
+        {
+          "path": "input/subject",
+          "sha256": "71148cba91a025b8e82f6ada93a0c5e78fa49beab367c42f14b3f0806014889c"
+        }
+      ],
+      "checkpointFiles": 5,
+      "checkpointBytes": 90158,
+      "checkpointSha256": "8b3bc588c340c501124ced0b1c6399ec46e53f5c1fca748c1d5a3e52a95dbb3b",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 4,
+      "observedBoundary": [
+        [
+          10,
+          130
+        ],
+        [
+          11,
+          109
+        ]
+      ],
+      "observedCalls": 4,
+      "moduleAndExportEstablished": true,
+      "passiveHookVerified": true,
+      "eventSummaryIndependentlyMatched": true,
+      "originalSubjectAbsent": true,
+      "nativeHelpersAbsent": 3
+    }
+  },
+  "retainedHistory": [
+    "Initial cold trial stopped after later IPC refusals despite an approved read-only status. Common skills now clarify the same execution route for later authorized calls and definite undispatched refusals.",
+    "Initial prepared investigation had correct boundary evidence and five byte-matched checkpoint files but manually reported 28 of 29 retained call messages. Final facade summary and payload-filter guidance distinguish calls from service/hook-ready receipts."
+  ],
+  "limits": [
+    "Observed intervals and explicit hook bounds do not establish absent calls or internal implementation.",
+    "macOS process birth identity is best effort.",
+    "Known native attach failure on bare non-CoreFoundation targets remains explicit; these supplied owned subjects load CoreFoundation."
+  ]
+}

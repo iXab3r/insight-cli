@@ -1,0 +1,14 @@
+{
+  "reproducible": true,
+  "compiler": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64",
+  "detoursCommit": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+  "schema": 1,
+  "flags": "/LD /TP /O2 /MT /DNDEBUG /DYNAMICBASE /NXCOMPAT /OPT:REF /OPT:ICF /Brepro",
+  "definitionSha256": "85aee230d2e3996676fbc52189b4ec4b4831ff783165a4db407877a05b1a531b",
+  "detoursSha256": "d24f5dd1f977c33301ebd9f3be064e938a7908954df15b31235c9ca6691cb356",
+  "sha256": "7b30875c531aff0a02610f3e828a00bd4afb54028a6f98264881fb27602b9939",
+  "size": 126976,
+  "sourceSha256": "6bc68b57b97978a45647b5731ce44a005a177b8c251d7ceb8e3ccfffedc56b75",
+  "definitionCanonicalSha256": "7c9d9858ebbd5bc5cce17ef7da8d5180cb782f8934e056c5b570db79e7ac4d9e",
+  "definitionCheckout": "Native Windows build used CRLF; canonical checked source uses LF with identical exports."
+}

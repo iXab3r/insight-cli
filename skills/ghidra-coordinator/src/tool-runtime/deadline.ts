@@ -1,0 +1,25 @@
+import {fileURLToPath} from 'node:url';
+import {CliError} from '@eyeauras/cli-factory';
+import {fileSha256} from './archives.js';
+import {isAbsolute} from 'node:path';
+/** For reviewed native helper execs started inside an adapter worker, never an external target. */
+export async function inheritedDeadlineEnvironment(deadlineUnixSeconds:number,receipts:string){
+ if(process.platform!=='darwin'||process.arch!=='arm64'||!Number.isInteger(deadlineUnixSeconds)||deadlineUnixSeconds<=Date.now()/1000||deadlineUnixSeconds>Date.now()/1000+600||!isAbsolute(receipts))throw new CliError('Invalid inherited native deadline.',{code:'tool.configuration'});
+ const library=fileURLToPath(new URL('../../../runtime/native/deadline-alarm-darwin-universal.dylib',import.meta.url));
+ if(library.includes(':')||await fileSha256(library)!=='cd5ebd65aa419b79cb327f2ae872f98f3fd222b93049c909e409776eab65b8ef')throw new CliError('Inherited deadline library differs from its reviewed build or has an unsupported loader path.',{code:'tool.binding'});
+ return {DYLD_INSERT_LIBRARIES:library,INSIGHT_NATIVE_DEADLINE_UNIX_SECONDS:String(deadlineUnixSeconds),INSIGHT_NATIVE_DEADLINE_RECEIPTS:receipts};
+}
+/** Internal, first-party exec helper. No service or timer in the owner is needed after exec. */
+export async function deadlineLaunch(executable:string,args:string[],timeoutMs:number){
+ if(process.platform==='linux'&&process.arch==='x64'){
+  if(!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>600000)throw new CliError('Native deadline must be 1–600 seconds.',{code:'tool.configuration'});
+  const helper=fileURLToPath(new URL('../../../runtime/native/child-deadline-linux-x64',import.meta.url));
+  if(await fileSha256(helper)!=='e070e2de9a21aea78f224062877cdc0264be11229af314d3b88ff3b6bd77e26f')throw new CliError('Packaged Linux launcher differs from its reviewed build.',{code:'tool.binding'});
+  return {executable:helper,arguments:[String(Math.ceil(timeoutMs/1000)),String(process.pid),executable,...args]};
+ }
+ if(process.platform!=='darwin'||process.arch!=='arm64')throw new CliError('A packaged native deadline is unavailable on this host.',{code:'tool.unsupported'});
+ if(!Number.isInteger(timeoutMs)||timeoutMs<1000||timeoutMs>600000)throw new CliError('Native deadline must be between one and 600 seconds.',{code:'tool.configuration'});
+ const helper=fileURLToPath(new URL('../../../runtime/native/deadline-exec-darwin-arm64',import.meta.url));
+ if(await fileSha256(helper)!=='32c146075d1c83422b068eeedd4a244d5e30cb768b279b185756c5d3b8008d88')throw new CliError('Packaged native deadline differs from its reviewed build.',{code:'tool.binding'});
+ return {executable:helper,arguments:[String(Math.ceil(timeoutMs/1000)),'--',executable,...args]};
+}

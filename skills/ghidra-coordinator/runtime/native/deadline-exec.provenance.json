@@ -1,0 +1,17 @@
+{
+  "platform": "darwin-arm64",
+  "compiler": "LLVM 22.1.8",
+  "sourceSha256": "d4f17b44fe6703073fd090aff5a2770441e185c1ece07f06228ee0f21dbec47e",
+  "sha256": "32c146075d1c83422b068eeedd4a244d5e30cb768b279b185756c5d3b8008d88",
+  "size": 33824,
+  "flags": [
+    "--target=arm64-apple-macos13.0",
+    "-Oz",
+    "-g0",
+    "-fno-ident",
+    "-fno-stack-protector",
+    "-Wl,-no_uuid",
+    "-Wl,-platform_version,macos,13.0,13.0"
+  ],
+  "reproducibility": "Two builds in different temporary directories produced identical bytes. Ad-hoc signature verified; only libSystem is dynamically linked."
+}

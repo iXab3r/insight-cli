@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "scope": "Windows host feasibility, not toolbox acceptance",
+  "tools": {
+    "windbg": {
+      "adapterAccepted": false,
+      "version": "1.2610.1001.0",
+      "consoleAutomation": true
+    },
+    "procmon": {
+      "fixtureOutputValid": true,
+      "stopExit": 0,
+      "driverRunning": false,
+      "fixtureExit": 0,
+      "exportExit": 0,
+      "version": "4.12",
+      "matchingEvents": 1,
+      "configOperations": [
+        {
+          "count": 1,
+          "operation": "CloseFile",
+          "result": "SUCCESS"
+        },
+        {
+          "count": 1,
+          "operation": "CreateFile",
+          "result": "SUCCESS"
+        },
+        {
+          "count": 1,
+          "operation": "ReadFile",
+          "result": "END OF FILE"
+        },
+        {
+          "count": 1,
+          "operation": "ReadFile",
+          "result": "SUCCESS"
+        }
+      ],
+      "totalEvents": 166919,
+      "captureExited": true,
+      "adapterAccepted": false,
+      "columns": [
+        "Time of Day",
+        "Process Name",
+        "PID",
+        "Operation",
+        "Path",
+        "Result",
+        "Detail"
+      ],
+      "idleExit": 0,
+      "ownedEvents": 579,
+      "configSuffixEvents": 4,
+      "ownedConfigReadObserved": true,
+      "captureScope": "disposable runner feasibility only; product-side prefilter still required"
+    },
+    "dnspy": {
+      "launchAlive": true,
+      "extensionContractsPresent": true,
+      "adapterAccepted": false,
+      "version": "6.6.0",
+      "debugEditAutomationProven": false,
+      "windowHandlePresent": true
+    }
+  },
+  "administrator": true,
+  "fixtureSha256": "803b1ef5626bd05c3828b944993b018a49e4178f2daab5618042a014169e4719",
+  "currentState": "native_capture_feasible_with_explicit_filter_reset_adapter_pending",
+  "historicalPassRun": 39029921856,
+  "subsequentChecks": [
+    {
+      "run": 39036574636,
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "idleExit": 1
+    },
+    {
+      "run": 39038803051,
+      "source": "dd7552187cb4131cf52e34c4d9e0b7b89c2bf506",
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "idleExit": 0,
+      "readinessAttempts": 1,
+      "readinessMs": 128
+    },
+    {
+      "run": 39039221126,
+      "source": "eac7f6f19975d4be285d2ddaf2c207a3871dc0d8",
+      "ownedConfigReadObserved": false,
+      "ownedEvents": 0,
+      "fixturePidEvents": 0,
+      "anyProcessConfigEvents": 0,
+      "postExitObservationMs": 2000,
+      "idleExit": 0
+    }
+  ],
+  "interpretation": "Both repeat runs observed the actual successful owned ReadFile after explicitly clearing capture/export filters with /NoFilter. Readiness and a post-exit window alone had failed. This supports inherited filter state as the capture gap. A product-side prefilter, public adapter, skill and independent agent acceptance remain required; these runner captures do not admit a general unscoped capture API.",
+  "confirmations": [
+    {
+      "run": 39039589569,
+      "attempt": 1,
+      "source": "353cb6a6a2e0cc37397eb48452d9d6f03a1168fd",
+      "ownedConfigReadObserved": true,
+      "matchingEvents": 1,
+      "fixturePidEvents": 654,
+      "anyProcessConfigEvents": 7,
+      "readinessMs": 145,
+      "totalEvents": 87918,
+      "noInheritedFilter": true
+    },
+    {
+      "run": 39039589569,
+      "attempt": 2,
+      "artifactId": 12104115153,
+      "source": "353cb6a6a2e0cc37397eb48452d9d6f03a1168fd",
+      "ownedConfigReadObserved": true,
+      "matchingEvents": 1,
+      "fixturePidEvents": 654,
+      "anyProcessConfigEvents": 7,
+      "readinessMs": 135,
+      "totalEvents": 84058,
+      "noInheritedFilter": true,
+      "receiptMatchesAttemptLog": true
+    }
+  ]
+}

@@ -1,4 +1,19 @@
+import {captureCommands} from './capture.js';
+import {binaryCommands} from './binary.js';
+import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
+import {diagnosticsCommands} from './dotnet-diagnostics.js';
+import {fridaCommands} from './frida.js';
+import {mitmproxyCommands} from './mitmproxy.js';
+import {tsharkCommands} from './tshark.js';
+import {dnspyCommands} from './dnspy.js';
+import {procmonCommands} from './procmon.js';
+import {straceCommands} from './strace.js';
+import {windbgCommands} from './windbg.js';
+import {lldbCommands} from './lldb.js';
+import {dieCommands} from './die.js';
+import {llvmCommands} from './llvm.js';
+import {sevenzipCommands} from './sevenzip.js';
 import {ilspyCommands} from './ilspy.js';
 import {toolProcessCommands} from './tool-runtime/commands.js';
 import {ghidraProcessHooks} from './ghidra-processes.js';
@@ -7,7 +22,6 @@ import { command, createCli, Permission, CliError, ProfileStore, type CommandDef
 import { join, resolve } from 'node:path';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { Workspace } from './workspace.js';
 import { GhidraContexts, type ToolMode } from './contexts.js';
 import { nativeInputs } from './native-inputs.js';
@@ -214,16 +228,25 @@ export function createDefinition(options: Options = {}): CliDefinition {
         await c.secrets.delete('readerPassword');await c.secrets.delete('publisherPassword');
       },
     },
-    builtins:[command('skill [name]','Locate the installed insight-cli or insight-re skill',({args})=>{
-      const name=args.name===undefined?'insight-cli':text(args.name);
-      if(!['insight-cli','insight-re'].includes(name))fail('notFound','Unknown skill; choose insight-cli or insight-re.');
-      return {version:packageVersion,name,path:fileURLToPath(new URL(name==='insight-re'?'../../skills/insight-re/SKILL.md':'../../SKILL.md',import.meta.url)),
-        skills:['insight-cli','insight-re']};
-    })],
+    builtins:[skillCommand()],
     commands:[
       ...artifactsCommands(),
+      ...diagnosticsCommands(c=>owner.selected(c).workspace),
+      ...llvmCommands(c=>owner.selected(c).workspace),
+      ...dieCommands(c=>owner.selected(c).workspace),
+      ...lldbCommands(c=>owner.selected(c).workspace),
+      ...windbgCommands(c=>owner.selected(c).workspace),
+      ...procmonCommands(),
+      ...dnspyCommands(c=>owner.selected(c).workspace),
+      ...tsharkCommands(c=>owner.selected(c).workspace),
+      ...mitmproxyCommands(c=>owner.selected(c).workspace),
+      ...straceCommands(c=>owner.selected(c).workspace),
+      ...fridaCommands(c=>owner.selected(c).workspace),
+      ...sevenzipCommands(c=>owner.selected(c).workspace),
       ...ilspyCommands(c=>owner.selected(c).workspace),
-      ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))}),
+      ...binaryCommands(c=>owner.selected(c).workspace),
+      ...captureCommands(c=>owner.selected(c).workspace),
+      ...toolProcessCommands({ghidra:ghidraProcessHooks(c=>owner.selected(c).workspace,(scope,c)=>owner.selected(c).lifecycle.change(scope,'close'))},toolboxCommands()),
       command('targets','Inspect immutable inputs',[
         command('add <input>','Consume input without starting a tool',async({args},c)=>targetView(await owner.selected(c).workspace.importTarget(resolve(c.cwd,text(args.input,4096)))),{permission:Permission.Update}),
         command('list','List known inputs',({options:o},c)=>{
@@ -323,7 +346,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
           },{permission:Permission.Update,options:[...scoped,at,{flags:'--prototype <signature>',description:'Complete C prototype',required:true},
             {flags:'--calling-convention <name>',description:'Explicit convention supported by the selected compiler specification'},request]}),
           command('get','Read a function and entry comments',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address)),{permission:Permission.ReadOnly,options:[...scoped,at]}),
-          command('decompile','Read decompiled function text',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true),{permission:Permission.ReadOnly,options:[...scoped,at]}),
+          command('decompile','Read a bounded Unicode window of one decompiled function',({options:o},c)=>owner.selected(c).research.function(scope(o),address(o.address),true,{limit:number(o.limitChars??16000,32768,1),offset:number(o.offsetChars??0,4*1024**2)}),{permission:Permission.ReadOnly,options:[...scoped,at,{flags:'--limit-chars <count>',description:'Return 1–32768 Unicode characters',defaultValue:16000},{flags:'--offset-chars <count>',description:'Skip Unicode characters in the returned native text',defaultValue:0}]}),
           command('rename','Record a saved private name',({options:o},c)=>{
             const name=text(o.name,512);if(name!==name.trim())fail('invalid','Function name may not have leading or trailing whitespace.');
             return owner.selected(c).research.edit(scope(o),address(o.address),'function.name',name,o.requestId===undefined?undefined:id(o.requestId),resolution(o));

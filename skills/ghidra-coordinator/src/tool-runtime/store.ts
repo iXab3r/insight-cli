@@ -41,8 +41,10 @@ export async function assertUnused(directory:string,tool:string){
  if(toolUseCount(directory,tool))fail('busy','Tool installation is reserved by an active operation.');
  let names:string[];const root=join(directory,'runtime/processes');try{names=await readdir(root);}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
  for(const name of names){if(!/^[a-f0-9-]{36}\.json$/.test(name))continue;
-  const record=await readJson<{tool:string;state:string;pid?:number;ownerPid?:number;gated?:boolean}>(join(root,name));
-  if(!record||record.tool!==tool||['exited','failed'].includes(record.state))continue;
+  const retained=await readJson<{tool:string}>(join(root,name));if(!retained||retained.tool!==tool)continue;
+  const {processStatus}=await import('./supervisor.js'),record=await processStatus(directory,name.slice(0,-5));
+  if(['exited','failed'].includes(record.state))continue;
+  if(record.phase==='native_children_pending'||record.phase==='native_children_unverified')fail('busy','Tool has an active or unverified native helper; inspect its retained records before changing installations.');
   if(!record.pid){
    if(record.gated&&record.ownerPid)try{process.kill(record.ownerPid,0);}catch(e){if((e as NodeJS.ErrnoException).code==='ESRCH')continue;throw e;}
    fail('busy','Tool has an unresolved process launch; inspect its process record.');
@@ -77,7 +79,7 @@ export async function removeInstallation(root:string,id:string){
  await rm(path,{recursive:true,force:true});
 }
 export async function treeFingerprint(root:string){
- const hash=createHash('sha256');let count=0;
+ const hash=createHash('sha256'),canonicalRoot=await realpath(root);let count=0;
  async function visit(path:string):Promise<void>{
   for(const name of (await readdir(path)).sort()){
    if(path===root&&name==='ready.json')continue;
@@ -85,8 +87,8 @@ export async function treeFingerprint(root:string){
    hash.update(relative(root,at).replaceAll('\\','/')+'\0');
    if(st.isDirectory())await visit(at);
    else if(st.isSymbolicLink()){
-    const destination=await realpath(at);if(!destination.startsWith((await realpath(root))+sep))fail('binding','Installed component link escapes its owned directory.');
-    hash.update('link:'+relative(root,destination));
+    const destination=await realpath(at);if(!destination.startsWith(canonicalRoot+sep))fail('binding','Installed component link escapes its owned directory.');
+    hash.update('link:'+relative(canonicalRoot,destination));
    }else if(st.isFile()){const leaf=createHash('sha256');for await(const b of createReadStream(at))leaf.update(b);hash.update('file:'+st.size+':'+leaf.digest('hex')+'\0');}
    else fail('binding','Unsupported tool installation entry.');
   }

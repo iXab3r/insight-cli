@@ -24,6 +24,11 @@ files; byte count counts their contents. A file's SHA-256 hashes its bytes; a di
 SHA-256 hashes its canonical manifest of relative paths, kinds, file lengths and hashes.
 The manifest is stored beside the content, outside the returned directory.
 
+Before claiming a verified checkpoint, read the expected files at the returned `path` using
+ordinary file tools. Preserve that path verbatim in the handoff, alongside the receipt;
+profile and snapshot identifiers must not be reconstructed from memory. If access is denied,
+retain the actual receipt and state that readback remains unverified.
+
 The service copies and syncs data before publishing the completed snapshot. Failure does
 not return a successful receipt or expose a partial completed snapshot. Source edits made
 after a successful save do not change the copy. Treat saved copies as retained snapshots;

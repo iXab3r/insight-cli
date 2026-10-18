@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "low",
+  "candidatePackageVersion": "0.2.0",
+  "candidateArtifactSha256": "54733f38975f41e3fa799021e19dee83da0f5de03b8df55e3085e7b4a68ab4ae",
+  "installedBuild": "7471b604f0ec072c71b136d50689fbfacfc41208afd6d89891083ed53240b308",
+  "inputSha256": "7537a69697276b2606d6cc2659efb199f2605651a4a29297a1b171bffc42fac2",
+  "reviewMethod": "Independent comparison of original ZIP bytes, recovered configuration/assembly, focused code/IL evidence, stated findings and saved checkpoint file hashes. No correction hints were supplied to these two clean agents.",
+  "cases": [
+    {
+      "mode": "cold",
+      "state": "passed",
+      "files": {
+        "Policy.cs": "a64ae9a51b4aa6bdc8b30a9d1d804d00d180814ef1f64e3acbacd28967086f23",
+        "Policy.il": "1c3272e1788f236f779ad742c97fcc2a8bf862c1471552aa3e7acc6d1bf15267",
+        "findings.md": "c40e865a43e50b8ef3b76ee22c1c1b9aa202f104b73845be07e444d4d7de728d",
+        "recovered/embedded-settings/ResearchFixture.settings.json": "7e00877be60972e868b89752e39ce40a283f2fc608c1354215a842956353b521",
+        "recovered/release-package/configuration/settings.json": "dd30a53ad65a2221f6456eda74ccc5742f31b2476cc1b497ae85d62eec1d2757",
+        "recovered/release-package/lib/ResearchFixture.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb"
+      },
+      "checks": {
+        "actualPublicCliSevenzipAndIlspyUsed": true,
+        "containerAndRecoveredBytesMatch": true,
+        "configurationCorrect": true,
+        "pricingComponentAndBoundaryCorrect": true,
+        "distinctConfigurationAndAssemblyConstantsNotConflated": true,
+        "projectConventionPreserved": true,
+        "checkpointMatchesSourceBytes": true,
+        "ownedOwnerStopped": true
+      },
+      "installation": "cold download/install; one expected uncached offline refusal recovered autonomously"
+    },
+    {
+      "mode": "prepared",
+      "state": "passed",
+      "files": {
+        "Policy.cs": "a64ae9a51b4aa6bdc8b30a9d1d804d00d180814ef1f64e3acbacd28967086f23",
+        "findings.md": "60cbcf3885ce61af5807fbc88d70732431389612ab388affb2cda0aa32d7737f",
+        "recovered/release/configuration/settings.json": "dd30a53ad65a2221f6456eda74ccc5742f31b2476cc1b497ae85d62eec1d2757",
+        "recovered/release/lib/ResearchFixture.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb"
+      },
+      "checks": {
+        "actualPublicCliSevenzipAndIlspyUsed": true,
+        "containerAndRecoveredBytesMatch": true,
+        "configurationCorrect": true,
+        "pricingComponentAndBoundaryCorrect": true,
+        "distinctConfigurationAndAssemblyConstantsNotConflated": true,
+        "projectConventionPreserved": true,
+        "checkpointMatchesSourceBytes": true,
+        "ownedOwnerStopped": true
+      },
+      "installation": "reused prepared private runtimes; no install"
+    }
+  ],
+  "priorRejectedColdTrial": {
+    "state": "failed_then_corrected",
+    "reason": "Report omitted retries field although extracted JSON bytes were exact. Correction is retained separately and does not count as a clean pass."
+  },
+  "hostDiscoveryObservation": "Plain find did not follow the bundle symlink; direct named SKILL.md and actual Codex skills/list metadata succeeded. No files were missing.",
+  "wholeToolboxAccepted": false
+}

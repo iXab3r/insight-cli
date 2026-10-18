@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "state": "native_passed_agent_pending",
+  "scope": "DiE console adapter native unit proof; independent agent and combined whole-toolbox gates remain incomplete",
+  "artifactSha256": "e116f5d81c03904719ab93095f5e0d3ef1a6b89e4caf716603e49f6f226b5025",
+  "packageBuild": "82f30ea7df5b5eb47e51c0e6875557dd564694d58391e4916e24c901ad9f3058",
+  "distribution": {
+    "tag": "tool-diec-3.21-r1",
+    "binarySha256": "5fc9f1d870b4c791ae688a07ccbae0dcdf677eedeeb6ae732bbc83eac61148af",
+    "state": "published_verified",
+    "exactSourceCompanions": 4,
+    "embeddedLicenseAndAttributionFiles": 306,
+    "fullNoticesPreserved": true,
+    "installerNeverExecuted": true,
+    "privateDynamicQtFrameworks": 5,
+    "url": "https://github.com/iXab3r/insight-cli/releases/tag/tool-diec-3.21-r1",
+    "allSixRemoteAssetsReadBackAndHashVerified": true
+  },
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Native public CLI triage proof; independent cold/prepared agent gate pending",
+    "version": "0.2.0",
+    "inputs": [
+      {
+        "name": "program.exe",
+        "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+      },
+      {
+        "name": "program.elf",
+        "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+      },
+      {
+        "name": "program.macho",
+        "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+      },
+      {
+        "name": "worker.dll",
+        "sha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb"
+      }
+    ],
+    "checks": {
+      "privateQtClosure": true,
+      "peElfMachoHeaders": true,
+      "managedRuntimeSignature": true,
+      "realUpstreamErrorMarkedPartial": true,
+      "unknownSignaturePreserved": true,
+      "boundedPagination": true,
+      "newOutputAndWarningsRetained": true,
+      "externalDatabaseDriftRefused": true,
+      "externalFilesPreserved": true,
+      "inputsUnchanged": true,
+      "checkpointSurvivesRemoval": true,
+      "terminalOwnedProcesses": true
+    },
+    "cleanupComplete": true
+  },
+  "gherkin": {
+    "executed": 5,
+    "passed": 5,
+    "scope": "Host, 7-Zip, LLVM, managed diagnostics and DiE on this exact globally installed candidate"
+  },
+  "offline": {
+    "tests": 184,
+    "passed": 182,
+    "optInSkipped": 2,
+    "releaseTestsPassed": 24,
+    "isolatedPackageProof": true
+  },
+  "retainedFailure": {
+    "initialGherkinPassed": 4,
+    "initialGherkinFailed": 1,
+    "reason": "DiE installed but doctor rejected its relocated framework symlink fingerprint. treeFingerprint mixed the alias root (/tmp) with canonical destinations (/private/tmp), accidentally hashing the stage path.",
+    "fix": "Hash symlink targets relative to the canonical installation root; regression covers aliased parents, staging rename, changed content and escaping links."
+  },
+  "independentAgentGate": {
+    "state": "pending",
+    "reason": "The prior independent stack trial exhausted the model-account usage limit. No model trial was run or claimed for DiE."
+  },
+  "wholeToolboxAccepted": false,
+  "ownedReleaseConsumer": {
+    "state": "passed",
+    "freshProfileDownload": true,
+    "downloadedBytesIndependentlyHashVerified": true,
+    "offlineInstallFromDownloadedCache": true,
+    "doctorAndRealPEClassification": true,
+    "ownedCleanup": true
+  }
+}

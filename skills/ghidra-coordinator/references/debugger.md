@@ -6,6 +6,12 @@ verified copy of the selected immutable input in an owned run directory. It acce
 `--args`, `--cwd`, a bounded launch timeout and the optional request ID. A second live process
 uses another session; it does not replace this context's current process.
 
+For local macOS `lldb`, `--stop-at-entry` launches stopped before normal program startup.
+The response verifies a live `STOPPED` target and reports `stoppedAtEntry: true`. This is
+useful for short programs: inspect/map/set breakpoints, then explicitly resume. Without the
+flag, the existing immediate-run behavior is unchanged. Other offers reject this flag before
+a CPU intent is reserved. An unknown stopped launch still requires ordinary request recovery.
+
 Read `debugger status`, `modules`, `registers`, `stack-trace` and `traces`. Address conversion
 uses `static-to-dynamic` and `dynamic-to-static`; memory and breakpoint commands take dynamic
 addresses. Lists are paged. Read results identify the logical context and current trace, and
@@ -38,3 +44,19 @@ directory are Factory profile settings. Native Windows/Linux acceptance remains 
 
 Use generated help for exact flags. A retained static breakpoint bookmark may remain after its live trace placement is
 removed; `trace_location_count` distinguishes current placements from that static metadata.
+
+For a call observation, set the mapped function breakpoint **before** resuming from entry.
+After the stop, check the PC against that address, then capture arguments and stack before
+stepping. Step-out verifies return to the native caller in the same thread and stack;
+return registers are observed without being modified. A competing stop or unavailable caller
+does not count as a verified return. A requested step whose reply
+or observed completion is unknown remains journaled; do not issue another CPU action to
+try to recover a missing return. Retain its diagnostics and use request/status recovery.
+
+For another intentional run, close and reopen the same owned context first: this disconnects
+and retains the previous trace without relaunching it. Then launch with a distinct request ID
+and desired arguments. A connected debugger remains busy even after its subject has exited;
+selecting or reading its old trace is not a request to execute the subject again.
+Map the new process and explicitly set/check its live breakpoints before each resume from
+entry. Old static bookmarks do not establish new trace placements. Reopening restores each
+trace's saved snap/thread, including inactive traces; choose its returned ID with `--trace`.

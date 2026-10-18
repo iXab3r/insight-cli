@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Native installed public CLI overview/drilldown and 1001-method short-name search proof; independent model receipts are separate",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "checks": {
+    "sixDiscoverableCapabilityUnits": true,
+    "sixteenAnalyticalFamilies": true,
+    "boundedManagedOverview": true,
+    "pagedMethodSelection": true,
+    "largeAssemblyHas1001Methods": true,
+    "caseInsensitiveShortMemberSearch": true,
+    "namespaceFilterCollisionExplicit": true,
+    "exactMemberWithoutWholeClass": true,
+    "actualIlspyCharacterWindows": true,
+    "fullOrdinaryFileIndependentHash": true,
+    "actualGhidraCharacterWindows": true,
+    "stableTextHashAndScopedIdentity": true,
+    "endOfObservedTextExplicit": true,
+    "nativeSourceTruncationFlagExplicit": true,
+    "invalidWindowBoundRefused": true,
+    "usefulFocusedCode": true,
+    "ordinaryCheckpoint": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "9523dd3f5d560df312fd03049fe8a45345fd7f07ee50b299f83fe3229f5ffc2e"
+  },
+  "cleanupComplete": true,
+  "runId": "05ba05150f7641e28b55753420524383",
+  "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99"
+}

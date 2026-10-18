@@ -71,7 +71,7 @@ exit as successful save, merge or completion of an arbitrary research operation.
 
 ## Distributions retained in our releases
 
-Runtime delivery reads exact assets from public releases in `iXab3r/insight-cli`. CLI/npm versions
+Default runtime delivery reads exact assets from public releases in `iXab3r/insight-cli`. CLI/npm versions
 and tool-distribution versions are independent. Example tag: `tool-ghidra-12.1.2-r1`; the revision
 changes if packaging or any retained byte changes. Ghidra, JDK and .NET component releases can be
 reused across compatible tool definitions without copying them into every CLI release.
@@ -82,6 +82,16 @@ manifest describing this same inventory and upstream provenance. Installed CLI d
 not trust a replacement manifest fetched from the same release to redefine their expected hashes.
 No `latest` resolution or automatic upstream fallback occurs during installation. Upstream URLs
 are acquisition provenance for the release workflow, not runtime dependencies.
+
+Microsoft-only exception: ProcMon and WinDbg prohibit our redistribution. Their exact vendor
+URLs, sizes, SHA256 values, terms and delivery reason are retained in
+`scripts/vendor-tool-sources.json` and compiled into the installed catalog. They never enter
+`tool-release.mjs`: the mirror publisher rejects a `vendor-direct` asset. A consuming adapter
+must expose `--vendor-direct` for explicit network acquisition; normal installation cannot
+silently fall back to Microsoft if a mirror fails. Already verified cache bytes work offline
+without another download opt-in. A local archive or explicit external executable remains possible.
+The shared runtime verifies size/hash before cache selection and refuses a corrupt cached entry.
+These source-policy entries alone do not advertise an implemented/accepted ProcMon or WinDbg adapter.
 
 The release workflow performs this sequence:
 
@@ -202,3 +212,88 @@ require a new output directory. Existing output is never overwritten. These comm
 because they capture immutable input and start a tool. They perform static analysis; they do not
 execute the analyzed assembly. Tool update checks are disabled. Output remains ordinary files that
 agents may keep according to project conventions or explicitly save with `artifacts save`.
+
+### Native helper deadlines
+
+Reviewed adapters can opt into the packaged kernel deadline exec helper; a JavaScript timer
+in the owner alone cannot bound execution after owner SIGKILL. LLDB also sets its native
+kill-on-connection-loss policy. Frida SDK helpers create separate sessions, so its worker
+provides an inherited deadline constructor only to those owned helper execs. The first-party
+ARM64/ARM64e library arms the absolute deadline and records PID/birth/deadline before main.
+It is never placed in the external target's environment. Both native components ship source
+and reproducible build provenance; normal npm builds do not require a compiler.
+
+A terminal collector with a still-present native child is unverified/native_children_pending;
+selection/removal guards wait for the child. Per-receipt exit acknowledgments avoid later
+PID-reuse false positives. A changed observable birth establishes an old child has exited;
+ambiguous identities remain unverified. Child receipts grant no signaling authority.
+
+Maintainer distribution recipes also support a source-set companion: exact bounded upstream
+archives plus public origin/revision/hash metadata, without local build paths. Frida's Node
+composition retains npm runtime bytes and native binding unchanged, indexes full notices
+from its corresponding source set and runs no installation script.
+
+### Windows owned Job Object executor
+
+Adapters opting into `nativeDeadline` on Windows use the packaged first-party
+`Insight.WindowsJob.dll` through stock Windows PowerShell. The launcher creates
+a kill-on-close job, creates its native child suspended, assigns it before resume,
+and persists the child birth identity. It waits on an authenticated owner handle
+and terminates the job on timeout or owner exit. Killing the launcher closes the
+last job handle. Child exit codes come from the verified result receipt, rather
+than the PowerShell exit code. Missing receipts never mean success. The DLL has
+source, locked build dependencies and reproducible SDK provenance; installation
+does not compile code or change system policy. Native Windows acceptance is
+tracked separately in the Windows workflow; other direct Windows launches retain
+the existing direct-child-only contract.
+
+Unreadable native helper receipts leave the affected process unverified and block
+removal, while keeping the process list readable for recovery.
+
+### Linux tracer deadline
+
+The reviewed Linux x64 launcher uses its own kernel alarm and authenticates its
+original parent before launching a native child. Both launcher and native child
+set `PR_SET_PDEATHSIG` to `SIGKILL`; this closes owner-loss and launcher-loss paths.
+It intentionally keeps the alarm in its parent, because strace replaces SIGALRM.
+An adapter must still prove native descendant cleanup: strace supplies that contract
+with `--kill-on-exit` and `PTRACE_O_EXITKILL`. This is not a general guarantee for
+arbitrary grandchildren. The packaged first-party source, ELF and provenance are
+checked during package preparation and launch. The Linux source-build receipt
+records actual owned-file observation and timeout/kill/owner-loss tests; public
+CLI and independent-model gates remain separate. Native startup failures also
+retain a private structured `error.json`, with configured secrets redacted.
+
+For Windows collectors observing an existing process, the job executor can hold
+an authenticated subject handle for the capture lifetime. That subject is never
+assigned to the owned job or signaled during collector cleanup. An optional
+native ProcMon mutex serializes its upstream singleton across profiles and
+refuses existing native instances before launching a collector. Native tests
+cover borrowed-subject preservation and exclusion separately from the earlier
+five lifetime cases. File-version probes use a minimal .NET property reader,
+with no PowerShell module autoload. The [seven native cases](verification/toolbox-windows-job.json)
+passed completion, timeout, launcher/owner loss, overflow, singleton exclusion and
+borrowed-subject birth mismatch.
+
+ProcMon's [private HKCU proof](verification/toolbox-procmon-isolation.json) and
+[public CLI Gherkin proof](verification/toolbox-procmon.json) passed on Windows x64.
+Its first-party native shim redirects HKCU to an application hive under the owned
+run directory before the new collector's entry point. Pinned MIT Detours source,
+license, reproducible native DLL and provenance are packaged; consumers need no compiler.
+A temporary process-owned NT directory alias supports Unicode profile paths without
+placing native DLLs outside AppData. Constructor nonce/PID/error receipts are required.
+The alias and hive handles close on process death; global user preferences are untouched.
+
+`procmon observe --pid PID [--path EXACT_NATIVE_PATH] --duration-seconds 5` loads
+PID/path rules and destructive filtering before collection. An elevated authorized
+owner is required; no automatic elevation occurs. The borrowed process is never
+terminated. A global native singleton guard rejects existing ProcMon instances.
+`procmon inspect PROCESS_ID` reads the retained PML/export without collecting again;
+export receipts bind PML/CSV hashes. Both collector and export use private HKCU.
+The native `/Runtime` capture returns 1 on the verified successful path; the facade
+requires a verified job/constructor receipt and complete scoped native readback as
+well. A lost/interrupted capture remains partial even if its PML can be read.
+Native PML queries are bounded to 64 MiB and CSV to 16 MiB/100000 events. Earlier,
+filtered or dropped activity is unknown; an empty interval does not establish absence.
+Uninstall retains captures/checkpoints and external executables. Microsoft's driver
+runs in the OS; this facade does not claim kernel isolation or remove shared drivers.

@@ -7,7 +7,7 @@ import {validateRecipe,acquire} from '../tool-release.mjs';
 const a={name:'fixture.zip',upstream:'https://example.invalid/file',sha256:'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',size:5,license:'Synthetic',role:'source'};
 test('mirror admits only reviewed exact assets with source companions',()=>{
  const r={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',assets:[a],redistribution:'Fixture'};validateRecipe(r);
- for(const patch of [{assets:[{...a,name:'../escape'}]},{assets:[a,a]},{assets:[{...a,role:'binary'}]},{tag:'latest'},{assets:[{...a,size:2*1024**3}]}])assert.throws(()=>validateRecipe({...r,...patch}));
+ for(const patch of [{assets:[{...a,name:'../escape'}]},{assets:[a,a]},{assets:[{...a,delivery:{kind:'vendor-direct'}}]},{assets:[{...a,role:'binary'}]},{tag:'latest'},{assets:[{...a,size:2*1024**3}]}])assert.throws(()=>validateRecipe({...r,...patch}));
 });
 test('mirror acquisition verifies size and hash and reuses exact retained bytes',async t=>{
  const dir=await mkdtemp(join(tmpdir(),'mirror-'));t.after(()=>rm(dir,{recursive:true,force:true}));let count=0;
@@ -39,4 +39,85 @@ test('draft/readback reconciliation tolerates delayed visibility with bounded re
  const {waitFor}=await import('../tool-release.mjs');let reads=0;
  assert.equal(await waitFor(()=>++reads>=3?'visible':undefined,Boolean,4,1),'visible');assert.equal(reads,3);
  await assert.rejects(waitFor(()=>undefined,Boolean,2,1),/visibility is unresolved/);
+});
+test('xz recompression retains exact tar bytes and rejects modified upstream content',async t=>{
+ const {gunzipSync}=await import('node:zlib');const {createHash}=await import('node:crypto');
+ const {execFileSync}=await import('node:child_process');
+ const input=execFileSync('python3',['-I','-c','import lzma,sys;sys.stdout.buffer.write(lzma.compress(b"owned tar bytes"))']);
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const directory=await mkdtemp(join(tmpdir(),'recompress-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const {writeFile}=await import('node:fs/promises');const source=join(directory,'source.xz'),derived=join(directory,'expected.tgz');await writeFile(source,input);
+ const {fileURLToPath}=await import('node:url');
+ execFileSync('python3',['-I',fileURLToPath(new URL('../tool-recompress.py',import.meta.url)),source,derived]);const expected=await readFile(derived);
+ const asset={...a,name:'runtime.tgz',role:'binary',size:expected.length,sha256:hash(expected),recompress:{format:'xz-to-gzip',size:input.length,sha256:hash(input)}};
+ let calls=0;const fetcher=async()=>{calls++;return new Response(input);};
+ const path=await acquire(asset,directory,fetcher);assert.deepEqual(gunzipSync(await readFile(path)),Buffer.from('owned tar bytes'));
+ await acquire(asset,directory,fetcher);assert.equal(calls,1);
+ await assert.rejects(acquire({...asset,name:'bad.tgz',recompress:{...asset.recompress,sha256:'0'.repeat(64)}},directory,fetcher),/differs/);
+});
+
+test('subset repack retains exact selected bytes and full license, rejecting links and missing members',async t=>{
+ const {execFileSync}=await import('node:child_process');
+ try{execFileSync('zstd',['--version'],{stdio:'ignore'});}catch{t.skip('Maintainer zstd prerequisite is not installed');return;}
+ const {writeFile}=await import('node:fs/promises'),{fileURLToPath}=await import('node:url'),{createHash}=await import('node:crypto');
+ const directory=await mkdtemp(join(tmpdir(),'subset-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const input=execFileSync('python3',['-I','-c',`import io,tarfile,sys
+b=io.BytesIO()
+with tarfile.open(fileobj=b,mode='w') as a:
+ for n,data in [('up/bin/run',b'\\x00\\xffnative'),('up/private/not-shipped',b'omit')]:
+  i=tarfile.TarInfo(n);i.size=len(data);a.addfile(i,io.BytesIO(data))
+ i=tarfile.TarInfo('up/bin/link');i.type=tarfile.SYMTYPE;i.linkname='outside';a.addfile(i)
+sys.stdout.buffer.write(b.getvalue())`]);
+ const compressed=execFileSync('zstd',['-q','-c'],{input});const source=join(directory,'input.zst');await writeFile(source,compressed);
+ const notice=Buffer.from('Full fixture license\n'),license={...a,name:'license.txt',role:'license-companion',size:notice.length,sha256:hash(notice)};
+ const repack={format:'tar-zstd-subset-v1',size:compressed.length,sha256:hash(compressed),stripPrefix:'up/',outputRoot:'subset',entries:['bin/run'],appendAssets:[{asset:license.name,path:'LICENSE.TXT'}]};
+ const helper=fileURLToPath(new URL('../tool-repack.py',import.meta.url)),noticeFile=join(directory,license.name);await writeFile(noticeFile,notice);
+ const expected=join(directory,'expected.tgz');execFileSync('python3',['-I',helper,source,expected,JSON.stringify({...repack,appendFiles:[{file:noticeFile,path:'LICENSE.TXT'}]})]);const bytes=await readFile(expected);
+ const asset={...a,name:'runtime.tgz',role:'binary',size:bytes.length,sha256:hash(bytes),repack};
+ const path=await acquire(asset,directory,async()=>new Response(compressed),[license]);
+ const archive=JSON.parse(execFileSync('python3',['-I','-c',`import tarfile,json,sys
+with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:list(a.extractfile(i).read()) for i in a}))`,path],{encoding:'utf8'}));
+ assert.deepEqual(archive,{'subset/bin/run':[0,255,...Buffer.from('native')],'subset/LICENSE.TXT':[...notice]});
+ await assert.rejects(acquire({...asset,name:'missing.tgz',repack:{...repack,entries:['bin/missing']}},directory,async()=>new Response(compressed),[license]),/Command failed/);
+ await assert.rejects(acquire({...asset,name:'link.tgz',repack:{...repack,entries:['bin/link']}},directory,async()=>new Response(compressed),[license]),/Command failed/);
+ await assert.rejects(acquire({...asset,name:'changed.tgz',sha256:'f'.repeat(64)},directory,async()=>new Response(compressed),[license]),/differs/);
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Synthetic',assets:[asset,license,a]};validateRecipe(recipe);
+ for(const bad of [{...repack,entries:['../escape']},{...repack,appendAssets:[{asset:license.name,path:'../escape'}]},{...repack,appendAssets:[{asset:'absent',path:'LICENSE'}]}])assert.throws(()=>validateRecipe({...recipe,assets:[{...asset,repack:bad},license,a]}));
+});
+
+test('DiE console recipe requires four exact matching source companions and safe output identity',()=>{
+ const sources=['engine.tar.gz','qtbase.tar.xz','qtdeclarative.tar.xz','qt5compat.tar.xz'].map(name=>({...a,name}));
+ const repack={format:'die-pkg-console-v1',sha256:a.sha256,size:a.size,outputRoot:'diec-3.21',sourceAssets:sources.map(s=>s.name)};
+ const binary={...a,name:'diec.tgz',role:'binary',repack};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',assets:[binary,...sources],redistribution:'Synthetic'};
+ validateRecipe(recipe);
+ for(const bad of [{...repack,sourceAssets:[]},{...repack,sourceAssets:[...repack.sourceAssets.slice(1),'absent.tar.xz']},{...repack,sourceAssets:Array(4).fill('engine.tar.gz')},{...repack,outputRoot:'../escape'},{...repack,sha256:'no'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...binary,repack:bad},...sources]}));
+});
+
+test('reviewed subset library aliases must resolve to selected siblings',()=>{
+ const repack={format:'tar-zstd-subset-v1',sha256:a.sha256,size:5,stripPrefix:'up/',outputRoot:'runtime',entries:['lib/actual.dylib'],aliases:[{path:'lib/alias.dylib',target:'actual.dylib'}]};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[{...a,name:'native.tgz',role:'binary',repack},a]};validateRecipe(recipe);
+ for(const alias of [{path:'lib/alias',target:'../actual.dylib'},{path:'../escape',target:'actual.dylib'},{path:'lib/alias',target:'missing'},{path:'lib/actual.dylib',target:'actual.dylib'}])assert.throws(()=>validateRecipe({...recipe,assets:[{...recipe.assets[0],repack:{...repack,aliases:[alias]}},a]}));
+});
+
+test('source-set recipes reject unpinned, recursive or vendor-only hidden inputs',()=>{
+ const input={...a,id:'source',revision:'synthetic'},source={...a,name:'sources.tgz',repack:{format:'source-set-v1',outputRoot:'source-set',inputs:[input]}};
+ const recipe={schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[source]};validateRecipe(recipe);
+ for(const patch of [{id:'../escape'},{sha256:'bad'},{upstream:'http://example.invalid'},{repack:{}},{delivery:{kind:'vendor-direct'}},{size:2*1024**3}])assert.throws(()=>validateRecipe({...recipe,assets:[{...source,repack:{...source.repack,inputs:[{...input,...patch}]}}]}));
+ const runtime={...a,name:'runtime.tgz',role:'binary',repack:{format:'frida-node-runtime-v1',sha256:a.sha256,size:5,outputRoot:'frida-node-17.24.0',sourceAssets:['sources.tgz']}};validateRecipe({...recipe,assets:[runtime,source]});assert.throws(()=>validateRecipe({...recipe,assets:[runtime]}));
+});
+test('source-set assembly retains exact component bytes with public provenance and no local build paths',async t=>{
+ const {writeFile}=await import('node:fs/promises'),{execFileSync}=await import('node:child_process'),{fileURLToPath}=await import('node:url');const directory=await mkdtemp(join(tmpdir(),'source-set-'));t.after(()=>rm(directory,{recursive:true,force:true}));const file=join(directory,'private-source');await writeFile(file,'hello');
+ const input={...a,id:'component',file},recipe={format:'source-set-v1',outputRoot:'matching-source',inputs:[input]},helper=fileURLToPath(new URL('../tool-source-set.py',import.meta.url)),output=join(directory,'sources.tgz');execFileSync('python3',['-I',helper,output,JSON.stringify(recipe)]);
+ const contents=JSON.parse(execFileSync('python3',['-I','-c',`import tarfile,json,sys
+with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:a.extractfile(i).read().decode() for i in a}))`,output],{encoding:'utf8'}));assert.equal(contents['matching-source/inputs/component.tar.gz'],'hello');assert.ok(!contents['matching-source/SOURCE-MANIFEST.json'].includes(directory));assert.equal(JSON.parse(contents['matching-source/SOURCE-MANIFEST.json']).inputs[0].sha256,a.sha256);
+ const again=join(directory,'again.tgz');execFileSync('python3',['-I',helper,again,JSON.stringify(recipe)]);assert.deepEqual(await readFile(output),await readFile(again));await writeFile(file,'wrong');assert.throws(()=>execFileSync('python3',['-I',helper,join(directory,'bad.tgz'),JSON.stringify(recipe)],{stdio:'pipe'}));
+});
+test('source-set V2 retains original archive extensions and public provenance',async t=>{
+ const {writeFile}=await import('node:fs/promises'),{execFileSync}=await import('node:child_process'),{fileURLToPath}=await import('node:url');const directory=await mkdtemp(join(tmpdir(),'source-set-v2-'));t.after(()=>rm(directory,{recursive:true,force:true}));const file=join(directory,'private-source');await writeFile(file,'hello');
+ const input={...a,id:'component',name:'component-1.tar.xz',file},recipe={format:'source-set-v2',outputRoot:'matching-source',inputs:[input]},source={...a,name:'sources.tgz',repack:{...recipe,inputs:[{...input,file:undefined}]}};validateRecipe({schema:1,repository:'iXab3r/insight-cli',tag:'tool-fixture-1-r1',redistribution:'Fixture',assets:[source]});
+ const helper=fileURLToPath(new URL('../tool-source-set.py',import.meta.url)),output=join(directory,'sources.tgz');execFileSync('python3',['-I',helper,output,JSON.stringify(recipe)]);
+ const contents=JSON.parse(execFileSync('python3',['-I','-c',`import tarfile,json,sys
+with tarfile.open(sys.argv[1],'r:gz') as a: print(json.dumps({i.name:a.extractfile(i).read().decode() for i in a}))`,output],{encoding:'utf8'}));assert.equal(contents['matching-source/inputs/component/component-1.tar.xz'],'hello');const manifest=JSON.parse(contents['matching-source/SOURCE-MANIFEST.json']);assert.equal(manifest.schema,2);assert.equal(manifest.inputs[0].name,'component-1.tar.xz');assert.ok(!JSON.stringify(manifest).includes(directory));
 });

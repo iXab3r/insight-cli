@@ -1,6 +1,6 @@
 import {runtimeSelection} from './runtime-selection.js';
 import type {CommandContext} from '@eyeauras/cli-factory';
-import {join,resolve,sep} from 'node:path';
+import {join,resolve,relative,sep} from 'node:path';
 import {readFile,readdir,realpath} from 'node:fs/promises';
 import {serverIdentity,stopLocalServer} from './server.js';
 import {HttpBridge} from './transport.js';
@@ -9,7 +9,14 @@ import type {ToolProcessHooks} from './tool-runtime/commands.js';
 import {fail} from './model.js';
 import type {Scope,Workspace} from './workspace.js';
 async function ownedPath(c:CommandContext,path:unknown){
- if(typeof path!=='string'||!resolve(path).startsWith(resolve(c.appArguments.AppDataDirectory)+sep)||await realpath(path)!==resolve(path))fail('binding','Tool resource moved outside this profile.');return path;
+ if(typeof path!=='string')fail('binding','Tool resource moved outside this profile.');
+ const supplied=resolve(path),profile=resolve(c.appArguments.AppDataDirectory),canonical=await realpath(profile);
+ const base=supplied.startsWith(profile+sep)?profile:supplied.startsWith(canonical+sep)?canonical:undefined;
+ if(!base)fail('binding','Tool resource moved outside this profile.');
+ // Keep Factory's raw AppData identity in process records, but compare native resources
+ // under its canonical profile. Accept the parent alias, never a replaced child link.
+ const expected=join(canonical,relative(base,supplied));
+ if(await realpath(supplied)!==expected)fail('binding','Tool resource moved outside this profile.');return expected;
 }
 export async function verifyGhidraProcess(r:ProcessRecord,c:CommandContext):Promise<boolean|undefined>{
  try{

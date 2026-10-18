@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "host": "actual Codex exec; project skill-bundle symlink",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "low",
+  "artifactSha256": "54733f38975f41e3fa799021e19dee83da0f5de03b8df55e3085e7b4a68ab4ae",
+  "packageBuild": "7471b604f0ec072c71b136d50689fbfacfc41208afd6d89891083ed53240b308",
+  "skillBundleSha256": "6838af0fd1dda855412825675bfc585d146717a29cdae0540de34c800078cb86",
+  "promptSha256": "1618acff45d66011fc6f1c749e5e3ef3b942010904c2bf46c4ce9f87a7fd5758",
+  "businessPrompt": "Investigate input/release.zip. What configuration does this package supply, and which recovered component explains its pricing behavior? Recover the relevant material, explain the findings with focused evidence, and retain a checkpoint using the project conventions. Use the connected toolbox where useful. Do not execute recovered programs. Finish with verified findings, remaining uncertainty and retained paths.",
+  "controls": [
+    "fresh ephemeral contexts",
+    "no command/tool/answer hints in the business prompt",
+    "actual startup skill metadata, no manually supplied skill list",
+    "project evidence rules retained",
+    "ordinary scoped automatic approval review; no broader network/filesystem grant",
+    "public CLI selects and starts its owner; operator does not prestart a different Node"
+  ],
+  "cases": [
+    {
+      "mode": "cold",
+      "state": "passed",
+      "checkpointScope": "complete evidence folder",
+      "files": {
+        "release-analysis.md": "3f7f0d46056e72ecba422e142747193f574e2a887dc4d0c59f4eb8462b495846",
+        "recovered/release_contents/configuration/settings.json": "dd30a53ad65a2221f6456eda74ccc5742f31b2476cc1b497ae85d62eec1d2757",
+        "recovered/release_contents/lib/ResearchFixture.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb"
+      },
+      "checks": {
+        "businessPromptWithoutToolNamesOrCommands": true,
+        "actualCodexStartupSkillsUsed": true,
+        "publicCliResearchAndHandoff": true,
+        "configurationAndPricingCorrect": true,
+        "checkpointBytesReadBack": true,
+        "originalInputUnchanged": true,
+        "ownedOwnerStopped": true
+      }
+    },
+    {
+      "mode": "prepared",
+      "state": "passed",
+      "checkpointScope": "completed findings file; recovered inputs remain in the canonical project",
+      "files": {
+        "release-package-findings.md": "ec550a3d3806c25b1fd7843af6061567b89b6661e44c2de62d7c1125b64ea396",
+        "recovered/release-config/configuration/settings.json": "dd30a53ad65a2221f6456eda74ccc5742f31b2476cc1b497ae85d62eec1d2757",
+        "recovered/release-component/lib/ResearchFixture.dll": "5d26a212fc91bc0bbec4c95eda9dc98b18fc3cbbf84e09bd137c14db784e41fb"
+      },
+      "checks": {
+        "businessPromptWithoutToolNamesOrCommands": true,
+        "actualCodexStartupSkillsUsed": true,
+        "publicCliResearchAndHandoff": true,
+        "configurationAndPricingCorrect": true,
+        "checkpointBytesReadBack": true,
+        "originalInputUnchanged": true,
+        "ownedOwnerStopped": true
+      }
+    }
+  ],
+  "sourceEvaluatorSmoke": {
+    "state": "reviewed",
+    "modelElapsedMs": 151589,
+    "modelExitWasNotAcceptance": true,
+    "findingsAndSavedBytesVerified": true,
+    "note": "Final prose omitted checkpoint locators, although both receipts are retained in the event transcript; canonical project paths were reported."
+  },
+  "rejectedSetupAttempt": {
+    "state": "failed",
+    "reason": "Operator prestarted an incompatible runtime owner; no research completed. Trial was repeated with public CLI startup."
+  },
+  "wholeToolboxAccepted": false
+}

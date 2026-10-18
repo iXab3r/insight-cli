@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting><AssemblyName>Insight.DnSpy.x</AssemblyName><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><Deterministic>true</Deterministic><DebugType>none</DebugType><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile></PropertyGroup>
+ <ItemGroup>
+  <Reference Include="dnSpy.Contracts.DnSpy"><HintPath>$(DnSpyRuntime)/dnSpy.Contracts.DnSpy.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnSpy.Contracts.Logic"><HintPath>$(DnSpyRuntime)/dnSpy.Contracts.Logic.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnSpy.Contracts.Debugger"><HintPath>$(DnSpyRuntime)/dnSpy.Contracts.Debugger.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnSpy.Contracts.Debugger.DotNet"><HintPath>$(DnSpyRuntime)/dnSpy.Contracts.Debugger.DotNet.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnSpy.Contracts.Debugger.DotNet.CorDebug"><HintPath>$(DnSpyRuntime)/dnSpy.Contracts.Debugger.DotNet.CorDebug.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnSpy.Debugger.DotNet.Metadata"><HintPath>$(DnSpyRuntime)/dnSpy.Debugger.DotNet.Metadata.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="dnlib"><HintPath>$(DnSpyRuntime)/dnlib.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="System.ComponentModel.Composition"><HintPath>$(DnSpyRuntime)/System.ComponentModel.Composition.dll</HintPath><Private>false</Private></Reference>
+ </ItemGroup>
+</Project>

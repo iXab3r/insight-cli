@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "checks": {
+    "ownedMirrorDownload": true,
+    "offlineInstall": true,
+    "doctor": true,
+    "actualHttpMethodPathFrame": true,
+    "paginationAfterFilter": true,
+    "packetDetail": true,
+    "nativeStreamIdentity": true,
+    "reassembledApplicationBytes": true,
+    "invalidFilterRefused": true,
+    "missingFrameRefused": true,
+    "missingStreamRefused": true,
+    "boundedPrefixNotAbsence": true,
+    "externalCopyVerified": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "inputUnchanged": true,
+    "checkpointPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "inputSha256": "75b515999c27187200d400810063a7ffb0404d4c966ccee731da9e5b3dc2e9ce",
+  "build": {
+    "version": 1,
+    "artifact": "d56c44e6026091173028784c5c0d4aa2b75f7288f275902d78b203322de9a7ae"
+  },
+  "cleanupComplete": true,
+  "sourceCommit": "3840238a4134271acd03525dad1ac914c733e3b8",
+  "packageSha256": "ceb6029e7f79e431b111a40dcb40f2e479e711eb59a12d744134584a1f11ec05",
+  "toolRelease": "https://github.com/iXab3r/insight-cli/releases/tag/tool-tshark-4.6.9-r1",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "ac22f9d8b5a243a8866a27f9242eb2f6",
+    "outcome": "Passed",
+    "scenario": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+    "duration": "00:00:39.3772390",
+    "passed": 1,
+    "failed": 0
+  }
+}

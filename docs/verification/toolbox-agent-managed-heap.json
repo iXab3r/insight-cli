@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "C02 independently reviewed structured heap/stack unit proof; complete-toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 97466,
+      "candidateInvocations": 16,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Investigate the retained managed worker dump offline. Determine what retained application state identifies the queued job and pending quantity, and explain how the relevant managed thread was waiting at capture time. Establish the actual object type/address/fields and supporting stack rather than guessing from names. Use structured queries where useful, preserve runtime/DAC and snapshot limitations, and retain raw evidence and a verified checkpoint. Do not execute an assembly or attach to a live process.",
+      "promptSha256": "ab12eb01f405d41855c4c582be833cd3a2aeca8133ba7f1551e6b94772ca391b",
+      "inputs": [
+        {
+          "path": "input/worker.dmp",
+          "sha256": "681c96159d670277aa65a558ac767a0ef74ea7f093fccad1f7c23c3370b9d020"
+        }
+      ],
+      "checkpointFiles": 6,
+      "checkpointBytes": 45191,
+      "checkpointSha256": "966f7a867dcdb47f6e065f860133c4c239fd978ff6b3b9adea9f5adec1e0d27b",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 7,
+      "actualObjectFields": {
+        "type": "BusinessState",
+        "Pending": 37,
+        "Job": "owned-report"
+      },
+      "snapshotStack": [
+        "Thread.Sleep",
+        "Program.WaitForRelease",
+        "Program.Main"
+      ],
+      "targetExecutionOrAttach": false
+    },
+    "prepared": {
+      "elapsedMs": 115000,
+      "candidateInvocations": 13,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Investigate the retained managed worker dump offline. Determine what retained application state identifies the queued job and pending quantity, and explain how the relevant managed thread was waiting at capture time. Establish the actual object type/address/fields and supporting stack rather than guessing from names. Use structured queries where useful, preserve runtime/DAC and snapshot limitations, and retain raw evidence and a verified checkpoint. Do not execute an assembly or attach to a live process.",
+      "promptSha256": "ab12eb01f405d41855c4c582be833cd3a2aeca8133ba7f1551e6b94772ca391b",
+      "inputs": [
+        {
+          "path": "input/worker.dmp",
+          "sha256": "681c96159d670277aa65a558ac767a0ef74ea7f093fccad1f7c23c3370b9d020"
+        }
+      ],
+      "checkpointFiles": 7,
+      "checkpointBytes": 47887,
+      "checkpointSha256": "fc8328f2f62603fd352ffbfb5013ec91c69bf4ed49623de6dfba0d07dde5a483",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 7,
+      "actualObjectFields": {
+        "type": "BusinessState",
+        "Pending": 37,
+        "Job": "owned-report"
+      },
+      "snapshotStack": [
+        "Thread.Sleep",
+        "Program.WaitForRelease",
+        "Program.Main"
+      ],
+      "targetExecutionOrAttach": false
+    }
+  },
+  "retainedHistory": [
+    "Initial cold trial obeyed overly broad offline-only test instructions and stopped after a missing runtime cache. No findings were fabricated. Fresh cold instructions explicitly allow pinned runtime delivery while keeping analysis offline."
+  ]
+}

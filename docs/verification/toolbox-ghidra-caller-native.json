@@ -1,0 +1,678 @@
+{
+  "schema": 1,
+  "state": "native_passed_independent_model_family_gate_separate",
+  "scope": "Installed public Ghidra GUI/LLDB caller, frame and retained-trace regressions; independent model acceptance is separate",
+  "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+  "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+  "build": {
+    "version": 1,
+    "artifact": "eaae6812e63374a7b300648ee8ecb90d55f9b81719017733d5105c7b466db18c"
+  },
+  "sourcePackByteIdentical": true,
+  "strategy": "Dispatch one Continue to a thread/stack-qualified one-shot caller breakpoint. After the native RPC returns, confirm a correlated new stopped process using live PC/SP registers through its existing owned LLDB interpreter; synchronize the trace without another CPU action.",
+  "coordinates": {
+    "liveFrame": "Native PC/SP registers; frame code address can lag the actual stop.",
+    "callerFrames": "Unwound frame PC/SP; caller register aliases can describe the current live frame.",
+    "stackPaths": "Frame ordinals, preserving recursive duplicate return addresses.",
+    "retainedTraces": "Restore snap/thread separately for every trace; await native navigation."
+  },
+  "physicalStackGuard": "Discard only a zero-span non-inline/non-artificial prefix when an existing subsequent native frame matches the hardware PC/SP. Preserve recursive duplicates with distinct SP, and retain hardware frame 0 as the source of live volatile registers.",
+  "arm64RegisterAliases": {
+    "read": {
+      "fp": "x29",
+      "lr": "x30"
+    },
+    "write": {
+      "x29": "fp",
+      "x30": "lr"
+    },
+    "nativeOracle": "x30 equals the actual caller address at function entry; x29 records the real frame pointer."
+  },
+  "nativeFocused": {
+    "state": "replaced_by_recursive_preflight_and_combined_repeat",
+    "qualification": "The earlier two-case focused pass belongs to source 457f481 and is retained in managedCheckpointCandidate."
+  },
+  "nativeCombined": {
+    "runId": "07cdc39c00724feab3b0bc563fbbf9f0",
+    "state": "passed",
+    "passed": 20,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "21m35s",
+    "scenarios": [
+      {
+        "name": "CorroborateANativeCalculationAndRetainItsDisconnectedContextTrace",
+        "outcome": "Passed",
+        "duration": "00:04:48.3663649"
+      },
+      {
+        "name": "RemoveTemporaryHooksAfterCollectorInterruptionOrOwnerLoss",
+        "outcome": "Passed",
+        "duration": "00:00:53.2425960"
+      },
+      {
+        "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
+        "outcome": "Passed",
+        "duration": "00:00:28.8560010"
+      },
+      {
+        "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
+        "outcome": "Passed",
+        "duration": "00:00:36.8092309"
+      },
+      {
+        "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
+        "outcome": "Passed",
+        "duration": "00:01:23.8471310"
+      },
+      {
+        "name": "RecoverUsefulInputFromASuppliedContainer",
+        "outcome": "Passed",
+        "duration": "00:00:14.8096220"
+      },
+      {
+        "name": "ExplainWaitingManagedWorkFromStacksHeapAndSampledTime",
+        "outcome": "Passed",
+        "duration": "00:00:31.7129730"
+      },
+      {
+        "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0158130"
+      },
+      {
+        "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
+        "outcome": "Passed",
+        "duration": "00:00:00.4647880"
+      },
+      {
+        "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0049250"
+      },
+      {
+        "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
+        "outcome": "Passed",
+        "duration": "00:01:02.1860620"
+      },
+      {
+        "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
+        "outcome": "Passed",
+        "duration": "00:00:12.1742200"
+      },
+      {
+        "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
+        "outcome": "Passed",
+        "duration": "00:00:25.5696850"
+      },
+      {
+        "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+        "outcome": "Passed",
+        "duration": "00:02:33.9857419"
+      },
+      {
+        "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0013410"
+      },
+      {
+        "name": "DeliverAndRemoveAPrivateDebuggerWithoutLosingTheInvestigation",
+        "outcome": "Passed",
+        "duration": "00:01:25.4631680"
+      },
+      {
+        "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0012190"
+      },
+      {
+        "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
+        "outcome": "Passed",
+        "duration": "00:00:23.4056310"
+      },
+      {
+        "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
+        "outcome": "Passed",
+        "duration": "00:00:28.7317990"
+      },
+      {
+        "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+        "outcome": "Passed",
+        "duration": "00:00:26.0676430"
+      },
+      {
+        "name": "ReturnFromTheSelectedRecursiveFrameRatherThanAnInnerCall",
+        "outcome": "Passed",
+        "duration": "00:03:50.4772600"
+      },
+      {
+        "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
+        "outcome": "Passed",
+        "duration": "00:00:27.3634530"
+      },
+      {
+        "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
+        "outcome": "Passed",
+        "duration": "00:00:53.9060200"
+      },
+      {
+        "name": "InvestigateNativeLinkageAndDebugRecords",
+        "outcome": "Passed",
+        "duration": "00:00:28.0335200"
+      }
+    ],
+    "cleanupComplete": true
+  },
+  "additionalAssertions": [
+    "Ordinary and recursive returns remove exactly the selected callee frame.",
+    "Stopped thread description PC equals the actual PC register.",
+    "ARM64 x30 equals the actual caller PC at function entry and x29 retains the native FP value.",
+    "Live volatile return registers come from physical hardware frame 0, independently of stack metadata normalization."
+  ],
+  "checks": {
+    "offlineTests": 218,
+    "offlinePassed": 216,
+    "offlineOptInSkipped": 2,
+    "releasePassed": 31,
+    "packagedSkillsValidated": 25,
+    "relocatedGlobalPackagePassed": true,
+    "actualSupervisorStartupAndEarlyStopPassed": 2,
+    "ownedPythonSyntaxPassed": true,
+    "traceBatchCallbackDeadlockRegressionPassed": true,
+    "traceTransactionAndBatchFailureCleanupPassed": true,
+    "realPinnedWheelsPatchedAndSyntaxChecked": true
+  },
+  "nativeFrameViewInvariantsPassed": true,
+  "ci": {
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "offline": {
+      "runId": 39100877450,
+      "state": "passed"
+    },
+    "windows": {
+      "runId": 39100877533,
+      "state": "passed",
+      "requiredNativeJobs": 7
+    },
+    "linux": {
+      "runId": 39100877444,
+      "state": "passed"
+    }
+  },
+  "retainedHistory": {
+    "priorSourceCommit": "24fb63aebfa6c3c785060fc6151b8eed267c446d",
+    "priorArtifactSha256": "b702eacbe01b776ea0a1fd18306f97e7fe20d9da403e8dad5d5eddaf412f22f5",
+    "priorFocusedPass": {
+      "runId": "b0d0fb164af743729387c3d815adb8ff",
+      "passed": 2,
+      "failed": 0,
+      "duration": "10m24s"
+    },
+    "unchangedCombinedRepeat": {
+      "runId": "9b6f3bca72e44dc08d91bdfda61e9aee",
+      "state": "completed_two_failed",
+      "artifactUnchanged": true,
+      "observation": "The unchanged selected artifact also failed final caller PC verification (expected 0x100000508, actual 0x100000464). The first two passing cases do not establish stable CPU acceptance.",
+      "passed": 17,
+      "failed": 2,
+      "skipped": 4,
+      "duration": "21m29s"
+    },
+    "rejectedExperiments": [
+      {
+        "artifactSha256": "d4a9eaae2ded6e679c132f55ce391320d01f40bce757d64056d185adb542a7ca",
+        "runId": "7495ab06ee1b42ff8b4ab4e8b255dfef",
+        "state": "two_failed",
+        "review": "Additional callback/event handling regressed actual caller PC validation. Not included in the selected source."
+      },
+      {
+        "artifactSha256": "2b036286501dd0c19a6d13ef78bcdc05fbd47bef99e46cdc6c32d30af4533f9e",
+        "state": "focused_main_failed_full_run_retained",
+        "review": "Filtering internal trace/plan reasons still stopped at the entry breakpoint with reason 3. Rejected rather than weakening final PC validation."
+      },
+      {
+        "state": "native_rpc_timeout",
+        "review": "Calling sync-synth-stopped synchronously inside the native step RPC timed out. That command was removed; it is not part of the minimal corrected poll."
+      },
+      {
+        "artifactSha256": "c5ee9e6bfecd9822154746ad9a4968b30a6bf3c1110789d882f937ca08def32e",
+        "build": {
+          "version": 1,
+          "artifact": "d109994e0ee56ffa905acbbfa1c3c4a2d4bbf1afc3412b9c199854aac680c71a"
+        },
+        "state": "one_pass_one_failed",
+        "checks": {
+          "offlinePassed": 214,
+          "offlineOptInSkipped": 2,
+          "releasePassed": 29,
+          "realSupervisorLifetimePassed": 2,
+          "extractedAdapterSyntaxPassed": true
+        },
+        "nativeRunId": "0e1c48c9257b4708a9f49cafa36d382e",
+        "passed": 1,
+        "failed": 1,
+        "duration": "7m26s",
+        "review": "Ordinary caller, stack/register consistency and two retained traces passed. Reading caller-frame PC registers selected the current recursive entry instead of an unwound return address; the recursive EXE exited. Preserve unwound caller addresses and use native PC registers only for live top-frame confirmation/export."
+      }
+    ],
+    "stopRaceDiagnosis": {
+      "observedBeforeStopId": 13,
+      "afterStopId": 15,
+      "actualCallerPc": "0x100000508",
+      "actualCallerSpStable": true,
+      "observations": "The first post-check observation was RUNNING with no valid frame; 100 ms later the target was STOPPED at the expected caller, with no further CPU command. The original compound loop sampled native state twice and could exit during that transition.",
+      "correction": "Dispatch one Continue, then verify a correlated new stop via the owned LLDB command interpreter after the RPC returns. A settled native register PC/SP is authoritative; frame code addresses can remain stale."
+    },
+    "frameCacheDiagnosis": {
+      "nativeFramePc": "0x100000464",
+      "nativeRegisterPc": "0x100000508",
+      "nativeReturnRegister": "0x6d",
+      "actualReturn": 109,
+      "stopId": 15,
+      "callerSpMatched": true,
+      "observation": "Read-only native observation found the frame code address still at the callee while hardware register values already described the caller. No additional CPU command was issued."
+    },
+    "earlyNativeExperiments": [
+      {
+        "runId": "ef8f9a086bcb4d99aa0a8d4dcd81609c",
+        "state": "one_pass_one_fail",
+        "review": "Distinct saved coordinates passed; recursive caller PC/SP did not verify."
+      },
+      {
+        "runId": "bb7105b81a3c4d458a278f86b061ca6d",
+        "state": "two_failed",
+        "review": "Detected transient control breakpoints entering static metadata; recursive return still failed."
+      },
+      {
+        "runId": "7495ab06ee1b42ff8b4ab4e8b255dfef",
+        "state": "two_failed",
+        "review": "Callback/event candidate stopped at intermediate coordinates and was rejected."
+      }
+    ],
+    "returnOnlyCandidate": {
+      "sourceCommit": "0406afcd277e51f1d44a2b155e56acbf93c729c3",
+      "artifactSha256": "5592153303f491494fafc90a23f0f058993edbd9383a8329f1f903291a707727",
+      "build": {
+        "version": 1,
+        "artifact": "1d69a89e15e33d0a751381da825958b2bc9866a365286edd4dc0fd0885882dda"
+      },
+      "directRecursive": {
+        "schema": 1,
+        "state": "passed",
+        "scope": "Installed public Ghidra CLI recursive native caller regression; not independent model acceptance",
+        "inputSha256": "eba51d0e3a74d9632e0ee56cc8594b1075e69dcd58bdd499f01a4412a227c826",
+        "observation": {
+          "arguments": [
+            5,
+            4,
+            3
+          ],
+          "actualReturn": 6
+        },
+        "checks": {
+          "actualRecursiveArguments": true,
+          "selectedCallerReturn": true,
+          "stackDepthReducedByOne": true,
+          "returnNotReplayed": true,
+          "noExtraStaticProgramMetadata": true,
+          "retainedDisconnectedRegisters": true,
+          "checkpointBytesMatched": true,
+          "originalInputUnchanged": true,
+          "ownedDebuggerAndServerStopped": true
+        },
+        "build": {
+          "version": 1,
+          "artifact": "1d69a89e15e33d0a751381da825958b2bc9866a365286edd4dc0fd0885882dda"
+        },
+        "cleanupComplete": true
+      },
+      "directRecursiveStop": {
+        "expectedPc": "0x100000494",
+        "observedPc": "0x100000494",
+        "stackPointerMatched": true,
+        "beforeStopId": 17,
+        "afterStopId": 24,
+        "observationState": "verified"
+      },
+      "nativeCombined": {
+        "runId": "307fcfa6005d43d593f133faf76d3c37",
+        "state": "completed_one_failed",
+        "passed": 18,
+        "failed": 1,
+        "skippedOtherOperatingSystems": 4,
+        "duration": "24m08s",
+        "review": "Actual recursive return 6 verified, but unchanged package retained five stack frames instead of four. This combined result predates the stronger ordinary depth/thread-description assertions."
+      },
+      "ci": {
+        "sourceCommit": "0406afcd277e51f1d44a2b155e56acbf93c729c3",
+        "offline": {
+          "runId": 39092639991,
+          "state": "passed"
+        },
+        "linux": {
+          "runId": 39092639972,
+          "state": "passed"
+        },
+        "windows": {
+          "runId": 39092639971,
+          "state": "passed",
+          "firstAttemptPassedNativeJobs": 6,
+          "failedJob": "windbg-public-cli",
+          "failure": "CLI host startup timed out before any command was sent. The failure preceded profile creation and WinDbg invocation; only failed CI jobs were retried.",
+          "requiredNativeJobs": 7,
+          "attempt": 2,
+          "allSevenRequiredNativeJobsPassed": true
+        }
+      }
+    },
+    "systemLldbD807": {
+      "sourceCommit": "d807f7f8985648b30a6355a43f2673d27312079f",
+      "artifactSha256": "404197380352c66d05077ebbef5115480dc491c69f13bb22b8f672988334723c",
+      "build": {
+        "version": 1,
+        "artifact": "712148076bba2df6442b717af3a65a74a19b905d601f6cd18f4e82bc25543986"
+      },
+      "sourcePackByteIdentical": true,
+      "nativeFocused": {
+        "runId": "89c144bd097248f689ca920f09724e31",
+        "state": "failed",
+        "passed": 1,
+        "failed": 1,
+        "observation": "Apple LLDB 17 exposed cached caller PC 0x100000464 while the actual live LR was 0x100000494; the recursive target exited. Preserve the failed intent without CPU replay."
+      },
+      "nativeCombined": {
+        "runId": "4a4cbe78eea04791b90a667cf945ac53",
+        "state": "passed",
+        "passed": 19,
+        "failed": 0,
+        "skipped": 4,
+        "duration": "29m20s",
+        "qualification": "One passing combined repeat does not cancel the separate recursive focused failure on the identical package."
+      },
+      "checks": {
+        "offlineTests": 218,
+        "offlinePassed": 216,
+        "offlineOptInSkipped": 2,
+        "releasePassed": 30,
+        "packagedSkillsValidated": 25,
+        "relocatedGlobalPackagePassed": true,
+        "actualSupervisorStartupAndEarlyStopPassed": 2,
+        "ownedPythonSyntaxPassed": true
+      },
+      "ci": {
+        "sourceCommit": "d807f7f8985648b30a6355a43f2673d27312079f",
+        "offline": {
+          "runId": 39095507282,
+          "state": "passed"
+        },
+        "windows": {
+          "runId": 39095507272,
+          "state": "passed",
+          "requiredNativeJobs": 7
+        },
+        "linux": {
+          "runId": 39095507363,
+          "state": "passed"
+        }
+      }
+    },
+    "managedRuntimeR1": {
+      "release": "tool-lldb-python-23.1.3-r1",
+      "artifactSha256": "10a4da0e1ef351fda272549cfeaea52022800b7dcfd1eb3c73b54e1e0d6d3074",
+      "packageSha256": "aea4635ae6c31889e300c2ec2614eb73c9850aee1b7204190748f3de2eccf97d",
+      "state": "rejected_before_cpu_execution",
+      "runId": "9c311c551ed44dc49a7dccbf4a68910a",
+      "failure": "Strict Node extraction rejects chained symbolic-link targets. Fixed in a new immutable mirror revision without weakening extraction."
+    },
+    "managedAliasCandidate": {
+      "sourceCommit": "4939382025924336b6190424780c57efcaa3df66",
+      "packageSha256": "918b8933598754403ea2cb259933424850a5e4ebb19a87fe72db1c3c8fe6a68f",
+      "focused": {
+        "runId": "f0e5f81bdfdc4a00853cb9a74119e951",
+        "passed": 1,
+        "failed": 1,
+        "duration": "5m32s",
+        "failure": "Public process inventory marked the working managed LLDB child unverified because native canonical paths were compared against the raw /tmp profile alias. The real ownership assertion was retained and the verifier was fixed."
+      },
+      "combined": {
+        "runId": "2f4b60a945ca449f93285dba6fe5576f",
+        "state": "failed",
+        "passed": 19,
+        "failed": 1,
+        "skipped": 4,
+        "duration": "22m58s",
+        "failure": "The same authenticated-running inventory assertion exposed the /tmp parent-alias verifier bug; all other native cases passed. Fixed by source 457f481, without weakening the assertion."
+      },
+      "offlineRuntimeLifecyclePreflight": {
+        "state": "passed",
+        "build": {
+          "version": 1,
+          "artifact": "dbc2d2a6e098157f041c83187c7d21bfbec7478052f307b46e6c94cc7e5314c8"
+        },
+        "checks": {
+          "offlineArchiveInstalled": true,
+          "actualPrivatePythonProbed": true,
+          "changedRuntimeRejected": true,
+          "activeContextBlocksRemoval": true,
+          "ownedDependencyRemoved": true,
+          "externalGhidraAndJavaPreserved": true,
+          "savedEvidenceRetained": true,
+          "originalInputUnchanged": true,
+          "ownedProcessesStopped": true
+        }
+      }
+    },
+    "managedCheckpointCandidate": {
+      "sourceCommit": "457f481b4b15d9bb74b52ca3824c7d907108d64b",
+      "artifactSha256": "ec498d69480f262700fdcd657ca0235de165477e5d30207410c889b27c73f1c7",
+      "build": {
+        "version": 1,
+        "artifact": "2f01932e1c372d994f0fae11e1e9c71b1c3b95379e3abbd22c19e09900227d85"
+      },
+      "nativeFocused": {
+        "runId": "0cacf61bafcf4486b52ce73f18b73c9a",
+        "state": "passed",
+        "passed": 2,
+        "failed": 0,
+        "duration": "11m38s",
+        "scenarios": [
+          {
+            "name": "ReturnFromTheSelectedRecursiveFrameRatherThanAnInnerCall",
+            "outcome": "Passed",
+            "duration": "00:04:45.6998750"
+          },
+          {
+            "name": "CorroborateANativeCalculationAndRetainItsDisconnectedContextTrace",
+            "outcome": "Passed",
+            "duration": "00:06:53.1940240"
+          }
+        ]
+      },
+      "nativeCombined": {
+        "runId": "da3316b20ea147f99128f632073950e3",
+        "state": "failed",
+        "passed": 19,
+        "failed": 1,
+        "skipped": 4,
+        "duration": "25m11s",
+        "failure": "Recursive caller PC/SP were verified, but the trace transaction did not release for checkpoint. Closing the context also hit the checkpoint lock. The retained inferior cleanup receipt verified exit, and all four owned GUI/supervisor/LLDB/inferior PIDs were subsequently absent. No CPU action was replayed."
+      },
+      "checks": {
+        "offlineTests": 218,
+        "offlinePassed": 216,
+        "offlineOptInSkipped": 2,
+        "releasePassed": 31,
+        "packagedSkillsValidated": 25,
+        "relocatedGlobalPackagePassed": true,
+        "actualSupervisorStartupAndEarlyStopPassed": 2,
+        "ownedPythonSyntaxPassed": true,
+        "traceBatchCallbackDeadlockRegressionPassed": true,
+        "traceTransactionAndBatchFailureCleanupPassed": true,
+        "realPinnedWheelsPatchedAndSyntaxChecked": true
+      },
+      "ci": {
+        "sourceCommit": "457f481b4b15d9bb74b52ca3824c7d907108d64b",
+        "offline": {
+          "runId": 39098717234,
+          "state": "passed"
+        },
+        "windows": {
+          "runId": 39098717283,
+          "state": "passed",
+          "requiredNativeJobs": 7
+        },
+        "linux": {
+          "runId": 39098717266,
+          "state": "passed"
+        }
+      }
+    }
+  },
+  "rejectedCallbackCandidate": {
+    "artifactSha256": "b9def2f6933bf6623858e44d75b9601cdb2306910a527b3f248aa6b2a219d2bd",
+    "runId": "32944445995c47079d3091a84e41a952",
+    "passed": 0,
+    "failed": 2,
+    "duration": "6m12s",
+    "state": "rejected"
+  },
+  "nativeDiagnostic": {
+    "frame0": {
+      "pc": "0x100000464",
+      "spEqualsCfa": true,
+      "inline": false,
+      "artificial": false
+    },
+    "frame1": {
+      "pc": "0x100000508",
+      "spEqualsHardwareSp": true
+    },
+    "hardwarePc": "0x100000508",
+    "ordinaryBacktraceStillContainedStalePrefix": true
+  },
+  "limits": [
+    "A native driver and direct LLDB controls do not establish independent model research acceptance.",
+    "Earlier artifacts keep their own results; neither first success nor transport completion establishes stable combined acceptance.",
+    "Unknown CPU intents and journals are retained without automatic execution or publication replay.",
+    "The direct competing-stop control belongs to the earlier adapter; it is not relabeled as current asynchronous-facade proof."
+  ],
+  "backendComparison": {
+    "state": "diagnostic_only_not_product_acceptance",
+    "sourceDifference": "Only replace the internal native backend with installed Python-capable LLDB 22.1.8; no CPU or memory patches. This diagnostic hardcoded path is absent from committed source.",
+    "recursiveStandalonePassed": true,
+    "ordinaryAndRecursiveRepeat": {
+      "runId": "6a7fd9da890c41b18e9cf7e0a9c82b77",
+      "passed": 2,
+      "failed": 0,
+      "duration": "8m33s"
+    },
+    "nextGate": "Final managed package native gate passed. Model history retains its original artifact identities; broader family and whole-toolbox agent gates remain separate.",
+    "relocatedLldb23": {
+      "state": "diagnostic_passed",
+      "artifactSha256": "ee9e605b1f3be23eaec90e9d5935c09a9b272c814288b155fb427156e21c886d",
+      "runId": "f22b5772889849dcbfa3d07ed1ff01fa",
+      "passed": 2,
+      "failed": 0,
+      "duration": "8m21s",
+      "qualification": "Private diagnostic build replaces the system path/environment only. Not the final managed product package."
+    }
+  },
+  "managedRuntime": {
+    "release": "https://github.com/iXab3r/insight-cli/releases/tag/tool-lldb-python-23.1.3-r2",
+    "artifactSha256": "0f9e88490490fb2f487ad6f02d7aea774629a2839a10497fdcbaad9c6481c839",
+    "size": 105314583,
+    "lldbVersion": "23.1.3",
+    "pythonVersion": "3.15.0",
+    "platform": "macOS 15+ ARM64",
+    "nativeProofHost": "macOS 26.6.2 ARM64",
+    "relocatedNativeFiles": 99,
+    "unchangedOfficialDebugserver": true,
+    "matchingSourceComponents": 9,
+    "sourceNotices": 68,
+    "additionalFullNotices": [
+      "Homebrew",
+      "Homebrew core",
+      "SQLite public domain"
+    ],
+    "repackByteReproducible": true,
+    "strictNodeExtractionPassed": true,
+    "clearedEnvironmentProbeWithoutHomebrewOrApplePythonPassed": true,
+    "machoMinimumOs": {
+      "14.0": 1,
+      "15.0": 99
+    },
+    "privateGhidraDependency": true,
+    "publicLldbSelectionUnchanged": true
+  },
+  "authenticatedOwnership": "Keep Factory raw AppData process binding; normalize the owned profile parent alias for authenticated native resources. Reject substituted child symlinks. Retain session identity on both supervisor and LLDB records.",
+  "publicProcessInventory": {
+    "state": "authenticated_running",
+    "actualManagedExecutable": true,
+    "researchSessionRetained": true,
+    "profileAliasExercised": true
+  },
+  "focusedObservations": [
+    {
+      "arguments": [
+        5,
+        4,
+        3
+      ],
+      "actualReturn": 6
+    },
+    {
+      "count": 11,
+      "result": 109
+    }
+  ],
+  "nativeRecursivePreflight": {
+    "state": "passed",
+    "runner": "The same installed public-CLI driver used by the recursive Gherkin case; fresh isolated profile and new request IDs, not a replay of the failed CPU action.",
+    "observation": {
+      "arguments": [
+        5,
+        4,
+        3
+      ],
+      "actualReturn": 6
+    },
+    "checks": {
+      "actualRecursiveArguments": true,
+      "selectedCallerReturn": true,
+      "stackDepthReducedByOne": true,
+      "returnNotReplayed": true,
+      "noExtraStaticProgramMetadata": true,
+      "retainedDisconnectedRegisters": true,
+      "checkpointBytesMatched": true,
+      "originalInputUnchanged": true,
+      "ownedDebuggerAndServerStopped": true
+    },
+    "cleanupComplete": true,
+    "publicCliInvocations": 33
+  },
+  "traceBatchCorrection": {
+    "scope": "Only the fresh owned SDK Python copy; external Ghidra files are unchanged.",
+    "evidence": "The pinned Client.end_batch awaits futures while holding _block. A bounded regression reproduces a reply callback unable to enter that same mutex; the corrected code passes.",
+    "changes": [
+      "Wait for batch results after releasing _block.",
+      "Abort failed model transactions, end failed batches, and reset tracked transaction state in cleanup paths.",
+      "Observe batch quiescence before/after stopped-trace synthesis, yielding pending observations without blocking or repeating CPU actions."
+    ],
+    "budgetsUnchanged": true,
+    "qualification": "This independently reproduced client deadlock pattern and cleanup defect are corrected; final native repeats establish the package gate."
+  },
+  "combinedGhidraObservations": [
+    {
+      "arguments": [
+        5,
+        4,
+        3
+      ],
+      "actualReturn": 6
+    },
+    {
+      "count": 11,
+      "result": 109
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent owned HTTP observation/comparison business unit proof; complete-toolbox acceptance remains separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 150895,
+      "candidateInvocations": 19,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The two owned HTTP endpoints in input/endpoints.json represent before/after versions of the same quote service for the same input. Record actual requests and responses through the connected toolbox and explain what changed in the response body and caching policy, with stable controls. Retain the captured material and comparison evidence so another agent can inspect it without replaying traffic. Scope is HTTP at the supplied endpoints only; do not change system proxy or trust, and do not claim TLS coverage. Use the project evidence conventions and retain a verified checkpoint. Clean up owned collectors and state observation limits.",
+      "promptSha256": "88bf2406f74cb563f844eb0b501b7d8ee31c007585c27a00a3b9bca4b6748609",
+      "inputs": [
+        {
+          "path": "input/endpoints.json",
+          "sha256": "bf36a0f830a8616f8becf9502cc8c4d65d3115ea8d84fd2ab9063a79cda20ddd"
+        }
+      ],
+      "checkpointFiles": 9,
+      "checkpointBytes": 37469,
+      "checkpointSha256": "b23f3d691f7b12724cf43744f3c7b8da6bc60d70821ea7921334113a2828aa1c",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 7,
+      "actualCapturedFlows": 6,
+      "controllerRequestsMatchCaptures": true,
+      "bodyChange": [
+        109,
+        131
+      ],
+      "cacheControlChange": [
+        "public, max-age=60",
+        "no-store"
+      ],
+      "unchangedControls": [
+        "HTTP 200",
+        "X-Input-Count 11"
+      ],
+      "nativeArchivesRetained": 2
+    },
+    "prepared": {
+      "elapsedMs": 113028,
+      "candidateInvocations": 17,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "The two owned HTTP endpoints in input/endpoints.json represent before/after versions of the same quote service for the same input. Record actual requests and responses through the connected toolbox and explain what changed in the response body and caching policy, with stable controls. Retain the captured material and comparison evidence so another agent can inspect it without replaying traffic. Scope is HTTP at the supplied endpoints only; do not change system proxy or trust, and do not claim TLS coverage. Use the project evidence conventions and retain a verified checkpoint. Clean up owned collectors and state observation limits.",
+      "promptSha256": "88bf2406f74cb563f844eb0b501b7d8ee31c007585c27a00a3b9bca4b6748609",
+      "inputs": [
+        {
+          "path": "input/endpoints.json",
+          "sha256": "9e42afeb788ed3a3066ef002f995f7e35a534275049c1b62de995862d2dbb883"
+        }
+      ],
+      "checkpointFiles": 13,
+      "checkpointBytes": 26872,
+      "checkpointSha256": "718c20c461012e4122fb66d4d2cbe036a0a14ef326820e7ea083fdb1e09ce04c",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 5,
+      "actualCapturedFlows": 4,
+      "controllerRequestsMatchCaptures": true,
+      "bodyChange": [
+        109,
+        131
+      ],
+      "cacheControlChange": [
+        "public, max-age=60",
+        "no-store"
+      ],
+      "unchangedControls": [
+        "HTTP 200",
+        "X-Input-Count 11"
+      ],
+      "nativeArchivesRetained": 1
+    }
+  },
+  "limits": [
+    "Only explicit local HTTP endpoints were observed; no TLS or cache-hit behavior was claimed.",
+    "Literal-URL compare keeps the version-specific paths distinct; the evidence documents the supplied before/after pairing.",
+    "Date/transport headers are not asserted constant."
+  ]
+}

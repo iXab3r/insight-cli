@@ -11,6 +11,15 @@ for(const file of (await readdir(directory)).sort()){
   catalog[a.sha256]={...Object.fromEntries(['name','sha256','size','format','root','license'].map(k=>[k,a[k]])),url:`https://github.com/${r.repository}/releases/download/${r.tag}/${a.name}`};
  }
 }
+// Non-redistributable vendor payloads never enter the GitHub mirror publisher.
+const vendor=JSON.parse(await readFile(new URL('scripts/vendor-tool-sources.json',root),'utf8'));
+if(vendor.schema!==1||!Array.isArray(vendor.sources))throw Error('Invalid explicit vendor source inventory');
+for(const a of vendor.sources){
+ const url=new URL(a.url),delivery=a.delivery,terms=new URL(delivery?.termsUrl??'https://invalid.local');
+ const approved=(delivery?.publisher==='Microsoft'&&['download.sysinternals.com','windbg.download.prss.microsoft.com'].includes(url.hostname)&&terms.hostname==='learn.microsoft.com')||(delivery?.publisher==='dnSpyEx'&&a.url==='https://github.com/dnSpyEx/dnSpy/releases/download/v6.6.0/dnSpy-net-win64.zip'&&a.sha256==='8ed48f165dc355e869f3a0037ad4f9216147f995a5ae0258b296eeef1f73aab0'&&terms.href==='https://visualstudio.microsoft.com/license-terms/mlt552233/');
+ if(!approved||url.protocol!=='https:'||url.username||url.password||!/^([a-f0-9]{64})$/.test(a.sha256)||!Number.isSafeInteger(a.size)||a.size<1||a.size>=2*1024**3||a.format!=='zip'||a.root!=='.'||!a.license||delivery?.kind!=='vendor-direct'||!delivery.reason||terms.protocol!=='https:'||catalog[a.sha256])throw Error('Invalid pinned upstream-only delivery exception');
+ catalog[a.sha256]=a;
+}
 const path=new URL('skills/ghidra-coordinator/runtime/tool-catalog.json',root),bytes=JSON.stringify(catalog,null,2)+'\n';
 if(process.argv.includes('--check')){if(await readFile(path,'utf8')!==bytes)throw Error('Tool catalog differs; regenerate with node scripts/tool-catalog.mjs');}
 else await writeFile(path,bytes);

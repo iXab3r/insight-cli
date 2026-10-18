@@ -4,7 +4,7 @@ import {Workspace,type Scope,type DebuggerState} from './workspace.js';
 import {Research,scope,address,number,type ResearchBackend} from './research.js';
 import {id,text,object,fail} from './model.js';
 import {selectedOptions} from './arguments.js';
-import {debuggerResult,debuggerProgramMetadata as metadata} from './debugger-results.js';
+import {debuggerResult,debuggerExecutionSettled,debuggerProgramMetadata as metadata} from './debugger-results.js';
 import {setTimeout as delay} from 'node:timers/promises';
 import {randomUUID} from 'node:crypto';
 import type {Artifact} from './artifacts.js';
@@ -48,11 +48,11 @@ export class Debugger {
     return this.research.ordered(selected,async()=>{
       const request=this.workspace.request(reserved.request.id);if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;
         const result=object(request.result??{});if(request.state==='failed'&&result.reason==='disconnected')fail('disconnected','Selected trace has no live target.',result);
-        if(request.state==='failed'&&result.reason==='busy')fail('busy','This context already has a live debug target; use another session for another process.',result);
+        if(request.state==='failed'&&result.reason==='busy')fail('busy','This context still has a connected debugger; close/reopen it or use another session before a new launch.',result);
         if(request.state==='failed'&&result.reason==='native_precondition')fail('rejected','The native live precondition failed; the target write was not started.',result);
         fail('unknown','Debugger action is retained and is not repeated.',request.result);}
       const backend=await this.prepared(selected,trace),context=this.workspace.context(selected);
-      if(operation==='launch'&&(await backend.debuggerSaved(selected)).connected){const result={...selected,state:'not_started',reason:'busy'};this.workspace.recordRequest(request.id,'failed',result);fail('busy','This context already has a live debug target; use another session for another process.',result);}
+      if(operation==='launch'&&(await backend.debuggerSaved(selected)).connected){const result={...selected,state:'not_started',reason:'busy'};this.workspace.recordRequest(request.id,'failed',result);fail('busy','This context still has a connected debugger; close/reopen it or use another session before a new launch.',result);}
       const before=debuggerResult('status',{},await backend.debuggerCall(selected,'status'));
       if(operation!=='launch'&&object(before).target_connected!==true){const result={...selected,state:'not_started',reason:'disconnected'};this.workspace.recordRequest(request.id,'failed',result);fail('disconnected','Selected trace has no live target.',result);}
       const beforeMetadata=context.workingSnapshot?await metadata(backend,context.workingSnapshot):undefined;
@@ -67,9 +67,9 @@ export class Debugger {
         }
         const value=debuggerResult(operation,p,raw);
         if(['resume','interrupt','step'].includes(operation)){
-          const wanted=operation==='resume'?'RUNNING':'STOPPED';let observed=false;
+          let observed=false;
           for(let attempt=0;attempt<40;attempt++){const status=object(debuggerResult('status',{},await backend.debuggerCall(selected,'status')));
-            if(status.execution_state===wanted||operation==='resume'&&status.execution_state==='STOPPED'&&BigInt(String(status.snap??0))>BigInt(String(object(before).snap??0))){observed=true;break;}await delay(100);}
+            if(debuggerExecutionSettled(operation,object(before),status)){observed=true;break;}await delay(100);}
           if(!observed)fail('partial','Debugger execution state did not settle after the action.');
         }
         if(operation==='set_breakpoint'||operation==='remove_breakpoint'){
@@ -79,10 +79,14 @@ export class Debugger {
           }
           if(!observed)fail('partial','Breakpoint inventory did not verify the action.');
         }
+        if(operation==='launch'&&p.stop_at_entry===true){
+          const stopped=object(debuggerResult('status',{},await backend.debuggerCall(selected,'status')));
+          if(stopped.target_connected!==true||stopped.execution_state!=='STOPPED')fail('partial','Entry-stop launch did not verify a stopped live target.');
+        }
         saved=await backend.debuggerSaved(selected);savedSnapshot=await backend.saved(selected);
         metadataChanged=beforeMetadata!==undefined&&beforeMetadata!==await metadata(backend,savedSnapshot);
         const complexChanges=metadataChanged?[...context.complexChanges,request.id]:context.complexChanges;
-        const result={...selected,state:'applied',...(saved.active?{trace:saved.active}:{}),pendingChanges:context.scalars.length+complexChanges.length,sharedState:context.scalars.length||complexChanges.length?'pending':'shared',value};
+        const result={...selected,state:'applied',...(operation==='launch'&&p.stop_at_entry===true?{stoppedAtEntry:true}:{}),...(saved.active?{trace:saved.active}:{}),pendingChanges:context.scalars.length+complexChanges.length,sharedState:context.scalars.length||complexChanges.length?'pending':'shared',value};
         this.workspace.completeSavedRequest(selected,request.id,context.generation,{debugger:saved,workingSnapshot:savedSnapshot,complexChanges},result);return result;
       }catch(error){if(this.workspace.request(request.id).state==='failed')throw error;
         try{saved??=await backend.debuggerSaved(selected);}catch{}
@@ -108,7 +112,7 @@ export function debuggerCommands(service:(c:CommandContext)=>Debugger):CommandDe
       ...(operation==='schedule'?[{flags:'--schedule <time>',description:'Parse and validate a native time schedule without executing it',required:true}]:[]),
       ...(paged?[{flags:'--limit <count>',description:'Page size 1–100',defaultValue:50},{flags:'--offset <count>',description:'Page offset',defaultValue:0}]:[]),
       ...(operation==='step'?[{flags:'--kind <kind>',description:'into, over or out',defaultValue:'into'}]:[]),
-      ...(operation==='launch'?[{flags:'--args <text>',description:'Target command-line arguments',defaultValue:''},{flags:'--cwd <directory>',description:'Target working directory (default owned run folder)'},
+      ...(operation==='launch'?[{flags:'--stop-at-entry',description:'macOS local LLDB: launch stopped at entry for inspection before running'},{flags:'--args <text>',description:'Target command-line arguments',defaultValue:''},{flags:'--cwd <directory>',description:'Target working directory (default owned run folder)'},
         {flags:'--offer <name>',description:'Launch offer title or configuration name',defaultValue:process.platform==='win32'?'dbgeng':process.platform==='darwin'?'lldb':'gdb'},{flags:'--timeout-seconds <count>',description:'Launch wait 1–300 seconds',defaultValue:60}]:[]),...(changing?[request]:[])];
     leaves.push(command(operation.replaceAll('_','-'),'Use the selected context debugger',({options:o},c)=>{
       const p:Record<string,unknown>={};if(at)p.address=address(o.address);if(paged){p.limit=number(o.limit,100,1);p.offset=number(o.offset,2147483647);}
@@ -123,7 +127,7 @@ export function debuggerCommands(service:(c:CommandContext)=>Debugger):CommandDe
         if(p.from_snap!==undefined&&p.to_snap!==undefined&&(BigInt(String(p.to_snap))<BigInt(String(p.from_snap))||BigInt(String(p.to_snap))-BigInt(String(p.from_snap))>999n))fail('invalid','Trace value history is bounded to 1000 snaps.');}
       if(operation==='schedule')p.schedule=text(o.schedule,4096);
       if(operation==='step'){p.kind=text(o.kind);if(!['into','over','out'].includes(String(p.kind)))fail('invalid','Step kind must be into, over or out.');}
-      if(operation==='launch'){if(typeof o.args!=='string'||o.args.length>8192||o.args.includes('\0'))fail('invalid','Arguments must be bounded text.');p.args=o.args;p.offer=text(o.offer,512);p.timeout_seconds=number(o.timeoutSeconds,300,1);if(o.cwd){p.cwd=resolve(c.cwd,text(o.cwd,4096));if(/[\r\n\0]/.test(String(p.cwd)))fail('invalid','Debugger working directory must be a single filesystem path.');}}
+      if(operation==='launch'){if(o.stopAtEntry===true){if(process.platform!=='darwin'||o.offer!=='lldb')fail('unsupported','--stop-at-entry requires the local macOS lldb offer.');p.stop_at_entry=true;}if(typeof o.args!=='string'||o.args.length>8192||o.args.includes('\0'))fail('invalid','Arguments must be bounded text.');p.args=o.args;p.offer=text(o.offer,512);p.timeout_seconds=number(o.timeoutSeconds,300,1);if(o.cwd){p.cwd=resolve(c.cwd,text(o.cwd,4096));if(/[\r\n\0]/.test(String(p.cwd)))fail('invalid','Debugger working directory must be a single filesystem path.');}}
       const selected=scope(o),selectedTrace=o.trace===undefined?undefined:id(o.trace);
       return changing?service(c).change(selected,operation,p,o.requestId===undefined?undefined:id(o.requestId),selectedTrace):service(c).read(selected,operation,p,selectedTrace);
     },{permission:operation==='remove_breakpoint'||liveWrites.has(operation)?'Destructive':changing?Permission.Update:Permission.ReadOnly,options}));

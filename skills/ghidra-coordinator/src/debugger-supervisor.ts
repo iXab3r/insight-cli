@@ -5,6 +5,9 @@ import {readFile,writeFile,mkdir,open,rename,realpath} from 'node:fs/promises';
 import {join,resolve,delimiter} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {HttpBridge} from './transport.js';
+import {callerMonitor} from './debugger-caller.js';
+import {debuggerLaunchArguments} from './debugger-launch.js';
+import {verifyManagedInstallation} from './tool-runtime/installer.js';
 
 async function main(){
   const root=await realpath(process.argv[2]!),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
@@ -19,21 +22,30 @@ async function main(){
   const id=randomUUID(),path=join(directory,id+'.json'),resultPath=join(directory,id+'.result.json');
   const receipt={schema:1,id,root,guiPid:binding.pid,ownerToken:binding.tokenSecret,context:binding.context,target:binding.target,supervisorPid:process.pid,childPid:0,state:'starting',inferiorTerminated:false};
   async function saved(){const temporary=path+'.new',file=await open(temporary,'w',0o600);try{await file.writeFile(JSON.stringify(receipt));await file.sync();}finally{await file.close();}await rename(temporary,path);const parent=await open(directory,'r');try{await parent.sync();}finally{await parent.close();}}
-  const appData=process.env.INSIGHT_TOOL_APPDATA;if(!appData||!root.startsWith(resolve(appData)+'/workspace/ghidra-native/'))throw Error('Invalid tool profile');
+  const appData=process.env.INSIGHT_TOOL_APPDATA,canonicalAppData=appData?await realpath(appData):undefined;
+  if(!appData||!canonicalAppData||!root.startsWith(join(canonicalAppData,'workspace','ghidra-native')+'/'))throw Error('Invalid tool profile');
+  if(binding.debuggerRuntime)await verifyManagedInstallation(appData,'ghidra-debugger',binding.debuggerRuntime);
   const authority=createServer((req,res)=>{if(req.url!=='/identity'||req.headers.authorization!=='Bearer '+token){res.writeHead(403).end();return;}res.setHeader('Content-Type','application/json');res.end(JSON.stringify({id,pid:process.pid,childPid:receipt.childPid,state:receipt.state}));});
   await new Promise<void>(ok=>authority.listen(0,'127.0.0.1',ok));authority.unref();const address=authority.address();if(!address||typeof address==='string')throw Error('No debugger identity port');Object.assign(receipt,{identityPort:address.port});
-  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,metadata:{debuggerReceipt:path,contextRoot:root}};
+  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,session:binding.session,metadata:{debuggerReceipt:path,debuggerDiagnostics:join(directory,id+'.diagnostic.log'),contextRoot:root,...(binding.debuggerRuntime?{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint}:{})}};
   const helperProcess=await registerExistingProcess(appData,{...processSpec,role:'debugger-supervisor'},process.execPath,process.pid,async()=>true);
   await saved();const environment={...process.env};delete environment.GHIDRA_MCP_AUTH_TOKEN;delete environment.GHIDRA_SERVER_PASSWORD;
   // Ghidra's launcher prepends its source tree to PYTHONPATH. Restore the owned wheel
   // copy first, including the pinned SBProcess compatibility adapter, before LLDB imports it.
   const python=await realpath(environment.INSIGHT_DEBUGGER_PYTHON??'');
   if(!python.startsWith(root+'/debug-python-')||python!==environment.INSIGHT_DEBUGGER_PYTHON)throw Error('Owned debugger Python identity changed');
+  let debuggerExecutable='/usr/bin/lldb';
+  if(binding.debuggerRuntime){
+    debuggerExecutable=binding.debuggerRuntime.executable;
+    Object.assign(environment,binding.debuggerRuntime.environment);
+    Object.assign(receipt,{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint});
+  }
   environment.PYTHONPATH=python+delimiter+(environment.PYTHONPATH??'');delete environment.INSIGHT_DEBUGGER_PYTHON;
   let closing=false,finished=false,launchComplete=false;
   process.once('SIGHUP',close);process.once('SIGTERM',close);
   // A separate session keeps the GUI terminal's SIGHUP from bypassing our orderly kill.
-  const child=await launchProcess(appData,{...processSpec,role:'debugger'},'/usr/bin/lldb',['--no-lldbinit','-o','settings set auto-confirm true',...process.argv.slice(3)],{env:environment,detached:true,stdio:['pipe','pipe','pipe']});
+  const launchArguments=process.argv.slice(3),usesGhidra=launchArguments.includes('script import os, ghidralldb');
+  const child=await launchProcess(appData,{...processSpec,role:'debugger'},debuggerExecutable,['--no-lldbinit','-o','settings set auto-confirm true','-o','settings set target.detach-on-error false',...debuggerLaunchArguments(launchArguments,launch.stopAtEntry===true,usesGhidra?python:undefined)],{env:environment,detached:true,stdio:['pipe','pipe','pipe']});
   launchComplete=true;
   const exited=child.toolClosed.then(()=>{finished=true;});
   void exited.catch(()=>{});receipt.childPid=child.pid??0;receipt.state='running';
@@ -60,10 +72,14 @@ async function main(){
     const commands='script exec('+JSON.stringify(code)+')\nquit\n';child.stdin!.write(commands);
     setTimeout(()=>{if(!finished){child.kill('SIGINT');child.stdin!.write(commands);}},3000).unref();}
   process.once('SIGINT',()=>{if(!closing)child.kill('SIGINT');});process.stdin.once('end',close);process.stdin.once('error',close);
-  const monitor=setInterval(()=>{try{process.kill(binding.pid,0);}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')close();}},250);
+  const observeCaller=callerMonitor(python,command=>{if(!closing&&!finished)child.stdin!.write(command);});
+  let callerDiagnostic=false;
+  const monitor=setInterval(()=>{try{process.kill(binding.pid,0);}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')close();}
+    if(!closing&&!finished)void observeCaller().catch(()=>{if(!callerDiagnostic){callerDiagnostic=true;process.stderr.write('Native caller observation failed; its request is retained.\n');}});
+  },250);
   try{await saved();await exited;let result;try{result=JSON.parse(await readFile(resultPath,'utf8'));}catch{}
     receipt.inferiorTerminated=result?.id===id&&result.inferiorTerminated===true;receipt.state=receipt.inferiorTerminated?'closed':'failed';Object.assign(receipt,{exitCode:child.exitCode,signalCode:child.signalCode});
-    if(!receipt.inferiorTerminated)await writeFile(join(directory,id+'.diagnostic.log'),diagnostics,{mode:0o600});await saved();
+    await writeFile(join(directory,id+'.diagnostic.log'),diagnostics,{mode:0o600});await saved();
   }finally{clearInterval(monitor);process.stdin.pause();authority.close();}
   // Keep a failed child outcome observable; never claim that killing LLDB proves inferior exit.
   process.exitCode=receipt.inferiorTerminated?0:1;

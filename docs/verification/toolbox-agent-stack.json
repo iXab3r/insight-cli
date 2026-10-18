@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent live .NET stack unit proof; not combined toolbox acceptance",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 63069,
+      "candidateInvocations": 14,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Observe the running managed worker identified in input/subject.json and explain where its relevant thread is waiting, using an actual live stack snapshot through the connected toolbox. Retain method/thread evidence and exact observation conditions, distinguish a snapshot from CPU activity or a history of waits, preserve the borrowed process lifetime, and save a verified checkpoint using the project conventions.",
+      "promptSha256": "d50f9006625f1412af10a22eb273c0f9eb0bd70e3ba7076db11c33707c2886f8",
+      "inputs": [
+        {
+          "path": "input/InsightOwnedWorker.dll",
+          "sha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb"
+        },
+        {
+          "path": "input/InsightOwnedWorker.runtimeconfig.json",
+          "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+        },
+        {
+          "path": "input/subject.json",
+          "sha256": "56759d70539759a9ed394ea503fd73db9a8bf84a36e02ab170cc839bafcfbe1b"
+        }
+      ],
+      "checkpointFiles": 2,
+      "checkpointBytes": 3070,
+      "checkpointSha256": "98bfb5ff0fb9629b40dd211ecf235f79c4ed15787ab738c1cad2bda277158778",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 2,
+      "observedStack": [
+        "Thread.Sleep(int32)",
+        "Program.WaitForRelease()",
+        "Program.Main()"
+      ],
+      "snapshotNotCpuOrHistory": true,
+      "borrowedSubjectSurvivedAgent": true,
+      "controllerOwnedSubjectAbsentAfterCleanup": true
+    },
+    "prepared": {
+      "elapsedMs": 46451,
+      "candidateInvocations": 9,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Observe the running managed worker identified in input/subject.json and explain where its relevant thread is waiting, using an actual live stack snapshot through the connected toolbox. Retain method/thread evidence and exact observation conditions, distinguish a snapshot from CPU activity or a history of waits, preserve the borrowed process lifetime, and save a verified checkpoint using the project conventions.",
+      "promptSha256": "d50f9006625f1412af10a22eb273c0f9eb0bd70e3ba7076db11c33707c2886f8",
+      "inputs": [
+        {
+          "path": "input/InsightOwnedWorker.dll",
+          "sha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb"
+        },
+        {
+          "path": "input/InsightOwnedWorker.runtimeconfig.json",
+          "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+        },
+        {
+          "path": "input/subject.json",
+          "sha256": "881c47dd2cad392750fdf7251fee88f15860df15fb1cf9b7af0a145882aee2a0"
+        }
+      ],
+      "checkpointFiles": 2,
+      "checkpointBytes": 2759,
+      "checkpointSha256": "3ddb7b84bc4e7fb5a43b815701d357d03d9dae7bf57cf1e7208d3ec335a2379f",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 2,
+      "observedStack": [
+        "Thread.Sleep(int32)",
+        "Program.WaitForRelease()",
+        "Program.Main()"
+      ],
+      "snapshotNotCpuOrHistory": true,
+      "borrowedSubjectSurvivedAgent": true,
+      "controllerOwnedSubjectAbsentAfterCleanup": true
+    }
+  },
+  "limitations": [
+    "Live macOS process birth identity is weak; reports retain that limitation.",
+    "Borrowed worker lifetime belonged to the controller; only collectors were owned by the agent."
+  ]
+}

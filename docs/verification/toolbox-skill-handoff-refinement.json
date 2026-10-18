@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "state": "guidance_only_native_tree_identical",
+  "scope": "Bind the later checkpoint/hash guidance package to the combined-native implementation candidate; this is not a new whole-package native or combined agent pass",
+  "nativeCandidate": {
+    "sourceCommit": "bac359cbdb23dcc42d10dba9fe3c23fe936cb49f",
+    "sha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+    "runId": "05ba05150f7641e28b55753420524383",
+    "state": "passed",
+    "passed": 17,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4
+  },
+  "guidanceCandidate": {
+    "sourceCommit": "75cca82f937acf70e5110feabdda773492b8e42a",
+    "sha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+    "cleanSourcePackByteIdentical": true
+  },
+  "changedPackedEntries": [
+    "package/.cli-package-build.json",
+    "package/skill-bundle/insight-ilspy/SKILL.md",
+    "package/skill-bundle/insight-overview/SKILL.md",
+    "package/skills/insight-ilspy/SKILL.md",
+    "package/skills/insight-overview/SKILL.md"
+  ],
+  "nativeImplementationFilesByteIdentical": 382,
+  "nativeImplementationManifestSha256": "772c799d5dce549f78ed1d6053e87508e65ce061389908424a3742d173becd2e",
+  "checks": {
+    "offlineRelocatedPackage": true,
+    "releaseAdmission29": true,
+    "sourceSkills25": true
+  },
+  "independentModelReceipts": [
+    "toolbox-agent-overview.json",
+    "toolbox-agent-ilspy-project.json"
+  ]
+}

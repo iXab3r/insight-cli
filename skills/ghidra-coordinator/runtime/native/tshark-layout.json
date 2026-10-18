@@ -1,0 +1,2247 @@
+{
+  "format": "tshark-console-subset-v1",
+  "outputRoot": "tshark-4.6.9",
+  "platform": "darwin-arm64",
+  "minimumSystem": "macOS 12.0; native proof on macOS 26.6.2 ARM64",
+  "upstreamDmgSha256": "10bd54ccdc3f40457f6a1f0c517bc93703fcb327c4cd4b93002e7a623dacbf38",
+  "entries": [
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libbrotlicommon.1.dylib",
+      "sha256": "3b01dc59d077c6e0de734afe67c6732a182f9bd27e4e116e6649ce7f436525d2",
+      "size": 351008
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libbrotlidec.1.2.0.dylib",
+      "sha256": "5117c9f9cda08907fb129989ac38fe1c0cd974d6598671523b3ee88261b668ad",
+      "size": 191280
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libcares.2.19.7.dylib",
+      "sha256": "d111ada86f3c83cc8ba83dbb6116b73feb8d5514daedc58813e2fcc3d434c264",
+      "size": 658800
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libgcrypt.20.dylib",
+      "sha256": "af6b79675e70343cc2d87a8ce76351738b61a9ee042a06f656c76d575e93772a",
+      "size": 2938864
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libglib-2.0.0.dylib",
+      "sha256": "246c40ce1b60d8dd5285f225b5401c5ab91f030eaf3f2c4d3ff63983f7e5cfbb",
+      "size": 3642720
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libgmodule-2.0.0.dylib",
+      "sha256": "a1c556fc9beb7543ed74a6fad40bb046eab6e77c0de76b71147898c6b0b79df9",
+      "size": 139456
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libgmp.10.dylib",
+      "sha256": "1b0a91f93468771995c4e79da712475805c7481fb2bb0a3e9488b923895a97a2",
+      "size": 1491936
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libgnutls.30.dylib",
+      "sha256": "1dffabdadac29fb641b8d6ecdc4bcb041ecd07477f162256c97bc3115fd1f6d2",
+      "size": 7567344
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libgpg-error.0.dylib",
+      "sha256": "9b89733598d3155c69eadd3ffa9a5948a682f9cb69ce16a80b4796ceb9f357cb",
+      "size": 484016
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libhogweed.6.dylib",
+      "sha256": "876cc42361d23684c0c80f6d8c23958e56d0d8eb1d118bd6d866ecc64205607f",
+      "size": 776016
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libintl.8.dylib",
+      "sha256": "4123f3824db03c4d8d96d919d13705ff2050d90dcb87f6a71bc9590b0b354fc8",
+      "size": 567024
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/liblz4.1.10.0.dylib",
+      "sha256": "0663f99e7ce7bb0a54e396b6ff553c9e9a67c905d05ea9d7a657a14a5bbe2bd0",
+      "size": 434464
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libnettle.8.dylib",
+      "sha256": "56d265c38402787a574cf6fc15159c80ee87fd085752c8cd7183c91ab3e87653",
+      "size": 963488
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libnghttp2.14.29.4.dylib",
+      "sha256": "9aefceb2c8836e658cd8db104349f17a0c437455e2a7a0d09add5454ac56fa94",
+      "size": 543456
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libnghttp3.9.2.7.dylib",
+      "sha256": "8bf39c4946cbad270dab56e6053290074563a9e719524f5a1c6644f17cf457b3",
+      "size": 543200
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libp11-kit.0.dylib",
+      "sha256": "d16fbc927128c4c185d04115d32488c6d8a23eb0ccdf2f33fdda441d0f8949e8",
+      "size": 4434544
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libpcre2-8.0.15.0.dylib",
+      "sha256": "180d1245fd53a99c015fceec16621f987a0820dd90895cbcb82df0e70277b47b",
+      "size": 1617440
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libsmi.2.0.27.dylib",
+      "sha256": "029610a0bac3f79451b85ee0bec92f016190accd917609816bec88d2cb3ea285",
+      "size": 807616
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libsnappy.1.2.2.dylib",
+      "sha256": "ac714582cbbbe92d88f138c4183ab288f4bc23150ba83c5977b51da7602f491f",
+      "size": 183056
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libtasn1.6.dylib",
+      "sha256": "c376f09adebbc1aed65e62c33e00876e2bd588efdf5beaf02011fc3e88d26911",
+      "size": 265840
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libwireshark.19.dylib",
+      "sha256": "2f60b02c704d4aca856ccd2c5cc190a1c96274df52092123f82c78fc285fcc51",
+      "size": 245574112
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libwiretap.16.dylib",
+      "sha256": "c1e28c0df35f662d6167aea12b541a40f3e963cc60ed3863aef96a51bb7fa7b4",
+      "size": 1715264
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libwsutil.17.dylib",
+      "sha256": "709aa0e60b37ab5c7932211e6ef4148e07026ce9ac0c5d996c5324927b483f0d",
+      "size": 902528
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libxml2.16.dylib",
+      "sha256": "4e11275191b570e150732fdb5fe75a335c9d69cdbee51742381d75dfcd91ea12",
+      "size": 2696544
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libxxhash.0.8.3.dylib",
+      "sha256": "14e2faad2ae9de5c2d9e6b2636bee3ed0ae52193066d614eb4a41a80db66f0c2",
+      "size": 174000
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libz-ng.2.2.4.dylib",
+      "sha256": "f44e302a4ce102f5be5a06764ecd78ddab90fb5a283f8155a61ed6870d83ea91",
+      "size": 360672
+    },
+    {
+      "path": "Wireshark.app/Contents/Frameworks/libzstd.1.5.7.dylib",
+      "sha256": "b5fb434973687684b4b75f49ee435deca9d17c29750f0171bd93802ecf0c0741",
+      "size": 1834384
+    },
+    {
+      "path": "Wireshark.app/Contents/Info.plist",
+      "sha256": "d8c8304245517bd6203a68eb7b4cfd4110ab519a9c10786a0fc0ef62e4d2eabd",
+      "size": 8116
+    },
+    {
+      "path": "Wireshark.app/Contents/MacOS/tshark",
+      "sha256": "a9f0dd3ad6488be6dd4bf4506c3d72e667933a8aceaa6ada1a5fe9284b69774f",
+      "size": 901584
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/COPYING",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "size": 17984
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/README.xml-output",
+      "sha256": "890d2997446813ecf7de42d12423c7dcd7f5682406f42d8690e7701f47768077",
+      "size": 9162
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/Stratoshark Release Notes.html",
+      "sha256": "01b22cbee6ad343f8ab9192c2d3a379fb4024d9957f19de2025fa1564677299f",
+      "size": 7074
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/Wireshark Release Notes.html",
+      "sha256": "05757d9ab7e8caac5e574f4518fe4178485b3e5d0c010ce5f70ff7d5b64523a8",
+      "size": 69533
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/androiddump.html",
+      "sha256": "8fab7fe411369e108855bd27e64896201122bd019d97eb9a2f3a92bb438873b8",
+      "size": 13439
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/capinfos.html",
+      "sha256": "26f80c428dea10241c7ce194b5b40d7e9c5b0b458567b658a81df2e3b389ecce",
+      "size": 19908
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/captype.html",
+      "sha256": "a7c8a492082c2598e314d2418ca860ef2fba8a95b808603ecec0b59632c5fc62",
+      "size": 5829
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/cfilters",
+      "sha256": "20cb4ad8c3b9379d6c69d836d35e2a2537607340b5f7050c95017878c0b79964",
+      "size": 744
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/ciscodump.html",
+      "sha256": "b54e5763bb9dffb5fe29c1df26a954320d802ac9bbfedc4c581fa753a21bae67",
+      "size": 20509
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/colorfilters",
+      "sha256": "0db519d9bb85865c4c7f4b5145af7b2ee47809c42b34e1d86b7c8cd7cdaa372b",
+      "size": 2251
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dfilters",
+      "sha256": "739a8fbbc1ad90ad59582cfb2d78266329b62c53db9671c090c730b92642fdbc",
+      "size": 816
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/AlcatelLucent.xml",
+      "sha256": "0e4509fda912d9a78769f33228e83cbf86f14d5c2282f5907a82d85b40a5dd03",
+      "size": 2137
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Cisco.xml",
+      "sha256": "b374a42c124cb09c7c93841af2436ad1c17939caec3806ec34ad00a22112f6b2",
+      "size": 48680
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/CiscoSystems.xml",
+      "sha256": "c3db0e4516c74fc0ef5e993ec8f5b3d0f349e57819a125961ade1c2a715914d9",
+      "size": 9306
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Ericsson.xml",
+      "sha256": "009d8562737c2cf2edf4082e213688984527c989cf82c64ccb67cd1c12cc6efe",
+      "size": 23979
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/HP.xml",
+      "sha256": "24be4c48f1b96632cd1ca56a6dc1c749be5420c8d30dc7740ec7b3a96910aa11",
+      "size": 1622
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Huawei.xml",
+      "sha256": "ae289f86b955492eea067245946a87f2240a17b26a061527ec26e2d110b0b261",
+      "size": 4428
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Inovar.xml",
+      "sha256": "fc76022454b11293fe8e64696627a699c7fd866bb12bdcf8bb98a9008ddab7e4",
+      "size": 3081
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Juniper.xml",
+      "sha256": "59ece5dd674a1821276da0ef2910d0b0d3f145c648effcb508beb9475dd3c4a2",
+      "size": 1820
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Metaswitch.xml",
+      "sha256": "a5b2b11e6ccefcafcee1c35e37ee66e0585e8d2a23a0cb5c389ce74f8b2caf1b",
+      "size": 3817
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Microsoft.xml",
+      "sha256": "e03a11cf6ec71d85f24dd807dcca84633ece27088521b321237a6af4ee395a1d",
+      "size": 1232
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Nokia.xml",
+      "sha256": "887053b402ba8c53f63d806660ae2714be6ce21ba0d4049bd24cadb630b3729a",
+      "size": 1582
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/NokiaSolutionsAndNetworks.xml",
+      "sha256": "d2d7579638559493ee5ae9d22ea2f2f4e97f4c20c9a465a7658c1506fdbd5faf",
+      "size": 4824
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Oracle.xml",
+      "sha256": "93f801b256f767f799265f12acac28297db04d67a38e853747a425f0fa2f3279",
+      "size": 851
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Siemens.xml",
+      "sha256": "8333f12a3495c26af24db6180b57076dd96865c9b37c6292733b9beff9504b8f",
+      "size": 640
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Starent.xml",
+      "sha256": "36f129e1347fe1de79a7f2d22a6a923e852f443c420de878aaef3a28a460d2d1",
+      "size": 97847
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/TGPP.xml",
+      "sha256": "04622f9c71105fd7b64393edd13467cd40a78ef67b36aff68b9c5a5e6c602e7a",
+      "size": 90991
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/TGPP2.xml",
+      "sha256": "e679c8e8955292b938105ff906a5997219df6c347e72ee285e05697ad6395d81",
+      "size": 5604
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Telefonica.xml",
+      "sha256": "d1615cfe4487c341923adc491ce95dce16b08e3d748a35eeaceaed2bc5656ae1",
+      "size": 11437
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Travelping.xml",
+      "sha256": "41955f97a5e33b6b0ed116bd5968241d17dd35a6b416eaf11fba70db2433a028",
+      "size": 1277
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/VerizonWireless.xml",
+      "sha256": "0f5f46cee3c86a53b4ae13f502e1765a2da26e2ee92105e5429b30512224e237",
+      "size": 3114
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/Vodafone.xml",
+      "sha256": "2cbf9b95f93d93ca71ea5d38b2a71c08bb7a4af24acaec1a7bea6625e2455062",
+      "size": 3445
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/chargecontrol.xml",
+      "sha256": "2d52ac0a1ae2418469e1cebcefe55ad9275fd4cade9aa2027b608eaf55d49e8a",
+      "size": 10527
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/dictionary.dtd",
+      "sha256": "624fbd6c5918b6fe0b3ed4d9f1b4e0e4295cf9fc6da760eb42e7d47a3111b67c",
+      "size": 1867
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/dictionary.ent",
+      "sha256": "60ba62bd103a8934872a70c1eb6dc381ed770b8d25912e75fd52125c604d9bf4",
+      "size": 1157
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/dictionary.xml",
+      "sha256": "56f258eed2a2f3b66a172cc1027585c71f0bf55511dc9425401b22777bf46d8d",
+      "size": 408487
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/eap.xml",
+      "sha256": "96ddbd40ee91200167541ac2d107a1448adbbbca48a85f6e6ad645525d504218",
+      "size": 553
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/etsie2e4.xml",
+      "sha256": "fa4ab9b8f57084b4793699a2b4c5fb4b5dec2cb0f6c07ecde25d45c0bdfeb498",
+      "size": 15537
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/mobileipv4.xml",
+      "sha256": "4f37b13483b89a5dec38d4eb1296d16c14891fdad7f9d0af787e41b462b2620c",
+      "size": 6801
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/mobileipv6.xml",
+      "sha256": "3b400b377a0ecb0352eece3dd99343b7be21f1176f8f82771a7a16c022162256",
+      "size": 2753
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/nasreq.xml",
+      "sha256": "28243df463a2e831e72a7d7288231786f6c8c5b2ba29a900e1ef109260f714c1",
+      "size": 3945
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/sip.xml",
+      "sha256": "a2cc69fe80372952be624f656094b670df28b029a342a91f08b3b734292951eb",
+      "size": 7126
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/diameter/sunping.xml",
+      "sha256": "211e030529185262312b920d13bd848e71245e24321903ba27b5a15924275e33",
+      "size": 787
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dmacros",
+      "sha256": "353542ac19ff374a64ccbb7269c7dcde95056adb271dbfd01acd9559e85f9ece",
+      "size": 321
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/dc.dtd",
+      "sha256": "e8b6eddb8bf9e0050bf09af2425e0501ba018d9fba55ac345db92604f5ed5324",
+      "size": 780
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/itunes.dtd",
+      "sha256": "e2d4fddb06d886001f8bee6115da6739a441d9b97a3e038a8cf8c4e2c3ecc0b8",
+      "size": 523
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/mscml.dtd",
+      "sha256": "55ff1bc1ed128036a65bf5f1e98b487e00f605a27832525fc2ace55ee7e5bcee",
+      "size": 7594
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/pocsettings.dtd",
+      "sha256": "4733e0a775fe68e67a031dbae74b7ceef17b44dd9d200b6736a83e1c43eb0440",
+      "size": 914
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/presence.dtd",
+      "sha256": "adda140b9bb0e8e3d4cc53a1caad6e6384512e949b3fe3e02fe64e2736dacab0",
+      "size": 573
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/reginfo.dtd",
+      "sha256": "1f30279a79124211c6ac8cbc952928228b2e935e7808c93fc31d448333243be6",
+      "size": 1107
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/rlmi.dtd",
+      "sha256": "6a03a53a6be3b3a305716b6609f71b62fdbec34b32dc743c83f94279d362a66d",
+      "size": 769
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/rss.dtd",
+      "sha256": "9a22c6105c1c171441dd88c74c61d9941cde7fb4fe638dba79fada0b4517ba10",
+      "size": 2394
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/smil.dtd",
+      "sha256": "c1a7fd27fdf893bb14c704fed108c188a4a252722ea69dcca51baa89675ca085",
+      "size": 7559
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/watcherinfo.dtd",
+      "sha256": "7ee322d80076a887eb227cfa06e7d4374206598de16ffeb99b4fc31fdf7ee5c0",
+      "size": 800
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/xcap-caps.dtd",
+      "sha256": "9c2020c99fc46c97cfa6b27e3355e103020a4864ead9c6c1f86e834b7d6f9fe7",
+      "size": 297
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dtds/xcap-error.dtd",
+      "sha256": "5b6502fc496a9e181447fe1d7cb067e03e7291aa1c8e89f2aa04750d4aea95f2",
+      "size": 1572
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/dumpcap.html",
+      "sha256": "bb5699d74421f6521a19dec9829c2428a5116204ad96bdd0ad78ad25ca107d12",
+      "size": 31177
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/editcap.html",
+      "sha256": "5275187423b382b5b19e1536a0484e0fb6c17d5b3db2cb2fd8eabda2ca380e35",
+      "size": 41287
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/etwdump.html",
+      "sha256": "fc2591d5edb0c30208b0ac8a095e0ab534109631834e0af59b8f0482f2213206",
+      "size": 6925
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/extcap.html",
+      "sha256": "79c6ee5f880e5bf536cde78097abf458c6c25e831c20adc971995ecca8f4233e",
+      "size": 10756
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/falcodump.html",
+      "sha256": "159bf17ac1493c12caaa19e4f585a90dbfa59645f9e149e4e9414de50a7f3dea",
+      "size": 14919
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/ipmap.html",
+      "sha256": "11efe3471d02bdefa320199b63e373c70ce2573626dc6d40ce5e061cc5e3c040",
+      "size": 13928
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/mergecap.html",
+      "sha256": "9a33984ea44ebba8384bbc07d968e92d9aed7764e0214b88e8bbc447e0f0cc6c",
+      "size": 14005
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/mmdbresolve.html",
+      "sha256": "d2fb68eec491729e8eb42fbb547e5af1a1d3b856ef196305d3f3c2a2d71a5d88",
+      "size": 3972
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/pdml2html.xsl",
+      "sha256": "94bc29b55dd2a72b001bcd785f8f32a827368e9c624073769422f4abd91f7da2",
+      "size": 6403
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/profiles/Bluetooth/colorfilters",
+      "sha256": "dcc3d94554d499a15cd04e7c1eb1de26b1f42edb0fdafee136a90fe432239027",
+      "size": 3402
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/profiles/Bluetooth/preferences",
+      "sha256": "628e11820351803e79deab9865668615c33b71449d543c892f2c25c940116281",
+      "size": 390
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/profiles/Classic/colorfilters",
+      "sha256": "7b5623ef5082e4392657642f126afa0b053649a60ebd44289c3c1fdecc4ec956",
+      "size": 1991
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/profiles/No Reassembly/preferences",
+      "sha256": "961d7899253468a6041e83c956d2432001983f319bb5b81282cf9290cdf0d0f6",
+      "size": 5086
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/protobuf/sparkplug_b.proto",
+      "sha256": "7f397f3a0038a8569c5c59ae675898242c8ec2061a580360e719951601484f7e",
+      "size": 7768
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/README.radius_dictionary",
+      "sha256": "978736a67ec0b02a7d271e29ee40531a0b5d7b3b2214973a600c5f75dc152a06",
+      "size": 3646
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/custom.includes",
+      "sha256": "a7160f72814a3121f375f78dc29c918d770a7ba0f100ae45cd3e45c1239d0a48",
+      "size": 87
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary",
+      "sha256": "dc3db77598a32d41e27b8bab30a99ae6281aca37c53e2745422b2c2fec66d40b",
+      "size": 11774
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.3com",
+      "sha256": "36529c207f3d537a22f865916c81b611e404a31bf7dc59de44f111fc09b1c2fa",
+      "size": 1591
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.3gpp",
+      "sha256": "8fb8729b9b5c4e5e27b5b3008a4c9313d7a184eda771a0d54a9272435808519f",
+      "size": 4350
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.3gpp2",
+      "sha256": "afaa22e43018bbc68d8a70994e34563f8b126bd7408f1a85f5ad44f946dbc915",
+      "size": 16446
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.5x9",
+      "sha256": "c99071b8446cf5693d083227f3a99d64d6f93815b8dede84fdecfbe30a8249e4",
+      "size": 1166
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.acc",
+      "sha256": "4d8bbd652f45cd366b79e185fb9589bfb98b6793455893767759e68e231938f8",
+      "size": 10995
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.acme",
+      "sha256": "55b9cd33c20d7f953921174fc221b4d72eb8178282186728199d0d1bcc52313f",
+      "size": 10165
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.actelis",
+      "sha256": "4d01b99f4c42ce9148858d22db6fe001745019a74b9c42c65c533f6454f751f2",
+      "size": 519
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.adtran",
+      "sha256": "b0628cac686194c463c75a008032456f96dece439e82a96bc3c3da57189828c0",
+      "size": 458
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.adva",
+      "sha256": "d1bb94ae45d22e168ace194115a7b1f70c93d02697fa2a9f916e60c984da7e38",
+      "size": 1160
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.aerohive",
+      "sha256": "ca3cd7de911ea68dcb133214c9effbd87c7ee730803ef5d28ac645ecd87533bf",
+      "size": 2653
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.airespace",
+      "sha256": "42f084c9d385869142e0d4cb034eda19eec8ff0b1ed1a8082848d253c05a4f28",
+      "size": 1321
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alcatel",
+      "sha256": "c5cbdf119e0c504a7ea2e70fc954bb50513f2d2973f8711e239ac63be25b39cc",
+      "size": 3746
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alcatel-lucent.aaa",
+      "sha256": "b30fcf48340a899b72da408c56b01f8c8889ea8d70032bd8333ddd8431f58166",
+      "size": 3397
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alcatel.esam",
+      "sha256": "e34bcdf9fa4717f16a8bb3056d218dd2a7ab66825d96fe906a4728a0d29ff91f",
+      "size": 7690
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alcatel.sr",
+      "sha256": "6fb563ef703f37ac260764812f5e0759a93e608aff71c7b2cfd19312872877a6",
+      "size": 14464
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alphion",
+      "sha256": "798024d27e25434dd4b09f89f604b38cb625ffdfcd3485eeeab28115c101c4d2",
+      "size": 2754
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alteon",
+      "sha256": "3161b357940f91ce8e38b7861e18b06bc5e628078381a2914221b1986222ec9e",
+      "size": 1033
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.altiga",
+      "sha256": "8fd32ca89e0068dfb7127550fcf123183cc3ae270a926105d7acfb2d3d0e8903",
+      "size": 7536
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alvarion",
+      "sha256": "24ecab633e2021387dc97dca3cfad1c5b8887dc7dcd5a558b39e48099d860b05",
+      "size": 11996
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.alvarion.wimax.v2_2",
+      "sha256": "f15f493c5a6ab75614ad25c3573bdac3be378b21108c185a64b803b16f2a93ed",
+      "size": 1308
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.apc",
+      "sha256": "d72956653fae3429b7c51d279bcc431bf57eb7607c799c3f4961c3ea24d6a270",
+      "size": 1266
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.aptilo",
+      "sha256": "68b368d67808bb073da54ebe4d41da5dea5503236c671899d28f9ea98d13079c",
+      "size": 6182
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.aptis",
+      "sha256": "42f07c0f1fd67abf34b7ea6ac58c950e9f4eeaf5fcda2078bd318d6598b5e9cf",
+      "size": 8541
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.arbor",
+      "sha256": "a4480610a941518388343cced47c80ca9348297e4a3e1d61f9a964e480d0dc7f",
+      "size": 589
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.arista",
+      "sha256": "97bbb1507f81d4cdd85130de134f9d0d311207d37954277275c54296da280ede",
+      "size": 987
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.aruba",
+      "sha256": "070962dbe79de66d816a9e0203ad7debea99db106cf10a670eadcf1da84f9272",
+      "size": 5208
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ascend",
+      "sha256": "9506b441b95d327dd5e268b9df1b2a8958395a3f8fd70472824a1a4572540dca",
+      "size": 39037
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ascend.illegal",
+      "sha256": "3a9982bba40164dbde4085753eb058587c8f01f123324b621612a2193e9d518d",
+      "size": 20410
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ascend.illegal.extended",
+      "sha256": "a68a2a7eef9dfae0f2482d3c4954ebbcd63d561f359d73e66eff4f059b4a3837",
+      "size": 1390
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.asn",
+      "sha256": "9c9c5a529efca8369a5935bd95f5b2334a5ec8da7dce0f62fcd0f318bd3421f4",
+      "size": 3199
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.audiocodes",
+      "sha256": "5889aac6b21f7bddf11add045a69dfbfa9f3e5e83c56fca3c659b72bc835697d",
+      "size": 725
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.avaya",
+      "sha256": "2c194a7882904e6be48d1122c737d73b99ebcf30aa657c3287ae0c5000cdf0a0",
+      "size": 1026
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.azaire",
+      "sha256": "49af584d275a6e5081841a9b7db2c4d2d7c2ddda1d9c05808382a7d50bb0b9f6",
+      "size": 1694
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bay",
+      "sha256": "9244697a934dd9f7418787a18faa4ec90ebe6b83d50587f2cd99899cea23300a",
+      "size": 12008
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bigswitch",
+      "sha256": "b2a53ac4995bc2b9450f2cbf9f835e1092678d5ceae054fc600cf647a2a793d9",
+      "size": 668
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bintec",
+      "sha256": "b6aaad7b3e770b7f840ced8f169e094246663adccdd98870bee4494ccd5f6538",
+      "size": 1713
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bluecoat",
+      "sha256": "ce2dc320d338da3259a7f0276b0daf3358d3448579a8efa1365d6319989b303e",
+      "size": 829
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.boingo",
+      "sha256": "5e463c7ff4d2024f2694b5f302ca301dbefdb9efc1eae6247df9a00028f7fe3a",
+      "size": 1615
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bristol",
+      "sha256": "cba40290743cc857ee6e0ee36289a7ec69292c0fa22ef4c16cb324d34f16fca9",
+      "size": 553
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.broadsoft",
+      "sha256": "ae7a0a1415667033a29a41d2d3e47a71ef126690cec11bc3909eebc068f35a0e",
+      "size": 17781
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.brocade",
+      "sha256": "2dc1e8203bf0dad4a4dfa49490916fff4dc9fef87bf8d3b74c2d8cac018298e7",
+      "size": 780
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bskyb",
+      "sha256": "64c70bc468d78beb2d702f991af2ba4b923b12a679f9efa51cbd9a2c13f83b33",
+      "size": 849
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.bt",
+      "sha256": "821a5e9f306c31556f8b9d1997d8135080beb2a518e8944f547d6b89ca5a6650",
+      "size": 498
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cablelabs",
+      "sha256": "48e992ad37f583ee10d367b3aabcc7c328c6b481e37c1542a6d4deb5c06d5dcf",
+      "size": 10639
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cabletron",
+      "sha256": "9670bb360d1f7ff155c27beb48162bd407c148f5bcecbda471160ad0c206e1ab",
+      "size": 964
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.calix",
+      "sha256": "e03ab53b0b4f4cb7c08b55d2e3e31568cac8217880d282369468c4241ae9085c",
+      "size": 1069
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cambium",
+      "sha256": "a9818d2dcea0dd232d7635db79d2cc9fff6c2ffbd470a370c7f943a1b2c8d773",
+      "size": 2937
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.camiant",
+      "sha256": "4c74ce545e69eab1bd8f39f6fd138d5d3d75e1ac0cc6ff9da4601cee0b43cb51",
+      "size": 750
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.centec",
+      "sha256": "85d5f3273a1b39606ced1c92c9bad331e4029e266826b3fbe1dff5c18bc62882",
+      "size": 383
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.checkpoint",
+      "sha256": "6ba9b5468d392811851dceb8b538a532a595fb4c668ef39f8e9a6ea27420b2b4",
+      "size": 384
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.chillispot",
+      "sha256": "dc412afd1e91d149fe4b1c8224b4e148d990b9e5a70202aed37beb6fff679928",
+      "size": 1510
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ciena",
+      "sha256": "b42084b14e493ecfbe106256025806f0b43cfbb4c1b87979e4b50b1e717d4c4e",
+      "size": 2820
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cisco",
+      "sha256": "eb5e4a9c7dab3a43ed30efbeb42b6014f3ff7d2832f5c4c5408701d6dff6c711",
+      "size": 9026
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cisco.asa",
+      "sha256": "4417fe3e4da7fe146a14dba2aceb1677a110ef1196122df112453a1c1cdbc2df",
+      "size": 14922
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cisco.bbsm",
+      "sha256": "a293ba65126e25891f5a1e8de5cfb8c18dc2f75837ff39ec5ace9021667fde13",
+      "size": 495
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cisco.vpn3000",
+      "sha256": "57804ab8f80db080a645e7ef845046dfeb8f60645a2efdcd17dd061897280763",
+      "size": 16199
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cisco.vpn5000",
+      "sha256": "d5e43be41e47c8c5961fc2dd33678d3f15e805f97f9f7e1a67b8a2fe70f418de",
+      "size": 766
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.citrix",
+      "sha256": "d8078dd9c1368475fce3d81e336031d7a3e74931bba8b8b80abf1f623f4719ec",
+      "size": 730
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ckey",
+      "sha256": "1e7cf7b120d47c1558ca0b8eba713046d224f51bcb946bd2461b21d0ad8ac089",
+      "size": 1438
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.clavister",
+      "sha256": "41ce860c42f28aa44029cbb1b69bc7ce335777b4cdc7814f3480fd4281c57a72",
+      "size": 550
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cnergee",
+      "sha256": "e663c2e34bfd9ae2a12c8e9ed9cabcc081d650ffc52aefbb10620bf8408fbf64",
+      "size": 1852
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.colubris",
+      "sha256": "8840019a1a6b7656fe30253cd05a5b934de6037130161a2a045296e9336c7f12",
+      "size": 326
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.columbia_university",
+      "sha256": "a189c098de45563fe8e30bd08d6b578832a378697ed9fc25b806430a86b579c6",
+      "size": 770
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.compat",
+      "sha256": "ee29b661741515b8b2d2c9506c9498cb3f5d1b400ab6e779aa1ad050969f72f4",
+      "size": 1665
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.compatible",
+      "sha256": "e7c58ab264d5225cafebd632cc5a41afc086c618fa08461a054b1e50d2d40554",
+      "size": 685
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.cosine",
+      "sha256": "f6bbe38d099f899171969e8974ef6d217e90d063f5854cf4d14a1518010f323f",
+      "size": 823
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.covaro",
+      "sha256": "3724b8e1789a45b0ea770cd1a61bf19dbda5093236b8da2869bee1df198ab6ed",
+      "size": 1144
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.dante",
+      "sha256": "0596daf60225db8dce8de83b7b9fc889cf301b494865e500cb5fab0febbce9ff",
+      "size": 540
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.dellemc",
+      "sha256": "fc073a1bf235c34e44c71d1c7375c4e4a6efb3b6789523143110c313ca11e150",
+      "size": 534
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.digium",
+      "sha256": "c946d134b81410f9ca6b4a4d1a03659ef693ae91af5f40b922aad5bcf238337a",
+      "size": 1339
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.dlink",
+      "sha256": "3186c72ec7d7e9f49bf7595ce351c374303ba82f6140066dbdb713032ee64925",
+      "size": 1169
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.dragonwave",
+      "sha256": "af1a1ba36ce97e55121e84abd525e300ac7bb3ec031b42e7aa289e8d18f2c7d7",
+      "size": 891
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.efficientip",
+      "sha256": "4b23393ea0abc3c5d1e2d66446ed84c8b5c7dbb1863e42f6626b708e91e8f4bb",
+      "size": 1074
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.eleven",
+      "sha256": "7099a583d46331a10f06fc5d01d13462d2c3f354344bd07b8ad9476fcefa8cc7",
+      "size": 1152
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.eltex",
+      "sha256": "7454bdd7de70107b720ea2fd6585475cdb33350d9178463437e48e4f9b353057",
+      "size": 920
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.enterasys",
+      "sha256": "9463b093083f4712e5f8a2b50e7cd0cda6feb4a6eef8b160ff23399339cc4b7d",
+      "size": 2250
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.epygi",
+      "sha256": "beb000a2557458f63d4179238bf28f2e0ef2545612b0e7e895eefb0715fe5dca",
+      "size": 4413
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.equallogic",
+      "sha256": "032e9f0c69d235f5bfc86bfbde1a2fb5e896117b6412511375620bc0d9a5a52d",
+      "size": 1573
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ericsson",
+      "sha256": "28d6bf054079093672d136a4a4e24ac4930bc80be39f07b700ed47600e5e2585",
+      "size": 6295
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ericsson.ab",
+      "sha256": "58bcf04476b59da329892db70fa8d46f9a5fdbf0e7d3a32b2f7819427486b6aa",
+      "size": 17929
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ericsson.packet.core.networks",
+      "sha256": "77741f1b08331661e3d78c9294360b4df4013aa64bade84d8526941435842381",
+      "size": 417
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.erx",
+      "sha256": "34387cc6f2349b4b5547210e3a36655232b849c0272c5dfa84ac8ca336ae3043",
+      "size": 17103
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.extreme",
+      "sha256": "f4125ff76d972fd68c82d9cff396e0f8b4965aafba8da91de73f9217afc77b74",
+      "size": 2634
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.f5",
+      "sha256": "cec9a8258a5bd89a32b47b4576e29f716e9bee1a7ecdc6771a28673afe4ceca4",
+      "size": 1909
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.fdxtended",
+      "sha256": "d354119c913bd8ac4a97ac43a666acecfdd41a615af9fc2abcd8f47ff35c3373",
+      "size": 736
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.force10",
+      "sha256": "17610efc619eb3a391e87bfe18a721cf39e7c57e78467237d7c1cf4316221cba",
+      "size": 337
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.fortinet",
+      "sha256": "850195b97d7c2eeafd66e2541b7273fc977cce84aef9fbf27ae009cdd3f8a57e",
+      "size": 2066
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.foundry",
+      "sha256": "8695ed5206b3b2b1f57339e40010f3ee5fc3bc7b166b5fc4f70caf551fe42ea5",
+      "size": 2523
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.freedhcp",
+      "sha256": "129091a82db0436c025cbfcd74fb839ac7eb538b709a64bd1468c9cd79b8b433",
+      "size": 17491
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.freeradius",
+      "sha256": "ab29a396d9da6492cdf0f4b6bb6ddefa890c5ea2e42930e5dbeb449a5561796f",
+      "size": 13472
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.freeradius.evs5",
+      "sha256": "45cfb8568563c8572c3c21691a717d282ed0011a7b5f1a60f5159fe0c7b33ad7",
+      "size": 664
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.freeradius.internal",
+      "sha256": "81ebb6a3e151d25d3e3ddda25bf1410c15fcd770aa3739784c0ca22311c33d44",
+      "size": 29462
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.freeswitch",
+      "sha256": "812272a35decc7ec6b807ca3126521f0fc11fa2df6dde6dbb4ae6962a01a4d08",
+      "size": 4671
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.gandalf",
+      "sha256": "fe78f1d243e73d5b272c863681b8d9b727cead04cfb6652b74166429147837d9",
+      "size": 3703
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.garderos",
+      "sha256": "d38ebc51f2f83c339793c1b9f3567df34683290de24fbf7b357b5cfb8db15f05",
+      "size": 600
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.gemtek",
+      "sha256": "ed1acb10820b9d9b24e36330c0337c394a8491494c4ab9cd877af60ff24c1f10",
+      "size": 598
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.h3c",
+      "sha256": "61c453b253316833e50abf9434471fb3ab1aac33b9ad0e90ab703dcd907bc1ed",
+      "size": 3619
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.hillstone",
+      "sha256": "4df641d15a24ac9a8cd987a2ad9a8df1fa333caf87f9c8b402f9a4a474a079cb",
+      "size": 1971
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.hp",
+      "sha256": "2d78ef89c22e497a5a7dabf539bc17af6f516fb3c3302cf8cc5776318b31cb85",
+      "size": 3095
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.huawei",
+      "sha256": "5c3c39d31f375742c22eccbf1a9c4bd94d0082f19c228539b758d5736b64b4f9",
+      "size": 9340
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.iana",
+      "sha256": "fc5465c4b8c444ce4ac797c7817956ee0c7123bb6fe29af5e899c751e3feb51d",
+      "size": 1508
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.identity_engines",
+      "sha256": "ae4f725f8e582cebbe195421898e0a087ef553083a7cd39ccd60f3971008fe34",
+      "size": 375
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.iea",
+      "sha256": "1a90da0a37fa82cfdd057a7ce6fd50e784a6aa9abf90aa36ef6765da142708f9",
+      "size": 1114
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.infinera",
+      "sha256": "2282d8fc8bec44ad5d85f636021d98dc9709d8d384a0621a65cb20eb7a091753",
+      "size": 342
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.infoblox",
+      "sha256": "25d641c15b3234c758120063a46e065fc96f4100e8f9543583a58784c69f6424",
+      "size": 646
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.infonet",
+      "sha256": "ff4bed69d893c08b1e19121691932d09f6ed15e9bd277e13ed2a14ba99d82b2c",
+      "size": 1618
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ingate",
+      "sha256": "7b91610f583b71b624892076352ea3b7f741a1e41be6833522c8febef86cebec",
+      "size": 5768
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ipunplugged",
+      "sha256": "fcb3568de59e9fbe932ab7ef6446f804ce42b693c36aa04e85749eef29761e5f",
+      "size": 902
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.issanni",
+      "sha256": "4562cdf284555844409bb277e39eb0ac7ae9892f0cb8eb94abf7f296bcc6a4ee",
+      "size": 1400
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.itk",
+      "sha256": "5fee74eda72b26c8040bf7277289c1887e19b37611eb8e62727949012d132d95",
+      "size": 1620
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.jradius",
+      "sha256": "d8a8225f4e980d03e0aa8626626a629ed9c68a1935031f19f9c07b0eadf27bdd",
+      "size": 417
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.juniper",
+      "sha256": "084f8fb9ec00a971159c0fec42ae49df6396332d86fa91dbbc88c4e43a50884b",
+      "size": 2792
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.karlnet",
+      "sha256": "397cbe376d218c8620ae1ceaa0b74f7a2cfc184ac660ae15aa11a4b265966215",
+      "size": 102139
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.kineto",
+      "sha256": "0b5452763358e1dbcefcd692b812a37bd1cf59091a84aee37a8cd5f7efcd8d1b",
+      "size": 4717
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.lancom",
+      "sha256": "7782cc93f47a380a3aa412915314db98ff3a9135bf646c8dceb9b77e74415e86",
+      "size": 1533
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.lantronix",
+      "sha256": "f57704a66005bd4c0d93e2e9514244bf5e7767f0d68ee2b112148ca1b1d4c635",
+      "size": 370
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.livingston",
+      "sha256": "7391d79046bb3f576838dd6c5667bd69ef2e05ab580d2b5867d6df09062b1623",
+      "size": 2198
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.localweb",
+      "sha256": "fc0f41cf482353f7c6922debd93be9b9dcdc8cf9434d1882346e570f7dba5a45",
+      "size": 1187
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.lucent",
+      "sha256": "fbeef5a8d4927fe4d7532bff7f2360789f1290b4a3e6e9907d091b4061c9c87a",
+      "size": 21263
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.manzara",
+      "sha256": "1c46d4bb13d60519b0a70211acfb84fa3fd31ebdbed10779844440f86cff0c1c",
+      "size": 1030
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.meinberg",
+      "sha256": "2b5638798a99f9ac7b75f410657c0291f677686e59120db6649306c7154a14de",
+      "size": 705
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.mellanox",
+      "sha256": "4515018c3c53e4eb5fe05539161320935d3fc5ad11d35a8b8e20d5212e401345",
+      "size": 482
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.meraki",
+      "sha256": "8eefd2a9cd9eaf1825540eea76eae03337701581d0ca366b2a4a8fb6b8c3f52f",
+      "size": 332
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.merit",
+      "sha256": "5858a2ca6d3bcfec005c3183b634810735a0f6e470dce8d9da8b96ddb8f86a67",
+      "size": 423
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.meru",
+      "sha256": "a39a70d955a37918f81499016af8f44b73a26683674457d206905df84cde6f85",
+      "size": 403
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.microsemi",
+      "sha256": "9aa24ff1c95a23047c79da4eda1e52951c90059c80896b0885e79ae7bf7e0351",
+      "size": 702
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.microsoft",
+      "sha256": "abdde69c9fa757c8a82e34df1d0f526f9d0a31eba735a5cb07123161d0da97bf",
+      "size": 6343
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.mikrotik",
+      "sha256": "1a6f1994954388b427ffb209a0f3335919ec8739a47ac873099995272552ea26",
+      "size": 2489
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.mimosa",
+      "sha256": "cd5a67f69be99c7e16af06065dc6876167833c9ede293b7d9582266b12f360db",
+      "size": 1773
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.motorola",
+      "sha256": "c3a8686a6b47989c717c8d8589ff99195e7f186aafab1327c4c0424d0a8fc73a",
+      "size": 2559
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.motorola.illegal",
+      "sha256": "aee79a97a7cc9df952b1d5c06ea145d113ebf98bc9619411f56fae726e785e34",
+      "size": 1131
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.motorola.wimax",
+      "sha256": "6e27d1ae96e58b102470a42000ea9222d58a03d014c5431701a918216e87c433",
+      "size": 1414
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.navini",
+      "sha256": "a929ed7f5d37097dfa721da22466689dc5fcd6572f2e1c14421a3b9865233375",
+      "size": 471
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.net",
+      "sha256": "622ecacda1badc94b913172289f03a895a12df94ab3608e13c2d60a702706de6",
+      "size": 5513
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.netelastic",
+      "sha256": "6831866eff49347cf03ffa6811d4f27f7526712c8548f0e9ef1549f34f2ddc1c",
+      "size": 2368
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.netscreen",
+      "sha256": "c341227e5e1288e5759dce4bf687e96be18953722fe8c80902be281129de0cdf",
+      "size": 1043
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.networkphysics",
+      "sha256": "44ff1893654c367541192eddbafc71f12a1c60461c87a085ea00f64a35f84cef",
+      "size": 594
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nexans",
+      "sha256": "22126bbf1905c81d5e32dc47df07094c3a4340b9b10874a0a1872b61a600b26d",
+      "size": 698
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nile",
+      "sha256": "4d68d6339c671002433dfc1fd891539ff1580769ffd3bc739356104b74a6bb4f",
+      "size": 582
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nokia",
+      "sha256": "516a7af040451e3027b0592b7299538362366bf0a064c2c4ec067bb4d2e0dc46",
+      "size": 1451
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nokia.conflict",
+      "sha256": "314e8e13cf78460e84b2ab294ab0b5db4a0186f9423ce6d8a70e22493d4538fd",
+      "size": 1153
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nomadix",
+      "sha256": "68b48b1ffe29f07d5e34a597830827d4c3d63bb6ee0b9e554d898624ebd81266",
+      "size": 1189
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.nortel",
+      "sha256": "00da79aed6b9acefd6d9353ba75a010133958c16f58e928eb1821e6911ca1ebe",
+      "size": 3083
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ntua",
+      "sha256": "ed7a650907e0ef50ce646c11819a90cbf32c1d6abe1591d26dbd93773ea20ac7",
+      "size": 1430
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.openser",
+      "sha256": "debc18d1bda215df3c931eb63f5625bfb682ff6027cb5158c77e7591d9a686bd",
+      "size": 1587
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.openwifi",
+      "sha256": "4746b25666a7c6fb712876b0205e9585bc419409f1d705b260bf1eea9d6b32ed",
+      "size": 637
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.packeteer",
+      "sha256": "3f8e59d9c1ebc92e6ba99da540d0f87bfa088c976df1dafdcaaf2ccc747f2c8f",
+      "size": 708
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.paloalto",
+      "sha256": "453257535e6a3a0e313d6b78feddba0bedc28c669ca0be0c2d489ca9fe638e6a",
+      "size": 1010
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.patton",
+      "sha256": "ac76c95cba97f29a890becd784b9f1c97f368e71d3ae696fcf5ca48f3ffa6f62",
+      "size": 8743
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.perle",
+      "sha256": "97caea69bbc158e67debd10315d960ad09f3c9df7d367efd0c3e086a33883abd",
+      "size": 22860
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.pfsense",
+      "sha256": "dbda1636add0b8d16328f22595f915f1c05d766b68cd5017763afe39836623bb",
+      "size": 448
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.pica8",
+      "sha256": "42618ffbcacda10fca203ce60fecb779a282cc3e35f5cea39092acc5f58300c2",
+      "size": 566
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.propel",
+      "sha256": "0d13aebe76f9d47d29d4ce2081a9f2d93d4d749f051d206e5d44833515f01479",
+      "size": 561
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.prosoft",
+      "sha256": "8a4d41e00f053f22e435148e91abe57d39619b61c3bfd2730650e5c9139eccfb",
+      "size": 1417
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.proxim",
+      "sha256": "a965f36704a4f24bda33d2f4ff034434eec035e74e99e3aa117c3359b217261a",
+      "size": 3253
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.purewave",
+      "sha256": "254c50f544209076643c740e44284598809cd52554617db667b3339c8424dafc",
+      "size": 1637
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.quiconnect",
+      "sha256": "af6b10269f8c9548a9ec05e9f6fbca2f59c2ddb8f6cca9a2820872a9ef0f122d",
+      "size": 621
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.quintum",
+      "sha256": "8af0381919e4bfd290795d0dd5c9ba9c9cb582c22b007f088ce8522f5db7ecfa",
+      "size": 1640
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rcntec",
+      "sha256": "6e2237a307b14c10bd074ae9a7377c03672ccc5cf1d9c5baa9e4b39fba6ecba8",
+      "size": 664
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.redcreek",
+      "sha256": "c1b51b3d2e24f277c4d3cde2b5651ffa524c562e4e0b0607768f46c2505a0f5d",
+      "size": 767
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc2865",
+      "sha256": "6c6bf92b94cdc5864bd4d11a4f274001bbc7c7793bafcadd81f9422dc7123aa6",
+      "size": 4309
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc2866",
+      "sha256": "e08df582a7db7fc16ecefa26f82cffe3c517a32671bc5dc81bfa5fb53b9c3005",
+      "size": 2059
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc2867",
+      "sha256": "f0b0ca21b0c814669db768174f402824bc02d6206629abf2728bdae843bb2658",
+      "size": 664
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc2868",
+      "sha256": "9b1afa2c7dd7ed9c2e819ab6e514b72762835fb15b489abec310fe2c2933db8f",
+      "size": 1811
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc2869",
+      "sha256": "b07cd08f629c1492af6e304346369d5a140f13696bdf242cc57ea9c66f6ddf3f",
+      "size": 1278
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc3162",
+      "sha256": "926398c89b782f3ab9c8fc0a21a9026ec029482d2892562e6728f4dc272b8d3d",
+      "size": 561
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc3576",
+      "sha256": "5a7483dead57f34c1927635398a84eec66faf227785d31d72127ca81713e2b6b",
+      "size": 1131
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc3580",
+      "sha256": "d5752edf23dcd2f6be74884441f4d9dc464e03919adcc201e8316efaf2e488e8",
+      "size": 611
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4072",
+      "sha256": "2900a80b71ca1fc19a8dab4d95667e4f2d3ca8da770cc445ac2b8cb05efe2406",
+      "size": 351
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4372",
+      "sha256": "0f7fe5084e1bbe2a563042ef4b6edcdc462035ba31e84cbc0f3021dfee90ca78",
+      "size": 360
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4603",
+      "sha256": "c4acbf46a3ec15312171494e558c51d56b8976c26a668d1d488bbe1280283f12",
+      "size": 653
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4675",
+      "sha256": "c63ef3be148c38c204ff8aed77aead4d5cac3077d2ed454cbf03ccd675fd5006",
+      "size": 878
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4679",
+      "sha256": "dbaa53a461f903bfa5c127534888188c2f49d704a0a6166839823eed0e3d40c1",
+      "size": 2565
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4818",
+      "sha256": "92743ea57dd8202dc3c1e2647832c5578c3ad4358cf37dd01522e3de358a1626",
+      "size": 524
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc4849",
+      "sha256": "8ccf19eea0f55378b2596a9012496fce0475b962ac92d79e684c4fbc3887f236",
+      "size": 353
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5090",
+      "sha256": "93781a9b31c65e3a2790d09fba56de41ea7a7bdf7dcc879e716e5eb61f15a133",
+      "size": 1089
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5176",
+      "sha256": "2ed64bc104516dcff6afb7679676fd329d77ef24eb1c91628025bc24001f7ea5",
+      "size": 425
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5447",
+      "sha256": "43a706418bf9a9c40c9df6c8b8632289efd17b70846e0acd5957531e01d43b03",
+      "size": 508
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5580",
+      "sha256": "38df9d9414042bb4700abf1efef4e8b699e254b80e580009ae9247a2230a2ad5",
+      "size": 1254
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5607",
+      "sha256": "aecd5989c4014a4e45eb7c1c7090872674ef7edaf5a38eebf41e0bc917c5b3d2",
+      "size": 1023
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc5904",
+      "sha256": "15266a8ea8449d2a0dc840e83b7e1d28475e165bda6dece67683d363255447c4",
+      "size": 821
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6519",
+      "sha256": "a443a0f25b0b74a5e547ad4cb74ad885c9d9a677d0c254b7a95a8f4ac5336db3",
+      "size": 358
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6572",
+      "sha256": "695f6462c05a9090eede29499e915625ed99154da68806b963b3dcf6834b1149",
+      "size": 1220
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6677",
+      "sha256": "25691fa293f5674a0498684045dd0cb071cb0daf49e557fcb2bb268a4da75d99",
+      "size": 669
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6911",
+      "sha256": "d0f86f38cce76c2204cc961514f13af0a42e253f3cf1f04320316b59e1b11b16",
+      "size": 504
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6929",
+      "sha256": "f0d930041cb9202e21a50f4fab2cb3bf35d682675dbf21c508b378748cbc422b",
+      "size": 1051
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc6930",
+      "sha256": "ccda1d2e0caed502799b413da3d01ac8083631adfcc09b0ad559a7fb357318af",
+      "size": 503
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc7055",
+      "sha256": "c71a9ba7c50d49d5d31281f8881c97e06a3e572ad4a1389bb21731230ed55e22",
+      "size": 470
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc7155",
+      "sha256": "5fc4d84ce1cf61d357708ebddb518def97ed92db88a57fb4cdcc2698626703f1",
+      "size": 479
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc7268",
+      "sha256": "807bb5c019f713cd56247cd9de2a90ca80f802d9b73e3fdf55ede5dbc072953a",
+      "size": 2456
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc7499",
+      "sha256": "f560bcc542580ed663e3f10970fbe8d3dcaba0650c72da430faac7afd0596418",
+      "size": 559
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc7930",
+      "sha256": "5d1a319ab86dfccb7507bf534c047b1059f6aa3db50328b69fefbd58b8d3d19d",
+      "size": 366
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc8045",
+      "sha256": "b009b60d803204117e112660da79983b46f26f2726ed0c44d1e584d0bde2c586",
+      "size": 2578
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.rfc8559",
+      "sha256": "7828dcfac088749714871a08242df838d37fed67ea13eda2ccc27c873d6688eb",
+      "size": 325
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.riverbed",
+      "sha256": "0587d2615d8088ab1193fcf0b15f7c313d10a7f73c04e82ca8c28888fda26b3d",
+      "size": 691
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.riverstone",
+      "sha256": "3a80145db0db4fefab54cf4d5b52050c5fc2a2d212c52634c1760bbb31b20367",
+      "size": 1231
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.roaringpenguin",
+      "sha256": "8a0dcefc0c7f54db6439704a14143993d45b7b0439ba929f9b74353ac0ef84e5",
+      "size": 837
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ruckus",
+      "sha256": "60b2ec2f528445368011b7a7b6dcb21135215e5842d13cf9d3cd5684f164928c",
+      "size": 5749
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ruggedcom",
+      "sha256": "c7bafaac12bf430741c36596d7b64eef081c4421d6d54128e1be0638bd85a634",
+      "size": 297
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.sangoma",
+      "sha256": "9f000ad4e83ecd61eb57cda7c391fa54a265739ab927356e1a2135bf25f304b9",
+      "size": 4582
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.sg",
+      "sha256": "14c83e87a1fee3884d2cd374f12b5ed1ca5790857cc4bbcc8f1087f4517fb605",
+      "size": 6104
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.shasta",
+      "sha256": "403ac7de1d6830b4b49271668dca9cfc9169959a6b2c782c1f5db080ca19e013",
+      "size": 648
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.shiva",
+      "sha256": "ac99592d690d90c5be986072b705dcb583e1ea8300f1fa67c2cc5fcc3857b5bd",
+      "size": 4316
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.siemens",
+      "sha256": "856499279357b340def18a8c6d05a52d546d8f3b6727634998e610e08f695a6e",
+      "size": 876
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.slipstream",
+      "sha256": "20bb756d636db2a2e719ff80ea03e88aee9208741d0e242b2096fc417a9b2bea",
+      "size": 630
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.smartsharesystems",
+      "sha256": "06d851811eb863f9de7d633e116d5f4dc558118485ecbb1b78abab6b7701c4d8",
+      "size": 1150
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.sofaware",
+      "sha256": "b03d93f30717458b034d2bd2eaed668754bf959e0ecfe98e17ec88de7eb2ad3d",
+      "size": 1234
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.softbank",
+      "sha256": "dd37845f736183b7d3b5bee00a0f784f0864dae6d092e1fe8af993c108928fd6",
+      "size": 1121
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.sonicwall",
+      "sha256": "79b27a5f3b043e84a1fb5dd23f14b47b5d65ae7e127eed1763b39cf7127c4edf",
+      "size": 2813
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.springtide",
+      "sha256": "a9161810c013c999bb8a3a49ffc34e2f3cad2c9989f660c5846180443560de31",
+      "size": 1159
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.starent",
+      "sha256": "b8628b114ce96deeaefc1a12ac2c4fd0e17aecb9de61661ec9cdf8db125729d6",
+      "size": 61937
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.starent.vsa1",
+      "sha256": "8314d046744cb80ee03e5349fececf3ab46a21ac3a1b85a482eebd1dec091e83",
+      "size": 55809
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.surfnet",
+      "sha256": "a43b1a8ff73bdbbdb8862b178ddf8969a70d14419af5b6fa871feab87c4f808b",
+      "size": 598
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.symbol",
+      "sha256": "496f7f79bccc983a657d176e3c80386e145c0749c0c99ed5cc18056cb3f88c51",
+      "size": 3223
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.t_systems_nova",
+      "sha256": "967abeaaba0608a5edad8c419e17977dd96625adcb7bc9cb92ad2e6fcddb1334",
+      "size": 1356
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.telebit",
+      "sha256": "cec48960a185682f133fec1040f3f1b0e93180da657792b1134e038658710c24",
+      "size": 575
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.telkom",
+      "sha256": "9a3981a4c781cbeb6ca000585fb242836a099fec8707d836678e8f7495ebbc29",
+      "size": 1098
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.telrad",
+      "sha256": "30f3294a9ca191f5ccafde7c7c97240b432fc8eb7fd8b8a6b3a6ddd8dbf3a7a0",
+      "size": 903
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.terena",
+      "sha256": "6874c0a9409b00776303228ad61bd5b997d7229cf4780e528d5ac69401316c96",
+      "size": 519
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.tplink",
+      "sha256": "b20309936dbfa1e196c1f5d09516331268d790fd7bbb5d7e04366371ddf83a40",
+      "size": 679
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.trapeze",
+      "sha256": "8151f33c8761746e0af09d8657fdde22f26be8c23b610edd99270ffed580b653",
+      "size": 1444
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.travelping",
+      "sha256": "fd0f2d9f233f33a6d52b50d9575b1b6e7634c24222c7f1cc0638a64080d45360",
+      "size": 3258
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.tripplite",
+      "sha256": "21504182a4a43fee3a5ff26cd0c29ca28863c729493557b45b2b77193e444fe2",
+      "size": 1892
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.tropos",
+      "sha256": "0ef4467190b68ac7f0c8cd986962efdd0808a7390469b6276b7258d16d883879",
+      "size": 2259
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.ukerna",
+      "sha256": "240f8e598fd8ff5f0badea9775fb31a932e232dfb212c223a27322758c190870",
+      "size": 1318
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.unisphere",
+      "sha256": "1d49a700852528703c2241b5a67c7643f0098b327bfe5291638976523333f896",
+      "size": 15381
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.unix",
+      "sha256": "3881b384576158e28bf2e0afdc7a59504b146f31936e4633555bb63c7033746d",
+      "size": 545
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.usr",
+      "sha256": "43df7a8af6bfb8562564b40a0bb95843749373ef8ee2a596b0adc7ec92ceea97",
+      "size": 72715
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.usr.illegal",
+      "sha256": "1632f47c3221360cd090d35b0c7bb84a069439d0f27727117e8a59d06d348051",
+      "size": 1383
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.utstarcom",
+      "sha256": "a746f2432e129f60b66dbc82089d54e5bc064a7629d666303afb1f732689f7e7",
+      "size": 1760
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.valemount",
+      "sha256": "4a7457a01655a50c18a2bd32d9573f861343be4693d7a3bb1f4001ef0713e8df",
+      "size": 825
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.vasexperts",
+      "sha256": "ee0f45f254e10349c416207199bd38f9fb8763fc39f323cc0a4c45fa1046da74",
+      "size": 4891
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.verizon",
+      "sha256": "6f0ccab220f5dd456220cf4698f3c38d701b1eb2ccc6f8b394c29df366f6050f",
+      "size": 907
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.versanet",
+      "sha256": "3bee46b9a4bc5a2a8ee50fa860fe5a9b947bde6b1ae6a1bc94be707d72866e9d",
+      "size": 2236
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.walabi",
+      "sha256": "a71cbf00c7ee2b36b5385a270d268e3a168343b852345eab5fde4fcb902f47b8",
+      "size": 1058
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.waverider",
+      "sha256": "7f3b1f840d57a5afbc92fbb737e6201ff5102f8ad71fa86b92798adb25daf497",
+      "size": 2056
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wichorus",
+      "sha256": "33ddf5da69c940d962bb9f714868a40ed2318c7b3dcf918f9c008144e521a1b9",
+      "size": 665
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wifialliance",
+      "sha256": "5e6d7cec45456bd8b72fca2d0b7505f48362058fa16879212b11d0177729477e",
+      "size": 3583
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wimax",
+      "sha256": "c1ed076f704374cefc224c2ea1f51ff23dacad41096770efefff0103d8f30815",
+      "size": 28605
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wimax.alvarion",
+      "sha256": "5c742e392d44a0d2eed282c5f9f35be8f2e695971a98edf56c248cb0ab596b84",
+      "size": 20417
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wimax.wichorus",
+      "sha256": "d6bb2cba7c35f491001b32bb4ce9a157f40f696cbcca1bf5de9ce95042f7088a",
+      "size": 15519
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.wispr",
+      "sha256": "fa80483da3e66c117404e274e62f8ebd252f78903296b1e51e54dcd47774a525",
+      "size": 1287
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.xedia",
+      "sha256": "3c64abe619db490d19230a1fea6b851fc079265eccce108402512a0ba02cf0fc",
+      "size": 919
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.xylan",
+      "sha256": "b84ce213c290fdec962f9afd13213112936d8462659d9e27ae0b7d846090b6f1",
+      "size": 2164
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.yubico",
+      "sha256": "a5592947cbb7808b340b7889530a3819c21071d8ccbe1a60c8ec30049a4552ca",
+      "size": 736
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.zeus",
+      "sha256": "4b0e790edb73337ae152883141cf198660d45e69cd12ed571753ba639c1e8c38",
+      "size": 346
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.zte",
+      "sha256": "89c41eac7179c5e574d9d95e78a2923fb576b0635b47f5b615a0e492c806d428",
+      "size": 2688
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/radius/dictionary.zyxel",
+      "sha256": "84c2fdf477f2ee6b2b2a9d281dc3ff11563b6f86b697a8494f9ac3ba90e8ac4f",
+      "size": 859
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/randpkt.html",
+      "sha256": "a5d3f7941c8c946d727e01489b5e6beb53bf1e10abc29ec6d3c7279d8861f2ae",
+      "size": 8526
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/randpktdump.html",
+      "sha256": "f78b6f9a92e918ad227b3f1b3506779cdc982a759d4c7aecffef7b3890f9b266",
+      "size": 7651
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/rawshark.html",
+      "sha256": "e59ce14ede31985a167ed70daef66d02db6b3d2b0c37c9c7d1434739c703d0c6",
+      "size": 46255
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/reordercap.html",
+      "sha256": "20e6d5778d61ea4db76c4301cc39a9594667655ffdcba8e3fa773f1a1e7ecc64",
+      "size": 6660
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/sharkd.html",
+      "sha256": "6ad34bb20f5039bca915302836cb6d7424e5c1d00480716029f18fba17098c05",
+      "size": 18953
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/smi_modules",
+      "sha256": "39ec77eb7b0663481d3123f2a859a058f8be9c4422fb96814ad05679ee98fb87",
+      "size": 315
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/sshdig.html",
+      "sha256": "cc87f1cec0ea9232b5070b7caa0e3c341bbd52b90e6f9204732e9ace371ee2e7",
+      "size": 15705
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/sshdump.html",
+      "sha256": "5940af9f5aa775a07870371d754555d1f1271e58beacf7642e8d260b539f7cc3",
+      "size": 18642
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/strato.html",
+      "sha256": "de74038efc6a485b510ca9eb9773c19cc5706a55f55b1c687f18d61d451f2429",
+      "size": 109586
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/stratoshark.html",
+      "sha256": "89292f29cae7f77d09432b67f88aaa2e85125358ff1d9160fe1f9cb6fdb9c130",
+      "size": 60634
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/text2pcap.html",
+      "sha256": "9772d911866c76d4b066710a0ac9a68b0e58fcc2cf87cb8a45fbc98aff7dec28",
+      "size": 28069
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/tpncp/tpncp.dat",
+      "sha256": "5d70cc7ec3e4ff7aa466e8c5496afe75eaacbfba487429bec0f78c0f66ee21ce",
+      "size": 569116
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/tshark.html",
+      "sha256": "ea79fc0253cefbf4288d17d9b0b890ae0eb54eb89ee082edf9a72fe3b141e3d1",
+      "size": 173578
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/udpdump.html",
+      "sha256": "7a1b88b86c1d943a01a1523f1a7bb2456344e5cb0ddcc1326b61e33cd670cef3",
+      "size": 6522
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wifidump.html",
+      "sha256": "4f9b94c45db7d84817903765b3caaa2688be792602f4c7255d032f7ad2e44caa",
+      "size": 13262
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wimaxasncp/dictionary.dtd",
+      "sha256": "38b59b9c9948a383cec318144b7f91a0ee9e24221ef1c3a996fb13f08d1ba8e6",
+      "size": 307
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wimaxasncp/dictionary.xml",
+      "sha256": "e9484f6d369087f3eb39d53bb182ce70ac7d1af05a12274a58126552a49da5e8",
+      "size": 91495
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wireshark-filter.html",
+      "sha256": "97191c5456b70a444ed0e0b00fdb9d63be20d681d9c33eb7e385a3b4cdd8f51c",
+      "size": 40972
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wireshark.html",
+      "sha256": "40cc70debad8ac58836f6f6fa87d90fff7a652c2cfc7ad8ea67f07c0cf6e371b",
+      "size": 90920
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/wka",
+      "sha256": "67becc04ec6c5e567987aa1f53020c12a2a2a1ebbc08f0bcd0077dd10376e4f6",
+      "size": 12448
+    },
+    {
+      "path": "Wireshark.app/Contents/Resources/share/wireshark/ws.css",
+      "sha256": "bdd5e47b334b2a6eae172446f63836d009606146be31fb8243df1c807dd1e5d4",
+      "size": 40670
+    }
+  ],
+  "aliases": [],
+  "notices": [
+    {
+      "component": "glib",
+      "sourcePath": "glib-2.88.0/LICENSES/LicenseRef-old-glib-tests.txt",
+      "sha256": "fb261b2d5dbe76c4850f90da763210bc385e52428df6bbfd7b06295ac8a32914"
+    },
+    {
+      "component": "glib",
+      "sourcePath": "glib-2.88.0/docs/reference/COPYING",
+      "sha256": "b1ec1d0e5947f81e815d8771f7d4d90671a94bb10a42dc687fb566de461a57aa"
+    },
+    {
+      "component": "glib",
+      "sourcePath": "glib-2.88.0/subprojects/gvdb/COPYING",
+      "sha256": "bdbcdaa7858872393e9d6b216bbdc8a23e99d98dd6cdb7cda19458025b9e19fc"
+    },
+    {
+      "component": "pcre2",
+      "sourcePath": "pcre2-10.47/deps/sljit/LICENSE",
+      "sha256": "5f216505c0f6ea3273caec89e766eef93cdeb7bbb0c429f9360116d7c938feeb"
+    },
+    {
+      "component": "pcre2",
+      "sourcePath": "pcre2-10.47/cmake/COPYING-CMAKE-SCRIPTS",
+      "sha256": "c666ec2313dba24523ccad88f4c04ea4b24fad6545263a35b1d4ab2b08efe50a"
+    },
+    {
+      "component": "pcre2",
+      "sourcePath": "pcre2-10.47/COPYING",
+      "sha256": "99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/COPYING",
+      "sha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-runtime/COPYING",
+      "sha256": "7ef2cdfe58e0c0460657b6598b49af29d4e03c1e41cbaf0e1da1eb8ad74b95d0"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-runtime/libasprintf/COPYING",
+      "sha256": "03133addae5b99a6148c538300e6d97074453089be1423b741bd081f18e2b298"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/COPYING",
+      "sha256": "5d4cff30d5038f82a0edc79798456049b61e1752fdb7e9ab1f4bfb9fae3a7303"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/gnulib-lib/libxml/COPYING",
+      "sha256": "c5c63674f8a83c4d2e385d96d1c670a03cb871ba2927755467017317878574bd"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gnulib-local/lib/libxml/COPYING",
+      "sha256": "c5c63674f8a83c4d2e385d96d1c670a03cb871ba2927755467017317878574bd"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/libtextstyle/COPYING",
+      "sha256": "e79e9c8a0c85d735ff98185918ec94ed7d175efc377012787aebcf3b80f0d90b"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/libtextstyle/lib/libxml/COPYING",
+      "sha256": "c5c63674f8a83c4d2e385d96d1c670a03cb871ba2927755467017317878574bd"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-runtime/intl/COPYING.LIB",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-runtime/libasprintf/COPYING.LIB",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-0.23.2/LICENSE",
+      "sha256": "5f9cf9fb6acb1972b35ae29119ce563bb60ec097656bc4b69b9bac2d04c7a147"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-0.23.2/lib/src/unicode/LICENSE",
+      "sha256": "6a18c5fac70d7860b57f5b72b4e2c9a1ba6b3d2741eef7ff9767c5379364f10d"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-d-0.8.2/LICENSE",
+      "sha256": "ecf206b1a27e8e4ea07f1e1529cb111b4be5ce8420bd27b8269981d9c0c389f8"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-go-0.23.4/LICENSE",
+      "sha256": "2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-ocaml-0.23.2/LICENSE",
+      "sha256": "f977a20805dd6e275f14bc090a5f8e638401dad4df366841c1060f12c75b74ae"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-rust-0.23.2/LICENSE",
+      "sha256": "31d5b6f4243d5c7c6e1c4ebbbb9f6407bd1457a08bcc4f706521710341acba36"
+    },
+    {
+      "component": "gettext",
+      "sourcePath": "gettext-1.0/gettext-tools/tree-sitter-typescript-0.23.2/LICENSE",
+      "sha256": "49bf33cf78ef5897e4e161ce1517df7de1ae5042a65b6bcfd44401e0fc606559"
+    },
+    {
+      "component": "libxml2",
+      "sourcePath": "libxml2-2.15.3/Copyright",
+      "sha256": "5d4873884a890122a4b9b20ad56ac6f7da1d796a5bfcf04a427970ac96217626"
+    },
+    {
+      "component": "libxml2",
+      "sourcePath": "libxml2-2.15.3/test/html-tokenizer/NOTICE",
+      "sha256": "d6a2cb265a0a249a234b89eeffa7f316ebe5bff546672a0a2b1a861dd2238460"
+    },
+    {
+      "component": "libxml2",
+      "sourcePath": "libxml2-2.15.3/result/html-tokenizer/NOTICE",
+      "sha256": "d6a2cb265a0a249a234b89eeffa7f316ebe5bff546672a0a2b1a861dd2238460"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/COPYING",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/COPYING.LESSERv2",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/doc/examples/tlsproxy/LICENSE",
+      "sha256": "b42dbe48110754b99f026ad30e69b1069f826fb07e7c616b526bd1090952fb1b"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/lib/accelerated/x86/license.txt",
+      "sha256": "0c35a52bcfa4da2f0df4a1282a6034e211c976b8b6d43691a639eef9c8aebf7e"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/lib/crau/LICENSE",
+      "sha256": "b3c9aed2f5750f6bf698c74916d675d1734e12455b96bfdf6f90e23ab01595cd"
+    },
+    {
+      "component": "gnutls",
+      "sourcePath": "gnutls-3.8.13/lib/inih/LICENSE.txt",
+      "sha256": "9ae3b39e83e9158e44b67733baa3bb2d84e80efdcfb14a5820210a42c7abdf7f"
+    },
+    {
+      "component": "gmp",
+      "sourcePath": "gmp-6.3.0/COPYING",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "component": "gmp",
+      "sourcePath": "gmp-6.3.0/COPYING.LESSERv3",
+      "sha256": "a853c2ffec17057872340eee242ae4d96cbf2b520ae27d903e1b2fef1a5f9d1c"
+    },
+    {
+      "component": "gmp",
+      "sourcePath": "gmp-6.3.0/COPYINGv3",
+      "sha256": "e6037104443f9a7829b2aa7c5370d0789a7bda3ca65a0b904cdc0c2e285d9195"
+    },
+    {
+      "component": "gmp",
+      "sourcePath": "gmp-6.3.0/COPYINGv2",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "component": "nettle",
+      "sourcePath": "nettle-3.10.2/COPYINGv3",
+      "sha256": "e6037104443f9a7829b2aa7c5370d0789a7bda3ca65a0b904cdc0c2e285d9195"
+    },
+    {
+      "component": "nettle",
+      "sourcePath": "nettle-3.10.2/COPYING.LESSERv3",
+      "sha256": "a853c2ffec17057872340eee242ae4d96cbf2b520ae27d903e1b2fef1a5f9d1c"
+    },
+    {
+      "component": "nettle",
+      "sourcePath": "nettle-3.10.2/COPYINGv2",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "component": "libtasn1",
+      "sourcePath": "libtasn1-4.21.0/COPYING",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "component": "libtasn1",
+      "sourcePath": "libtasn1-4.21.0/COPYING.LESSERv2",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "component": "p11-kit",
+      "sourcePath": "p11-kit-0.26.2/COPYING",
+      "sha256": "2e1ba993904df807a10c3eda1e5c272338edc35674b679773a8b3ad460731054"
+    },
+    {
+      "component": "libgcrypt",
+      "sourcePath": "libgcrypt-1.12.4/COPYING",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    },
+    {
+      "component": "libgcrypt",
+      "sourcePath": "libgcrypt-1.12.4/COPYING.LIB",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "component": "libgcrypt",
+      "sourcePath": "libgcrypt-1.12.4/LICENSES",
+      "sha256": "2a047a5799926c3cd705ce6df4b560d67578061ad5019fbff2a4609a3f0090bd"
+    },
+    {
+      "component": "libgpg-error",
+      "sourcePath": "libgpg-error-1.61/COPYING",
+      "sha256": "231f7edcc7352d7734a96eef0b8030f77982678c516876fcb81e25b32d68564c"
+    },
+    {
+      "component": "libgpg-error",
+      "sourcePath": "libgpg-error-1.61/COPYING.LIB",
+      "sha256": "a9bdde5616ecdd1e980b44f360600ee8783b1f99b8cc83a2beb163a0a390e861"
+    },
+    {
+      "component": "lua",
+      "sourcePath": "lua-5.4.7/doc/readme.html",
+      "sha256": "33a975a766520bc54de2d71e45442e504effa0519e331e31ee3fc46eca4f98bd"
+    },
+    {
+      "component": "brotli",
+      "sourcePath": "brotli-1.2.0/LICENSE",
+      "sha256": "3d180008e36922a4e8daec11c34c7af264fed5962d07924aea928c38e8663c94"
+    },
+    {
+      "component": "c-ares",
+      "sourcePath": "c-ares-1.34.8/LICENSE.md",
+      "sha256": "460f5e768fda3752ca2169a95df062578a10fb126bfd65f3b9b1a1bed2f84807"
+    },
+    {
+      "component": "nghttp2",
+      "sourcePath": "nghttp2-1.69.0/tests/munit/COPYING",
+      "sha256": "551a04ab9278e48e3d4ef8b0381ad54e54e84fac1a225c50247fa3669dfdef75"
+    },
+    {
+      "component": "nghttp2",
+      "sourcePath": "nghttp2-1.69.0/doc/_exts/rubydomain/LICENSE.rubydomain",
+      "sha256": "2dee6027d254030e382dd8e9f0f1b4ac2c186bd409c85ca2bef80d38b4da283c"
+    },
+    {
+      "component": "nghttp2",
+      "sourcePath": "nghttp2-1.69.0/COPYING",
+      "sha256": "6b94f3abc1aabd0c72a7c7d92a77f79dda7c8a0cb3df839a97890b4116a2de2a"
+    },
+    {
+      "component": "nghttp2",
+      "sourcePath": "nghttp2-1.69.0/third-party/mruby/LICENSE",
+      "sha256": "07dc3c033f3f0ee600f76ac52211a04cbb67e722f8da44767687e86151586170"
+    },
+    {
+      "component": "nghttp2",
+      "sourcePath": "nghttp2-1.69.0/third-party/mruby/mrbgems/mruby-set/LICENSE",
+      "sha256": "2c78d80cafa36acdd728d6a5ddd68aef42e603ae246b3d0c9ac85f09d87d7e17"
+    },
+    {
+      "component": "nghttp3",
+      "sourcePath": "nghttp3-1.9.0/tests/munit/COPYING",
+      "sha256": "551a04ab9278e48e3d4ef8b0381ad54e54e84fac1a225c50247fa3669dfdef75"
+    },
+    {
+      "component": "nghttp3",
+      "sourcePath": "nghttp3-1.9.0/lib/sfparse/COPYING",
+      "sha256": "cd6d5feeacf9406fe915d3c23b85a6bf86deecfa1661396b63d2d2188b90beda"
+    },
+    {
+      "component": "nghttp3",
+      "sourcePath": "nghttp3-1.9.0/COPYING",
+      "sha256": "58cc3fc8c6d6cb2485ab35eb5918e849b5bf1e56522974e106d7a39a88d61dcd"
+    },
+    {
+      "component": "snappy",
+      "sourcePath": "snappy-1.2.2/COPYING",
+      "sha256": "55172044f7e241207117448a4d9d6ba1d0925c8ad66b5d4c08c70adfa9cc3de6"
+    },
+    {
+      "component": "xxhash",
+      "sourcePath": "xxHash-0.8.3/LICENSE",
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a"
+    },
+    {
+      "component": "xxhash",
+      "sourcePath": "xxHash-0.8.3/cli/COPYING",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "component": "xxhash",
+      "sourcePath": "xxHash-0.8.3/tests/bench/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "component": "xxhash",
+      "sourcePath": "xxHash-0.8.3/tests/collisions/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "component": "zlib-ng",
+      "sourcePath": "zlib-ng-2.2.4/LICENSE.md",
+      "sha256": "6c9f0d975b41afaa34d22f55bb8986ce69e5cb7ad327cb2b28820cd425edf5ee"
+    },
+    {
+      "component": "zstd",
+      "sourcePath": "zstd-1.5.7/COPYING",
+      "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505"
+    },
+    {
+      "component": "zstd",
+      "sourcePath": "zstd-1.5.7/LICENSE",
+      "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+    },
+    {
+      "component": "zstd",
+      "sourcePath": "zstd-1.5.7/build/LICENSE",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/LICENSE",
+      "sha256": "4bc9c403f6b679cc076dee210e0e21c27b4e8f6d3fb43d85364c76657bfaaac5"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/contrib/debian/copyright",
+      "sha256": "4f6ef9d0e844bf432d6a0abb2623f5a61175ae40f7f0e3665490311d89e3af87"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/contrib/djgpp/LICENSE",
+      "sha256": "d011d1e02cb32b71c1ce2922ab41a2e2ad30f4ecf8de22c078d53618205abc05"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/examples/COPYING",
+      "sha256": "609b910ef05c9c855ecc1da155a36ed0f57514eac452cf93446530b5ea4b3bc3"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/lib/LICENSE",
+      "sha256": "8b58c446121a109ccf32edc094bba3010a3d85e4ee3702950db55e4d3e87736c"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/programs/COPYING",
+      "sha256": "609b910ef05c9c855ecc1da155a36ed0f57514eac452cf93446530b5ea4b3bc3"
+    },
+    {
+      "component": "lz4",
+      "sourcePath": "lz4-1.10.0/tests/COPYING",
+      "sha256": "609b910ef05c9c855ecc1da155a36ed0f57514eac452cf93446530b5ea4b3bc3"
+    },
+    {
+      "component": "libsmi",
+      "sourcePath": "libsmi-0.4.8/COPYING",
+      "sha256": "7aefc0abc9a860cb41d74cce0889ffa5544cac78a7821c7001290d67eab40187"
+    },
+    {
+      "component": "wireshark",
+      "sourcePath": "COPYING",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    }
+  ]
+}

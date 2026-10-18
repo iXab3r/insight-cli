@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Native public CLI composition and independent Ghidra contexts; no inference-model execution or observed runtime invocation claimed",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputs": {
+    "managed": "8aabf417296818dcd83636c62798d3fe0deb9bea1b25ef10450ac2cc2125ad1d",
+    "native": "b3603e68fbb9ed17b575913bae2abf95957f5da07df3657f267ed7fc9a5f067e"
+  },
+  "checks": {
+    "exactPinvokeMetadata": true,
+    "managedTokenDrilldown": true,
+    "explicitNativeCandidateExport": true,
+    "ghidraTargetIdentity": true,
+    "actualFunctionAndFormula": true,
+    "staticCorrespondenceQualified": true,
+    "isolatedContextBeforeRefresh": true,
+    "refreshPreservesSecondLocalAnnotation": true,
+    "explicitBothMerges": true,
+    "independentPublishedReadback": true,
+    "ordinaryCheckpoint": true,
+    "originalInputsPreserved": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "a0b100a8d25d901a38a1c24341706791bd8e6230c337303ed02193d5a7232147"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "6f2697a",
+  "candidate": "Working-tree interop workflow candidate; package SHA/build bind the exact tested bytes",
+  "packageSha256": "901d47d8ed6d71f212d20def9e2c9ca19527de0bfae8d5fa300d4df5c40af78f",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "78af992341064831b030e6e9db95d310",
+    "passed": 1,
+    "failed": 0
+  }
+}

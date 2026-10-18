@@ -6,13 +6,13 @@ import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {createInsightCli} from '../src/cli.js';
 import {SessionBackend} from './fixtures/session-backend.js';
-import {debuggerResult} from '../src/debugger-results.js';
+import {debuggerResult,debuggerExecutionSettled} from '../src/debugger-results.js';
 import type {Scope} from '../src/workspace.js';
 import type {Artifact} from '../src/artifacts.js';
 
 test('debugger program metadata stays private and pending, while CPU steps add no program edit; lost responses retain metadata on close',async t=>{
   for(const lost of [false,true]){
-    const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});let backend:SessionBackend,connected=false,placed=false,sets=0;
+    const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});let backend:SessionBackend,connected=false,placed=false,sets=0,snap=0;
     const trace='trace_00000000-0000-4000-8000-000000000001';
     const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
       backend=new SessionBackend(workspace);const close=backend.close.bind(backend);
@@ -21,8 +21,8 @@ test('debugger program metadata stays private and pending, while CPU steps add n
         debuggerLaunch:async()=>{connected=true;return {status:'launched',offer_title:'fixture',trace_name:'fixture'};},
         debuggerSaved:async(selected:Scope)=>({connected,active:trace,traces:[{id:trace,name:'fixture',snapshot:workspace.context(selected).workingSnapshot!,snap:'0',modules:1,threads:1,connected}]}),
         debuggerCall:async(selected:Scope,operation:string)=>{
-          if(operation==='status')return {debugger_active:true,trace_active:true,open_traces:1,target_connected:connected,module_count:1,snap:0,execution_state:'STOPPED'};
-          if(operation==='step')return {status:'stepped'};
+          if(operation==='status')return {debugger_active:true,trace_active:true,open_traces:1,target_connected:connected,module_count:1,snap,execution_state:'STOPPED'};
+          if(operation==='step'){snap++;return {status:'stepped'};}
           if(operation==='list_breakpoints')return placed?[{address:'1000',name:'',state:'ENABLED',kinds:['SW_EXECUTE'],trace_location_count:1}]:[];
           if(operation==='set_breakpoint'){sets++;placed=true;backend.views.get(workspace.context(selected).id)!.view.opaque='breakpoint';if(lost)throw Error('Synthetic lost breakpoint response');return {status:'set',address:'1000'};}
           throw Error('Unexpected debugger fixture operation');
@@ -38,6 +38,18 @@ test('debugger program metadata stays private and pending, while CPU steps add n
     const snapshot=backend!.workspace.context(a).workingSnapshot!;assert.equal(JSON.parse(await readFile(await backend!.workspace.artifacts.verify(snapshot),'utf8')).opaque,'breakpoint');
     await f.run(app,args);assert.equal(sets,1);
   }
+});
+
+test('debugger completion rejects stale stopped snapshots and terminated or disconnected targets',()=>{
+ const before={snap:2},stopped={snap:2,target_connected:true,execution_state:'STOPPED'};
+ assert.equal(debuggerExecutionSettled('step',before,stopped),false);
+ assert.equal(debuggerExecutionSettled('step',before,{...stopped,snap:3}),true);
+ assert.equal(debuggerExecutionSettled('step',before,{...stopped,snap:3,execution_state:'TERMINATED'}),false);
+ assert.equal(debuggerExecutionSettled('step',before,{...stopped,snap:3,target_connected:false}),false);
+ assert.equal(debuggerExecutionSettled('resume',before,stopped),false);
+ assert.equal(debuggerExecutionSettled('resume',before,{...stopped,snap:3}),true);
+ assert.equal(debuggerExecutionSettled('resume',before,{...stopped,execution_state:'RUNNING'}),true);
+ assert.equal(debuggerExecutionSettled('interrupt',before,stopped),true);
 });
 
 test('debugger readback rejects wrong addresses, inconsistent memory and malformed CPU data',()=>{

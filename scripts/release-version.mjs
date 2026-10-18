@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {readFile,writeFile,mkdir,appendFile} from 'node:fs/promises';
 import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 
 const workspace='skills/ghidra-coordinator';
-export const versionFiles=[`${workspace}/package.json`,'package-lock.json',`${workspace}/SKILL.md`,`${workspace}/skills/insight-re/SKILL.md`];
+const skillVersions=JSON.parse(readFileSync(new URL('../skills/ghidra-coordinator/runtime/toolbox.json',import.meta.url),'utf8')).skills.map(skill=>[`${workspace}/${skill.path}`,skill.title]);
+export const versionFiles=[`${workspace}/package.json`,'package-lock.json',...skillVersions.map(([path])=>path)];
 export const increments=['patch','minor','major','none'];
 const packageName='@eyeauras/insight-cli';
 function parts(version){
@@ -54,7 +56,7 @@ function transformed(originals,record){
   assert.equal(pkg.name,packageName);assert.equal(lock.packages[workspace].version,pkg.version);
   pkg.version=record.version;lock.packages[workspace].version=record.version;
   const result={[versionFiles[0]]:JSON.stringify(pkg,null,2)+'\n','package-lock.json':JSON.stringify(lock,null,2)+'\n'};
-  for(const [path,title] of [[versionFiles[2],'insight-cli'],[versionFiles[3],'Insight RE']]){
+  for(const [path,title] of skillVersions){
     const heading=`# ${title} ${record.sourceVersion}`;
     assert.ok(originals[path].split('\n').includes(heading),`Missing original skill heading: ${path}`);
     result[path]=originals[path].replace(heading,`# ${title} ${record.version}`);

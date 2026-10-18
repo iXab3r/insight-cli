@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Owned native public CLI capture/fault proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputSha256": "5f6b83fe8e615a1793b83466445c76783a0d229f0471de67568286d78c77ec8e",
+  "checks": {
+    "actualInputOutputAndFileChanges": true,
+    "exactNonUtf8OutputAndKnownNonzeroExit": true,
+    "exactBinaryStdin": true,
+    "literalArgumentsWithoutShell": true,
+    "copiedInputMutationPreservesOriginal": true,
+    "boundedOutputAndFileDrilldown": true,
+    "retainedComparisonWithoutRerun": true,
+    "durableRequestReplayNoExecution": true,
+    "differentIntentRefused": true,
+    "timeoutRemainsPartial": true,
+    "outputOverflowRetainsExactBoundedPrefix": true,
+    "stopKillRetainPrefix": true,
+    "ownerLossStaysUnknownWithoutReplay": true,
+    "retainedWorkingFilesAfterOwnerLoss": true,
+    "malformedReportHashRefused": true,
+    "existingOutputAndInvalidPathRefused": true,
+    "immutableOriginalInputs": true,
+    "ordinaryCheckpoints": true,
+    "ownedJobsStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "024eb38d59518f5e0bd16c38782cff338df9edba3e2c433ddc3152190d7ad40c"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "6f2697a",
+  "candidate": "Working-tree capture candidate; package SHA/build identify exact tested bytes",
+  "packageSha256": "e76fcc914a699b721419082d7882bf85bdf3acd08f25ef50cd757cf428d67343",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "a172598173c541898ffeb309b90a0b62",
+    "passed": 1,
+    "failed": 0
+  }
+}

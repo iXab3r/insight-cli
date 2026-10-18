@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "state": "cold_prepared_passed",
+  "scope": "Independent live .NET trace unit proof; not combined toolbox acceptance",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "trials": {
+    "cold": {
+      "elapsedMs": 75097,
+      "candidateInvocations": 17,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Collect a bounded sampled thread-time observation of the running managed worker identified in input/subject.json through the connected toolbox. Identify the relevant waiting/execution path from the retained trace, produce an inspectable analysis/export without collecting again just for analysis, and distinguish sampled thread/wall time from CPU consumption or unobserved behavior. Preserve the borrowed process lifetime and retain useful raw evidence, conditions and a verified checkpoint.",
+      "promptSha256": "8b7951ac3297ebba61bef0e85f5e27b09772b1fa37cb99a27b475d8a0a9faa8f",
+      "inputs": [
+        {
+          "path": "input/InsightOwnedWorker.dll",
+          "sha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb"
+        },
+        {
+          "path": "input/InsightOwnedWorker.runtimeconfig.json",
+          "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+        },
+        {
+          "path": "input/subject.json",
+          "sha256": "f0f2f411ac92e0d5b4b5f89f6c8a9247ee895f69b7431d999a5daf5858ac2079"
+        }
+      ],
+      "checkpointFiles": 4,
+      "checkpointBytes": 103783,
+      "checkpointSha256": "843290dfb53c68fbfb3cf323f0fc43f78d149231cbc45f66bc925d2bb150db6e",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 4,
+      "actualCollections": 1,
+      "retainedTraceAnalysisAndSpeedscopeExport": true,
+      "sampledThreadTimeNotCpu": true,
+      "borrowedSubjectSurvivedAgent": true,
+      "controllerOwnedSubjectAbsentAfterCleanup": true
+    },
+    "prepared": {
+      "elapsedMs": 58883,
+      "candidateInvocations": 8,
+      "artifactSha256": "fa2ea779b61852e6a860f5f7cf91b4172d319e0243b723e71983cf350771ff59",
+      "skillBundleSha256": "e2c0acfa2452f2ddb578d47c665a4248cb659b6a793cbe5a2fcdccc299bbcca7",
+      "packageBuild": "ae04be7204ff73102007fafa22b7f41851865d7b1f93613c478670944475a9ae",
+      "prompt": "Collect a bounded sampled thread-time observation of the running managed worker identified in input/subject.json through the connected toolbox. Identify the relevant waiting/execution path from the retained trace, produce an inspectable analysis/export without collecting again just for analysis, and distinguish sampled thread/wall time from CPU consumption or unobserved behavior. Preserve the borrowed process lifetime and retain useful raw evidence, conditions and a verified checkpoint.",
+      "promptSha256": "8b7951ac3297ebba61bef0e85f5e27b09772b1fa37cb99a27b475d8a0a9faa8f",
+      "inputs": [
+        {
+          "path": "input/InsightOwnedWorker.dll",
+          "sha256": "ab4a86862eee5d858be3f03cdc8d4854214786faed9a1dfe131e3fff2a1e56cb"
+        },
+        {
+          "path": "input/InsightOwnedWorker.runtimeconfig.json",
+          "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+        },
+        {
+          "path": "input/subject.json",
+          "sha256": "4dae7eeea5922a921f66a81bb1c2d685b4a03c331234622a1b1dda6494b58612"
+        }
+      ],
+      "checkpointFiles": 3,
+      "checkpointBytes": 103484,
+      "checkpointSha256": "668aefc9331af8762902082e9d05d2500890d9bfbc0bb91ad3f681e40c0b63c6",
+      "everyCheckpointFileIndependentlyMatched": true,
+      "receiptPathInFinal": true,
+      "agentReadbackReported": true,
+      "inputsUnchanged": true,
+      "ownerStopped": true,
+      "terminalOwnedJobs": 4,
+      "actualCollections": 1,
+      "retainedTraceAnalysisAndSpeedscopeExport": true,
+      "sampledThreadTimeNotCpu": true,
+      "borrowedSubjectSurvivedAgent": true,
+      "controllerOwnedSubjectAbsentAfterCleanup": true
+    }
+  },
+  "limitations": [
+    "Live macOS process birth identity is weak; reports retain that limitation.",
+    "Borrowed worker lifetime belonged to the controller; only collectors were owned by the agent."
+  ]
+}

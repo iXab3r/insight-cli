@@ -4,6 +4,7 @@ import type {ToolProcessHooks} from './commands.js';
 
 export interface ToolArtifact {
   name:string; url:string; sha256:string; size?:number; format:'zip'|'tgz'; root:string; license:string;
+  delivery?:{kind:'vendor-direct';publisher:string;termsUrl:string;reason:string};
 }
 export interface ToolComponent {
   id:string; version:string; artifacts:ToolArtifact[]; dependencies?:string[];
@@ -28,6 +29,7 @@ export interface ToolLifecycle {
 }
 export interface ToolDefinition {
   id:string; description:string; components:ToolComponent[]; lifecycle:ToolLifecycle;
+  vendorDirect?:boolean;
   installOptions?:NonNullable<CommandDefinition['options']>;
   commands?:CommandDefinition[];
   processes?:ToolProcessHooks;
@@ -52,13 +54,14 @@ export function defineTool(value:ToolDefinition):ToolDefinition {
 }
 export function lifecycleCommands(tool:ToolDefinition):CommandDefinition[]{
   const offline={flags:'--offline',description:'Use verified local archives and cache without network access'};
-  const source=[{flags:'--archive <path>',description:'Install from a local tool archive'},
+  const vendor=tool.vendorDirect?[{flags:'--vendor-direct',description:'Explicitly acquire pinned non-redistributable bytes from the named vendor'}]:[];
+  const source=[...vendor,{flags:'--archive <path>',description:'Install from a local tool archive'},
     {flags:'--archive-sha256 <sha256>',description:'Expected SHA256 of the local tool archive'},
     {flags:'--executable <path>',description:'Use an external executable; its files are never deleted'},offline];
   const leaf=(name:keyof ToolLifecycle,description:string,permission:string,options:CommandDefinition['options'])=>
     command(name,description,({options:o},c)=>tool.lifecycle[name]!(o,c),{permission,options});
   return [
-    leaf('download','Download the pinned tool and required runtime components',Permission.Update,[offline]),
+    leaf('download','Download the pinned tool and required runtime components',Permission.Update,[offline,...vendor]),
     leaf('install','Prepare, verify and select the tool installation',Permission.Update,tool.installOptions??source),
     leaf('uninstall','Remove owned software while preserving research and external files','Destructive',[
       {flags:'--purge-cache',description:'Also remove owned downloaded archives'}]),

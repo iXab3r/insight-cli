@@ -5,8 +5,10 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
-The [shared tool runtime](docs/TOOL-RUNTIME.md) now delivers Ghidra and ILSpy with pinned
-GitHub Release assets, private runtime dependencies, common lifecycle and owned process controls.
+The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, ProcMon, dnSpyEx, TShark, mitmproxy, strace and .NET diagnostics with pinned
+distributions (GitHub mirrors or explicit Microsoft-only acquisition), private runtime dependencies, common lifecycle and owned process controls.
+Toolbox additions remain under development in [draft PR #55](https://github.com/iXab3r/insight-cli/pull/55);
+the registry package has not been updated by these source commits.
 [Native acceptance](docs/TOOL-RUNTIME-ACCEPTANCE.md) covers the packed globally installed
 candidate; npm publication remains a separate manual release. See the
 [new-tool author guide](docs/ADDING-TOOLS.md) to add another adapter.
@@ -17,12 +19,20 @@ for multiple agents, Ghidra and ordinary external tools. Locate it with
 `insight-cli artifacts save ./research --json` retains a file or folder and returns a
 browsable saved path. It uses the profile's Update permission and needs no Ghidra/Java.
 The [save contract](skills/ghidra-coordinator/references/artifacts.md) covers stable folders,
-independent copies and receipts. Installing the package does not register either skill.
+independent copies and receipts. Installing the package does not register skills in an agent host.
 Downloading runtimes also does not advertise them to an agent. Follow the explicit
 [agent setup](skills/ghidra-coordinator/references/agent-setup.md) to connect the skills;
 [practical discovery checks](docs/AGENT-DISCOVERY.md) test startup visibility and actual research.
-The [full toolbox plan](docs/TOOLBOX-PLAN.md) records the next delivery: 16 tool/family
+The [full toolbox plan](docs/TOOLBOX-PLAN.md) tracks the ongoing delivery: 16 tool/family
 entries, their skills, library/cross-tool capabilities and per-tool agent acceptance.
+`insight-cli tools list` and `tools show <tool>` describe the capabilities already shipped;
+`skill <name>` locates their instructions without profile or IPC access. The packaged
+`skill-bundle` connects all 25 admitted skills at once. The six library/workflow capabilities
+cover managed metadata/comparison, structured dump queries, binary structure/copy edits,
+managed/native correspondence, owned execution capture and bounded overview/drilldown.
+They reuse existing runtimes or packaged helpers, with no fake library installation.
+[Native proof and remaining independent agent gates](docs/TOOLBOX-AUDIT.md) retain exact
+artifact identities; a passing native script is not an independent agent pass.
 The [real 7zr.exe workflow](docs/RE-SKILL.md) records three agents, two isolated Ghidra
 contexts, external utilities, reviewed findings, merge/refresh and saved-copy verification.
 

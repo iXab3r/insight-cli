@@ -157,3 +157,131 @@ a successful process exit without completed research/cleanup is insufficient.
 
 [Shared tool runtime acceptance](verification/tool-runtime.json) records the passing exact
 packed/global-installed macOS candidate and all named research/recovery/removal checks.
+
+## Toolbox development gates
+
+`Toolbox.feature` adds five separately selected native scenarios: actual Codex bundle
+metadata connect/disconnect, a globally installed public 7-Zip container workflow, and
+LLVM investigation of owned PE/PDB, ELF and Mach-O images, plus live managed
+stack/heap/trace research and DiE classification with explicit scan uncertainty. Run
+
+```sh
+INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_TOOLBOX_MANIFEST=... npm run automation -- test \
+  --suite acceptance --tag toolbox --property RestoreLockedMode=true --timeout-seconds 1200
+```
+The private JSON manifest supplies `packageRoot`, `sevenzipArchive`, `sevenzipExecutable` and `container` for the
+owned two-entry fixture; `llvmArchive` and `nativeSubjects` select the LLVM archive and
+owned image directory. Prepare those images with `scripts/toolbox/prepare-native-inputs.mjs`
+and explicit Clang/lld-link/ld.lld paths (a maintainer fixture prerequisite, not a user SDK).
+`diagnosticsArchives`, `dotnetArchive` and `managedWorker` select the three retained NuGet
+archives, the private runtime archive and a maintainer-built owned console fixture. Build
+`tests/acceptance/fixtures/diagnostics/Probe.csproj` into a disposable output directory.
+`dieArchive` selects the reviewed console/Qt archive for header and signature triage of those inputs.
+The acceptance project excludes fixture source and nested build output from its own assembly.
+The driver creates a separate profile and test-only short temporary
+AppData root, so long Automation artifact paths cannot exceed the Unix socket path limit.
+No ordinary user profile or installed tool is reset. All five scenarios passed together (5/5) on the recorded DiE candidate; an earlier runner-path failure was corrected
+in the fixture setup. LLVM verifies each advertised family, the hexadecimal type index,
+output limits/overwrite refusal and external sibling drift/preservation. Managed diagnostics
+verify the waiting stack, real heap/object/field/root evidence, a two-second thread-time
+trace, readable Speedscope export, preserved external target lifetime and retained licenses.
+DiE verifies native/managed headers, .NET signatures, explicit partial results on actual upstream
+script errors, pagination, output preservation and external database drift. The first five-case
+run failed only DiE doctor: canonicalizing framework symlink targets fixed staging relocation.
+Its regression still rejects changed bytes and links escaping owned installation storage.
+
+These are native developer gates, not independent model acceptance. The
+[managed agent evidence](verification/toolbox-agent-managed.json) separately records cold
+and prepared independent cheap-model static research, exact resource/checkpoint readback,
+and the earlier IPC-blocked trials that were rejected. Per-tool family coverage and the
+final exact-artifact whole-toolbox gate remain open. A successful model exit or plausible
+report does not count without evidence review: the first container trial omitted a real
+configuration field despite correct recovered bytes, and required a correction pass.
+
+The macOS `ghidra-debugger` selection adds two installed public-CLI GUI/LLDB cases. Its private
+manifest supplies `packageRoot`, `ghidraHome`, `java`, `ghidraDebuggerWorker` and
+`ghidraRecursiveWorker`. Prepare the
+short-lived, source-unavailable native worker with `prepare-native-agent-fixture.mjs` and use
+its `fast` executable; the source fixture is `fixtures/toolbox/debugger-fast.c`. It requires no
+sleep or interactive subject. The case stops at entry, maps a function, sets a breakpoint
+before resuming, checks actual argument/return registers, closes/reopens the same context and
+compares disconnected trace registers, memory and mapping. It also checks launch request replay,
+checkpoint bytes, actual session IDs and terminal public debugger process inventory. Run it
+with the ordinary acceptance runner and `--tag ghidra-debugger`. The two opt-in owner fault
+tests remain separate from these real Ghidra GUI cases. Use the producer's `recursive`
+executable for `ghidraRecursiveWorker`: the second case observes arguments 5, 4 and 3, removes
+the entry breakpoint, then verifies the actual return 6 from the call with argument 3 to its caller with argument 4. An inner
+return has the same instruction address but a different stack pointer. Request replay,
+unchanged static program metadata, disconnected readback and cleanup are checked as well.
+
+The actual standalone [Codex host trials](verification/toolbox-agent-host.json) also passed
+cold/prepared container research with the same business-only prompt. Project startup metadata
+supplied the skill list; the prompt did not identify a tool or a command sequence. Keep the
+runtime selected by that CLI consistent with its shared owner. Prestarting an owner from an
+operator's different Node can create a deliberate compatibility rejection.
+
+For new tool cases, `scripts/toolbox/run-agent.mjs MANIFEST` launches the real opt-in model
+trial with `INSIGHT_NATIVE_DISPOSABLE=1 INSIGHT_RUN_AGENT_EVAL=1`. The private manifest supplies
+absolute `packageRoot`, `project`, `preload`, `outputDirectory` and frozen package `artifact`,
+project-relative `inputs`, a business-only `prompt`, and the explicitly chosen `model` and
+`reasoningEffort`. `path` may select the candidate global prefix. Prepare only disposable
+profile storage and a project bundle link, using `public-fixture.mjs` as the test-side seam;
+existing project instructions remain authoritative. Use a new output directory per attempt.
+
+The runner records package/build/skill/input/prompt identities, raw private events, final
+answer, time/exit state and owned-owner shutdown. Its successful terminal state is
+`needs_review`. Independently verify the useful answer, recovered bytes, saved checkpoint
+and tool-specific process cleanup before writing an acceptance receipt. It does not make
+model calls in default CI or turn a zero exit code into a business verdict. The actual
+source-runner smoke was reviewed against the owned oracle and exact saved bytes; its final
+prose omitted checkpoint locators, so that small handoff limitation is retained in the receipt.
+
+Native toolbox CI checks out the private Automation repository at the exact pinned
+submodule commit using the repository secret `AUTOMATION_READ_KEY`. Its deploy key
+grants read-only access to Automation, is not persisted into test runtime configuration,
+and is not available to fork pull requests. The framework remains private; it is not
+copied into this repository's package or tool Releases.
+
+
+The TShark native gate is independently selectable with `--tag tshark`. Prepare its
+private manifest with `INSIGHT_NATIVE_DISPOSABLE=1 node scripts/toolbox/prepare-tshark-fixture.mjs
+OUTPUT GLOBAL_PACKAGE_ROOT [SOURCE_BUNDLE] [RUNTIME_ARCHIVE]`. Without local archives it
+fetches the pinned assets from our immutable Release. It verifies the runtime/source hashes,
+extracts the public HTTP fixture only from the matching original Wireshark source and retains
+its GPL text. Set `INSIGHT_TOOLBOX_MANIFEST=OUTPUT/manifest.json` and run the ordinary
+Automation command above with `--tag tshark`. No live traffic or system capture settings
+are involved. [Receipt](verification/toolbox-tshark.json) records the final installed build.
+The current TShark addition passed this scenario on its committed globally installed
+artifact. The complete Node 24 offline suite is 201 tests (199 passed, two explicit
+opt-in skips), and release/admission checks are 29/29. Offline process fixtures require
+permission to authenticate their own PIDs/listen on their own loopback sockets; a denied
+native identity read remains unverified rather than being weakened into a pass.
+
+### Large-assembly bounded discovery fixture
+
+The C06 `overview` native case also requires `largeManagedAssembly` in the private
+`INSIGHT_TOOLBOX_MANIFEST`. Produce that assembly with
+`scripts/toolbox/prepare-overview-agent-fixture.mjs` into disposable storage and pass its
+returned `assembly` path. The maintainer producer requires the pinned .NET SDK; the
+installed CLI needs only its managed runtime. The fixture contains 1001 methods, including
+one business method under a namespace shared by unrelated helpers. The public CLI test
+checks full-signature collisions, case-insensitive `--name-filter` selection, exact-token
+member decompilation without the whole class, and existing ILSpy/Ghidra text windows.
+Do not supply producer source or PDBs to independent research agents.
+
+### Isolated Ghidra debugger runtime
+
+The whole `toolbox` suite also includes `@ghidra-debugger-runtime` on macOS 15+ ARM64.
+Its private manifest needs `ghidraDebuggerArchive`, the exact LLDB/Python archive from the
+pinned `tool-lldb-python-23.1.3-r2` mirror, alongside `ghidraDebuggerWorker`, `ghidraHome`
+and `java`. The public CLI installs it with `--debugger-archive ... --offline`, runs the
+actual private Python probe, rejects modified dependency bytes, refuses uninstall under a
+live context, and verifies retained evidence/external paths after removing owned code.
+The two `@ghidra-debugger` CPU cases exercise automatic acquisition from our mirror instead.
+The ordinary case requires an authenticated `running` process record for the actual managed
+LLDB executable; a merely working child marked `unverified` fails acceptance.
+
+The current [caller/runtime receipt](verification/toolbox-ghidra-caller-native.json) preserves
+failed system-backend, archive-extraction and profile-alias candidates separately. It also
+records exact final-package repeats and the two actual supervisor startup/early-stop checks.
+Native execution and independent model business verdicts remain separate gates.

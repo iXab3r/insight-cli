@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "compiler": "Apple clang version 17.0.0 (clang-1700.3.19.1)",
+  "platform": "darwin-arm64",
+  "minimumSystem": "macOS14+",
+  "sdkVersion": "26.0",
+  "inputs": {
+    "helper.cpp": "2350499d7db21318791027cc859c714d9902cc746525cf5e2b9a560285ec69fe",
+    "dependencies.json": "e9d5960a2d4920ca442df3ecc77730588708fc7e934ba4a6831a1cc6ed4f6819",
+    "notices/LIEF-LICENSE.txt": "998dc6a9d251b4d9d4274d8a7e121fe20c33b1dfd4300bca276e87da23dc582e",
+    "notices/LIEF-attribution.txt": "14353f94305648fa88cf28a78fe92ea24420e7851802b8f01930b3f09eee2656",
+    "notices/Catch2-3.12.0--Catch2-3.12.0__LICENSE.txt": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+    "notices/Melkor_ELF_Fuzzer-ac2495b--elf_fuzzer-master__LICENSE.txt": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+    "notices/expected-1.3.1--expected-1.3.1__COPYING": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+    "notices/frozen-61dce5a--frozen-61dce5ae18ca59931e27675c468e64118aba8744__AUTHORS": "e87cb6aaac199b412d4a0c85b3507891dfa5054a5b80169b07e39142a9226264",
+    "notices/frozen-61dce5a--frozen-61dce5ae18ca59931e27675c468e64118aba8744__LICENSE": "f6099ed23682840ae60a76fce378faae9b5c75f7d162188883e13b790ca18b98",
+    "notices/mbedtls-4.0.0.r0.gec4044008d--LICENSE": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+    "notices/mbedtls-4.0.0.r0.gec4044008d--framework__LICENSE": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490",
+    "notices/mbedtls-4.0.0.r0.gec4044008d--tf-psa-crypto__framework__LICENSE": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490",
+    "notices/mbedtls-4.0.0.r0.gec4044008d--tf-psa-crypto__LICENSE": "da8c58f05f135a9d15e9ffad4ecf854cfcc1f014c8abfd75ba05f62630ccc118",
+    "notices/nanobind-2.13.0.r18.g4db9ed3f--LICENSE": "f305091a4e57805870b217a28ea4b1f16610eece8457d2370f822a9696b75836",
+    "notices/nanobind-2.13.0.r18.g4db9ed3f--ext__robin_map__LICENSE": "11f2c685ba565a31aef1219f63a7a8845602c97bff70016b9e3278dfe51a2ec5",
+    "notices/spdlog-1.17.0--spdlog-1.17.0__LICENSE": "d678c20826e1392578508e1c78649a1e3c31bda05ef4388d967dbd654461b140",
+    "notices/span-attribution.txt": "2bb98c5155725644491fe894aa468d0b76f17b90d378d0990d723b36e17cab85",
+    "notices/utfcpp-4.0.9--utfcpp-4.0.9__LICENSE": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+    "notices/json-LICENSE.MIT": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+    "notices/span-LICENSE_1_0.txt": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+  },
+  "files": {
+    "insight-binary-darwin-arm64": {
+      "size": 3038984,
+      "sha256": "ffbe5f37ec336a96fe4e885247e321b63cbd5b8f5d7809d8fa00f812ac0d25b9"
+    }
+  },
+  "sourceLicense": "MIT",
+  "dependencies": "dependencies.json",
+  "reproducible": true,
+  "staticLibrary": {
+    "name": "LIEF-1.0.0-Darwin-arm64.tar.gz",
+    "sha256": "c7bedf2e2acab9bced1c8701b06261fc6f4eba1957f80cbf86323a3f5e172167",
+    "url": "https://github.com/lief-project/LIEF/releases/download/1.0.0/LIEF-1.0.0-Darwin-arm64.tar.gz",
+    "mirror": "https://github.com/iXab3r/insight-cli/releases/download/tool-lief-1.0.0-r1/LIEF-1.0.0-Darwin-arm64.tar.gz"
+  },
+  "linkedSystemLibraries": [
+    "/usr/lib/libc++.1.dylib",
+    "/usr/lib/libSystem.B.dylib"
+  ]
+}

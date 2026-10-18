@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "LLVM toolbox unit; full-toolbox gate remains open",
+  "distribution": {
+    "release": "https://github.com/iXab3r/insight-cli/releases/tag/tool-llvm-utilities-23.1.3-r1",
+    "binarySha256": "2599cb40282085a61a3d8b50003d75d556010d764c05a9bf30e45a7c7b5b7861",
+    "assetReadbackVerified": true,
+    "sourceAndFullLicenseRetained": true
+  },
+  "native": {
+    "schema": 1,
+    "state": "passed",
+    "scope": "Real public CLI developer proof; independent cold/prepared model gate separate",
+    "version": "0.2.0",
+    "inputs": [
+      {
+        "name": "program.exe",
+        "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+      },
+      {
+        "name": "program.pdb",
+        "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+      },
+      {
+        "name": "program.macho",
+        "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+      },
+      {
+        "name": "program.elf",
+        "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+      }
+    ],
+    "checks": {
+      "peLinkage": true,
+      "sectionConstants": true,
+      "machoLinkage": true,
+      "elfLinkage": true,
+      "pdbSummaryModulesGlobalsPublicsProceduresTypes": true,
+      "hexTypeIndexCorrect": true,
+      "boundedDisassembly": true,
+      "pagedOutput": true,
+      "outputParentsAndNoOverwrite": true,
+      "externalFamilyDriftRefused": true,
+      "externalFamilyPreserved": true,
+      "inputsUnchanged": true,
+      "checkpointSurvivesRemoval": true,
+      "terminalOwnedProcesses": true
+    },
+    "cleanupComplete": true
+  },
+  "gherkin": {
+    "executed": 3,
+    "passed": 3,
+    "scope": "Host metadata, container recovery and native LLVM research; not model acceptance"
+  },
+  "agentCases": [
+    {
+      "artifactSha256": "cc4f82a42c63d7f428fce0845c2c6ccba59c06b9f8409b17ac032852f9499222",
+      "packageBuild": "0f2ddb743ade5057115fa100cb758d67ee03675ed03212711b16e5dff17c55ab",
+      "skillBundleSha256": "dcfa1bb1a86e1fc5eb7fb8de4067c0083167841bf1aba9f6c8e0329291094c10",
+      "promptSha256": "aa12a332a4b7bc732b5b98885d3be9343bea7507b53a3928c3d1b8866d1c6565",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "low",
+      "elapsedMs": 125867,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "cold",
+      "state": "incomplete",
+      "reason": "No concrete pricing constants; cold also confused ordinary ELF symbols with dynamic exports",
+      "modelExitWasNotAcceptance": true
+    },
+    {
+      "artifactSha256": "cc4f82a42c63d7f428fce0845c2c6ccba59c06b9f8409b17ac032852f9499222",
+      "packageBuild": "0f2ddb743ade5057115fa100cb758d67ee03675ed03212711b16e5dff17c55ab",
+      "skillBundleSha256": "dcfa1bb1a86e1fc5eb7fb8de4067c0083167841bf1aba9f6c8e0329291094c10",
+      "promptSha256": "aa12a332a4b7bc732b5b98885d3be9343bea7507b53a3928c3d1b8866d1c6565",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "low",
+      "elapsedMs": 87163,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "prepared",
+      "state": "incomplete",
+      "reason": "No concrete pricing constants; cold also confused ordinary ELF symbols with dynamic exports",
+      "modelExitWasNotAcceptance": true
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "2f112927bee52047effb9db25a9447da6c916fe606c80a2b5b156d092623e769",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "low",
+      "elapsedMs": 163947,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "cold",
+      "state": "incomplete",
+      "reason": "Concrete constants and boundary totals recovered, but cold retained contradictory intermediate address arithmetic and both reports misstated parts of the symbol/export inventory",
+      "modelExitWasNotAcceptance": true
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "2f112927bee52047effb9db25a9447da6c916fe606c80a2b5b156d092623e769",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "low",
+      "elapsedMs": 116534,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "prepared",
+      "state": "incomplete",
+      "reason": "Concrete constants and boundary totals recovered, but cold retained contradictory intermediate address arithmetic and both reports misstated parts of the symbol/export inventory",
+      "modelExitWasNotAcceptance": true
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "89a93eaf0a0ec6bd3387cbe863a70242d4d2efee9cf152990b571f46d1d9d4b3",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "medium",
+      "elapsedMs": 139190,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "cold",
+      "state": "passed",
+      "acceptanceScope": "Required business questions: format/linkage, concrete pricing and boundary values, PDB addresses/layout, retained byte-verified evidence and owned cleanup",
+      "reportSha256": "818d3cc5f305f63c382dbda1b6ad0db2db3b569ff7973c131561101509ce6863",
+      "checkpointFiles": 31,
+      "checkpointBytesMatched": true,
+      "allOwnedToolProcessesTerminal": true,
+      "modelExitWasNotAcceptance": true,
+      "reviewNotes": [
+        "Cold did not inspect the supplied DLL adjustment body; its final phrasing overstates that uncertainty. The required Windows base-pricing result is independently supported."
+      ]
+    },
+    {
+      "artifactSha256": "a8c228189186150a2bfdc584f3407936e32907c174f7ad0793d059df0e6776ea",
+      "packageBuild": "229c77f70d297d0bbe8bcf8c6fbb3d761e3b0ccd425ada4b03e8008b5826bf86",
+      "skillBundleSha256": "91d83bf99c5299cee7af64e2bffc46e3efac723ef620d25b7bf5f5e70d18a9d0",
+      "promptSha256": "89a93eaf0a0ec6bd3387cbe863a70242d4d2efee9cf152990b571f46d1d9d4b3",
+      "inputs": [
+        {
+          "path": "input/program.exe",
+          "sha256": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3"
+        },
+        {
+          "path": "input/program.pdb",
+          "sha256": "68e6b7b8d245cd7f5a86ef0d1a5b48a99bac02487f341de1e918edb649ad6ded"
+        },
+        {
+          "path": "input/program.macho",
+          "sha256": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+        },
+        {
+          "path": "input/program.elf",
+          "sha256": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78"
+        },
+        {
+          "path": "input/PolicyNative.dll",
+          "sha256": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170"
+        },
+        {
+          "path": "input/libpolicy.so",
+          "sha256": "1475305f64a98bfb9f3be98e281b37d47d3913a6b8f36be598bfef8d7caca2c7"
+        }
+      ],
+      "model": "gpt-6-luna",
+      "reasoningEffort": "medium",
+      "elapsedMs": 135439,
+      "ownerStopped": true,
+      "inputsUnchanged": true,
+      "artifactUnchanged": true,
+      "mode": "prepared",
+      "state": "passed",
+      "acceptanceScope": "Required business questions: format/linkage, concrete pricing and boundary values, PDB addresses/layout, retained byte-verified evidence and owned cleanup",
+      "reportSha256": "277da96e8db24cfdf8bf15efece84ce914c4c9ab65a41799d80aa5c89cea4a01",
+      "checkpointFiles": 43,
+      "checkpointBytesMatched": true,
+      "allOwnedToolProcessesTerminal": true,
+      "modelExitWasNotAcceptance": true,
+      "reviewNotes": [
+        "The introductory prose miscounts the five image files as four; the inventory table identifies all five correctly."
+      ]
+    }
+  ],
+  "wholeToolboxAccepted": false,
+  "controls": [
+    "Actual project startup skill metadata; business prompt contains no tool names, commands or answer hints",
+    "Fresh ephemeral cold/prepared contexts; ordinary project evidence rules",
+    "Earlier low-reasoning failures remain recorded; success is not inferred from process exit",
+    "Each accepted checkpoint was independently matched to the canonical project files; tool process ledger and owner shutdown checked"
+  ],
+  "interpretation": "LLVM unit business gate passed on the frozen package with gpt-6-luna medium. Four low-reasoning trials remained semantically incomplete. This is evidence of usable tooling and a reviewed workflow, not a guarantee that an unreviewed low-reasoning report is correct."
+}

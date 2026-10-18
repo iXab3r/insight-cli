@@ -30,7 +30,7 @@ try{
  for(const name of [profile,externalProfile]){await call(['profile','create',name],{global:true});await call(['permissions','grant','Update'],{selected:name});await call(['permissions','grant','Destructive'],{selected:name});}
  const initial=await call(['ghidra','status']);assert.equal(initial.mode,'unconfigured');assert.deepEqual(initial.missing,['jdk','ghidra']);assert.equal((await call(['ghidra','server','status'])).state,'runtime_not_ready');
  report.checks.freshProfileWithoutRuntimePaths=true;
- const downloaded=await call(['ghidra','download']);assert.equal(downloaded.items.length,2);report.artifacts=downloaded.items.map(({name,sha256,license})=>({name,sha256,license}));
+ const downloaded=await call(['ghidra','download']);assert.equal(downloaded.items.length,initial.capabilities.debugger.backend==='managed-lldb'?3:2);report.artifacts=downloaded.items.map(({name,sha256,license})=>({name,sha256,license}));
  assert.equal((await call(['ghidra','download','--offline'])).state,'downloaded');report.checks.pinnedDownloadsAndOfflineCache=true;
  const installed=await call(['ghidra','install','--offline']);assert.equal(installed.mode,'managed');assert.ok(installed.java.includes('/runtime/installations/'));assert.ok(installed.ghidraHome.includes('/runtime/installations/'));report.runtimeFingerprint=installed.fingerprint;
  const doctor=await call(['ghidra','doctor']);assert.equal(doctor.state,'verified');assert.equal(doctor.server,true);assert.equal(doctor.decompiler,true);assert.equal(doctor.debugger.state,'ready');report.checks.nativeInstallAndDoctor=true;

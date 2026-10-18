@@ -33,3 +33,36 @@ test('shared cache validates cancellation and declared size without activating p
  const results=await Promise.all([cacheArtifact(a,root,fetcher,new AbortController().signal),cacheArtifact(a,root,fetcher,new AbortController().signal)]);
  assert.equal(results[0],results[1]);
 });
+
+test('installation fingerprints survive staging relocation and an aliased parent without admitting escaping links',async t=>{
+ if(process.platform==='win32'){t.skip('Symbolic-link privileges are not a Windows unit prerequisite');return;}
+ const {mkdtemp,rm,mkdir,writeFile,symlink,rename}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {treeFingerprint}=await import('../src/tool-runtime/store.js');
+ const root=await mkdtemp(join(tmpdir(),'linked-installation-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const actual=join(root,'actual'),alias=join(root,'alias');await mkdir(actual);await symlink(actual,alias,'dir');
+ const stage=join(alias,'stage');await mkdir(join(stage,'Framework/Versions/A'),{recursive:true});await writeFile(join(stage,'Framework/Versions/A/runtime'),'original');await symlink('A',join(stage,'Framework/Versions/Current'),'dir');await symlink('Versions/Current/runtime',join(stage,'Framework/runtime'));
+ const expected=await treeFingerprint(stage);const installed=join(alias,'installed');await rename(stage,installed);
+ assert.equal(await treeFingerprint(installed),expected);assert.equal(await treeFingerprint(join(actual,'installed')),expected);
+ await writeFile(join(installed,'Framework/Versions/A/runtime'),'modified');assert.notEqual(await treeFingerprint(installed),expected);
+ await symlink(root,join(installed,'escape'),'dir');await assert.rejects(treeFingerprint(installed),/escapes/);
+});
+
+test('native preflight failure retains a readable terminal record without freezing tool removal',async t=>{
+ const {mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {runTool}=await import('../src/tool-runtime/run.js'),{listProcesses}=await import('../src/tool-runtime/supervisor.js'),{assertUnused}=await import('../src/tool-runtime/store.js');
+ const root=await mkdtemp(join(tmpdir(),'tool-native-preflight-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ await assert.rejects(runTool({appArguments:{AppDataDirectory:root},environment:{PATH:process.env.PATH},signal:new AbortController().signal},{tool:'fixture',role:'invalid-native-deadline',executable:process.execPath,nativeDeadline:true,timeoutMs:0}));
+ const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');await assertUnused(root,'fixture');
+});
+
+test('child runtime verification rejects changed code, receipts and executable substitution',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {verifyManagedInstallation}=await import('../src/tool-runtime/installer.js'),{toolRoot,treeFingerprint,atomicWrite}=await import('../src/tool-runtime/store.js');
+ const directory=await mkdtemp(join(tmpdir(),'child-runtime-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const id='a'.repeat(64),root=join(toolRoot(directory,'fixture'),'installations',id),executable=join(root,'bin/lldb');await mkdir(join(root,'bin'),{recursive:true});await writeFile(executable,'verified-runtime');
+ const selected={schema:1 as const,tool:'fixture',id,mode:'managed' as const,root,executable,arguments:[],environment:{PYTHONNOUSERSITE:'1'},roots:{},components:{},fingerprint:await treeFingerprint(root),lastProbe:{},selectedAt:new Date().toISOString()};
+ await atomicWrite(join(root,'ready.json'),selected);await verifyManagedInstallation(directory,'fixture',selected);
+ await assert.rejects(verifyManagedInstallation(directory,'fixture',{...selected,executable:process.execPath}),/receipt/);
+ await assert.rejects(verifyManagedInstallation(directory,'fixture',{...selected,environment:{PYTHONNOUSERSITE:'0'}}),/differs/);
+ await writeFile(executable,'modified-runtime');await assert.rejects(verifyManagedInstallation(directory,'fixture',selected),/code differs/);
+});

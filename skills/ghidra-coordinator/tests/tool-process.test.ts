@@ -33,3 +33,13 @@ test('failed exits redact diagnostics and a one-shot cannot leave inherited outp
   assert.match((error as {code:string}).code,/background.output/);return true;
  });
 });
+test('binary stdout export preserves exact bytes, refuses overwrite and leaves no success artifact on failed execution',async t=>{
+ const c=await fixture(t),output=join(c.appArguments.AppDataDirectory,'recovered.bin');
+ const result=await runTool(c,{tool:'fixture',role:'binary',executable:process.execPath,arguments:['-e','process.stdout.write(Buffer.from([0,255,128,13,10,0]))'],outputFile:output});
+ assert.equal(result.exitCode,0);assert.deepEqual(await readFile(output),Buffer.from([0,255,128,13,10,0]));
+ await assert.rejects(runTool(c,{tool:'fixture',role:'binary',executable:process.execPath,arguments:['-e','process.stdout.write("overwrite")'],outputFile:output}));
+ assert.deepEqual(await readFile(output),Buffer.from([0,255,128,13,10,0]));
+ const failed=join(c.appArguments.AppDataDirectory,'failed.bin');
+ await assert.rejects(runTool(c,{tool:'fixture',role:'binary',executable:process.execPath,arguments:['-e','process.stdout.write("partial");process.exitCode=3'],outputFile:failed}));
+ await assert.rejects(readFile(failed));
+});

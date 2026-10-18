@@ -1,12 +1,36 @@
 # Agent toolbox: delivery plan
 
-Status: full delivery scope selected on 2026-10-17; detailed plan proposed, planning only. The owner selected the product direction:
-insight-cli supplies a toolbox with a discoverable skill for each analytical tool. The
-runtime-only delivery and two successful worker workflows do not establish toolbox readiness.
-This document does not start implementation or mark future tools delivered.
+Status: all sixteen analytical families and six capabilities have implemented public
+surfaces, 25 packaged skills and recorded native proofs. Reviewed cold/prepared model units
+cover 7-Zip, LLVM, dump/stack/trace, DiE, LLDB, Frida, TShark, mitmproxy, C01–C05,
+ILSpy project/resources and C06 bounded research. The corrected C06 cold report and excerpt
+match the saved checkpoint byte for byte. These unit receipts retain their original package
+identities and do not complete the exact-artifact whole-toolbox agent gate.
+
+The final macOS native gate passed **20 scenarios, zero failures and four declared host
+skips** on source `f3ea16f`, frozen package
+`87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0`, in 21m35s.
+A separate recursive public-CLI preflight passed all 33 calls on that same package. The
+combined gate covers real LLDB/Frida lifetime faults, ordinary and recursive Ghidra CPU
+returns, disconnected trace restoration, and private debugger dependency delivery/removal.
+Windows passed all seven scoped native jobs; Linux and offline CI also passed on `f3ea16f`.
+
+The GUI correction delivers private LLDB/Python on macOS 15+ ARM64, verifies native process
+ownership through profile aliases, and corrects reentrant SDK trace-batch/model-transaction
+cleanup. Earlier passing and failed candidates retain their exact identities in the
+[caller receipt](verification/toolbox-ghidra-caller-native.json) and
+[combined receipt](verification/toolbox-combined-native.json).
+
+Current offline regression passes 216 tests with two explicit native opt-in skips, plus
+31 release checks. Relocated package installation, 25 skill validations, actual supervisor
+startup/early-stop checks, real pinned-wheel patch/syntax checks and source-pack byte identity
+passed. Reviewed cold/prepared GUI business units retain their earlier package identities;
+broader family/host model coverage and whole-toolbox agent acceptance remain open. Factory
+discovery/access fixes are merged and pinned. The [inventory audit](TOOLBOX-AUDIT.md) separates
+implementation, native verification and reviewed model evidence.
 
 Execution tracker: [epic #23](https://github.com/iXab3r/insight-cli/issues/23), with nine native stage sub-issues
-and 22 tool/capability sub-issues under TB-07. All remain planned/open.
+and 22 tool/capability sub-issues under TB-07. All remain open; completion requires the evidence below.
 
 ## Outcome and scope
 
@@ -29,11 +53,25 @@ Current verified inventory:
 | Item | Current state | Role in toolbox |
 | --- | --- | --- |
 | Ghidra | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
-| ILSpy | Runtime/API implemented; selected installed-tool agent workflow passed | Analytical tool with its own skill and complete new toolbox gate still required |
+| ILSpy | Runtime/API implemented; reviewed cold/prepared project/resource and metadata units passed | Analytical tool with its own skill; combined/final-family gate remains separate |
 | artifacts | File/folder save implemented | Supporting application with concise workflow guidance; no artificial download/install lifecycle |
 | Ghidra Server/headless/GUI/debugger roles | Managed within Ghidra | Explicit capabilities/lifecycle under Ghidra; list separately only when independently useful to the agent |
 | JDK/.NET runtime | Managed dependencies | Delivered by the consuming tool; not advertised as independently accepted analytical tools |
-| Additional tool candidates | Recovered into the complete inventory below | All included in this planned delivery; none are claimed implemented |
+| 7-Zip | Public CLI adapter, dedicated skill, native Gherkin and independent cold/prepared host trials passed for the recorded package | Container inventory, integrity and bounded ordinary-file recovery |
+| LLVM utilities | Adapter/skill and pinned four-utility distribution implemented; native/Gherkin and reviewed cold/prepared medium-reasoning unit gates passed on the recorded package | Headers, linkage, symbols, instruction windows and PDB records |
+| .NET dump / stack / trace | Three adapters and dedicated skills implemented; combined native CLI/Gherkin passed; dump/stack/trace cold/prepared agent proofs independently reviewed; earlier quota interruptions remain historical | Managed snapshot objects, live waiting stacks and bounded EventPipe thread-time research |
+| Detect It Easy | Console adapter/skill, private Qt/database and source/notices bundle; native CLI/Gherkin and cold/prepared agent proof passed with explicit heuristic errors | Header and compiler/runtime/packer triage with explicit partial scan results |
+| LLDB | Owned-launch adapter/skill and pinned debugger/library/debugserver distribution; native snapshots/lifetime faults and source-unavailable cold/prepared model unit proof passed | Breakpoint arguments/returns, registers, memory and backtrace with kernel deadline after owner loss |
+| Frida | Modules/exports and script-observation adapter/skill; official Node binding/runtime closure and full source/notices mirror; native CLI/collector/helper fault and cold/prepared passive-hook model proof passed on recorded candidates | Runtime argument/result corroboration while preserving the external target lifetime |
+| WinDbg / ProcMon / dnSpyEx | Windows native public CLI Gherkin passed on recorded candidates; independent model gates pending | Dump research, scoped file observation, actual managed debug and copy-only edit |
+| strace | Linux x64 source-built runtime and native public CLI Gherkin passed; independent model gate pending | Owned execution and bounded syscall evidence |
+| TShark / mitmproxy | Source-complete mirrored runtimes, dedicated skills and native public CLI Gherkin and reviewed cold/prepared model unit proofs passed | Offline packet/stream research and explicit bounded HTTP observation/comparison |
+| Managed metadata | Packaged dnlib-backed query/compare API, native Gherkin and cold/prepared model unit proof passed | Exact-token IL, P/Invoke and structural assembly comparison |
+| Managed heap queries | ClrMD-backed dump API/skill, full dependency notices, native public CLI Gherkin and reviewed cold/prepared model unit proof passed | Bounded object fields and managed stacks with matching explicit DAC |
+| Structured binaries | LIEF API/skill, immutable source mirror, native Gherkin and cold/prepared copy-edit model unit proof passed | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
+| Managed/native correspondence | Public API composition, dedicated skill, real Ghidra Gherkin and reviewed cold/prepared static publication/readback/cleanup unit proof passed | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
+| Owned process capture | Capture API/skill, execution/fault Gherkin and cold/prepared retained-report model unit proof passed | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
+| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research and final locators passed; a fresh cold correction verified every saved report byte and the final checkpoint locator | Small metadata/index queries and focused source-bound evidence pages |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -41,6 +79,22 @@ unsupported result elsewhere. Do not make every tool run on every OS, add emulat
 a complete tool-by-all-OS test matrix. Native proof runs in an appropriate environment for that
 tool; an unavailable environment leaves the row unverified, never implicitly passed. Codex is
 the first actual agent-host gate, not the universal definition of an agent.
+
+## Remaining acceptance gates
+
+The implementation inventory is complete; the following checks remain distinct from it:
+
+- Ghidra's complete GUI/debugger family and the final multi-client whole-toolbox agent
+  workflow require their own recorded acceptance. Static interop publication/readback is
+  a selected unit, not proof of every exposed operation.
+- WinDbg, ProcMon, dnSpyEx and strace have actual native CI, but no independently reviewed
+  cold/prepared model trials in their respective native hosts. A native script cannot
+  substitute for those trials; an authenticated model runner is not provisioned there.
+- The first combined native attempt's empty version-probe/Frida startup failures remain
+  unexplained historical observations. Subsequent passing runs do not claim a diagnosed
+  fix, longer deadlines or permission to replay unknown effects.
+- Final exact-artifact whole-toolbox agent acceptance and release review remain open. No npm
+  publication or merge of draft PR #55 follows from individual unit success.
 
 ## Complete tool and capability inventory
 
@@ -99,7 +153,9 @@ runner is not assumed to provide it. TB-01 verifies this before that tool is imp
 
 These sources inform investigation; they do not establish that our adapters or redistribution
 rights are already verified. Check exact distribution terms, prerequisites and automation before
-promising a mirror or admitting a platform. If a source cannot be mirrored, record that obstacle
+promising a mirror or admitting a platform. ProcMon uses the owner-selected exception: explicit Microsoft download, local cache and pinned
+SHA256. WinDbg has the same verified redistribution restriction and uses a separate explicit
+Microsoft delivery policy. If another source cannot be mirrored, record that obstacle
 and decide a permitted delivery path explicitly; never silently fall back to arbitrary upstream.
 
 ## Agreed design direction
@@ -125,7 +181,7 @@ existing artifact/hash catalogs continue to describe distribution bytes, not res
 
 ### Catalog and proposed CLI surface
 
-These additions are proposed, not existing commands:
+The foundation candidate now implements these commands; whole-toolbox acceptance is still pending:
 
 ```text
 insight-cli tools list --json
@@ -157,8 +213,9 @@ release path would leave later tool skills stale.
 Provide one explicit connection of the toolbox bundle to the supported host, with update and
 removal semantics scoped to owned entries. New admitted tool skills must become discoverable
 without a bespoke user procedure for each tool. npm installation does not silently edit agent
-settings. Select the concrete connection/export mechanism during TB-02 rather than implementing
-several competing installers. Verify actual startup metadata and implicit routing.
+settings. The selected mechanism is one explicit project-local link to the deterministic `skill-bundle`,
+whose path comes from `skill --json`. A stable global npm prefix carries upgrades; disconnect
+removes only that owned link. This avoids a second host configuration store or per-tool installers. Verify actual startup metadata and implicit routing.
 
 Factory owns generic help/discovery/bootstrap and IPC behavior. Its open
 [skill policy issue #29](https://github.com/iXab3r/EyeAuras.CliFactory/issues/29) already owns the
@@ -172,9 +229,10 @@ to stop another agent's owner. Grant no broad network access just to reach a loc
 
 ## Ordered work hierarchy
 
-Statuses below are planned, not completed. Technical inspection/design of TB-01 has started;
-the owner has selected full inventory scope and tool-specific applicability. This planning
-turn does not start implementation or count the preliminary inventory as a completed audit.
+TB-01 is in progress. Required discovery/skill foundation work for TB-02–TB-05 is in draft PR #55;
+no phase exit is claimed. TB-06–TB-09 remain pending their gates. The owner selected full inventory
+scope and tool-specific applicability. Preliminary metadata and vendor probes do not complete
+the audit or the tool delivery.
 
 | ID | Deliverable | Depends on | Acceptance / exit condition |
 | --- | --- | --- | --- |
@@ -275,3 +333,33 @@ report an actual blocker rather than inventing support or silently removing a to
 Host mechanics, reference packaging, admission checks, test bindings and scoped IPC diagnostics
 are engineering tasks within the selected direction. Publishing a new npm version remains a
 separate release action, not implied by planning.
+
+Native delivery checkpoint: LLDB and Frida have managed runtimes, public facades,
+packaged guidance and real macOS fault/CLI proof. WinDbg now has a Windows x64
+read-only dump facade and native Gherkin proof; strace has a source-built mirrored
+Linux x64 runtime and native Gherkin proof. Exact artifacts and limitations are in
+`verification/toolbox-{lldb,frida,windbg,strace,procmon}.json`. Windows common Job Object
+lifetime also passed real completion, timeout, kill, owner-loss and overflow cases.
+These checkpoints do not close independent agent or combined full-inventory gates.
+ProcMon now has a vendor-direct lifecycle, scoped observe/retained inspect facade,
+private HKCU, packaged skill and public Windows Gherkin proof, including stop/kill,
+external drift and preserved original process/settings. TShark now has a source-complete
+console mirror, offline packet/stream facade, skill and real global CLI Gherkin proof
+(`verification/toolbox-tshark.json`). dnSpyEx now also passed the globally installed Windows public CLI Gherkin gate, including
+Framework/Core breakpoints, copied edits, stop/kill and external preservation
+(`verification/toolbox-dnspy.json`). mitmproxy passed explicit TLS, HTTP comparison,
+interruption/recovery and external-copy Gherkin proof (`verification/toolbox-mitmproxy.json`).
+C01 passed real static assembly comparison (`verification/toolbox-managed-metadata.json`);
+C02 passed actual structured object/stack queries and wrong DAC refusal
+(`verification/toolbox-managed-heap.json`); C03 passed native structured binary queries and exact copied field verification
+(`verification/toolbox-binary.json`). C04 passed concrete metadata/export/Ghidra correspondence
+with merge/refresh and independent readback (`verification/toolbox-interop.json`). C05 passed
+exact native capture and owner-loss/no-replay faults (`verification/toolbox-capture.json`).
+C06 passed actual ILSpy/Ghidra text windows (`verification/toolbox-overview.json`).
+The complete implementation inventory now contains 16 analytical families, six capabilities
+and 25 skills. Offline verification: 218 tests, 216 passed and two explicitly opt-in skipped;
+release/admission checks 31/31 passed. Combined exact-artifact native acceptance passed on
+`f3ea16f`; remaining inference-agent gates retain separate status.
+Historical quota interruptions are retained in receipts; inference was available for the
+subsequent reviewed tasks. Missing native agent hosts, broader family coverage and actual
+review findings retain their own open gates.

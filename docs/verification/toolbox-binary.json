@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Native global public CLI LIEF proof; independent model gates pending",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputs": {
+    "program.exe": "2f4fc7fb3284e42a526c71a8f6dccff8bb1bdb8f2987b8eaa6d6e95474b9e2c3",
+    "PolicyNative.dll": "5dab1b1569eb3000646acf5b50fe31ea6a20485edd6ddb4a9689d9830cf73170",
+    "program.elf": "0b9f2f4bca653bfc601c1f7cba9d3e6447991b6a43113220d40ccbfab739cf78",
+    "program.macho": "cb6bcd3af1ad5d698a392c61d1dd575f3e6611751de93031bf2f55064411a801"
+  },
+  "checks": {
+    "packagedHelperWithoutCompiler": true,
+    "actualPeHeaderAndSections": true,
+    "actualPeImportExportAndAddress": true,
+    "actualElfLinkage": true,
+    "actualThinMachO": true,
+    "focusedPagination": true,
+    "guardedNewPeSubsystemCopy": true,
+    "independentExactFieldBytes": true,
+    "readbackNewCopy": true,
+    "wrongExpectedValueRefused": true,
+    "nonPeEditRefused": true,
+    "existingOutputsPreserved": true,
+    "invalidBoundsRefused": true,
+    "immutableOriginals": true,
+    "ordinaryCheckpoint": true,
+    "terminalOwnedProcesses": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "d144a6287baf8533442c73057e48894e2f8ae577aa89baa3c767ffc8457cc337"
+  },
+  "cleanupComplete": true,
+  "sourceBaseCommit": "2bd3488",
+  "candidate": "Working-tree capability candidate; package SHA/build identify actual tested bytes",
+  "packageSha256": "e65065658783ce037c6f9cfd504f4d443a7389ac227e58bf758a8af72b0b3221",
+  "toolRelease": "https://github.com/iXab3r/insight-cli/releases/tag/tool-lief-1.0.0-r1",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "runId": "7b92cd2d234a40d984595c43424d4f74",
+    "passed": 1,
+    "failed": 0
+  }
+}

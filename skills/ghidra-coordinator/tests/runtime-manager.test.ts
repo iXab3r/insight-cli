@@ -52,7 +52,7 @@ test('external executable resolves a complete installation and never accepts a t
 });
 test('passive process inventory conservatively blocks live receipts and honors verified stopped receipts',async t=>{
  const root=await temporary(t),processRoot=join(root,'workspace/ghidra-native/context/c/one');await mkdir(processRoot,{recursive:true});
- const receipt={pid:process.pid,tokenSecret:'fixture',kind:'context',context:'c',target:'t'};await runtimeWrite(join(processRoot,'process.json'),receipt);assert.equal((await runtimeProcesses(root)).length,1);
+ const receipt={pid:process.pid,tokenSecret:'fixture',kind:'context',context:'c',session:'s_owned',target:'t'};await runtimeWrite(join(processRoot,'process.json'),receipt);assert.equal((await runtimeProcesses(root)).length,1);assert.equal((await runtimeProcesses(root))[0]?.session,'s_owned');
  await runtimeWrite(join(processRoot,'stopped.json'),{pid:process.pid,tokenSecret:'other'});assert.equal((await runtimeProcesses(root)).length,1);
  await runtimeWrite(join(processRoot,'stopped.json'),{pid:process.pid,tokenSecret:'fixture'});assert.equal((await runtimeProcesses(root)).length,0);
 });
@@ -86,6 +86,17 @@ test('runtime removal deletes owned components and preserves external code, rese
  assert.equal(await readFile(join(external,'ghidraRun'),'utf8'),'external code');assert.equal(await readFile(join(root,'workspace/workspace.sqlite'),'utf8'),'retained journal');assert.equal(await readFile(join(root,'materials/evidence.md'),'utf8'),'retained evidence');
  assert.throws(()=>runtimeValues(root,{}),/uninstalled/);
 });
+test('managed Ghidra accepts a retained profile alias but rejects an installation redirected outside it',async t=>{
+ const root=await temporary(t),profile=join(root,'profile'),alias=join(root,'profile-alias'),id='a'.repeat(64),home=join(profile,'runtime/installations',id,'ghidra');
+ await mkdir(home,{recursive:true});await symlink(profile,alias,process.platform==='win32'?'junction':'dir');
+ const selected={schema:1,mode:'managed',id,ghidraHome:join(alias,'runtime/installations',id,'ghidra'),java:join(alias,'runtime/installations',id,'jdk/bin/java'),fingerprint:'b'.repeat(64),selectedAt:'now'};
+ await runtimeWrite(join(profile,'runtime/selection.json'),selected);await runtimeWrite(join(profile,'runtime/installations',id,'ready.json'),{});
+ assert.deepEqual(runtimeSelection(profile),selected);assert.deepEqual(runtimeSelection(alias),selected);assert.equal(runtimeValues(profile,{}).ghidraHome,selected.ghidraHome);
+ const outside=join(root,'outside');await mkdir(outside);await rm(home,{recursive:true});await symlink(outside,home,process.platform==='win32'?'junction':'dir');
+ assert.throws(()=>runtimeSelection(profile),/outside/);await rm(home,{recursive:true});
+ await runtimeWrite(join(profile,'runtime/selection.json'),{...selected,uninstalledAt:'later'});assert.equal(runtimeSelection(profile)?.uninstalledAt,'later');assert.throws(()=>runtimeValues(profile,{}),/uninstalled/);
+});
+
 test('runtime replacement refuses a live context before acquisition and never signals its PID',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]}),app=f.createApplication(runtime=>createInsightCli({runtime}));
  await runtimeWrite(join(f.appArguments.AppDataDirectory,'workspace/ghidra-native/context/c/r/process.json'),{pid:process.pid,kind:'context',context:'c',target:'t',tokenSecret:'fixture'});
@@ -118,4 +129,18 @@ test('portable zip extraction preserves native executable modes and refuses link
  if(process.platform!=='win32')assert.ok((await stat(join(root,'valid/sdk/bin/tool'))).mode&0o100);
  for(const [name,mode]of [['../escape',0o100644],['sdk/link',0o120777]] as const){await writeFile(file,zipFile(name,'../../escape',mode));await assert.rejects(extractArchive(file,join(root,'invalid-'+mode),'zip'));}
  await assert.rejects(stat(join(root,'escape')));
+});
+
+test('vendor-only acquisition is explicit, pinned and cacheable without an implicit mirror fallback',async t=>{
+ const {createHash}=await import('node:crypto');const {catalogArtifact}=await import('../src/tool-runtime/catalog.js');
+ const root=await mkdtemp(join(tmpdir(),'vendor-cache-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const bytes=Buffer.from('owned vendor fixture'),artifact={...catalogArtifact('477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10'),size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+ assert.equal(artifact.delivery?.publisher,'Microsoft');assert.equal(artifact.url,'https://download.sysinternals.com/files/ProcessMonitor.zip');
+ let requests=0;const fetcher=(async(url:string)=>{requests++;assert.equal(url,artifact.url);return new Response(bytes);}) as typeof fetch,signal=new AbortController().signal;
+ await assert.rejects(cacheArtifact(artifact,root,fetcher,signal),/explicit vendor download/);assert.equal(requests,0);
+ const path=await cacheArtifact(artifact,root,fetcher,signal,false,true);assert.equal(requests,1);assert.equal(await fileSha256(path),artifact.sha256);
+ assert.equal(await cacheArtifact(artifact,root,fetcher,signal,true),path);assert.equal(requests,1);
+ await writeFile(path,'corrupt');await assert.rejects(cacheArtifact(artifact,root,fetcher,signal,false,true),/Cached runtime archive/);assert.equal(requests,1);
+ const other=await mkdtemp(join(tmpdir(),'vendor-mismatch-'));t.after(()=>rm(other,{recursive:true,force:true}));
+ await assert.rejects(cacheArtifact({...artifact,sha256:'f'.repeat(64)},other,fetcher,signal,false,true),/pinned SHA256/);assert.equal(requests,2);
 });

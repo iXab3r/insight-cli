@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Globally installed public CLI native proof; independent model gates pending",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "packageSha256": "67c04c6453679d1fa8646ca4090b83025794897124d08257e1ecd652a00a45af",
+  "build": {
+    "version": 1,
+    "artifact": "c0fd1d9c13f697cbb8ee3689bd82d3852be4b695a37ee31f9bdaad66bd18fa85"
+  },
+  "checks": {
+    "explicitUpstreamDownload": true,
+    "offlineManagedInstall": true,
+    "doctor": true,
+    "actualFrameworkArgument11": true,
+    "actualCoreArgument11": true,
+    "managedStack": true,
+    "boundedPagination": true,
+    "editorDocumentLoaded": true,
+    "patchedBehaviorVerified": true,
+    "expectedConstantMismatchRefused": true,
+    "ownedStopKillCleanup": true,
+    "noInterruptedRelaunch": true,
+    "originalInputsPreserved": true,
+    "externalDriftRefused": true,
+    "externalPreserved": true,
+    "checkpointPreserved": true,
+    "terminalOwnedProcesses": true
+  },
+  "originalSha256": "15ffb8c057317c135af7466a8c462ea4cf2cb640e9bcfff028bd2a82b16337b8",
+  "patchedSha256": "890e8029decea29d6dd95d1cc0ca2d341bc6e1c18eb8d1c4afb4b84e069550ae",
+  "faults": [
+    "stop",
+    "kill"
+  ],
+  "cleanupComplete": true,
+  "sourceCommit": "fa2b03aca833c1008577d1bc794dc8537b9e7029",
+  "workflowRun": "https://github.com/iXab3r/insight-cli/actions/runs/39062864342",
+  "nativeJob": "https://github.com/iXab3r/insight-cli/actions/runs/39062864342/job/117484251563",
+  "nativeGherkin": {
+    "runner": "EyeAuras.Automation",
+    "scenario": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+    "passed": 1,
+    "failed": 0
+  }
+}

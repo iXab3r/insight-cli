@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Upgraded public CLI on the exact retained aliased profile; the original context with a distinct new CPU intent, never a replay or acknowledgment of the original unknown launch",
+  "checks": {
+    "exactProfileSelectedBeforeMutations": true,
+    "originalInputPreserved": true,
+    "sharedR2AndPublishedAnnotationPreserved": true,
+    "sameOriginalContextAndExplicitNewLaunchIntent": true,
+    "actualGuiLldbRegistersStackAndMapping": true,
+    "retainedTraceAndMemoryAfterDisconnectedReopen": true,
+    "allPriorUnknownJournalBytesAndStatesUnchanged": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "priorUnknownRequests": [
+    {
+      "operation": "ghidra.debugger.launch",
+      "state": "failed",
+      "dataSha256": "9982a89b7d43af52a17a9993f7980ae3e783232781e39084729e81db10aba0cf"
+    },
+    {
+      "operation": "ghidra.open",
+      "state": "unknown",
+      "dataSha256": "6c61d37d769c1d36837420936bc3620a86b7d4fb39c5c67519a6ad8931a1849c"
+    }
+  ],
+  "commands": [
+    [
+      "profile",
+      "show"
+    ],
+    [
+      "ghidra",
+      "status"
+    ],
+    [
+      "targets",
+      "show",
+      "t_9242fbd55d60213452ceb56f0791de9d"
+    ],
+    [
+      "ghidra",
+      "open",
+      "--target"
+    ],
+    [
+      "ghidra",
+      "refresh",
+      "--session"
+    ],
+    [
+      "sessions",
+      "status",
+      "s_16bef1f4-a592-4bee-9317-9b8c123e5852"
+    ],
+    [
+      "ghidra",
+      "comments",
+      "get"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "launch-offers"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "launch"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "interrupt"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "registers"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "stack-trace"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "static-to-dynamic"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "read-memory"
+    ],
+    [
+      "ghidra",
+      "close",
+      "--session"
+    ],
+    [
+      "ghidra",
+      "open",
+      "--session"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "status"
+    ],
+    [
+      "ghidra",
+      "debugger",
+      "read-memory"
+    ],
+    [
+      "ghidra",
+      "close",
+      "--session"
+    ],
+    [
+      "ghidra",
+      "server",
+      "stop"
+    ],
+    [
+      "ghidra",
+      "status"
+    ],
+    [
+      "ipc-server",
+      "stop"
+    ]
+  ],
+  "cleanupComplete": true,
+  "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+  "nativeOwnerRegression": {
+    "realProfileAliasAccepted": true,
+    "authenticatedContextOutsideProfileRejected": true,
+    "earlyStopDuringOwnedLaunch": true,
+    "nativeTestsPassed": 2
+  },
+  "retainedHistory": [
+    "Prepared GUI agent initially reached the actual launcher but the supervisor rejected /tmp profile against a /private/tmp GUI root before child registration.",
+    "On context close the original CPU record became failed/disconnected with outcome unknown. The continuation preserved those exact post-close journal bytes and did not replay or acknowledge the old CPU action."
+  ]
+}

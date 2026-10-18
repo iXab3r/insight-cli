@@ -1,0 +1,1401 @@
+{
+  "schema": 1,
+  "skills": [
+    {
+      "name": "insight-cli",
+      "title": "insight-cli",
+      "path": "SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-re",
+      "title": "Insight RE",
+      "path": "skills/insight-re/SKILL.md",
+      "resources": {
+        "references/recovery.md": "references/recovery.md",
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-ghidra",
+      "title": "Insight Ghidra",
+      "path": "skills/insight-ghidra/SKILL.md",
+      "resources": {
+        "references/setup.md": "references/setup.md",
+        "references/research.md": "references/research.md",
+        "references/query-semantics.md": "references/query-semantics.md",
+        "references/native-workflows.md": "references/native-workflows.md",
+        "references/recovery.md": "references/recovery.md",
+        "references/managed-runtime.md": "references/managed-runtime.md",
+        "references/administration.md": "references/administration.md",
+        "references/debugger.md": "references/debugger.md",
+        "references/archive.md": "references/archive.md",
+        "references/extensions-and-sync.md": "references/extensions-and-sync.md",
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-ilspy",
+      "title": "Insight ILSpy",
+      "path": "skills/insight-ilspy/SKILL.md",
+      "resources": {
+        "references/ilspy.md": "references/ilspy.md",
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-artifacts",
+      "title": "Insight Artifacts",
+      "path": "skills/insight-artifacts/SKILL.md",
+      "resources": {
+        "references/artifacts.md": "references/artifacts.md",
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-sevenzip",
+      "title": "Insight 7-Zip",
+      "path": "skills/insight-sevenzip/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-llvm",
+      "title": "Insight LLVM",
+      "path": "skills/insight-llvm/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-dotnet-dump",
+      "title": "Insight .NET Dump",
+      "path": "skills/insight-dotnet-dump/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-dotnet-stack",
+      "title": "Insight .NET Stack",
+      "path": "skills/insight-dotnet-stack/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-dotnet-trace",
+      "title": "Insight .NET Trace",
+      "path": "skills/insight-dotnet-trace/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-die",
+      "title": "Insight Detect It Easy",
+      "path": "skills/insight-die/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-lldb",
+      "title": "Insight LLDB",
+      "path": "skills/insight-lldb/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-frida",
+      "title": "Insight Frida",
+      "path": "skills/insight-frida/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-windbg",
+      "title": "Insight WinDbg",
+      "path": "skills/insight-windbg/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-strace",
+      "title": "Insight strace",
+      "path": "skills/insight-strace/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-procmon",
+      "title": "Insight ProcMon",
+      "path": "skills/insight-procmon/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-dnspy",
+      "title": "Insight dnSpyEx",
+      "path": "skills/insight-dnspy/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-tshark",
+      "title": "Insight TShark",
+      "path": "skills/insight-tshark/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-mitmproxy",
+      "title": "Insight mitmproxy",
+      "path": "skills/insight-mitmproxy/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-managed-metadata",
+      "title": "Insight Managed Metadata",
+      "path": "skills/insight-managed-metadata/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-managed-heap",
+      "title": "Insight Managed Heap",
+      "path": "skills/insight-managed-heap/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-binary",
+      "title": "Insight Binary",
+      "path": "skills/insight-binary/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-interop",
+      "title": "Insight Interop",
+      "path": "skills/insight-interop/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-capture",
+      "title": "Insight Capture",
+      "path": "skills/insight-capture/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    },
+    {
+      "name": "insight-overview",
+      "title": "Insight Overview",
+      "path": "skills/insight-overview/SKILL.md",
+      "resources": {
+        "references/agent-execution.md": "references/agent-execution.md"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "ghidra",
+      "namespace": "ghidra",
+      "kind": "analytical",
+      "skill": "insight-ghidra",
+      "purpose": "Investigate and edit native code in isolated shared analysis contexts",
+      "inputs": [
+        "PE",
+        "ELF",
+        "Mach-O",
+        "supported binary formats"
+      ],
+      "tasks": [
+        "strings and cross-references",
+        "functions and decompilation",
+        "types and program edits",
+        "multi-agent merge/refresh",
+        "managed server and GUI",
+        "native debugger and retained traces"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64",
+        "linux-x64",
+        "win32-x64"
+      ],
+      "dependencies": [
+        "private Ghidra",
+        "private JDK",
+        "packaged Ghidra bridge"
+      ],
+      "workflowCommands": [
+        "ghidra open",
+        "ghidra functions",
+        "ghidra strings",
+        "ghidra merge",
+        "ghidra refresh",
+        "ghidra debugger"
+      ],
+      "limitations": [
+        "GUI/debugger native acceptance is macOS-specific; imported Windows code is not executable on macOS",
+        "Publication is explicit; preserve uncertain journals",
+        "Archive exchange requires a separately configured service"
+      ],
+      "evaluationCase": {
+        "id": "native-shared-research",
+        "inputFamily": "native-branch",
+        "task": "Explain the requested branch in the supplied native input, retain inspectable evidence, publish a useful annotation and verify it from an independent context.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct branch explanation",
+          "ordinary project evidence",
+          "published annotation",
+          "independent fresh-context readback",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "ilspy",
+      "namespace": "ilspy",
+      "kind": "analytical",
+      "skill": "insight-ilspy",
+      "purpose": "Inspect managed .NET types, C#, IL, metadata and resources",
+      "inputs": [
+        "managed .NET assembly"
+      ],
+      "tasks": [
+        "bounded type inventory",
+        "selected type/member decompilation",
+        "IL and metadata inspection",
+        "resource extraction",
+        "project recovery"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64",
+        "linux-x64",
+        "win32-x64"
+      ],
+      "dependencies": [
+        "private ILSpy CLI",
+        "private .NET runtime"
+      ],
+      "workflowCommands": [
+        "ilspy types",
+        "ilspy decompile",
+        "ilspy il",
+        "ilspy metadata",
+        "ilspy resources",
+        "ilspy resource",
+        "ilspy project"
+      ],
+      "limitations": [
+        "Static analysis does not execute code",
+        "NativeAOT inputs need native analysis",
+        "No Ghidra context or merge is required"
+      ],
+      "evaluationCase": {
+        "id": "managed-static-research",
+        "inputFamily": "managed-policy",
+        "task": "Recover the requested managed behavior and embedded configuration from the supplied assembly. Explain the boundary cases and retain focused, inspectable supporting materials.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct behavior and resource findings",
+          "focused code or IL evidence",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "managed-metadata",
+      "namespace": "ilspy",
+      "kind": "capability",
+      "skill": "insight-managed-metadata",
+      "purpose": "Query managed metadata/IL and compare actual changed signatures, methods and P/Invoke declarations without target execution",
+      "inputs": [
+        "managed PE assembly",
+        "immutable managed target",
+        "two assembly revisions"
+      ],
+      "tasks": [
+        "overview managed identity and framework hints",
+        "query MethodDef tokens and normalized IL",
+        "inspect declared P/Invoke metadata",
+        "compare managed signatures, IL and imports across revisions"
+      ],
+      "platforms": [
+        "private .NET 10 provider profiles; native acceptance starts on macOS ARM64"
+      ],
+      "dependencies": [
+        "ilspy managed private .NET runtime, or an explicit compatible dotnet host for external ILSpy",
+        "packaged dnlib 4.5.0 library; no separate application/download"
+      ],
+      "workflowCommands": [
+        "ilspy query",
+        "ilspy compare"
+      ],
+      "limitations": [
+        "Static metadata only; no target execution, dependency resolution or PDB loading",
+        "Tokens are scoped to one exact input; structural equality is not semantic equivalence",
+        "64 MiB inputs; bounded rows/instructions; compare at most 100000 methods, narrowing large inputs explicitly",
+        "P/Invoke declarations do not establish the loaded native file or an observed call"
+      ],
+      "evaluationCase": {
+        "id": "managed-assembly-change-investigation",
+        "inputFamily": "two-owned-managed-assembly-revisions",
+        "task": "Determine which managed method and native import changed between the supplied revisions. Retain exact signature/token/IL evidence, preserve both inputs and distinguish static findings from execution.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual changed managed method and IL constant",
+          "actual changed P/Invoke metadata",
+          "no false change from metadata token renumbering alone",
+          "bounded drilldown and original inputs preserved",
+          "ordinary project evidence"
+        ]
+      }
+    },
+    {
+      "id": "managed-native-linkage",
+      "namespace": "ilspy",
+      "kind": "capability",
+      "skill": "insight-interop",
+      "purpose": "Trace a managed P/Invoke declaration through a supplied native export into a scoped Ghidra function using the existing public APIs",
+      "inputs": [
+        "managed assembly",
+        "explicit native library candidate",
+        "Ghidra native session/target"
+      ],
+      "tasks": [
+        "identify exact managed import metadata",
+        "verify supplied native export and scoped address",
+        "inspect native function and publish qualified correspondence evidence"
+      ],
+      "platforms": [
+        "darwin-arm64 native workflow; static Windows PE/.NET pair; existing per-tool profiles apply"
+      ],
+      "dependencies": [
+        "managed metadata query capability and ILSpy private runtime",
+        "packaged binary query capability",
+        "managed or external Ghidra and Java runtime"
+      ],
+      "workflowCommands": [
+        "ilspy query"
+      ],
+      "limitations": [
+        "Composition of ilspy query, binary query and scoped Ghidra APIs; no additional installation or universal resolver",
+        "A matching filename/export is a static candidate, not proof that the runtime loaded or invoked that file",
+        "Forwarded, ordinal-only, ambiguous decorated/charset names and incompatible architectures require explicit further evidence",
+        "Addresses, tokens and annotations must retain their respective immutable target identities"
+      ],
+      "evaluationCase": {
+        "id": "managed-native-static-correspondence",
+        "inputFamily": "owned-managed-pinvoke-and-native-export-pair",
+        "task": "Explain the supplied managed-to-native boundary, identify the concrete native implementation candidate, inspect its behavior and retain a reviewable shared finding. Distinguish static correspondence from an observed invocation.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "exact P/Invoke module/entrypoint/signature",
+          "candidate native export and immutable address identity",
+          "Ghidra function and useful behavior evidence",
+          "qualified ordinary evidence and verified merge",
+          "no invented runtime invocation"
+        ]
+      }
+    },
+    {
+      "id": "sevenzip",
+      "namespace": "sevenzip",
+      "kind": "analytical",
+      "skill": "insight-sevenzip",
+      "purpose": "Inventory containers and recover configuration or binary inputs as ordinary files",
+      "inputs": [
+        "archives",
+        "supported 7-Zip containers"
+      ],
+      "tasks": [
+        "bounded container inventory",
+        "integrity check",
+        "selected regular-file recovery",
+        "handoff to managed/native analysis"
+      ],
+      "platforms": [
+        "darwin-arm64",
+        "darwin-x64"
+      ],
+      "dependencies": [
+        "private 7zz 26.04"
+      ],
+      "workflowCommands": [
+        "sevenzip list",
+        "sevenzip test",
+        "sevenzip extract"
+      ],
+      "limitations": [
+        "Managed distribution is macOS universal; external compatible executable is optional",
+        "Recovery requires a new output directory; encrypted, linked, colliding or ambiguous entries are unsupported",
+        "64-MiB per file, 256-MiB total and 512-entry recovery limits"
+      ],
+      "evaluationCase": {
+        "id": "container-research",
+        "inputFamily": "packaged-managed-configuration",
+        "task": "Identify which configuration and assembly are supplied by the container, recover the relevant files, explain their relationship and retain evidence using project conventions.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct container inventory",
+          "exact recovered bytes",
+          "useful handoff finding",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "llvm",
+      "namespace": "llvm",
+      "kind": "analytical",
+      "skill": "insight-llvm",
+      "purpose": "Inspect binary structure, linkage, symbols, focused instructions and PDB debug records without an analysis project",
+      "inputs": [
+        "PE",
+        "ELF",
+        "Mach-O",
+        "object files",
+        "PDB"
+      ],
+      "tasks": [
+        "headers, sections and bounded section bytes",
+        "import/export linkage",
+        "llvm-nm symbol inventory",
+        "llvm-objdump bounded disassembly",
+        "llvm-pdbutil summary, modules, globals, publics, procedures and selected types"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private LLVM utilities 23.1.3",
+        "macOS 14+ for managed bundle"
+      ],
+      "workflowCommands": [
+        "llvm headers",
+        "llvm sections",
+        "llvm section-data",
+        "llvm imports",
+        "llvm exports",
+        "llvm symbols",
+        "llvm disassemble",
+        "llvm pdb"
+      ],
+      "limitations": [
+        "Managed bundle is macOS ARM64; a compatible external four-utility family is optional",
+        "Native-text views are bounded and may omit surrounding filtered context",
+        "Static addresses and linkage do not establish observed calls or runtime load bias",
+        "PDB section:offset addresses require image section/image-base correspondence"
+      ],
+      "evaluationCase": {
+        "id": "native-structure-and-debug-symbols",
+        "inputFamily": "native-images-and-debug-companion",
+        "task": "Describe the supplied program format, dependencies and supported entry points. Use its debug companion to locate the relevant implementation and retain a focused instruction window with checkable address correspondence.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct format and linkage findings",
+          "debug symbol correspondence",
+          "focused instruction evidence",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "binary",
+      "namespace": "binary",
+      "kind": "capability",
+      "skill": "insight-binary",
+      "purpose": "Read structured PE/ELF/Mach-O metadata and guard a selected copy-only PE header edit",
+      "inputs": [
+        "PE",
+        "ELF",
+        "thin Mach-O",
+        "immutable binary target"
+      ],
+      "tasks": [
+        "bounded structure and linkage queries",
+        "exact guarded PE subsystem edit on a new copy"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+ host; PE/ELF/thin Mach-O inputs"
+      ],
+      "dependencies": [
+        "packaged first-party helper statically linked to pinned LIEF 1.0.0; no separate install or compiler"
+      ],
+      "workflowCommands": [
+        "binary query",
+        "binary edit-subsystem"
+      ],
+      "limitations": [
+        "No target execution or implicit universal Mach-O slice selection",
+        "Export queries cover PE export entries and ELF/Mach-O exported functions, not a complete data-symbol analysis",
+        "Native parser diagnostics remain partial; omitted malformed tables never prove absence",
+        "Copy edit supports only expected gui/console subsystem; checksums/signatures are not recomputed",
+        "At most 64 MiB input, 100000 scanned records and 500 returned rows"
+      ],
+      "evaluationCase": {
+        "id": "structured-binary-copy-edit",
+        "inputFamily": "owned-native-multi-format-and-pe-header-fixtures",
+        "task": "Determine input format and concrete native linkage from the supplied binaries, retain bounded structure evidence and create a separately verified requested header edit without changing the original.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual structure and import/export identity",
+          "scoped address and immutable bytes",
+          "expected-value copy-only edit verified independently",
+          "ordinary saved evidence",
+          "no target execution or original mutation"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-dump",
+      "namespace": "dotnet-dump",
+      "kind": "analytical",
+      "skill": "insight-dotnet-dump",
+      "purpose": "Capture a managed heap dump or inspect compatible .NET dumps with SOS to recover waiting stacks, objects, fields and retention evidence.",
+      "inputs": [
+        "explicit live .NET process PID",
+        "compatible managed dump"
+      ],
+      "tasks": [
+        "collect",
+        "analyze"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-dump 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-dump collect",
+        "dotnet-dump analyze"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "Compatible native runtime/DAC required for dump inspection"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-dump-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, explain where it is waiting and identify the held job and pending item count from a retained compatible snapshot. Keep focused evidence and a checkpoint.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "managed-heap",
+      "namespace": "dotnet-dump",
+      "kind": "capability",
+      "skill": "insight-managed-heap",
+      "purpose": "Query managed object fields and stacks in an immutable compatible dump without live attachment or automatic symbol lookup",
+      "inputs": [
+        "CoreCLR Heap or Full dump",
+        "immutable dump target"
+      ],
+      "tasks": [
+        "identify heap objects by exact type",
+        "read primitive object fields",
+        "inspect managed thread stacks"
+      ],
+      "platforms": [
+        "darwin-arm64 matching CoreCLR dump and DAC"
+      ],
+      "dependencies": [
+        "managed dotnet-dump private .NET 10 runtime",
+        "matching local CoreCLR DAC; default managed version 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-dump query"
+      ],
+      "limitations": [
+        "No live attach or target expression evaluation",
+        "Explicit native DAC must match dump runtime, OS and architecture; no downloaded symbols or ambient file lookup",
+        "Object addresses belong to this exact dump",
+        "At most one million scanned objects; reaching the bound remains partial, unreadable fields unknown"
+      ],
+      "evaluationCase": {
+        "id": "managed-dump-structured-queries",
+        "inputFamily": "owned-compatible-managed-heap-dump",
+        "task": "Determine the queued work state and waiting execution path from the supplied dump. Retain concrete object/field/stack evidence, immutable input identity and limitations.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual object address and primitive/string state",
+          "managed waiting stack",
+          "explicit matching runtime/DAC identity",
+          "ordinary saved evidence",
+          "immutable dump and owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-stack",
+      "namespace": "dotnet-stack",
+      "kind": "analytical",
+      "skill": "insight-dotnet-stack",
+      "purpose": "Inspect live managed thread stacks to identify active or waiting work in an explicitly selected .NET process without taking a dump.",
+      "inputs": [
+        "explicit live .NET process PID"
+      ],
+      "tasks": [
+        "report"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-stack 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-stack report"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "One stack is a point-in-time observation"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-stack-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, quickly identify the managed waiting call chain without creating a heap dump or a time-series recording. Retain the relevant snapshot and explain its limits.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "dotnet-trace",
+      "namespace": "dotnet-trace",
+      "kind": "analytical",
+      "skill": "insight-dotnet-trace",
+      "purpose": "Collect and inspect bounded .NET EventPipe traces to identify sampled thread work, waits or runtime activity; distinguish wall-clock samples from CPU consumption.",
+      "inputs": [
+        "explicit live .NET process PID",
+        "EventPipe trace"
+      ],
+      "tasks": [
+        "collect",
+        "report",
+        "convert"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private dotnet-trace 10.0.750501",
+        "private .NET 10.0.13"
+      ],
+      "workflowCommands": [
+        "dotnet-trace collect",
+        "dotnet-trace report",
+        "dotnet-trace convert"
+      ],
+      "limitations": [
+        "Target process remains external; only collectors are owned",
+        "PID birth checks are best effort on macOS",
+        "Sampled thread time is not kernel CPU consumption"
+      ],
+      "evaluationCase": {
+        "id": "dotnet-trace-managed-investigation",
+        "inputFamily": "owned-live-managed-worker",
+        "task": "For the supplied disposable managed worker, retain a short observation over time and a portable viewer export. Identify where sampled thread time went and explain whether that establishes CPU consumption.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct requested managed finding",
+          "ordinary project evidence",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "die",
+      "namespace": "die",
+      "kind": "analytical",
+      "skill": "insight-die",
+      "purpose": "Classify unknown binaries and containers by header and compiler/runtime/packer signature evidence before choosing a research tool",
+      "inputs": [
+        "unknown executable",
+        "binary image",
+        "supported container"
+      ],
+      "tasks": [
+        "static file and architecture triage",
+        "compiler/runtime/packer signatures",
+        "focused handoff to managed or native inspection"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private DiE console 3.21 and pinned database",
+        "five private dynamic Qt 6.11.0 frameworks",
+        "macOS 13+"
+      ],
+      "workflowCommands": [
+        "die classify"
+      ],
+      "limitations": [
+        "Heuristic signatures require corroboration; Unknown does not prove absence",
+        "Pinned upstream signature errors produce an explicit partial result even on native exit zero",
+        "Managed AnyCPU header architecture does not establish eventual process architecture"
+      ],
+      "evaluationCase": {
+        "id": "binary-triage-and-handoff",
+        "inputFamily": "native-and-managed-images",
+        "task": "Classify the supplied unknown binaries, select useful follow-up analysis for each, corroborate an important finding and retain evidence including any scan uncertainty.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct header and managed/native distinction",
+          "signature errors retained as partial",
+          "useful next-tool handoff",
+          "ordinary project evidence",
+          "owned cleanup"
+        ]
+      }
+    },
+    {
+      "id": "lldb",
+      "namespace": "lldb",
+      "kind": "analytical",
+      "skill": "insight-lldb",
+      "purpose": "Observe arguments, returns, registers, stack and bounded memory in an owned native launch",
+      "inputs": [
+        "thin native Mach-O executable",
+        "literal program arguments"
+      ],
+      "tasks": [
+        "selected breakpoint snapshot",
+        "argument and return observation",
+        "bounded native memory and backtrace"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private LLDB 23.1.3, debugserver and liblldb",
+        "macOS 14+"
+      ],
+      "workflowCommands": [
+        "lldb inspect"
+      ],
+      "limitations": [
+        "Owned launches only; executing the input can have application side effects",
+        "No arbitrary expression, script, external attach or persistent interactive session",
+        "ASLR and debug information affect address and variable correspondence",
+        "Recovered owner-loss execution has unknown result; kernel deadline bounds its lifetime"
+      ],
+      "evaluationCase": {
+        "id": "native-breakpoint-observation",
+        "inputFamily": "owned-native-boundary-worker",
+        "task": "Corroborate the supplied native price calculation around its boundary with concrete argument and return observations. Retain focused runtime evidence, explain its limits and verify owned cleanup.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct arguments and returns around boundary",
+          "ordinary project evidence",
+          "inferior termination independently verified",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "frida",
+      "namespace": "frida",
+      "kind": "analytical",
+      "skill": "insight-frida",
+      "purpose": "Corroborate static findings with concrete runtime call arguments/results, modules and exports",
+      "inputs": [
+        "explicit authorized local process PID",
+        "focused Frida JavaScript source"
+      ],
+      "tasks": [
+        "bounded runtime module/export inventory",
+        "bounded script messages and binary evidence",
+        "observed argument/return pairs"
+      ],
+      "platforms": [
+        "darwin-arm64"
+      ],
+      "dependencies": [
+        "private Frida Node 17.24.0 NAPI-v8 binding and JavaScript runtime dependencies",
+        "existing CLI Node runtime",
+        "macOS 14+ and native attach authorization"
+      ],
+      "workflowCommands": [
+        "frida modules",
+        "frida exports",
+        "frida observe"
+      ],
+      "limitations": [
+        "Collector owns no target lifetime; only collector stop/kill is exposed",
+        "Known pinned bare-C attach failure when CoreFoundation is absent",
+        "macOS PID birth identity is best effort; runtime addresses vary with ASLR",
+        "Script/application changes are not automatically rolled back by unload"
+      ],
+      "evaluationCase": {
+        "id": "native-call-instrumentation",
+        "inputFamily": "owned-native-boundary-worker",
+        "task": "Corroborate the supplied price calculation with concrete calls around its boundary in the authorized running worker. Retain argument/result evidence, establish the relevant module and explain observation limits while preserving the original process lifetime.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct observed arguments and returns",
+          "ordinary project evidence",
+          "script source retained by hash",
+          "original target lifetime preserved",
+          "owned collector cleanup"
+        ]
+      }
+    },
+    {
+      "id": "windbg",
+      "namespace": "windbg",
+      "kind": "analytical",
+      "skill": "insight-windbg",
+      "purpose": "Inspect Windows native user-mode minidump stacks, registers, modules and bounded memory",
+      "inputs": [
+        "Windows user-mode minidump",
+        "optional matching local PDB"
+      ],
+      "tasks": [
+        "native crash or stopped-state investigation",
+        "bounded runtime address drilldown"
+      ],
+      "platforms": [
+        "win32-x64"
+      ],
+      "dependencies": [
+        "Microsoft WinDbg CDB 10.x console runtime",
+        "stock Windows PowerShell/.NET Framework"
+      ],
+      "workflowCommands": [
+        "windbg inspect"
+      ],
+      "limitations": [
+        "Read-only user-mode MDMP queries; no live attach or kernel debugging",
+        "Missing memory and symbols remain unknown",
+        "Microsoft distribution requires explicit vendor-direct download or local archive"
+      ],
+      "evaluationCase": {
+        "id": "windows-native-dump",
+        "inputFamily": "owned-native-user-dump",
+        "task": "Explain the stopped native calculation in the supplied Windows dump, establish its stack and relevant runtime state, and retain ordinary evidence without running the original application.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct native function and runtime state",
+          "ordinary project evidence",
+          "input and symbol companions preserved",
+          "owned debugger cleanup"
+        ]
+      }
+    },
+    {
+      "id": "procmon",
+      "namespace": "procmon",
+      "kind": "analytical",
+      "skill": "insight-procmon",
+      "purpose": "Observe which files and registry paths an explicit existing Windows process actually accesses",
+      "inputs": [
+        "authorized running Windows PID",
+        "retained owned ProcMon capture"
+      ],
+      "tasks": [
+        "bounded file and registry observation",
+        "inspect retained native events without collecting again"
+      ],
+      "platforms": [
+        "win32-x64-administrator"
+      ],
+      "dependencies": [
+        "Windows 11 or Windows Server 2019+",
+        "elevated authorized insight-cli owner",
+        "Microsoft Process Monitor 4.12"
+      ],
+      "workflowCommands": [
+        "procmon observe",
+        "procmon inspect"
+      ],
+      "limitations": [
+        "Explicit vendor-direct acquisition; Microsoft distribution is not mirrored",
+        "Only existing explicit PID; child processes are excluded",
+        "Native driver needs administrator privileges; no automatic elevation",
+        "Global ProcMon singleton: existing instances block collection/export",
+        "Private process-local HKCU and profile-local capture/settings; no global preference edits",
+        "Bounded interval and destructive filtering exclude earlier and filtered activity; an empty window does not prove absence",
+        "No Ghidra merge or automatic replay; lost/interrupted captures remain partial"
+      ],
+      "evaluationCase": {
+        "id": "windows-existing-file-observation",
+        "inputFamily": "owned-existing-windows-worker",
+        "task": "Determine which configuration the supplied running Windows worker actually reads. Retain concrete read evidence and ordinary project notes; preserve the worker, inputs and user ProcMon settings. Inspect the saved observation again without collecting another interval.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual successful configuration ReadFile",
+          "ordinary project evidence",
+          "bounded evidence and explicit unknowns",
+          "existing subject preserved",
+          "global preferences unchanged",
+          "owned capture cleanup",
+          "retained observation reuse"
+        ]
+      }
+    },
+    {
+      "id": "dnspy",
+      "namespace": "dnspy",
+      "kind": "analytical",
+      "skill": "insight-dnspy",
+      "purpose": "Observe managed breakpoint parameters and make a controlled IL constant edit in a new assembly copy",
+      "inputs": [
+        "authorized Windows Framework EXE",
+        "Core apphost EXE with explicit managed module/companions",
+        "managed EXE or DLL for static copy editing"
+      ],
+      "tasks": [
+        "read actual primitive parameters and managed stack at a selected IL breakpoint",
+        "replace one expected Int32 IL constant in a new assembly copy"
+      ],
+      "platforms": [
+        "win32-x64-desktop"
+      ],
+      "dependencies": [
+        "dnSpyEx 6.6.0 with bundled debugger .NET 10.0.9",
+        "private .NET 10.0.13 for managed Core target setup",
+        "interactive Windows desktop"
+      ],
+      "workflowCommands": [
+        "dnspy inspect",
+        "dnspy edit-constant"
+      ],
+      "limitations": [
+        "Original upstream bundle contains separately licensed Microsoft DLLs; explicit upstream-only download, local cache and pinned SHA256; no insight-cli mirror",
+        "Breakpoint tokens/IL offsets belong to one exact managed module",
+        "Debugging launches a new owned process; original application side effects need authorization",
+        "Explicit input companions; no guessed startup dependencies",
+        "Primitive parameters only; no arbitrary C# evaluation or existing PID attachment",
+        "One expected Int32 IL load per static edit; signatures and output behavior require independent verification",
+        "No automatic replay of uncertain executions or edits"
+      ],
+      "evaluationCase": {
+        "id": "windows-managed-breakpoint-and-copy-edit",
+        "inputFamily": "owned-managed-calculation",
+        "task": "Determine which actual managed argument reaches the supplied calculation and how a selected configuration constant affects the result. Retain runtime and IL evidence, make and verify a separate changed copy, preserve original inputs and project notes, and verify owned debugger cleanup.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "real managed breakpoint and argument",
+          "correct module/IL evidence",
+          "separate patched copy with independently verified behavior",
+          "original inputs preserved",
+          "ordinary project evidence",
+          "owned debugger and debuggee cleanup"
+        ]
+      }
+    },
+    {
+      "id": "strace",
+      "namespace": "strace",
+      "kind": "analytical",
+      "skill": "insight-strace",
+      "purpose": "Observe actual file, process, I/O and network syscalls from an authorized owned Linux launch",
+      "inputs": [
+        "native x64 ELF executable",
+        "literal program arguments"
+      ],
+      "tasks": [
+        "explain real file reads and writes",
+        "corroborate process and syscall behavior"
+      ],
+      "platforms": [
+        "linux-x64"
+      ],
+      "dependencies": [
+        "Linux glibc 2.35+",
+        "ptrace permission for owned children"
+      ],
+      "workflowCommands": [
+        "strace trace"
+      ],
+      "limitations": [
+        "Only an owned new native launch; no arbitrary PID attach",
+        "Application side effects require authorization; adjacent executable sidecars are not copied",
+        "Native trace and program stderr share the stderr stream; bounded strings and filters leave unobserved operations unknown"
+      ],
+      "evaluationCase": {
+        "id": "linux-owned-file-observation",
+        "inputFamily": "owned-native-file-worker",
+        "task": "Determine which configuration the supplied Linux worker actually reads and what state it reports. Retain concrete path and read evidence, preserve original inputs and verify only owned captures are cleaned up.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual owned configuration read and value",
+          "ordinary project evidence",
+          "bounded evidence and explicit unknowns",
+          "owned launch cleanup",
+          "original inputs preserved"
+        ]
+      }
+    },
+    {
+      "id": "tshark",
+      "namespace": "tshark",
+      "kind": "analytical",
+      "skill": "insight-tshark",
+      "purpose": "Answer protocol questions from an immutable offline capture with packet and stream evidence",
+      "inputs": [
+        "PCAP",
+        "PCAPNG",
+        "immutable capture target"
+      ],
+      "tasks": [
+        "inspect protocol overview",
+        "locate HTTP/DNS/TLS packet evidence",
+        "read packet detail",
+        "follow reconstructed TCP/UDP streams"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+"
+      ],
+      "dependencies": [
+        "managed TShark 4.6.9 console subset or matching external Wireshark.app"
+      ],
+      "workflowCommands": [
+        "tshark inspect"
+      ],
+      "limitations": [
+        "Offline capture analysis only; no live acquisition, network changes or TLS decryption",
+        "Inventory, filters and follow inspect at most 10000 frames; partial prefixes do not prove absence",
+        "Up to 64 MiB input; bounded native output and owned process deadline",
+        "External selection uses a verified owned console copy, excluding unselected plugins"
+      ],
+      "evaluationCase": {
+        "id": "offline-protocol-investigation",
+        "inputFamily": "owned-public-http-capture",
+        "task": "Determine which HTTP methods and paths were observed, cite frame and native stream evidence, reconstruct relevant bytes and preserve the original capture and ordinary project evidence.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual method/path and frame evidence",
+          "native stream follow bytes",
+          "explicit prefix and encryption limits",
+          "original capture preserved",
+          "ordinary project evidence"
+        ]
+      }
+    },
+    {
+      "id": "mitmproxy",
+      "namespace": "mitmproxy",
+      "kind": "analytical",
+      "skill": "insight-mitmproxy",
+      "purpose": "Observe and compare bounded HTTP exchanges through an explicitly selected owned loopback proxy",
+      "inputs": [
+        "owned client using an explicit loopback HTTP proxy",
+        "native flow archive",
+        "HAR",
+        "immutable flow target"
+      ],
+      "tasks": [
+        "record an HTTP observation window",
+        "inspect request/response fields and bounded body evidence",
+        "compare retained HTTP captures without replay",
+        "recover a readable interrupted archive prefix"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS15+"
+      ],
+      "dependencies": [
+        "managed mitmproxy 12.2.3 standalone runtime or complete matching external bundle",
+        "explicit per-client proxy configuration",
+        "explicit per-client trust of the profile CA for HTTPS"
+      ],
+      "workflowCommands": [
+        "mitmproxy record",
+        "mitmproxy inspect",
+        "mitmproxy compare"
+      ],
+      "limitations": [
+        "No system proxy/trust/Network Extension setup; HTTPS requires explicit client trust",
+        "HTTP request/response only; no WebSocket payload or generic TCP/UDP claim",
+        "64 MiB archive/input, 8 MiB JSON, up to 1000 flows and bounded body prefixes; partial input never proves absence",
+        "Literal method/URL/occurrence comparison is not a causal request match; no traffic replay"
+      ],
+      "evaluationCase": {
+        "id": "owned-http-observation-comparison",
+        "inputFamily": "owned-loopback-http-service-and-client",
+        "task": "Determine which HTTP request produced the supplied application state, retain request/response evidence and compare two controlled observations. Preserve the original service and input bytes; describe scope, TLS prerequisites and incomplete observations.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "actual HTTP request and application response",
+          "saved native archive independently inspected",
+          "useful comparison with bounded uncertainty",
+          "ordinary project evidence",
+          "owned proxy cleanup and original service preserved"
+        ]
+      }
+    },
+    {
+      "id": "capture",
+      "namespace": "capture",
+      "kind": "capability",
+      "skill": "insight-capture",
+      "purpose": "Record and compare bounded owned native executions, exact output bytes and explicitly declared file snapshots",
+      "inputs": [
+        "authorized thin ARM64 Mach-O executable",
+        "selected ordinary input files and optional stdin file",
+        "explicit relative watch paths",
+        "retained capture reports"
+      ],
+      "tasks": [
+        "capture one owned program execution",
+        "inspect retained output and selected file changes",
+        "compare literal retained observations without re-execution",
+        "retain unknown owner-loss intent without replay"
+      ],
+      "platforms": [
+        "darwin-arm64 macOS14+"
+      ],
+      "dependencies": [
+        "packaged common owned-process/deadline helpers; no additional runtime or compiler"
+      ],
+      "workflowCommands": [
+        "capture run",
+        "capture show",
+        "capture compare"
+      ],
+      "limitations": [
+        "Explicit program copy and literal argv; no shell expansion or command string gateway",
+        "Not an OS sandbox or a trace of undeclared filesystem/network effects",
+        "Native alarm survives ordinary owner loss; a subject can deliberately replace its inherited alarm",
+        "64 MiB program/selected files, 16 MiB per selected/watched file, 1 MiB stdin and 4 MiB aggregate output",
+        "Interrupted/overflow/unavailable output stays partial; owner-loss intent without a durable outcome remains unknown and is never rerun automatically",
+        "Retained report comparison is literal data comparison, not execution authenticity, causal equivalence or a speedup benchmark"
+      ],
+      "evaluationCase": {
+        "id": "owned-execution-retained-comparison",
+        "inputFamily": "owned-native-program-input-output-and-file-fixtures",
+        "task": "Explain how the supplied owned program responds to two controlled inputs, retain exact output/exit and declared file effects, compare observations and preserve uncertainty after an interrupted run.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "explicit captured program/input identities",
+          "actual output/exit and declared file changes",
+          "useful comparison without rerunning reports",
+          "ordinary retained evidence",
+          "original inputs preserved and owned cleanup",
+          "interrupted or unknown intent not blindly replayed"
+        ]
+      }
+    },
+    {
+      "id": "overview-drilldown",
+      "namespace": "tools",
+      "kind": "capability",
+      "skill": "insight-overview",
+      "purpose": "Choose a bounded overview, preserve source identity and retrieve only the needed code, object, event or output window",
+      "inputs": [
+        "research question",
+        "known immutable target or retained observation"
+      ],
+      "tasks": [
+        "discover relevant tool guidance before installation",
+        "inspect bounded metadata before expensive decompilation",
+        "page focused evidence and preserve partial scope"
+      ],
+      "platforms": [
+        "existing tool-specific native profiles; discovery works on any Node24 host"
+      ],
+      "dependencies": [
+        "existing analytical APIs and their declared runtimes; no additional tool or install"
+      ],
+      "workflowCommands": [
+        "tools list",
+        "tools show"
+      ],
+      "limitations": [
+        "Workflow across existing namespaces, not a universal analysis database",
+        "Each command declares its own byte/row/character coordinate system",
+        "A page at EOF cannot establish full coverage if the native source is truncated or a scan is partial",
+        "Text pages must retain the same source hash to be combined; different runtime snapshots are separate observations"
+      ],
+      "evaluationCase": {
+        "id": "bounded-overview-focused-evidence",
+        "inputFamily": "owned-multi-tool-inputs-with-focused-code-and-observation-oracles",
+        "task": "Answer the supplied narrow research question using concise overviews and focused evidence. Avoid whole-program output in context, retain exact input/page identity and preserve incomplete scan uncertainty.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "useful bounded overview before focused analysis",
+          "focused code/object/event evidence",
+          "stable source identity across pages",
+          "explicit native partial/truncation scope",
+          "ordinary saved evidence without whole-program context dump"
+        ]
+      }
+    },
+    {
+      "id": "artifacts",
+      "namespace": "artifacts",
+      "kind": "supporting",
+      "skill": "insight-artifacts",
+      "purpose": "Retain an ordinary completed research file or directory",
+      "inputs": [
+        "regular file",
+        "stable directory"
+      ],
+      "tasks": [
+        "checkpoint any external-tool output",
+        "retain completed worker materials"
+      ],
+      "platforms": [
+        "any-node24"
+      ],
+      "dependencies": [],
+      "workflowCommands": [
+        "artifacts save"
+      ],
+      "limitations": [
+        "Every call creates a new checkpoint",
+        "Directory saves require a stable tree; links and special files are rejected",
+        "Saved copies do not replace project source of truth or publish Ghidra changes"
+      ],
+      "evaluationCase": {
+        "id": "ordinary-evidence-checkpoint",
+        "inputFamily": "ordinary-research-folder",
+        "task": "Retain the completed investigation folder as a checkpoint, then verify its saved bytes remain intact after the original is edited. Preserve the project evidence format.",
+        "modes": [
+          "cold",
+          "prepared"
+        ],
+        "requiredObservations": [
+          "intended public CLI execution",
+          "correct saved bytes and identity",
+          "source unchanged by save",
+          "checkpoint survives later source edit"
+        ]
+      }
+    }
+  ]
+}
