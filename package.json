@@ -31,7 +31,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/e37a767dddbcedf53aaf9358768726e6031c5e5b/vendor/factory-ipc-c773126.tgz",
-    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/e37a767dddbcedf53aaf9358768726e6031c5e5b/vendor/factory-core-c773126.tgz"
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-ipc-13b01dc.tgz",
+    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-core-13b01dc.tgz"
   }
 }

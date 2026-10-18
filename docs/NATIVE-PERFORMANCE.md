@@ -79,7 +79,7 @@ The initial release baseline is public `@eyeauras/insight-cli@0.2.4`, independen
 identified through registry integrity and SLSA provenance as source
 `fab6dd11a4e866f5ce4108f5773b27d2d0fa89f0`, release run `39132631665`.
 Record identities again for each independent run rather than trusting a directory
-name. Factory candidate dependency is `c7731269b68eaebbde69843430e1a5f178631c16`
+name. Factory candidate dependency is `13b01dc40b32e59a4b6c1d1da333a1bf87fd9921`
 ([upstream PR #56](https://github.com/iXab3r/EyeAuras.CliFactory/pull/56)); immutable
 vendored URLs/provenance are checked by the package proof.
 

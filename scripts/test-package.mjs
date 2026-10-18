@@ -5,7 +5,7 @@ const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile
 const keep=process.argv.includes('--keep-installed');
 const proof=await realpath(await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','ip-'))),install=join(proof,'installed spaces-Ω');await mkdir(install);
 const provenance=JSON.parse(await readFile(join(root,'vendor/provenance.json'),'utf8'));
-const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-c773126.json'),'utf8'));
+const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-13b01dc.json'),'utf8'));
 for(const record of [provenance,coreProvenance])assert.equal(createHash('sha256').update(await readFile(join(root,'vendor',record.file))).digest('hex'),record.sha256);
 try{
  const artifacts=join(install,'artifacts');await mkdir(artifacts);

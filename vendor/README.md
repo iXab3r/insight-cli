@@ -1,6 +1,6 @@
 # Prepared Factory dependencies
 
-`provenance.json` pins the current IPC artifact; `factory-core-c773126.json` pins its matching
+`provenance.json` pins the current IPC artifact; `factory-core-13b01dc.json` pins its matching
 Core artifact. Both are official Factory package builds from the recorded commit, consumed by
 immutable content URLs. They contain compiled Factory packages and MIT notices, not copied
 source or a product-specific host. Factory PR #51 owns packed external consumers; PR #53 adds
