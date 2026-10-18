@@ -20,6 +20,7 @@ import {scriptInventory,scriptPath} from './scripts.js';
 import {logicalPrograms} from './cross-results.js';
 import {uiResult} from './ui-results.js';
 import {fileURLToPath} from 'node:url';
+import {readCallerGoal,awaitCaller} from './debugger-caller.js';
 import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
@@ -29,7 +30,7 @@ import {initialIntent,initializeModel} from './initial-model.js';
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
   toolProcessId?:string; pid: number; endpoint: string; root: string; target: string; context?: string; session?:string;
-  mode: ToolMode; program: string; tokenSecret: string; runtimeFingerprint: string;
+  mode: ToolMode; debuggerPython?:string; program: string; tokenSecret: string; runtimeFingerprint: string;
   kind: 'context' | 'shared' | 'bootstrap' | 'candidate'; baseRevision?:number;viewEpoch?:number;
 }
 interface Running {binding: ProcessBinding; http: HttpBridge; child?: ChildProcess}
@@ -77,9 +78,9 @@ export class GhidraContexts {
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs,this.c);
-    let debuggerEnvironment:Record<string,string>={};
+    let debuggerEnvironment:Record<string,string>={},debuggerPython:string|undefined;
     if(mode==='gui'){
-      const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});
+      const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});debuggerPython=python;
       const prepared=await runTool(this.c,{tool:'ghidra',role:'debugger-wheels',installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],timeoutMs:30000,maxOutputBytes:65536});
       if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
       debuggerEnvironment={INSIGHT_DEBUGGER_PYTHON:python,PYTHONPATH:python,PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:join(python,'isolated-cache')};
@@ -103,7 +104,7 @@ export class GhidraContexts {
           INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
           GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn:async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
-        binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,target:target.id,
+        binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,...(debuggerPython?{debuggerPython}:{}),target:target.id,
           ...(context?{context,session:this.workspace.contextById(context).session}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
         await durable(join(root,'process.json'),binding);
       }});
@@ -530,8 +531,16 @@ public class ${name} extends GhidraScript {
     if(['resume','interrupt','step','set_breakpoint','remove_breakpoint'].includes(operation))await this.traceHelper(scope,{operation:'focus'});
     if(operation==='read_memory')await this.traceHelper(scope,{operation:'read_memory',address:p.address,size:p.size});
     const token=await this.c.secrets.require(record.binding.tokenSecret),timeout=operation==='launch'?(Number(p.timeout_seconds??60)+90)*1000:45000;
+    const callerPython=process.platform==='darwin'&&operation==='step'&&p.kind==='out'?record.binding.debuggerPython:undefined;
+    if(callerPython&&(dirname(callerPython)!==record.binding.root||await realpath(callerPython)!==callerPython))fail('binding','Native caller Python scope changed.');
+    const priorCaller=callerPython?await readCallerGoal(callerPython):undefined;
     const raw=await new HttpBridge(record.binding.endpoint,this.c.fetch,this.c.signal,token,timeout).call('/debugger/'+operation,
       {...p,...(['launch','launch_offers','static_to_dynamic'].includes(operation)?{program:record.binding.program}:{})});
+    if(callerPython){const goal=await readCallerGoal(callerPython);if(goal&&goal.id!==priorCaller?.id){
+      const launch=object(JSON.parse(await readFile(join(record.binding.root,'debugger-run','current.json'),'utf8')));
+      if(goal.executable!==launch.executable||launch.context!==record.binding.context||launch.target!==scope.target)fail('binding','Native caller belongs to another launch.');
+      await awaitCaller(callerPython,goal,this.c.signal);
+    }}
     const label=this.workspace.target(scope.target).name;
     if(operation==='modules'&&Array.isArray(raw))return raw.map(value=>{const row=object(value),{path,...rest}=row;return {...rest,...(typeof row.name==='string'&&(row.name.includes(record.binding.root)||['image','image.exe'].includes(row.name))?{name:label}:{})};});
     if(raw&&typeof raw==='object'&&!Array.isArray(raw)){

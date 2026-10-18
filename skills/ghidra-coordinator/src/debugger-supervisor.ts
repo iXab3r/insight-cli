@@ -5,6 +5,7 @@ import {readFile,writeFile,mkdir,open,rename,realpath} from 'node:fs/promises';
 import {join,resolve,delimiter} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {HttpBridge} from './transport.js';
+import {callerMonitor} from './debugger-caller.js';
 import {debuggerLaunchArguments} from './debugger-launch.js';
 
 async function main(){
@@ -63,7 +64,11 @@ async function main(){
     const commands='script exec('+JSON.stringify(code)+')\nquit\n';child.stdin!.write(commands);
     setTimeout(()=>{if(!finished){child.kill('SIGINT');child.stdin!.write(commands);}},3000).unref();}
   process.once('SIGINT',()=>{if(!closing)child.kill('SIGINT');});process.stdin.once('end',close);process.stdin.once('error',close);
-  const monitor=setInterval(()=>{try{process.kill(binding.pid,0);}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')close();}},250);
+  const observeCaller=callerMonitor(python,command=>{if(!closing&&!finished)child.stdin!.write(command);});
+  let callerDiagnostic=false;
+  const monitor=setInterval(()=>{try{process.kill(binding.pid,0);}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')close();}
+    if(!closing&&!finished)void observeCaller().catch(()=>{if(!callerDiagnostic){callerDiagnostic=true;process.stderr.write('Native caller observation failed; its request is retained.\n');}});
+  },250);
   try{await saved();await exited;let result;try{result=JSON.parse(await readFile(resultPath,'utf8'));}catch{}
     receipt.inferiorTerminated=result?.id===id&&result.inferiorTerminated===true;receipt.state=receipt.inferiorTerminated?'closed':'failed';Object.assign(receipt,{exitCode:child.exitCode,signalCode:child.signalCode});
     await writeFile(join(directory,id+'.diagnostic.log'),diagnostics,{mode:0o600});await saved();
