@@ -114,15 +114,21 @@ public class InsightTraceState extends GhidraScript {
     if(!operation.equals("checkpoint"))throw new IllegalArgumentException();
     Path root=Path.of(string(p,"output")).toRealPath();List<Object> traces=new ArrayList<>();String active=null;
     if(manager.getOpenTraces().size()>64)throw new IllegalArgumentException("Trace count exceeds 64");
+    long lockDeadline=System.nanoTime()+java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
     for(var trace:manager.getOpenTraces()){
       bind(trace,p,false);String id=trace.getOptions("Insight").getString("Trace ID",null);if(id==null||!id.matches("trace_[a-f0-9-]{36}"))throw new IllegalArgumentException();
       Path output=root.resolve(id+".gzf");if(Files.exists(output))throw new IllegalArgumentException();
+      while(!trace.lock("Insight consistent trace checkpoint")){
+        monitor.checkCancelled();if(System.nanoTime()>=lockDeadline)throw new IllegalStateException("Trace transaction did not release for checkpoint");Thread.sleep(25);
+      }
+      try{
       var coordinates=manager.getCurrentFor(trace);trace.saveToPackedFile(output.toFile(),monitor);
       Map<String,Object> row=new LinkedHashMap<>();row.put("id",id);row.put("name",trace.getName());row.put("snap",Long.toString(coordinates.getSnap()));
       row.put("modules",trace.getModuleManager().getAllModules().size());row.put("threads",trace.getThreadManager().getAllThreads().size());
       if(coordinates.getThread()!=null)row.put("thread",Long.toString(coordinates.getThread().getKey()));
       var targets=selected.getService(DebuggerTargetService.class);var live=targets==null?null:targets.getTarget(trace);row.put("connected",live!=null&&live.isValid());
       traces.add(row);if(manager.getCurrentTrace()==trace)active=id;
+      }finally{trace.unlock();}
     }
     Map<String,Object> result=new LinkedHashMap<>();result.put("traces",traces);if(active!=null)result.put("active",active);
     println("INSIGHT_TRACE_STATE "+new Gson().toJson(result));

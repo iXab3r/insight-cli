@@ -11,6 +11,12 @@ bounded large-assembly research and final saved-path handoff passed both modes, 
 retained cold snapshot-report metadata difference. ILSpy project/resource agents now also
 passed fresh cold/prepared checks. The final implementation native rerun passed 17 cases,
 zero failures and four OS skips (16m07s); Windows/Linux and offline CI passed on `75cca82`.
+A separate current-package [Ghidra GUI/LLDB native case](verification/toolbox-ghidra-entry-native.json)
+passed stopped entry, actual 11→109 call/return, launch replay, disconnected registers/memory
+and full cleanup (4m49s). The new supervisor alias/terminal-inventory fault tests passed;
+current offline regression is 209 passed, two opt-in skips, plus 29 release checks.
+[Seven independent GUI trials](verification/toolbox-agent-ghidra-debugger.json) remain
+unaccepted/partial; their native failures, deadlines and maintainer cleanup are explicit.
 Remaining family coverage and the exact-artifact combined agent gate stay open. The
 [inventory audit](TOOLBOX-AUDIT.md) preserves failed histories and package identities.
 Factory discovery/access fixes are merged and pinned. Native success is not

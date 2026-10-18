@@ -21,7 +21,7 @@ export async function runtimeProcesses(directory:string){
  async function walk(path:string,depth=0):Promise<void>{if(depth>6)return;let entries;try{entries=await readdir(path,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
   for(const entry of entries){const at=join(path,entry.name);if(entry.isDirectory())await walk(at,depth+1);else if(entry.name==='process.json'){
    const p=object(JSON.parse(await readFile(at,'utf8')));let stopped=false;try{const s=object(JSON.parse(await readFile(join(path,'stopped.json'),'utf8')));stopped=s.pid===p.pid&&s.tokenSecret===p.tokenSecret;}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-   if(!stopped&&live(p.pid))items.push({kind:p.kind,pid:p.pid,sessionContext:p.context,target:p.target,mode:p.mode});
+   if(!stopped&&live(p.pid))items.push({kind:p.kind,pid:p.pid,sessionContext:p.context,...(typeof p.session==='string'?{session:p.session}:{}),target:p.target,mode:p.mode});
   }}
  }
  await walk(join(directory,'workspace','ghidra-native'));

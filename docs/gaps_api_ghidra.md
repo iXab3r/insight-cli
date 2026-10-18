@@ -328,6 +328,24 @@ The installed CLI/IPC and P3-resource tests use the same accepted tarball.
 adapter. The earlier P2 report retains its separate selected headless Windows/Linux identity;
 this combined gate is native macOS and does not claim every GUI debugger on every OS.
 
+### Later debugger workflow hardening
+
+The toolbox acceptance extends the selected debugger contract without claiming whole-SDK
+coverage. In the 1:1:1 comparison, the native local LLDB TraceRmi launcher has an
+`OPT_START_CMD`; the pinned MCP launch schema does not expose arbitrary launcher parameters;
+our `ghidra debugger launch --stop-at-entry` provides one typed macOS/local-LLDB option.
+It rewrites only the exact pinned launch command and verifies a live stopped target before
+acknowledgment. Other offers reject the option before reserving a CPU intent. Existing
+immediate-run calls and their request identity remain unchanged.
+
+The owned LLDB Python adapter also selects native frame zero before step-out: an inspected
+caller frame must not redirect the requested return observation. This changes the owned
+extracted adapter, not the user's Ghidra installation. Trace checkpointing obtains an ordinary
+bounded lock so a live transaction cannot overlap packed-file save. Profile boundary checks
+accept canonical filesystem aliases while preserving the original Factory process binding.
+Native and independent-model results, including failures, are recorded in the
+[toolbox audit](TOOLBOX-AUDIT.md); unknown CPU actions are retained without automatic replay.
+
 ## Appendix A — every pinned REST operation, 1:1:1
 
 Every one of the **210** catalog paths occurs once below. The native column names the relevant

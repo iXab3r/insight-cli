@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Installed public Ghidra GUI/LLDB and retained-trace native proof; independent model gate is separate",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputSha256": "d808e73e9f3a24057d0ea14f9c12a7e3214f656f679a32d16d385e344171ac58",
+  "observation": {
+    "count": 11,
+    "result": 109
+  },
+  "checks": {
+    "actualProfileAlias": true,
+    "stoppedAtEntryVerified": true,
+    "shortLivedProgramHeldForInspection": true,
+    "ownedGuiDebuggerLaunch": true,
+    "sameRequestLaunchNotRepeated": true,
+    "staticDynamicAddressRoundtrip": true,
+    "actualPausedRegistersAndStack": true,
+    "actualArgumentReturnVerified": true,
+    "breakpointAndStepOut": true,
+    "retainedDisconnectedTraceAfterReopen": true,
+    "retainedCpuRegistersAfterReopen": true,
+    "retainedMemoryAndMappingReadback": true,
+    "noImplicitSubjectRelaunch": true,
+    "ordinaryCheckpointBytesMatched": true,
+    "originalInputUnchanged": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "309b756cec5218bf50e1486975f062f7391f8d5a6fd6e6df785d22c44eb062a4"
+  },
+  "cleanupComplete": true,
+  "runId": "45e6c35e7edd42ad9cdab464022270f1",
+  "duration": "4m49s",
+  "artifactSha256": "b434e16180113c7c2bf8650d1dbf54f8eaa6681153d47abf607fda3a558188ed",
+  "regressions": {
+    "offlineTests": 211,
+    "passed": 209,
+    "optInNativeSkips": 2,
+    "releaseTestsPassed": 29,
+    "realLldbOwnerFaultTestsPassed": 2,
+    "skillValidatorsPassed": 25,
+    "offlineRelocatedPackagePassed": true
+  },
+  "history": [
+    {
+      "runId": "0612ecd398224fdcbe0c688a2aadac21",
+      "state": "failed",
+      "observation": "A step acknowledgment was followed by zero registers and actual inferior termination; this was not accepted as return evidence."
+    },
+    {
+      "runId": "9b253531efe04e0ab8842b8a9b967a46",
+      "state": "failed",
+      "observation": "Explicit frame step did not establish a stopped execution state; original CPU outcome was retained."
+    },
+    {
+      "runId": "57a0f129403c4b25acf42856f54401a7",
+      "state": "failed",
+      "observation": "Verified owned Python import alone did not settle the step. This candidate is not relabeled as passed."
+    }
+  ],
+  "limits": [
+    "Independent GUI/debugger model acceptance is not passed.",
+    "Earlier candidate step failures remain retained; one passing instrumented package is not a claim that all timing causes were diagnosed.",
+    "The 17-case combined baseline belongs to its earlier artifact; this is a separate focused native case."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "scope": "Installed public Ghidra GUI/LLDB default-launch regression after profile alias fix, before the optional entry-stop refinement; independent model acceptance is separate",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.19.0",
+  "inputSha256": "dcf3c1347199feb9c59f4d10a840e220c3a10657c9c24af99cff7f7191902a9f",
+  "observation": {
+    "count": 4,
+    "result": 52
+  },
+  "checks": {
+    "actualProfileAlias": true,
+    "ownedGuiDebuggerLaunch": true,
+    "sameRequestLaunchNotRepeated": true,
+    "staticDynamicAddressRoundtrip": true,
+    "actualPausedRegistersAndStack": true,
+    "actualArgumentReturnVerified": true,
+    "breakpointAndStepOut": true,
+    "retainedDisconnectedTraceAfterReopen": true,
+    "retainedMemoryAndMappingReadback": true,
+    "noImplicitSubjectRelaunch": true,
+    "ordinaryCheckpointBytesMatched": true,
+    "originalInputUnchanged": true,
+    "ownedContextsAndServerStopped": true
+  },
+  "build": {
+    "version": 1,
+    "artifact": "3d06631042024849b840b382a2e13b3489babefadf5693e17e7195fd57e23e83"
+  },
+  "cleanupComplete": true,
+  "runId": "b290f576e6104ad8891c5923420cf13e",
+  "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+  "duration": "6m21s"
+}

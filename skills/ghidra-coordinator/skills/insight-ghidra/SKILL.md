@@ -12,6 +12,11 @@ retried through that route. Keep HOME, profile and owner state; see
 [host execution permissions](references/agent-execution.md). A lost mutation reply needs
 request/status recovery, never blind retry.
 
+Ghidra operations can exceed the host execution tool's first wait. If it returns a running
+session/cell ID, await that same execution with the host's wait/poll facility until terminal
+status and read its stdout/stderr. An empty first chunk is not a lost CLI response. Do not
+start another open or repeat a CPU mutation while the original command is still running.
+
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
 For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while
@@ -31,7 +36,7 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 
 1. Select the configured runtime profile. Ordinary work uses a managed local server; an external
    server is optional. See [setup](references/setup.md). Factory permissions authorize changes.
-2. Open the input with `ghidra open <input> --session new`. Retain the returned session and target.
+2. Open the input with `ghidra open <input> --session new --json`. Retain the returned session and target.
    Another agent chooses `new` independently; one session can open several inputs.
 3. Pass both `--session` and `--target` on research calls. Follow strings to xrefs and their
    function addresses, then inspect/decompile. Decompilation defaults to a 16000-character
@@ -73,3 +78,12 @@ FID/BSim, namespaces and typed IR), read [native workflows](references/native-wo
 
 For managed SDK extension modules, actual language/analyzer/plugin discovery and opt-in
 automatic synchronization, read [extensions and sync](references/extensions-and-sync.md).
+
+For authorized macOS local debugging, use `ghidra debugger launch --stop-at-entry`
+with the returned session/target and `--json`; then inspect status, registers and stack
+before resuming. The default launch runs immediately, so a short program may exit before
+an interrupt. Before resuming from entry, map the selected function and set a live breakpoint at the
+returned dynamic address. Resuming a short program without that breakpoint can run it to
+exit before any call is observed. At the breakpoint verify PC, then read arguments/stack
+and step out or over the call to inspect its actual return.
+Use `new` only when creating a session; subsequent calls take its actual returned ID.

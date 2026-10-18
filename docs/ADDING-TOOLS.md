@@ -65,6 +65,15 @@ additional selections live under `runtime/tools/<tool>`, shared cache under `run
 records under `runtime/processes`, and bounded run diagnostics under `runtime/runs`. Changing a
 runtime does not change the RE finding format or promote saved output into a source of truth.
 
+Canonicalize filesystem paths when checking installation/profile boundaries. Preserve the
+original Factory AppData identity when calling common process APIs: `/tmp` and `/private/tmp`
+can resolve to the same directory while still being different profile-binding strings. The
+debugger owner regression exercises both alias admission and terminal public process inventory,
+as well as rejection of a context belonging to another profile.
+
+Host execution may return a running cell/session before the CLI completes. Packaged execution
+guidance requires waiting for its final output; an initial empty chunk is not an empty CLI result.
+
 Two opt-in macOS LLDB lifetime fault tests exercise exit-before-readiness and stop-during-startup:
 `INSIGHT_NATIVE_LLDB=1 node --test skills/ghidra-coordinator/dist/tests/debugger-owner.test.js`.
 They use a fixture identity endpoint and real LLDB without executing a target; the combined

@@ -52,7 +52,7 @@ test('external executable resolves a complete installation and never accepts a t
 });
 test('passive process inventory conservatively blocks live receipts and honors verified stopped receipts',async t=>{
  const root=await temporary(t),processRoot=join(root,'workspace/ghidra-native/context/c/one');await mkdir(processRoot,{recursive:true});
- const receipt={pid:process.pid,tokenSecret:'fixture',kind:'context',context:'c',target:'t'};await runtimeWrite(join(processRoot,'process.json'),receipt);assert.equal((await runtimeProcesses(root)).length,1);
+ const receipt={pid:process.pid,tokenSecret:'fixture',kind:'context',context:'c',session:'s_owned',target:'t'};await runtimeWrite(join(processRoot,'process.json'),receipt);assert.equal((await runtimeProcesses(root)).length,1);assert.equal((await runtimeProcesses(root))[0]?.session,'s_owned');
  await runtimeWrite(join(processRoot,'stopped.json'),{pid:process.pid,tokenSecret:'other'});assert.equal((await runtimeProcesses(root)).length,1);
  await runtimeWrite(join(processRoot,'stopped.json'),{pid:process.pid,tokenSecret:'fixture'});assert.equal((await runtimeProcesses(root)).length,0);
 });

@@ -24,3 +24,13 @@ request/status/recovery evidence and use its request ID when supported. Never bl
 repeat a publication, script or program run whose outcome is unknown. External-tool
 fallback is allowed by project rules, but record that the intended facade was not used
 and do not invent a successful checkpoint or native result.
+
+## Wait for the original execution
+
+A tool operation may outlast the host execution tool's initial wait. A returned running
+session/cell ID means that command is still in progress, not that the CLI returned no data.
+Use the host's session poll/wait facility until terminal exit and consume stdout/stderr
+before issuing a dependent command. In Codex, an `exec_command` session is continued with
+`write_stdin`; a yielded execution cell uses that host's cell wait. Do not launch a second
+open/install or repeat a CPU action just because the first chunk was empty. If the execution
+really loses its terminal result, use the CLI's request/status recovery as described above.

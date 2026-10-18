@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "state": "not_accepted",
+  "scope": "Independent source-unavailable Ghidra GUI/CPU family; static interop and standalone LLDB gates are separate",
+  "model": "gpt-6-luna",
+  "reasoningEffort": "medium",
+  "history": [
+    {
+      "trial": "prepared-r1",
+      "artifactSha256": "72b199819eb48365f9132e4e9f19667ef5f2c55a60c3d159e4e99388c91e683e",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The static formula and independent published annotation readback were correct; the GUI supervisor rejected the actual /tmp alias before LLDB launch. The retained original profile was subsequently recovered by the maintainer without repeating its old unknown CPU intent."
+    },
+    {
+      "trial": "prepared-r2",
+      "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The agent misread host execution yields as empty CLI replies and opened another context; it left its own first context/server. Maintainer cleanup is recorded separately. An automatic approval rejection prevented an uncertain interrupt repeat."
+    },
+    {
+      "trial": "cold-r2",
+      "artifactSha256": "a02b4982b15731726da3b9e7c2f59bad3688648f802ca5df9c53dd3c6b7c6cbf",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "partial_not_accepted",
+      "review": "The agent observed a real paused quote argument and retained disconnected registers, but no actual return. Step-out failed; static publication/readback does not complete the CPU task."
+    },
+    {
+      "trial": "prepared-entry-r3",
+      "artifactSha256": "7dd8f9ee6a1f8fe645dfb4d674595582d8173c2cd5c4c74985dd646a8b9aa75e",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The agent used stopped entry but resumed the short-lived target without first setting its function breakpoint. No actual quote call/return or complete published finding was observed."
+    },
+    {
+      "trial": "cold-entry-r3",
+      "artifactSha256": "7dd8f9ee6a1f8fe645dfb4d674595582d8173c2cd5c4c74985dd646a8b9aa75e",
+      "transportState": "failed",
+      "timedOut": true,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The controller reached its 900-second deadline. Unknown CPU journals and local snapshots were retained; controller/maintainer cleanup is not an autonomous agent pass."
+    },
+    {
+      "trial": "cold-entry-r4",
+      "artifactSha256": "1ebc6c438f2b1582af0e1e42f7af95e2e11dda9f3bb9d49e2a3344a85b3a9b52",
+      "transportState": "needs_review",
+      "timedOut": false,
+      "elapsedMs": 648694,
+      "candidateInvocations": 75,
+      "inputsUnchanged": true,
+      "reviewState": "partial_not_accepted",
+      "review": "The agent observed the actual count-10 argument at the quote breakpoint, retained a disconnected trace and published/read back the qualified static annotation from another context. It explicitly declined to claim an actual return or count-11 observation after the uncertain step. The complete CPU task did not pass."
+    },
+    {
+      "trial": "prepared-entry-r4",
+      "artifactSha256": "1ebc6c438f2b1582af0e1e42f7af95e2e11dda9f3bb9d49e2a3344a85b3a9b52",
+      "transportState": "failed",
+      "timedOut": true,
+      "elapsedMs": 901553,
+      "candidateInvocations": 93,
+      "inputsUnchanged": true,
+      "reviewState": "not_accepted",
+      "review": "The controller reached its 900-second deadline after 93 candidate calls. Several retained traces and partial CPU work do not establish complete return evidence or autonomous cleanup. Journals and input bytes were preserved; maintainer cleanup is separate."
+    }
+  ],
+  "rules": {
+    "hostYieldIsNotEmptyCliResult": true,
+    "unknownCpuIntentsNotReplayed": true,
+    "maintainerCleanupNotAgentAcceptance": true,
+    "nativeProofNotModelAcceptance": true
+  }
+}

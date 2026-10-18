@@ -145,6 +145,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI observes owned native breakpoint snapshots")]
     public Task ObserveNative() => Execute("scripts/toolbox/native-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
 
+    [When("the public CLI debugs the owned program and reopens its retained trace")]
+    public Task ObserveGhidraDebugger() => Execute("scripts/toolbox/native-ghidra-debugger.mjs", Value("ghidraDebuggerWorker"), Value("ghidraHome"), Value("java"));
+
     [When("the installed debugger runner suffers controlled lifetime faults")]
     public Task DebuggerFaults() => Execute("scripts/toolbox/fault-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
 
@@ -181,6 +184,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public instrumentation collector suffers controlled lifetime faults")]
     public Task InstrumentationFaults() => Execute("scripts/toolbox/fault-frida.mjs", Value("fridaArchive"), Value("instrumentedWorker"));
 
+    [Then("paused CPU evidence and disconnected trace readback preserve ownership and input identity")]
     [Then("bounded evidence retains source hashes and explicit native truncation")]
     [Then("exact observations and unknown intents survive without automatic execution replay")]
     [Then("qualified static correspondence survives merge and independent readback")]

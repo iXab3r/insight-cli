@@ -198,6 +198,17 @@ final exact-artifact whole-toolbox gate remain open. A successful model exit or 
 report does not count without evidence review: the first container trial omitted a real
 configuration field despite correct recovered bytes, and required a correction pass.
 
+The macOS `ghidra-debugger` selection adds an installed public-CLI GUI/LLDB case. Its private
+manifest supplies `packageRoot`, `ghidraHome`, `java` and `ghidraDebuggerWorker`. Prepare the
+short-lived, source-unavailable native worker with `prepare-native-agent-fixture.mjs` and use
+its `fast` executable; the source fixture is `fixtures/toolbox/debugger-fast.c`. It requires no
+sleep or interactive subject. The case stops at entry, maps a function, sets a breakpoint
+before resuming, checks actual argument/return registers, closes/reopens the same context and
+compares disconnected trace registers, memory and mapping. It also checks launch request replay,
+checkpoint bytes, actual session IDs and terminal public debugger process inventory. Run it
+with the ordinary acceptance runner and `--tag ghidra-debugger`. The two opt-in owner fault
+tests remain separate from this real Ghidra GUI case.
+
 The actual standalone [Codex host trials](verification/toolbox-agent-host.json) also passed
 cold/prepared container research with the same business-only prompt. Project startup metadata
 supplied the skill list; the prompt did not identify a tool or a command sequence. Keep the

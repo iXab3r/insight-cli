@@ -868,3 +868,42 @@ all seven actual native jobs plus their aggregate on `75cca82`. Linux
 [39077664196](https://github.com/iXab3r/insight-cli/actions/runs/39077664196) also passed.
 The separate prepared Ghidra GUI/debugger model investigation is still under review;
 neither static interop nor this native suite silently completes that agent-family gate.
+
+
+### Ghidra GUI/debugger recovery and independently reviewed failed trials
+
+The [GUI agent history](verification/toolbox-agent-ghidra-debugger.json) retains seven
+source-unavailable trials without counting transport completion as acceptance. They exposed
+an actual profile alias rejection, host-yield confusion, incomplete owned-context cleanup,
+missing breakpoint setup before running a short program, and an unobserved step-out return.
+Two trials timed out. Static findings/publication from these trials do not complete their CPU
+task. Unknown CPU outcomes and original snapshots were preserved; maintainer cleanup is
+explicitly separate from an autonomous agent pass.
+
+The [retained original-profile continuation](verification/toolbox-ghidra-debugger-alias.json)
+used the exact original session and profile after the alias fix, explicitly refreshed its
+published R2 annotation, launched a distinct new CPU intent and read real registers/stack/
+mapping. It retained disconnected trace memory on reopen and left the original unknown
+journal bytes/states unchanged. The [default-launch native regression](verification/toolbox-ghidra-gui-native.json)
+also passed a real owned GUI/LLDB argument/return and trace recovery task. These receipts
+identify their earlier frozen package and do not substitute for a new candidate or model gate.
+
+
+The later [entry-stop native case](verification/toolbox-ghidra-entry-native.json) passed on
+its exact frozen installed package: actual argument 11 and return 109, explicit request replay
+without a second launch, function mapping/breakpoint/stack, and identical disconnected CPU
+registers/memory after reopen. Checkpoint bytes and input identity matched; the public process
+inventory had no live debugger/helper after cleanup. This is an additional focused case,
+not a relabeled 18-case combined run. Its ordinary regression passed 209 tests with two native
+opt-in skips, 29 release checks, two real LLDB owner faults, all 25 skill validators and
+relocated offline package installation.
+
+The candidate uses explicit owned-adapter import verification, an explicit native-frame
+step API and fresh stopped-snapshot completion checks. Its private bounded RPC log stores
+method names only (0600, 64 KiB), alongside the retained backend diagnostics. Earlier
+candidates that acknowledged zero registers or failed to settle their step remain failed;
+the successful instrumented candidate does not establish a diagnosed cause for every timing
+variation. A repeated unchanged native gate is checked separately before final stability claims.
+The current independent GUI trials are not passes: cold observed count 10 and explicitly
+qualified unobserved returns while publishing/readback succeeded; prepared reached 900 seconds.
+Their exact artifacts, inputs and cleanup limits stay in the model receipt.

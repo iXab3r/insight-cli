@@ -128,3 +128,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI narrows managed and native code to stable text windows
     Then bounded evidence retains source hashes and explicit native truncation
+
+  @ghidra-debugger @macos
+  Scenario: Corroborate a native calculation and retain its disconnected context trace
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI debugs the owned program and reopens its retained trace
+    Then paused CPU evidence and disconnected trace readback preserve ownership and input identity

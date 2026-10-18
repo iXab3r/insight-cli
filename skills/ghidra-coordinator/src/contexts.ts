@@ -28,7 +28,7 @@ import {initialIntent,initializeModel} from './initial-model.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
-  toolProcessId?:string; pid: number; endpoint: string; root: string; target: string; context?: string;
+  toolProcessId?:string; pid: number; endpoint: string; root: string; target: string; context?: string; session?:string;
   mode: ToolMode; program: string; tokenSecret: string; runtimeFingerprint: string;
   kind: 'context' | 'shared' | 'bootstrap' | 'candidate'; baseRevision?:number;viewEpoch?:number;
 }
@@ -104,7 +104,7 @@ export class GhidraContexts {
           GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn:async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
         binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,target:target.id,
-          ...(context?{context}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
+          ...(context?{context,session:this.workspace.contextById(context).session}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
         await durable(join(root,'process.json'),binding);
       }});
     child.on('error',()=>{});child.unref();await log.close();
@@ -584,8 +584,9 @@ public class ${name} extends GhidraScript {
     const executable=join(root,process.platform==='win32'?'image.exe':'image');await copyFile(await this.workspace.artifacts.verify(target.input),executable,constants.COPYFILE_EXCL);await chmod(executable,0o500);
     const copied=await this.workspace.artifacts.capture(executable,'input');if(copied.id!==target.input.id)fail('binding','Staged debug executable differs from the immutable target.');
     const cwd=p.cwd===undefined?root:text(p.cwd,4096);if(/[\r\n\0]/.test(cwd))fail('invalid','Debugger working directory must be a single filesystem path.');
-    await durable(join(record.binding.root,'debugger-run','current.json'),{request,target:scope.target,context:record.binding.context,executable,cwd});
-    return this.debuggerCall(scope,'launch',{...p,executable_path:executable,cwd,
+    await durable(join(record.binding.root,'debugger-run','current.json'),{request,target:scope.target,context:record.binding.context,executable,cwd,...(p.stop_at_entry===true?{stopAtEntry:true}:{})});
+    const {stop_at_entry,...parameters}=p;
+    return this.debuggerCall(scope,'launch',{...parameters,executable_path:executable,cwd,
       ...(this.c.profile.values.debuggerPython?{python_executable:text(this.c.profile.values.debuggerPython,4096)}:{}),
       ...(this.c.profile.values.windbgDir?{windbg_dir:text(this.c.profile.values.windbgDir,4096)}:{})});
   }

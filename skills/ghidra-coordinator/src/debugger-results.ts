@@ -4,6 +4,12 @@ import type {ResearchBackend} from './research.js';
 import type {Artifact} from './artifacts.js';
 const array=(raw:unknown)=>{if(!Array.isArray(raw))fail('partial','Debugger inventory is absent.');return raw.map(object);};
 const count=(value:unknown)=>{if(!Number.isSafeInteger(value)||Number(value)<0)fail('partial','Debugger count is invalid.');};
+export function debuggerExecutionSettled(operation:string,before:Record<string,unknown>,after:Record<string,unknown>){
+  if(after.target_connected!==true)return false;
+  const advanced=/^\d+$/.test(String(after.snap))&&/^\d+$/.test(String(before.snap))&&BigInt(String(after.snap))>BigInt(String(before.snap));
+  if(operation==='resume')return after.execution_state==='RUNNING'||after.execution_state==='STOPPED'&&advanced;
+  return after.execution_state==='STOPPED'&&(operation!=='step'||advanced);
+}
 export async function debuggerProgramMetadata(backend:Pick<ResearchBackend,'inspect'>,snapshot:Artifact){
   if(!backend.inspect)return undefined;const value=object(await backend.inspect(snapshot,{kind:'debugger_bookmarks'}));
   if(typeof value.fingerprint!=='string'||! /^[a-f0-9]{64}$/.test(value.fingerprint))fail('partial','Debugger program metadata inspection is incomplete.');count(value.count);return value.fingerprint;
