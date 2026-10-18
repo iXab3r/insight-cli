@@ -36,7 +36,8 @@ class InsightPythonWheels {
         proc = t.GetProcess()
         if proc.GetState() != lldb.eStateStopped:
             raise RuntimeError("Native target is not stopped")
-        caller = t.GetFrameAtIndex(1)
+        frames = util.insight_frames(t)
+        caller = frames[1] if len(frames) > 1 else lldb.SBFrame()
         if not caller.IsValid():
             raise RuntimeError("No native caller frame")
         return_pc, return_sp = caller.GetPC(), caller.GetSP()
@@ -95,7 +96,7 @@ class InsightPythonWheels {
     if(first<0||second<0||frameBlock.indexOf(frameIndex,second+frameIndex.length())>=0)throw new IllegalArgumentException("Unexpected pinned LLDB frame identity");
     if(ownedCaller){
       if(!frameBlock.contains("mapper.map(proc, f.GetPC())")||!frameBlock.contains("str(f.GetFunctionName())")||!frameBlock.contains("util.get_description(f)"))throw new IllegalArgumentException("Unexpected pinned LLDB frame coordinates");
-      frameBlock=frameBlock.replace("mapper.map(proc, f.GetPC())","mapper.map(proc, util.insight_frame_pc(f))").replace("str(f.GetFunctionName())","util.insight_frame_function(f)").replace("util.get_description(f)","util.insight_frame_description(f)");
+      frameBlock=frameBlock.replace("for i in range(0, t.GetNumFrames()):", "frames = util.insight_frames(t)\n    for i in range(len(frames)):").replace("f = t.GetFrameAtIndex(i)", "f = frames[i]").replace("mapper.map(proc, f.GetPC())","mapper.map(proc, util.insight_frame_pc(f))").replace("str(f.GetFunctionName())","util.insight_frame_function(f)").replace("util.get_description(f)","util.insight_frame_description(f)");
     }
     commandSource=commandSource.substring(0,frameStart)+frameBlock.replace(frameIndex,"level=i")+commandSource.substring(frameEnd);
     String single="def put_single_breakpoint(b: lldb.SBBreakpoint, proc: lldb.SBProcess) -> None:\n";
@@ -132,11 +133,50 @@ class InsightPythonWheels {
     """;
     if(utilSource.indexOf(evaluation)<0||utilSource.indexOf(evaluation)!=utilSource.lastIndexOf(evaluation))throw new IllegalArgumentException("Unexpected pinned LLDB address evaluator");
     utilSource=utilSource.replace(evaluation,readOnlyEvaluation.stripTrailing());
-    utilSource+="\n\ndef insight_frame_level(frame):\n    thread = frame.GetThread()\n    for index in range(thread.GetNumFrames()):\n        if thread.GetFrameAtIndex(index).GetFrameID() == frame.GetFrameID():\n            return index\n    raise RuntimeError('Native frame is no longer present')\n";
+    utilSource+="\n\nINSIGHT_NORMALIZE_PHYSICAL_STACK = "+(ownedCaller?"True":"False")+"\n";
+    utilSource+="""
+
+    def insight_frames(thread):
+        frames = [thread.GetFrameAtIndex(i) for i in range(thread.GetNumFrames())]
+        if not INSIGHT_NORMALIZE_PHYSICAL_STACK or not frames:
+            return frames
+        head = frames[0]
+        pc, sp = head.FindRegister('pc'), head.FindRegister('sp')
+        if not pc.IsValid() or not sp.IsValid() or pc.GetError().Fail() or sp.GetError().Fail():
+            return frames
+        live_pc, live_sp = pc.GetValueAsUnsigned(), sp.GetValueAsUnsigned()
+        for index in range(1, min(len(frames), 16)):
+            previous, candidate = frames[index - 1], frames[index]
+            if previous.IsInlined() or previous.IsArtificial() or previous.GetSP() != live_sp or previous.GetCFA() != live_sp:
+                break
+            if candidate.GetPC() == live_pc and candidate.GetSP() == live_sp and not candidate.IsInlined() and not candidate.IsArtificial():
+                return frames[index:]
+        return frames
+
+    def insight_frame_native_index(frame):
+        thread = frame.GetThread()
+        for index in range(thread.GetNumFrames()):
+            if thread.GetFrameAtIndex(index).GetFrameID() == frame.GetFrameID():
+                return index
+        raise RuntimeError('Native frame is no longer present')
+
+    def insight_frame_for_level(thread, level):
+        return thread.GetFrameAtIndex(0) if level == 0 else insight_frames(thread)[level]
+
+    def insight_frame_level(frame):
+        thread = frame.GetThread()
+        for index, candidate in enumerate(insight_frames(thread)):
+            if candidate.GetFrameID() == frame.GetFrameID():
+                return index
+        frames = insight_frames(thread)
+        if frames and insight_frame_native_index(frame) < insight_frame_native_index(frames[0]):
+            return 0
+        raise RuntimeError('Native frame is no longer in the current stack')
+    """;
     utilSource+="""
 
     def insight_frame_pc(frame):
-        if insight_frame_level(frame) != 0:
+        if insight_frame_level(frame) != 0 or frame.IsInlined() or frame.IsArtificial():
             return frame.GetPC()
         value = frame.FindRegister('pc')
         if not value.IsValid() or value.GetError().Fail():
@@ -151,14 +191,45 @@ class InsightPythonWheels {
 
     def insight_frame_description(frame):
         return '#%d: %s %s' % (insight_frame_level(frame), hex(insight_frame_pc(frame)), insight_frame_function(frame))
+
+    def insight_thread_description(thread):
+        if thread.GetProcess().GetState() != lldb.eStateStopped:
+            return get_description(thread)
+        frames = insight_frames(thread)
+        if not frames:
+            return get_description(thread)
+        frame = frames[0]
+        return 'thread #%d: tid = %s, %s %s, stop reason = %s' % (thread.GetIndexID(), hex(thread.GetThreadID()), hex(insight_frame_pc(frame)), insight_frame_function(frame), thread.GetStopDescription(512))
     """;
     Files.writeString(util,utilSource,StandardOpenOption.TRUNCATE_EXISTING);
     String selectFrame="f.thread.SetSelectedFrame(f.GetFrameID())";
     if(source.split(java.util.regex.Pattern.quote(selectFrame),-1).length!=3)throw new IllegalArgumentException("Unexpected pinned LLDB frame selector");
-    source=source.replace(selectFrame,"f.thread.SetSelectedFrame(util.insight_frame_level(f))");
+    source=source.replace(selectFrame,"f.thread.SetSelectedFrame(util.insight_frame_native_index(f))");
+    if(ownedCaller){
+      String lookup="    return thread.GetFrameAtIndex(level)";
+      if(source.indexOf(lookup)<0||source.indexOf(lookup)!=source.lastIndexOf(lookup))throw new IllegalArgumentException("Unexpected pinned LLDB frame lookup");
+      source=source.replace(lookup,"    return util.insight_frame_for_level(thread, level)");
+      String display="def compute_thread_display(t: lldb.SBThread) -> str:\n    return util.get_description(t)";
+      if(commandSource.indexOf(display)<0||commandSource.indexOf(display)!=commandSource.lastIndexOf(display))throw new IllegalArgumentException("Unexpected pinned LLDB thread display");
+      commandSource=commandSource.replace(display,"def compute_thread_display(t: lldb.SBThread) -> str:\n    return util.insight_thread_description(t)");
+    }
     Files.writeString(methods,source,StandardOpenOption.TRUNCATE_EXISTING);
     Files.writeString(commands,commandSource,StandardOpenOption.TRUNCATE_EXISTING);
     Files.writeString(client,clientSource,StandardOpenOption.TRUNCATE_EXISTING);
+    Path architecture=root.resolve("ghidralldb/arch.py");String architectureSource=Files.readString(architecture);
+    String registerAliases="""
+
+    class InsightAarch64RegisterMapper(DefaultRegisterMapper):
+        def map_name(self, proc, name):
+            return {'fp': 'x29', 'lr': 'x30'}.get(name, super().map_name(proc, name))
+
+        def map_name_back(self, proc, name):
+            return {'x29': 'fp', 'x30': 'lr'}.get(name, super().map_name_back(proc, name))
+    """;
+    String mapper="def compute_register_mapper(lang: str) -> DefaultRegisterMapper:\n";
+    if(architectureSource.indexOf(mapper)<0||architectureSource.indexOf(mapper)!=architectureSource.lastIndexOf(mapper))throw new IllegalArgumentException("Unexpected pinned LLDB register mapper");
+    architectureSource=architectureSource.replace(mapper,mapper+"    if lang.startswith('AARCH64:'):\n        return InsightAarch64RegisterMapper('big' if ':BE:' in lang else 'little')\n")+registerAliases;
+    Files.writeString(architecture,architectureSource,StandardOpenOption.TRUNCATE_EXISTING);
     System.out.println("{\"state\":\"prepared\",\"lldb_memory_adapter\":\"insight-sbprocess-v1\",\"lldb_step_adapter\":\"insight-caller-dispatch-v2\"}");
   }
 }
