@@ -174,7 +174,7 @@ const targetView=(target:ReturnType<Workspace['target']>)=>({target:target.id,na
 function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[]):CommandDefinition {
   const path=[...parents,entry.name.split(' ')[0]!],name=path.join(' ');
   const run=entry.run;
-  return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{return timingScope(JSON.stringify([input.options.session,input.options.target,input.options.requestId]),async()=>{
+  return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{return timingScope(JSON.stringify([c.profile.name,input.options.session,input.options.target]),async()=>{
     try{
       let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
       if(!selected)return await run(input,c);

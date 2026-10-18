@@ -22,11 +22,15 @@ no usable trace. Retain the directory privately and inspect before sharing.
 Stages cover module/schema preparation, deployed-byte verification, owner discovery
 and IPC, permissions/profile validation, command/context queue waits, authenticated
 backend calls, native helper processes, save/export, snapshot copy/verification,
-saved-effect inspection, journal transactions, publication and output serialization.
+saved-effect inspection, journal transactions, publication, output serialization/write
+and bounded-function owner-file writes. Logical scope digests remain stable across
+different caller request IDs for the same session/target.
 `backend.dispatch` includes network and native execution until response headers;
 `backend.response-read/decode` cover body transfer/decoding. A Java helper span covers
 its entire child process, including Ghidra initialization and execution. These are
 boundary timings, not CPU profiling inside the Ghidra decompiler.
+`output.write` covers the synchronous write/enqueue call; asynchronous OS draining
+remains part of the externally observed end-to-end request time.
 
 Spans are inclusive and can overlap. Never add client roundtrip, owner command,
 handler and backend durations into one critical path. The repository's
