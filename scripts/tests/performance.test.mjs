@@ -14,15 +14,16 @@ test('performance gate rejects missing/failed samples and tolerates only declare
  const b={'before/tiny/no-analysis/cli/read.metadata':{n:30,p50:100,p95:120,mad:2,failures:0,censored:0}},a={'after/tiny/no-analysis/cli/read.metadata':{n:30,p50:110,p95:130,mad:2,failures:0,censored:0}};
  assert.equal(gate(b,a).passed,true);a['after/tiny/no-analysis/cli/read.metadata'].p50=130;assert.equal(gate(b,a).passed,false);assert.equal(gate(b,{}).passed,false);assert.equal(gate({},{}).passed,false);a['after/tiny/no-analysis/cli/read.metadata'].n=3;assert.equal(gate(b,a).passed,false);
 });
-import {union,traceCoverage} from '../performance/trace-report.mjs';
+import {union,traceCoverage,settledTraceReport} from '../performance/trace-report.mjs';
 test('timing coverage subtracts interval union, including nested/parallel overlap',()=>{assert.equal(union([[0n,10n],[2n,4n],[8n,12n],[20n,25n]]),17);});
 test('native diagnostic trace coverage rejects missing stages and unresolved context trees',()=>{const empty=traceCoverage({stages:{},danglingParents:0,bindingScopesWithMultipleRequests:1});assert.equal(empty.passed,false);const stages=Object.fromEntries(empty.required.map(s=>[s,{count:1}]));assert.equal(traceCoverage({stages,danglingParents:0,bindingScopesWithMultipleRequests:1}).passed,true);assert.equal(traceCoverage({stages,danglingParents:1,bindingScopesWithMultipleRequests:1}).passed,false);assert.equal(traceCoverage({stages,danglingParents:0,bindingScopesWithMultipleRequests:0}).passed,false);});
-import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,appendFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {PublicCli,Recorder} from '../performance/public.mjs';
 import {scriptEffects} from '../performance/script-effects.mjs';
 import {requestTraces} from '../performance/request-traces.mjs';
+test('trace finalization waits passively for late lifetime roots and retains unresolved parents',async t=>{const root=await mkdtemp(join(tmpdir(),'perf-trace-settle-'));t.after(()=>rm(root,{recursive:true,force:true}));const file=join(root,'owned.jsonl'),base={schema:1,pid:1,request:'owned',startNs:'0',durationNs:'10',ok:true};await writeFile(file,JSON.stringify({...base,id:2,parent:1,stage:'gate.wait'})+'\n');let pending;const timer=setTimeout(()=>{pending=appendFile(file,JSON.stringify({...base,id:1,stage:'command.total'})+'\n');},20);t.after(()=>clearTimeout(timer));const settled=await settledTraceReport(root,{timeoutMs:2000,intervalMs:10});await pending;assert.equal(settled.danglingParents,0);assert.equal(settled.records,2);await writeFile(file,JSON.stringify({...base,id:2,parent:1,stage:'gate.wait'})+'\n');const missing=await settledTraceReport(root,{timeoutMs:20,intervalMs:10});assert.equal(missing.danglingParents,1);assert.equal(missing.records,1);});
 test('private transcript reduction binds script effects while retaining only public state counts',async t=>{
  const root=await mkdtemp(join(tmpdir(),'perf-effects-'));t.after(()=>rm(root,{recursive:true,force:true}));
  for(const label of ['baseline','candidate'])for(const fixture of ['tiny','large'])for(const analysis of [false,true]){const directory=join(root,label,fixture+'-'+(analysis?'analysis':'no-analysis')+'-0');await mkdir(directory,{recursive:true});await writeFile(join(directory,'requests.jsonl'),[{n:1,stage:'state.before-read-script',ok:true},{n:2,stage:'state.after-read-script',ok:true}].map(JSON.stringify).join('\n'));for(let n=1;n<=2;n++)await writeFile(join(directory,n+'.stdout'),JSON.stringify({session:'private-session',ghidra:{state:'ready',baseRevision:'R3',sharedRevision:'R3',unresolvedRequests:[],pendingChanges:n-1}}));}

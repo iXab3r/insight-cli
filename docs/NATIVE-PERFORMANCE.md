@@ -218,6 +218,9 @@ additional diagnostic samples do not replace any untraced sample.
 and binding scopes shared across multiple requests. The bounded proof includes a
 structured function mutation checked in an independently reopened saved database
 and exact durable-ID replay, so saved-effect inspection is exercised in native traces.
+The finalizer passively allows up to three minutes for an owner lifetime root to be
+emitted at ordinary idle exit. It reads trace files without polling owner status or
+stopping an owner. Remaining missing parents still fail diagnostic coverage.
 
 The component `view-compare` phase alternates old/new Java sources on the same
 immutable prepared database, three warmups plus 30 measured calls each, requiring

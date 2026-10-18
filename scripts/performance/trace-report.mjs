@@ -1,6 +1,7 @@
 import {readFile,readdir,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {distribution} from './compare.mjs';
+import {setTimeout as delay} from 'node:timers/promises';
 export function union(intervals){let total=0,end;for(const [a,b] of intervals.sort((a,b)=>a[0]<b[0]?-1:1)){if(end===undefined||a>end){total+=Number(b-a);end=b;}else if(b>end){total+=Number(b-end);end=b;}}return total;}
 export async function traceReport(directory){
  const records=[];for(const name of await readdir(directory)){if(!name.endsWith('.jsonl'))continue;for(const line of (await readFile(join(directory,name),'utf8')).trim().split('\n').filter(Boolean))records.push(JSON.parse(line));}
@@ -10,4 +11,7 @@ export async function traceReport(directory){
  return {schema:1,records:records.length,pids:new Set(records.map(r=>r.pid)).size,requests:new Set(records.map(r=>r.pid+':'+r.request)).size,danglingParents,verifiedBindingScopes:bindingScopes.size,bindingScopesWithMultipleRequests:[...bindingScopes.values()].filter(s=>s.size>1).length,overlap:'Inclusive spans overlap; exclusive durations subtract the union of immediate child intervals. No cross-process span sums.',stages};
 }
 export function traceCoverage(report){const required=['bootstrap.artifact-hash','bootstrap.domain-modules','schema.prepare','profile.resolve','profile.permissions','owner.discover','ipc.roundtrip','gate.wait','context.queue','context.boundary-wait','command.handler','binding.verify','backend.dispatch','backend.response-read','backend.response-decode','backend.http.save_program','backend.http.export_program','artifact.copy','artifact.verify','saved.verify','saved.fields','journal.transaction','publication.publish','publication.latest','native.helper.snapshot-inspect','native.helper.snapshot-fields','native.helper.publish','native.helper.recover-publication','output.serialize','output.write','output.files'];const missing=required.filter(s=>!report.stages[s]?.count);return {schema:1,passed:missing.length===0&&report.danglingParents===0&&report.bindingScopesWithMultipleRequests>0,required,missing,danglingParents:report.danglingParents,bindingScopesWithMultipleRequests:report.bindingScopesWithMultipleRequests};}
+// The owner startup/lifetime root closes on its ordinary idle exit. Do not query
+// owner status here: that could extend its lifetime. Never stop a shared owner.
+export async function settledTraceReport(directory,{timeoutMs=180000,intervalMs=10000}={}){const deadline=Date.now()+timeoutMs;let report=await traceReport(directory);while(report.danglingParents&&Date.now()<deadline){await delay(Math.min(intervalMs,Math.max(0,deadline-Date.now())));report=await traceReport(directory);}return report;}
 if(process.argv[1]===new URL(import.meta.url).pathname)console.log(JSON.stringify(await traceReport(process.argv[2]),null,2));
