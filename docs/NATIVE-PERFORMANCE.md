@@ -166,6 +166,11 @@ measured memory digest against the independently constructed fixture data array,
 including all returned bytes. Entirely absent cases fail acceptance.
 `equivalence.json` binds stable useful hashes within/across routes. `gate.json` retains budget decisions.
 `cleanup.json` and lifecycle readbacks establish owned cleanup and saved state.
+`script-effects.json` reduces private before/after status transcripts to pending-change
+counts and unchanged revisions for every cold trial, checking baseline/candidate
+equivalence. `trace-request-windows.json` correlates fully contained spans with isolated
+serial diagnostic requests. It retains repeated backend/save/export/hash counts;
+inclusive durations are distributions, never cross-stage or cross-process sums.
 
 Raw stdout, database manifests and JVM logs can contain local paths. Keep them in the
 private evidence directory. Publish sanitized `requests.jsonl`, distribution/gate/
