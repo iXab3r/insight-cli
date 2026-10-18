@@ -5,7 +5,7 @@ import {homedir,loadavg,cpus,totalmem,release} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 import {PublicCli,Recorder,hash} from './public.mjs';
 import {archiveClosedProfile} from './storage.mjs';
-export const setupScript=`import ghidra.app.script.GhidraScript; public class OwnedPerformanceSetup extends GhidraScript {public void run() throws Exception {for(String p:new String[]{"140001000","140001010","140001050"}){var a=toAddr(p);if(getFunctionAt(a)==null){disassemble(a);createFunction(a,null);}}}}`;
+export const setupScript=f=>`import ghidra.app.script.GhidraScript; public class OwnedPerformanceSetup extends GhidraScript {public void run() throws Exception {for(String p:new String[]{${['owned_add','owned_hash','main'].map(n=>JSON.stringify(f.exports[n].replace(/^0x/i,''))).join(',')}}){var a=toAddr(p);if(getFunctionAt(a)==null){disassemble(a);createFunction(a,null);}}}}`;
 export function cases(f){return [
  {name:'metadata',argv:['program','metadata'],check:v=>{assert.equal(v.value.language,'x86:LE:64:default');assert.equal(v.value.compiler,'windows');assert.ok(v.value.function_count>=3);}},
  {name:'decompile',argv:['functions','decompile','--address',f.exports.owned_add],check:v=>{assert.match(v.code,/return/);assert.match(v.code,/17|0x11/);assert.equal(v.truncated,false);}},
@@ -34,7 +34,7 @@ export async function runInsight(o,fixtures){
     assert.ok(otherFixture,'Warm-server import requires another owned input');
     client.scope=await client.call(['ghidra','open',otherFixture.path,'--session','new','--language','x86:LE:64:default','--compiler-spec','windows',...analyzed?[]:['--no-analysis']],{stage:'warm.new-input'});assert.equal(client.scope.state,'ready');
     await client.scoped(['close'],{stage:'warm.close-new-input'});client.scope=primary;retained.pop();
-    await client.scoped(['scripts','run-inline','--code',setupScript,'--request-id','prepare-functions'],{stage:'prepare.functions'});
+    await client.scoped(['scripts','run-inline','--code',setupScript(f),'--request-id','prepare-functions'],{stage:'prepare.functions'});
     await client.scoped(['merge','--request-id','prepare-merge'],{stage:'prepare.merge'});
     const dbPath=join(homedir(),'Library/Application Support/insight-cli',profile,'workspace/workspace.sqlite');
     const db=new DatabaseSync(dbPath,{readOnly:true});let context;try{context=JSON.parse(db.prepare('SELECT data FROM contexts WHERE session=? AND target=?').get(client.scope.session,client.scope.target).data);}finally{db.close();}

@@ -156,8 +156,15 @@ Every request has monotonic nanosecond start, end-to-end milliseconds, observer/
 I/O time, fixture/analysis/route/stage, warmup/sample/cold-trial identity, success and
 load averages. One-shot records include PID/exit status. Failed/censored samples are
 retained; only declared warmups are excluded. `summary.json` reports n, p50/p95,
-mean, sample standard deviation, MAD, min/max and failure counts. `equivalence.json`
-binds stable useful hashes within/across routes. `gate.json` retains budget decisions.
+mean, sample standard deviation, MAD, min/max and failure counts. Use
+`summary-by-phase.json` to distinguish the prepared first query from the separate
+cold-RPC import, and `summary-warm-by-phase.json` for warm reads/lifecycle operations;
+the latter excludes the four extra stock cold-trial persistence cycles.
+`coverage.json` requires every declared case/route/input/analysis combination,
+unique repetition indices and complete successful 30/5 counts. It also checks every
+measured memory digest against the independently constructed fixture data array,
+including all returned bytes. Entirely absent cases fail acceptance.
+`equivalence.json` binds stable useful hashes within/across routes. `gate.json` retains budget decisions.
 `cleanup.json` and lifecycle readbacks establish owned cleanup and saved state.
 
 Raw stdout, database manifests and JVM logs can contain local paths. Keep them in the
@@ -169,6 +176,7 @@ data. Do not publish auth headers, process receipts, local roots or research log
 node scripts/performance/compare.mjs "$EVIDENCE_DIRECTORY"
 node scripts/performance/verify-results.mjs "$EVIDENCE_DIRECTORY/baseline" "$EVIDENCE_DIRECTORY/candidate" "$EVIDENCE_DIRECTORY/stock-parity"
 node scripts/performance/trace-report.mjs "$EVIDENCE_DIRECTORY/trace"
+node scripts/performance/finalize.mjs "$EVIDENCE_DIRECTORY" 30 5
 node scripts/performance/trace-cost.mjs --module "$FACTORY_TIMING_MODULE" --root "$NEW_TRACE_COST_DIRECTORY"
 ```
 
@@ -180,6 +188,10 @@ The on/off sink-cost experiment alternates 30 samples, each 100 no-op requests /
 spans, with exact work-count checks; it excludes child startup and cannot establish
 the entire native tracing overhead. Native traced runs are diagnostic and kept out
 of the untraced regression/equivalence gate.
+The diagnostic collection also repeats contention with tracing and runs the installed
+bounded-function proof with tracing enabled. The proof exercises actual result-file
+writes; contention exposes queue wait separately from handler/backend work. These
+additional diagnostic samples do not replace any untraced sample.
 
 The component `view-compare` phase alternates old/new Java sources on the same
 immutable prepared database, three warmups plus 30 measured calls each, requiring

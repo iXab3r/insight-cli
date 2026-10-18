@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
 import {parseArgs,promisify} from 'node:util';
 import {execFile,spawn} from 'node:child_process';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {fixtures} from './fixtures.mjs';
-import {rows,summarize} from './compare.mjs';
-import {verifyResults} from './verify-results.mjs';
-import {gate} from './gate.mjs';
+import {finalize} from './finalize.mjs';
 import {identity} from './identity.mjs';
 const exec=promisify(execFile),{values:o}=parseArgs({options:{root:{type:'string'},baseline:{type:'string'},candidate:{type:'string'},java:{type:'string'},ghidra:{type:'string'},python:{type:'string'},bridge:{type:'string'},'stock-jar':{type:'string'},'parity-jar':{type:'string'},smoke:{type:'boolean'},'ack-disposable':{type:'boolean'}}});
 assert.equal(o['ack-disposable'],true);for(const k of ['root','baseline','candidate','java','ghidra','python','bridge','stock-jar','parity-jar'])assert.ok(o[k],k);
@@ -28,16 +26,14 @@ await run('candidate',['--cli',resolve(o.candidate),'--label','candidate','--fix
 await run('candidate-cold-rpc',['--phase','cold-rpc','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
 await run('candidate-persistence',['--phase','persistence','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
 await run('candidate-concurrency',['--phase','concurrency','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
-const proofStarted=process.hrtime.bigint();let proofCode;
-try{await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/proof-bounded-functions.mjs','--cli',resolve(o.candidate),'--java',resolve(o.java),'--ghidra-home',resolve(o.ghidra),'--root',join(root,'candidate-bounded-proof'),'--ack-disposable'],{cwd:process.cwd(),env:process.env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>{proofCode=code;code===0?ok():bad(Error('Final installed native bounded-function proof failed'));});});}
-finally{phases.push({label:'candidate-bounded-proof',ms:Number(process.hrtime.bigint()-proofStarted)/1e6,code:proofCode});await writeFile(join(root,'phases.json'),JSON.stringify(phases,null,2)+'\n');}
+async function proof(label,env={}){const started=process.hrtime.bigint();let code;
+ try{await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/proof-bounded-functions.mjs','--cli',resolve(o.candidate),'--java',resolve(o.java),'--ghidra-home',resolve(o.ghidra),'--root',join(root,label),'--ack-disposable'],{cwd:process.cwd(),env:{...process.env,...env},stdio:'inherit'});child.once('error',bad);child.once('exit',value=>{code=value;value===0?ok():bad(Error('Final installed native bounded-function proof failed: '+label));});});}
+ finally{phases.push({label,ms:Number(process.hrtime.bigint()-started)/1e6,code});await writeFile(join(root,'phases.json'),JSON.stringify(phases,null,2)+'\n');}}
+await proof('candidate-bounded-proof');
 // A separate bridge-version factor; this also allows the ordinary owner to exit idle before opt-in tracing.
 await run('stock-version-factor',[...stockArgs,'--jar',resolve(o['stock-jar']),'--label','stock-version-factor']);
 const trace=join(root,'trace');await mkdir(trace,{mode:0o700});
 await run('candidate-trace',['--cli',resolve(o.candidate),'--label','candidate-trace','--fixtures',manifest,'--warm','3','--cold','1','--warmups','1'],{CLI_FACTORY_TRACE_DIRECTORY:trace});
-const all=await rows(root),summary=summarize(all);await writeFile(join(root,'summary.json'),JSON.stringify(summary,null,2)+'\n');
-const equivalence=verifyResults(all.filter(r=>!r.label.includes('trace')));await writeFile(join(root,'equivalence.json'),JSON.stringify(equivalence,null,2)+'\n');assert.equal(equivalence.passed,true,'Useful output/state equivalence failed');
-const families=['read.','persistence.','concurrency.'];
-const results=Object.fromEntries(families.map(family=>[family,gate(summarize(all.filter(r=>r.label==='baseline'&&r.stage.startsWith(family)&&r.sample!==undefined)),summarize(all.filter(r=>r.label==='candidate'&&r.stage.startsWith(family)&&r.sample!==undefined)),{minimum:Number(warm)})]));
-const result={passed:Object.values(results).every(r=>r.passed),families:results};
-await writeFile(join(root,'gate.json'),JSON.stringify(result,null,2)+'\n');assert.equal(result.passed,true,'Native performance regression gate failed; retain every raw sample.');
+await run('candidate-trace-concurrency',['--phase','concurrency','--cli',resolve(o.candidate),'--label','candidate-trace','--manifest',join(root,'candidate-trace/manifest.json'),'--warm','3','--cold','1','--warmups','1'],{CLI_FACTORY_TRACE_DIRECTORY:trace});
+await proof('candidate-trace-bounded-proof',{CLI_FACTORY_TRACE_DIRECTORY:trace});
+const result=await finalize(root,Number(warm),Number(cold));assert.equal(result.passed,true,'Native coverage, useful-output or regression check failed; retain every raw sample.');

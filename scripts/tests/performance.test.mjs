@@ -27,6 +27,16 @@ test('public benchmark adapter retains expected missing-function replies as chec
 });
 import {resultHash} from '../performance/equivalence.mjs';
 import {verifyResults} from '../performance/verify-results.mjs';
+import {coverage} from '../performance/coverage.mjs';
+test('coverage rejects an entirely omitted case, duplicate repetitions and incorrect fixture bytes',()=>{
+ const inventory=coverage([],{warm:2,cold:1});assert.equal(inventory.passed,false);assert.ok(inventory.failures.some(r=>r.fixture==='large'&&r.stage==='read.undefined'));
+ const input=inventory.groups.flatMap(g=>Array.from({length:g.expected},(_,i)=>({evidencePhase:g.phase,label:g.label,fixture:g.fixture,analysis:g.analysis,route:g.route,stage:g.stage,...g.kind==='warm'?{sample:i,coldTrial:0}:{coldTrial:i},ok:true,ms:1,resultHash:'a'.repeat(64)})));
+ for(const r of input.filter(r=>/^read\.(memory|large-output)$/.test(r.stage))){const length=r.stage==='read.memory'?16:r.fixture==='large'?65536:256,data=Array(length).fill(0);data.splice(0,4,1,2,3,4);r.resultHash=resultHash(r.stage,{length,data,hex:Buffer.from(data).toString('hex')});}
+ assert.equal(coverage(input,{warm:2,cold:1}).passed,true);
+ const dropped=input.filter(r=>!(r.evidencePhase==='candidate'&&r.fixture==='large'&&r.stage==='read.undefined'));assert.equal(coverage(dropped,{warm:2,cold:1}).passed,false);
+ assert.equal(coverage([...input,input[0]],{warm:2,cold:1}).passed,false);
+ const memory=input.find(r=>r.stage==='read.memory');memory.resultHash='b'.repeat(64);assert.ok(coverage(input,{warm:2,cold:1}).failures.some(r=>r.reason[0].startsWith('Memory bytes differ')));
+});
 test('equivalence excludes routing metadata but binds complete useful output',()=>{
  const first={session:'s_one',target:'t_one',code:'return 17;',signature:'int owned_add(int x)',comments:{plate:null,eol:null,pre:null,post:null,repeatable:null}};
  const second={...first,session:'s_two',target:'t_two'};assert.equal(resultHash('read.decompile',first),resultHash('read.decompile',second));assert.notEqual(resultHash('read.decompile',first),resultHash('read.decompile',{...second,code:'return 0;'}));
