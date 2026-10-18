@@ -13,3 +13,24 @@ jobs:
       - run: npm test
       - run: npm run test:package
       - run: git diff --exit-code
+  windows-java-arguments:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Real java and javac long-classpath regression
+        shell: pwsh
+        run: |
+          $env:INSIGHT_TEST_JDK = Join-Path $env:JAVA_HOME 'bin'
+          node --test skills/ghidra-coordinator/dist/tests/java-arguments.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - run: git diff --exit-code
