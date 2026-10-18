@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "date": "2026-10-18",
+  "issues": [59, 60],
+  "sourceHead": "3a99a5e9d43f2f9c9b8a2a0e06ff188a0150207d",
+  "platform": "Windows x64; Ghidra 12.1.2; JDK 21; Node 24.4.1",
+  "scope": "Installed public CLI in isolated npm prefixes, Factory AppData and IPC owners; disposable non-private native PE with controlled SDK fault fixtures",
+  "stock": {
+    "version": "0.2.2",
+    "initialImport": {"configuredMilliseconds": 600000, "elapsedMilliseconds": 600106, "state": "unknown", "workerTerminated": true, "completedSnapshotAbsent": true},
+    "save": {"configuredMilliseconds": 30000, "nativeSaveMilliseconds": 36026, "state": "unknown", "originalScriptRetryBlocked": true}
+  },
+  "candidate": {
+    "longImport": {"controlledAnalyzerDelayMilliseconds": 610000, "completeHashedReceipt": true, "independentR1PublicationVerified": true, "completedOptionReadViaPublicCli": true, "reopenedSnapshotReadback": true, "originalRequestReused": true, "analysisNotReplayed": true, "harnessInterruption": "Harness interrupted after private preparation/publication; original public intent continued from retained complete receipt"},
+    "save": {"nativeSaveMilliseconds": 36020, "scriptApplied": true, "executionCount": 1, "requestRetryReturnedRecordedResult": true, "closedAndReopened": true, "mergedRevision": "R2", "independentNewSessionReadback": true},
+    "abandon": {"configuredMilliseconds": 1000, "statusRetainsSavePhaseAndBudget": true, "noSecondSaveFromFailureHandler": true, "liveWorkerRejected": true, "verifiedOwnedWorkerStopped": true, "terminalOutcomeRemainsUnknown": true, "previousSavedViewRestored": true, "unprovedNativeStateNotAdopted": true, "originalScriptNotReplayed": true},
+    "budgetRecovery": {"initialMilliseconds": 1000, "updatedMilliseconds": 3600000, "sameProfileSessionTargetAndRequest": true, "retainedResearchNotInvalidated": true, "completedR1": true},
+    "ownedNativeProcessesStopped": true,
+    "globalInstallationModified": false,
+    "researchProfilesAccessedForMutation": false
+  },
+  "offline": {
+    "focusedRegressionTestsPassed": 17,
+    "windowsPortableSuite": {"passed": 218, "failed": 0, "skipped": 9, "excluded": "Existing replacement-owner process identity test also fails on an isolated stock 0.2.2 install; supervisor output is byte-identical"},
+    "packageInstallGate": "passed",
+    "linuxFullNpmTestAndPackageCI": "passed",
+    "windowsRealJavaAndJavacLongClasspathCI": "passed",
+    "ciRun": "https://github.com/iXab3r/insight-cli/actions/runs/39127381968"
+  },
+  "review": {"manualDiffAndRecoveryReview": true, "foundAndFixed": ["Generic profile set invalidates retained research; dedicated budget command uses Factory ProfileStore", "Budget updates must merge patches atomically to preserve concurrent settings"], "automatedReviewRequested": true, "automatedReviewResponseReceived": false},
+  "limits": ["Controlled native delays exercise real import/save/export/publication paths; they are not throughput benchmarks or tests on private inputs", "Incomplete initial analysis restarts from immutable input; no partial-analysis checkpoint is introduced", "A timed-out native save can continue until its worker ends; an unknown script is never blindly replayed", "Abandon retains uncertainty and evidence and cannot undo external script effects", "Publication helpers retain their existing independent bounds and authority/readback checks"]
+}
