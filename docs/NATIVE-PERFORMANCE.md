@@ -186,6 +186,9 @@ Raw stdout, database manifests and JVM logs can contain local paths. Keep them i
 private evidence directory. Publish sanitized `requests.jsonl`, distribution/gate/
 equivalence/trace summaries, fixture recipe and tool hashes after scanning for private
 data. Do not publish auth headers, process receipts, local roots or research logs.
+The exporter retains raw `trace-events.jsonl` using only the documented trace-field
+allowlist. Process/request/parent IDs and hashed scopes support independent queue-tree
+inspection; no arguments, credentials, endpoint URLs or result text are exported.
 
 ```sh
 node scripts/performance/compare.mjs "$EVIDENCE_DIRECTORY"
