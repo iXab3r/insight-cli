@@ -1,3 +1,4 @@
+import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
 import {verifyGhidraProcess} from './ghidra-processes.js';
@@ -113,7 +114,7 @@ export class GhidraContexts {
       }});
     child.on('error',()=>{});child.unref();await log.close();
     if(!child.pid)fail('launch','Owned Ghidra context could not be launched.');
-    const record={binding,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token),child};
+    const record={binding,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save')),child};
     this.running.set(root,record);
     const deadline=Date.now()+90000;
     try {
@@ -138,7 +139,7 @@ export class GhidraContexts {
     if(stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))
       fail('binding','Native context receipt changed.');
     const token=await this.c.secrets.require(binding.tokenSecret);
-    const http=new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token);
+    const http=new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save'));
     const info=await http.instance();
     if(info.pid!==binding.pid||info.tcp_port!==Number(new URL(binding.endpoint).port)||
         !String(info.project_path??'').startsWith(root+sep))fail('binding','Live context PID, endpoint or project no longer matches its receipt.');

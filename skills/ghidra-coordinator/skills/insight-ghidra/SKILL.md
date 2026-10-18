@@ -89,3 +89,5 @@ and step out or over the call to inspect its actual return.
 Repeat mapping and live breakpoint setup for every new launch. A saved breakpoint bookmark
 does not prove placement in that new process; check its `trace_location_count` before resuming.
 Use `new` only when creating a session; subsequent calls take its actual returned ID.
+
+Long import/save budgets and stopped-worker abandonment: see [recovery](references/recovery.md) and [setup](references/setup.md). Never replay an uncertain script.

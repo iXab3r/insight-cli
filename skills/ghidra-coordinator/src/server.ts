@@ -1,3 +1,5 @@
+import {ghidraBudget} from './budgets.js';
+import {CliError} from '@eyeauras/cli-factory';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
@@ -130,7 +132,12 @@ export class GhidraServer {
   async programStatus(binding:ServerBinding,path:string) {
     return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
   }
-  async initialImport(root:string){return this.run('initial-import','InsightInitialImport',[root],{},undefined,[0],600000);}
+  async initialImport(root:string){
+    const timeoutMilliseconds=ghidraBudget(this.c.profile.values,'import');
+    try{return await this.run('initial-import','InsightInitialImport',[root],{},undefined,[0],timeoutMilliseconds);}
+    catch(error){if(error instanceof CliError)throw new CliError(error.message+' Initial import remains unproved. Increase profile initialImportSeconds and continue the original scope; incomplete private analysis restarts from the retained input.',
+      {code:error.code,result:{phase:'initial-import',timeoutMilliseconds,budgetSetting:'initialImportSeconds',outcome:'unknown',diagnostics:error.result}});throw error;}
+  }
   async initialPublication(binding:ServerBinding,root:string,operation:'stage'|'verify-stage'|'promote'|'verify'='stage'){
     return this.run('initial-publication','db.InsightInitialPublication',[root,operation],await this.credentials(binding,operation.startsWith('verify')?'reader':'publisher'));
   }

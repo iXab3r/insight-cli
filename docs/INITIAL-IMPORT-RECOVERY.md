@@ -52,6 +52,24 @@ back. A proven-owned incomplete direct create with synthetic `<Recovered>` histo
 moved to quarantine without deletion before staging a complete result. A foreign identity,
 ordinary conflicting history, active check-in or changed input/settings remains blocked.
 
+## Long initial analysis
+
+Initial import/analysis defaults to 3600 seconds. Set the profile's
+`--initial-import-seconds <seconds>` (1–86400) before opening a long input, or after a
+failed worker has stopped, then continue the original session/target. For example:
+
+```sh
+insight-cli profile set research --initial-import-seconds 7200
+insight-cli --profile research ghidra open --session <session> --target <target> --json
+```
+
+The budget is execution policy, separate from immutable auto-analysis/load settings.
+Existing profiles need no new target or profile to raise it. Timeout diagnostics retain
+phase, effective milliseconds, setting name and process diagnostics. An incomplete attempt
+still restarts private analysis from the retained immutable input; there is no partial-analysis
+checkpoint. Only the existing complete, hashed receipt and independent full-buffer readback
+permit initial publication. A longer deadline does not make an incomplete snapshot valid.
+
 ## Real CLI acceptance
 
 [Evidence](verification/initial-import-recovery.json) records recovery of the actual earlier

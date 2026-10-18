@@ -6,21 +6,23 @@ export interface Descriptor { path: string; method: string; params: { name: stri
 /** The pinned GhidraMCP HTTP side of a dedicated bridge. No discovery by project name. */
 export class HttpBridge {
   private schema?: Map<string, Descriptor>;
-  constructor(readonly endpoint: string, private fetch: typeof globalThis.fetch = globalThis.fetch, private signal?: AbortSignal, private token?: string,private timeoutMilliseconds?:number) {
+  constructor(readonly endpoint: string, private fetch: typeof globalThis.fetch = globalThis.fetch, private signal?: AbortSignal, private token?: string,private timeoutMilliseconds?:number,private saveTimeoutMilliseconds=120000) {
     const url = new URL(endpoint);
     if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || !url.port || url.username || url.password || url.pathname !== '/')
       fail('binding', 'Worker bridge must use an explicit loopback HTTP port.');
+    if(!Number.isSafeInteger(saveTimeoutMilliseconds)||saveTimeoutMilliseconds<1000||saveTimeoutMilliseconds>3600000)fail('invalid','Save timeout is outside the supported bound.');
     if(timeoutMilliseconds!==undefined&&(!Number.isSafeInteger(timeoutMilliseconds)||timeoutMilliseconds<1||timeoutMilliseconds>1800000))fail('invalid','Bridge timeout is outside the supported bound.');
   }
   private async request(path: string, method: string, query: Record<string, unknown>, body: Record<string, unknown>): Promise<unknown> {
     const url = new URL(path, this.endpoint);
     // Import includes synchronous auto-analysis. Keep discovery/ordinary requests short,
     // while allowing a real executable to finish its first analysis without losing the reply.
-    const timeoutMilliseconds=this.timeoutMilliseconds??(path==='/import_file'?600000:30000);
+    const saving=path==='/save_program'||path==='/export_program';
+    const timeoutMilliseconds=this.timeoutMilliseconds??(saving?this.saveTimeoutMilliseconds:path==='/import_file'?600000:30000);
     const signal=this.signal?AbortSignal.any([this.signal,AbortSignal.timeout(timeoutMilliseconds)]):AbortSignal.timeout(timeoutMilliseconds);
     const transportFailure=()=>{
       if(this.signal?.aborted)fail('cancelled',`Ghidra request ${path} was cancelled; its outcome may require reconciliation.`,{operation:path});
-      if(signal.aborted)fail('timeout',`Ghidra request ${path} exceeded ${timeoutMilliseconds/1000} seconds; its outcome may require reconciliation.`,{operation:path,timeoutMilliseconds});
+      if(signal.aborted)fail('timeout',`Ghidra request ${path} exceeded ${timeoutMilliseconds/1000} seconds; its outcome may require reconciliation.${saving?' Configure profile saveSeconds before future work; inspect sessions status and never replay an uncertain script.':''}`,{operation:path,timeoutMilliseconds,...(saving?{phase:'save',budgetSetting:'saveSeconds',outcome:'unknown'}:{})});
       fail('transport',`Ghidra request ${path} did not complete; its outcome may require reconciliation.`,{operation:path});
     };
     for (const [name, value] of Object.entries(query)) url.searchParams.set(name, String(value));

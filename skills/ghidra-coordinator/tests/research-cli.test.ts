@@ -193,3 +193,30 @@ test('an existing session can first open targets already consumed by another too
  const rpc=await f.rpc(app,[['ghidra','open','--target',third.target,'--session',first.session]]);assert.equal((rpc[0] as any).result.state,'ready');assert.equal((rpc[0] as any).result.session,first.session);
  assert.equal((await f.json(app,['sessions','status',first.session]) as any).contexts.length,3);
 });
+
+test('uncertain script save is not retried or adopted; explicit stopped-worker abandonment retains prior work',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});
+ let workspace:Workspace,backend:Fake,stopped=false,saves=0,scripts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;backend=new Fake(w);const call=backend.call.bind(backend),saved=backend.saved.bind(backend);
+  backend.call=async(s,op,p)=>{if(op==='/run_script_inline'){scripts++;return {success:true,console_output:'fixture completed'};}return call(s,op,p);};
+  backend.saved=async s=>{if(scripts){saves++;throw new CliError('Save deadline exceeded',{code:'coordinator.timeout',result:{phase:'save',timeoutMilliseconds:1000}});}return saved(s);};
+  return Object.assign(backend,{closed:async()=>stopped,inspect:async()=>({sha256:'fixture'})});
+ }}));
+ const exe=join(f.root,'save.exe');await writeFile(exe,'synthetic save input');
+ const selected=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened;
+ const args=['--session',selected.session,'--target',selected.target],before=workspace!.context(selected).workingSnapshot;
+ const run=['ghidra','scripts','run-inline',...args,'--code','generic fixture','--request-id','script-save'];
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(saves,1);assert.equal(scripts,1);
+ let request=workspace!.scopedRequest(selected,'script-save')!;assert.equal(request.state,'unknown');assert.equal((request.result as {phase:string}).phase,'save');assert.ok(!(request.result as {savedSnapshot?:unknown}).savedSnapshot);
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
+ const abandon=['ghidra','abandon',...args,'--request-id','script-save'];
+ assert.notEqual((await f.run(app,[...abandon,'--json'])).exitCode,0);
+ assert.notEqual((await f.run(app,[...abandon,'--acknowledge-unknown-effects','--json'])).exitCode,0);
+ stopped=true;backend!.views.clear();const result=await f.json(app,[...abandon,'--acknowledge-unknown-effects']) as {state:string;outcome:string};
+ assert.equal(result.state,'abandoned');assert.equal(result.outcome,'unknown');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
+ assert.deepEqual(await f.json(app,[...abandon,'--acknowledge-unknown-effects']),result);
+ request=workspace!.scopedRequest(selected,'script-save')!;assert.equal(request.state,'failed');assert.ok((request.result as {previousResult:unknown}).previousResult);
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
+ assert.equal((await f.json(app,['ghidra','open',...args]) as Opened).state,'ready');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
+});

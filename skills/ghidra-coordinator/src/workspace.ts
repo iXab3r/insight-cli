@@ -3,7 +3,7 @@ import { chmodSync, mkdirSync, realpathSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Artifacts, type Artifact } from './artifacts.js';
-import { digest, fail, id, stable, text, version } from './model.js';
+import { digest, fail, id, stable, text, version, object } from './model.js';
 
 export interface ResearchTarget {
   id: string; name: string; binarySha256: string; size: number; input: Artifact; createdAt: string;
@@ -266,6 +266,10 @@ export class Workspace {
       return previous ? {request: previous, replay: true} : {request: this.insertRequest(context.id, operation, intent, callerId, hash), replay: false};
     });
   }
+  scopedRequest(scope:Scope,identity:string):ResearchRequest|undefined {
+    const row=this.db.prepare('SELECT data FROM requests WHERE context=? AND (id=? OR caller_id=?)').get(this.context(scope).id,id(identity),id(identity));
+    return row?JSON.parse(String(row.data)):undefined;
+  }
   request(request: string): ResearchRequest {
     const row = this.db.prepare('SELECT data FROM requests WHERE id=?').get(id(request));
     if (!row) fail('notFound', 'Request was not found in the selected profile.');
@@ -450,6 +454,17 @@ export class Workspace {
     return this.transaction(() => this.writeContext(scope, expectedGeneration, patch));
   }
   /** Snapshot and successful request acknowledgment enter the same durable transaction. */
+  abandonProgramRequest(scope:Scope,request:string,generation:number) {
+    return this.transaction(()=>{
+      const previous=this.request(request),context=this.context(scope),execution=object(previous.execution??{});
+      if(previous.context!==context.id||!['running','unknown'].includes(previous.state)||execution.kind!=='program'||execution.generation!==generation||
+        this.unresolved(scope).length!==1||this.activePublication(scope.target)||!context.workingSnapshot||object(execution.workingSnapshot).id!==context.workingSnapshot.id)
+        fail('binding','Uncertain attempt changed before abandonment.');
+      const result={...scope,state:'abandoned',outcome:'unknown',requestId:previous.callerId??previous.id,previousResult:previous.result??null,retainedSnapshot:context.workingSnapshot};
+      this.writeContext(scope,generation,{state:'stopped',viewEpoch:(context.viewEpoch??0)+1});
+      this.writeRequest(request,'failed',result);return result;
+    });
+  }
   completeSavedRequest(scope: Scope, request: string, expectedGeneration: number, patch: ContextPatch, result: unknown) {
     return this.transaction(() => {
       const previous = this.context(scope), intent = this.request(request);

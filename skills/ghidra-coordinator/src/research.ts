@@ -113,7 +113,23 @@ export class Research {
       mergeState:model.state==='unknown'?'unknown':'idle',
       conflicts:context.scalars.filter(change=>change.conflict).map(change=>({address:publicAddress(change.address),field:change.field,
         original:change.original,local:change.local,shared:change.conflict!.shared})),
-      unresolvedRequests:unresolved.map(request=>({...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state}))}};
+      unresolvedRequests:unresolved.map(request=>({id:request.id,...(request.result?{detail:request.result}:{}),...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state}))}};
+  }
+  async abandon(selected:Scope,requestId:string,acknowledged:boolean) {
+    return this.ordered(selected,async()=>{
+      if(!acknowledged)fail('invalid','Explicit --acknowledge-unknown-effects is required.');
+      const context=this.workspace.context(selected),requests=this.workspace.unresolved(selected);
+      const request=this.workspace.scopedRequest(selected,requestId);
+      if(request?.state==='failed'&&object(request.result??{}).state==='abandoned')return request.result;
+      if(!request||!['running','unknown'].includes(request.state)||requests.length!==1||object(request.execution??{}).kind!=='program')fail('blocked','Abandon requires exactly one unresolved private program operation.');
+      if(this.workspace.activePublication(selected.target)||context.debugger?.connected)fail('blocked','Publication or a live debugger prevents private abandonment.');
+      const execution=object(request.execution!),snapshot=context.workingSnapshot;
+      if(!snapshot||execution.generation!==context.generation||object(execution.workingSnapshot).id!==snapshot.id)fail('binding','The previous saved program view no longer matches the attempt.');
+      await this.workspace.artifacts.verify(snapshot);
+      const backend=await this.backend();
+      if(!backend.closed||!await backend.closed(selected))fail('busy','The original native worker must be stopped before abandoning its uncertain program attempt.');
+      return this.workspace.abandonProgramRequest(selected,request.id,context.generation);
+    });
   }
   async open(target: string, session: string|'new', settings: GhidraLoadSettings, callerId?: string, mode?:ToolMode) {
     // Mode belongs to the request's effective intent. It does not alter target load identity.
@@ -619,12 +635,13 @@ export class Research {
       const context=this.workspace.context(selected);
       this.workspace.startRequest(request.id,{kind:'program',operation,generation:context.generation,workingSnapshot:context.workingSnapshot,
         savedVerification:!!verifySaved});
+      let savedSnapshot:Artifact|undefined,phase='operation';
       try {
         const raw=await backend.call(selected,operation,parameters),response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
         if(['rejected','partial','failed','error'].includes(String(response.status))||response.success===false)
           fail('partial','Program operation reported a rejected or incomplete effect.');
         if(!verifySaved&&response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
-        let value=await verify(backend,response);const snapshot=await backend.saved(selected);
+        let value=await verify(backend,response);phase='save';const snapshot=await backend.saved(selected);savedSnapshot=snapshot;phase='verification';
         if(verifySaved)value=await verifySaved(backend,snapshot,response);
         const scalars=await this.savedScalars(context,backend,snapshot),complexChanges=[...context.complexChanges,request.id],result={...selected,state:'applied',sharedState:'pending',
           pendingChanges:scalars.length+complexChanges.length,value};
@@ -633,9 +650,13 @@ export class Research {
         if(operation.startsWith('/sdk/')&&String((error as {code?:unknown}).code).endsWith('.rejected')){
           this.workspace.recordRequest(request.id,'failed',{...selected,state:'rejected',reason:'native_transaction_rolled_back'});throw error;
         }
-        let savedSnapshot:Artifact|undefined;
-        try{savedSnapshot=await backend.saved(selected);}catch{/* A failed/dead backend retains its native stage and the last acknowledged snapshot. */}
-        this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;
+        // Retain supported structural candidates after a lost operation reply. Never
+        // dispatch another save after a save deadline or an arbitrary script failure.
+        if(phase==='operation'&&verifySaved&&!['/run_script_inline','/run_ghidra_script'].includes(operation)){
+          try{savedSnapshot=await backend.saved(selected);}catch{/* Native evidence stays retained. */}
+        }
+        const detail=error instanceof CliError?{code:error.code,...(error.result?{result:error.result}:{})}:{};
+        this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',phase,...detail,...(savedSnapshot?{savedSnapshot}:{})});throw error;
       }
     });
   }
