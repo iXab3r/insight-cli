@@ -17,6 +17,15 @@ import ghidra.trace.model.memory.TraceMemoryState;
 /** Save/restore trace databases independently of the program database and live execution. */
 public class InsightTraceState extends GhidraScript {
   static String string(JsonObject p,String key){return p.get(key).getAsString();}
+  static void activateAndWait(DebuggerTraceManagerService manager,ghidra.debug.api.tracemgr.DebuggerCoordinates coordinates)throws Exception{
+    var pending=new java.util.concurrent.atomic.AtomicReference<java.util.concurrent.CompletableFuture<Void>>();
+    Runnable activate=()->pending.set(manager.activateAndNotify(coordinates,DebuggerTraceManagerService.ActivationCause.USER));
+    if(SwingUtilities.isEventDispatchThread()){
+      activate.run();if(!pending.get().isDone())throw new IllegalStateException("Asynchronous trace navigation requires a background script");pending.get().join();
+    }else{SwingUtilities.invokeAndWait(activate);pending.get().get(30,java.util.concurrent.TimeUnit.SECONDS);}
+    if(manager.getCurrentTrace()!=coordinates.getTrace())throw new IllegalStateException("Trace selection did not settle");
+  }
+
   static void bind(Trace trace,JsonObject p,boolean create){
     var options=trace.getOptions("Insight");String target=options.getString("Target",null),context=options.getString("Context",null);
     if(target==null&&context==null&&create){int tx=trace.startTransaction("Bind owned trace");try{
@@ -82,31 +91,31 @@ public class InsightTraceState extends GhidraScript {
       var thread=manager.getCurrentThread();var object=thread==null?null:thread.getObject();
       if(object==null){var candidates=manager.getCurrentTrace().getObjectManager().getAllObjects().filter(item->item.getSchema().getName().toString().equals("Process")).toList();
         if(candidates.size()!=1)throw new IllegalStateException("Debugger process selection is ambiguous");object=candidates.get(0);}
-      var m=manager;final var selectedObject=object;Runnable focus=()->m.activateObject(selectedObject);
-      if(SwingUtilities.isEventDispatchThread())focus.run();else SwingUtilities.invokeAndWait(focus);
+      activateAndWait(manager,manager.resolveObject(object));
       println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","focused")));return;
     }
     if(operation.equals("restore")){
       var folder=data.getRootFolder().getFolder("__insight_traces");if(folder==null)folder=data.getRootFolder().createFolder("__insight_traces");
       for(var entry:p.getAsJsonArray("traces")){
         var saved=entry.getAsJsonObject();String id=string(saved,"id");if(!id.matches("trace_[a-f0-9-]{36}"))throw new IllegalArgumentException();
-        boolean present=false;for(var trace:manager.getOpenTraces())if(id.equals(trace.getOptions("Insight").getString("Trace ID",null)))present=true;
-        if(present)continue;
-        var file=folder.getFile(id);if(file==null)file=folder.createFile(id,Path.of(string(saved,"input")).toFile(),monitor);
-        Trace trace=manager.openTrace(file,-1);bind(trace,p,false);
-        if(!id.equals(trace.getOptions("Insight").getString("Trace ID",null)))throw new IllegalArgumentException("Restored trace identity changed");
+        Trace trace=null;for(var existing:manager.getOpenTraces())if(id.equals(existing.getOptions("Insight").getString("Trace ID",null)))trace=existing;
+        if(trace==null){var file=folder.getFile(id);if(file==null)file=folder.createFile(id,Path.of(string(saved,"input")).toFile(),monitor);trace=manager.openTrace(file,-1);}
+        bind(trace,p,false);if(!id.equals(trace.getOptions("Insight").getString("Trace ID",null)))throw new IllegalArgumentException("Restored trace identity changed");
         relocateMappings(trace,selected);
-        if(p.has("active")&&id.equals(string(p,"active"))){final var m=manager;Runnable activate=()->{
-          m.activateTrace(trace);m.activateSnap(Long.parseLong(string(saved,"snap")));
-          if(saved.has("thread")){var thread=trace.getThreadManager().getThread(Long.parseLong(string(saved,"thread")));if(thread!=null)m.activateThread(thread);}
-        };if(SwingUtilities.isEventDispatchThread())activate.run();else SwingUtilities.invokeAndWait(activate);}
+        var coordinates=manager.resolveTrace(trace).snap(Long.parseLong(string(saved,"snap")));
+        if(saved.has("thread")){var thread=trace.getThreadManager().getThread(Long.parseLong(string(saved,"thread")));if(thread!=null)coordinates=coordinates.thread(thread);}
+        activateAndWait(manager,coordinates);
+        if(manager.getCurrentSnap()!=Long.parseLong(string(saved,"snap")))throw new IllegalStateException("Saved trace snap did not restore");
+      }
+      if(p.has("active"))for(var trace:manager.getOpenTraces())if(string(p,"active").equals(trace.getOptions("Insight").getString("Trace ID",null))){
+        activateAndWait(manager,manager.resolveTrace(trace));
       }
       println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","restored")));return;
     }
     if(operation.equals("select")){
       String id=string(p,"id");for(var trace:manager.getOpenTraces()){
-        bind(trace,p,false);if(id.equals(trace.getOptions("Insight").getString("Trace ID",null))){final var m=manager;
-          if(SwingUtilities.isEventDispatchThread())m.activateTrace(trace);else SwingUtilities.invokeAndWait(()->m.activateTrace(trace));
+        bind(trace,p,false);if(id.equals(trace.getOptions("Insight").getString("Trace ID",null))){
+          activateAndWait(manager,manager.resolveTrace(trace));
           println("INSIGHT_TRACE_STATE "+new Gson().toJson(Map.of("state","selected","id",id)));return;}
       }
       throw new IllegalArgumentException("Trace not found");

@@ -134,3 +134,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI debugs the owned program and reopens its retained trace
     Then paused CPU evidence and disconnected trace readback preserve ownership and input identity
+
+  @ghidra-debugger @macos
+  Scenario: Return from the selected recursive frame rather than an inner call
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI returns from the selected recursive call
+    Then the caller stack and actual return survive without extra program edits or replay

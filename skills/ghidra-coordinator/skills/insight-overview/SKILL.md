@@ -76,4 +76,4 @@ do not observe execution; choosing a debugger or collector is an explicit runtim
 
 When a checkpoint is requested, save after the evidence files are complete, read back the
 returned saved path, and copy that exact path into the final handoff. A successful save or
-links to the mutable project files alone do not give the next agent the checkpoint locator.
+links to the mutable project files alone do not give the next agent the checkpoint locator. Finish the saved report before that save; avoid changing its footer afterward just to insert its own checkpoint path. Return that locator in the final handoff.

@@ -47,8 +47,9 @@ removed; `trace_location_count` distinguishes current placements from that stati
 
 For a call observation, set the mapped function breakpoint **before** resuming from entry.
 After the stop, check the PC against that address, then capture arguments and stack before
-stepping. Step-out selects the top native frame, so a previously inspected caller frame cannot
-redirect the step. A requested step whose reply
+stepping. Step-out verifies return to the native caller in the same thread and stack;
+return registers are observed without being modified. A competing stop or unavailable caller
+does not count as a verified return. A requested step whose reply
 or observed completion is unknown remains journaled; do not issue another CPU action to
 try to recover a missing return. Retain its diagnostics and use request/status recovery.
 
@@ -56,3 +57,6 @@ For another intentional run, close and reopen the same owned context first: this
 and retains the previous trace without relaunching it. Then launch with a distinct request ID
 and desired arguments. A connected debugger remains busy even after its subject has exited;
 selecting or reading its old trace is not a request to execute the subject again.
+Map the new process and explicitly set/check its live breakpoints before each resume from
+entry. Old static bookmarks do not establish new trace placements. Reopening restores each
+trace's saved snap/thread, including inactive traces; choose its returned ID with `--trace`.

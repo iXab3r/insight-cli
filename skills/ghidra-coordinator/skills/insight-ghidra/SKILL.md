@@ -86,4 +86,6 @@ an interrupt. Before resuming from entry, map the selected function and set a li
 returned dynamic address. Resuming a short program without that breakpoint can run it to
 exit before any call is observed. At the breakpoint verify PC, then read arguments/stack
 and step out or over the call to inspect its actual return.
+Repeat mapping and live breakpoint setup for every new launch. A saved breakpoint bookmark
+does not prove placement in that new process; check its `trace_location_count` before resuming.
 Use `new` only when creating a session; subsequent calls take its actual returned ID.

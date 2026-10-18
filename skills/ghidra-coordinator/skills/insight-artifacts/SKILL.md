@@ -25,6 +25,6 @@ The original project records keep their canonical role. No Ghidra selectors, fin
 or evidence IDs are required; saving does not merge tool databases or attest interpretations.
 
 Wait until other agents stop editing the selected files. Links and special files are rejected;
-select the actual regular files. A later source edit does not change the saved copy. After a
+select the actual regular files. A later source edit does not change the saved copy. Finish the report before saving; put its returned checkpoint locator in the final handoff or outside the saved folder. If the source changes afterward, save and verify a new intentional checkpoint before calling it the final copy. After a
 lost answer, inspect retained results before making a new intentional save: every call makes
 a new checkpoint. See [save semantics](references/artifacts.md) for failure and folder behavior.
