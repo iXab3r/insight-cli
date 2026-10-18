@@ -17,7 +17,17 @@ and measures sink/API overhead, not complete native overhead. Raw JSON is under
 `components/`; no private inputs, endpoint credentials, local program paths or raw
 research logs are included.
 
-The main serial matrix uses the separately packed candidate build identity
-`c308a3c77622451ef330dd86b48495a46c9bb7b8aac0995b7ba49743cc75f49c`.
+The main serial matrix freezes source `97e272413fc8974b4ad7be313fc0b248c872eff7`,
+package artifact `01d03023112c2b36e7a540c3436a88929bb86f0f0aad6bad60701ec9f63979fc`
+and resolved deployed-runtime graph
+`716ced78afe22b8b1f983d89aa1be74fa5889f759ac9ab8e097ec911ea912e32`.
+The earlier `c308a3c77622451ef330dd86b48495a46c9bb7b8aac0995b7ba49743cc75f49c`
+was an unmeasured candidate plan, replaced before its first native request. The
+original baseline rows and initial identity remain retained. Package-file identity
+and resolved dependency-graph identity are distinct hashes; both are verified.
+The installed dependency inventory retains actual versions/integrities, including
+baseline/candidate `qs` 6.16.1/6.16.0, Node type-package differences and candidate
+test-only tooling. Controlled component comparisons use the same installation;
+whole serial version phases are descriptive comparisons under host load.
 Full native results and attribution are pending; reduced smoke results are not
 substituted for the 30-warm / 5-cold protocol.
