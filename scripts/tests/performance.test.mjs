@@ -8,6 +8,8 @@ test('performance summary retains failures/censoring and removes only declared w
  const r=out['before/tiny/no-analysis/cli/read.metadata'];assert.equal(r.n,2);assert.equal(r.failures,1);assert.equal(r.censored,1);assert.equal(r.p50,2);
 });
 import {gate} from '../performance/gate.mjs';
+import {pairedOverhead} from '../performance/paired-overhead.mjs';
+test('paired route differences preserve negative deltas and reject missing or duplicate rounds',()=>{const base={evidencePhase:'baseline',label:'baseline',fixture:'tiny',analysis:false,stage:'read.metadata',ok:true,sample:0,startNs:'0'},records=[{...base,route:'cli',ms:10},{...base,route:'rpc',ms:20}];assert.equal(pairedOverhead(records,1).groups['baseline/tiny/no-analysis/read.metadata'].cliMinusRpcMs.p50,-10);assert.equal(pairedOverhead(records,1).passed,true);assert.equal(pairedOverhead(records.slice(0,1),1).passed,false);assert.equal(pairedOverhead([...records,records[0]],1).passed,false);});
 test('performance gate rejects missing/failed samples and tolerates only declared variability',()=>{
  const b={'before/tiny/no-analysis/cli/read.metadata':{n:30,p50:100,p95:120,mad:2,failures:0,censored:0}},a={'after/tiny/no-analysis/cli/read.metadata':{n:30,p50:110,p95:130,mad:2,failures:0,censored:0}};
  assert.equal(gate(b,a).passed,true);a['after/tiny/no-analysis/cli/read.metadata'].p50=130;assert.equal(gate(b,a).passed,false);assert.equal(gate(b,{}).passed,false);assert.equal(gate({},{}).passed,false);a['after/tiny/no-analysis/cli/read.metadata'].n=3;assert.equal(gate(b,a).passed,false);

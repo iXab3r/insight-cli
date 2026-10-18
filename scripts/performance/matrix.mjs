@@ -8,6 +8,7 @@ import {finalize} from './finalize.mjs';
 import {scriptEffects} from './script-effects.mjs';
 import {requestTraces} from './request-traces.mjs';
 import {report} from './report.mjs';
+import {writePairedOverhead} from './paired-overhead.mjs';
 import {identity} from './identity.mjs';
 const exec=promisify(execFile),{values:o}=parseArgs({options:{root:{type:'string'},baseline:{type:'string'},candidate:{type:'string'},java:{type:'string'},ghidra:{type:'string'},python:{type:'string'},bridge:{type:'string'},'stock-jar':{type:'string'},'parity-jar':{type:'string'},smoke:{type:'boolean'},'ack-disposable':{type:'boolean'}}});
 assert.equal(o['ack-disposable'],true);for(const k of ['root','baseline','candidate','java','ghidra','python','bridge','stock-jar','parity-jar'])assert.ok(o[k],k);
@@ -40,4 +41,4 @@ await run('candidate-trace',['--cli',resolve(o.candidate),'--label','candidate-t
 await run('candidate-trace-concurrency',['--phase','concurrency','--cli',resolve(o.candidate),'--label','candidate-trace','--manifest',join(root,'candidate-trace/manifest.json'),'--warm','3','--cold','1','--warmups','1'],{CLI_FACTORY_TRACE_DIRECTORY:trace});
 await proof('candidate-trace-bounded-proof',{CLI_FACTORY_TRACE_DIRECTORY:trace});
 const effects=await scriptEffects(root,Number(cold));await requestTraces(root);
-const result=await finalize(root,Number(warm),Number(cold));await report(root);assert.equal(result.passed&&effects.passed,true,'Native coverage, useful-output, script-effect or regression check failed; retain every raw sample.');
+const result=await finalize(root,Number(warm),Number(cold)),pairs=await writePairedOverhead(root,Number(warm));await report(root);assert.equal(result.passed&&effects.passed&&pairs.passed,true,'Native coverage, useful-output, paired-route, script-effect or regression check failed; retain every raw sample.');

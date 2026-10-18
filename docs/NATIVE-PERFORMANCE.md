@@ -176,6 +176,9 @@ counts and unchanged revisions for every cold trial, checking baseline/candidate
 equivalence. `trace-request-windows.json` correlates fully contained spans with isolated
 serial diagnostic requests. It retains repeated backend/save/export/hash counts;
 inclusive durations are distributions, never cross-stage or cross-process sums.
+`paired-overhead.json` retains per-round CLI minus persistent-RPC differences for
+adjacent alternating requests on matched prepared private states. Negative deltas
+are retained. Serial package/stock phases are not labeled time-paired comparisons.
 
 Raw stdout, database manifests and JVM logs can contain local paths. Keep them in the
 private evidence directory. Publish sanitized `requests.jsonl`, distribution/gate/
@@ -187,6 +190,7 @@ node scripts/performance/compare.mjs "$EVIDENCE_DIRECTORY"
 node scripts/performance/verify-results.mjs "$EVIDENCE_DIRECTORY/baseline" "$EVIDENCE_DIRECTORY/candidate" "$EVIDENCE_DIRECTORY/stock-parity"
 node scripts/performance/trace-report.mjs "$EVIDENCE_DIRECTORY/trace"
 node scripts/performance/finalize.mjs "$EVIDENCE_DIRECTORY" 30 5
+node scripts/performance/paired-overhead.mjs "$EVIDENCE_DIRECTORY" 30
 node scripts/performance/report.mjs "$EVIDENCE_DIRECTORY"
 node scripts/performance/trace-cost.mjs --module "$FACTORY_TIMING_MODULE" --root "$NEW_TRACE_COST_DIRECTORY"
 ```
