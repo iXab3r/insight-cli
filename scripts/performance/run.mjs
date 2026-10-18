@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {parseArgs} from 'node:util';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile,readdir} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {fixtures} from './fixtures.mjs';
@@ -10,6 +10,7 @@ import {runConcurrency} from './concurrency.mjs';
 import {runPersistence} from './persistence.mjs';
 import {runStock} from './stock.mjs';
 import {runInsight} from './insight.mjs';
+import {hash} from './public.mjs';
 const {values:v}=parseArgs({options:{route:{type:'string',default:'insight'},'view-source':{type:'string'},phase:{type:'string',default:'reads'},manifest:{type:'string'},jar:{type:'string'},python:{type:'string'},bridge:{type:'string'},'fixture-root':{type:'string'},root:{type:'string'},cli:{type:'string'},java:{type:'string'},ghidra:{type:'string'},label:{type:'string',default:'candidate'},source:{type:'string',default:'uncommitted'},warm:{type:'string',default:'30'},cold:{type:'string',default:'5'},warmups:{type:'string',default:'3'},analysis:{type:'string',default:'both'},fixtures:{type:'string'},'ack-disposable':{type:'boolean'}}});
 assert.equal(v['ack-disposable'],true);assert.ok(!process.env.CI||process.env.INSIGHT_NATIVE_PERFORMANCE==='owned');for(const key of ['root','java','ghidra',...(v.route==='insight'?['cli']:['manifest','jar','python','bridge','fixture-root'])])assert.ok(v[key],key);
 const o={...v,root:resolve(v.root),cli:v.cli?resolve(v.cli):undefined,fixtureRoot:v['fixture-root'],java:resolve(v.java),ghidra:resolve(v.ghidra),warm:Number(v.warm),cold:Number(v.cold),warmups:Number(v.warmups),runId:randomUUID().slice(0,8)};
@@ -17,5 +18,6 @@ assert.ok(['both','full','none'].includes(o.analysis));assert.match(o.label,/^[a
 for(const k of ['warm','cold','warmups'])assert.ok(Number.isSafeInteger(o[k])&&o[k]>=0);assert.ok(o.cold>=1);
 await mkdir(o.root,{recursive:false});
 const corpus=v.route==='stock'||v.phase!=='reads'?undefined:v.fixtures?JSON.parse(await readFile(v.fixtures,'utf8')):await fixtures(join(o.root,'fixtures'));
-await writeFile(join(o.root,'protocol.json'),JSON.stringify(o,null,2)+'\n');
+const collectorSources={};for(const name of(await readdir('scripts/performance')).filter(n=>n.endsWith('.mjs')).sort())collectorSources[name]=hash(await readFile(join('scripts/performance',name)));
+await writeFile(join(o.root,'protocol.json'),JSON.stringify({...o,collectorSources,storage:'Completed, no-longer-used native backing files are compressed outside request timing; journals/snapshots remain, gzip bytes verify before removal.'},null,2)+'\n');
 if(v.phase==='view-compare')await compareView(o,JSON.parse(await readFile(v.manifest,'utf8')));else if(v.phase==='cold-rpc')await runColdRpc(o,JSON.parse(await readFile(v.manifest,'utf8')));else if(v.phase==='concurrency')await runConcurrency(o,JSON.parse(await readFile(v.manifest,'utf8')));else if(v.phase==='persistence')await runPersistence(o,JSON.parse(await readFile(v.manifest,'utf8')));else if(v.route==='stock')await runStock(o,JSON.parse(await readFile(v.manifest,'utf8')));else await runInsight(o,corpus);

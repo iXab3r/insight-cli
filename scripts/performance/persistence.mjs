@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {join} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {PublicCli,Recorder} from './public.mjs';
+import {archiveClosedProfile} from './storage.mjs';
 // Reopen the same public prepared model with fresh private contexts, preserving the original input/state recipe.
 export async function runPersistence(o,manifest){
  for(const f of manifest.fixtures){const directory=join(o.root,`${f.name}-${f.analyzed?'analysis':'no-analysis'}`);await mkdir(directory,{recursive:true});
@@ -25,5 +26,6 @@ export async function runPersistence(o,manifest){
     await cli.scoped(['close'],{stage:'persistence.final-close',...meta});cli.scope=undefined;
    }
   }finally{if(peer){const original=cli.scope;cli.scope=peer;await cli.scoped(['close'],{stage:'cleanup.peer'});cli.scope=original;}await cli.cleanup();await writeFile(join(directory,'cleanup.json'),JSON.stringify({ownedContextsClosed:true,ownedServerStopped:true}));}
+  if(f.profile!==manifest.fixtures[0].profile)await archiveClosedProfile(o,f.profile);
  }
 }

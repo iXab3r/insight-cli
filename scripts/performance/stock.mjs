@@ -9,6 +9,7 @@ import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StdioClientTransport} from '@modelcontextprotocol/sdk/client/stdio.js';
 import {resultHash} from './equivalence.mjs';
 import {Recorder,hash} from './public.mjs';
+import {archivePayloads} from './storage.mjs';
 async function port(){const s=createServer();await new Promise((ok,bad)=>{s.once('error',bad);s.listen(0,'127.0.0.1',ok);});const p=s.address().port;await new Promise(ok=>s.close(ok));return p;}
 async function jars(path){const out=[];for(const e of await readdir(path,{withFileTypes:true})){if(e.isDirectory()&&e.name!=='data')out.push(...await jars(join(path,e.name)));else if(e.isFile()&&e.name.endsWith('.jar'))out.push(join(path,e.name));}return out;}
 export class Stock {
@@ -76,6 +77,7 @@ export async function runStock(o,manifest){
      assert.equal((await s.scoped('get_comment',{address:fixture.exports.owned_add},{stage:'persistence.readback',...meta})).plate,text);
     }
    }finally{await s.close();assert.equal(hash(await readFile(fixture.prepared)),fixture.snapshotSha256);assert.equal(hash(await readFile(fixture.path)),fixture.sha256);await writeFile(join(directory,'cleanup.json'),JSON.stringify({nativeExited:!s.child||s.child.exitCode!==null||s.child.signalCode!==null,bridgeClosed:true}));}
+   await archivePayloads(s.root,join(directory,'closed-fixtures'),{roots:['owned.rep']});
   }
  }
 }

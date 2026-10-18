@@ -4,6 +4,7 @@ import {join,dirname} from 'node:path';
 import {homedir,loadavg,cpus,totalmem,release} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 import {PublicCli,Recorder,hash} from './public.mjs';
+import {archiveClosedProfile} from './storage.mjs';
 export const setupScript=`import ghidra.app.script.GhidraScript; public class OwnedPerformanceSetup extends GhidraScript {public void run() throws Exception {for(String p:new String[]{"140001000","140001010","140001050"}){var a=toAddr(p);if(getFunctionAt(a)==null){disassemble(a);createFunction(a,null);}}}}`;
 export function cases(f){return [
  {name:'metadata',argv:['program','metadata'],check:v=>{assert.equal(v.value.language,'x86:LE:64:default');assert.equal(v.value.compiler,'windows');assert.ok(v.value.function_count>=3);}},
@@ -19,6 +20,7 @@ export function cases(f){return [
  {name:'undefined',argv:['functions','decode','--address','140001100','--max-bytes','16','--max-instructions','4'],check:v=>assert.equal(v.value.read_only.modification_unchanged,true)}
  ];}
 export async function runInsight(o,fixtures){
+ const completedProfiles=[];
  const report={schema:1,label:o.label,source:o.source,cli:o.cli,warm:o.warm,cold:o.cold,warmups:o.warmups,seed:66067,cache:'OS caches are not flushed; each cold native trial uses a fresh profile/server/JVM/DB',host:{node:process.version,cpu:cpus()[0].model,memory:totalmem(),os:release()},fixtures:[]};
  for(const f of fixtures)for(const analyzed of (o.analysis==='both'?[false,true]:[o.analysis==='full'])){
   for(let cold=0;cold<o.cold;cold++){
@@ -64,7 +66,9 @@ export async function runInsight(o,fixtures){
     const after=await client.call(['sessions','status',original.session,'--target',original.target],{stage:'state.after-read-script'});
     report.readOnlyScriptPending={before:before.ghidra.pendingChanges,after:after.ghidra.pendingChanges};
    }finally{await rpc?.close();const primary=client.scope;for(const scope of retained){client.scope=scope;await client.scoped(['close'],{stage:'cleanup.retained'});}client.scope=primary;await client.cleanup();assert.equal(hash(await readFile(f.path)),f.sha256,'Fixture bytes changed');await writeFile(join(o.root,'manifest.json'),JSON.stringify(report,null,2)+'\n');}
+   if(cold>0)completedProfiles.push(profile);
   }
  }
+ for(const profile of completedProfiles)await archiveClosedProfile(o,profile);
  return report;
 }

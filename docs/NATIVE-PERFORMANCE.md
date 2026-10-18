@@ -45,6 +45,25 @@ is unique to this run. Stock selection asserts the exact owned endpoint and PID.
 Only those contexts/servers are closed. Failures abort and retain partial evidence;
 do not replace failing samples with successful retries.
 
+Large raw Ghidra working databases and revision history can otherwise consume over
+100 GiB across the matrix. After a fixture profile has completed **all** its later
+uses, `storage.mjs` compresses large `.gbf` backing files. It requires closed private
+contexts, no running/unknown journal or publication, verified retained GZF snapshots,
+a stopped owned server and no matching live native process. Compression occurs
+outside request timing. Each compressed stream is read back and SHA-256 checked;
+an fsynced index records its source/hash before the uncompressed completed copy is
+removed. Journals, receipts, immutable artifacts and prepared snapshots remain in
+place. Failed/uncertain profiles are preserved without this housekeeping. Stock's
+completed local project receives the same compression after its JVM has exited.
+
+Archives and indices under `closed-fixtures` are private evidence and are never
+included in public artifact uploads. Restore backing files before reusing an archived
+benchmark profile; restoration refuses overwrite and verifies bytes again:
+
+```sh
+node --input-type=module -e 'import {restorePayloads} from "./scripts/performance/storage.mjs"; await restorePayloads(process.argv[1]);' "$PRIVATE_INDEX_JSON"
+```
+
 `.github/workflows/native-performance.yml` supplies the repeatable manual job. It
 requires an explicitly labeled dedicated macOS ARM64 self-hosted runner and repository
 variables `PERF_JAVA`, `PERF_GHIDRA`, `PERF_PYTHON`, `PERF_BRIDGE`, `PERF_STOCK_JAR`.
