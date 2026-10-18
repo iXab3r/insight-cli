@@ -51,3 +51,29 @@ goto. If its original owned GUI process has exited, continuation reports the unc
 as disconnected and retains saved program work. It does not recreate the old cursor or re-enable
 a previous prompt policy. Other unproved live UI effects remain retained until their outcome is
 established or the original process is known to have ended.
+
+## Abandon an uncertain private program attempt
+
+A post-mutation save timeout does not repeat the script or issue another save in the
+error handler. Status exposes the original request identity and retained phase/budget.
+Arbitrary script effects are never inferred from metadata or from an unverified DB.
+After inspecting the retained attempt, explicitly stop only its verified owned worker
+(`tools processes`, then `tools processes kill <process>` if required). Resume the
+last acknowledged private snapshot with:
+
+```sh
+insight-cli permissions grant Destructive
+insight-cli ghidra abandon --session <session> --target <target> \
+  --request-id <original-request> --acknowledge-unknown-effects --json
+insight-cli ghidra open --session <session> --target <target> --json
+```
+
+Abandon requires exactly one unresolved private program operation, an unchanged verified
+previous snapshot/generation, a stopped original worker and no active publication or live
+debugger. It retains the native project, candidate artifacts, original intent/execution and
+previous diagnostic result. Its terminal request is `failed` / `state: abandoned` with
+`outcome: unknown`; no effect is marked applied. Repeating abandonment retrieves the same
+result. Earlier saved private edits remain pending. The original changing request ID cannot
+execute again. Abandoning never undoes external effects or establishes what an arbitrary
+script did; the acknowledgement explicitly accepts that uncertainty. Publication recovery,
+initial import, UI and debugger attempts use their own protocols and cannot use this command.

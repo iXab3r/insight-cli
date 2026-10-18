@@ -48,3 +48,20 @@ debugger runtime directory when relevant. These are runtime profile settings, no
 
 Archive exchange is opt-in through `archiveUrl`; its optional token uses Factory secrets.
 See [archive](archive.md) for the service contract and submission recovery behavior.
+
+## Native operation budgets
+
+Profile `initialImportSeconds` defaults to 3600 (1–86400 seconds); `saveSeconds`
+defaults to 120 (1–3600 seconds). Configure them with `ghidra budgets set
+--initial-import-seconds 7200 --save-seconds 300`; `ghidra budgets show` reads effective values.
+This uses Factory ProfileStore without invalidating research or stopping native contexts.
+Active requests retain their original budget. Generic `profile set` remains guarded for
+profiles containing research; initial profile creation also accepts these fields. Both are execution policy, independent
+of immutable target/load identity. Save and packed snapshot export use the save budget;
+discovery and ordinary HTTP queries keep their 30-second budget. Each native request has
+its own budget, not a total command deadline. Cancellation remains independent.
+
+After an import timeout, wait for the original worker to end, raise its budget and continue
+the original scope. Incomplete private analysis restarts; a completed receipt is reused.
+A save timeout reports `phase: save`, the effective budget and `saveSeconds`. Inspect
+`sessions status`; a native log or broken response stream cannot prove a saved snapshot.

@@ -1,3 +1,4 @@
+import {ghidraBudget} from './budgets.js';
 import {captureCommands} from './capture.js';
 import {binaryCommands} from './binary.js';
 import {skillCommand,toolboxCommands} from './toolbox.js';
@@ -156,6 +157,8 @@ const fields=[
   ['repository','--repository <name>','Repository on the external server'],
   ['readerUser','--reader-user <name>','Read-only external account'],
   ['publisherUser','--publisher-user <name>','External publication account'],
+  ['initialImportSeconds','--initial-import-seconds <seconds>','Initial import/analysis budget (default 3600, range 1–86400 seconds)'],
+  ['saveSeconds','--save-seconds <seconds>','Native save/export budget (default 120, range 1–3600 seconds)'],
   ['maxContexts','--max-contexts <count>','Concurrent contexts (default 4, maximum 16)'],
   ['debuggerPython','--debugger-python <path>','Optional Python executable for a configured debugger offer'],
   ['windbgDir','--windbg-dir <path>','Optional Windows debugger runtime directory'],
@@ -199,7 +202,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
     name:'insight-cli',applicationId:'insight-cli',version:packageVersion,description:'Isolated research contexts and coordinated Ghidra analysis',
     resources:[owner],permissions:{categories:[{name:'Destructive',description:'Explicit deletion or replacement of retained research data',enabledByDefault:false}]},...(options.runtime?{runtime:options.runtime}:{}),
     profile:{fields:fields.map(([name,flags,description])=>({name:name!,flags:flags!,description:description!,
-      ...(name==='maxContexts'?{normalize:(value:unknown)=>number(value,16,1)}:{})}))},
+      ...(['maxContexts','initialImportSeconds','saveSeconds'].includes(name!)?{normalize:(value:unknown)=>number(value,name==='maxContexts'?16:name==='saveSeconds'?3600:86400,1)}:{})}))},
     auth:{
       loginOptions:[{flags:'--role <role>',description:'External reader, publisher or archive role',defaultValue:'reader'},
         {flags:'--password-stdin',description:'Read the password from stdin'}],
@@ -265,6 +268,21 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
+        command('budgets','Inspect or configure native execution budgets',[
+          command('show','Read effective per-request native budgets',(_invocation,c)=>({profile:c.profile.name,initialImportSeconds:ghidraBudget(c.profile.values,'import')/1000,saveSeconds:ghidraBudget(c.profile.values,'save')/1000}),{permission:Permission.ReadOnly}),
+          command('set','Configure subsequent native requests without invalidating retained research',async({options:o},c)=>{
+            if(o.initialImportSeconds===undefined&&o.saveSeconds===undefined)fail('invalid','Supply at least one native budget.');
+            const store=options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
+            const patch={
+              ...(o.initialImportSeconds===undefined?{}:{initialImportSeconds:number(o.initialImportSeconds,86400,1)}),
+              ...(o.saveSeconds===undefined?{}:{saveSeconds:number(o.saveSeconds,3600,1)})};
+            const {values}=await store.set(c.profile.name,patch);
+            return {profile:c.profile.name,state:'configured',initialImportSeconds:ghidraBudget(values,'import')/1000,saveSeconds:ghidraBudget(values,'save')/1000,appliesTo:'subsequent-requests'};
+          },{permission:Permission.Update,options:[{flags:'--initial-import-seconds <seconds>',description:'Initial import/analysis: 1–86400 seconds'},
+            {flags:'--save-seconds <seconds>',description:'Native save/export: 1–3600 seconds'}]})
+        ]),
+        command('abandon','Retain an uncertain program attempt and resume its previous saved view',({options:o},c)=>owner.selected(c).research.abandon(scope(o),id(o.requestId),Boolean(o.acknowledgeUnknownEffects)),
+          {permission:'Destructive',options:[...scoped,{flags:'--request-id <id>',description:'Original unresolved request ID from sessions status',required:true},{flags:'--acknowledge-unknown-effects',description:'Acknowledge that the abandoned effect remains unknown; no script is replayed'}]}),
         command('refresh','Receive safe shared changes while retaining local conflicts',({options:o},c)=>owner.selected(c).research.refresh(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
           {permission:Permission.Update,options:[...scoped,request]}),
         command('merge','Publish the complete selected context or retain every conflict',({options:o},c)=>owner.selected(c).research.merge(scope(o),o.requestId===undefined?undefined:id(o.requestId)),

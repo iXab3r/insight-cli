@@ -193,3 +193,50 @@ test('an existing session can first open targets already consumed by another too
  const rpc=await f.rpc(app,[['ghidra','open','--target',third.target,'--session',first.session]]);assert.equal((rpc[0] as any).result.state,'ready');assert.equal((rpc[0] as any).result.session,first.session);
  assert.equal((await f.json(app,['sessions','status',first.session]) as any).contexts.length,3);
 });
+
+test('uncertain script save is not retried or adopted; explicit stopped-worker abandonment retains prior work',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update','Destructive']}]});
+ let workspace:Workspace,backend:Fake,stopped=false,saves=0,scripts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;backend=new Fake(w);const call=backend.call.bind(backend),saved=backend.saved.bind(backend);
+  backend.call=async(s,op,p)=>{if(op==='/run_script_inline'){scripts++;return {success:true,console_output:'fixture completed'};}return call(s,op,p);};
+  backend.saved=async s=>{if(scripts){saves++;throw new CliError('Save deadline exceeded',{code:'coordinator.timeout',result:{phase:'save',timeoutMilliseconds:1000}});}return saved(s);};
+  return Object.assign(backend,{closed:async()=>stopped,inspect:async()=>({sha256:'fixture'})});
+ }}));
+ const exe=join(f.root,'save.exe');await writeFile(exe,'synthetic save input');
+ const selected=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened;
+ const args=['--session',selected.session,'--target',selected.target],before=workspace!.context(selected).workingSnapshot;
+ const run=['ghidra','scripts','run-inline',...args,'--code','generic fixture','--request-id','script-save'];
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(saves,1);assert.equal(scripts,1);
+ let request=workspace!.scopedRequest(selected,'script-save')!;assert.equal(request.state,'unknown');assert.equal((request.result as {phase:string}).phase,'save');assert.ok(!(request.result as {savedSnapshot?:unknown}).savedSnapshot);
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
+ const abandon=['ghidra','abandon',...args,'--request-id','script-save'];
+ assert.notEqual((await f.run(app,[...abandon,'--json'])).exitCode,0);
+ assert.notEqual((await f.run(app,[...abandon,'--acknowledge-unknown-effects','--json'])).exitCode,0);
+ stopped=true;backend!.views.clear();const result=await f.json(app,[...abandon,'--acknowledge-unknown-effects']) as {state:string;outcome:string};
+ assert.equal(result.state,'abandoned');assert.equal(result.outcome,'unknown');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
+ assert.deepEqual(await f.json(app,[...abandon,'--acknowledge-unknown-effects']),result);
+ request=workspace!.scopedRequest(selected,'script-save')!;assert.equal(request.state,'failed');assert.ok((request.result as {previousResult:unknown}).previousResult);
+ assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
+ assert.equal((await f.json(app,['ghidra','open',...args]) as Opened).state,'ready');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
+});
+
+test('native budget settings can change after a failed import without invalidating saved research or its intent',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update'],values:{java:'fixture-runtime',initialImportSeconds:1}}]});let attempts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  const backend=new Fake(w),open=backend.open.bind(backend);backend.open=async(s,request)=>{if(attempts++===0)throw Error('Interrupted native import');return open(s,request);};return Object.assign(backend,{recoverModel:async()=>true});
+ }}));
+ const exe=join(f.root,'budget.exe');await writeFile(exe,'budget recovery input');
+ const open=['ghidra','open',exe,'--session','new','--request-id','budget-open'];
+ const interrupted=await f.run(app,[...open,'--json']);assert.notEqual(interrupted.exitCode,0);const retained=JSON.parse(interrupted.stdout);
+ const configured=await f.json(app,['ghidra','budgets','set','--initial-import-seconds','7200','--save-seconds','300']) as {initialImportSeconds:number;saveSeconds:number};
+ assert.equal(configured.initialImportSeconds,7200);assert.equal(configured.saveSeconds,300);
+ assert.equal((await f.profileStore.get('default')).values.java,'fixture-runtime');assert.deepEqual(await f.profileStore.getPermissions('default'),['ReadOnly','Update']);
+ const ready=await f.json(app,open) as Opened;assert.equal(ready.session,retained.session);assert.equal(ready.target,retained.target);assert.equal(ready.state,'ready');
+ assert.deepEqual(await f.json(app,open),ready);
+ const shown=await f.json(app,['ghidra','budgets','show']) as {initialImportSeconds:number};assert.equal(shown.initialImportSeconds,7200);
+ assert.notEqual((await f.run(app,['ghidra','budgets','set','--save-seconds','0','--json'])).exitCode,0);
+ assert.equal((await f.profileStore.get('default')).values.saveSeconds,300);
+ await Promise.all([f.json(app,['ghidra','budgets','set','--initial-import-seconds','1800']),f.json(app,['ghidra','budgets','set','--save-seconds','60'])]);
+ const concurrent=await f.profileStore.get('default');assert.equal(concurrent.values.initialImportSeconds,1800);assert.equal(concurrent.values.saveSeconds,60);assert.equal(concurrent.values.java,'fixture-runtime');
+});
