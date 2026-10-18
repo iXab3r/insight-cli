@@ -14,5 +14,3 @@ public class LongBudgetAnalyzer extends AbstractAnalyzer {
   System.err.println("LONG_BUDGET_ANALYSIS_COMPLETED");return true;
  }
 }
-
-

@@ -5,7 +5,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
 import {createPublicFixture,digest} from './toolbox/public-fixture.mjs';
 const [packageRoot,directory,input,ghidra,java,scenario,module]=process.argv.slice(2);
-assert.ok(['import','save','abandon'].includes(scenario));
+assert.ok(['import','save','abandon','recover-import'].includes(scenario));
 assert.equal(process.platform,'win32','This fixture gate records Windows headless behavior');
 const f=await createPublicFixture(packageRoot,directory),call=f.call,inputHash=digest(await readFile(input));
 let scope,complete=false;
@@ -18,7 +18,7 @@ const option=async(group,name)=>{
 try{
  await call(['permissions','grant','Destructive']);
  await call(['profile','set',f.profile,'--java',resolve(java),'--ghidra-home',resolve(ghidra),'--max-contexts','1',
-  '--save-seconds',scenario==='abandon'?'1':'120']);
+  '--initial-import-seconds',scenario==='recover-import'?'1':'3600','--save-seconds',scenario==='abandon'?'1':'120']);
  if(scenario==='import'){
   assert.ok(module,'Supply the compiled LongBudget module');
   const m=await call(['ghidra','extensions','inspect','--directory',resolve(module)]);
@@ -26,12 +26,18 @@ try{
   await call(['ipc-server','stop']);
  }
  const open=['ghidra','open',resolve(input),'--session','new','--request-id','budget-open',...(scenario==='import'?[]:['--no-analysis'])];
- scope=await call(open,{timeout:900000});
+ if(scenario==='recover-import'){
+  const interrupted=await call(open,{allowFailure:true,timeout:150000});assert.notEqual(interrupted.code,0);
+  assert.equal(interrupted.value.detail.phase,'initial-import');assert.equal(interrupted.value.detail.timeoutMilliseconds,1000);
+  await call(['ghidra','budgets','set','--initial-import-seconds','3600']);
+  scope=await call(open,{timeout:150000});assert.equal(scope.session,interrupted.value.session);assert.equal(scope.target,interrupted.value.target);
+  assert.deepEqual(await call(open),scope);
+ }else scope=await call(open,{timeout:900000});
  assert.equal(scope.sharedRevision,'R1');
  if(scenario==='import'){
   assert.equal(await option('LongBudgetFixture','completed'),'true');
   assert.deepEqual(await call(open),scope);
- }else{
+ }else if(scenario!=='recover-import'){
   const code=await readFile(new URL('../tests/acceptance/fixtures/ghidra-budgets/SlowSaveFixture.java',import.meta.url),'utf8');
   const run=['ghidra','scripts','run-inline',...selected(),'--code',code,'--request-id','budget-script'];
   const result=await call(run,{allowFailure:true,timeout:150000});
@@ -73,5 +79,3 @@ try{
   build:JSON.parse(await readFile(join(packageRoot,'.cli-package-build.json'),'utf8'))},null,2)+'\n');
  console.log('Ghidra budget native gate PASS:',scenario);
 }finally{if(!complete)console.error('Retain owned native diagnostics for recovery:',directory);await f.cleanup();}
-
-

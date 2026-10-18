@@ -220,3 +220,21 @@ test('uncertain script save is not retried or adopted; explicit stopped-worker a
  assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
  assert.equal((await f.json(app,['ghidra','open',...args]) as Opened).state,'ready');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
 });
+
+test('native budget settings can change after a failed import without invalidating saved research or its intent',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update'],values:{java:'fixture-runtime',initialImportSeconds:1}}]});let attempts=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  const backend=new Fake(w),open=backend.open.bind(backend);backend.open=async(s,request)=>{if(attempts++===0)throw Error('Interrupted native import');return open(s,request);};return Object.assign(backend,{recoverModel:async()=>true});
+ }}));
+ const exe=join(f.root,'budget.exe');await writeFile(exe,'budget recovery input');
+ const open=['ghidra','open',exe,'--session','new','--request-id','budget-open'];
+ const interrupted=await f.run(app,[...open,'--json']);assert.notEqual(interrupted.exitCode,0);const retained=JSON.parse(interrupted.stdout);
+ const configured=await f.json(app,['ghidra','budgets','set','--initial-import-seconds','7200','--save-seconds','300']) as {initialImportSeconds:number;saveSeconds:number};
+ assert.equal(configured.initialImportSeconds,7200);assert.equal(configured.saveSeconds,300);
+ assert.equal((await f.profileStore.get('default')).values.java,'fixture-runtime');assert.deepEqual(await f.profileStore.getPermissions('default'),['ReadOnly','Update']);
+ const ready=await f.json(app,open) as Opened;assert.equal(ready.session,retained.session);assert.equal(ready.target,retained.target);assert.equal(ready.state,'ready');
+ assert.deepEqual(await f.json(app,open),ready);
+ const shown=await f.json(app,['ghidra','budgets','show']) as {initialImportSeconds:number};assert.equal(shown.initialImportSeconds,7200);
+ assert.notEqual((await f.run(app,['ghidra','budgets','set','--save-seconds','0','--json'])).exitCode,0);
+ assert.equal((await f.profileStore.get('default')).values.saveSeconds,300);
+});

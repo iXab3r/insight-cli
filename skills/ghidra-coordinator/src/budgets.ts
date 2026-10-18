@@ -10,4 +10,3 @@ export function ghidraBudget(values:Record<string,unknown>,phase:'import'|'save'
   if(!Number.isSafeInteger(seconds)||seconds<1||seconds>max)fail('configuration',field+' must be between 1 and '+max+' seconds.');
   return seconds*1000;
 }
-

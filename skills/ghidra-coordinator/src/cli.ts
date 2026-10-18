@@ -1,3 +1,4 @@
+import {ghidraBudget} from './budgets.js';
 import {captureCommands} from './capture.js';
 import {binaryCommands} from './binary.js';
 import {skillCommand,toolboxCommands} from './toolbox.js';
@@ -267,6 +268,19 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
+        command('budgets','Inspect or configure native execution budgets',[
+          command('show','Read effective per-request native budgets',(_invocation,c)=>({profile:c.profile.name,initialImportSeconds:ghidraBudget(c.profile.values,'import')/1000,saveSeconds:ghidraBudget(c.profile.values,'save')/1000}),{permission:Permission.ReadOnly}),
+          command('set','Configure subsequent native requests without invalidating retained research',async({options:o},c)=>{
+            if(o.initialImportSeconds===undefined&&o.saveSeconds===undefined)fail('invalid','Supply at least one native budget.');
+            const store=options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
+            const previous=await store.get(c.profile.name),values={...previous.values,
+              ...(o.initialImportSeconds===undefined?{}:{initialImportSeconds:number(o.initialImportSeconds,86400,1)}),
+              ...(o.saveSeconds===undefined?{}:{saveSeconds:number(o.saveSeconds,3600,1)})};
+            await store.set(c.profile.name,values);
+            return {profile:c.profile.name,state:'configured',initialImportSeconds:ghidraBudget(values,'import')/1000,saveSeconds:ghidraBudget(values,'save')/1000,appliesTo:'subsequent-requests'};
+          },{permission:Permission.Update,options:[{flags:'--initial-import-seconds <seconds>',description:'Initial import/analysis: 1–86400 seconds'},
+            {flags:'--save-seconds <seconds>',description:'Native save/export: 1–3600 seconds'}]})
+        ]),
         command('abandon','Retain an uncertain program attempt and resume its previous saved view',({options:o},c)=>owner.selected(c).research.abandon(scope(o),id(o.requestId),Boolean(o.acknowledgeUnknownEffects)),
           {permission:'Destructive',options:[...scoped,{flags:'--request-id <id>',description:'Original unresolved request ID from sessions status',required:true},{flags:'--acknowledge-unknown-effects',description:'Acknowledge that the abandoned effect remains unknown; no script is replayed'}]}),
         command('refresh','Receive safe shared changes while retaining local conflicts',({options:o},c)=>owner.selected(c).research.refresh(scope(o),o.requestId===undefined?undefined:id(o.requestId)),

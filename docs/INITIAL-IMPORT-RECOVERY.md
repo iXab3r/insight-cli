@@ -54,12 +54,11 @@ ordinary conflicting history, active check-in or changed input/settings remains 
 
 ## Long initial analysis
 
-Initial import/analysis defaults to 3600 seconds. Set the profile's
-`--initial-import-seconds <seconds>` (1–86400) before opening a long input, or after a
+Initial import/analysis defaults to 3600 seconds. Use `ghidra budgets set --initial-import-seconds <seconds>` (1–86400) before opening a long input, or after a
 failed worker has stopped, then continue the original session/target. For example:
 
 ```sh
-insight-cli profile set research --initial-import-seconds 7200
+insight-cli --profile research ghidra budgets set --initial-import-seconds 7200
 insight-cli --profile research ghidra open --session <session> --target <target> --json
 ```
 
