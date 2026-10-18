@@ -29,6 +29,7 @@ import { nativeInputs } from './native-inputs.js';
 import { Research, type ResearchBackend, scope, address, commentKind, scalarText, number } from './research.js';
 import { fail, id, text, digest, object } from './model.js';
 import {queryCommands,extendQueries} from './queries.js';
+import {decodedInstructions} from './decode-results.js';
 import {mutationCommands} from './mutations.js';
 import {crossCommands} from './cross.js';
 import {Administration,administrationCommands} from './administration.js';
@@ -356,6 +357,12 @@ export function createDefinition(options: Options = {}): CliDefinition {
             {flags:'--execute',description:'Enable execution permission'},request]}),
         ]),
         command('functions','Read or name functions',[
+          command('decode','Decode executable bytes without defining instructions or functions',async({options:o},c)=>{
+            const selected=owner.selected(c),who=scope(o),at=address(o.address),maxBytes=number(o.maxBytes??64,4096,1),maxInstructions=number(o.maxInstructions??16,256,1);
+            const value=decodedInstructions(await selected.research.read(who,'/decode_instructions',{address:at,max_bytes:maxBytes,max_instructions:maxInstructions}),at,maxBytes,maxInstructions);
+            const context=selected.workspace.context(who);
+            return {...who,value:{...value,view:{revision:context.baseRevision,identity:digest({context:context.id,generation:context.generation,snapshot:context.workingSnapshot,nativeModification:object(value.read_only).modification})}}};
+          },{permission:Permission.ReadOnly,options:[...scoped,at,{flags:'--max-bytes <count>',description:'Read 1–4096 executable bytes',defaultValue:64},{flags:'--max-instructions <count>',description:'Decode at most 1–256 instructions',defaultValue:16}]}),
           command('set-function-prototype','Set a C prototype and optional explicit compiler-supported calling convention',({options:o},c)=>{
             const selected=owner.selected(c),who=scope(o),parameters={function_address:address(o.address),prototype:text(o.prototype,16000),
               ...(o.callingConvention===undefined?{}:{calling_convention:text(o.callingConvention,512)})};

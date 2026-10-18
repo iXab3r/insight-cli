@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
-import {Research,scope} from './research.js';
+import {Research,scope,number} from './research.js';
 import {fail} from './model.js';
 import {queryResult} from './query-results.js';
 import {type Parameter,key,flag,parsed,option,selectedOptions} from './arguments.js';
@@ -34,6 +34,7 @@ export function queryCommands(research:(context:CommandContext)=>Research):Comma
     children.push(command(leaf,queryDescription(q.path,leaf.replaceAll('-',' ')),async({options:o},c)=>{
       const parameters:Record<string,unknown>={};
       for(const p of q.params){const input=o[key(p.name)];if(input===undefined){if(p.required)fail('invalid',`Missing --${flag(p.name)}.`);continue;}parameters[p.name]=parsed(p,input);}
+      if(q.path==='/get_functions')return research(c).inspectFunctions(scope(o),parameters,{limit:number(o.limitChars??16000,32768,1),offset:number(o.offsetChars??0,4*1024**2),total:number(o.totalChars??64000,128000,1),...(o.expectView===undefined?{}:{expectView:String(o.expectView)}),...(o.saveOwnerDirectory===undefined?{}:{saveDirectory:String(o.saveOwnerDirectory)})});
       if(nativeQueries.has(q.path)) {
         if(Number(parameters.timeout_seconds??5)>30)fail('invalid','Native query timeout must be at most 30 seconds.');
         if(Number(parameters.max_steps??10000)>100000)fail('invalid','Native emulation supports at most 100000 steps per candidate.');
@@ -44,7 +45,12 @@ export function queryCommands(research:(context:CommandContext)=>Research):Comma
         await research(c).scripts(who,String(parameters.filter??''),Number(o.limit),Number(o.offset)):
         await research(c).read(who,q.path,parameters);
       return {...who,value:value(qualifyQuery(q.path,queryResult(q.path,parameters,value(result))))};
-    },{permission:Permission.ReadOnly,options:[...selectedOptions,...q.params.map(option),...(q.path==='/list_scripts'?
+    },{permission:Permission.ReadOnly,options:[...selectedOptions,...q.params.map(option),...(q.path==='/get_functions'?[
+      {flags:'--limit-chars <count>',description:'Per-function Unicode window, 1–32768',defaultValue:16000},
+      {flags:'--offset-chars <count>',description:'Per-function Unicode offset',defaultValue:0},
+      {flags:'--total-chars <count>',description:'Total returned decompiler characters, 1–128000',defaultValue:64000},
+      {flags:'--expect-view <identity>',description:'Reject continuation from another observed view'},
+      {flags:'--save-owner-directory <path>',description:'Save full returned native text and manifest in a NEW directory on the owner host'}]:[]),...(q.path==='/list_scripts'?
       [option({name:'limit',type:'integer',required:false,default:'50'}),option({name:'offset',type:'integer',required:false,default:'0'})]:[])]}));
   }
   return [...groups].map(([group,children])=>command(group,`${group} research`,children));

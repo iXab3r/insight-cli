@@ -315,6 +315,7 @@ export class GhidraContexts {
     if(binding.context!==context.id)fail('binding','Context process binding changed.');
     return this.verified(binding,this.workspace.target(scope.target));
   }
+  async observation(scope:Scope){return this.call(scope,'/research_view');}
   async call(scope: Scope, operation: string, parameters: Record<string,unknown> = {}): Promise<unknown> {
     if(Object.hasOwn(parameters,'program'))fail('invalid','Program routing is owned by the session and target selectors.');
     if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};

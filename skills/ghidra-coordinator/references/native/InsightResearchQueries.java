@@ -172,14 +172,45 @@ public class InsightResearchQueries extends GhidraScript {
   }
 
   byte[] patternMasks;
-  Object execute(String operation)throws Exception{return switch(operation){case "/find_dead_code"->dead();case "/detect_crypto_constants"->bytes(true);case "/search_byte_patterns"->bytes(false);case "/get_valid_data_types"->types(true);case "/find_data_types"->types(false);case "/validate_data_type"->validateType();case "/validate_function_prototype"->validatePrototype();case "/get_entry_points"->entries();case "/list_globals"->globals();case "/list_strings"->strings(false);case "/search_strings"->strings(true);case "/search_instructions"->instructions();default->throw new IllegalArgumentException("Unknown native query");};}
+  Object decodeInstructions()throws Exception{
+    Address start=address(str("address",""));int maximum=number("max_bytes",64,1,4096),maxInstructions=number("max_instructions",16,1,256);
+    String language=currentProgram.getLanguageID().toString();
+    // Other processors may require mode propagation or delay-slot handling. Fail explicitly
+    // until those semantics have their own native acceptance; never fall back to an Update API.
+    if(!currentProgram.getLanguage().getProcessor().toString().equalsIgnoreCase("x86"))throw new UnsupportedOperationException("Read-only decode currently supports x86 languages only; language/context unavailable: "+language);
+    MemoryBlock block=currentProgram.getMemory().getBlock(start);
+    if(block==null||!block.isInitialized()||!block.isExecute())throw new IllegalArgumentException("Decode requires initialized executable memory");
+    int available=(int)Math.min(maximum,block.getEnd().subtract(start)+1);byte[] input=new byte[available];
+    if(currentProgram.getMemory().getBytes(start,input)!=available)throw new IllegalStateException("Incomplete executable memory read");
+    var decoder=new ghidra.app.util.PseudoDisassembler(currentProgram);List<Object> rows=new ArrayList<>();int consumed=0;String reason="byte_limit";
+    while(consumed<input.length&&rows.size()<maxInstructions){
+      boundedMonitor.checkCancelled();Address at=start.addNoWrap(consumed);ghidra.app.util.PseudoInstruction instruction;
+      try{instruction=decoder.disassemble(at,Arrays.copyOfRange(input,consumed,input.length));}
+      catch(ghidra.program.model.lang.InsufficientBytesException error){reason="truncated_instruction";break;}
+      catch(ghidra.program.model.lang.UnknownInstructionException error){reason="undecodable";break;}
+      catch(ghidra.program.model.lang.UnknownContextException error){reason="context_unavailable";break;}
+      if(instruction==null){reason="undecodable";break;}
+      int length=instruction.getLength();if(length<1||length>input.length-consumed){reason="truncated_instruction";break;}
+      List<String> operands=new ArrayList<>();for(int i=0;i<instruction.getNumOperands();i++)operands.add(instruction.getDefaultOperandRepresentation(i));
+      var flow=instruction.getFlowType();List<String> targets=new ArrayList<>();
+      if(!flow.isComputed())for(Address target:instruction.getFlows())if(target!=null&&!target.equals(Address.NO_ADDRESS))targets.add(target.toString());
+      rows.add(map("address",at.toString(),"bytes",HexFormat.of().formatHex(Arrays.copyOfRange(input,consumed,consumed+length)),"length",length,"mnemonic",instruction.getMnemonicString(),"operands",operands,"direct_targets",targets,"flow",flow.toString(),"computed_flow",flow.isComputed()));
+      consumed+=length;
+      if(flow.isTerminal()){reason="terminal_flow";break;}
+      if(flow.isJump()&&!flow.isConditional()){reason="control_flow";break;}
+    }
+    if(consumed<input.length&&rows.size()==maxInstructions&&reason.equals("byte_limit"))reason="instruction_limit";
+    if(consumed==input.length&&available<maximum&&reason.equals("byte_limit"))reason="executable_block_end";
+    return map("address",start.toString(),"language",language,"compiler",currentProgram.getCompilerSpec().getCompilerSpecID().toString(),"input_bytes",HexFormat.of().formatHex(input),"input_sha256",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input)),"maximum_bytes",maximum,"maximum_instructions",maxInstructions,"instructions",rows,"consumed_bytes",consumed,"stop_reason",reason,"truncated",List.of("byte_limit","instruction_limit","truncated_instruction","executable_block_end").contains(reason),"semantics","Linear pseudo instructions in the selected program context; direct targets are computed from bytes, not function membership or stored xrefs.");
+  }
+  Object execute(String operation)throws Exception{return switch(operation){case "/research_view"->map("modification",Long.toString(currentProgram.getModificationNumber()),"language",currentProgram.getLanguageID().toString(),"compiler",currentProgram.getCompilerSpec().getCompilerSpecID().toString());case "/decode_instructions"->decodeInstructions();case "/find_dead_code"->dead();case "/detect_crypto_constants"->bytes(true);case "/search_byte_patterns"->bytes(false);case "/get_valid_data_types"->types(true);case "/find_data_types"->types(false);case "/validate_data_type"->validateType();case "/validate_function_prototype"->validatePrototype();case "/get_entry_points"->entries();case "/list_globals"->globals();case "/list_strings"->strings(false);case "/search_strings"->strings(true);case "/search_instructions"->instructions();default->throw new IllegalArgumentException("Unknown native query");};}
   public void run()throws Exception{
     var request=JsonParser.parseString(new String(Base64.getDecoder().decode(getScriptArgs()[0]),StandardCharsets.UTF_8)).getAsJsonObject();p=request.getAsJsonObject("parameters");maxScan=number("max_scan",100000,1,200000);limit=number("limit",100,1,1000);offset=number("offset",0,0,2000000);deadline=System.nanoTime()+number("timeout_seconds",5,1,30)*1000000000L;
     boundedMonitor=TimeoutTaskMonitor.timeoutIn(number("timeout_seconds",5,1,30),TimeUnit.SECONDS,monitor);
     Map<String,Object> result;long modification=currentProgram.getModificationNumber();try{
       Object value=execute(request.get("operation").getAsString());
       if(currentProgram.getModificationNumber()!=modification)throw new IllegalStateException("Read-only query changed the program modification counter");
-      if(value instanceof Map<?,?>)((Map<String,Object>)value).put("read_only",map("modification_unchanged",true));result=map("value",value);
+      if(value instanceof Map<?,?>)((Map<String,Object>)value).put("read_only",map("modification_unchanged",true,"modification",Long.toString(modification)));result=map("value",value);
     }catch(Exception error){result=map("error",map("code",error instanceof UnsupportedOperationException?"unsupported":error instanceof IllegalArgumentException?"invalid":"partial","message",Objects.toString(error.getMessage(),"Native query failed")));}
     finally{boundedMonitor.finished();if(temporaryTypes!=null){temporaryTypes.endTransaction(temporaryTransaction,false);temporaryTypes.close();}}
 

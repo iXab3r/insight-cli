@@ -10,8 +10,58 @@ import {type ResearchBackend} from '../src/research.js';
 import {address} from '../src/research.js';
 import type {ToolMode} from '../src/contexts.js';
 import {CliError} from '@eyeauras/cli-factory';
+import {createHash} from 'node:crypto';
 
 const entry='140001000';
+test('decode uses ReadOnly scope and the same bounded native operation over CLI and RPC',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});const calls:unknown[]=[];let saves=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+  const backend=new Fake(workspace);backend.saved=async()=>{saves++;throw Error('Decode must never save');};
+  backend.call=async(_s,operation,p={})=>{calls.push({operation,p});return {address:entry,input_bytes:'c3',input_sha256:createHash('sha256').update(Buffer.from('c3','hex')).digest('hex'),instructions:[{address:entry,bytes:'c3',length:1,mnemonic:'RET',operands:[],direct_targets:[],computed_flow:false}],consumed_bytes:1,language:'x86:LE:64:default',stop_reason:'terminal_flow',read_only:{modification_unchanged:true,modification:'1'}};};return backend;
+ }}));
+ const input=join(f.root,'decode.exe');await writeFile(input,'owned decode');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ await f.profileStore.setPermissions('default',['ReadOnly']);const args=['ghidra','functions','decode','--session',s.session,'--target',s.target,'--address',entry,'--max-bytes','1','--max-instructions','1'];
+ const result=await f.json(app,args) as any;assert.equal(result.value.consumed_bytes,1);const [rpc]=await f.rpc(app,[args]) as any[];assert.deepEqual(rpc.result,result);assert.equal(saves,0);assert.equal(calls.length,2);assert.deepEqual(calls[0],{operation:'/decode_instructions',p:{address:entry,max_bytes:1,max_instructions:1}});
+ for(const option of [['--max-bytes','4097'],['--max-instructions','257']])assert.notEqual((await f.run(app,[...args,...option,'--json'])).exitCode,0);assert.equal(calls.length,2);
+});
+test('function diagnostics survive one-shot and cli.execute without a mutation or comment read',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let response:unknown,reads=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+  const backend=new Fake(workspace);backend.call=async(_scope,operation)=>{assert.equal(operation,'/get_functions');reads++;return response;};return backend;
+ }}));
+ const input=join(f.root,'diagnostic.exe');await writeFile(input,'owned diagnostic');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ const argv=['ghidra','functions','decompile','--session',s.session,'--target',s.target,'--address',entry];
+ const cases:[unknown,string][]=[
+  [{functions:{[entry]:{error:'Function not found: no function at or containing that address\u0000'+ 'x'.repeat(600)}}},'function_not_found'],
+  [{functions:{[entry]:{error:'Decompiler failed'}}},'native_function_failure'],
+  [{functions:{other:{name:'f',entry_point:entry}}},'selector_mismatch'],
+  [{functions:{[entry]:null}},'invalid_native_shape'],
+  [{functions:{[entry]:{name:'f',entry_point:entry,signature:'void f()'}}},'missing_decompiler_text']
+ ];
+ for(const [value,reason]of cases){response=value;const one=await f.run(app,[...argv,'--json']);assert.notEqual(one.exitCode,0);const result=JSON.parse(one.stdout);assert.equal(result.reason,reason);assert.equal(result.selector,entry);assert.equal(result.session,s.session);
+  if(result.nativeDiagnostic){assert.ok(Array.from(result.nativeDiagnostic).length<=500);assert.ok(!result.nativeDiagnostic.includes('\0'));}
+  const [rpc]=await f.rpc(app,[argv]) as any[];assert.equal(rpc.error.data.result.reason,reason);
+ }
+ assert.equal(reads,cases.length*2);
+});
+
+test('bulk function windows preserve mixed outcomes, Unicode hashes, view guards and exact saved files',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace!:Workspace,modification=0,changeDuringRead=false;
+ const source='a😀б'.repeat(20),short='return 1;';
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const backend=new Fake(w);backend.call=async(_s,op,p={})=>{assert.equal(op,'/get_functions');if(changeDuringRead)modification++;return {functions:Object.fromEntries(String(p.functions).split(',').map(selector=>[selector,selector==='missing'?{error:'Function not found: fixture'}:{name:selector,entry_point:entry,signature:'void f()',decompiled_code:selector==='short'?short:source,truncation:{decompiled_code:selector==='prefix'}}])),requested:4,count:3};};return Object.assign(backend,{observation:async()=>({modification})});
+ }}));
+ const input=join(f.root,'bulk.exe');await writeFile(input,'owned bulk');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ const args=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','short,long,missing,prefix','--fields','entry_point,signature,decompiled_code','--limit-chars','4','--total-chars','7'];
+ const first=await f.json(app,args) as any;assert.equal(first.value.functions.short.decompiled_code,'retu');assert.equal(first.value.functions.long.decompiled_code,'a😀б');assert.equal(first.value.functions.missing.reason,'function_not_found');assert.equal(first.value.textBudget.returnedCharacters,7);
+ const page=await f.json(app,[...args,'--offset-chars','3','--expect-view',first.value.view.identity]) as any;assert.equal(page.value.functions.long.text.textSha256,first.value.functions.long.text.textSha256);
+ const directory=join(f.root,'saved');const saved=await f.json(app,[...args,'--save-owner-directory',directory]) as any;assert.ok(!('decompiled_code'in saved.value.functions.long));assert.equal(await readFile(saved.value.functions.long.savedText.file,'utf8'),source);assert.equal(await readFile(saved.value.functions.short.savedText.file,'utf8'),short);assert.equal(JSON.parse(await readFile(join(directory,'manifest.json'),'utf8')).value.view.identity,first.value.view.identity);
+ const end=await f.json(app,[...args,'--offset-chars','60']) as any;assert.equal(end.value.functions.prefix.text.sourceTruncated,true);assert.equal(end.value.functions.prefix.text.truncated,true);
+ const before=workspace.context(s);workspace.saveContext(s,before.generation,{viewEpoch:1});const changed=await f.run(app,[...args,'--expect-view',first.value.view.identity,'--json']);assert.notEqual(changed.exitCode,0);assert.equal(JSON.parse(changed.stdout).reason,'changed_view');
+ assert.notEqual((await f.run(app,[...args,'--fields','invented','--json'])).exitCode,0);
+ const single=await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','short','--fields','decompiled_code']) as any;assert.equal(single.value.name,'short');assert.equal(single.value.decompiled_code,short);
+ changeDuringRead=true;const raced=await f.run(app,[...args,'--json']);assert.notEqual(raced.exitCode,0);assert.equal(JSON.parse(raced.stdout).reason,'changed_view');
+});
 interface View {name:string;comments:Record<string,string|null>}
 const empty=():View=>({name:'first',comments:{eol:null,pre:null,post:null,plate:null,repeatable:null}});
 class Fake implements ResearchBackend {

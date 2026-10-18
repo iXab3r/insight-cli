@@ -1,4 +1,6 @@
 import {textWindow} from './text-window.js';
+import {functionResult,functionFailure} from './function-results.js';
+import {inspectFunctions,type FunctionInspectionOptions} from './function-inspection.js';
 import type { Artifact } from './artifacts.js';
 import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
 import { Workspace } from './workspace.js';
@@ -11,6 +13,7 @@ import {transferResult} from './cross-results.js';
 import {CliError} from '@eyeauras/cli-factory';
 
 export interface ResearchBackend {
+  observation?(scope:Scope):Promise<unknown>;
   sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
   archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
   debuggerStart?(scope:Scope):Promise<void>;
@@ -75,12 +78,6 @@ function comments(value: unknown) {
     observed[kind]=scalarText(result[kind]);
   }
   return observed;
-}
-function functionResult(value: unknown, selector: string) {
-  const result=object(value),functions=object(result.functions),found=object(functions[selector]);
-  if(Object.keys(functions).length!==1||found.error||typeof found.name!=='string'||!found.name||!found.entry_point)
-    fail('partial','Function result omitted, failed or changed the requested selector.');
-  return found;
 }
 function pageResult(value: unknown, key: string, limit: number, offset: number) {
   const result=object(value);
@@ -245,12 +242,21 @@ export class Research {
       const backend=await this.backend();await backend.open(selected);
       const value=await backend.call(selected,'/get_functions',{functions:at,fields:decompile?'entry_point,signature,decompiled_code':'entry_point,signature',include_call_context:false});
       const result=functionResult(value,at);
-      if(typeof result.signature!=='string')fail('partial','Function result lacks its signature.');
-      if(decompile&&typeof result.decompiled_code!=='string')fail('partial','Function decompilation did not produce text.');
+      if(typeof result.signature!=='string')functionFailure(at,'missing_signature');
+      if(decompile&&typeof result.decompiled_code!=='string')functionFailure(at,'missing_decompiler_text');
       const listing=object(await backend.call(selected,'/get_comment',{address:result.entry_point}));
       const window=decompile?textWindow(String(result.decompiled_code),page?.limit??16000,page?.offset??0,Boolean(object(result.truncation??{}).decompiled_code)):undefined;
       const {content,...paging}=window??{content:undefined};
       return {...selected,address:publicAddress(result.entry_point),name:result.name,signature:result.signature,comments:comments(listing),...(window?{code:content,...paging}:{})};
+    });
+  }
+  async inspectFunctions(selected:Scope,parameters:Record<string,unknown>,options:FunctionInspectionOptions){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      const context=this.workspace.context(selected);
+      const observation=await backend.observation?.(selected);
+      const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
+      return inspectFunctions(backend,selected,parameters,options,view,observation);
     });
   }
   async xrefs(selected: Scope, at: string, limit: number, offset: number) {

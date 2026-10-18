@@ -99,3 +99,43 @@ publish program work. Switching modes retains private edits and other sessions k
 
 Selected native SDK commands and their effect/budget contracts are described in
 [native workflows](native-workflows.md).
+
+`functions get/decompile` failures include `selector`, stable `reason` and, when supplied by
+native, a sanitized diagnostic of at most 500 Unicode characters. Reasons distinguish
+`function_not_found`, `native_function_failure`, `selector_mismatch`, `invalid_native_shape`,
+`missing_signature` and `missing_decompiler_text`. Missing definitions remain failures; reads
+never create functions or run analysis. JSON-RPC `cli.execute` preserves the same error data.
+
+The existing `functions inspect` accepts 1–20 distinct names/addresses. Existing `--fields`
+remain valid; unknown fields fail before dispatch. Decompiled text uses per-item
+`--offset-chars` (default 0), `--limit-chars` (default 16000, maximum 32768), and a shared
+`--total-chars` budget (default 64000, maximum 128000), allocated in selector order.
+Each item retains success/not-found/failure and `text` metadata: full returned-native-text
+SHA-256, Unicode code-point length, window, next offset and native truncation. A zero-length
+window can mean the total budget was exhausted. A last CLI page does not establish native
+completeness. Use fewer selectors to advance a starved item. The one MiB response cap still
+applies to all fields. These are text/result bounds, not a native decompiler CPU budget.
+
+Keep `value.view.identity` and supply `--expect-view <identity>` on continuation. An observed
+context generation, snapshot or revision change rejects continuation with `changed_view`.
+Hashes bind each observed native text; compare them across pages as well. A view identity is
+conservative across lifecycle changes and does not assert determinism of the decompiler.
+
+For compact evidence, use `--save-owner-directory <absolute-new-path>`. The elected CLI owner
+writes full returned native text (at most four MiB per function, at most 20 functions) to numbered
+hash-named `.c` files and writes `manifest.json` last. The response omits inline code and gives
+absolute paths, coverage, hashes, lengths and native truncation. This directory is on the owner
+host, including through JSON-RPC; it is never silently a client-host path. An existing directory
+is rejected. A filesystem failure can leave a partial new directory without a completed manifest;
+retain it for inspection and choose a fresh directory for another explicit save.
+
+`functions decode --address <address> --max-bytes 64 --max-instructions 16` uses Ghidra pseudo
+instructions without defining listing instructions, functions or xrefs, running analyzers or
+saving state. It requires initialized executable memory and currently supports x86 language
+variants; other languages return an explicit unsupported capability error. Bounds are 1–4096
+bytes in one executable block and 1–256 instructions. Results bind input bytes/hash, language,
+compiler and context view to instructions, consumed bytes and stop reason. Direct targets are
+computed from instruction bytes, not proof of function membership or stored xrefs. Indirect
+flow has no invented target. Decoding stops at terminal/unconditional flow, input/instruction
+bounds, undecodable/truncated bytes or unavailable context. Existing `disassemble-bytes` remains
+an Update operation with its original guards.
