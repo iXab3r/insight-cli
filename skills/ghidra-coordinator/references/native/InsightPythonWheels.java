@@ -19,6 +19,67 @@ class InsightPythonWheels {
         }
       }
     }
+    // Never wait for remote futures while holding the batch-state mutex: completing
+    // a reply can require a callback which starts another batch. Also close model
+    // transactions/batches on exceptions; these adapters never repeat a CPU action.
+    Path traceClient=root.resolve("ghidratrace/client.py");String traceClientSource=Files.readString(traceClient);
+    String batchEndBefore="""
+        def end_batch(self) -> Optional[List[Any]]:
+            cb = None
+            with self._block:
+                cb = self.cur_batch
+                if cb is None:
+                    raise ValueError("No batch to end")
+                if 0 == cb.dec():
+                    self.cur_batch = None
+                    return cb.results()
+            return None
+    """;
+    String batchEndAfter="""
+        def end_batch(self) -> Optional[List[Any]]:
+            with self._block:
+                cb = self.cur_batch
+                if cb is None:
+                    raise ValueError("No batch to end")
+                if cb.dec() != 0:
+                    return None
+                self.cur_batch = None
+            return cb.results()
+    """;
+    String traceTxBefore="""
+        tx = self.start_tx(description, undoable)
+        yield tx
+        tx.commit()
+    """;
+    String traceTxAfter="""
+        tx = self.start_tx(description, undoable)
+        try:
+            yield tx
+        except BaseException:
+            tx.abort()
+            raise
+        else:
+            tx.commit()
+    """;
+    String batchBodyBefore="""
+        batch = self.start_batch()
+        yield batch
+        return self.end_batch()
+    """;
+    String batchBodyAfter="""
+        batch = self.start_batch()
+        try:
+            yield batch
+        finally:
+            results = self.end_batch()
+        return results
+    """;
+    String[][] tracePatches={{batchEndBefore,batchEndAfter},{traceTxBefore.indent(4),traceTxAfter.indent(4)},{batchBodyBefore.indent(4),batchBodyAfter.indent(4)}};
+    for(String[] patch:tracePatches){
+      if(traceClientSource.indexOf(patch[0])<0||traceClientSource.indexOf(patch[0])!=traceClientSource.lastIndexOf(patch[0]))throw new IllegalArgumentException("Unexpected pinned trace transaction/batch lifecycle");
+      traceClientSource=traceClientSource.replace(patch[0],patch[1]);
+    }
+    Files.writeString(traceClient,traceClientSource);
     // Ghidra 12.1.2's LLDB adapter calls a nonexistent SBProcess.write_memory method.
     // Adapt only the newly extracted owned copy; refuse a different upstream implementation.
     Path methods=root.resolve("ghidralldb/methods.py");String source=Files.readString(methods);
@@ -89,6 +150,22 @@ class InsightPythonWheels {
     String logPath="__import__('base64').b64decode('"+Base64.getEncoder().encodeToString(root.resolve("rpc-methods.log").toString().getBytes(java.nio.charset.StandardCharsets.UTF_8))+"').decode('utf-8')";
     clientSource=clientSource.replace(call,"        name = request.name\n        import os as _insight_os\n        _insight_fd = _insight_os.open("+logPath+", _insight_os.O_CREAT | _insight_os.O_APPEND | _insight_os.O_WRONLY, 0o600)\n        try:\n            if _insight_os.fstat(_insight_fd).st_size < 65536:\n                _insight_os.write(_insight_fd, (name[:128] + '\\n').encode('utf-8'))\n        finally:\n            _insight_os.close(_insight_fd)\n        if not name in self._method_registry._methods:");
     Path commands=root.resolve("ghidralldb/commands.py");String commandSource=Files.readString(commands);
+    String trackedTxBefore="""
+        with STATE.require_trace().open_tx(description) as tx:
+            STATE.tx = tx
+            yield tx
+        STATE.reset_tx()
+    """;
+    String trackedTxAfter="""
+        try:
+            with STATE.require_trace().open_tx(description) as tx:
+                STATE.tx = tx
+                yield tx
+        finally:
+            STATE.reset_tx()
+    """;
+    if(commandSource.indexOf(trackedTxBefore)<0||commandSource.indexOf(trackedTxBefore)!=commandSource.lastIndexOf(trackedTxBefore))throw new IllegalArgumentException("Unexpected pinned tracked transaction lifecycle");
+    commandSource=commandSource.replace(trackedTxBefore,trackedTxAfter);
     int frameStart=commandSource.indexOf("def put_frames() -> None:"),frameEnd=commandSource.indexOf("@convert_errors\ndef ghidra_trace_put_frames",frameStart);
     if(frameStart<0||frameEnd<frameStart)throw new IllegalArgumentException("Unexpected pinned LLDB frame exporter");
     String frameBlock=commandSource.substring(frameStart,frameEnd),frameIndex="level=f.GetFrameID()";
