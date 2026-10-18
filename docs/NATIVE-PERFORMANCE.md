@@ -192,6 +192,10 @@ The diagnostic collection also repeats contention with tracing and runs the inst
 bounded-function proof with tracing enabled. The proof exercises actual result-file
 writes; contention exposes queue wait separately from handler/backend work. These
 additional diagnostic samples do not replace any untraced sample.
+`trace-coverage.json` requires the declared stage boundaries, resolved parent trees
+and binding scopes shared across multiple requests. The bounded proof includes a
+structured function mutation checked in an independently reopened saved database
+and exact durable-ID replay, so saved-effect inspection is exercised in native traces.
 
 The component `view-compare` phase alternates old/new Java sources on the same
 immutable prepared database, three warmups plus 30 measured calls each, requiring

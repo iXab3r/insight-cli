@@ -9,7 +9,7 @@ import {homedir} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 const {values:o}=parseArgs({options:{cli:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},root:{type:'string'},'ack-disposable':{type:'boolean'}}});
 assert.equal(o['ack-disposable'],true);for(const k of ['cli','java','ghidra-home','root'])assert.ok(o[k],k);
-assert.ok(!process.env.CI);const root=resolve(o.root),cli=resolve(o.cli),profile='bounded-'+randomUUID(),exec=promisify(execFile);
+assert.ok(!process.env.CI||process.env.INSIGHT_NATIVE_PERFORMANCE==='owned');const root=resolve(o.root),cli=resolve(o.cli),profile='bounded-'+randomUUID(),exec=promisify(execFile);
 await mkdir(root);await mkdir(join(root,'appdata'));await mkdir(join(root,'local'));
 const env={...process.env,APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'local'),XDG_DATA_HOME:join(root,'appdata')};
 let sequence=0,scope;const checks={},calls=[],scopes=[];
@@ -62,6 +62,8 @@ try{
  const manifest=JSON.parse(await readFile(join(directory,'manifest.json'),'utf8'));assert.deepEqual(manifest.value,saved);checks.bulkNativePagingAndManifest=true;
  await scoped(['comments','set','--address','1000','--kind','plate','--text','Owned changed view','--request-id','owned-change']);
  const changed=await scoped([...args,'--expect-view',first.view.identity],{failure:true});assert.equal(changed.reason,'changed_view');checks.changedView=true;
+ const verified=await scoped(['functions','create','--address','1080','--name','owned_verified','--request-id','owned-saved-function']);assert.equal(verified.state,'applied');assert.equal(verified.value.exists,true);assert.equal(verified.value.name,'owned_verified');
+ assert.deepEqual(await scoped(['functions','create','--address','1080','--name','owned_verified','--request-id','owned-saved-function']),verified);checks.independentSavedFunctionAndReplay=true;
  assert.equal(sha(await readFile(input)),sha(bytes));checks.inputUnchanged=true;
  const armInput=join(root,'owned-arm.bin');await writeFile(armInput,Buffer.from('1eff2fe1','hex'));
  scope=await call(['ghidra','open',armInput,'--session','new','--language','ARM:LE:32:v8','--compiler-spec','default','--no-analysis']);scopes.push(scope);

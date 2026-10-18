@@ -12,8 +12,9 @@ test('performance gate rejects missing/failed samples and tolerates only declare
  const b={'before/tiny/no-analysis/cli/read.metadata':{n:30,p50:100,p95:120,mad:2,failures:0,censored:0}},a={'after/tiny/no-analysis/cli/read.metadata':{n:30,p50:110,p95:130,mad:2,failures:0,censored:0}};
  assert.equal(gate(b,a).passed,true);a['after/tiny/no-analysis/cli/read.metadata'].p50=130;assert.equal(gate(b,a).passed,false);assert.equal(gate(b,{}).passed,false);assert.equal(gate({},{}).passed,false);a['after/tiny/no-analysis/cli/read.metadata'].n=3;assert.equal(gate(b,a).passed,false);
 });
-import {union} from '../performance/trace-report.mjs';
+import {union,traceCoverage} from '../performance/trace-report.mjs';
 test('timing coverage subtracts interval union, including nested/parallel overlap',()=>{assert.equal(union([[0n,10n],[2n,4n],[8n,12n],[20n,25n]]),17);});
+test('native diagnostic trace coverage rejects missing stages and unresolved context trees',()=>{const empty=traceCoverage({stages:{},danglingParents:0,bindingScopesWithMultipleRequests:1});assert.equal(empty.passed,false);const stages=Object.fromEntries(empty.required.map(s=>[s,{count:1}]));assert.equal(traceCoverage({stages,danglingParents:0,bindingScopesWithMultipleRequests:1}).passed,true);assert.equal(traceCoverage({stages,danglingParents:1,bindingScopesWithMultipleRequests:1}).passed,false);assert.equal(traceCoverage({stages,danglingParents:0,bindingScopesWithMultipleRequests:0}).passed,false);});
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
