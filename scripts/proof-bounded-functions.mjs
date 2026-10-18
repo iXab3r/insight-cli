@@ -22,8 +22,8 @@ async function call(args,{failure=false,global=false}={}){
 }
 const scoped=(args,options)=>call(['ghidra',...args,'--session',scope.session,'--target',scope.target],options);
 async function rpc(argv){
- const child=spawn(process.execPath,[cli,'--profile',profile,'--json-rpc'],{env,cwd:root,stdio:['pipe','pipe','pipe']});let output='',errors='';child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>errors+=b);
- child.stdin.end(JSON.stringify({jsonrpc:'2.0',id:1,method:'cli.execute',params:{argv}})+'\n');
+ const child=spawn(process.execPath,[cli,'--json-rpc'],{env,cwd:root,stdio:['pipe','pipe','pipe']});let output='',errors='';child.stdout.on('data',b=>output+=b);child.stderr.on('data',b=>errors+=b);
+ child.stdin.end(JSON.stringify({jsonrpc:'2.0',id:1,method:'cli.execute',params:{argv:['--profile',profile,...argv]}})+'\n');
  const code=await new Promise(ok=>child.once('close',ok));await writeFile(join(root,'rpc.stdout'),output);await writeFile(join(root,'rpc.stderr'),errors);assert.equal(code,0);return output.trim().split('\n').map(line=>JSON.parse(line)).find(r=>r.id===1);
 }
 try{
