@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {setTimeout as delay} from 'node:timers/promises';
+import {PublicCli,Recorder} from './public.mjs';
+export async function runConcurrency(o,manifest){
+ const f=manifest.fixtures[0],directory=join(o.root,'concurrency');await mkdir(directory,{recursive:true});const r=new Recorder(directory,{label:o.label,fixture:f.name,analysis:f.analyzed}),cli=new PublicCli(o.cli,f.profile,r);let other;
+ try{
+  cli.scope=await cli.call(['ghidra','open',f.path,'--session','new'],{stage:'setup.context'});other=await cli.call(['ghidra','open','--target',cli.scope.target,'--session','new'],{stage:'setup.independent-context'});
+  const original=cli.scope;
+  const slow=cli.scoped(['scripts','run-inline','--code','import ghidra.app.script.GhidraScript; public class OwnedQueueProbe extends GhidraScript {public void run() throws Exception {Thread.sleep(8000);println("owned-queue-probe");}}','--request-id',o.runId+'-slow'],{stage:'concurrency.long-operation'});
+  await delay(1000);
+  const configuration=cli.call(['profile','create','perf66-queue-'+o.runId],{global:true,stage:'concurrency.queued-configuration'});
+  await delay(500);
+  const independent=cli.call(['ghidra','program','metadata','--session',other.session,'--target',other.target],{stage:'concurrency.independent-read'});
+  const diagnostic=cli.call(['sessions','status',other.session,'--target',other.target],{stage:'concurrency.diagnostic'});
+  const [long,configured,read,status]=await Promise.all([slow,configuration,independent,diagnostic]);assert.ok(long);assert.ok(configured);assert.match(JSON.stringify(read),new RegExp(f.sha256));assert.equal(status.ghidra.state,'ready');
+  // Concurrent independent workers without an exclusive profile change must both return useful results.
+  await Promise.all([cli.scoped(['program','metadata'],{stage:'concurrency.first-read'}),cli.call(['ghidra','program','metadata','--session',other.session,'--target',other.target],{stage:'concurrency.second-read'})]);
+ }finally{if(other){const original=cli.scope;cli.scope=other;await cli.scoped(['close'],{stage:'cleanup.peer'});cli.scope=original;}await cli.cleanup();await writeFile(join(directory,'cleanup.json'),JSON.stringify({ownedContextsClosed:true,ownedServerStopped:true}));}
+}

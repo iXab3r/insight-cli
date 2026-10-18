@@ -4,13 +4,14 @@ import {execFile,spawn} from 'node:child_process';
 import {promisify,parseArgs} from 'node:util';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
+import {homedir} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 const {values:o}=parseArgs({options:{cli:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},root:{type:'string'},'ack-disposable':{type:'boolean'}}});
 assert.equal(o['ack-disposable'],true);for(const k of ['cli','java','ghidra-home','root'])assert.ok(o[k],k);
-assert.ok(!process.env.CI);const root=resolve(o.root),cli=resolve(o.cli),profile='bounded',exec=promisify(execFile);
+assert.ok(!process.env.CI);const root=resolve(o.root),cli=resolve(o.cli),profile='bounded-'+randomUUID(),exec=promisify(execFile);
 await mkdir(root);await mkdir(join(root,'appdata'));await mkdir(join(root,'local'));
-const env={...process.env,APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'local')};
+const env={...process.env,APPDATA:join(root,'appdata'),LOCALAPPDATA:join(root,'local'),XDG_DATA_HOME:join(root,'appdata')};
 let sequence=0,scope;const checks={},calls=[],scopes=[];
 const sha=b=>createHash('sha256').update(b).digest('hex');
 async function call(args,{failure=false,global=false}={}){
@@ -37,7 +38,8 @@ try{
  const setup='import ghidra.app.script.GhidraScript; public class OwnedDecodeSetup extends GhidraScript {public void run() throws Exception {currentProgram.getMemory().getBlock(toAddr("1000")).setExecute(true);}}';
  await scoped(['scripts','run-inline','--code',setup,'--request-id','owned-execute']);await scoped(['merge','--request-id','owned-setup-merge']);
  const clean=await state();assert.equal(clean.ghidra.pendingChanges,0);
- const savedContext=()=>{const db=new DatabaseSync(join(root,'appdata/insight-cli/bounded/workspace/workspace.sqlite'),{readOnly:true});try{return JSON.parse(db.prepare('SELECT data FROM contexts WHERE session=? AND target=?').get(scope.session,scope.target).data);}finally{db.close();}};
+ const storage=process.platform==='darwin'?join(homedir(),'Library','Application Support'):join(root,'appdata');
+ const savedContext=()=>{const db=new DatabaseSync(join(storage,'insight-cli',profile,'workspace','workspace.sqlite'),{readOnly:true});try{return JSON.parse(db.prepare('SELECT data FROM contexts WHERE session=? AND target=?').get(scope.session,scope.target).data);}finally{db.close();}};
  const decode=(at,b=16,n=8)=>scoped(['functions','decode','--address',at,'--max-bytes',String(b),'--max-instructions',String(n)]);
  const leaf=(await decode('1080',1)).value;assert.equal(leaf.instructions[0].mnemonic.toLowerCase(),'ret');assert.equal(leaf.input_bytes,'c3');assert.equal(leaf.stop_reason,'terminal_flow');assert.equal(leaf.read_only.modification_unchanged,true);
  const snapshotBefore=savedContext();
@@ -67,7 +69,6 @@ try{
 }finally{
  const cleanup=[];for(const selected of scopes.reverse()){scope=selected;try{await scoped(['close']);}catch(error){cleanup.push('close');}}
  try{await call(['ghidra','server','stop']);}catch(error){cleanup.push('server');}
- try{await call(['ipc-server','stop'],{global:true});}catch(error){cleanup.push('owner');}
  checks.ownedCleanup=cleanup.length===0;
  await writeFile(join(root,'report.json'),JSON.stringify({schema:1,checks,calls,cleanup},null,2)+'\n');
  console.log(JSON.stringify({checks,cleanup}));

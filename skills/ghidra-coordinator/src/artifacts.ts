@@ -1,3 +1,4 @@
+import {timingSpan} from '@eyeauras/cli-factory';
 import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { open, mkdir, link, unlink, realpath, lstat } from 'node:fs/promises';
@@ -39,7 +40,7 @@ export class Artifacts {
     try { await handle.sync(); } finally { await handle.close(); }
   }
 
-  async verify(value: Artifact): Promise<string> {
+  async verify(value: Artifact): Promise<string> {return timingSpan('artifact.verify',async()=>{
     await this.ownedDirectory();
     const path = this.path(value);
     if ((await lstat(path)).isSymbolicLink()) fail('artifact', 'Saved artifact cannot be replaced by a symbolic link.');
@@ -57,9 +58,9 @@ export class Artifacts {
         fail('artifact', 'Saved artifact contents changed; its original copy is required.');
       return path;
     } finally { await handle.close(); }
-  }
+  });}
 
-  async capture(source: string, kind: ArtifactKind): Promise<Artifact> {
+  async capture(source: string, kind: ArtifactKind): Promise<Artifact> {return timingSpan('artifact.copy',async()=>{
     if (!['input', 'snapshot'].includes(kind)) fail('artifact', 'Unsupported artifact kind.');
     const directory = await this.ownedDirectory();
     const temporary = join(directory, 'pending-' + randomUUID());
@@ -97,5 +98,5 @@ export class Artifacts {
       await output?.close();
       await unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error; });
     }
-  }
+  });}
 }

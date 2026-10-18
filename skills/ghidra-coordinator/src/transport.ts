@@ -1,3 +1,4 @@
+import {timingSpan,timingSync} from '@eyeauras/cli-factory';
 import { fail, object } from './model.js';
 import {parseDomainJson} from './json.js';
 import {CliError} from '@eyeauras/cli-factory';
@@ -13,7 +14,13 @@ export class HttpBridge {
     if(!Number.isSafeInteger(saveTimeoutMilliseconds)||saveTimeoutMilliseconds<1000||saveTimeoutMilliseconds>3600000)fail('invalid','Save timeout is outside the supported bound.');
     if(timeoutMilliseconds!==undefined&&(!Number.isSafeInteger(timeoutMilliseconds)||timeoutMilliseconds<1||timeoutMilliseconds>1800000))fail('invalid','Bridge timeout is outside the supported bound.');
   }
-  private async request(path: string, method: string, query: Record<string, unknown>, body: Record<string, unknown>): Promise<unknown> {
+  /** Rebind cancellation to the current request after fresh PID/receipt authentication. */
+  forRequest(fetch:typeof globalThis.fetch,signal:AbortSignal,token:string|undefined,saveTimeoutMilliseconds:number){
+    const next=new HttpBridge(this.endpoint,fetch,signal,token,undefined,saveTimeoutMilliseconds);
+    if(token===this.token)next.schema=this.schema;
+    return next;
+  }
+  private async request(path: string, method: string, query: Record<string, unknown>, body: Record<string, unknown>): Promise<unknown> {return timingSpan('backend.http.'+path.replace(/[^a-z0-9_-]/g,'.').replace(/^\./,''),async()=>{
     const url = new URL(path, this.endpoint);
     // Import includes synchronous auto-analysis. Keep discovery/ordinary requests short,
     // while allowing a real executable to finish its first analysis without losing the reply.
@@ -28,19 +35,19 @@ export class HttpBridge {
     for (const [name, value] of Object.entries(query)) url.searchParams.set(name, String(value));
     let response: Response;
     try {
-      response = await this.fetch(url, { method, redirect: 'error', signal, headers: { ...(this.token ? { Authorization: 'Bearer ' + this.token } : {}), ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}) }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) });
+      response = await timingSpan('backend.dispatch',()=>this.fetch(url, { method, redirect: 'error', signal, headers: { ...(this.token ? { Authorization: 'Bearer ' + this.token } : {}), ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}) }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) }));
     } catch { return transportFailure(); }
     if (!response.ok) fail('remote', 'Ghidra bridge rejected the operation.');
     // Bound even a chunked/malformed service response; never persist raw payloads as logs.
     const reader = response.body?.getReader();
     if (!reader) fail('malformed', 'Ghidra bridge returned an empty body.');
     const chunks: Uint8Array[] = []; let length = 0;
-    try { for (;;) { const next = await reader.read(); if (next.done) break; length += next.value.byteLength; if (length > 1024 * 1024) fail('limit', 'Ghidra response exceeded one MiB.'); chunks.push(next.value); } }
+    try { await timingSpan('backend.response-read',async()=>{for (;;) { const next = await reader.read(); if (next.done) break; length += next.value.byteLength; if (length > 1024 * 1024) fail('limit', 'Ghidra response exceeded one MiB.'); chunks.push(next.value); }}); }
     catch(error){if(error instanceof CliError)throw error;return transportFailure();}
     finally { await reader.cancel().catch(() => {}); }
     const text = Buffer.concat(chunks).toString('utf8');
     let result: unknown;
-    try { result = parseDomainJson(text); } catch { result = text; }
+    try { result = timingSync('backend.response-decode',()=>parseDomainJson(text)); } catch { result = text; }
     if (result && typeof result === 'object' && !Array.isArray(result)) {
       const o = object(result);
       if (o.error || o.success === false || o.status === 'error') {
@@ -49,7 +56,7 @@ export class HttpBridge {
       }
     }
     return result;
-  }
+  });}
   async instance() { return object(await this.request('/mcp/instance_info', 'GET', {}, {})); }
   async descriptor(path:string):Promise<Descriptor> {
     if (!this.schema) {

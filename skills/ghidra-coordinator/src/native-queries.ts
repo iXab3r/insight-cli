@@ -4,7 +4,7 @@ import type {HttpBridge} from './transport.js';
 import {object,fail} from './model.js';
 
 export async function nativeQuery(http:HttpBridge,program:string,operation:string,parameters:Record<string,unknown>,write=false) {
-  const base=operation.startsWith('/sdk/')?'InsightSdkScript':operation.startsWith('/emulate_')?'InsightEmulation':'InsightResearchQueries';
+  const base=operation==='/research_view'?'InsightResearchView':operation.startsWith('/sdk/')?'InsightSdkScript':operation.startsWith('/emulate_')?'InsightEmulation':'InsightResearchQueries';
   const name=base+'_'+randomUUID().replaceAll('-','');
   const source=await readFile(new URL('../../references/native/'+base+'.java',import.meta.url),'utf8');
   const response=object(await http.call('/run_script_inline',{program,code:source.replace('public class '+base+' ','public class '+name+' '),
