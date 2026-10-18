@@ -166,6 +166,8 @@ measured memory digest against the independently constructed fixture data array,
 including all returned bytes. Entirely absent cases fail acceptance.
 `equivalence.json` binds stable useful hashes within/across routes. `gate.json` retains budget decisions.
 `cleanup.json` and lifecycle readbacks establish owned cleanup and saved state.
+The full runner generates `report.md` with all warm/first-query routes, separate cold
+startup and persistence tables, contention, trace boundaries and the optimization plan.
 `script-effects.json` reduces private before/after status transcripts to pending-change
 counts and unchanged revisions for every cold trial, checking baseline/candidate
 equivalence. `trace-request-windows.json` correlates fully contained spans with isolated
@@ -182,6 +184,7 @@ node scripts/performance/compare.mjs "$EVIDENCE_DIRECTORY"
 node scripts/performance/verify-results.mjs "$EVIDENCE_DIRECTORY/baseline" "$EVIDENCE_DIRECTORY/candidate" "$EVIDENCE_DIRECTORY/stock-parity"
 node scripts/performance/trace-report.mjs "$EVIDENCE_DIRECTORY/trace"
 node scripts/performance/finalize.mjs "$EVIDENCE_DIRECTORY" 30 5
+node scripts/performance/report.mjs "$EVIDENCE_DIRECTORY"
 node scripts/performance/trace-cost.mjs --module "$FACTORY_TIMING_MODULE" --root "$NEW_TRACE_COST_DIRECTORY"
 ```
 
