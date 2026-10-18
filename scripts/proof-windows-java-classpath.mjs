@@ -6,17 +6,18 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {join,resolve,dirname} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 import {exportsOf} from './business/prepare.mjs';
-const {values:o}=parseArgs({options:{cli:{type:'string'},input:{type:'string'},output:{type:'string'},transcripts:{type:'string'},profile:{type:'string'},'skip-install':{type:'boolean'},'ack-disposable':{type:'boolean'}}});
+const {values:o}=parseArgs({options:{cli:{type:'string'},input:{type:'string'},output:{type:'string'},transcripts:{type:'string'},profile:{type:'string'},session:{type:'string'},'skip-install':{type:'boolean'},'ack-disposable':{type:'boolean'}}});
 assert.equal(process.platform,'win32');assert.equal(o['ack-disposable'],true);assert.ok(!process.env.CI);
 for(const key of ['cli','input','output','transcripts'])assert.ok(o[key],key+' required');
 assert.ok(!o['skip-install']||o.profile,'Existing owned profile required to skip installation');
-const cli=resolve(o.cli),input=resolve(o.input),output=resolve(o.output),raw=resolve(o.transcripts),profile=o.profile??'issue56-'+randomUUID().slice(0,8);
-assert.match(profile,/^issue56-[a-z0-9-]+$/);assert.ok(!cli.includes('dist/src/bin.ts'));
-await mkdir(raw,{recursive:true});await mkdir(dirname(output),{recursive:true});
+assert.ok(!o.session||o['skip-install'],'Resume only an existing disposable managed installation');
+const cli=resolve(o.cli),input=resolve(o.input),output=resolve(o.output),raw=resolve(o.transcripts),profile=o.profile??'i56-'+randomUUID().slice(0,8);
+assert.match(profile,/^(?:issue56|i56)-[a-z0-9-]+$/);assert.ok(!cli.includes('dist/src/bin.ts'));
+await mkdir(dirname(raw),{recursive:true});await mkdir(raw,{mode:0o700});await mkdir(dirname(output),{recursive:true});
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex'),bytes=await readFile(input),inputSha256=sha(bytes),exports=exportsOf(bytes);
 assert.ok(exports.config_read&&exports.evidence_config,'Use the public tests/acceptance/fixtures/research.c VERSION=1 PE');
-const exec=promisify(execFile),scopes=[],calls=[],checks={};let sequence=0,installed;
-const report={schema:1,state:'running',scope:'Windows managed Ghidra long-classpath install and bounded synthetic PE research; no wider toolbox acceptance',node:process.version,platform:process.platform,architecture:process.arch,inputSha256,checks,calls};
+const exec=promisify(execFile),scopes=[],calls=[],checks={};let sequence=0,installed,ownsProfile=o['skip-install']===true;
+const report={schema:1,state:'running',scope:'Windows managed Ghidra long-classpath install and bounded synthetic PE research; no wider toolbox acceptance',installation:o['skip-install']?'existing-disposable-managed-selection':'fresh-managed-install',resumedScope:Boolean(o.session),node:process.version,platform:process.platform,architecture:process.arch,inputSha256,checks,calls};
 async function call(args,{global=false,json=true}={}){
  const n=++sequence,started=Date.now();let result,code=0;
  try{result=await exec(process.execPath,[cli,...(global?[]:['--profile',profile]),...args,...(json?['--json']:[])],{timeout:1200000,maxBuffer:8*1024*1024});}
@@ -26,14 +27,14 @@ async function call(args,{global=false,json=true}={}){
  assert.equal(code,0,'CLI failed; inspect transcript '+n+' before any retry');return json?JSON.parse(result.stdout):result.stdout.trim();
 }
 const scoped=(s,args)=>call(['ghidra',...args,'--session',s.session,'--target',s.target]);
-async function open(args){const s=await call(['ghidra','open',...args,'--session','new']);assert.equal(s.state,'ready');scopes.push(s);return s;}
+async function open(args,session='new'){const s=await call(['ghidra','open',...args,'--session',session]);assert.equal(s.state,'ready');scopes.push(s);return s;}
 try{
  report.version=await call(['--version'],{global:true,json:false});
  report.installedPackageSha256=sha(await readFile(join(dirname(cli),'../../package.json')));
- if(!o['skip-install']){await call(['profile','create',profile],{global:true});await call(['permissions','grant','Update']);installed=await call(['ghidra','install']);}
+ if(!o['skip-install']){await call(['profile','create',profile],{global:true});ownsProfile=true;await call(['permissions','grant','Update']);installed=await call(['ghidra','install']);}
  else installed=await call(['ghidra','status']);
  assert.equal(installed.mode,'managed');checks.managedRuntime=true;
- const a=await open([input]);assert.equal(a.sharedRevision,'R1');
+ const a=await open([input],o.session??'new');assert.equal(a.sharedRevision,'R1');
  const strings=await scoped(a,['strings','search','--contains','insight-config-v1.json']);assert.ok(strings.items.some(s=>s.address===exports.evidence_config));
  const refs=await scoped(a,['xrefs','to','--address',exports.evidence_config]);assert.ok(refs.items.some(r=>r.function?.address===exports.config_read));
  const code=await scoped(a,['functions','decompile','--address',exports.config_read]);assert.equal(code.truncated,false);assert.match(code.code,/case1/);checks.nativeResearch=true;
@@ -54,8 +55,8 @@ try{
 }catch(error){report.state='failed';throw error;}
 finally{
  const errors=[];for(const s of scopes.reverse())try{await scoped(s,['close']);}catch{errors.push('context close');}
- try{await call(['ghidra','server','stop']);}catch{errors.push('server stop');}
- try{await call(['ipc-server','stop']);}catch{errors.push('IPC stop');}
+ if(ownsProfile)try{await call(['ghidra','server','stop']);}catch{errors.push('server stop');}
+ // Factory's IPC owner serves multiple profiles; its idle policy owns that lifecycle.
  checks.ownedCleanup=errors.length===0;if(errors.length){report.state='failed';report.cleanupErrors=errors;}
  await writeFile(output,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({state:report.state,checks}));
  if(report.state!=='passed')process.exitCode=1;
