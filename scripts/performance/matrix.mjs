@@ -28,6 +28,9 @@ await run('candidate',['--cli',resolve(o.candidate),'--label','candidate','--fix
 await run('candidate-cold-rpc',['--phase','cold-rpc','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
 await run('candidate-persistence',['--phase','persistence','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
 await run('candidate-concurrency',['--phase','concurrency','--cli',resolve(o.candidate),'--label','candidate','--manifest',join(root,'candidate/manifest.json')]);
+const proofStarted=process.hrtime.bigint();let proofCode;
+try{await new Promise((ok,bad)=>{const child=spawn(process.execPath,['scripts/proof-bounded-functions.mjs','--cli',resolve(o.candidate),'--java',resolve(o.java),'--ghidra-home',resolve(o.ghidra),'--root',join(root,'candidate-bounded-proof'),'--ack-disposable'],{cwd:process.cwd(),env:process.env,stdio:'inherit'});child.once('error',bad);child.once('exit',code=>{proofCode=code;code===0?ok():bad(Error('Final installed native bounded-function proof failed'));});});}
+finally{phases.push({label:'candidate-bounded-proof',ms:Number(process.hrtime.bigint()-proofStarted)/1e6,code:proofCode});await writeFile(join(root,'phases.json'),JSON.stringify(phases,null,2)+'\n');}
 // A separate bridge-version factor; this also allows the ordinary owner to exit idle before opt-in tracing.
 await run('stock-version-factor',[...stockArgs,'--jar',resolve(o['stock-jar']),'--label','stock-version-factor']);
 const trace=join(root,'trace');await mkdir(trace,{mode:0o700});
