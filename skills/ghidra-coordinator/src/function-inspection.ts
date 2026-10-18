@@ -13,7 +13,7 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   if(options.saveDirectory!==undefined&&!isAbsolute(options.saveDirectory))fail('invalid','Save directory must be an absolute path on the owner host.');
   const selectors=String(parameters.functions||parameters.function||'').split(',').map(s=>s.trim());
   if(!selectors.length||selectors.length>20||selectors.some(s=>!s||s.length>128)||new Set(selectors).size!==selectors.length)fail('invalid','Select 1–20 distinct function names or addresses.');
-  const selectedFields=String(parameters.fields??'').split(',').map(s=>s.trim()).filter(Boolean);
+  const selectedFields=String(parameters.fields??'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
   if(selectedFields.some(s=>!fields.has(s)))fail('invalid','Unknown function field. Allowed fields: '+[...fields].join(', '));
   if(options.expectView!==undefined&&options.expectView!==view.identity)fail('binding','Function continuation view changed.',{reason:'changed_view',view});
   const raw=object(await backend.call(scope,'/get_functions',{...parameters,functions:selectors.join(',')}));
@@ -24,7 +24,7 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   for(const [index,selector]of selectors.entries()){
     let found:Record<string,unknown>;
     try{found=functionResult({functions:{[selector]:functions[selector]}},selector);}
-    catch(error){if(!(error instanceof CliError))throw error;const detail=object(error.result);output[selector]={error:error.message,...detail,status:detail.reason==='function_not_found'?'not_found':'failed'};continue;}
+    catch(error){if(!(error instanceof CliError))throw error;const detail=object(error.result);output[selector]={error:detail.nativeDiagnostic??error.message,...detail,status:detail.reason==='function_not_found'?'not_found':'failed'};continue;}
     const row:Record<string,unknown>={...found,status:'success'};
     if(typeof row.decompiled_code==='string'){
       const source=row.decompiled_code,window=textWindow(source,options.saveDirectory?0:Math.min(options.limit,remaining),options.saveDirectory?0:options.offset,Boolean(object(row.truncation??{}).decompiled_code));
@@ -38,6 +38,7 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
     }else if(!selectedFields.length||selectedFields.includes('decompiled_code')){row.status='partial';row.text={reason:'missing_decompiler_text'};}
     output[selector]=row;
   }
+  if(!parameters.functions){const single=object(output[selectors[0]!]);if(single.status==='failed'||single.status==='not_found')fail('partial',String(single.error),single);}
   const result={...(parameters.functions?{...raw,functions:output}:object(output[selectors[0]!])),view,textBudget:{maximumCharacters:options.total,returnedCharacters:options.total-remaining},...(options.saveDirectory?{save:{host:'owner',directory:resolve(options.saveDirectory),manifest:join(resolve(options.saveDirectory),'manifest.json')}}:{})};
   if(Buffer.byteLength(JSON.stringify(result))>1048576)fail('limit','Function response exceeds one MiB; narrow fields or selectors.');
   if(options.saveDirectory){

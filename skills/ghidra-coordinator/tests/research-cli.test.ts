@@ -60,6 +60,8 @@ test('bulk function windows preserve mixed outcomes, Unicode hashes, view guards
  const before=workspace.context(s);workspace.saveContext(s,before.generation,{viewEpoch:1});const changed=await f.run(app,[...args,'--expect-view',first.value.view.identity,'--json']);assert.notEqual(changed.exitCode,0);assert.equal(JSON.parse(changed.stdout).reason,'changed_view');
  assert.notEqual((await f.run(app,[...args,'--fields','invented','--json'])).exitCode,0);
  const single=await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','short','--fields','decompiled_code']) as any;assert.equal(single.value.name,'short');assert.equal(single.value.decompiled_code,short);
+ assert.equal((await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','short','--fields','SIGNATURE,ENTRY_POINT']) as any).value.name,'short');
+ const missing=await f.run(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','missing','--json']);assert.notEqual(missing.exitCode,0);assert.equal(JSON.parse(missing.stdout).reason,'function_not_found');
  const named=await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','__proto__','--fields','decompiled_code']) as any;assert.equal(named.value.functions.__proto__.name,'__proto__');
  assert.equal(saved.value.textBudget.returnedCharacters,0);assert.equal(saved.value.functions.prefix.savedText.sourceTruncated,true);
  assert.notEqual((await f.run(app,[...args,'--save-owner-directory',directory,'--json'])).exitCode,0);assert.equal(await readFile(saved.value.functions.long.savedText.file,'utf8'),source);

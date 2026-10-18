@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "date": "2026-10-18",
+  "issues": [62, 63, 64],
+  "state": "candidate_verified",
+  "scope": "Owned generic fixtures only; no research input, identifiers, runtime paths or raw native transcripts",
+  "baseline": {
+    "package": "@eyeauras/insight-cli@0.2.3",
+    "installedInSeparatePrefix": true,
+    "nativeMissingFunctionDiagnosticLost": true
+  },
+  "offline": {
+    "focusedTestsPassed": 17,
+    "cliAndJsonRpcDiagnostics": true,
+    "mixedUnicodePagingHashAndNativePrefixMetadata": true,
+    "changedNativeViewDuringReadRejected": true,
+    "oneMiBResponseAndFourMiBSavedTextLimits": true,
+    "noFilesCreatedOnLimitFailure": true,
+    "legacySingleInspectAndCaseInsensitiveFields": true,
+    "isolatedPackageInstallationPassed": true
+  },
+  "native": {
+    "platform": "Windows x64",
+    "ghidra": "12.1.2",
+    "jdk": 21,
+    "installedCandidate": true,
+    "isolatedAppDataOwnerAndServer": true,
+    "noAnalysisOwnedRawInputs": true,
+    "undefinedLeafReturn": true,
+    "directRelativeJumpTarget": true,
+    "indirectJumpWithoutInventedTarget": true,
+    "undecodableAndTruncatedInstruction": true,
+    "instructionBudget": true,
+    "programModificationCounterUnchanged": true,
+    "savedSnapshotUnchanged": true,
+    "zeroPendingEditsAfterDecode": true,
+    "missingFunctionCliAndJsonRpcReason": true,
+    "mixedBulkNativeWindowsAndManifestExactReadback": true,
+    "changedViewContinuationRejected": true,
+    "unsupportedArmLanguageRejected": true,
+    "inputUnchanged": true,
+    "ownedProcessesCleanedUp": true
+  },
+  "boundaries": [
+    "Only x86 language variants are supported by read-only decoding; other processor families fail explicitly.",
+    "Unicode, large text and native-truncated-prefix semantics use synthetic backend fixtures; native acceptance covers the actual decoder and ordinary native decompiler text.",
+    "Text windows and response limits do not bound native decompiler CPU work.",
+    "A native text prefix remains incomplete at its last CLI page.",
+    "The installed candidate is not a registry publication receipt; the exact published artifact requires a separate post-release proof.",
+    "Local Windows full application tests retain one existing supervisor recovery failure. Linux full npm/package and Windows Java/javac CI pass; local release tests pass with LF text and Python 3 available."
+  ]
+}
