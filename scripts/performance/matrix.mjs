@@ -34,5 +34,7 @@ const trace=join(root,'trace');await mkdir(trace,{mode:0o700});
 await run('candidate-trace',['--cli',resolve(o.candidate),'--label','candidate-trace','--fixtures',manifest,'--warm','3','--cold','1','--warmups','1'],{CLI_FACTORY_TRACE_DIRECTORY:trace});
 const all=await rows(root),summary=summarize(all);await writeFile(join(root,'summary.json'),JSON.stringify(summary,null,2)+'\n');
 const equivalence=verifyResults(all.filter(r=>!r.label.includes('trace')));await writeFile(join(root,'equivalence.json'),JSON.stringify(equivalence,null,2)+'\n');assert.equal(equivalence.passed,true,'Useful output/state equivalence failed');
-const result=gate(summarize(all.filter(r=>r.label==='baseline'&&r.stage.startsWith('read.'))),summarize(all.filter(r=>r.label==='candidate'&&r.stage.startsWith('read.'))),{minimum:Number(warm)});
+const families=['read.','persistence.','concurrency.'];
+const results=Object.fromEntries(families.map(family=>[family,gate(summarize(all.filter(r=>r.label==='baseline'&&r.stage.startsWith(family)&&r.sample!==undefined)),summarize(all.filter(r=>r.label==='candidate'&&r.stage.startsWith(family)&&r.sample!==undefined)),{minimum:Number(warm)})]));
+const result={passed:Object.values(results).every(r=>r.passed),families:results};
 await writeFile(join(root,'gate.json'),JSON.stringify(result,null,2)+'\n');assert.equal(result.passed,true,'Native performance regression gate failed; retain every raw sample.');

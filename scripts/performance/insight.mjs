@@ -28,6 +28,10 @@ export async function runInsight(o,fixtures){
    try{
     await client.setup(o.java,o.ghidra);
     client.scope=await client.call(['ghidra','open',f.path,'--session','new','--language','x86:LE:64:default','--compiler-spec','windows',...analyzed?[]:['--no-analysis']],{stage:'cold.open'});assert.equal(client.scope.state,'ready');
+    const primary=client.scope,otherFixture=fixtures.find(other=>other.sha256!==f.sha256);retained.push(primary);
+    assert.ok(otherFixture,'Warm-server import requires another owned input');
+    client.scope=await client.call(['ghidra','open',otherFixture.path,'--session','new','--language','x86:LE:64:default','--compiler-spec','windows',...analyzed?[]:['--no-analysis']],{stage:'warm.new-input'});assert.equal(client.scope.state,'ready');
+    await client.scoped(['close'],{stage:'warm.close-new-input'});client.scope=primary;retained.pop();
     await client.scoped(['scripts','run-inline','--code',setupScript,'--request-id','prepare-functions'],{stage:'prepare.functions'});
     await client.scoped(['merge','--request-id','prepare-merge'],{stage:'prepare.merge'});
     const dbPath=join(homedir(),'Library/Application Support/insight-cli',profile,'workspace/workspace.sqlite');

@@ -15,5 +15,5 @@ export async function compareView(o,manifest){
    const source=sources[variant],base=source.match(/public class (\w+)/)[1],code=source.replace('public class '+base+' ','public class '+base+'_'+randomUUID().replaceAll('-','')+' ');
    await s.scoped('run_script_inline',{code,args:Buffer.from(JSON.stringify({operation:'/research_view',parameters:{}})).toString('base64')},{stage:'component.view',label:variant,sample:i,warmup:i<0,validate:result=>{assert.equal(result.success,true);const found=[...result.console_output.matchAll(/^INSIGHT_QUERY:(.+)$/gm)];assert.equal(found.length,1);const v=JSON.parse(found[0][1]).value;assert.equal(v.read_only.modification_unchanged,true);const observed=JSON.stringify(stable(v));expected??=observed;assert.equal(observed,expected);}});
   }
- }finally{await s.close();await writeFile(join(o.root,'cleanup.json'),JSON.stringify({ownedNativeExited:s.child?.exitCode!==null,bridgeClosed:true}));}
+ }finally{await s.close();await writeFile(join(o.root,'cleanup.json'),JSON.stringify({ownedNativeExited:!s.child||s.child.exitCode!==null||s.child.signalCode!==null,bridgeClosed:true}));}
 }

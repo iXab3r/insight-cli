@@ -97,7 +97,10 @@ expected reason. Every measured response is validated inside the timing observer
 a fast truncated/error/missing answer is not useful throughput.
 
 For every input/analysis combination, five fresh profiles/JVMs measure cold open and
-first queries, and separate five fresh RPC processes measure cold RPC open. The first
+first queries, and separate five fresh RPC processes measure cold RPC open. Each
+initial open is followed by an import of the other owned input through the already
+running profile server (`warm.new-input`), then that extra private context is closed.
+The first
 trial runs three warmups and 30 reads per case through both one-shot CLI and the
 existing persistent JSON-RPC transport. Case rotation is deterministic (seed 66067,
 round-index rotation); CLI/RPC order alternates each round. Whole version phases are
@@ -121,7 +124,8 @@ cycles plus the remaining cold-trial cycles, retaining their cold-trial IDs. A s
 save is not equivalent to shared publication with history and independent verification;
 report these stage families side by side with the difference in guarantees.
 
-Concurrency runs a controlled eight-second script, queues a profile creation, then
+Concurrency repeats three warmups and 30 measured rounds of a controlled eight-second
+script on two independent tiny contexts, queues a unique profile creation, then
 issues a cheap independent read and diagnostic, followed by two parallel context reads.
 It retains the existing FIFO diagnostic blockage tracked by #68; #67 must not claim
 to have solved that scheduling issue. Recovery/failure-path semantics are additionally
