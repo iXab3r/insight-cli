@@ -9,6 +9,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {CliError} from '@eyeauras/cli-factory';
 import {atomicWrite,readJson,toolRoot,withToolLock} from './store.js';
 import {processIdentity} from './identity.js';
+import {javaClasspathArguments} from './java-arguments.js';
 import {digest} from '../model.js';
 import type {ToolProcess} from './definition.js';
 export interface ProcessRecord extends ToolProcess {
@@ -48,7 +49,7 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
   await atomicWrite(path,record);try{control.signal?.throwIfAborted();await access(executable,process.platform==='win32'?constants.F_OK:constants.X_OK);}catch(error){Object.assign(record,{state:'failed',phase:'preflight_failed'});await atomicWrite(path,record);throw error;}
   const environment=options.env??{PATH:process.env.PATH,HOME:root,TMPDIR:root};
   const stdio=Array.isArray(options.stdio)?[...options.stdio]:Array(3).fill(options.stdio??'pipe'),fd=stdio.length,nonce=randomUUID();if(gated)stdio.push('pipe');
-  let child:TrackedChild;try{child=spawn(gated?process.execPath:executable,gated?['--no-warnings',fileURLToPath(new URL('./launch-worker.js',import.meta.url)),directory,id,String(fd)]:args,
+  let child:TrackedChild;try{args=await javaClasspathArguments(root,spec.tool,executable,args);control.signal?.throwIfAborted();child=spawn(gated?process.execPath:executable,gated?['--no-warnings',fileURLToPath(new URL('./launch-worker.js',import.meta.url)),directory,id,String(fd)]:args,
    {cwd:root,...options,stdio,windowsHide:true,env:gated?{PATH:environment.PATH,HOME:root,TMPDIR:root}:environment}) as TrackedChild;}catch(error){Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);throw error;}
   const closed=new Promise<void>((ok,bad)=>{child.on('error',error=>{if(!child.pid)bad(error);});child.once('close',ok);});void closed.catch(()=>{});
   const handle:Owned={child,closed,record};owned.set(ownedKey(directory,id),handle);

@@ -44,6 +44,16 @@ loader IDs, supported language/compiler specifications and native option definit
 selects a loader explicitly. Primitive options, native address and HexLong options are converted
 and validated; unsupported complex option classes fail explicitly. One program belongs to a target.
 
+For a mixed managed/native or protected PE, first inspect the installed loader options. If the
+task needs its native view and CLI metadata parsing emits repeated warnings or prevents import,
+an explicit PE import may select `--loader <PE-loader-ID-from-discovery>` together with
+`--loader-options '{"Parse CLI headers (if present)":false}'`.
+This is a per-target analysis choice: record it with the findings. For an alternative managed
+import of the same bytes, use a separate disposable profile; targets within one profile reuse
+the same immutable input identity. An output-limit failure means import/analysis is incomplete; inspect
+the retained diagnostics and first-import recovery state before continuing. Do not treat warnings,
+a killed worker or a partial snapshot as a successful analysis or blindly repeat publication.
+
 `formats exporters` lists compatible native exporters and their options. `formats export
 --exporter 'Raw Bytes' --ranges '[{"start":"0x10001","end":"0x10003"}]'
 --output-directory <new-directory>` requires a format supporting restricted address sets.

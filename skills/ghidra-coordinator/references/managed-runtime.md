@@ -22,6 +22,11 @@ A failed install preserves its stage/diagnostics and the old selection. Retrying
 completed cached archives are reused. A later install/doctor/uninstall authenticates and stops
 any leftover disposable probe server before proceeding; an unverified live identity blocks recovery. Interrupted partial downloads are never used as complete files.
 
+On Windows, long Ghidra Java classpaths use an owned per-execution argument file, retained with
+the process diagnostics. `javac` files use UTF-8; `java` launcher files use the Windows system
+code page. Java 21's launcher still requires paths representable in that code page. Unmappable
+characters fail before launch rather than selecting different files through lossy conversion.
+
 `status` without scope is passive: selection, paths, missing components, installations, retained
 stages, recorded checks and live process receipts. It works before installation. It does not start
 Java or create a research workspace. `status --session S --target T` retains the scoped live health
