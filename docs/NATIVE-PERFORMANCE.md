@@ -169,6 +169,8 @@ prepared first queries against the warm results. The separate cold-RPC raw impor
 initial metadata is excluded from prepared-state equivalence because it precedes
 explicit function preparation. `gate.json` retains budget decisions.
 `cleanup.json` and lifecycle readbacks establish owned cleanup and saved state.
+`native-proofs.json` requires all nine installed native functional checks both with
+tracing off and on; only booleans are exported, excluding private call transcripts.
 The full runner generates `report.md` with all warm/first-query routes, separate cold
 startup and persistence tables, contention, trace boundaries and the optimization plan.
 `script-effects.json` reduces private before/after status transcripts to pending-change

@@ -41,6 +41,8 @@ test('public benchmark adapter retains expected missing-function replies as chec
 import {resultHash} from '../performance/equivalence.mjs';
 import {verifyResults} from '../performance/verify-results.mjs';
 import {coverage} from '../performance/coverage.mjs';
+import {nativeProofs} from '../performance/finalize.mjs';
+test('native proof reduction fails incomplete checks and strips private call transcripts',()=>{const missing=nativeProofs({});assert.equal(missing.passed,false);const valid={checks:Object.fromEntries(Object.keys(missing.proofs['candidate-bounded-proof'].checks).map(k=>[k,true])),cleanup:[],calls:['private-transcript']},reports={'candidate-bounded-proof':valid,'candidate-trace-bounded-proof':valid};assert.equal(nativeProofs(reports).passed,true);assert.ok(!JSON.stringify(nativeProofs(reports)).includes('private-transcript'));valid.checks.inputUnchanged=false;assert.equal(nativeProofs(reports).passed,false);});
 test('coverage rejects an entirely omitted case, duplicate repetitions and incorrect fixture bytes',()=>{
  const inventory=coverage([],{warm:2,cold:1});assert.equal(inventory.passed,false);assert.ok(inventory.failures.some(r=>r.fixture==='large'&&r.stage==='read.undefined'));
  const input=inventory.groups.flatMap(g=>Array.from({length:g.expected},(_,i)=>({evidencePhase:g.phase,label:g.label,fixture:g.fixture,analysis:g.analysis,route:g.route,stage:g.stage,...g.kind==='warm'?{sample:i,coldTrial:0}:{coldTrial:i},ok:true,ms:1,resultHash:'a'.repeat(64)})));
