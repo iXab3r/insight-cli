@@ -27,7 +27,7 @@ async function main(){
   if(binding.debuggerRuntime)await verifyManagedInstallation(appData,'ghidra-debugger',binding.debuggerRuntime);
   const authority=createServer((req,res)=>{if(req.url!=='/identity'||req.headers.authorization!=='Bearer '+token){res.writeHead(403).end();return;}res.setHeader('Content-Type','application/json');res.end(JSON.stringify({id,pid:process.pid,childPid:receipt.childPid,state:receipt.state}));});
   await new Promise<void>(ok=>authority.listen(0,'127.0.0.1',ok));authority.unref();const address=authority.address();if(!address||typeof address==='string')throw Error('No debugger identity port');Object.assign(receipt,{identityPort:address.port});
-  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,metadata:{debuggerReceipt:path,debuggerDiagnostics:join(directory,id+'.diagnostic.log'),contextRoot:root,...(binding.debuggerRuntime?{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint}:{})}};
+  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,session:binding.session,metadata:{debuggerReceipt:path,debuggerDiagnostics:join(directory,id+'.diagnostic.log'),contextRoot:root,...(binding.debuggerRuntime?{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint}:{})}};
   const helperProcess=await registerExistingProcess(appData,{...processSpec,role:'debugger-supervisor'},process.execPath,process.pid,async()=>true);
   await saved();const environment={...process.env};delete environment.GHIDRA_MCP_AUTH_TOKEN;delete environment.GHIDRA_SERVER_PASSWORD;
   // Ghidra's launcher prepends its source tree to PYTHONPATH. Restore the owned wheel
