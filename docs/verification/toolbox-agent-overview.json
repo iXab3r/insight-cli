@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "state": "research_passed_snapshot_metadata_gap",
-  "scope": "C06 bounded research and exact final saved-path handoff passed cold/prepared; cold snapshot-report checkpoint footer remains pending",
+  "state": "cold_prepared_reviewed_units_passed",
+  "scope": "C06 bounded research, byte-identical final report and exact checkpoint handoff passed in reviewed cold/prepared units on their recorded artifacts; full exact-artifact toolbox agent gate remains separate",
   "model": "gpt-6-luna",
   "reasoningEffort": "medium",
   "fixtureProducer": "scripts/toolbox/prepare-overview-agent-fixture.mjs",
@@ -150,5 +150,38 @@
       "stdoutIsNotBilledModelInputMeasurement": true
     }
   },
-  "remainingGap": "Cold agent saved complete research and then replaced only its pending checkpoint footer in the ordinary report. Every raw evidence byte and the analytical report body match the saved snapshot; the snapshot footer still says pending. This is not byte-identical final project/snapshot acceptance. Prepared all-file bytes and final locator passed."
+  "priorSnapshotMetadataGap": "Cold agent saved complete research and then replaced only its pending checkpoint footer in the ordinary report. Every raw evidence byte and the analytical report body match the saved snapshot; the snapshot footer still says pending. This is not byte-identical final project/snapshot acceptance. Prepared all-file bytes and final locator passed.",
+  "coldSnapshotCorrection": {
+    "artifactSha256": "b702eacbe01b776ea0a1fd18306f97e7fe20d9da403e8dad5d5eddaf412f22f5",
+    "skillBundleSha256": "ff40ac86496209e19c90a8c7fd73b1c42841acaf91cc05798974481e2782279d",
+    "packageBuild": "3bfa895c0d890f6a8f0a717328bc2735afc107ca9da1244721ecec1961a28c7a",
+    "promptSha256": "1af2ad9f0bd0d61c9861be0740517f1e33e4ad37dbbd12e060161c3a0cfc873b",
+    "inputs": [
+      {
+        "path": "input/ReviewPolicy.dll",
+        "sha256": "c268d1541e89d0d72b62d309a3772ef4a43aa132940349049ede2fbffd84d46e"
+      }
+    ],
+    "elapsedMs": 68810,
+    "candidateInvocations": 14,
+    "inputsUnchanged": true,
+    "artifactUnchanged": true,
+    "ownerStopped": true,
+    "state": "reviewed_passed",
+    "checkpointFiles": 2,
+    "checkpointBytes": 4591,
+    "everyFinalProjectFileByteIdentical": true,
+    "exactSavedPathInFinal": true,
+    "actualColdInstall": true,
+    "shortNameQueryAndExactMemberUsed": true,
+    "noWholeClassDecompilation": true,
+    "observedResults": {
+      "20": 217,
+      "27": 253
+    },
+    "methodToken": "0x06000242",
+    "finalReportSha256": "86cbf2973483482e9b3b4b0a123fda76cb2a85d0700c1418a8f80088d54c9b56",
+    "sourceExcerptSha256": "df739824f9f68aea126ed2a8fa21c6233e5cb9ca5faacbc52cea6b490b061e6f",
+    "review": "Reviewed actual invocation output and ordinary files. The report was complete before saving, and both saved files match final project bytes. The final handoff supplies the exact returned checkpoint. The initial read-only IPC refusal was retried with host permissions before analysis, not bypassed by restarting an owner."
+  }
 }

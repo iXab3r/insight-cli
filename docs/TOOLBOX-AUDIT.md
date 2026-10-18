@@ -5,8 +5,17 @@ implemented facades, packaged guidance and real native proofs. The
 [toolbox plan](TOOLBOX-PLAN.md) provides the current acceptance matrix; sections below
 retain the investigation history, including failed candidates. Native and independent
 agent acceptance are separate. Reviewed cold/prepared units now cover container, LLVM,
-dump/stack/trace, DiE, LLDB, Frida, packets/HTTP and C01–C05 on their recorded artifacts.
+dump/stack/trace, DiE, LLDB, Frida, packets/HTTP, C01–C06, ILSpy projects/resources
+and selected Ghidra GUI research units on their recorded artifacts.
 The final whole-toolbox agent gate and some broader family/host workflows remain open.
+Current final native implementation: source `f3ea16f`, exact frozen package
+`87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0`.
+All 20 macOS scenarios passed in 21m35s, with four declared Windows/Linux skips. The separate
+recursive public-CLI preflight passed on the same package; current Windows seven-job native,
+Linux and offline CI are green. [Exact results](verification/toolbox-combined-native.json)
+and [caller/runtime correction](verification/toolbox-ghidra-caller-native.json) preserve the
+older failed candidates and the scope of independent model units.
+
 Existing Ghidra/ILSpy runtime acceptance is separately identified in
 [tool runtime acceptance](TOOL-RUNTIME-ACCEPTANCE.md).
 
@@ -19,24 +28,24 @@ only after its archive, dependency closure, license companions and real workflow
 
 | Child | Frozen candidate / primary source | Agent surface and dependency closure | Delivery and remaining admission check |
 | --- | --- | --- | --- |
-| T01 | [Ghidra 12.1.2](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.2_build), GhidraMCP 7.0.0, Temurin 21.0.11+10 | Existing facade: isolated static contexts, server, GUI and debugger; bundled JDK/native/bridge | Existing immutable release recipes and licenses; new dedicated skill and whole-toolbox agent gates required |
-| T02 | [ILSpy 11.1.0.9782](https://www.nuget.org/packages/ilspycmd/11.1.0.9782), .NET 10.0.13 | Existing facade: types/C#/IL/resources/project; private runtime | Existing immutable release recipes and MIT/dependency companions; new dedicated skill and toolbox agent gates required |
-| T03 | [DiE 3.21](https://github.com/horsicq/DIE-engine/releases/tag/3.21) | `diec` console, signature database, Qt frameworks; macOS ARM64 package can be extracted without installer execution | MIT engine plus Qt and dependency terms; derive console bundle preserving dependency closure and matching source/notices. Real PE probe found mixed JSON/diagnostics; see below |
+| T01 | [Ghidra 12.1.2](https://github.com/NationalSecurityAgency/ghidra/releases/tag/Ghidra_12.1.2_build), GhidraMCP 7.0.0, Temurin 21.0.11+10 | Isolated static contexts, server, GUI and debugger; bundled JDK/native/bridge plus private LLDB/Python on macOS 15+ ARM64 | Immutable distributions/licenses and dedicated skill shipped. Selected cold/prepared GUI business units passed; complete family and whole-toolbox agent gates remain separate |
+| T02 | [ILSpy 11.1.0.9782](https://www.nuget.org/packages/ilspycmd/11.1.0.9782), .NET 10.0.13 | Existing facade: types/C#/IL/resources/project; private runtime | Immutable runtime and MIT/dependency companions shipped. Native CLI and reviewed cold/prepared project/resource and metadata units passed on recorded packages; combined agent gate remains separate |
+| T03 | [DiE 3.21](https://github.com/horsicq/DIE-engine/releases/tag/3.21) | `diec` console, signature database, Qt frameworks; macOS ARM64 package can be extracted without installer execution | Console bundle with private Qt/database and matching sources/notices shipped. Native CLI and reviewed cold/prepared triage units passed; scan uncertainty remains explicit |
 | T04 | [LLVM 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | readobj/objdump/nm/pdbutil, no non-system dylibs; macOS 14+ ARM64 | Derived 23 MB subset retains exact executables, full matching license and source companions. Real CLI/Gherkin and reviewed medium-reasoning cold/prepared business trials passed on a frozen package; low-reasoning reports remain incomplete; no compiler required by users |
-| T05 | [7-Zip 26.04](https://github.com/ip7z/7zip/releases/tag/26.04) | `7zz` list/test/extract into new output directory; macOS native bundle | LGPL/BSD/unRAR terms and matching source; immutable binary/source release companions |
-| T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT plus dependencies; package declares net8 with major roll-forward. Prove .NET 10 compatibility and actual owned dump/object workflow |
-| T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | MIT plus dependencies; exact runtime/process association and real stack task required |
-| T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | MIT plus dependencies; retain conditions and actual trace interpretation |
-| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Bounded attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | Frida-declared LGPL-2.0 WITH WxWindows-exception-3.1 and separate dependency terms; full notices and 69 exact source/component archives retained. Node facade/native proof delivered; independent model gate pending |
-| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Owned-launch facade with explicit symbol companion, bounded breakpoint snapshot, registers, memory and backtrace; native macOS ARM64 CLI proof | Apache-2.0 with LLVM exceptions; immutable binary/source/license release, native snapshots and controller/owner-loss cleanup proof passed; independent model gate pending |
-| T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Embedded EULA prohibits redistribution. Explicit Microsoft delivery policy with pinned bytes/local cache; no mirror. Do not consume mutable auto-update appinstaller as the managed version |
-| T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. [Sysinternals terms](https://learn.microsoft.com/en-us/sysinternals/license-terms) prohibit our mirror. Actual driver/capture feasibility must be proven |
-| T13 | [strace 7.2](https://github.com/strace/strace/releases/tag/v7.2) | Scoped syscall/file/process capture, owned Linux fixture | LGPL-2.1-or-later for tool; test/UAPI notices retained. Build a pinned Linux artifact from exact source; ptrace host prerequisite |
-| T14 | [dnSpyEx 6.6.0](https://github.com/dnSpyEx/dnSpy/releases/tag/v6.6.0) | Windows WPF debugger/editor, extension/scripting APIs; managed debug/edit automation must be established | GPL-3.0. Mirror exact binary + matching source/notices. GUI launch is not acceptance; real controlled debugging/editing remains a feasibility gate |
-| T15 | [TShark / Wireshark 4.6.9](https://www.wireshark.org/download.html) | Offline packet fields/filtering first, then supported owned capture; CLI dependency closure from official macOS bundle | GPL-2.0 and bundled components; matching source + notices. No global BPF permission changes; Windows Npcap is separate, not implicitly redistributed |
-| T16 | [mitmproxy 12.2.3](https://github.com/mitmproxy/mitmproxy/releases/tag/v12.2.3) | Standalone mitmdump CLI, pinned embedded Python/dependencies; controlled localhost HTTP workflow | MIT plus bundled notices. Official standalone archive has framework symlinks; use verified relocatable closure. Profile-local CA only, no global trust changes |
+| T05 | [7-Zip 26.04](https://github.com/ip7z/7zip/releases/tag/26.04) | `7zz` list/test/extract into new output directory; macOS native bundle | Immutable binary/source release under LGPL/BSD/unRAR terms; native CLI and reviewed cold/prepared container units passed |
+| T06 | [dotnet-dump 10.0.750501](https://www.nuget.org/packages/dotnet-dump/10.0.750501) | collect/analyze + SOS, private .NET, matching native RID and DAC support | MIT/dependency companions and private runtime shipped. Actual .NET 10 dump/object workflows and reviewed cold/prepared dump units passed |
+| T07 | [dotnet-stack 10.0.750501](https://www.nuget.org/packages/dotnet-stack/10.0.750501) | report owned managed-process threads/stacks; private .NET/diagnostics transport | Private runtime/transport and exact process association shipped; native CLI and reviewed cold/prepared waiting-stack units passed |
+| T08 | [dotnet-trace 10.0.750501](https://www.nuget.org/packages/dotnet-trace/10.0.750501) | bounded collect/report/convert; private .NET | Bounded collection/reporting shipped with MIT/dependency companions; native CLI and reviewed cold/prepared trace units passed with explicit capture conditions |
+| T09 | [Frida 17.24.0](https://github.com/frida/frida/releases/tag/17.24.0), [frida-tools 14.11.0](https://pypi.org/project/frida-tools/14.11.0/) | Bounded attach/hooks on owned fixtures; official Node NAPI-v8 binding is feasible on the existing Node 24 host, avoiding a private Python dependency | Frida-declared LGPL-2.0 WITH WxWindows-exception-3.1 and separate dependency terms; full notices and 69 exact source/component archives retained. Node facade/native and collector/helper fault proof delivered; reviewed cold/prepared passive-hook units passed; combined agent gate remains open |
+| T10 | [LLDB 23.1.3](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.3) | Owned-launch facade with explicit symbol companion, bounded breakpoint snapshot, registers, memory and backtrace; native macOS ARM64 CLI proof | Apache-2.0 with LLVM exceptions; immutable binary/source/license release, native snapshots, controller/owner-loss cleanup and reviewed cold/prepared breakpoint units passed; combined agent gate remains open |
+| T11 | [WinDbg 1.2610.1001.0](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) | Exact MSIX bundle contains amd64/arm64/x86 `cdb.exe`, DbgEng and related libraries; use supported console automation, Windows | Pinned vendor-only Microsoft download/local cache; no mirror or mutable appinstaller version. Native dump CLI passed; independent Windows model gate remains open |
+| T12 | [Process Monitor 4.12](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) | Scoped native file/registry/process capture, owned Windows fixture; driver/admin requirements | **Owner-selected exception:** explicit Microsoft download + local cache + pinned SHA256. Native capture, fault, registry and scope checks passed; independent Windows model gate remains open |
+| T13 | [strace 7.2](https://github.com/strace/strace/releases/tag/v7.2) | Scoped syscall/file/process capture, owned Linux fixture | Source-built Linux x64 immutable runtime/source/notices shipped under retained LGPL/UAPI terms. Native CLI passed; independent Linux model gate remains open; ptrace is a host prerequisite |
+| T14 | [dnSpyEx 6.6.0](https://github.com/dnSpyEx/dnSpy/releases/tag/v6.6.0) | Windows debugger/editor facade with actual managed breakpoint observations and copy-only edits | Catalog uses explicit vendor-only download, pinned bytes and local cache for the distributed bundle. Native debug/edit, registry and lifetime checks passed; independent Windows model gate remains open |
+| T15 | [TShark / Wireshark 4.6.9](https://www.wireshark.org/download.html) | Offline packet fields/filtering first, then supported owned capture; CLI dependency closure from official macOS bundle | Source-complete GPL/component mirror and relocatable console closure shipped; native CLI and reviewed cold/prepared offline packet units passed. Capture prerequisites remain explicit |
+| T16 | [mitmproxy 12.2.3](https://github.com/mitmproxy/mitmproxy/releases/tag/v12.2.3) | Standalone mitmdump CLI, pinned embedded Python/dependencies; controlled localhost HTTP workflow | Relocatable source-complete MIT/component closure shipped; native HTTP/HTTPS, lifetime faults and reviewed cold/prepared units passed. Only profile-local trust is configured |
 | C01 | [dnlib 4.5.0](https://www.nuget.org/packages/dnlib/4.5.0) | Prebuilt managed metadata/IL/comparison helper behind our application API | MIT; no user SDK requirement, no pretend library installation commands |
-| C02 | [ClrMD 4.2.751201](https://www.nuget.org/packages/Microsoft.Diagnostics.Runtime/4.2.751201) | Prebuilt heap/dump helper behind API, matching DAC/runtime/OS | MIT; real compatible dump task required; report unsupported DAC/platform explicitly |
+| C02 | [ClrMD 4.2.751201](https://www.nuget.org/packages/Microsoft.Diagnostics.Runtime/4.2.751201) | Prebuilt heap/dump helper behind API, matching DAC/runtime/OS | Prebuilt helper/notices shipped; native compatible-dump queries and reviewed cold/prepared units passed. Unsupported DAC/platform stays explicit |
 | C03 | [LIEF 1.0.0](https://github.com/lief-project/LIEF/releases/tag/1.0.0) | Binary query/copy-only edit API; native SDK or private Python ABI3 wheel | Apache-2.0; reuse private runtime where feasible; original input never overwritten |
 | C04 | Existing C01 + binary utility + Ghidra APIs | P/Invoke declaration → matching native export → imported function, with exact identities | No additional runtime; distinguish static correspondence from observed invocation |
 | C05 | Existing owned tool supervisor + explicit fixture-run API | Bounded input/output/exit/files capture and comparison | No arbitrary shell execution gateway or broad process ownership claim |
@@ -45,8 +54,8 @@ only after its archive, dependency closure, license companions and real workflow
 ## Pinned inspected bytes
 
 These upstream SHA256 values establish the inspected input, **not a published mirror catalog**.
-The installation catalog will pin the final retained asset bytes after any deterministic
-repack and required license/source companions. An upstream changing a mutable URL fails closed;
+The retained installation catalog pins the final assets separately after deterministic
+repacking and required license/source companions. An upstream changing a mutable URL fails closed;
 it is not accepted by updating the hash at runtime.
 
 | Input | Bytes | SHA256 |
@@ -852,7 +861,7 @@ new guide-only artifact to the combined-native implementation: only the two skil
 bundle copies and build manifest differ. All 382 executable/runtime/reference files match.
 This does not silently relabel a different whole package as the exact native-tested artifact.
 
-### Final combined native implementation acceptance
+### Earlier combined native implementation baseline
 
 Run `05ba05150f7641e28b55753420524383` passed **17 macOS native scenarios, zero failures,
 four OS-specific skips**, in 16m07s on the frozen `bac359c` implementation package. It
@@ -870,40 +879,140 @@ The separate prepared Ghidra GUI/debugger model investigation is still under rev
 neither static interop nor this native suite silently completes that agent-family gate.
 
 
-### Ghidra GUI/debugger recovery and independently reviewed failed trials
+### Ghidra GUI/debugger caller and retained-trace correction
 
-The [GUI agent history](verification/toolbox-agent-ghidra-debugger.json) retains seven
-source-unavailable trials without counting transport completion as acceptance. They exposed
-an actual profile alias rejection, host-yield confusion, incomplete owned-context cleanup,
-missing breakpoint setup before running a short program, and an unobserved step-out return.
-Two trials timed out. Static findings/publication from these trials do not complete their CPU
-task. Unknown CPU outcomes and original snapshots were preserved; maintainer cleanup is
-explicitly separate from an autonomous agent pass.
+The [GUI model history](verification/toolbox-agent-ghidra-debugger.json) retains sixteen
+source-unavailable trials. Earlier trials exposed profile alias rejection, host-yield confusion,
+incomplete cleanup, missing live breakpoints and stale CPU coordinates. The latest cold and
+prepared business units on the recorded `d807f7f` package both completed actual 10→130 and
+11→109 research, both disconnected trace readbacks, R2 publication, independent annotation
+readback, byte-identical saved reports, exact final locators and autonomous cleanup. Cold took
+868.007 seconds / 92 CLI invocations; prepared took 746.963 seconds / 76 invocations, within
+the unchanged 900-second budget. These reviewed unit passes do not erase earlier timeouts or
+prove the entire debugger family or the later managed-backend package. No uncertain old CPU
+intent or publication was replayed.
 
-The [retained original-profile continuation](verification/toolbox-ghidra-debugger-alias.json)
-used the exact original session and profile after the alias fix, explicitly refreshed its
-published R2 annotation, launched a distinct new CPU intent and read real registers/stack/
-mapping. It retained disconnected trace memory on reopen and left the original unknown
-journal bytes/states unchanged. The [default-launch native regression](verification/toolbox-ghidra-gui-native.json)
-also passed a real owned GUI/LLDB argument/return and trace recovery task. These receipts
-identify their earlier frozen package and do not substitute for a new candidate or model gate.
+Earlier [alias continuation](verification/toolbox-ghidra-debugger-alias.json),
+[default-launch](verification/toolbox-ghidra-gui-native.json) and
+[entry-stop](verification/toolbox-ghidra-entry-native.json) native receipts retain their
+original package identities. The caller candidate `24fb63a` passed two focused cases once,
+then failed both CPU cases in an unchanged combined repeat (17 passed, two failed, four OS
+skips). That failure prevents claiming stable acceptance from the first pass.
+
+A read-only native diagnostic then established the concrete inconsistency: frame code
+address `0x100000464`, PC register `0x100000508`, return register `0x6d` (109), matched
+caller SP and fresh stop ID 15. Repeating execution was unnecessary. The corrected owned
+adapter verifies live PC/SP registers and exports the top stack PC/function from that
+native PC. Caller frames retain unwound code addresses: a recursive native check showed
+that caller register aliases can describe the live frame instead of its return address. It dispatches one thread/stack-qualified one-shot caller breakpoint, then the
+facade awaits correlated native stop confirmation through the existing owned LLDB
+interpreter after the MCP action returns. This avoids waiting under the native RPC's locks.
+Automatic PC/SP memory capture and register traversal avoid target-executing evaluation;
+explicit agent expressions retain their usual semantics. Transient control breakpoints do
+not become static program bookmarks. No user Ghidra installation is modified.
+
+The [caller receipt](verification/toolbox-ghidra-caller-native.json) records exact package,
+failed experiments, ordinary/recursive public-CLI cases and the combined repeat. Current
+offline checks pass 216 tests with two native opt-in skips and 31 release checks; relocated
+npm installation and both actual LLDB supervisor startup/early-stop lifetime tests pass.
+These tests do not substitute for independent model or whole-toolbox acceptance.
 
 
-The later [entry-stop native case](verification/toolbox-ghidra-entry-native.json) passed on
-its exact frozen installed package: actual argument 11 and return 109, explicit request replay
-without a second launch, function mapping/breakpoint/stack, and identical disconnected CPU
-registers/memory after reopen. Checkpoint bytes and input identity matched; the public process
-inventory had no live debugger/helper after cleanup. This is an additional focused case,
-not a relabeled 18-case combined run. Its ordinary regression passed 209 tests with two native
-opt-in skips, 29 release checks, two real LLDB owner faults, all 25 skill validators and
-relocated offline package installation.
+### Completed cold overview checkpoint correction
 
-The candidate uses explicit owned-adapter import verification, an explicit native-frame
-step API and fresh stopped-snapshot completion checks. Its private bounded RPC log stores
-method names only (0600, 64 KiB), alongside the retained backend diagnostics. Earlier
-candidates that acknowledged zero registers or failed to settle their step remain failed;
-the successful instrumented candidate does not establish a diagnosed cause for every timing
-variation. A repeated unchanged native gate is checked separately before final stability claims.
-The current independent GUI trials are not passes: cold observed count 10 and explicitly
-qualified unobserved returns while publishing/readback succeeded; prepared reached 900 seconds.
-Their exact artifacts, inputs and cleanup limits stay in the model receipt.
+The fresh C06 cold trial used the installed artifact
+`b702eacbe01b776ea0a1fd18306f97e7fe20d9da403e8dad5d5eddaf412f22f5`
+and the unchanged business-only large-assembly question. The independent medium-reasoning
+agent selected ILSpy, installed the missing private runtime, narrowed 1,001 methods to the
+exact invoice method and retained its complete focused body. Review verified the actual
+217/253 calculations, two saved files (4,591 bytes), byte-identical final report/evidence
+and the exact checkpoint locator in the final handoff. The trial took 68.810 seconds and
+14 public CLI invocations. This closes the prior pending-footer defect for this reviewed
+cold unit; the older failure and prepared artifact remain explicit in
+[the overview receipt](verification/toolbox-agent-overview.json). It does not replace the
+combined exact-artifact toolbox gate.
+
+### Isolated Python-capable LLDB backend
+
+The same `d807f7f` artifact passed the 19-case macOS combined native run in 29m20s, but its
+separate recursive focused repeat failed: Apple LLDB 17 exposed caller PC `0x100000464`
+while the actual native LR was `0x100000494`, and the target exited. The passing combined
+run cannot cancel this failure. A controlled substitution of Python-capable LLDB 22 passed
+a recursive workflow and then both ordinary/recursive workflows in 8m33s. A private relocated
+LLDB 23.1.3/Python 3.15 closure subsequently passed those two workflows in 8m21s.
+These substitutions were diagnostic builds; no hardcoded Homebrew path entered product source.
+
+Ghidra now has its own managed LLDB/Python dependency, using the shared archive installer,
+code fingerprint, process ownership and removal rules. macOS 15+ ARM64 install/download
+includes it; external Ghidra selection and an explicit offline `--debugger-archive` are supported.
+The GUI pins its receipt and the owned debugger supervisor verifies its code before launch.
+The separate public LLDB application retains its independently selected runtime. Ghidra's
+existing core fingerprint and saved research identities are preserved.
+
+The [immutable runtime mirror](https://github.com/iXab3r/insight-cli/releases/tag/tool-lldb-python-23.1.3-r2)
+contains the binary, exact matching sources for nine components, full notices and reconstruction
+scripts/layout. Repacking is byte reproducible. A relocated cleared-environment probe loaded
+private Python/SSL/SQLite/decimal/lzma without Homebrew or Apple Python. Revision 1 failed
+strict Node extraction because of chained symbolic links before any target execution; revision 2
+normalizes direct internal aliases and passes that same strict extractor. Its failure remains
+recorded instead of weakening extraction safeguards or replacing an immutable asset.
+
+The final managed-backend package is undergoing focused and whole-toolbox public CLI
+acceptance, including a new Gherkin case for offline install/doctor, dependency drift, active
+context removal refusal, and evidence/external-tool preservation after uninstall. Native and
+independent-model receipts remain separately scoped.
+
+A subsequent public-inventory check found that a running managed LLDB was marked
+`unverified` under the native `/tmp` profile alias. The ownership verifier now normalizes
+only the profile parent, retains Factory's raw process binding and rejects substituted child
+links. Debugger records also retain their research session. The native assertion still requires
+an authenticated `running` child, and the new regression covers both accepted aliases and
+rejected identity/path substitution. Source `457f481` passes 216 offline tests, two explicit
+native opt-in skips, 30 release checks, relocated package installation and both real LLDB
+supervisor startup/early-stop checks. The final source pack is byte identical to the frozen
+`ec498d69480f262700fdcd657ca0235de165477e5d30207410c889b27c73f1c7` candidate.
+
+### Reentrant trace batch and checkpoint correction
+
+The unchanged `457f481` package subsequently passed its two focused CPU cases, but the
+combined repeat passed 19 and failed the recursive case at trace checkpoint (four host skips).
+The correlated native receipt verified caller PC/SP; no second CPU action was issued. The
+checkpoint and attempted close could not obtain the trace lock. The retained cleanup receipt
+verified inferior exit, and the GUI/supervisor/LLDB/inferior PIDs were later independently absent.
+The profile, request journal and trace material were retained. This is a real failed repeat,
+not stable acceptance inferred from the earlier focused pass.
+
+Inspection found a separately reproducible deadlock pattern in the pinned SDK Python client:
+`Client.end_batch` waits for remote results while holding the mutex needed by reentrant reply
+callbacks. The owned adapter releases that mutex before waiting. Model transactions abort on
+failure, batch cleanup runs in `finally`, and tracked transaction state is reset on failure.
+The caller observer yields while trace batches remain active before/after stopped-trace
+synthesis; it does not hold a new global lock or repeat execution. A bounded regression fails
+on the pinned implementation, passes on the adapter, and verifies model transaction/batch
+cleanup. The actual pinned wheels were patched and syntax-checked successfully.
+
+Source `f3ea16f` has 216 passing offline tests, two explicit native opt-in skips and 31 passing
+release checks. Its relocated package check passes, and its source pack matches frozen artifact
+`87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0` byte for byte.
+A fresh public-CLI recursive preflight completed all 33 calls: actual arguments 5/4/3, return 6,
+one-frame stack reduction, request replay without execution, disconnected trace readback,
+byte-identical saved evidence and native cleanup. The complete 24-case repeat is recorded in
+the caller/combined receipts; independent model and whole-toolbox agent gates remain separate.
+
+### Final managed-backend combined native acceptance
+
+Run `07cdc39c00724feab3b0bc563fbbf9f0` passed **20 macOS native scenarios, zero failures,
+four declared host skips**, in 21m35s on the unchanged frozen `f3ea16f` package above. The
+recursive checkpoint that failed in the previous combined candidate now passed alongside
+ordinary caller/stack/register verification, two disconnected traces, private LLDB/Python
+installation/doctor/drift/removal, the real standalone LLDB/Frida lifetime faults and the
+remaining toolbox workflows. A separate recursive preflight passed on that same package.
+
+Windows [39100877533](https://github.com/iXab3r/insight-cli/actions/runs/39100877533) passed all
+seven scoped native jobs and their aggregate. Linux
+[39100877444](https://github.com/iXab3r/insight-cli/actions/runs/39100877444) and offline
+[39100877450](https://github.com/iXab3r/insight-cli/actions/runs/39100877450) also passed on
+`f3ea16f`. The [combined receipt](verification/toolbox-combined-native.json) identifies this
+revision as the latest native-tested implementation. The separately reviewed model units
+retain their original package identities; complete GUI/family/host model and whole-toolbox agent
+gates remain open. Draft PR #55 remains a review artifact, with no npm publication implied.

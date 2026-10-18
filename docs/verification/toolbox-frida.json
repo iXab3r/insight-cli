@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "state": "native_passed_model_pending",
+  "state": "native_passed_reviewed_model_units_separate",
   "platform": "darwin-arm64",
   "version": "17.24.0",
   "packageVersion": "0.2.0",
@@ -21,7 +21,7 @@
   "native": {
     "schema": 1,
     "state": "passed",
-    "scope": "Installed public CLI native proof; independent model gate pending",
+    "scope": "Installed public CLI native proof; later independent model unit review is recorded separately",
     "version": "0.2.0",
     "fixtureSha256": "71148cba91a025b8e82f6ada93a0c5e78fa49beab367c42f14b3f0806014889c",
     "observations": [
@@ -225,8 +225,8 @@
     "Automation bootstrap overwrote INSIGHT_NODE, so the first final nine-scenario run used Node 26.4.0. The override is now honored; the Node 24 run is recorded separately."
   ],
   "remaining": [
-    "Independent cold/prepared model gates blocked by evaluator account quota; no native test is counted as an independent model pass.",
-    "Combined complete 16-tool/6-capability acceptance."
+    "Combined complete 16-tool/6-capability whole-toolbox agent acceptance; the native combined gate is recorded separately.",
+    "Reviewed cold/prepared model unit results are linked separately; they do not establish the combined whole-toolbox gate or acceptance of later artifacts."
   ],
   "earlierNativeRuns": [
     {
@@ -249,5 +249,21 @@
     "checks": "Full Frida CLI plus stop/kill/owner-loss/native-children removal guards on this artifact",
     "caseCount": 2,
     "installation": "Isolated installed npm artifact (spaces/Unicode path), no source checkout runtime"
+  },
+  "modelAcceptanceReceipt": "toolbox-agent-frida.json",
+  "latestCombinedNativeProof": {
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+    "build": {
+      "version": 1,
+      "artifact": "eaae6812e63374a7b300648ee8ecb90d55f9b81719017733d5105c7b466db18c"
+    },
+    "runId": "07cdc39c00724feab3b0bc563fbbf9f0",
+    "passed": 20,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "21m35s",
+    "receipt": "toolbox-combined-native.json",
+    "qualification": "Native proof only; independent model receipts retain their original artifacts."
   }
 }

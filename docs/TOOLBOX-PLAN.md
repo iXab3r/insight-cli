@@ -1,26 +1,33 @@
 # Agent toolbox: delivery plan
 
 Status: all sixteen analytical families and six capabilities have implemented public
-surfaces, packaged guidance (25 skills) and recorded native proofs. Four subsequent
-combined macOS candidates passed 17 cases with four OS-specific skips, including the
-managed profile-alias correction. Windows now requires all seven scoped native jobs;
-Reviewed cold/prepared unit gates cover
-7-Zip, LLVM, dump, stack, trace, DiE, LLDB, Frida, TShark, mitmproxy and C01/C02/C03/C05.
-C04 static interop publication/readback and autonomous cleanup passed cold/prepared;
-bounded large-assembly research and final saved-path handoff passed both modes, with a
-retained cold snapshot-report metadata difference. ILSpy project/resource agents now also
-passed fresh cold/prepared checks. The final implementation native rerun passed 17 cases,
-zero failures and four OS skips (16m07s); Windows/Linux and offline CI passed on `75cca82`.
-A separate current-package [Ghidra GUI/LLDB native case](verification/toolbox-ghidra-entry-native.json)
-passed stopped entry, actual 11→109 call/return, launch replay, disconnected registers/memory
-and full cleanup (4m49s). The new supervisor alias/terminal-inventory fault tests passed;
-current offline regression is 209 passed, two opt-in skips, plus 29 release checks.
-[Seven independent GUI trials](verification/toolbox-agent-ghidra-debugger.json) remain
-unaccepted/partial; their native failures, deadlines and maintainer cleanup are explicit.
-Remaining family coverage and the exact-artifact combined agent gate stay open. The
-[inventory audit](TOOLBOX-AUDIT.md) preserves failed histories and package identities.
-Factory discovery/access fixes are merged and pinned. Native success is not
-interchangeable with independent agent acceptance.
+surfaces, 25 packaged skills and recorded native proofs. Reviewed cold/prepared model units
+cover 7-Zip, LLVM, dump/stack/trace, DiE, LLDB, Frida, TShark, mitmproxy, C01–C05,
+ILSpy project/resources and C06 bounded research. The corrected C06 cold report and excerpt
+match the saved checkpoint byte for byte. These unit receipts retain their original package
+identities and do not complete the exact-artifact whole-toolbox agent gate.
+
+The final macOS native gate passed **20 scenarios, zero failures and four declared host
+skips** on source `f3ea16f`, frozen package
+`87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0`, in 21m35s.
+A separate recursive public-CLI preflight passed all 33 calls on that same package. The
+combined gate covers real LLDB/Frida lifetime faults, ordinary and recursive Ghidra CPU
+returns, disconnected trace restoration, and private debugger dependency delivery/removal.
+Windows passed all seven scoped native jobs; Linux and offline CI also passed on `f3ea16f`.
+
+The GUI correction delivers private LLDB/Python on macOS 15+ ARM64, verifies native process
+ownership through profile aliases, and corrects reentrant SDK trace-batch/model-transaction
+cleanup. Earlier passing and failed candidates retain their exact identities in the
+[caller receipt](verification/toolbox-ghidra-caller-native.json) and
+[combined receipt](verification/toolbox-combined-native.json).
+
+Current offline regression passes 216 tests with two explicit native opt-in skips, plus
+31 release checks. Relocated package installation, 25 skill validations, actual supervisor
+startup/early-stop checks, real pinned-wheel patch/syntax checks and source-pack byte identity
+passed. Reviewed cold/prepared GUI business units retain their earlier package identities;
+broader family/host model coverage and whole-toolbox agent acceptance remain open. Factory
+discovery/access fixes are merged and pinned. The [inventory audit](TOOLBOX-AUDIT.md) separates
+implementation, native verification and reviewed model evidence.
 
 Execution tracker: [epic #23](https://github.com/iXab3r/insight-cli/issues/23), with nine native stage sub-issues
 and 22 tool/capability sub-issues under TB-07. All remain open; completion requires the evidence below.
@@ -64,7 +71,7 @@ Current verified inventory:
 | Structured binaries | LIEF API/skill, immutable source mirror, native Gherkin and cold/prepared copy-edit model unit proof passed | PE/ELF/thin Mach-O structure/linkage and expected-value copy-only PE edit |
 | Managed/native correspondence | Public API composition, dedicated skill, real Ghidra Gherkin and reviewed cold/prepared static publication/readback/cleanup unit proof passed | Exact declaration/export/function evidence, qualified static correspondence and verified multi-context merge/refresh |
 | Owned process capture | Capture API/skill, execution/fault Gherkin and cold/prepared retained-report model unit proof passed | Exact byte output, input/file effects, repeatable report comparison and no replay of unknown intent |
-| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research and final locators passed; cold saved report retains a pending checkpoint footer | Small metadata/index queries and focused source-bound evidence pages |
+| Overview/drilldown | Dedicated navigation skill, bounded Unicode text windows/native ILSpy/Ghidra Gherkin passed; cold/prepared focused research and final locators passed; a fresh cold correction verified every saved report byte and the final checkpoint locator | Small metadata/index queries and focused source-bound evidence pages |
 
 The owner chose explicit tool-specific applicability, not a cross-platform expansion project.
 Each catalog/skill row declares where that tool and capability work and returns a clear
@@ -77,10 +84,6 @@ the first actual agent-host gate, not the universal definition of an agent.
 
 The implementation inventory is complete; the following checks remain distinct from it:
 
-- The C06 cold saved snapshot contains all research and identical raw evidence, but its
-  report still says checkpoint pending; the agent updated that footer only in its ordinary
-  report after saving. Prepared all-file checkpoint bytes and both final locators passed.
-  This is recorded as a snapshot-metadata gap, not byte-identical final-project acceptance.
 - Ghidra's complete GUI/debugger family and the final multi-client whole-toolbox agent
   workflow require their own recorded acceptance. Static interop publication/readback is
   a selected unit, not proof of every exposed operation.
@@ -90,7 +93,7 @@ The implementation inventory is complete; the following checks remain distinct f
 - The first combined native attempt's empty version-probe/Frida startup failures remain
   unexplained historical observations. Subsequent passing runs do not claim a diagnosed
   fix, longer deadlines or permission to replay unknown effects.
-- Final exact-artifact, cross-tool/host acceptance and release review remain open. No npm
+- Final exact-artifact whole-toolbox agent acceptance and release review remain open. No npm
   publication or merge of draft PR #55 follows from individual unit success.
 
 ## Complete tool and capability inventory
@@ -354,9 +357,9 @@ with merge/refresh and independent readback (`verification/toolbox-interop.json`
 exact native capture and owner-loss/no-replay faults (`verification/toolbox-capture.json`).
 C06 passed actual ILSpy/Ghidra text windows (`verification/toolbox-overview.json`).
 The complete implementation inventory now contains 16 analytical families, six capabilities
-and 25 skills. Offline verification: 208 tests, 206 passed and two explicitly opt-in skipped;
-release/admission checks 29/29 passed. Combined exact-artifact native acceptance and all
-remaining inference-agent gates retain separate status; implementation is not a milestone pass.
+and 25 skills. Offline verification: 218 tests, 216 passed and two explicitly opt-in skipped;
+release/admission checks 31/31 passed. Combined exact-artifact native acceptance passed on
+`f3ea16f`; remaining inference-agent gates retain separate status.
 Historical quota interruptions are retained in receipts; inference was available for the
 subsequent reviewed tasks. Missing native agent hosts, broader family coverage and actual
 review findings retain their own open gates.

@@ -198,8 +198,9 @@ final exact-artifact whole-toolbox gate remain open. A successful model exit or 
 report does not count without evidence review: the first container trial omitted a real
 configuration field despite correct recovered bytes, and required a correction pass.
 
-The macOS `ghidra-debugger` selection adds an installed public-CLI GUI/LLDB case. Its private
-manifest supplies `packageRoot`, `ghidraHome`, `java` and `ghidraDebuggerWorker`. Prepare the
+The macOS `ghidra-debugger` selection adds two installed public-CLI GUI/LLDB cases. Its private
+manifest supplies `packageRoot`, `ghidraHome`, `java`, `ghidraDebuggerWorker` and
+`ghidraRecursiveWorker`. Prepare the
 short-lived, source-unavailable native worker with `prepare-native-agent-fixture.mjs` and use
 its `fast` executable; the source fixture is `fixtures/toolbox/debugger-fast.c`. It requires no
 sleep or interactive subject. The case stops at entry, maps a function, sets a breakpoint
@@ -207,7 +208,11 @@ before resuming, checks actual argument/return registers, closes/reopens the sam
 compares disconnected trace registers, memory and mapping. It also checks launch request replay,
 checkpoint bytes, actual session IDs and terminal public debugger process inventory. Run it
 with the ordinary acceptance runner and `--tag ghidra-debugger`. The two opt-in owner fault
-tests remain separate from this real Ghidra GUI case.
+tests remain separate from these real Ghidra GUI cases. Use the producer's `recursive`
+executable for `ghidraRecursiveWorker`: the second case observes arguments 5, 4 and 3, removes
+the entry breakpoint, then verifies the actual return 6 from the call with argument 3 to its caller with argument 4. An inner
+return has the same instruction address but a different stack pointer. Request replay,
+unchanged static program metadata, disconnected readback and cleanup are checked as well.
 
 The actual standalone [Codex host trials](verification/toolbox-agent-host.json) also passed
 cold/prepared container research with the same business-only prompt. Project startup metadata
@@ -263,3 +268,20 @@ one business method under a namespace shared by unrelated helpers. The public CL
 checks full-signature collisions, case-insensitive `--name-filter` selection, exact-token
 member decompilation without the whole class, and existing ILSpy/Ghidra text windows.
 Do not supply producer source or PDBs to independent research agents.
+
+### Isolated Ghidra debugger runtime
+
+The whole `toolbox` suite also includes `@ghidra-debugger-runtime` on macOS 15+ ARM64.
+Its private manifest needs `ghidraDebuggerArchive`, the exact LLDB/Python archive from the
+pinned `tool-lldb-python-23.1.3-r2` mirror, alongside `ghidraDebuggerWorker`, `ghidraHome`
+and `java`. The public CLI installs it with `--debugger-archive ... --offline`, runs the
+actual private Python probe, rejects modified dependency bytes, refuses uninstall under a
+live context, and verifies retained evidence/external paths after removing owned code.
+The two `@ghidra-debugger` CPU cases exercise automatic acquisition from our mirror instead.
+The ordinary case requires an authenticated `running` process record for the actual managed
+LLDB executable; a merely working child marked `unverified` fails acceptance.
+
+The current [caller/runtime receipt](verification/toolbox-ghidra-caller-native.json) preserves
+failed system-backend, archive-extraction and profile-alias candidates separately. It also
+records exact final-package repeats and the two actual supervisor startup/early-stop checks.
+Native execution and independent model business verdicts remain separate gates.

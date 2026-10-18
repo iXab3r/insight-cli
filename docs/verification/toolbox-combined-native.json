@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "state": "native_passed",
-  "scope": "Recorded combined native public-CLI candidate runs, not independent model or complete-product acceptance; latestImplementationRevision identifies the final native-tested implementation",
+  "scope": "The original native baseline and subsequent failed/pass candidates are retained. latestImplementationRevision identifies the current final native-tested source/package and its declared host profiles. Independent model acceptance is recorded separately.",
   "platform": "darwin-arm64",
   "node": "v24.19.0",
   "sourceCommit": "4027416c20e02d1104597bf75df02d93b59c0920",
@@ -166,120 +166,162 @@
     "packageSha256": "fd7d40ab8873d0792a656e5d01d6039ed0f5d09c144c1e98f1983afb6c3a8ff7"
   },
   "latestImplementationRevision": {
-    "sourceCommit": "bac359cbdb23dcc42d10dba9fe3c23fe936cb49f",
-    "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+    "build": {
+      "version": 1,
+      "artifact": "eaae6812e63374a7b300648ee8ecb90d55f9b81719017733d5105c7b466db18c"
+    },
     "sourcePackByteIdentical": true,
-    "runId": "05ba05150f7641e28b55753420524383",
-    "passed": 17,
+    "runId": "07cdc39c00724feab3b0bc563fbbf9f0",
+    "state": "native_passed",
+    "scope": "24 Gherkin toolbox cases; four declared Windows/Linux host skips on macOS. Independent model-family acceptance remains separate.",
+    "passed": 20,
     "failed": 0,
     "skippedOtherOperatingSystems": 4,
-    "duration": "16m07s",
+    "duration": "21m35s",
     "scenarios": [
       {
-        "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+        "name": "CorroborateANativeCalculationAndRetainItsDisconnectedContextTrace",
         "outcome": "Passed",
-        "duration": "00:03:47.9972170"
-      },
-      {
-        "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
-        "outcome": "Passed",
-        "duration": "00:00:54.5781740"
-      },
-      {
-        "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
-        "outcome": "NotExecuted",
-        "duration": "00:00:00.0034400"
-      },
-      {
-        "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
-        "outcome": "NotExecuted",
-        "duration": "00:00:00.0034990"
-      },
-      {
-        "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
-        "outcome": "Passed",
-        "duration": "00:00:16.8618300"
-      },
-      {
-        "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
-        "outcome": "Passed",
-        "duration": "00:00:42.7157150"
-      },
-      {
-        "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
-        "outcome": "Passed",
-        "duration": "00:00:00.4889540"
-      },
-      {
-        "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
-        "outcome": "NotExecuted",
-        "duration": "00:00:00.0091790"
-      },
-      {
-        "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
-        "outcome": "Passed",
-        "duration": "00:00:48.6262370"
-      },
-      {
-        "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
-        "outcome": "Passed",
-        "duration": "00:00:34.2130490"
-      },
-      {
-        "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
-        "outcome": "Passed",
-        "duration": "00:00:43.5835730"
-      },
-      {
-        "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
-        "outcome": "NotExecuted",
-        "duration": "00:00:00.0012780"
-      },
-      {
-        "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
-        "outcome": "Passed",
-        "duration": "00:00:37.2765100"
-      },
-      {
-        "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
-        "outcome": "Passed",
-        "duration": "00:01:17.3208049"
-      },
-      {
-        "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
-        "outcome": "Passed",
-        "duration": "00:01:47.7573360"
-      },
-      {
-        "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
-        "outcome": "Passed",
-        "duration": "00:00:48.4470630"
-      },
-      {
-        "name": "InvestigateNativeLinkageAndDebugRecords",
-        "outcome": "Passed",
-        "duration": "00:00:31.6169270"
-      },
-      {
-        "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
-        "outcome": "Passed",
-        "duration": "00:01:13.3158820"
+        "duration": "00:04:48.3663649"
       },
       {
         "name": "RemoveTemporaryHooksAfterCollectorInterruptionOrOwnerLoss",
         "outcome": "Passed",
-        "duration": "00:00:56.6858510"
+        "duration": "00:00:53.2425960"
+      },
+      {
+        "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
+        "outcome": "Passed",
+        "duration": "00:00:28.8560010"
+      },
+      {
+        "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
+        "outcome": "Passed",
+        "duration": "00:00:36.8092309"
+      },
+      {
+        "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
+        "outcome": "Passed",
+        "duration": "00:01:23.8471310"
       },
       {
         "name": "RecoverUsefulInputFromASuppliedContainer",
         "outcome": "Passed",
-        "duration": "00:00:18.1477260"
+        "duration": "00:00:14.8096220"
       },
       {
         "name": "ExplainWaitingManagedWorkFromStacksHeapAndSampledTime",
         "outcome": "Passed",
-        "duration": "00:00:48.2540200"
+        "duration": "00:00:31.7129730"
+      },
+      {
+        "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0158130"
+      },
+      {
+        "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
+        "outcome": "Passed",
+        "duration": "00:00:00.4647880"
+      },
+      {
+        "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0049250"
+      },
+      {
+        "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
+        "outcome": "Passed",
+        "duration": "00:01:02.1860620"
+      },
+      {
+        "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
+        "outcome": "Passed",
+        "duration": "00:00:12.1742200"
+      },
+      {
+        "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
+        "outcome": "Passed",
+        "duration": "00:00:25.5696850"
+      },
+      {
+        "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+        "outcome": "Passed",
+        "duration": "00:02:33.9857419"
+      },
+      {
+        "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0013410"
+      },
+      {
+        "name": "DeliverAndRemoveAPrivateDebuggerWithoutLosingTheInvestigation",
+        "outcome": "Passed",
+        "duration": "00:01:25.4631680"
+      },
+      {
+        "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
+        "outcome": "NotExecuted",
+        "duration": "00:00:00.0012190"
+      },
+      {
+        "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
+        "outcome": "Passed",
+        "duration": "00:00:23.4056310"
+      },
+      {
+        "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
+        "outcome": "Passed",
+        "duration": "00:00:28.7317990"
+      },
+      {
+        "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+        "outcome": "Passed",
+        "duration": "00:00:26.0676430"
+      },
+      {
+        "name": "ReturnFromTheSelectedRecursiveFrameRatherThanAnInnerCall",
+        "outcome": "Passed",
+        "duration": "00:03:50.4772600"
+      },
+      {
+        "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
+        "outcome": "Passed",
+        "duration": "00:00:27.3634530"
+      },
+      {
+        "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
+        "outcome": "Passed",
+        "duration": "00:00:53.9060200"
+      },
+      {
+        "name": "InvestigateNativeLinkageAndDebugRecords",
+        "outcome": "Passed",
+        "duration": "00:00:28.0335200"
       }
+    ],
+    "cleanupComplete": true,
+    "nativeProfiles": {
+      "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+      "offline": {
+        "runId": 39100877450,
+        "state": "passed"
+      },
+      "windows": {
+        "runId": 39100877533,
+        "state": "passed",
+        "requiredNativeJobs": 7
+      },
+      "linux": {
+        "runId": 39100877444,
+        "state": "passed"
+      }
+    },
+    "qualifications": [
+      "This is the same frozen package used by the separate recursive public-CLI preflight.",
+      "Independent model-unit receipts retain their original artifact identities; broader host/family and whole-toolbox agent acceptance remain open."
     ]
   },
   "finalGuidanceRevision": {
@@ -294,5 +336,124 @@
     "linux": "https://github.com/iXab3r/insight-cli/actions/runs/39072836451",
     "sourceCommit": "a24db28fbd99cad8848b3e94474e3748eac54275",
     "allJobs": "success"
-  }
+  },
+  "implementationHistory": [
+    {
+      "sourceCommit": "bac359cbdb23dcc42d10dba9fe3c23fe936cb49f",
+      "artifactSha256": "f3fab8ab6fd5582f902bb878c58d66366ba60c3c9eb25fb927eff206151bfa99",
+      "sourcePackByteIdentical": true,
+      "runId": "05ba05150f7641e28b55753420524383",
+      "passed": 17,
+      "failed": 0,
+      "skippedOtherOperatingSystems": 4,
+      "duration": "16m07s",
+      "scenarios": [
+        {
+          "name": "TraceADeclaredManagedBoundaryToAConcreteNativeFunctionAndSharedEvidence",
+          "outcome": "Passed",
+          "duration": "00:03:47.9972170"
+        },
+        {
+          "name": "ExplainQueuedWorkAndAWaitingThreadFromOneRetainedManagedDump",
+          "outcome": "Passed",
+          "duration": "00:00:54.5781740"
+        },
+        {
+          "name": "ExplainRealLinuxFileReadsAndBoundOwnedProcessLifetime",
+          "outcome": "NotExecuted",
+          "duration": "00:00:00.0034400"
+        },
+        {
+          "name": "ObserveManagedArgumentsAndVerifyASeparatelyPatchedAssembly",
+          "outcome": "NotExecuted",
+          "duration": "00:00:00.0034990"
+        },
+        {
+          "name": "InspectNativeLinkageAndVerifyOneGuardedFieldOnANewPECopy",
+          "outcome": "Passed",
+          "duration": "00:00:16.8618300"
+        },
+        {
+          "name": "CompareManagedBehaviorStructureWithoutExecutingEitherRevision",
+          "outcome": "Passed",
+          "duration": "00:00:42.7157150"
+        },
+        {
+          "name": "DiscoverToolsBeforeInstallingTheirRuntimes",
+          "outcome": "Passed",
+          "duration": "00:00:00.4889540"
+        },
+        {
+          "name": "ExplainActualFileAccessWithoutTakingOwnershipOfTheRunningApplication",
+          "outcome": "NotExecuted",
+          "duration": "00:00:00.0091790"
+        },
+        {
+          "name": "CorroborateNativeCallsWhilePreservingTheOriginalProcess",
+          "outcome": "Passed",
+          "duration": "00:00:48.6262370"
+        },
+        {
+          "name": "ClassifyUnknownBinariesWithoutHidingSignatureFailures",
+          "outcome": "Passed",
+          "duration": "00:00:34.2130490"
+        },
+        {
+          "name": "ExplainObservedProtocolBehaviorFromRetainedPacketAndStreamEvidence",
+          "outcome": "Passed",
+          "duration": "00:00:43.5835730"
+        },
+        {
+          "name": "ExplainAStoppedNativeWindowsCalculationFromItsCapturedState",
+          "outcome": "NotExecuted",
+          "duration": "00:00:00.0012780"
+        },
+        {
+          "name": "RetainBoundedDebuggerLifetimeAfterInterruptionOrOwnerLoss",
+          "outcome": "Passed",
+          "duration": "00:00:37.2765100"
+        },
+        {
+          "name": "NarrowAResearchQuestionToBoundedMetadataAndStableDecompiledTextWindows",
+          "outcome": "Passed",
+          "duration": "00:01:17.3208049"
+        },
+        {
+          "name": "CompareObservedHTTPBehaviorWithoutSystemInterceptionOrReplay",
+          "outcome": "Passed",
+          "duration": "00:01:47.7573360"
+        },
+        {
+          "name": "CorroborateANativeBoundaryWithConcreteArgumentsAndReturns",
+          "outcome": "Passed",
+          "duration": "00:00:48.4470630"
+        },
+        {
+          "name": "InvestigateNativeLinkageAndDebugRecords",
+          "outcome": "Passed",
+          "duration": "00:00:31.6169270"
+        },
+        {
+          "name": "CompareActualOwnedExecutionsAndPreserveInterruptedOrUnknownObservations",
+          "outcome": "Passed",
+          "duration": "00:01:13.3158820"
+        },
+        {
+          "name": "RemoveTemporaryHooksAfterCollectorInterruptionOrOwnerLoss",
+          "outcome": "Passed",
+          "duration": "00:00:56.6858510"
+        },
+        {
+          "name": "RecoverUsefulInputFromASuppliedContainer",
+          "outcome": "Passed",
+          "duration": "00:00:18.1477260"
+        },
+        {
+          "name": "ExplainWaitingManagedWorkFromStacksHeapAndSampledTime",
+          "outcome": "Passed",
+          "duration": "00:00:48.2540200"
+        }
+      ]
+    }
+  ]
 }

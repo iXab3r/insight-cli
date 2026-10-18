@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "state": "passed",
+  "state": "unstable",
   "scope": "Installed public Ghidra GUI/LLDB and retained-trace native proof; independent model gate is separate",
   "platform": "darwin",
   "architecture": "arm64",
@@ -66,5 +66,26 @@
     "Independent GUI/debugger model acceptance is not passed.",
     "Earlier candidate step failures remain retained; one passing instrumented package is not a claim that all timing causes were diagnosed.",
     "The 17-case combined baseline belongs to its earlier artifact; this is a separate focused native case."
-  ]
+  ],
+  "repeat": {
+    "runId": "629b9ee9fc6c4d5f988221ff1629c700",
+    "state": "failed",
+    "artifactUnchanged": true,
+    "observation": "The exact unchanged package again failed to settle the CPU step; lifetime and cleanup remained owned. Stable CPU acceptance is open."
+  },
+  "latestCombinedNativeProof": {
+    "sourceCommit": "f3ea16f74166a56681d78ea56377850732b7a37c",
+    "artifactSha256": "87c0807bdbf3043eb0ce4b381ff024c66ca8beb9218b537d49f07e3fd1909ab0",
+    "build": {
+      "version": 1,
+      "artifact": "eaae6812e63374a7b300648ee8ecb90d55f9b81719017733d5105c7b466db18c"
+    },
+    "runId": "07cdc39c00724feab3b0bc563fbbf9f0",
+    "passed": 20,
+    "failed": 0,
+    "skippedOtherOperatingSystems": 4,
+    "duration": "21m35s",
+    "receipt": "toolbox-combined-native.json",
+    "qualification": "Native proof only; independent model receipts retain their original artifacts."
+  }
 }
