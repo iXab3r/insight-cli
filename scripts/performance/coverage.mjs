@@ -13,7 +13,7 @@ export function coverage(records,{warm=30,cold=5}={}){
   const indexes=matching.map(r=>kind==='cold'?r.coldTrial:r.sample),reason=[];
   if(matching.length!==count||new Set(indexes).size!==count||indexes.some(n=>!Number.isSafeInteger(n)||n<0||n>=count))reason.push('missing, duplicate or unexpected repetition');
   if(matching.some(r=>!r.ok||r.censored||!Number.isFinite(r.ms)))reason.push('failed or censored request');
-  if(stage.startsWith('read.')&&matching.some(r=>!/^[a-f0-9]{64}$/.test(r.resultHash??'')))reason.push('missing useful-output digest');
+  if(/^(read|first)\./.test(stage)&&matching.some(r=>!/^[a-f0-9]{64}$/.test(r.resultHash??'')))reason.push('missing useful-output digest');
   const group={phase,label,fixture,analysis,route,stage,kind,expected:count,observed:matching.length};groups.push(group);
   if(reason.length)failures.push({...group,reason});
  }
@@ -33,6 +33,6 @@ export function coverage(records,{warm=30,cold=5}={}){
  }
  for(const label of ['baseline','candidate'])for(const name of concurrency)check(label+'-concurrency',label,'tiny',false,'cli','concurrency.'+name,'warm',warm);
  let checkedMemoryOutputs=0;
- for(const r of records.filter(r=>/^read\.(memory|large-output)$/.test(r.stage)&&!r.warmup&&!r.label.includes('trace'))){const length=r.stage==='read.memory'?16:r.fixture==='large'?65536:256,data=Array(length).fill(0);data.splice(0,4,1,2,3,4);const expected=resultHash(r.stage,{length,data,hex:Buffer.from(data).toString('hex')});checkedMemoryOutputs++;if(r.resultHash!==expected)failures.push({phase:r.evidencePhase,fixture:r.fixture,analysis:r.analysis,route:r.route,stage:r.stage,sample:r.sample,reason:['Memory bytes differ from the independently constructed fixture data array']});}
+ for(const r of records.filter(r=>/^(read|first)\.(memory|large-output)$/.test(r.stage)&&!r.warmup&&!r.label.includes('trace'))){const length=r.stage.endsWith('.memory')?16:r.fixture==='large'?65536:256,data=Array(length).fill(0);data.splice(0,4,1,2,3,4);const expected=resultHash(r.stage,{length,data,hex:Buffer.from(data).toString('hex')});checkedMemoryOutputs++;if(r.resultHash!==expected)failures.push({phase:r.evidencePhase,fixture:r.fixture,analysis:r.analysis,route:r.route,stage:r.stage,sample:r.sample,reason:['Memory bytes differ from the independently constructed fixture data array']});}
  return {schema:1,passed:failures.length===0,warm,cold,expectedGroups:groups.length,groups,checkedMemoryOutputs,failures,notApplicable:[{route:'stock',stage:'read.undefined',reason:'The stock public MCP tool catalog has no matching read-only bounded decode operation.'}]};
 }

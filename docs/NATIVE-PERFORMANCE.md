@@ -164,7 +164,10 @@ the latter excludes the four extra stock cold-trial persistence cycles.
 unique repetition indices and complete successful 30/5 counts. It also checks every
 measured memory digest against the independently constructed fixture data array,
 including all returned bytes. Entirely absent cases fail acceptance.
-`equivalence.json` binds stable useful hashes within/across routes. `gate.json` retains budget decisions.
+`equivalence.json` binds stable useful hashes within/across routes, including all
+prepared first queries against the warm results. The separate cold-RPC raw import's
+initial metadata is excluded from prepared-state equivalence because it precedes
+explicit function preparation. `gate.json` retains budget decisions.
 `cleanup.json` and lifecycle readbacks establish owned cleanup and saved state.
 The full runner generates `report.md` with all warm/first-query routes, separate cold
 startup and persistence tables, contention, trace boundaries and the optimization plan.
