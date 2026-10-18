@@ -37,10 +37,10 @@ insight-cli --profile local ghidra download
 insight-cli --profile local ghidra install --offline
 insight-cli --profile local ghidra install --archive ./ghidra.zip
 insight-cli --profile local ghidra install --archive ./ghidra.zip \
-  --java-archive ./jdk.tar.gz --offline
+  --java-archive ./jdk.tar.gz --debugger-archive ./lldb-python.tar.gz --offline
 insight-cli --profile local ghidra install --executable /tools/ghidra/ghidraRun
 insight-cli --profile local ghidra install --executable /tools/ghidra \
-  --java /tools/jdk/bin/java --offline
+  --java /tools/jdk/bin/java --debugger-archive ./lldb-python.tar.gz --offline
 ```
 
 `--executable` accepts the actual Ghidra launcher (`ghidraRun[.bat]`, or
@@ -54,7 +54,7 @@ falls back to profile paths after failure or uninstall.
 
 Local archives are caller-selected inputs, consumed into owned hash-addressed copies before
 extraction so later source edits cannot change the installed bytes. Optional `--archive-sha256` and
-`--java-archive-sha256` check the expected bytes; the actual digests are recorded in the installation
+`--java-archive-sha256` and `--debugger-archive-sha256` check the expected bytes; the actual digests are recorded in the installation
 identity. `--offline` prohibits network acquisition: provide/cache every required archive. On macOS,
 an official Ghidra zip also needs the pinned prebuilt native archive in cache. The managed macOS
 distribution already includes these natives. Executable modes are preserved; paths, links and
@@ -139,3 +139,19 @@ not downloaded third-party Python dependencies. `doctor` reports a missing host 
 failure even when static analysis/server pass. No root installation, developer-tools installer,
 Gatekeeper disabling, shell-profile edit or global Java/Python selection is performed. Ghidra GUI
 agents receive private copies of the Ghidra SDK's pinned debugger Python wheels.
+
+## Managed debugger dependency
+
+On macOS 15+ ARM64, download/install also prepares pinned LLDB 23.1.3 with its own
+Python 3.15 and native library closure. It is a private Ghidra dependency; the separate
+`insight-cli lldb` application retains its own installation. `--debugger-archive` supplies
+the exact pinned debugger archive for offline installation, including an external Ghidra
+selection. Status reports this dependency and doctor probes its actual Python interpreter.
+GUI startup prepares it for legacy profiles as needed. The backend does not use Homebrew
+or Python from Apple developer tools. OS debugger authorization is still a host prerequisite.
+
+A GUI context pins the verified debugger receipt. Its supervisor verifies those code and
+library bytes again before launching LLDB. Close contexts and stop the local server before
+changing/removing the Ghidra runtime; uninstall removes this owned dependency while retaining
+research and external installations. Existing running GUI contexts must be closed/reopened
+to adopt a different backend. Other host debugger profiles retain their declared host requirements.

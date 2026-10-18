@@ -26,11 +26,13 @@ import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
 import {sdkWrites} from './sdk-contracts.js';
 import {initialIntent,initializeModel} from './initial-model.js';
+import {managedGhidraDebugger,prepareGhidraDebugger} from './ghidra-debugger-runtime.js';
+import type {SelectedTool} from './tool-runtime/installer.js';
 
 export type ToolMode = 'headless' | 'gui';
 interface ProcessBinding {
   toolProcessId?:string; pid: number; endpoint: string; root: string; target: string; context?: string; session?:string;
-  mode: ToolMode; debuggerPython?:string; program: string; tokenSecret: string; runtimeFingerprint: string;
+  mode: ToolMode; debuggerPython?:string; debuggerRuntime?:SelectedTool; program: string; tokenSecret: string; runtimeFingerprint: string;
   kind: 'context' | 'shared' | 'bootstrap' | 'candidate'; baseRevision?:number;viewEpoch?:number;
 }
 interface Running {binding: ProcessBinding; http: HttpBridge; child?: ChildProcess}
@@ -78,8 +80,9 @@ export class GhidraContexts {
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
     await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs,this.c);
-    let debuggerEnvironment:Record<string,string>={},debuggerPython:string|undefined;
+    let debuggerEnvironment:Record<string,string>={},debuggerPython:string|undefined,debuggerRuntime:SelectedTool|undefined;
     if(mode==='gui'){
+      if(managedGhidraDebugger())debuggerRuntime=await prepareGhidraDebugger(this.c);
       const python=join(root,'debug-python-'+randomUUID());await mkdir(python,{mode:0o700});debuggerPython=python;
       const prepared=await runTool(this.c,{tool:'ghidra',role:'debugger-wheels',installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-cp',classes,'InsightPythonWheels',python,...this.inputs.debuggerWheels],timeoutMs:30000,maxOutputBytes:65536});
       if(object(JSON.parse(prepared.stdout)).state!=='prepared')fail('configuration','Owned debugger Python dependencies could not be prepared.');
@@ -104,7 +107,7 @@ export class GhidraContexts {
           INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
           GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn:async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
-        binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,...(debuggerPython?{debuggerPython}:{}),target:target.id,
+        binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,...(debuggerPython?{debuggerPython}:{}),...(debuggerRuntime?{debuggerRuntime}:{}),target:target.id,
           ...(context?{context,session:this.workspace.contextById(context).session}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
         await durable(join(root,'process.json'),binding);
       }});

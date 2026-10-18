@@ -1,0 +1,230 @@
+{
+  "schema": 1,
+  "format": "lldb-python-closure-v1",
+  "outputRoot": "lldb-python-23.1.3",
+  "systemRequirement": "macOS 15+ ARM64, OS debugger authorization",
+  "bottles": [
+    {
+      "id": "python@3.15",
+      "version": "3.15.0",
+      "revision": 0,
+      "cell": "python@3.15/3.15.0",
+      "name": "python-3.15-3.15.0.tgz",
+      "sha256": "c072201ad7ecd98356242b2dbd2518c1966975e2c6211e85585720a873f5f0cd",
+      "size": 20175350,
+      "upstream": "https://ghcr.io/v2/homebrew/core/python/3.15/blobs/sha256:c072201ad7ecd98356242b2dbd2518c1966975e2c6211e85585720a873f5f0cd"
+    },
+    {
+      "id": "zstd",
+      "version": "1.5.7",
+      "revision": 1,
+      "cell": "zstd/1.5.7_1",
+      "name": "zstd-1.5.7.tgz",
+      "sha256": "d72adf48460a8384b256f88061cd7b9df4977df7fa2e0794051d427db754a565",
+      "size": 794657,
+      "upstream": "https://ghcr.io/v2/homebrew/core/zstd/blobs/sha256:d72adf48460a8384b256f88061cd7b9df4977df7fa2e0794051d427db754a565"
+    },
+    {
+      "id": "xz",
+      "version": "5.8.4",
+      "revision": 0,
+      "cell": "xz/5.8.4",
+      "name": "xz-5.8.4.tgz",
+      "sha256": "c2724c0db0398134694b8366d30d14f4de376115fb54c559c331d5fd0474af76",
+      "size": 789688,
+      "upstream": "https://ghcr.io/v2/homebrew/core/xz/blobs/sha256:c2724c0db0398134694b8366d30d14f4de376115fb54c559c331d5fd0474af76"
+    },
+    {
+      "id": "lz4",
+      "version": "1.10.0",
+      "revision": 0,
+      "cell": "lz4/1.10.0",
+      "name": "lz4-1.10.0.tgz",
+      "sha256": "91674f1c7407b1f7b73d5bd1d85ed1abaaca93be3b68607af4ef3df632540ac0",
+      "size": 282896,
+      "upstream": "https://ghcr.io/v2/homebrew/core/lz4/blobs/sha256:91674f1c7407b1f7b73d5bd1d85ed1abaaca93be3b68607af4ef3df632540ac0"
+    },
+    {
+      "id": "sqlite",
+      "version": "3.54.1",
+      "revision": 0,
+      "cell": "sqlite/3.54.1",
+      "name": "sqlite-3.54.1.tgz",
+      "sha256": "38bdb30f8e13a07cdcd86233de9ab4d8db29f2b81cb08c15c202ecea6835ab2f",
+      "size": 2492908,
+      "upstream": "https://ghcr.io/v2/homebrew/core/sqlite/blobs/sha256:38bdb30f8e13a07cdcd86233de9ab4d8db29f2b81cb08c15c202ecea6835ab2f"
+    },
+    {
+      "id": "openssl@4",
+      "version": "4.0.3",
+      "revision": 0,
+      "cell": "openssl@4/4.0.3",
+      "name": "openssl-4-4.0.3.tgz",
+      "sha256": "e9968c63732a4aa642c6131f120d0a89a119885f7ce3cfec796ae672369b98a6",
+      "size": 11219463,
+      "upstream": "https://ghcr.io/v2/homebrew/core/openssl/4/blobs/sha256:e9968c63732a4aa642c6131f120d0a89a119885f7ce3cfec796ae672369b98a6"
+    },
+    {
+      "id": "mpdecimal",
+      "version": "4.0.1",
+      "revision": 0,
+      "cell": "mpdecimal/4.0.1",
+      "name": "mpdecimal-4.0.1.tgz",
+      "sha256": "9e2dc44e47e91465c3cefa8969baa6af53a1ec339eda8443b18a30786147203e",
+      "size": 185092,
+      "upstream": "https://ghcr.io/v2/homebrew/core/mpdecimal/blobs/sha256:9e2dc44e47e91465c3cefa8969baa6af53a1ec339eda8443b18a30786147203e"
+    },
+    {
+      "id": "llvm",
+      "version": "23.1.3",
+      "revision": 2,
+      "cell": "llvm/23.1.3_2",
+      "name": "llvm-23.1.3.tgz",
+      "sha256": "cd68b4b54d1bcd70da83984a3fd139b96cdfc4b4db3171b2b836b29d8e1f7ab6",
+      "size": 456227092,
+      "upstream": "https://ghcr.io/v2/homebrew/core/llvm/blobs/sha256:cd68b4b54d1bcd70da83984a3fd139b96cdfc4b4db3171b2b836b29d8e1f7ab6"
+    },
+    {
+      "id": "z3",
+      "version": "5.3.1",
+      "revision": 0,
+      "cell": "z3/5.3.1",
+      "name": "z3-5.3.1.tgz",
+      "sha256": "5436cd3b3c2a314525e5190e9d0bf57d0c90103db9f4828c646a3c8a647165ee",
+      "size": 16106105,
+      "upstream": "https://ghcr.io/v2/homebrew/core/z3/blobs/sha256:5436cd3b3c2a314525e5190e9d0bf57d0c90103db9f4828c646a3c8a647165ee"
+    },
+    {
+      "id": "lldb",
+      "version": "23.1.3",
+      "revision": 1,
+      "cell": "lldb/23.1.3_1",
+      "name": "lldb-23.1.3.tgz",
+      "sha256": "279af7f8b0d0b8b70c1aebd13c5d4b1b2bd5dfe74128abfb3ae9b477697cb178",
+      "size": 8869312,
+      "upstream": "https://ghcr.io/v2/homebrew/core/lldb/blobs/sha256:279af7f8b0d0b8b70c1aebd13c5d4b1b2bd5dfe74128abfb3ae9b477697cb178"
+    }
+  ],
+  "sources": [
+    {
+      "id": "python-3.15",
+      "version": "3.15.0",
+      "name": "source-python-3.15-3.15.0.tgz",
+      "upstream": "https://www.python.org/ftp/python/3.15.0/Python-3.15.0.tgz",
+      "sha256": "438596cac081036d3c1d532ab7e7335eeb35567bc961749a0d5797176db0db68",
+      "license": "Python-2.0",
+      "size": 43686280
+    },
+    {
+      "id": "zstd",
+      "version": "1.5.7",
+      "name": "source-zstd-1.5.7.tgz",
+      "upstream": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
+      "sha256": "37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
+      "license": "(BSD-3-Clause OR GPL-2.0-only) AND BSD-2-Clause AND MIT",
+      "size": 2451884
+    },
+    {
+      "id": "xz",
+      "version": "5.8.4",
+      "name": "source-xz-5.8.4.tgz",
+      "upstream": "https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz",
+      "sha256": "0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9",
+      "license": "0BSD AND GPL-2.0-or-later",
+      "size": 2799797
+    },
+    {
+      "id": "lz4",
+      "version": "1.10.0",
+      "name": "source-lz4-1.10.0.tgz",
+      "upstream": "https://github.com/lz4/lz4/archive/refs/tags/v1.10.0.tar.gz",
+      "sha256": "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+      "license": "BSD-2-Clause",
+      "size": 387114
+    },
+    {
+      "id": "sqlite",
+      "version": "3.54.1",
+      "name": "source-sqlite-3.54.1.tgz",
+      "upstream": "https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz",
+      "sha256": "926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e",
+      "license": "blessing",
+      "size": 3332984
+    },
+    {
+      "id": "openssl-4",
+      "version": "4.0.3",
+      "name": "source-openssl-4-4.0.3.tgz",
+      "upstream": "https://github.com/openssl/openssl/releases/download/openssl-4.0.3/openssl-4.0.3.tar.gz",
+      "sha256": "325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9",
+      "license": "Apache-2.0",
+      "size": 55235667
+    },
+    {
+      "id": "mpdecimal",
+      "version": "4.0.1",
+      "name": "source-mpdecimal-4.0.1.tgz",
+      "upstream": "https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz",
+      "sha256": "96d33abb4bb0070c7be0fed4246cd38416188325f820468214471938545b1ac8",
+      "license": "BSD-2-Clause",
+      "size": 316268
+    },
+    {
+      "id": "llvm",
+      "version": "23.1.3",
+      "name": "source-llvm-23.1.3.tar.xz",
+      "upstream": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.3/llvm-project-23.1.3.src.tar.xz",
+      "sha256": "c44186a7762ed28954be72e5ff6df9808e0779d4f1bf014ecc4e7e211d31ee34",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "size": 179220548
+    },
+    {
+      "id": "z3",
+      "version": "5.3.1",
+      "name": "source-z3-5.3.1.tgz",
+      "upstream": "https://github.com/Z3Prover/z3/archive/refs/tags/z3-5.3.1.tar.gz",
+      "sha256": "c007089dd8d92298d2a7d14105b14e8dddfbb540062ce471c3111e0741edd8da",
+      "license": "MIT",
+      "size": 7868592
+    }
+  ],
+  "debugserver": {
+    "name": "lldb-23.1.3-macos-arm64.tgz",
+    "sha256": "3df8fefb9f15fd80d250dc78517a659f4ec67159f73fdc5df71b7100709213d5",
+    "size": 56154665,
+    "path": "lldb-23.1.3/bin/debugserver",
+    "binarySha256": "d1d3e96aa49df709703818474a85b591b1aa0418e73216266140dbaadfe38894",
+    "upstream": "https://github.com/iXab3r/insight-cli/releases/download/tool-lldb-23.1.3-r1/lldb-23.1.3-macos-arm64.tgz"
+  },
+  "notices": [
+    {
+      "name": "HOMEBREW-LICENSE.txt",
+      "upstream": "https://raw.githubusercontent.com/Homebrew/brew/3073d6a8c34f71da054b000cfdbb62594a07c969/LICENSE.txt",
+      "sha256": "f80329e58613ad669c0e73cb132d8060b9b2c55e339c73848068e4d1567f4627",
+      "size": 1334
+    },
+    {
+      "name": "HOMEBREW-CORE-LICENSE.txt",
+      "upstream": "https://raw.githubusercontent.com/Homebrew/homebrew-core/c95e2f7de852ea7907ad28487dbbf648f60c67da/LICENSE.txt",
+      "sha256": "f80329e58613ad669c0e73cb132d8060b9b2c55e339c73848068e4d1567f4627",
+      "size": 1334
+    },
+    {
+      "name": "SQLITE-PUBLIC-DOMAIN.txt",
+      "sourceSha256": "926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e",
+      "sourcePath": "sqlite-autoconf-3540100/sqlite3.c",
+      "sha256": "49cf7bcb103eb3244150a23bb23d840370a4762914faf1b450072a4b03c14670",
+      "size": 427
+    }
+  ],
+  "exclusions": [
+    "Unneeded LLVM compilers, static archives, MLIR and sanitizers",
+    "Python tests, IDLE, Tkinter and readline; no readline or CA bundle distribution"
+  ],
+  "environment": {
+    "PYTHONHOME": "python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15",
+    "PYTHONPATH": "lldb/23.1.3_1/lib/python3.15/site-packages",
+    "LLDB_PYTHON_LIBRARY": "python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python"
+  },
+  "linkPolicy": "Canonical direct internal targets, without chained symbolic-link traversal"
+}

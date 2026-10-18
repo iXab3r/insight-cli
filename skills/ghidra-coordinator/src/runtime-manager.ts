@@ -12,6 +12,7 @@ import {GhidraServer,stopLocalServer} from './server.js';
 import {fail,text,digest,object} from './model.js';
 import {atomicWrite,installationStage,removeInstallation,withToolLock,assertUnused} from './tool-runtime/store.js';
 import {lifecycleCommands as sharedLifecycle} from './tool-runtime/definition.js';
+import {managedGhidraDebugger,ghidraDebuggerInstaller,prepareGhidraDebugger} from './ghidra-debugger-runtime.js';
 const suffix=process.platform==='win32'?'.exe':'';
 export const runtimeWrite=atomicWrite;
 const live=(pid:unknown)=>{if(!Number.isSafeInteger(pid)||Number(pid)<1)return false;try{process.kill(Number(pid),0);return true;}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')return false;throw error;}};
@@ -66,13 +67,14 @@ export class RuntimeManager {
   const processes=await runtimeProcesses(this.directory),server=processes.find(p=>p.kind==='server');
   return {state:missing.length?'not_ready':'installed',mode:selected?.mode??(home||java?'external':'unconfigured'),recommended:'managed',ghidraVersion:version,java,ghidraHome:home,
    ...(selected?{installation:selected.id,fingerprint:selected.fingerprint}:{}),missing,capabilities:{headless:!missing.length,decompiler:!missing.length,gui:!missing.length,
-   debugger:process.platform==='darwin'?{backend:'system-lldb',requires:'Apple developer tools and OS debugger authorization',checkedBy:'ghidra doctor'}:{backend:'host-debugger',checkedBy:'ghidra doctor'}},
+   debugger:managedGhidraDebugger()?{backend:'managed-lldb',runtime:await ghidraDebuggerInstaller(this.c).status(),requires:'OS debugger authorization',checkedBy:'ghidra doctor'}:process.platform==='darwin'?{backend:'system-lldb',requires:'Apple developer tools and OS debugger authorization',checkedBy:'ghidra doctor'}:{backend:'host-debugger',checkedBy:'ghidra doctor'}},
    server:{mode:this.c.profile.values.server?'external':'local',state:this.c.profile.values.server?'configured':server?'running':'stopped',...(server?{pid:server.pid}:{})},processes,installations,retainedStages:stages,lastCheck:lastCheck?{...lastCheck,appliesToSelection:lastCheck.fingerprint===selected?.fingerprint&&!selected?.uninstalledAt}:undefined,
    storage:{runtime:this.root,research:join(this.directory,'workspace'),materials:join(this.directory,'materials')}};
  }
  async download(offline=false){
   const catalog=runtimeCatalog(),cache=join(this.root,'cache'),items=[];
   for(const artifact of [catalog.ghidra,catalog.java]){const path=await cacheArtifact(artifact,cache,this.c.fetch,this.c.signal,offline);items.push({name:artifact.name,path,sha256:artifact.sha256,license:artifact.license});}
+  if(managedGhidraDebugger())for(const item of (await ghidraDebuggerInstaller(this.c).download(offline)).items)items.push({name:'LLDB/Python',path:item.path,sha256:item.sha256,license:item.license});
   return {state:'downloaded',ghidraVersion:catalog.ghidraVersion,javaVersion:catalog.javaVersion,items};
  }
  private async archive(artifact:RuntimeArtifact,provided:unknown,checksum:unknown,offline:boolean){
@@ -99,6 +101,8 @@ export class RuntimeManager {
   await this.cleanupProbes();
   if(o.executable&&o.archive)fail('invalid','Choose --executable or --archive.');
   if(o.archiveSha256&&!o.archive||o.javaArchiveSha256&&!o.javaArchive)fail('invalid','Archive checksum requires its archive path.');
+  if(o.debuggerArchiveSha256&&!o.debuggerArchive)fail('invalid','Debugger archive checksum requires its archive path.');
+  if((o.debuggerArchive||o.debuggerArchiveSha256)&&!managedGhidraDebugger())fail('unsupported','A managed debugger archive requires macOS 15+ ARM64.');
   const catalog=runtimeCatalog(),offline=Boolean(o.offline),external=o.executable?await externalGhidra(resolve(this.c.cwd,text(o.executable,4096))):undefined;
   const ghidra=external?undefined:await this.archive(catalog.ghidra,o.archive,o.archiveSha256,offline);
   const java=o.java?await realpath(resolve(this.c.cwd,text(o.java,4096))):undefined;
@@ -133,7 +137,8 @@ export class RuntimeManager {
    if(inputs.fingerprint!==receipt.fingerprint)fail('binding','Installed runtime differs from its verified installation receipt.');
   },this.c.signal);
   const selected:RuntimeSelection={schema:1,mode:external?'external':'managed',id:identity,ghidraHome:String(receipt.ghidraHome),java:String(receipt.java),fingerprint:String(receipt.fingerprint),selectedAt:new Date().toISOString()};
-  await runtimeWrite(join(this.root,'selection.json'),selected);return {state:'installed',...selected,checks:receipt.checks};
+  const debuggerRuntime=managedGhidraDebugger()?await prepareGhidraDebugger(this.c,{archive:o.debuggerArchive,archiveSha256:o.debuggerArchiveSha256,offline:o.offline}):undefined;
+  await runtimeWrite(join(this.root,'selection.json'),selected);return {state:'installed',...selected,checks:receipt.checks,...(debuggerRuntime?{debugger:{backend:'managed-lldb',installation:debuggerRuntime.id,fingerprint:debuggerRuntime.fingerprint}}:{})};
  },this.c.signal);}
 
  async uninstall(purgeCache=false){return withToolLock(this.directory,'ghidra',async()=>{
@@ -142,6 +147,7 @@ export class RuntimeManager {
   const selected=runtimeSelection(this.directory);if(!selected)fail('configuration','No managed selection exists; externally configured profile paths are never removed.');
   if(purgeCache&&selected.id){const receipt=object(JSON.parse(await readFile(join(this.root,'installations',selected.id,'ready.json'),'utf8')));
    for(const a of Array.isArray(receipt.archives)?receipt.archives:[]){const sha=String(object(a).sha256);if(!/^[a-f0-9]{64}$/.test(sha))fail('binding','Invalid cached component identity.');for(const ext of ['zip','tgz'])await rm(join(this.root,'cache',sha+'.'+ext),{force:true});}}
+  if(managedGhidraDebugger()&&(await ghidraDebuggerInstaller(this.c).status()).state==='installed')await ghidraDebuggerInstaller(this.c).uninstall(purgeCache);
   if(selected.id)await removeInstallation(this.root,selected.id);
   await runtimeWrite(join(this.root,'selection.json'),{...selected,uninstalledAt:new Date().toISOString()});
   // Retain the selection: an explicit external profile must never become an implicit fallback.
@@ -165,7 +171,9 @@ export class RuntimeManager {
   await this.cleanupProbes();
   const root=join(this.root,'checks',randomUUID()),values=runtimeValues(this.directory,this.c.profile.values);
   const inputs=await nativeInputs(values,undefined,this.c),native=await this.probe(inputs,root);let debuggerCheck:Record<string,unknown>={state:'host_specific'};
-  if(process.platform==='darwin')try{const checked=await runTool(this.c,{tool:'ghidra',role:'debugger-doctor',executable:'/usr/bin/lldb',arguments:['--no-lldbinit','--batch','-o','script import lldb,sys; print("INSIGHT_LLDB_PYTHON_OK")'],environment:{PATH:'/usr/bin:/bin',HOME:root,TMPDIR:root},timeoutMs:30000,maxOutputBytes:65536});
+  if(managedGhidraDebugger())try{const selected=await ghidraDebuggerInstaller(this.c).selected();debuggerCheck={...(await ghidraDebuggerInstaller(this.c).doctor()),backend:'managed-lldb',installation:selected.id};}
+  catch{debuggerCheck={state:'missing',backend:'managed-lldb',reason:'Run insight-cli ghidra install to prepare or repair its LLDB/Python runtime'};}
+  else if(process.platform==='darwin')try{const checked=await runTool(this.c,{tool:'ghidra',role:'debugger-doctor',executable:'/usr/bin/lldb',arguments:['--no-lldbinit','--batch','-o','script import lldb,sys; print("INSIGHT_LLDB_PYTHON_OK")'],environment:{PATH:'/usr/bin:/bin',HOME:root,TMPDIR:root},timeoutMs:30000,maxOutputBytes:65536});
    debuggerCheck={state:checked.stdout.includes('INSIGHT_LLDB_PYTHON_OK')?'ready':'missing',backend:'system-lldb'};
   }catch{debuggerCheck={state:'missing',backend:'system-lldb',reason:'Apple developer tools or debugger authorization is unavailable'};}
   const result={state:'verified',fingerprint:inputs.fingerprint,ghidraVersion:inputs.ghidraVersion,checkedAt:new Date().toISOString(),headless:native.headless,decompiler:native.decompiler,server:true,debugger:debuggerCheck,diagnostics:root};
@@ -175,6 +183,8 @@ export class RuntimeManager {
 function runtimeValuesForStatus(selection:RuntimeSelection,values:Record<string,unknown>){return {...values,java:selection.java,ghidraHome:selection.ghidraHome};}
 export function runtimeCommands(exclusive:<T>(c:CommandContext,action:()=>Promise<T>,quiescent?:boolean)=>Promise<T>):CommandDefinition[]{
  const source=[{flags:'--archive <path>',description:'Local Ghidra zip/tar.gz; missing dependencies are downloaded'},
+  {flags:'--debugger-archive <path>',description:'Local pinned LLDB/Python runtime archive (macOS 15+ ARM64)'},
+  {flags:'--debugger-archive-sha256 <sha256>',description:'Expected SHA256 for the supplied debugger runtime archive'},
   {flags:'--archive-sha256 <sha256>',description:'Expected SHA256 for the supplied Ghidra archive'},
   {flags:'--java-archive <path>',description:'Local Java 21 JDK zip/tar.gz'},
   {flags:'--java-archive-sha256 <sha256>',description:'Expected SHA256 for the supplied JDK archive'},

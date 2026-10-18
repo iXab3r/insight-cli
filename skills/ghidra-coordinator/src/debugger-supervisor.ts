@@ -7,6 +7,7 @@ import {randomUUID} from 'node:crypto';
 import {HttpBridge} from './transport.js';
 import {callerMonitor} from './debugger-caller.js';
 import {debuggerLaunchArguments} from './debugger-launch.js';
+import {verifyManagedInstallation} from './tool-runtime/installer.js';
 
 async function main(){
   const root=await realpath(process.argv[2]!),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
@@ -23,21 +24,28 @@ async function main(){
   async function saved(){const temporary=path+'.new',file=await open(temporary,'w',0o600);try{await file.writeFile(JSON.stringify(receipt));await file.sync();}finally{await file.close();}await rename(temporary,path);const parent=await open(directory,'r');try{await parent.sync();}finally{await parent.close();}}
   const appData=process.env.INSIGHT_TOOL_APPDATA,canonicalAppData=appData?await realpath(appData):undefined;
   if(!appData||!canonicalAppData||!root.startsWith(join(canonicalAppData,'workspace','ghidra-native')+'/'))throw Error('Invalid tool profile');
+  if(binding.debuggerRuntime)await verifyManagedInstallation(appData,'ghidra-debugger',binding.debuggerRuntime);
   const authority=createServer((req,res)=>{if(req.url!=='/identity'||req.headers.authorization!=='Bearer '+token){res.writeHead(403).end();return;}res.setHeader('Content-Type','application/json');res.end(JSON.stringify({id,pid:process.pid,childPid:receipt.childPid,state:receipt.state}));});
   await new Promise<void>(ok=>authority.listen(0,'127.0.0.1',ok));authority.unref();const address=authority.address();if(!address||typeof address==='string')throw Error('No debugger identity port');Object.assign(receipt,{identityPort:address.port});
-  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,metadata:{debuggerReceipt:path,debuggerDiagnostics:join(directory,id+'.diagnostic.log'),contextRoot:root}};
+  const processSpec={tool:'ghidra',installation:binding.runtimeFingerprint,target:binding.target,metadata:{debuggerReceipt:path,debuggerDiagnostics:join(directory,id+'.diagnostic.log'),contextRoot:root,...(binding.debuggerRuntime?{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint}:{})}};
   const helperProcess=await registerExistingProcess(appData,{...processSpec,role:'debugger-supervisor'},process.execPath,process.pid,async()=>true);
   await saved();const environment={...process.env};delete environment.GHIDRA_MCP_AUTH_TOKEN;delete environment.GHIDRA_SERVER_PASSWORD;
   // Ghidra's launcher prepends its source tree to PYTHONPATH. Restore the owned wheel
   // copy first, including the pinned SBProcess compatibility adapter, before LLDB imports it.
   const python=await realpath(environment.INSIGHT_DEBUGGER_PYTHON??'');
   if(!python.startsWith(root+'/debug-python-')||python!==environment.INSIGHT_DEBUGGER_PYTHON)throw Error('Owned debugger Python identity changed');
+  let debuggerExecutable='/usr/bin/lldb';
+  if(binding.debuggerRuntime){
+    debuggerExecutable=binding.debuggerRuntime.executable;
+    Object.assign(environment,binding.debuggerRuntime.environment);
+    Object.assign(receipt,{debuggerInstallation:binding.debuggerRuntime.id,debuggerFingerprint:binding.debuggerRuntime.fingerprint});
+  }
   environment.PYTHONPATH=python+delimiter+(environment.PYTHONPATH??'');delete environment.INSIGHT_DEBUGGER_PYTHON;
   let closing=false,finished=false,launchComplete=false;
   process.once('SIGHUP',close);process.once('SIGTERM',close);
   // A separate session keeps the GUI terminal's SIGHUP from bypassing our orderly kill.
   const launchArguments=process.argv.slice(3),usesGhidra=launchArguments.includes('script import os, ghidralldb');
-  const child=await launchProcess(appData,{...processSpec,role:'debugger'},'/usr/bin/lldb',['--no-lldbinit','-o','settings set auto-confirm true','-o','settings set target.detach-on-error false',...debuggerLaunchArguments(launchArguments,launch.stopAtEntry===true,usesGhidra?python:undefined)],{env:environment,detached:true,stdio:['pipe','pipe','pipe']});
+  const child=await launchProcess(appData,{...processSpec,role:'debugger'},debuggerExecutable,['--no-lldbinit','-o','settings set auto-confirm true','-o','settings set target.detach-on-error false',...debuggerLaunchArguments(launchArguments,launch.stopAtEntry===true,usesGhidra?python:undefined)],{env:environment,detached:true,stdio:['pipe','pipe','pipe']});
   launchComplete=true;
   const exited=child.toolClosed.then(()=>{finished=true;});
   void exited.catch(()=>{});receipt.childPid=child.pid??0;receipt.state='running';

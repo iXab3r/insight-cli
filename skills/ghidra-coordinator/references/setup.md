@@ -40,7 +40,8 @@ Native acceptance separates macOS GUI/LLDB workflows from selected headless Wind
 SDK, Version Tracking and FID/BSim workflows. Native Windows/Linux debugger/GUI acceptance
 remains deferred. The ordinary CI lane stays offline; disposable native CI is explicit.
 
-Debugger execution additionally needs a supported host debugger (local LLDB on macOS). Its
+On macOS 15+ ARM64, `ghidra install` delivers an owned LLDB/Python debugger backend;
+OS debugger authorization remains required. Other host profiles need their supported debugger. Its
 Ghidra Python dependencies are prepared from the installed SDK wheels into owned GUI storage.
 `debuggerPython` optionally configures a Python-backed offer; `windbgDir` configures the Windows
 debugger runtime directory when relevant. These are runtime profile settings, not research scope.

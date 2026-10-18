@@ -8,6 +8,15 @@ import {listProcesses} from './supervisor.js';
 import {digest,fail,text} from '../model.js';
 export interface ToolLaunch {executable:string;arguments:string[];environment:Record<string,string>}
 export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<string,string>;lastProbe:Record<string,unknown>;externalInputs?:Record<string,string>;noticeDigest?:string;execution?:ToolLaunch;executionFingerprint?:string}
+/** Read-only verification used by an owned child after the command owner has staged a runtime. */
+export async function verifyManagedInstallation(directory:string,tool:string,selected:SelectedTool){
+ const root=join(toolRoot(directory,tool),'installations',selected.id);
+ if(selected.schema!==1||selected.tool!==tool||selected.mode!=='managed'||selected.uninstalledAt||!/^[a-f0-9]{64}$/.test(selected.id)||selected.root!==root||!resolve(selected.executable).startsWith(resolve(root)+sep))fail('binding','Invalid managed tool installation receipt.');
+ const ready=await readJson<SelectedTool>(join(root,'ready.json'));
+ const binding=(v:SelectedTool)=>{const {selectedAt,uninstalledAt,...rest}=v;return rest;};
+ if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Managed tool receipt differs from its verified installation.');
+ if(await treeFingerprint(root)!==selected.fingerprint)fail('binding','Managed tool code differs from its verified installation.');
+}
 export interface InstallDescriptor {
  id:string;primary:string;components:()=>Record<string,ToolArtifact>;
  launch:(roots:Record<string,string>)=>ToolLaunch;
@@ -80,8 +89,8 @@ export class ToolInstaller {
   const binding=(v:SelectedTool)=>{const {selectedAt,uninstalledAt,...rest}=v;return rest;};
   if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Selected tool receipt differs from its verified installation.');
   if(this.descriptor.noticeFiles){if(selected.noticeDigest!==digest(this.descriptor.noticeFiles))fail('binding','Bundled license notices changed; reinstall the selected tool.');for(const [name,body]of Object.entries(this.descriptor.noticeFiles)){archiveName(name);try{if(await readFile(join(root,name),'utf8')!==body)fail('binding','Installed license notice differs from its retained text.');}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')fail('binding','Installed license notice is missing.');throw error;}}}
-  const actual=selected.mode==='external'?await fileSha256(selected.executable,this.c.signal):await treeFingerprint(root);
-  if(actual!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
+  if(selected.mode==='managed')await verifyManagedInstallation(this.directory,this.descriptor.id,selected);
+  else if(await fileSha256(selected.executable,this.c.signal)!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
   if(selected.execution&&(!resolve(selected.execution.executable).startsWith(resolve(root)+sep)||await treeFingerprint(root)!==selected.executionFingerprint))fail('binding','Owned external-tool execution copy differs from its verified installation.');
   if(selected.mode==='external'&&this.descriptor.externalInputs&&(!selected.externalInputs||digest(await this.descriptor.externalInputs(selected.executable,this.c))!==digest(selected.externalInputs)))fail('binding','External tool family differs from its verified installation.');
  }

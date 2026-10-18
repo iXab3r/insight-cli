@@ -140,3 +140,9 @@ Feature: The installed toolbox supports a real investigation
     Given an isolated globally installed toolbox candidate is selected
     When the public CLI returns from the selected recursive call
     Then the caller stack and actual return survive without extra program edits or replay
+
+  @ghidra-debugger-runtime @macos
+  Scenario: Deliver and remove a private debugger without losing the investigation
+    Given an isolated globally installed toolbox candidate is selected
+    When the public CLI prepares and verifies its offline debugger runtime
+    Then debugger runtime changes and removal preserve the investigation and external tools

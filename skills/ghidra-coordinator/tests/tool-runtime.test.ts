@@ -54,3 +54,15 @@ test('native preflight failure retains a readable terminal record without freezi
  await assert.rejects(runTool({appArguments:{AppDataDirectory:root},environment:{PATH:process.env.PATH},signal:new AbortController().signal},{tool:'fixture',role:'invalid-native-deadline',executable:process.execPath,nativeDeadline:true,timeoutMs:0}));
  const records=await listProcesses(root);assert.equal(records.length,1);assert.equal(records[0]!.state,'failed');await assertUnused(root,'fixture');
 });
+
+test('child runtime verification rejects changed code, receipts and executable substitution',async t=>{
+ const {mkdtemp,rm,mkdir,writeFile}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {verifyManagedInstallation}=await import('../src/tool-runtime/installer.js'),{toolRoot,treeFingerprint,atomicWrite}=await import('../src/tool-runtime/store.js');
+ const directory=await mkdtemp(join(tmpdir(),'child-runtime-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const id='a'.repeat(64),root=join(toolRoot(directory,'fixture'),'installations',id),executable=join(root,'bin/lldb');await mkdir(join(root,'bin'),{recursive:true});await writeFile(executable,'verified-runtime');
+ const selected={schema:1 as const,tool:'fixture',id,mode:'managed' as const,root,executable,arguments:[],environment:{PYTHONNOUSERSITE:'1'},roots:{},components:{},fingerprint:await treeFingerprint(root),lastProbe:{},selectedAt:new Date().toISOString()};
+ await atomicWrite(join(root,'ready.json'),selected);await verifyManagedInstallation(directory,'fixture',selected);
+ await assert.rejects(verifyManagedInstallation(directory,'fixture',{...selected,executable:process.execPath}),/receipt/);
+ await assert.rejects(verifyManagedInstallation(directory,'fixture',{...selected,environment:{PYTHONNOUSERSITE:'0'}}),/differs/);
+ await writeFile(executable,'modified-runtime');await assert.rejects(verifyManagedInstallation(directory,'fixture',selected),/code differs/);
+});

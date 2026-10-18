@@ -151,6 +151,9 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [When("the public CLI returns from the selected recursive call")]
     public Task ObserveGhidraRecursiveCaller() => Execute("scripts/toolbox/native-ghidra-recursive.mjs", Value("ghidraRecursiveWorker"), Value("ghidraHome"), Value("java"));
 
+    [When("the public CLI prepares and verifies its offline debugger runtime")]
+    public Task VerifyGhidraDebuggerRuntime() => Execute("scripts/toolbox/native-ghidra-debugger-runtime.mjs", Value("ghidraDebuggerArchive"), Value("ghidraDebuggerWorker"), Value("ghidraHome"), Value("java"));
+
     [When("the installed debugger runner suffers controlled lifetime faults")]
     public Task DebuggerFaults() => Execute("scripts/toolbox/fault-lldb.mjs", Value("lldbArchive"), Value("nativeWorker"));
 
@@ -205,6 +208,7 @@ public sealed class ToolboxSteps(ScenarioContext context)
     [Then("the original target remains alive with its ordinary behavior restored")]
     [Then("runtime evidence and checkpoints survive debugger removal")]
     [Then("owned debugger processes exit and uncertain results are not replayed")]
+    [Then("debugger runtime changes and removal preserve the investigation and external tools")]
     [Then("header and signature evidence retains scan uncertainty")]
     [Then("the waiting stack and heap state have retained diagnostic evidence")]
     [Then("native linkage and focused debug evidence survive tool removal")]
