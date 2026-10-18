@@ -29,6 +29,8 @@ INSIGHT_NATIVE_DISPOSABLE=1 node scripts/acceptance-ghidra-budgets.mjs \
 Replace `import <module>` with `save` for the >30-second save/readback case, or `abandon`
 for a one-second configured save deadline. Abandon must fail while the original worker
 is live, retain its unknown outcome after verified termination, preserve the prior saved
-view, and never replay the original script. Each case uses its own profile/AppData/IPC owner.
+view, and never replay the original script. Use `recover-import` for a one-second import timeout followed by `ghidra budgets set`
+and successful continuation of the original request/session/target. Each case uses its own
+profile/AppData/IPC owner.
 The script uses the repository's existing public-fixture helper only for storage isolation;
 research and mutations use the installed public CLI.

@@ -237,4 +237,6 @@ test('native budget settings can change after a failed import without invalidati
  const shown=await f.json(app,['ghidra','budgets','show']) as {initialImportSeconds:number};assert.equal(shown.initialImportSeconds,7200);
  assert.notEqual((await f.run(app,['ghidra','budgets','set','--save-seconds','0','--json'])).exitCode,0);
  assert.equal((await f.profileStore.get('default')).values.saveSeconds,300);
+ await Promise.all([f.json(app,['ghidra','budgets','set','--initial-import-seconds','1800']),f.json(app,['ghidra','budgets','set','--save-seconds','60'])]);
+ const concurrent=await f.profileStore.get('default');assert.equal(concurrent.values.initialImportSeconds,1800);assert.equal(concurrent.values.saveSeconds,60);assert.equal(concurrent.values.java,'fixture-runtime');
 });

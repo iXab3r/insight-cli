@@ -273,10 +273,10 @@ export function createDefinition(options: Options = {}): CliDefinition {
           command('set','Configure subsequent native requests without invalidating retained research',async({options:o},c)=>{
             if(o.initialImportSeconds===undefined&&o.saveSeconds===undefined)fail('invalid','Supply at least one native budget.');
             const store=options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
-            const previous=await store.get(c.profile.name),values={...previous.values,
+            const patch={
               ...(o.initialImportSeconds===undefined?{}:{initialImportSeconds:number(o.initialImportSeconds,86400,1)}),
               ...(o.saveSeconds===undefined?{}:{saveSeconds:number(o.saveSeconds,3600,1)})};
-            await store.set(c.profile.name,values);
+            const {values}=await store.set(c.profile.name,patch);
             return {profile:c.profile.name,state:'configured',initialImportSeconds:ghidraBudget(values,'import')/1000,saveSeconds:ghidraBudget(values,'save')/1000,appliesTo:'subsequent-requests'};
           },{permission:Permission.Update,options:[{flags:'--initial-import-seconds <seconds>',description:'Initial import/analysis: 1–86400 seconds'},
             {flags:'--save-seconds <seconds>',description:'Native save/export: 1–3600 seconds'}]})

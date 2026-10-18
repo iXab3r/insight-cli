@@ -453,7 +453,7 @@ export class Workspace {
   saveContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     return this.transaction(() => this.writeContext(scope, expectedGeneration, patch));
   }
-  /** Snapshot and successful request acknowledgment enter the same durable transaction. */
+  /** Terminal abandonment retains the previous outcome and saved view atomically. */
   abandonProgramRequest(scope:Scope,request:string,generation:number) {
     return this.transaction(()=>{
       const previous=this.request(request),context=this.context(scope),execution=object(previous.execution??{});
@@ -465,6 +465,7 @@ export class Workspace {
       this.writeRequest(request,'failed',result);return result;
     });
   }
+  /** Snapshot and successful request acknowledgment enter the same durable transaction. */
   completeSavedRequest(scope: Scope, request: string, expectedGeneration: number, patch: ContextPatch, result: unknown) {
     return this.transaction(() => {
       const previous = this.context(scope), intent = this.request(request);
