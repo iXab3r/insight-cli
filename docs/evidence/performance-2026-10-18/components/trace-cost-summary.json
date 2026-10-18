@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "records": 6600,
+  "pids": 33,
+  "requests": 3300,
+  "danglingParents": 0,
+  "overlap": "Inclusive spans overlap; exclusive durations subtract the union of immediate child intervals. No cross-process span sums.",
+  "stages": {
+    "component.noop": {
+      "count": 3300,
+      "failed": 0,
+      "inclusiveMs": {
+        "n": 3300,
+        "p50": 0.001208,
+        "p95": 0.007583,
+        "min": 0.000708,
+        "max": 58.65125,
+        "mean": 0.02593920545454544,
+        "sd": 1.03247399683804,
+        "mad": 0.00033300000000000007
+      },
+      "exclusiveMs": {
+        "n": 3300,
+        "p50": 0.001208,
+        "p95": 0.007583,
+        "min": 0.000708,
+        "max": 58.65125,
+        "mean": 0.02593920545454544,
+        "sd": 1.03247399683804,
+        "mad": 0.00033300000000000007
+      }
+    },
+    "command.total": {
+      "count": 3300,
+      "failed": 0,
+      "inclusiveMs": {
+        "n": 3300,
+        "p50": 0.00575,
+        "p95": 0.027209,
+        "min": 0.003333,
+        "max": 58.818333,
+        "mean": 0.03555157454545453,
+        "sd": 1.0363935102589557,
+        "mad": 0.0015840000000000003
+      },
+      "exclusiveMs": {
+        "n": 3300,
+        "p50": 0.004375,
+        "p95": 0.020333,
+        "min": 0.002624,
+        "max": 0.615375,
+        "mean": 0.009612369090909059,
+        "sd": 0.026467034587097794,
+        "mad": 0.0012079999999999999
+      }
+    }
+  }
+}
