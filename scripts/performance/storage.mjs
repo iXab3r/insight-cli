@@ -38,6 +38,14 @@ export async function restorePayloads(indexPath){const index=JSON.parse(await re
   const temporary=target+'.restore-'+randomUUID();try{await pipeline(createReadStream(archive),createGunzip(),createWriteStream(temporary,{flags:'wx',mode:f.mode}));assert.equal(await digest(createReadStream(temporary)),f.sha256);const fd=await open(temporary,'r');try{await fd.sync();}finally{await fd.close();}await link(temporary,target);}finally{await unlink(temporary).catch(e=>{if(e.code!=='ENOENT')throw e;});}
  }
 }
+export async function verifyReceiptNotLive(receipt,{probe=pid=>process.kill(pid,0),inspect=async pid=>(await exec('/bin/ps',['-p',String(pid),'-o','args='])).stdout}={}){
+ assert.ok(Number.isSafeInteger(receipt.pid)&&receipt.pid>0);assert.ok(typeof receipt.root==='string'&&receipt.root.length>0);
+ try{probe(receipt.pid);}catch(e){if(e.code==='ESRCH')return;if(e.code!=='EPERM')throw e;}
+ // PID reuse can point at another user's process; EPERM alone proves neither identity nor absence.
+ let args;try{args=await inspect(receipt.pid);}catch(e){if(e.code===1)return;throw e;}
+ assert.ok(typeof args==='string'&&args.trim().length>0,'Cannot establish the recorded process identity');
+ assert.ok(!args.includes(receipt.root),'An owned native backing store is still live');
+}
 export async function verifyClosedProfile(root){assert.equal(await realpath(root),root);
  const db=new DatabaseSync(join(root,'workspace/workspace.sqlite'),{readOnly:true});try{
   const contexts=db.prepare('SELECT data FROM contexts').all().map(r=>JSON.parse(r.data));assert.ok(contexts.every(c=>c.state==='stopped'),'A private context is not closed');
@@ -45,7 +53,7 @@ export async function verifyClosedProfile(root){assert.equal(await realpath(root
   for(const [table,states]of [['requests',"'running','unknown'"],['publications',"'preparing','commit_intent','unknown'"],['administration_requests',"'running','unknown'"]])assert.equal(db.prepare(`SELECT count(*) AS n FROM ${table} WHERE state IN (${states})`).get().n,0,'Unresolved recovery evidence must remain usable');
  }finally{db.close();}
  const local=JSON.parse(await readFile(join(root,'workspace/server/local.json'),'utf8'));assert.equal(local.phase,'stopped');assert.equal(local.pid,undefined);
- const native=join(root,'workspace/ghidra-native');for(const path of(await files(native)).filter(p=>p.endsWith('/process.json'))){const receipt=JSON.parse(await readFile(path,'utf8'));assert.ok(receipt.root.startsWith(native+sep));try{process.kill(receipt.pid,0);const args=(await exec('/bin/ps',['-p',String(receipt.pid),'-o','args='])).stdout;assert.ok(!args.includes(receipt.root),'An owned native backing store is still live');}catch(e){if(e.code!=='ESRCH'&&e.code!==1)throw e;}}
+ const native=join(root,'workspace/ghidra-native');for(const path of(await files(native)).filter(p=>p.endsWith('/process.json'))){const receipt=JSON.parse(await readFile(path,'utf8'));assert.ok(receipt.root.startsWith(native+sep));await verifyReceiptNotLive(receipt);}
 }
 export async function archiveClosedProfile(o,profile){
  assert.ok(profile.startsWith('perf66-'+o.label+'-'));assert.equal(basename(profile),profile);
