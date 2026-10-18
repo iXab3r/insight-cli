@@ -189,6 +189,8 @@ data. Do not publish auth headers, process receipts, local roots or research log
 The exporter retains raw `trace-events.jsonl` using only the documented trace-field
 allowlist. Process/request/parent IDs and hashed scopes support independent queue-tree
 inspection; no arguments, credentials, endpoint URLs or result text are exported.
+The public fixture manifest/compiler recipe and prepared-snapshot hash inventory
+retain actual input/source/config identities while excluding local filesystem paths.
 
 ```sh
 node scripts/performance/compare.mjs "$EVIDENCE_DIRECTORY"
