@@ -36,6 +36,7 @@ test('function diagnostics survive one-shot and cli.execute without a mutation o
   [{functions:{[entry]:{error:'Decompiler failed'}}},'native_function_failure'],
   [{functions:{other:{name:'f',entry_point:entry}}},'selector_mismatch'],
   [{functions:{[entry]:null}},'invalid_native_shape'],
+  [{functions:{[entry]:{name:'f',entry_point:'not-an-address'}}},'invalid_native_shape'],
   [{functions:{[entry]:{name:'f',entry_point:entry,signature:'void f()'}}},'missing_decompiler_text']
  ];
  for(const [value,reason]of cases){response=value;const one=await f.run(app,[...argv,'--json']);assert.notEqual(one.exitCode,0);const result=JSON.parse(one.stdout);assert.equal(result.reason,reason);assert.equal(result.selector,entry);assert.equal(result.session,s.session);

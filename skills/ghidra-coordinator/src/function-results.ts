@@ -12,6 +12,6 @@ export function functionResult(value:unknown,selector:string){
   const found=functions[selector];
   if(!record(found))functionFailure(selector,'invalid_native_shape');
   if(found.error!==undefined)functionFailure(selector,typeof found.error==='string'&&/^Function not found\b/i.test(found.error)?'function_not_found':'native_function_failure',found.error);
-  if(typeof found.name!=='string'||!found.name||typeof found.entry_point!=='string'||!found.entry_point)functionFailure(selector,'invalid_native_shape');
+  if(typeof found.name!=='string'||!found.name||typeof found.entry_point!=='string'||found.entry_point.length>128||!/^(?:[A-Za-z0-9_]+:)?(?:0x)?[a-fA-F0-9]+$/.test(found.entry_point))functionFailure(selector,'invalid_native_shape');
   return found;
 }
