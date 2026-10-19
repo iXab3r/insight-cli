@@ -100,10 +100,12 @@ test('pending private snapshots and unknown request/publication identities survi
   const dbBefore=await readFile(join(source,'workspace/workspace.sqlite'));
   await storage.migrate(c,base);
   assert.deepEqual(await readFile(join(destination,'workspace/workspace.sqlite')),dbBefore,'Migration does not rewrite durable research state');
-  const reopened=new Workspace(join(destination,'workspace'),'default');t.after(()=>reopened.close());
-  assert.deepEqual(reopened.request(request.id),beforeRequest);assert.deepEqual(reopened.activePublication(target.id),beforePublication);assert.deepEqual(reopened.context(who),beforeContext);
-  assert.equal(await readFile(await reopened.artifacts.verify(candidate),'utf8'),JSON.stringify({names:{'1000':'retained'},comments:{},opaque:'candidate'}));
-  assert.equal((await f.profileStore.get()).values.analysisDirectory,destination);
+  const reopened=new Workspace(join(destination,'workspace'),'default');
+  try{
+    assert.deepEqual(reopened.request(request.id),beforeRequest);assert.deepEqual(reopened.activePublication(target.id),beforePublication);assert.deepEqual(reopened.context(who),beforeContext);
+    assert.equal(await readFile(await reopened.artifacts.verify(candidate),'utf8'),JSON.stringify({names:{'1000':'retained'},comments:{},opaque:'candidate'}));
+    assert.equal((await f.profileStore.get()).values.analysisDirectory,destination);
+  }finally{reopened.close();}
 });
 test('resume binds the destination filesystem anchor and never recreates an unmounted location',async t=>{
   const {c,storage,base,destination}=await setup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});
@@ -171,9 +173,11 @@ test('managed runtime authority and a closed native receipt reopen after paths m
   const id='b'.repeat(64),home=join(source,'runtime/installations',id,'ghidra');await mkdir(home,{recursive:true});
   const selection={schema:1,mode:'managed',id,ghidraHome:home,java:'/synthetic/java',fingerprint:'a'.repeat(64),selectedAt:'fixture'};await atomicWrite(join(source,'runtime/selection.json'),selection);w.close();
   await storage.migrate(c,base);assert.deepEqual(runtimeSelection(source,destination),selection);
-  const reopened=new Workspace(join(destination,'workspace'),'default');t.after(()=>reopened.close());
-  const backend=new GhidraContexts(reopened,{fingerprint:'a'.repeat(64)} as NativeInputs,{...c,profile:await f.profileStore.get()});
-  assert.equal(await backend.closed({session:opened.context.session,target:target.id}),true);
+  const reopened=new Workspace(join(destination,'workspace'),'default');
+  try{
+    const backend=new GhidraContexts(reopened,{fingerprint:'a'.repeat(64)} as NativeInputs,{...c,profile:await f.profileStore.get()});
+    assert.equal(await backend.closed({session:opened.context.session,target:target.id}),true);
+  }finally{reopened.close();}
 });
 test('active/unverified processes and escaping symlinks prevent migration without changing profile',async t=>{
   const {f,c,storage,source,base}=await setup(t);
