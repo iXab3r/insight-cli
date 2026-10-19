@@ -17,7 +17,11 @@ const inside=(parent:string,child:string)=>{const r=relative(parent,child);retur
 function fail(code:string,message:string):never{throw new CliError(message,{code:'storage.'+code});}
 const missing=(e:unknown)=>(e as NodeJS.ErrnoException).code==='ENOENT';
 async function present(path:string){try{return await lstat(path);}catch(e){if(missing(e))return;throw e;}}
-async function sync(path:string,directory=false){if(directory&&process.platform==='win32')return;const f=await open(path,'r');try{await f.sync();}finally{await f.close();}}
+async function sync(path:string,directory=false){
+  if(directory&&process.platform==='win32')return;
+  // Windows FlushFileBuffers requires write access even when no bytes are changed.
+  const f=await open(path,process.platform==='win32'&&!directory?'r+':'r');try{await f.sync();}finally{await f.close();}
+}
 export function analysisDirectory(c:Pick<CommandContext,'profile'|'appArguments'>):string{
   const value=c.profile.values.analysisDirectory;
   if(value===undefined||value===null)return c.appArguments.AppDataDirectory;
