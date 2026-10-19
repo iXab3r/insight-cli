@@ -39,6 +39,11 @@ installing npm binaries does not register them in an agent host. See
 Inspect `storage show --json` before relocating a profile. Use the supported
 [storage workflow](references/storage.md), preserving unknown operations and native folders.
 
+
+New targets import without full auto-analysis; `--analysis` opts in at first import.
+Reuse existing session/target selectors before opening another copy. Read [setup](references/setup.md)
+for explicit later analysis and passive first-open progress (`ghidra progress`).
+
 Use generated help as the syntax authority. Catalog metadata describes shipped capabilities;
 profile runtime readiness comes from the selected tool's `status`. Unavailable profile/IPC
 access means execution readiness is unknown. Preserve work and diagnose access before trying

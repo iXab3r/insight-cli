@@ -183,3 +183,7 @@ Managed Ghidra delivery: [runtime commands and ownership](skills/ghidra-coordina
 Version 0.2.0 is published on npm as `latest`. The manual release workflow passes build,
 OIDC publication and a fresh registry global installation; the archive matches the native-tested
 candidate byte for byte. See [release verification](docs/verification/npm-release-0.2.0.json).
+
+New Ghidra targets import without full automatic analysis; opt in with `ghidra open --analysis`.
+Use scoped `ghidra analysis run` or `analysis reanalyze` later when needed.
+`ghidra progress --session <id> --target <id> --json` reads first-open progress without launching Ghidra.

@@ -7,6 +7,8 @@ import {createHash} from 'node:crypto';
 import {Workspace} from '../src/workspace.js';
 import {initializeModel,initialIntent} from '../src/initial-model.js';
 import type {ServerBinding} from '../src/server.js';
+import {CliError} from '@eyeauras/cli-factory';
+import {readInitialProgress} from '../src/initial-progress.js';
 
 const binding:ServerBinding={mode:'local',origin:'ghidra://127.0.0.1:25000',repository:'owned',readerUser:'reader',publisherUser:'publisher',readerSecret:'reader-secret',publisherSecret:'publisher-secret'};
 async function fixture(t:{after:(fn:()=>Promise<void>)=>void}){
@@ -61,4 +63,21 @@ test('failed independent staging proof never invokes canonical promotion',async 
  f.server.initialPublication=async(_binding,_root,operation='stage')=>{operations.push(operation);return {state:operation==='stage'?'staged':'unknown',version:1,snapshotBuffersVerified:false};};
  await assert.rejects(initializeModel(f.workspace,f.target,binding,f.server,'runtime'),/Independent initial staging/);
  assert.deepEqual(operations,['stage','verify-stage']);assert.equal(f.workspace.model(f.target.id).state,'unknown');
+});
+test('a stopped timed-out or cancelled import keeps its phase and honest terminal observation',async t=>{
+ for(const [code,state]of [['tool.timeout','timed_out'],['tool.cancelled','cancelled']] as const){
+  const f=await fixture(t);
+  f.server.initialImport=async root=>{
+   await writeFile(join(root,'progress.json'),JSON.stringify({schema:1,target:f.target.id,phase:'analysis',state:'running',pid:2147483647,startedAt:new Date(Date.now()-1000).toISOString(),updatedAt:new Date().toISOString()}));
+   throw new CliError('Synthetic native termination',{code});
+  };
+  await assert.rejects(initializeModel(f.workspace,f.target,binding,f.server,'runtime'),/Synthetic native termination/);
+  const observed=await readInitialProgress(f.workspace.directory,f.target.id);assert.equal(observed.state,state);assert.equal(observed.phase,'analysis');assert.equal(f.workspace.model(f.target.id).state,'unknown');assert.equal(f.counts().published,0);
+ }
+});
+test('a busy continuation never overwrites another live initial worker progress',async t=>{
+ const f=await fixture(t);let path='',original='';
+ f.server.initialImport=async root=>{path=join(root,'progress.json');original=JSON.stringify({schema:1,target:f.target.id,phase:'analysis',state:'running',pid:process.ppid,startedAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await writeFile(path,original);return {state:'busy'};};
+ await assert.rejects(initializeModel(f.workspace,f.target,binding,f.server,'runtime'),/still active/);
+ assert.equal(await readFile(path,'utf8'),original);assert.equal(f.counts().published,0);
 });

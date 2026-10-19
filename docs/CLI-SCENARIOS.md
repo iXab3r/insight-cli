@@ -22,6 +22,25 @@ observable behavior; exact schemas and remaining edge cases are tracked in [the 
 The [design](DESIGN.md#agreed-product-model) owns the model. Factory supplies the same command
 tree for CLI help, human/JSON output and API execution; no separate product RPC methods are invented.
 
+## Fast first import and observable progress
+
+```
+insight-cli ghidra open ./client.exe --session new --json
+insight-cli ghidra progress --session <session> --target <target> --json
+insight-cli ghidra analysis run --session <session> --target <target> --json
+```
+
+New inputs skip full automatic analysis by default. The progress call reads first-open
+observations without launching Ghidra: stage, elapsed/heartbeat and optional task-local
+counters/message. It remains available while the original open runs; locate reserved selectors
+through sessions list/status if the host has not yet returned the final result. Keep the same
+host execution and report meaningful changes at roughly 5-10 second observation intervals.
+`--analysis` is an explicit full-analysis opt-in for the first import; `--no-analysis` retains
+its explicit fast spelling. Reopening existing selectors preserves their stored settings;
+conflicting flags fail. Later analysis run/reanalyze is an ordinary scoped private mutation,
+and is not described by the earlier initial-open progress record. Unknown or stale progress
+is not successful completion; recovery and publication receipts remain authoritative.
+
 ## Command baseline
 
 | Command | Purpose |
