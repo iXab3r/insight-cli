@@ -168,7 +168,8 @@ load settings on continuation; explicit conflicting switches fail instead of cha
 After opening, scoped `ghidra analysis run` and `analysis reanalyze` are ordinary private mutations.
 `ghidra progress --session <id> --target <id> --json` reads atomic persisted observations
 without starting native processes: phase, heartbeat, elapsed time and optional task-local counters.
-No overall percentage is inferred. Factory owns human progress; JSON/RPC keep final-result output.
+No overall percentage is inferred. `operation: initial-model` completes after verified shared-model
+publication, independently of the subsequent private context startup. Factory owns human progress; JSON/RPC keep final-result output.
 Completion receipts and independent publication readback remain authoritative.
 
 The result supplies `session` and `target`, for example `s_a` and `t_client`. B independently

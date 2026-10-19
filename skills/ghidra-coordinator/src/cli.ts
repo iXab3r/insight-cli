@@ -281,7 +281,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
-        command('progress','Read retained initial-open progress without starting Ghidra',async({options:o},c)=>{
+        command('progress','Read initial-model import/publication progress without starting Ghidra',async({options:o},c)=>{
           const selected=owner.selected(c),who=scope(o);selected.workspace.context(who);
           return {...who,progress:await readInitialProgress(selected.workspace.directory,who.target)};
         },{permission:Permission.ReadOnly,options:scoped}),

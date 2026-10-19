@@ -10,7 +10,7 @@ export async function readInitialProgress(directory:string,target:string){
     const ageMs=Math.max(0,Date.now()-Date.parse(value.updatedAt));
     let workerAlive:boolean|undefined;
     if(Number.isSafeInteger(value.pid)&&value.pid>0)try{process.kill(value.pid,0);workerAlive=true;}catch(error){if((error as NodeJS.ErrnoException).code==='ESRCH')workerAlive=false;}
-    return {...value,ageMs,elapsedMs:Math.max(0,(value.state==='running'?Date.now():Date.parse(value.updatedAt))-Date.parse(value.startedAt)),
+    return {...value,operation:'initial-model',ageMs,elapsedMs:Math.max(0,(value.state==='running'?Date.now():Date.parse(value.updatedAt))-Date.parse(value.startedAt)),
       ...(workerAlive===undefined?{}:{workerAlive}),
       observation:value.state==='running'&&(workerAlive===false||ageMs>15000)?'stale':'current'};
   }catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return null;throw error;}

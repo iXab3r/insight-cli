@@ -40,6 +40,8 @@ reserved scope. A stale heartbeat, dead worker or unknown result is not completi
 `sessions status` and recovery before continuing. Pre-upgrade workers have no progress record;
 null progress means unavailable, never success. Progress is observational, not a completion receipt. This command tracks first open only;
 its old complete record does not describe later `analysis run`/`reanalyze` operations.
+`operation: initial-model` completes after verified shared-model publication; the private
+session context can still be opening. Inspect `sessions status` for context readiness.
 
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
