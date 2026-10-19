@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "notRecorded": true,
+  "reason": "Native trace phase was not reached before the user requested wrap-up.",
+  "windows": []
+}

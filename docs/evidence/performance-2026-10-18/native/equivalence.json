@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "passed": true,
+  "checkedCases": 44,
+  "includesPreparedFirstQueries": true,
+  "failures": [],
+  "normalization": "Only documented transport/profile/view metadata is omitted; useful code, comments, field counts, addresses and memory bytes remain bound."
+}

@@ -1,3 +1,4 @@
+import {timingScope} from '@eyeauras/cli-factory';
 import {ghidraBudget} from './budgets.js';
 import {captureCommands} from './capture.js';
 import {binaryCommands} from './binary.js';
@@ -173,7 +174,7 @@ const targetView=(target:ReturnType<Workspace['target']>)=>({target:target.id,na
 function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[]):CommandDefinition {
   const path=[...parents,entry.name.split(' ')[0]!],name=path.join(' ');
   const run=entry.run;
-  return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{
+  return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{return timingScope(JSON.stringify([c.profile.name,input.options.session,input.options.target]),async()=>{
     try{
       let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
       if(!selected)return await run(input,c);
@@ -194,7 +195,7 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
       const result=error.result&&typeof error.result==='object'&&!Array.isArray(error.result)?error.result:{};
       throw new CliError(error.message,{code:error.code,exitCode:error.exitCode,next:error.next,result:{...result,...selected}});
     }
-  }}:{})};
+  });}}:{})};
 }
 
 export function createDefinition(options: Options = {}): CliDefinition {

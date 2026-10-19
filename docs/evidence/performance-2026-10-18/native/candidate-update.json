@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "reason": "Complete output-file/write timing and stable logical-context scope before the first candidate native measurement. Baseline package/source/dependency identities and all original measurements remain unchanged.",
+  "initialDispatcherSource": "fdb6cafd134b69bfe4893e7c658a98fba453545e",
+  "initialCandidatePlan": {
+    "version": "0.2.0",
+    "entrySha256": "a086b9bca33eb9d7597194065de7819bbbab2a5dd001ca05335d82e28d812eb9",
+    "build": {
+      "version": 1,
+      "artifact": "c308a3c77622451ef330dd86b48495a46c9bb7b8aac0995b7ba49743cc75f49c"
+    },
+    "dependencies": {
+      "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/e37a767dddbcedf53aaf9358768726e6031c5e5b/vendor/factory-core-c773126.tgz",
+      "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/e37a767dddbcedf53aaf9358768726e6031c5e5b/vendor/factory-ipc-c773126.tgz",
+      "@modelcontextprotocol/sdk": "1.32.1",
+      "tar": "7.5.22",
+      "yauzl": "3.4.0"
+    }
+  },
+  "initialCandidatePlanMeasured": false,
+  "candidate": {
+    "version": "0.2.0",
+    "entrySha256": "a086b9bca33eb9d7597194065de7819bbbab2a5dd001ca05335d82e28d812eb9",
+    "build": {
+      "version": 1,
+      "artifact": "01d03023112c2b36e7a540c3436a88929bb86f0f0aad6bad60701ec9f63979fc"
+    },
+    "dependencies": {
+      "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-core-13b01dc.tgz",
+      "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-ipc-13b01dc.tgz",
+      "@modelcontextprotocol/sdk": "1.32.1",
+      "tar": "7.5.22",
+      "yauzl": "3.4.0"
+    },
+    "runtimeGraphSha256": "716ced78afe22b8b1f983d89aa1be74fa5889f759ac9ab8e097ec911ea912e32"
+  },
+  "candidateSource": "97e272413fc8974b4ad7be313fc0b248c872eff7",
+  "factorySource": "13b01dc40b32e59a4b6c1d1da333a1bf87fd9921",
+  "packageArchiveSha256": "8dee85db5288d6754d617ee0c9e333fb0651f6fe821ead5dfb8e12363dc7a093",
+  "packageArchiveIntegrity": "sha512-PAguQVcuj3XYs+tP7QNUTCO6T2B5lTNHUw+ilxsOhdKiSqGf1mDaELw8Ik9Y0QefOmbz26yJWcRnpFlvyoFVqg==",
+  "runtimeNode": "v26.4.0",
+  "buildAndPackageProofNode": "v24.22.0",
+  "identityMeaning": "build.artifact verifies this package declared files. runtimeGraphSha256 additionally binds all resolved dependency bytes. They are deliberately distinct hashes.",
+  "tests": {
+    "facadePass": 230,
+    "facadePlatformSkips": 4,
+    "releasePass": 45,
+    "isolatedOfflinePackageProof": true,
+    "relocatedDeployedIdentityVerified": true,
+    "oldNewVerificationAlgorithmsAgree": true
+  },
+  "collectorUpdates": {
+    "source": "97e272413fc8974b4ad7be313fc0b248c872eff7",
+    "files": {
+      "cold-rpc.mjs": "7cad2649b993f3cd2405a218c82506dfe3e2e9ce7ea2882e4984a0a6ab606569",
+      "compare.mjs": "844b93c5811fbe9aeb463173b7d8ae60f806da6797a94468dbcc1d35e0f4c51e",
+      "concurrency.mjs": "3aa7144b7313be5c962c3fcde88752b8e0461c08421d189a6084cd50be8d8f47",
+      "coverage.mjs": "85692b43e3b26a5ed6456416ebbf9443ef9cc4ba25864676332cfa4b435c427e",
+      "equivalence.mjs": "155a38ed3f50efdf10fc78e7b0a1ba5947b1e8d44c8119a823b1cc86e7cdbc4d",
+      "export.mjs": "e7a4d1dc2085d328ca1d70d31a11e349a4e39124d59a243e016bf677a2e30f0b",
+      "finalize.mjs": "975ad8459492e0277f8080717cc475873776f386723f09a9f1df1248434d2aba",
+      "fixtures.mjs": "ed4edfc6a7f226791e8e87527daa1a34a72d1235fae072cc01eff2e190acd9c1",
+      "gate.mjs": "157606e39e284305afaedd627386e21bc10350e0caae2d33a47a68bc22b78913",
+      "hashing.mjs": "2b814c4e26c05c60b19028f759c3b8f992a4e4a49a3350055b3093ef073865b3",
+      "identity.mjs": "9be69ffcec44f522d41ffe5cf2ebd68c93d119d6f76ada0e62e74dd3584751f5",
+      "insight.mjs": "5516ea6d029a0acdc777df66704844deeb8af4ebb9e308ae894f7db751a87cc1",
+      "matrix.mjs": "2e7c808a44de515527fd2db744a50e470f5c2f5b28f8946e56addd490319cef6",
+      "paired-overhead.mjs": "569239676c371154796d0392f89f0e74d606a0e54536a1d31170f7b8fb9c6a13",
+      "persistence.mjs": "5eb6046141b192c761a282044964f2b0ff9e6d6635d39486a0dfe255b318826b",
+      "prepare-ci.mjs": "89e7f4d35adc7caa0ae11c31856944b561e920306846b01d7c241b2e9db25b89",
+      "public.mjs": "9bea6a91a16aba06f3c311009f7293ad6fddeda4405f11eede0b8ad3872eca07",
+      "report.mjs": "aea805690efa965e6c8a1df30015e720a4fc0b27b4875a5090e37dd89dbdf41a",
+      "request-traces.mjs": "a19828cb5750aba64fc0d3648917dc237e86eea36d15c80b9d75a9c22d13cbe5",
+      "run.mjs": "1dbdcff4d9f5a11a456d495ba4eac75f7c62023816ba2c4fe9ad64883c6b9d02",
+      "script-effects.mjs": "4186fc4aafbefb1a937523781eefc771cd0392ec31b5cfa3061e8048ab9a3f44",
+      "stock.mjs": "57c408367614674c3ffc1b28328ff08694da0c559d437187b44eb274cceb8529",
+      "storage.mjs": "e2a1d227dcb3308cc2ad93e6a72dff9794b9f862eab66392e60e315461feff17",
+      "trace-cost.mjs": "34352686be4ed0285094055e2bcceed882fcaa41ff7de597f224960989b4f50c",
+      "trace-report.mjs": "dd9ecd243550ad313abb63476fe1a79c466f89393b51406733f26eb57ba491f6",
+      "verify-results.mjs": "d1c3c764b7fcee17600b33f36db99a0715a0981ea8d40381be745796caf9b803",
+      "view-compare.mjs": "28e53ac6d07596117865879a096794c98ef33f65135a7de4ccfd28b8e5dde457"
+    },
+    "notes": [
+      "Closed native backing payloads are archived outside request timing after their final planned use.",
+      "Actual fixture export addresses generate the same setup Java bytes as the initial dispatcher for these unchanged fixtures.",
+      "Prepared first-query equivalence, independent memory oracle, phase-aware summaries, completeness, script effects, paired routes and sanitized raw trace/proof/fixture exports are postprocessing additions.",
+      "A serial traced contention/functional-proof supplement follows the cached initial dispatcher; no untraced samples are replaced."
+    ]
+  },
+  "countsAndBudgetsChanged": false,
+  "frozenBeforeFirstCandidateMeasurementAt": "2026-10-18T17:22:48.597Z",
+  "dependencyInventory": "identity.json retains lock hashes, exact resolved/integrity/version entries and actual installed versions; candidate test-only dev packages and uninstalled optional platform entries are marked explicitly.",
+  "postFreezePostprocessing": {
+    "source": "bf65293ef23c389bf5deb94446eb343a0c2c4e93",
+    "scope": "Passive trace-file wait for ordinary owner lifetime-root completion. No owner-status polling or owner stop; no measured candidate bytes, native calls, counts or latency budgets change."
+  },
+  "phaseDurationMeaning": "phases.json records orchestration wall time, including the completed-baseline archival/package-check hold; use per-request monotonic rows for latency."
+}

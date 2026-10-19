@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "records": 0,
+  "pids": 0,
+  "requests": 0,
+  "danglingParents": 0,
+  "verifiedBindingScopes": 0,
+  "bindingScopesWithMultipleRequests": 0,
+  "overlap": "Inclusive spans overlap; exclusive durations subtract the union of immediate child intervals. No cross-process span sums.",
+  "stages": {}
+}

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "reason": "31 GiB free space at preflight; retain completed raw databases as verified compressed private evidence. No in-flight request paused, discarded or replaced.",
+  "initialCandidatePlan": "c308a3c77622451ef330dd86b48495a46c9bb7b8aac0995b7ba49743cc75f49c",
+  "scope": "Baseline read phase used its original collector; completed cold trials 1–4 are archived at this phase boundary. Later phases use the same housekeeping outside request timers and record collector hashes in protocol.json. Prepared trial-0 profiles remain available for lifecycle measurements.",
+  "archivedProfiles": 16,
+  "archivedFiles": 88,
+  "retainedLogicalBytes": 7500660736,
+  "availableBefore": 21073641472,
+  "availableAfter": 28601303040,
+  "completedAt": "2026-10-18T17:14:51.914Z",
+  "dispatcherPid": 9036
+}

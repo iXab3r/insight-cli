@@ -1,3 +1,4 @@
+import {timingSpan} from '@eyeauras/cli-factory';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
@@ -75,7 +76,7 @@ export class GhidraContexts {
     const root=join(this.directory(),kind,context??target,randomUUID());await mkdir(root,{recursive:true,mode:0o700});return root;
   }
   private async launch(root: string, target: ResearchTarget, kind: ProcessBinding['kind'], program: string,
-    mode: ToolMode, context?: string, credentials: Record<string,string> = {}): Promise<Running> {
+    mode: ToolMode, context?: string, credentials: Record<string,string> = {}): Promise<Running> {return timingSpan('native.launch',async()=>{
     if((await nativeInputs(this.c.profile.values,this.workspace.directory,this.c)).fingerprint!==this.inputs.fingerprint)
       fail('binding','Native runtime inputs changed; stop the owner before using a different build.');
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
@@ -131,27 +132,30 @@ export class GhidraContexts {
       for(let i=0;i<100&&child.exitCode===null&&child.signalCode===null;i++)await delay(50);
       this.running.delete(root);throw error;
     }
-  }
-  private async verified(binding: ProcessBinding, target: ResearchTarget, verifySource = true): Promise<Running> {
+  });}
+  private async verified(binding: ProcessBinding, target: ResearchTarget, verifySource = true): Promise<Running> {return timingSpan('binding.verify',async()=>{
     const root=resolve(binding.root);
     if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||binding.target!==target.id||binding.runtimeFingerprint!==this.inputs.fingerprint)
       fail('binding','Native context receipt does not match its profile, target or runtime.');
     if(stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))
       fail('binding','Native context receipt changed.');
     const token=await this.c.secrets.require(binding.tokenSecret);
-    const http=new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save'));
+    const cached=this.running.get(root);
+    const http=cached?.binding.pid===binding.pid&&cached.binding.endpoint===binding.endpoint?
+      cached.http.forRequest(this.c.fetch,this.c.signal,token,ghidraBudget(this.c.profile.values,'save')):
+      new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save'));
     const info=await http.instance();
     if(info.pid!==binding.pid||info.tcp_port!==Number(new URL(binding.endpoint).port)||
         !String(info.project_path??'').startsWith(root+sep))fail('binding','Live context PID, endpoint or project no longer matches its receipt.');
     const record={...this.running.get(root),binding,http};this.running.set(root,record);
-    if(verifySource)await this.source(record,target);return record;
-  }
-  private async source(record: Running, target: ResearchTarget) {
+    if(verifySource)await this.source(record,target,false);return record;
+  });}
+  private async source(record: Running, target: ResearchTarget, includeMetadata=true) {return timingSpan('binding.source',async()=>{
     const result=object(await record.http.call('/get_program_options',{program:record.binding.program,group:'Program Information'}));
     if(!Array.isArray(result.options)||object(result.options.find(value=>object(value).name==='Executable SHA256')??{}).value!==target.binarySha256)
       fail('binding','Opened native program does not match the target input bytes.');
-    return object(await record.http.call('/get_metadata',{program:record.binding.program}));
-  }
+    return includeMetadata?object(await record.http.call('/get_metadata',{program:record.binding.program})):{};
+  });}
   private async stopRecord(record: Running, ready = true, releaseCapacity = true) {
     const {binding,child}=record;
     const childFinished=child&&child.pid===binding.pid&&(child.exitCode!==null||child.signalCode!==null);
@@ -190,7 +194,7 @@ export class GhidraContexts {
       if(!pending)return;if(Date.now()>=deadline)fail('busy','Owned debugger cleanup is still pending; its context is retained.');await delay(100);
     }
   }
-  private async capture(record: Running): Promise<Artifact> {
+  private async capture(record: Running): Promise<Artifact> {return timingSpan('persistence.capture',async()=>{
     const result=object(await record.http.call('/save_program',{program:record.binding.program}));
     if(result.success!==true)fail('save','Private program save was not acknowledged.');
     const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
@@ -198,7 +202,7 @@ export class GhidraContexts {
     const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:output,output_name:name}));
     if(exported.success!==true)fail('save','Saved private snapshot export was not acknowledged.');
     return this.workspace.captureSnapshot(join(output,name));
-  }
+  });}
   private async shared(target: ResearchTarget, binding: ServerBinding): Promise<Running> {
     const root=await this.prepareRoot('shared',target.id);
     const server=this.server();
@@ -246,7 +250,7 @@ export class GhidraContexts {
     }
     await task;return this.workspace.model(target.id);
   }
-  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running> {
+  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running> {return timingSpan('context.copy',async()=>{
     if(!this.capacity.inventory)this.capacity.inventory=this.inventory();
     await this.capacity.inventory;
     const configured=this.c.profile.values.maxContexts,max=configured===undefined?4:Number(configured);
@@ -271,8 +275,8 @@ export class GhidraContexts {
       await durable(join(root,'process.json'),record.binding);
       await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);return record;
     } catch(error){if(record)await this.stopRecord(record,false);else this.capacity.slots.delete(context.id);throw error;}
-  }
-  async open(scope: Scope, request?: string): Promise<GhidraContext> {
+  });}
+  async open(scope: Scope, request?: string): Promise<GhidraContext> {return timingSpan('context.open',async()=>{
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target);
     if(this.workspace.unresolved(scope).some(intent=>intent.id!==request))
       fail('blocked','This context retains an unresolved operation; reconcile its recorded outcome before continuing.');
@@ -308,7 +312,7 @@ export class GhidraContexts {
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
     return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,
       baseSnapshot:snapshot,workingSnapshot:snapshot});
-  }
+  });}
   private async selected(scope: Scope): Promise<Running> {
     const context=this.workspace.context(scope);
     const binding=JSON.parse(await readFile(join(this.directory(),'context',context.id,'current.json'),'utf8')) as ProcessBinding;
@@ -389,7 +393,7 @@ public class ${name} extends GhidraScript {
     const record=await this.selected(scope);
     return scriptInventory(this.inputs.ghidraHome,record.binding.root,filter,limit,offset,this.inputs.extensionRoots);
   }
-  async inspect(snapshot:Artifact,parameters:Record<string,unknown>) {
+  async inspect(snapshot:Artifact,parameters:Record<string,unknown>) {return timingSpan('saved.verify',async()=>{
     const root=join(this.directory(),'inspection',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
     if(parameters.kind==='sdk'&&parameters.operation==='type-archive-import'){
       const p=object(parameters.parameters),path=join(root,'input.gdt');await link(await this.workspace.artifacts.verify(p.archive as Artifact),path);
@@ -397,7 +401,7 @@ public class ${name} extends GhidraScript {
     }
     const request=join(root,'request.json');await durable(request,parameters);
     const result=await this.server().inspect(await this.workspace.artifacts.verify(snapshot),request);return object(result.value);
-  }
+  });}
   private async removePeer(record:Running,path:string) {
     // A cancelled invocation must still release its verified owned temporary program.
     const cleanup=this.fork({...this.c,signal:new AbortController().signal});
@@ -629,7 +633,7 @@ public class ${name} extends GhidraScript {
     if(!alive(binding.pid))return true;
     await this.verified(binding,this.workspace.target(scope.target));return false;
   }
-  async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {
+  async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {return timingSpan('publication.latest',async()=>{
     const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();
     const before=await server.programStatus(binding,programPath(targetId));
     if(before.checkinActive!==false)fail('blocked','Shared model has an active check-in.');
@@ -645,8 +649,8 @@ public class ${name} extends GhidraScript {
       if(after.version!==expected)fail('binding','Shared model changed before its snapshot was verified.');
       return {revision:expected,snapshot};
     } finally {await this.stopRecord(record);}
-  }
-  async fields(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>> {
+  });}
+  async fields(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>> {return timingSpan('saved.fields',async()=>{
     const directory=join(this.directory(),'inspection',randomUUID());await mkdir(directory,{recursive:true,mode:0o700});
     const selectors=join(directory,'fields.json');await durable(selectors,changes.map(change=>({address:change.address,field:change.field})));
     const result=await this.server().fields(await this.workspace.artifacts.verify(snapshot),selectors),values=object(result.fields);
@@ -656,7 +660,7 @@ public class ${name} extends GhidraScript {
         fail('partial','Saved field inspection returned an incomplete value or dependency.');
     }
     return values as Record<string,{value:string|null;dependency:string;exists:boolean}>;
-  }
+  });}
   private async applyField(record:Running,change:ScalarChange) {
     const result=object(await record.http.call(change.field==='function.name'?'/rename_function':'/set_comment',change.field==='function.name'?
       {program:record.binding.program,old_name:change.address,new_name:change.local,strict_mode:'off'}:
@@ -682,7 +686,7 @@ public class ${name} extends GhidraScript {
       return await this.capture(record);
     } finally {await this.stopRecord(record,false);}
   }
-  async publish(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}> {
+  async publish(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}> {return timingSpan('publication.publish',async()=>{
     const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
     const directory=join(this.directory(),'publications',publication.id);await mkdir(directory,{recursive:true,mode:0o700});
     const result=await server.publish(binding,programPath(target.id),await this.workspace.artifacts.verify(publication.snapshot),
@@ -693,7 +697,7 @@ public class ${name} extends GhidraScript {
     const verified=await this.recover(publication);
     if(verified.state!=='verified')fail('unknown','Independent exact-version publication verification remains unresolved.');
     return {state:'published',revision:verified.revision};
-  }
+  });}
   async recover(publication:Publication):Promise<{state:'verified';revision:number}|{state:'unknown'}> {
     const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
     const journal=join(this.directory(),'publications',publication.id,'native-intent.json');

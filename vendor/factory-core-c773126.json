@@ -1,0 +1,12 @@
+{
+  "package": "@eyeauras/cli-factory",
+  "version": "0.4.1",
+  "file": "factory-core-c773126.tgz",
+  "sha256": "46d6d636a771bd350960450aa6a72af6d51df41190c1747109b51e37e2a465b7",
+  "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
+  "commit": "c7731269b68eaebbde69843430e1a5f178631c16",
+  "license": "MIT",
+  "distribution": "Prepared official Factory package; immutable content pin, no registry publication",
+  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/56",
+  "url": "https://raw.githubusercontent.com/iXab3r/insight-cli/e37a767dddbcedf53aaf9358768726e6031c5e5b/vendor/factory-core-c773126.tgz"
+}

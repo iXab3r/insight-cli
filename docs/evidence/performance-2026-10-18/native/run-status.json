@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "status": "stopped-at-user-request",
+  "endedAt": "2026-10-19T00:46:21.712Z",
+  "strictAcceptance": false,
+  "protocol": {
+    "warm": 30,
+    "cold": 5,
+    "warmups": 3,
+    "countsAndBudgetsChanged": false
+  },
+  "completed": [
+    "Baseline CLI/RPC reads: all 20 native trials and 2640 warm reads",
+    "Candidate CLI/RPC reads: all 20 native trials and 2640 warm reads",
+    "Baseline and candidate separate cold RPC: all 20 trials each",
+    "Stock Java 7 / Python 6 parity: all planned warm reads, cold trials and save/reopen checks",
+    "Baseline persistence: all 120 measured cycles",
+    "Baseline concurrency: all 30 measured rounds"
+  ],
+  "persistence": [
+    {
+      "label": "baseline",
+      "fixture": "tiny",
+      "analysis": false,
+      "completedCycles": 30,
+      "required": 30
+    },
+    {
+      "label": "baseline",
+      "fixture": "tiny",
+      "analysis": true,
+      "completedCycles": 30,
+      "required": 30
+    },
+    {
+      "label": "baseline",
+      "fixture": "large",
+      "analysis": false,
+      "completedCycles": 30,
+      "required": 30
+    },
+    {
+      "label": "baseline",
+      "fixture": "large",
+      "analysis": true,
+      "completedCycles": 30,
+      "required": 30
+    },
+    {
+      "label": "candidate",
+      "fixture": "tiny",
+      "analysis": false,
+      "completedCycles": 30,
+      "required": 30
+    },
+    {
+      "label": "candidate",
+      "fixture": "tiny",
+      "analysis": true,
+      "completedCycles": 3,
+      "required": 30
+    },
+    {
+      "label": "candidate",
+      "fixture": "large",
+      "analysis": false,
+      "completedCycles": 0,
+      "required": 30
+    },
+    {
+      "label": "candidate",
+      "fixture": "large",
+      "analysis": true,
+      "completedCycles": 0,
+      "required": 30
+    }
+  ],
+  "notCompleted": [
+    "Candidate remaining persistence cycles and large-file persistence",
+    "Candidate concurrency",
+    "Stock Java 6 / Python 6 version factor",
+    "Full native opt-in trace phase and traced concurrency",
+    "Final frozen installed candidate bounded-function proofs with tracing off/on"
+  ],
+  "interruption": {
+    "boundary": "Last completed full persistence cycle was tiny/analysis sample 2. Next sample 3 opened two contexts; its dispatched peer-open completed before scheduler termination. These two contexts were then closed through the public CLI.",
+    "unrecordedCompletedPeerOpen": true,
+    "syntheticTimingRowsAdded": false
+  },
+  "runtimeGraphsVerifiedUnchanged": {
+    "candidate": "716ced78afe22b8b1f983d89aa1be74fa5889f759ac9ab8e097ec911ea912e32",
+    "baseline": "f2cbc9c3583cade90beb71c0fec706ae837bbd0e93caef2619f44ad9dd55fced"
+  },
+  "cleanup": {
+    "userRequestedStop": true,
+    "closedContexts": 2,
+    "allOwnedContextsClosed": true,
+    "ownedServerStopped": true,
+    "unresolved": {
+      "requests": 0,
+      "publications": 0,
+      "administration_requests": 0
+    },
+    "finishedAt": "2026-10-19T00:46:21.712Z",
+    "allCandidateProfilesClosed": true,
+    "checks": [
+      {
+        "fixture": "tiny",
+        "analysis": false,
+        "activeContexts": 0,
+        "unresolved": 0,
+        "serverStopped": true,
+        "matchingNativeProcesses": 0
+      },
+      {
+        "fixture": "tiny",
+        "analysis": true,
+        "activeContexts": 0,
+        "unresolved": 0,
+        "serverStopped": true,
+        "matchingNativeProcesses": 0
+      },
+      {
+        "fixture": "large",
+        "analysis": false,
+        "activeContexts": 0,
+        "unresolved": 0,
+        "serverStopped": true,
+        "matchingNativeProcesses": 0
+      },
+      {
+        "fixture": "large",
+        "analysis": true,
+        "activeContexts": 0,
+        "unresolved": 0,
+        "serverStopped": true,
+        "matchingNativeProcesses": 0
+      }
+    ]
+  }
+}

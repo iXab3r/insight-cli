@@ -17,7 +17,9 @@
     "test:acceptance": "node scripts/run-automation.mjs test --suite acceptance --tag offline --property RestoreLockedMode=true",
     "test:acceptance:native": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag facade --property RestoreLockedMode=true --timeout-seconds 2400",
     "test:acceptance:full": "node scripts/run-automation.mjs test --suite acceptance --tag native --tag full --property RestoreLockedMode=true --timeout-seconds 18000",
-    "test:business": "node scripts/business/run.mjs"
+    "test:business": "node scripts/business/run.mjs",
+    "performance:native": "node scripts/performance/matrix.mjs",
+    "performance:compare": "node scripts/performance/compare.mjs"
   },
   "engines": {
     "node": ">=24"
@@ -29,7 +31,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/f47f6d14e8aadc6b6778a6e3627bbb08909521d2/vendor/factory-ipc-7c403d8.tgz",
-    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/73459aecc88da6f878988b64f71ab72b34a83c45/vendor/factory-core-74e7a64.tgz"
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-ipc-13b01dc.tgz",
+    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/246048487ede0610e6171545875956f7df72ebfe/vendor/factory-core-13b01dc.tgz"
   }
 }

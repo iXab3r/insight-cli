@@ -1,3 +1,4 @@
+import {timingSync} from '@eyeauras/cli-factory';
 import { DatabaseSync } from 'node:sqlite';
 import { chmodSync, mkdirSync, realpathSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -136,11 +137,11 @@ export class Workspace {
     } catch (error) { this.db.close(); throw error; }
   }
   close() { this.db.close(); }
-  private transaction<T>(action: () => T): T {
+  private transaction<T>(action: () => T): T {return timingSync('journal.transaction',()=>{
     this.db.exec('BEGIN IMMEDIATE');
     try { const result = action(); this.db.exec('COMMIT'); return result; }
     catch (error) { this.db.exec('ROLLBACK'); throw error; }
-  }
+  });}
   private rememberArtifact(artifact: Artifact) {
     this.artifacts.path(artifact);
     const row = this.db.prepare('SELECT data FROM artifacts WHERE id=?').get(artifact.id);

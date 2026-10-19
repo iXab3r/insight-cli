@@ -1,3 +1,4 @@
+import {timingSpan} from '@eyeauras/cli-factory';
 import {textWindow} from './text-window.js';
 import {functionResult,functionFailure} from './function-results.js';
 import {inspectFunctions,type FunctionInspectionOptions} from './function-inspection.js';
@@ -93,12 +94,12 @@ export class Research {
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
   async ordered<T>(selected: Scope, action: ()=>Promise<T>): Promise<T> {
     const key=this.workspace.context(selected).id,previous=this.tasks.get(key);
-    const task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const task=timingSpan('context.queue',()=>previous?previous.catch(()=>{}):Promise.resolve()).then(action);
     this.tasks.set(key,task);
     try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   async boundary<T>(selected:Scope,action:()=>Promise<T>):Promise<T>{
-    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=timingSpan('context.boundary-wait',()=>previous?previous.catch(()=>{}):Promise.resolve()).then(action);
     this.tasks.set(key,task);try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   status(selected: Scope) {
@@ -352,7 +353,7 @@ export class Research {
     return this.ordered(selected,()=>resolution?this.sharedOrder(selected.target,action):action());
   }
   private async sharedOrder<T>(target:string,action:()=>Promise<T>):Promise<T> {
-    const key='shared:'+target,previous=this.tasks.get(key),task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const key='shared:'+target,previous=this.tasks.get(key),task=timingSpan('context.boundary-wait',()=>previous?previous.catch(()=>{}):Promise.resolve()).then(action);
     this.tasks.set(key,task);try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   private async reconcile(selected:Scope,backend:ResearchBackend) {

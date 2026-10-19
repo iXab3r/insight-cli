@@ -5,7 +5,7 @@ import type {Scope} from './workspace.js';
 import {fail,object,digest} from './model.js';
 import {functionResult} from './function-results.js';
 import {textWindow} from './text-window.js';
-import {CliError} from '@eyeauras/cli-factory';
+import {CliError,timingSpan} from '@eyeauras/cli-factory';
 
 export interface FunctionInspectionOptions {limit:number;offset:number;total:number;expectView?:string;saveDirectory?:string}
 const fields=new Set('signature classification return_type entry_point body_start body_end decompiled_code plate_comment comments labels tags parameters locals callers call_context callees xrefs disassembly jump_targets refs'.split(' '));
@@ -41,11 +41,11 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   if(!parameters.functions){const single=object(output[selectors[0]!]);if(single.status==='failed'||single.status==='not_found')fail('partial',String(single.error),single);}
   const result={...(parameters.functions?{...raw,functions:output}:object(output[selectors[0]!])),view,textBudget:{maximumCharacters:options.total,returnedCharacters:options.total-remaining},...(options.saveDirectory?{save:{host:'owner',directory:resolve(options.saveDirectory),manifest:join(resolve(options.saveDirectory),'manifest.json')}}:{})};
   if(Buffer.byteLength(JSON.stringify(result))>1048576)fail('limit','Function response exceeds one MiB; narrow fields or selectors.');
-  if(options.saveDirectory){
+  if(options.saveDirectory){const directory=resolve(options.saveDirectory);await timingSpan('output.files',async()=>{
     // A fresh directory prevents overwrite and makes a partial filesystem failure observable.
-    const directory=resolve(options.saveDirectory);await mkdir(directory,{recursive:false});
+    await mkdir(directory,{recursive:false});
     for(const file of saved)await writeFile(join(directory,file.name),file.content,{flag:'wx',mode:0o600});
     await writeFile(join(directory,'manifest.json'),JSON.stringify({...scope,value:result},null,2)+'\n',{flag:'wx',mode:0o600});
-  }
+  });}
   return {...scope,value:result};
 }

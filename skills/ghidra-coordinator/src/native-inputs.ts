@@ -1,3 +1,4 @@
+import {timingSpan} from '@eyeauras/cli-factory';
 import {runTool,type RunContext} from './tool-runtime/run.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, readdir, mkdir, open, rename, rm, realpath, stat } from 'node:fs/promises';
@@ -64,11 +65,11 @@ export async function nativeRuntimeFiles(ghidraHome:string,java:string):Promise<
   if(!(await stat(join(jdkHome,'lib','modules'))).isFile())fail('configuration','The configured JDK omitted its runtime modules.');
   return files.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0);
 }
-export async function nativeRuntimeFingerprint(ghidraVersion:string,files:NativeRuntimeFile[]):Promise<string>{
+export async function nativeRuntimeFingerprint(ghidraVersion:string,files:NativeRuntimeFile[]):Promise<string>{return timingSpan('runtime.hash',async()=>{
   const hashes=[];for(const file of files)hashes.push({name:file.name,sha256:await sha(file.path)});
   return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
-}
-export async function nativeInputs(values: Record<string, unknown>,directory?:string,c?:RunContext): Promise<NativeInputs> {
+});}
+export async function nativeInputs(values: Record<string, unknown>,directory?:string,c?:RunContext): Promise<NativeInputs> {return timingSpan('runtime.verify',async()=>{
   if(directory)values=runtimeValues(dirname(directory),values);
   if(!values.java||!values.ghidraHome)fail('configuration','Ghidra is not installed. Run insight-cli ghidra install, or supply external runtime paths.');
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
@@ -102,10 +103,10 @@ export async function nativeInputs(values: Record<string, unknown>,directory?:st
   files.push({name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar});
   const fingerprint=modules.length?await nativeRuntimeFingerprint(ghidraVersion,files):baseFingerprint;
   return {java, ghidraHome, mcpJar, jars, classpath: jars.join(delimiter), ghidraVersion, fingerprint,debuggerWheels,extensionRoots:modules.map(m=>m.root),serverClasspath:baseJars.join(delimiter)};
-}
+});}
 
 /** Compile packaged helper sources against the selected installation, never an author checkout. */
-export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:RunContext): Promise<string> {
+export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:RunContext): Promise<string> {return timingSpan('runtime.helpers',async()=>{
   const sources = fileURLToPath(new URL('../../references/native/', import.meta.url));
   const names = [...(await readdir(sources)).filter(name => name.endsWith('.java')), '../InsightRepositoryProbe.java'].sort();
   if (!names.length) fail('configuration', 'Installed package omitted its native helper sources.');
@@ -133,6 +134,6 @@ export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:R
     fail('configuration', 'Native helper compilation failed against the configured runtime; diagnostics remain in owned profile storage.');
   }
   finally { await rm(temporary, {recursive: true, force: true}); }
-}
+});}
 
 export const nativeExtensionArguments=(inputs:NativeInputs)=>extensionJvmArguments(inputs.extensionRoots??[]);

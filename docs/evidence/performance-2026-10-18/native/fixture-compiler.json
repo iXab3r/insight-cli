@@ -1,0 +1,17 @@
+{
+  "clang": "Apple clang version 17.0.0 (clang-1700.3.19.1)",
+  "lld": "Homebrew LLD 22.1.8",
+  "compile": [
+    "--target=x86_64-pc-windows-msvc",
+    "-O1",
+    "-fno-builtin",
+    "-c"
+  ],
+  "link": [
+    "/entry:main",
+    "/subsystem:console",
+    "/nodefaultlib",
+    "/timestamp:0"
+  ],
+  "recipeSha256": "8a2023ed9c249ff5a782dd70aff07e2d050c8f292fb523840c99cb1ca77144c9"
+}

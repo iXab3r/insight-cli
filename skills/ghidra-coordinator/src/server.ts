@@ -1,3 +1,4 @@
+import {timingSpan} from '@eyeauras/cli-factory';
 import {ghidraBudget} from './budgets.js';
 import {CliError} from '@eyeauras/cli-factory';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -55,14 +56,14 @@ export class GhidraServer {
     private readonly state: {initializing?: Promise<ServerBinding>; child?: ChildProcess} = {}) {}
   fork(c: CommandContext) {return new GhidraServer(this.directory,this.inputs,c,this.state);}
   private root() { return join(this.directory, 'server'); }
-  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0],timeoutMilliseconds=120000): Promise<Record<string,unknown>> {
+  private async run(label: string, main: string, args: string[], environment: Record<string,string> = {}, input?: string, acceptedCodes=[0],timeoutMilliseconds=120000): Promise<Record<string,unknown>> {return timingSpan('native.helper.'+label,async()=>{
     const root = join(this.root(), 'calls', label + '-' + randomUUID()); await mkdir(root, {recursive:true,mode:0o700});
     const classes = await nativeHelpers(this.directory,this.inputs,this.c);
     const output=await runTool(this.c,{tool:'ghidra',role:label,installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],cwd:root,environment, input,acceptedCodes,timeoutMs:timeoutMilliseconds,maxOutputBytes:1024*1024});
     let result;try{result=object(parseDomainJson(output.stdout));}catch{fail('malformed','Native server operation returned malformed content.');}
     if(result.error||result.state==='failed')fail('authorization','Native server operation did not establish its outcome.');return result;
-  }
+  });}
 
   async credentials(binding: ServerBinding, role: 'reader' | 'publisher'): Promise<Record<string,string>> {
     const url = new URL(binding.origin);

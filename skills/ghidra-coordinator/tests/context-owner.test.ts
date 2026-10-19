@@ -46,18 +46,19 @@ test('a GUI replacement ignores an earlier stop as proof and independently verif
   const binding={pid:child.pid,endpoint:'http://127.0.0.1:19092',root,target:target.id,context:scope.id,mode:'gui',program:'/program',kind:'context',tokenSecret:'current-fixture-token',runtimeFingerprint:'b'.repeat(64)};
   await writeFile(join(root,'process.json'),JSON.stringify(binding));await writeFile(join(directory,'ghidra-native/context',scope.id,'current.json'),JSON.stringify(binding));
   await writeFile(join(root,'stopped.json'),JSON.stringify({pid:child.pid+1,tokenSecret:'previous-headless-token'}));
-  let wrong=false,authentications=0;
+  let wrong=false,wrongSource=false;const paths:string[]=[];
   const context={profile:{name:'default',values:{}},signal:new AbortController().signal,environment:{},secrets:{require:async()=> 'fixture-private-token'},
-    fetch:async(input:URL,init:RequestInit)=>{assert.equal((init.headers as Record<string,string>).Authorization,'Bearer fixture-private-token');authentications++;
-      const path=new URL(input).pathname;
+    fetch:async(input:URL,init:RequestInit)=>{assert.equal((init.headers as Record<string,string>).Authorization,'Bearer fixture-private-token');
+      const path=new URL(input).pathname;paths.push(path);
       if(path==='/mcp/instance_info')return Response.json({pid:wrong?child.pid!+1:child.pid,tcp_port:19092,project_path:join(root,'view')});
       if(path==='/mcp/schema')return Response.json({tools:[{path:'/get_program_options',method:'GET',params:[{name:'program',source:'query'},{name:'group',source:'query'}]},{path:'/get_metadata',method:'GET',params:[{name:'program',source:'query'}]}]});
-      if(path==='/get_program_options')return Response.json({options:[{name:'Executable SHA256',value:target.binarySha256}]});
+      if(path==='/get_program_options')return Response.json({options:[{name:'Executable SHA256',value:wrongSource?'c'.repeat(64):target.binarySha256}]});
       if(path==='/get_metadata')return Response.json({program_name:'fixture'});throw Error('Unexpected protocol request');
     }} as unknown as CommandContext;
   const backend=new GhidraContexts(workspace,{fingerprint:binding.runtimeFingerprint} as NativeInputs,context);
-  assert.equal(await backend.closed(scope),false);assert.ok(authentications>=4);
-  wrong=true;await assert.rejects(backend.closed(scope),/no longer matches its receipt/);process.kill(child.pid,0);
+  assert.equal(await backend.closed(scope),false);assert.deepEqual(paths,['/mcp/instance_info','/mcp/schema','/get_program_options']);
+  wrongSource=true;await assert.rejects(backend.closed(scope),/does not match the target input bytes/);process.kill(child.pid,0);wrongSource=false;
+  wrong=true;const before=paths.length;await assert.rejects(backend.closed(scope),/no longer matches its receipt/);assert.deepEqual(paths.slice(before),['/mcp/instance_info']);process.kill(child.pid,0);
   const exited=new Promise<void>(resolve=>child.once('exit',()=>resolve()));child.kill('SIGTERM');await exited;
   assert.equal(await backend.closed(scope),true,'The recorded current PID actually exited; no stale stop receipt is used as proof');
 });

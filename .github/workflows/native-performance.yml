@@ -1,0 +1,50 @@
+name: native-performance
+on:
+  workflow_dispatch:
+    inputs:
+      smoke:
+        description: Reduced 3 warm / 1 cold smoke (does not establish acceptance)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: owned-native-performance
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: [self-hosted, macOS, ARM64, insight-performance]
+    timeout-minutes: 1440
+    env:
+      INSIGHT_NATIVE_PERFORMANCE: owned
+      PERF_JAVA: ${{ vars.PERF_JAVA }}
+      PERF_GHIDRA: ${{ vars.PERF_GHIDRA }}
+      PERF_PYTHON: ${{ vars.PERF_PYTHON }}
+      PERF_BRIDGE: ${{ vars.PERF_BRIDGE }}
+      PERF_STOCK_JAR: ${{ vars.PERF_STOCK_JAR }}
+      PERF_SMOKE: ${{ inputs.smoke }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Acquire immutable baseline and prove installed candidate
+        run: |
+          npm install --prefix "$RUNNER_TEMP/insight-baseline" --ignore-scripts --no-audit --no-fund @eyeauras/insight-cli@0.2.4
+          node scripts/performance/prepare-ci.mjs
+      - name: Native serial matrix
+        run: |
+          extra=()
+          if [[ "$PERF_SMOKE" == true ]]; then extra+=(--smoke); fi
+          npm run performance:native -- --root "$RUNNER_TEMP/native-evidence" --baseline "$RUNNER_TEMP/insight-baseline/node_modules/@eyeauras/insight-cli/dist/src/bin.js" --candidate "$INSIGHT_CANDIDATE_BIN" --java "$PERF_JAVA" --ghidra "$PERF_GHIDRA" --python "$PERF_PYTHON" --bridge "$PERF_BRIDGE" --stock-jar "$PERF_STOCK_JAR" --parity-jar "$GITHUB_WORKSPACE/skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar" --ack-disposable "${extra[@]}"
+      - name: Export sanitized evidence (also retain failures)
+        if: always()
+        run: node scripts/performance/export.mjs "$RUNNER_TEMP/native-evidence" "$RUNNER_TEMP/native-public"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-performance-public
+          path: ${{ runner.temp }}/native-public

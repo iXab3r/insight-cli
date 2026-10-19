@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "passed": false,
+  "proofs": {
+    "candidate-bounded-proof": {
+      "checks": {
+        "undefinedDecodeAndNoPendingChanges": false,
+        "savedSnapshotUnchanged": false,
+        "rpcDiagnostic": false,
+        "bulkNativePagingAndManifest": false,
+        "changedView": false,
+        "independentSavedFunctionAndReplay": false,
+        "inputUnchanged": false,
+        "unsupportedLanguage": false,
+        "ownedCleanup": false
+      },
+      "cleanupEmpty": false,
+      "passed": false
+    },
+    "candidate-trace-bounded-proof": {
+      "checks": {
+        "undefinedDecodeAndNoPendingChanges": false,
+        "savedSnapshotUnchanged": false,
+        "rpcDiagnostic": false,
+        "bulkNativePagingAndManifest": false,
+        "changedView": false,
+        "independentSavedFunctionAndReplay": false,
+        "inputUnchanged": false,
+        "unsupportedLanguage": false,
+        "ownedCleanup": false
+      },
+      "cleanupEmpty": false,
+      "passed": false
+    }
+  }
+}

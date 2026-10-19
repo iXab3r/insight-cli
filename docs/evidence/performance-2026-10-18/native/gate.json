@@ -1,0 +1,233 @@
+{
+  "passed": false,
+  "families": {
+    "read.": {
+      "passed": false,
+      "minimum": 30,
+      "relative": 0.15,
+      "noiseMultiplier": 3,
+      "failures": [
+        {
+          "case": "/tiny/analysis/rpc/read.strings",
+          "reason": "tail regression",
+          "before": 229.179,
+          "after": 389.221083,
+          "allowance": 68.7537
+        },
+        {
+          "case": "/tiny/analysis/rpc/read.undefined",
+          "reason": "tail regression",
+          "before": 238.063625,
+          "after": 330.161416,
+          "allowance": 71.4190875
+        },
+        {
+          "case": "/tiny/no-analysis/cli/read.missing",
+          "reason": "tail regression",
+          "before": 1857.739208,
+          "after": 2488.370583,
+          "allowance": 557.3217624
+        }
+      ]
+    },
+    "persistence.": {
+      "passed": false,
+      "minimum": 30,
+      "relative": 0.15,
+      "noiseMultiplier": 3,
+      "failures": [
+        {
+          "case": "/large/analysis/cli/persistence.new-context",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.peer-context",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.edit",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.durable-replay",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.read-script",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.merge",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.refresh",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.refresh-readback",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.peer-close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.reopen",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.reopen-readback",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/analysis/cli/persistence.final-close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.new-context",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.peer-context",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.edit",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.durable-replay",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.read-script",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.merge",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.refresh",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.refresh-readback",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.peer-close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.reopen",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.reopen-readback",
+          "reason": "missing case"
+        },
+        {
+          "case": "/large/no-analysis/cli/persistence.final-close",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.new-context",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.peer-context",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.edit",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.durable-replay",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.read-script",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.merge",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.refresh",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.refresh-readback",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.peer-close",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.close",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.reopen",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.reopen-readback",
+          "reason": "insufficient or failed evidence"
+        },
+        {
+          "case": "/tiny/analysis/cli/persistence.final-close",
+          "reason": "insufficient or failed evidence"
+        }
+      ]
+    },
+    "concurrency.": {
+      "passed": false,
+      "minimum": 30,
+      "relative": 0.15,
+      "noiseMultiplier": 3,
+      "failures": [
+        {
+          "reason": "empty evidence"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.long-operation",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.diagnostic",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.queued-configuration",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.independent-read",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.first-read",
+          "reason": "missing case"
+        },
+        {
+          "case": "/tiny/no-analysis/cli/concurrency.second-read",
+          "reason": "missing case"
+        }
+      ]
+    }
+  }
+}

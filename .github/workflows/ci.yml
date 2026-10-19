@@ -12,6 +12,15 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run test:package
+      - name: Artifact verification performance smoke
+        run: |
+          npm install --prefix "$RUNNER_TEMP/insight-baseline" --ignore-scripts --no-audit --no-fund @eyeauras/insight-cli@0.2.4
+          node scripts/performance/hashing.mjs --baseline "$RUNNER_TEMP/insight-baseline/node_modules/@eyeauras/cli-factory-ipc/dist/src/package-build.js" --candidate "$GITHUB_WORKSPACE/node_modules/@eyeauras/cli-factory-ipc/dist/src/package-build.js" --entry "$RUNNER_TEMP/insight-baseline/node_modules/@eyeauras/insight-cli/dist/src/bin.js" --output "$RUNNER_TEMP/hash-performance.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-verification-performance
+          path: ${{ runner.temp }}/hash-performance.json
       - run: git diff --exit-code
   windows-java-arguments:
     runs-on: windows-latest

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
-import { runHosted } from '@eyeauras/cli-factory-ipc';
-import { createDefinition } from './cli.js';
+import {timingSpan} from '@eyeauras/cli-factory';
+const {runHosted}=await timingSpan('bootstrap.ipc-module',()=>import('@eyeauras/cli-factory-ipc'));
+const {createDefinition}=await timingSpan('bootstrap.domain-modules',()=>import('./cli.js'));
 process.exitCode = await runHosted({ entryPoint: import.meta.url, createDefinition });

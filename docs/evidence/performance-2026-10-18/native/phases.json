@@ -1,0 +1,44 @@
+[
+  {
+    "label": "baseline",
+    "ms": 6742015.81475,
+    "code": 0
+  },
+  {
+    "label": "baseline-cold-rpc",
+    "ms": 934343.398833,
+    "code": 0
+  },
+  {
+    "label": "baseline-persistence",
+    "ms": 12294091.770792,
+    "code": 0
+  },
+  {
+    "label": "baseline-concurrency",
+    "ms": 415459.364459,
+    "code": 1
+  },
+  {
+    "label": "stock-parity",
+    "ms": 903903.070291,
+    "code": 0
+  },
+  {
+    "label": "candidate",
+    "ms": 5711720.288917,
+    "code": 0
+  },
+  {
+    "label": "candidate-cold-rpc",
+    "ms": 803862.446584,
+    "code": 0
+  },
+  {
+    "label": "candidate-persistence",
+    "code": 130,
+    "userRequestedStop": true,
+    "ms": 778150.680042,
+    "endedAt": "2026-10-19T00:46:21.712Z"
+  }
+]

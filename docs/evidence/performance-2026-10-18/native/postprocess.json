@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "userRequestedStop": true,
+  "coverage": false,
+  "equivalence": true,
+  "gate": false,
+  "tracing": false,
+  "nativeProofs": false,
+  "scriptEffects": true,
+  "pairedRoutes": true,
+  "endedAt": "2026-10-19T00:47:26.451Z"
+}

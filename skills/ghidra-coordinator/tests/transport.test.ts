@@ -40,3 +40,12 @@ test('response stream failure is a bounded transport error rather than a raw sta
  const fetch=async()=>new Response(new ReadableStream({start(controller){controller.error(new Error('private native error'));}}));
  await assert.rejects(new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch).instance(),/Ghidra request \/mcp\/instance_info did not complete/);
 });
+test('authenticated descriptor reuse rebinds cancellation and never crosses token identity',async()=>{
+ let schemas=0;const signals:AbortSignal[]=[],tokens:string[]=[];
+ const fetch=async(input:string|URL|Request,init?:RequestInit)=>{init!.signal!.throwIfAborted();signals.push(init!.signal!);tokens.push(String((init!.headers as Record<string,string>).Authorization));if(String(input).endsWith('/mcp/schema')){schemas++;return Response.json({tools:[{path:'/read',method:'GET',params:[]}]});}return Response.json({ok:true});};
+ const first=new AbortController(),bridge=new HttpBridge('http://127.0.0.1:19000',fetch as typeof globalThis.fetch,first.signal,'owned-token');
+ await bridge.call('/read');first.abort();const second=new AbortController();
+ const next=bridge.forRequest(fetch as typeof globalThis.fetch,second.signal,'owned-token',120000);assert.deepEqual(await next.call('/read'),{ok:true});assert.equal(schemas,1);assert.equal(signals.at(-1)!.aborted,false);
+ const changed=next.forRequest(fetch as typeof globalThis.fetch,second.signal,'other-owned-token',120000);await changed.call('/read');assert.equal(schemas,2);assert.equal(tokens.at(-1),'Bearer other-owned-token');
+ second.abort();await assert.rejects(next.call('/read'),/cancelled/);
+});
