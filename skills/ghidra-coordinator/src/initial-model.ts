@@ -27,7 +27,8 @@ export async function initializeModel(workspace:Workspace,target:ResearchTarget,
     intent=await initialIntent(workspace,target.id);
   }
   if(!intent||typeof intent.id!=='string'||!/^[a-f0-9-]{36}$/.test(intent.id)||
-    Object.entries(expected).some(([key,value])=>stable(intent![key])!==stable(value)))fail('binding','Retained initial model differs from its input, load settings, runtime or repository authority.');
+    Object.entries(expected).filter(([key])=>key!=='input').some(([key,value])=>stable(intent![key])!==stable(value))||
+    typeof intent.input!=='string'||await realpath(intent.input)!==expected.input)fail('binding','Retained initial model differs from its input, load settings, runtime or repository authority.');
   if(workspace.model(target.id).state==='opening')workspace.beginModelInitialization(target.id);
   const prepared=await server.initialImport(root);
   if(prepared.state==='busy')fail('busy','The original initial-import worker is still active; retain the context and continue after it completes.');

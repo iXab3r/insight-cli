@@ -127,7 +127,8 @@ measurements. `npm run test:business` runs their installed public-CLI/native gat
 The canonical npm helper and its progressive skill live in `skills/ghidra-coordinator`; the npm
 package is `@eyeauras/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared
-IPC ownership. Update permission starts disabled. All mutable state derives from profile AppData.
+IPC ownership. Update permission starts disabled. Factory control state stays in profile AppData; `storage` can relocate the complete
+analysis/runtime trees to a selected volume. See [storage](skills/ghidra-coordinator/references/storage.md).
 
 Configure Java 21 and Ghidra 12.1.2 as described in
 [setup](skills/ghidra-coordinator/references/setup.md). Omit `server` for managed local startup;

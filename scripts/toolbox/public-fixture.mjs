@@ -10,7 +10,7 @@ import {tmpdir} from 'node:os';
 import {randomUUID,createHash} from 'node:crypto';
 const execute=promisify(execFile);
 export const digest=b=>createHash('sha256').update(b).digest('hex');
-export async function createPublicFixture(packageRoot,directory){
+export async function createPublicFixture(packageRoot,directory,{appDataBase}={}){
  assert.equal(process.env.INSIGHT_NATIVE_DISPOSABLE,'1','Explicitly select disposable native acceptance');
  packageRoot=resolve(packageRoot);directory=resolve(directory);await mkdir(directory,{recursive:true,mode:0o700});
  const project=join(directory,'project');await mkdir(join(project,'.agents/skills'),{recursive:true,mode:0o700});
@@ -21,7 +21,7 @@ export async function createPublicFixture(packageRoot,directory){
  for(const base of createRequire(join(packageRoot,'package.json')).resolve.paths('@eyeauras/cli-factory')??[]){try{const candidate=join(base,'@eyeauras/cli-factory'),manifest=JSON.parse(await readFile(join(candidate,'package.json'),'utf8'));assert.equal(manifest.name,'@eyeauras/cli-factory');factoryRoot=candidate;factory=manifest;break;}catch(error){if(error.code!=='ENOENT')throw error;}}
  assert.ok(factoryRoot&&factory,'Factory package root must resolve');
  // Keep the Unix endpoint below its native path-length limit, even under long runner paths.
- const preload=join(directory,'fixture-environment.mjs'),appdata=await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','it-'));
+ const preload=join(directory,'fixture-environment.mjs'),appdata=await mkdtemp(join(appDataBase??(process.platform==='win32'?tmpdir():'/tmp'),'it-'));
  await writeFile(preload,`import{AppArguments}from ${JSON.stringify(pathToFileURL(join(factoryRoot,factory.main)).href)};const original=AppArguments.CurrentEnvironment;AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:${JSON.stringify(appdata)},EnvironmentLocalAppData:${JSON.stringify(appdata)}});`,{flag:'wx',mode:0o600});
  const environment={...process.env,NODE_OPTIONS:'--import '+pathToFileURL(preload).href};
  const profile='toolbox-'+randomUUID();let sequence=0;const calls=[];

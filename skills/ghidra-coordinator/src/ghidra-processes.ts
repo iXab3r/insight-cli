@@ -8,14 +8,15 @@ import {registerExistingProcess,type ProcessRecord} from './tool-runtime/supervi
 import type {ToolProcessHooks} from './tool-runtime/commands.js';
 import {fail} from './model.js';
 import type {Scope,Workspace} from './workspace.js';
+import {analysisDirectory} from './analysis-storage.js';
 async function ownedPath(c:CommandContext,path:unknown){
  if(typeof path!=='string')fail('binding','Tool resource moved outside this profile.');
- const supplied=resolve(path),profile=resolve(c.appArguments.AppDataDirectory),canonical=await realpath(profile);
- const base=supplied.startsWith(profile+sep)?profile:supplied.startsWith(canonical+sep)?canonical:undefined;
+ const supplied=resolve(path),profile=resolve(c.appArguments.AppDataDirectory),canonical=await realpath(profile),analysis=await realpath(analysisDirectory(c));
+ const base=supplied.startsWith(profile+sep)?profile:supplied.startsWith(canonical+sep)?canonical:supplied.startsWith(analysis+sep)?analysis:undefined;
  if(!base)fail('binding','Tool resource moved outside this profile.');
  // Keep Factory's raw AppData identity in process records, but compare native resources
  // under its canonical profile. Accept the parent alias, never a replaced child link.
- const expected=join(canonical,relative(base,supplied));
+ const suffix=relative(base,supplied),expected=base===analysis?supplied:['workspace','runtime','materials','temp'].some(tree=>suffix===tree||suffix.startsWith(tree+sep))?join(analysis,suffix):join(canonical,suffix);
  if(await realpath(supplied)!==expected)fail('binding','Tool resource moved outside this profile.');return expected;
 }
 export async function verifyGhidraProcess(r:ProcessRecord,c:CommandContext):Promise<boolean|undefined>{
@@ -38,7 +39,7 @@ export function ghidraProcessHooks(workspace:(c:CommandContext)=>Workspace,close
  return {
   verify:verifyGhidraProcess,
   async discover(c){
-   const directory=c.appArguments.AppDataDirectory,executable=runtimeSelection(directory)?.java??String(c.profile.values.java??'unverified-legacy-executable');
+   const directory=c.appArguments.AppDataDirectory,executable=runtimeSelection(directory,analysisDirectory(c))?.java??String(c.profile.values.java??'unverified-legacy-executable');
    async function walk(path:string,depth=0):Promise<void>{
     if(depth>6)return;let entries;try{entries=await readdir(path,{withFileTypes:true});}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
     for(const entry of entries){const at=join(path,entry.name);if(entry.isDirectory())await walk(at,depth+1);else if(entry.name==='process.json'){

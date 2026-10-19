@@ -395,3 +395,22 @@ changed the same field, before-edit refresh retains both values and refuses to s
 If divergence appears before save's merge, save fails with the retained local acknowledgment
 and publishes nothing. A lost merge reply follows the same reconciliation and no-replay rules
 as explicit merge; the request ID retrieves this workflow after owner replacement.
+
+## Choose storage and resume a cross-volume migration
+
+Inspect `storage show --json`. An empty profile can use `storage configure --directory BASE`;
+existing work uses `storage migrate --directory BASE --dry-run` then the same command without
+`--dry-run`. Both require Update and append `insight-cli/<profile>` to BASE. Close this profile's
+contexts and stop owned servers/processes first; other active profiles are preserved.
+
+The complete workspace/materials/temp/runtime trees move, including snapshots, native DBs,
+local repositories, unknown requests/candidates, temporary verification data, runtime installs
+and caches. Factory settings/permissions/IPC/logs and OS keyring secrets keep their locations.
+
+An interrupted move freezes research. `storage resume` verifies retained copies and continues;
+`storage rollback` restores source only when this cannot discard post-migration writes.
+After independent native reopen/readback, grant Destructive and run `storage cleanup` to free
+verified original copies. Cleanup intent disables rollback; interrupted cleanup uses resume.
+Stable old paths remain compatibility links. A stopped unknown-operation profile can migrate
+without replaying scripts/publications or declaring their effects applied. See the complete
+[storage contract](../skills/ghidra-coordinator/references/storage.md).

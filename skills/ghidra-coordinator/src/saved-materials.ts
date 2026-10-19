@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { constants, type BigIntStats } from 'node:fs';
 import { lstat, mkdir, open, opendir, realpath, rename, rm } from 'node:fs/promises';
 import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import {analysisDirectory} from './analysis-storage.js';
 
 export interface SavedMaterials {
   state: 'saved'; path: string; kind: 'file' | 'directory'; files: number; bytes: number; sha256: string;
@@ -152,7 +153,7 @@ export function artifactsCommands(): CommandDefinition[] {
     command('save <path>', 'Save a complete independent copy of a file or directory in this profile',
       ({args}, context) => {
         if (typeof args.path !== 'string' || !args.path || args.path.includes('\0')) fail('invalid', 'Provide one file or directory path.');
-        return saveMaterials(context.appArguments.AppDataDirectory, resolve(context.cwd, args.path), context.signal);
+        return saveMaterials(analysisDirectory(context), resolve(context.cwd, args.path), context.signal);
       }, {permission: Permission.Update}),
   ])];
 }

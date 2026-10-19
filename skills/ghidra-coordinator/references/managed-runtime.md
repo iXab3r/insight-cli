@@ -79,7 +79,7 @@ operations until `connect`/`start`. `server connect/disconnect` retain their con
 An external server remains configured through profile server/repository/account fields and Factory
 secrets; `server stop` cannot stop that external service.
 
-Code/cache/installation receipts live under profile AppData `runtime/`; research remains under
+Code/cache/installation receipts live under configured [analysis storage](storage.md) `runtime/`; research remains under
 `workspace/`, and saved files under `materials/`. One selected immutable installation serves many
 isolated JVM contexts; each has its own projects, home, settings, cache/temp and authenticated
 endpoint. No per-agent copy of the Ghidra code distribution is required. This is process and data

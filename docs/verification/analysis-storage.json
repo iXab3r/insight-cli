@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "status": "pre_release_acceptance_passed",
+  "scope": "Issue 76 configurable profile analysis storage and resumable migration",
+  "offline": {
+    "node": "24.19.0",
+    "tests": 256,
+    "passed": 252,
+    "explicitOptInSkipped": 4,
+    "failed": 0,
+    "releaseTests": 31,
+    "offlineGherkin": {
+      "executed": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "package": {
+    "isolatedOfflineInstall": "passed",
+    "relocationAndSkills": "passed",
+    "sha256": "adb805fc1b3f5e82c59069dabf869310684678b46e4c9cda95fa9ccdbb3f1c01"
+  },
+  "review": {
+    "independent": "passed",
+    "factoryPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/57",
+    "factoryMerged": true,
+    "factoryCi": "7/7 passed"
+  },
+  "native": {
+    "schema": 1,
+    "status": "passed",
+    "scope": "installed public CLI native Ghidra",
+    "native": true,
+    "version": "0.2.0",
+    "inputSha256": "a0506bae8ef5a9b82e4a97d9f2ca773753a56e16400ca4622006d08be642c9fb",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "24.19.0",
+    "crossFilesystem": true,
+    "migratedBytes": 285182748,
+    "manifest": "47e2ebc0e400403ad18e1bb9cbe837ca0abce7ee84ec50b1f80efe5b1e43ccbc",
+    "assertions": [
+      "installed public CLI and Factory profile/keyring/IPC",
+      "spaces and Unicode destinations",
+      "native saved private edit and local server repository",
+      "actual elected-owner SIGKILL while copying",
+      "ordinary-command freeze and durable resume",
+      "independent replacement-owner native reopen",
+      "preserved session/target and saved-file receipt",
+      "publication and fresh-session shared readback",
+      "rollback refuses post-migration writes",
+      "verified source cleanup and retained aliases",
+      "owned native processes stopped"
+    ]
+  },
+  "release": {
+    "state": "pending_at_acceptance",
+    "registryVerification": "Separate release workflow gate; its immutable build and registry receipts establish the published version and bytes."
+  },
+  "crossFilesystemCli": {
+    "schema": 1,
+    "status": "passed",
+    "scope": "installed public CLI copy/resume/file-readback",
+    "native": false,
+    "version": "0.2.0",
+    "inputSha256": "60cb5c12122992e52ca1b873bfe2cd78239a6688cac31226a5d92fd1008aa903",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "24.19.0",
+    "crossFilesystem": true,
+    "migratedBytes": 268533969,
+    "manifest": "b04530a25a21d74b4b03658e6df96225b47013d3070fe7239472dfce29f5853f",
+    "assertions": [
+      "installed public CLI and Factory profile/IPC",
+      "actual cross-filesystem copy",
+      "actual elected-owner SIGKILL while copying",
+      "ordinary-command freeze and durable resume",
+      "replacement-owner target and file readback",
+      "rollback refuses subsequent writes",
+      "verified source cleanup and retained aliases"
+    ]
+  },
+  "acceptanceSourceCommit": "ceac0d06de2ebd2c8242ce7637b680fc8925b2cf",
+  "ci": {
+    "offlinePlatforms": [
+      "Ubuntu",
+      "Windows"
+    ],
+    "state": "passed",
+    "workflow": "https://github.com/iXab3r/insight-cli/actions/runs/39319394128",
+    "windowsNativeTools": "Same production code passed all seven native gates in run 39319000123. Final-head checks are required before merge."
+  }
+}

@@ -23,7 +23,7 @@ Artifact checkpoints preserve the selected project bytes without replacing canon
 
 `skill` still locates the original `insight-cli` skill; `skill insight-re` locates the RE
 skill in the same relocatable package. Artifact saves need Update, store completed copies
-under profile AppData, and return an ordinary path plus file/byte counts and a digest.
+under configured profile analysis storage, and return an ordinary path plus file/byte counts and a digest.
 They neither execute tools nor publish Ghidra changes. The
 [artifact reference](../skills/ghidra-coordinator/references/artifacts.md) owns save semantics.
 
@@ -37,6 +37,28 @@ The earlier `insight-ghidra` implementation remains a scoped-comment regression 
 publication mechanisms, with its historical behavior recorded below. The agreed walkthroughs
 are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
 [work items](WORK-ITEMS.md) retain the delivery contract and checkpoint history.
+
+### Profile analysis storage
+
+The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,
+permissions, keyring identity and IPC. `storage show`, `configure`, `migrate --dry-run`, `migrate`,
+`resume`, `rollback` and `cleanup` manage the non-secret `analysisDirectory` setting through
+Factory ProfileStore, without another config or host. Defaults preserve existing AppData paths;
+a custom base appends application and exact profile name.
+
+The complete workspace/materials/temp/runtime trees move, including native/context DBs, local
+server repositories, snapshots, unknown-operation journals, temporary verification/execution
+state and runtime installations/caches. Factory control metadata, application logs and keyring
+secrets stay in their current locations. Missing configured storage fails without fallback.
+[Storage](../skills/ghidra-coordinator/references/storage.md) defines scope and filesystem limits.
+
+A quiescent profile freezes ordinary commands before copying. Hash verification, source-stability
+checks and fsync precede the compatibility-alias transaction and Factory setting commit.
+Permanent source aliases preserve native absolute references without rewriting research records.
+Interrupted copy/activation resumes; rollback verifies retained source and unchanged destination.
+Cleanup records irreversible intent before removing the original copy. Later writes require
+forward migration instead of a stale rollback. Stopped profiles with unknown operations can
+migrate without replay, forced abandonment or changed outcomes.
 
 ### Toolbox discovery and packaged instructions
 
@@ -84,7 +106,7 @@ macOS host debugger/display/keychain authorization remains an explicit OS prereq
 With an installed managed or external runtime, the facade starts its owned local server
 and creates its own repository/storage for the ordinary open workflow. An externally configured
 Ghidra Server is also supported through a profile. Factory continues to own profiles, permission
-gates, credentials and host lifecycle. Managed resources live in profile AppData; starting local
+gates, credentials and host lifecycle. Managed resources live in configured profile analysis storage; starting local
 infrastructure does not grant administrative control over unrelated external repositories.
 
 Two catalog operations exchange documentation with an independently configured archive service.

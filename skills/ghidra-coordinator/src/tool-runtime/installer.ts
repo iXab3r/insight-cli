@@ -1,5 +1,6 @@
 import type {CommandContext} from '@eyeauras/cli-factory';
-import {mkdir,stat,rm,readdir,writeFile,readFile} from 'node:fs/promises';
+import {analysisDirectory} from '../analysis-storage.js';
+import {mkdir,stat,rm,readdir,writeFile,readFile,realpath} from 'node:fs/promises';
 import {join,resolve,sep,dirname} from 'node:path';
 import {cacheArtifact,consumeArchive,extractArchive,fileSha256,archiveName} from './archives.js';
 import {atomicWrite,readJson,toolRoot,withToolLock,installationStage,removeInstallation,treeFingerprint,assertUnused,withToolUse} from './store.js';
@@ -11,7 +12,7 @@ export interface SelectedTool extends ToolInstallation,ToolLaunch {roots:Record<
 /** Read-only verification used by an owned child after the command owner has staged a runtime. */
 export async function verifyManagedInstallation(directory:string,tool:string,selected:SelectedTool){
  const root=join(toolRoot(directory,tool),'installations',selected.id);
- if(selected.schema!==1||selected.tool!==tool||selected.mode!=='managed'||selected.uninstalledAt||!/^[a-f0-9]{64}$/.test(selected.id)||selected.root!==root||!resolve(selected.executable).startsWith(resolve(root)+sep))fail('binding','Invalid managed tool installation receipt.');
+ if(selected.schema!==1||selected.tool!==tool||selected.mode!=='managed'||selected.uninstalledAt||!/^[a-f0-9]{64}$/.test(selected.id)||await realpath(selected.root)!==await realpath(root)||!(await realpath(selected.executable)).startsWith(await realpath(root)+sep))fail('binding','Invalid managed tool installation receipt.');
  const ready=await readJson<SelectedTool>(join(root,'ready.json'));
  const binding=(v:SelectedTool)=>{const {selectedAt,uninstalledAt,...rest}=v;return rest;};
  if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Managed tool receipt differs from its verified installation.');
@@ -35,7 +36,7 @@ export interface InstallDescriptor {
 export class ToolInstaller {
  readonly directory:string;readonly root:string;readonly cache:string;
  constructor(readonly c:CommandContext,readonly descriptor:InstallDescriptor){
-  this.directory=c.appArguments.AppDataDirectory;this.root=toolRoot(this.directory,descriptor.id);this.cache=join(this.directory,'runtime/cache');
+  this.directory=c.appArguments.AppDataDirectory;this.root=toolRoot(analysisDirectory(c),descriptor.id);this.cache=join(analysisDirectory(c),'runtime/cache');
  }
  private async receipt(){return readJson<SelectedTool>(join(this.root,'selection.json'));}
  async status(){
@@ -84,14 +85,14 @@ export class ToolInstaller {
  private async verify(selected:SelectedTool){
   if(selected.schema!==1||selected.tool!==this.descriptor.id||!/^[a-f0-9]{64}$/.test(selected.id))fail('binding','Invalid tool installation receipt.');
   const root=join(this.root,'installations',selected.id);
-  if(selected.root!==root||selected.mode==='managed'&&!resolve(selected.executable).startsWith(resolve(root)+sep))fail('binding','Selected tool points outside its owned installation.');
+  if(await realpath(selected.root)!==await realpath(root)||selected.mode==='managed'&&!(await realpath(selected.executable)).startsWith(await realpath(root)+sep))fail('binding','Selected tool points outside its owned installation.');
   const ready=await readJson<SelectedTool>(join(root,'ready.json'));
   const binding=(v:SelectedTool)=>{const {selectedAt,uninstalledAt,...rest}=v;return rest;};
   if(!ready||digest(binding(ready))!==digest(binding(selected)))fail('binding','Selected tool receipt differs from its verified installation.');
   if(this.descriptor.noticeFiles){if(selected.noticeDigest!==digest(this.descriptor.noticeFiles))fail('binding','Bundled license notices changed; reinstall the selected tool.');for(const [name,body]of Object.entries(this.descriptor.noticeFiles)){archiveName(name);try{if(await readFile(join(root,name),'utf8')!==body)fail('binding','Installed license notice differs from its retained text.');}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')fail('binding','Installed license notice is missing.');throw error;}}}
   if(selected.mode==='managed')await verifyManagedInstallation(this.directory,this.descriptor.id,selected);
   else if(await fileSha256(selected.executable,this.c.signal)!==selected.fingerprint)fail('binding','Selected tool code differs from its verified installation.');
-  if(selected.execution&&(!resolve(selected.execution.executable).startsWith(resolve(root)+sep)||await treeFingerprint(root)!==selected.executionFingerprint))fail('binding','Owned external-tool execution copy differs from its verified installation.');
+  if(selected.execution&&(!(await realpath(selected.execution.executable)).startsWith(await realpath(root)+sep)||await treeFingerprint(root)!==selected.executionFingerprint))fail('binding','Owned external-tool execution copy differs from its verified installation.');
   if(selected.mode==='external'&&this.descriptor.externalInputs&&(!selected.externalInputs||digest(await this.descriptor.externalInputs(selected.executable,this.c))!==digest(selected.externalInputs)))fail('binding','External tool family differs from its verified installation.');
  }
  async use<T>(action:(selection:SelectedTool)=>Promise<T>):Promise<T>{
