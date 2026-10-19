@@ -1,0 +1,11 @@
+{
+  "package": "@eyeauras/cli-factory",
+  "version": "0.4.1",
+  "file": "factory-core-0413409.tgz",
+  "sha256": "035224d38e02b57f53fb39cf31960e9e6ab74c61fc2864252dc3e1a4051fb617",
+  "source": "https://github.com/iXab3r/EyeAuras.CliFactory",
+  "commit": "041340922929d516ff4e2194a52bffa7d9c10569",
+  "license": "MIT",
+  "distribution": "Prepared official Factory package; immutable content pin, no registry publication",
+  "upstreamPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/57"
+}
