@@ -27,6 +27,8 @@ jobs:
           java-version: 21
       - run: npm ci --ignore-scripts
       - run: npm run build
+      - name: Portable storage migration and runtime regression
+        run: node --test skills/ghidra-coordinator/dist/tests/analysis-storage.test.js skills/ghidra-coordinator/dist/tests/runtime-manager.test.js skills/ghidra-coordinator/dist/tests/tool-installation.test.js
       - name: Real java and javac long-classpath regression
         shell: pwsh
         run: |

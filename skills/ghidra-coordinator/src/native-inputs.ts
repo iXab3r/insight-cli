@@ -69,7 +69,7 @@ export async function nativeRuntimeFingerprint(ghidraVersion:string,files:Native
   return createHash('sha256').update(stable({schema:2,ghidraVersion,hashes})).digest('hex');
 }
 export async function nativeInputs(values: Record<string, unknown>,directory?:string,c?:RunContext): Promise<NativeInputs> {
-  if(directory)values=runtimeValues(dirname(directory),values);
+  if(directory)values=runtimeValues(c?.appArguments.AppDataDirectory??dirname(directory),values,typeof values.analysisDirectory==='string'?values.analysisDirectory:undefined);
   if(!values.java||!values.ghidraHome)fail('configuration','Ghidra is not installed. Run insight-cli ghidra install, or supply external runtime paths.');
   const requested = [text(values.java, 4096), text(values.ghidraHome, 4096), text(values.mcpJar??packagedMcpJar, 4096)];
   if (!requested.every(isAbsolute)) fail('configuration', 'Configure absolute Java, Ghidra home and GhidraMCP jar paths.');
@@ -96,7 +96,7 @@ export async function nativeInputs(values: Record<string, unknown>,directory?:st
     join(debug,'Debugger-agent-lldb/pypkg/dist/ghidralldb-12.1-py3-none-any.whl')];
   const files=await nativeRuntimeFiles(ghidraHome,java);
   const baseFingerprint=await nativeRuntimeFingerprint(ghidraVersion,[...files,{name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar}]);
-  if(directory){const selected=runtimeSelection(dirname(directory));if(selected&&selected.fingerprint!==baseFingerprint)fail('binding','Selected runtime inputs differ from their installation receipt; reinstall or restore the verified files.');}
+  if(directory){const selected=runtimeSelection(c?.appArguments.AppDataDirectory??dirname(directory),typeof values.analysisDirectory==='string'?values.analysisDirectory:undefined);if(selected&&selected.fingerprint!==baseFingerprint)fail('binding','Selected runtime inputs differ from their installation receipt; reinstall or restore the verified files.');}
   for(const module of modules)for(const file of module.files)files.push({name:'extension/'+module.name+'/'+file.name,path:join(module.root,file.name)});
   // Logical names bind locations without embedding the author's installation path.
   files.push({name:'bridge/GhidraMCP-7.0.0.jar',path:mcpJar});

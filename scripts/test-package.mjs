@@ -3,9 +3,10 @@ import {runNpm} from './npm-command.mjs';
 import assert from 'node:assert/strict';import{execFile}from'node:child_process';import{promisify}from'node:util';import{mkdtemp,mkdir,readFile,writeFile,rm,realpath}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{createHash}from'node:crypto';import{fileURLToPath,pathToFileURL}from'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile);
 const keep=process.argv.includes('--keep-installed');
-const proof=await realpath(await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','ip-'))),install=join(proof,'installed spaces-Ω');await mkdir(install);
+const proof=await realpath(await mkdtemp(join(tmpdir(),'ip-'))),install=join(proof,'installed spaces-Ω');await mkdir(install);
+const endpointData=await realpath(await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','ip-control-')));
 const provenance=JSON.parse(await readFile(join(root,'vendor/provenance.json'),'utf8'));
-const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-74e7a64.json'),'utf8'));
+const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-0413409.json'),'utf8'));
 for(const record of [provenance,coreProvenance])assert.equal(createHash('sha256').update(await readFile(join(root,'vendor',record.file))).digest('hex'),record.sha256);
 try{
  const artifacts=join(install,'artifacts');await mkdir(artifacts);
@@ -28,7 +29,7 @@ try{
  await writeFile(join(install,'package.json'),JSON.stringify(manifest));await writeFile(join(install,'package-lock.json'),JSON.stringify(lock));
  await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:60000,maxBuffer:262144});
  const isolatedEnvironment=join(install,'isolated-environment.mjs');
- await writeFile(isolatedEnvironment,`import{AppArguments}from'@eyeauras/cli-factory';import{join}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';const original=AppArguments.CurrentEnvironment;const root=fileURLToPath(new URL('./owned appdata/',import.meta.url));AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:root,EnvironmentLocalAppData:root});`);
+ await writeFile(isolatedEnvironment,`import{AppArguments}from'@eyeauras/cli-factory';import{join}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';const original=AppArguments.CurrentEnvironment;const root=${JSON.stringify(endpointData)};AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:root,EnvironmentLocalAppData:root});`);
  const hostedHelp=await exec(process.execPath,['--import',pathToFileURL(isolatedEnvironment).href,join(install,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),'--help'],{cwd:install,timeout:30000,maxBuffer:262144});
  assert.match(hostedHelp.stdout,/insight-cli/);
  await exec(process.execPath,['--import',pathToFileURL(isolatedEnvironment).href,join(install,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),'ipc-server','stop'],{cwd:install,timeout:30000,maxBuffer:262144});
@@ -55,4 +56,4 @@ test('relocated RE skill and ordinary materials without native runtime',async t=
 });`);
  await exec(process.execPath,['--test',researchProof],{cwd:install,timeout:30000,maxBuffer:262144});
  console.log('Packed isolated install: skill/resources, profile/JSON/RPC, permission denial and spaces/Unicode PASS');
-}finally{if(keep)console.log('Retained owned installed package:',install);else await rm(proof,{recursive:true,force:true});}
+}finally{await rm(endpointData,{recursive:true,force:true});if(keep)console.log('Retained owned installed package:',install);else await rm(proof,{recursive:true,force:true});}

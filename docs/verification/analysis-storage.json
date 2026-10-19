@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "native_environment_blocked",
+  "scope": "Issue 76 configurable profile analysis storage and resumable migration",
+  "offline": {
+    "node": "24.19.0",
+    "tests": 256,
+    "passed": 252,
+    "explicitOptInSkipped": 4,
+    "failed": 0,
+    "releaseTests": 31,
+    "offlineGherkin": {
+      "executed": 2,
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "package": {
+    "isolatedOfflineInstall": "passed",
+    "relocationAndSkills": "passed",
+    "sha256": "c213efd97ef8ff9bc331e65e9de6e16cc41e1492789c31c88519fb7830137fd5"
+  },
+  "review": {
+    "independent": "passed",
+    "factoryPullRequest": "https://github.com/iXab3r/EyeAuras.CliFactory/pull/57",
+    "factoryMerged": true,
+    "factoryCi": "7/7 passed"
+  },
+  "native": {
+    "state": "environment_blocked",
+    "reason": "OS credential-store writes fail with UNIX ENOSPC. No plaintext fallback or credential changes were used. Native Ghidra reopen/publication acceptance and npm release remain pending."
+  },
+  "release": {
+    "state": "not_published",
+    "registryVerification": "pending"
+  }
+}

@@ -51,6 +51,7 @@ import {artifactsCommands} from './saved-materials.js';
 import {RuntimeManager,runtimeCommands,runtimeProcesses} from './runtime-manager.js';
 import {packageVersion} from './package-version.js';
 import {runtimeSelection} from './runtime-selection.js';
+import {AnalysisStorage,analysisDirectory} from './analysis-storage.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -62,6 +63,7 @@ interface ProfileOwner {
 }
 const bindingFields=['java','ghidraHome','mcpJar','mcpJarSha256','server','repository','readerUser','publisherUser','maxContexts','debuggerPython','windbgDir','archiveUrl'];
 class Owner {
+  storage?:AnalysisStorage;
   private readonly profiles=new Map<string,ProfileOwner>();
   private readonly runtimeChanging=new Set<string>();
   async runtime<T>(c:CommandContext,action:()=>Promise<T>,quiescent=true):Promise<T>{
@@ -81,10 +83,11 @@ class Owner {
   selected(c: CommandContext) {
     const directory=c.appArguments.AppDataDirectory;
     if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress.');
-    const configuration=digest({runtime:runtimeSelection(directory),profile:Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])),extensions:extensionState(join(directory,'workspace')).modules.filter(m=>m.enabled).map(m=>[m.name,m.sha256])});
+    const root=analysisDirectory(c);
+    const configuration=digest({analysisDirectory:root,runtime:runtimeSelection(directory,root),profile:Object.fromEntries(bindingFields.map(key=>[key,c.profile.values[key]])),extensions:extensionState(join(root,'workspace')).modules.filter(m=>m.enabled).map(m=>[m.name,m.sha256])});
     let profile=this.profiles.get(directory);
     if(!profile) {
-      profile={workspace:new Workspace(join(directory,'workspace'),c.profile.name),tasks:new Map(),configuration};
+      profile={workspace:new Workspace(join(root,'workspace'),c.profile.name),tasks:new Map(),configuration};
       this.profiles.set(directory,profile);
     }
     if(profile.configuration!==configuration)fail('binding','Runtime profile changed; stop the IPC owner before reopening its saved workspace.');
@@ -105,13 +108,20 @@ class Owner {
   }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
+    if(this.storage?.busy(directory))fail('busy','Storage migration is in progress.');
     if(this.runtimeChanging.has(directory))fail('busy','Runtime preparation is in progress; finish it before changing or deleting the profile.');
     if(toolProfileBusy(directory))fail('busy','A tool operation is active.');
     if((await listProcesses(directory)).some(r=>!['exited','failed'].includes(r.state)))fail('busy','The profile has active or unverified tool processes.');
     const materials=await readdir(join(directory,'materials')).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
-    if(existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
+    if(existsSync(join(directory,'storage','migration.json'))||existsSync(join(directory,'workspace','workspace.sqlite'))||materials.length)
       fail('blocked','Profile has retained research data; preserve its workspace and materials before deleting or reconfiguring it.');
     if(profile) {await (await profile.backend)?.dispose();profile.workspace.close();this.profiles.delete(directory);}
+  }
+  async releaseStorage(c:CommandContext){
+    const directory=c.appArguments.AppDataDirectory,profile=this.profiles.get(directory);
+    if(!profile)return;
+    if(profile.tasks.size)fail('busy','Research commands are active.');
+    await (await profile.backend)?.dispose();profile.workspace.close();this.profiles.delete(directory);
   }
   async dispose() {
     for(const profile of this.profiles.values()) {
@@ -199,6 +209,7 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
 
 export function createDefinition(options: Options = {}): CliDefinition {
   const owner=new Owner(options);
+  const storage=new AnalysisStorage(options.runtime?.profileStore,c=>owner.releaseStorage(c));owner.storage=storage;
   const definition:CliDefinition={
     name:'insight-cli',applicationId:'insight-cli',version:packageVersion,description:'Isolated research contexts and coordinated Ghidra analysis',
     resources:[owner],permissions:{categories:[{name:'Destructive',description:'Explicit deletion or replacement of retained research data',enabledByDefault:false}]},...(options.runtime?{runtime:options.runtime}:{}),
@@ -390,9 +401,10 @@ export function createDefinition(options: Options = {}): CliDefinition {
       ]),
     ],
   };
-  return {...definition,commands:definition.commands?.map(entry=>entry.name==='ghidra'?
+  const commands=definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
       mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
-        ...extensionCommands(c=>new Extensions(join(c.appArguments.AppDataDirectory,'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...runtimeCommands((c,action,quiescent)=>owner.runtime(c,action,quiescent)),...lifecycleCommands(c=>owner.selected(c).lifecycle,c=>new RuntimeManager(c).status()),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry)};
+        ...extensionCommands(c=>new Extensions(join(analysisDirectory(c),'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...runtimeCommands((c,action,quiescent)=>owner.runtime(c,action,quiescent)),...lifecycleCommands(c=>owner.selected(c).lifecycle,c=>new RuntimeManager(c).status()),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry);
+  return {...definition,commands:[...(commands??[]).map(e=>storage.wrap(e)),storage.commands()]};
 }
 export const createInsightCli=(options:Options={})=>createCli(createDefinition(options));

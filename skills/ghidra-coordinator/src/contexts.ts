@@ -133,8 +133,8 @@ export class GhidraContexts {
     }
   }
   private async verified(binding: ProcessBinding, target: ResearchTarget, verifySource = true): Promise<Running> {
-    const root=resolve(binding.root);
-    if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||binding.target!==target.id||binding.runtimeFingerprint!==this.inputs.fingerprint)
+    const root=await realpath(binding.root);
+    if(!root.startsWith(resolve(this.directory())+sep)||binding.target!==target.id||binding.runtimeFingerprint!==this.inputs.fingerprint)
       fail('binding','Native context receipt does not match its profile, target or runtime.');
     if(stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))
       fail('binding','Native context receipt changed.');
@@ -173,9 +173,9 @@ export class GhidraContexts {
     this.running.delete(binding.root);
   }
   private async debuggerReleased(binding:ProcessBinding){
-    const root=resolve(binding.root);if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||
+    const root=await realpath(binding.root);if(!root.startsWith(resolve(this.directory())+sep)||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Debugger lifetime binding moved outside its owned context.');
-    const directory=join(binding.root,'debugger-supervisors'),deadline=Date.now()+15000;
+    const directory=join(root,'debugger-supervisors'),deadline=Date.now()+15000;
     for(;;){let names:string[];try{names=await readdir(directory);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
       let pending=false;
       for(const name of names.filter(name=>/^[a-f0-9-]{36}\.json$/.test(name))){
@@ -218,7 +218,7 @@ export class GhidraContexts {
       if(!entry.isDirectory())continue;
       const root=join(parent,entry.name);if(await realpath(root)!==resolve(root))fail('binding','Legacy initial-import stage moved outside owned storage.');
       const binding=JSON.parse(await readFile(join(root,'process.json'),'utf8')) as ProcessBinding;
-      if(binding.root!==root||binding.target!==target.id||binding.kind!=='bootstrap'||binding.program!==programPath(target.id))fail('binding','Legacy bootstrap receipt changed.');
+      if(await realpath(binding.root)!==root||binding.target!==target.id||binding.kind!=='bootstrap'||binding.program!==programPath(target.id))fail('binding','Legacy bootstrap receipt changed.');
       let stopped=false;
       try{const receipt=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;}
       catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
@@ -617,8 +617,8 @@ public class ${name} extends GhidraScript {
   }
   async closed(scope:Scope) {
     const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');
-    const binding=JSON.parse(await readFile(path,'utf8')) as ProcessBinding,root=resolve(binding.root);
-    if(!root.startsWith(resolve(this.directory())+sep)||await realpath(root)!==root||binding.context!==context.id||binding.target!==scope.target||
+    const binding=JSON.parse(await readFile(path,'utf8')) as ProcessBinding,root=await realpath(binding.root);
+    if(!root.startsWith(resolve(this.directory())+sep)||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
       if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;

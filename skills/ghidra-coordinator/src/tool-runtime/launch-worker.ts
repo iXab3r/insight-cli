@@ -10,7 +10,9 @@ async function main(){
  const root=await realpath(directory),path=join(root,'runtime/processes',id+'.json');
  const record=await readJson<Record<string,unknown>>(path);if(!record||record.id!==id||record.pid||record.ownerPid!==process.ppid)throw Error('Launch owner changed');
  let input='';for await(const b of createReadStream('',{fd:Number(fd),autoClose:true})){input+=b.toString();if(input.length>4*1024**2)throw Error('Launch input exceeds its bound');}
- if(await realpath(String(record.root))!==join(root,'runtime/runs',id))throw Error('Launch storage changed');
+ // Factory's stable profile remains local while the complete runtime tree can be
+ // an authorized analysis-storage alias. Child paths must still stay inside it.
+ if(await realpath(String(record.root))!==join(await realpath(join(root,'runtime')),'runs',id))throw Error('Launch storage changed');
  const plan=JSON.parse(input) as {executable:string;arguments:string[];environment:Record<string,string>;nonce:string};
  if(plan.executable!==record.executable)throw Error('Launch executable changed');
  const identity=await processIdentity(process.pid);if(!identity)throw Error('Launch process identity unavailable');

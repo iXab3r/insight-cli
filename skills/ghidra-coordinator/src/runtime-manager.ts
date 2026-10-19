@@ -1,4 +1,5 @@
 import {runTool} from './tool-runtime/run.js';
+import {analysisDirectory} from './analysis-storage.js';
 import {type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {readFile,mkdir,rename,rm,realpath,readdir,stat,cp} from 'node:fs/promises';
 import {existsSync,realpathSync} from 'node:fs';
@@ -48,9 +49,9 @@ export class RuntimeManager {
  constructor(private readonly c:CommandContext){this.directory=c.appArguments.AppDataDirectory;}
  // Canonicalize storage once the profile exists, without creating it for passive status.
  // Keep the Factory directory for shared process/lock identity and existing run receipts.
- get root(){return runtimeRoot(existsSync(this.directory)?realpathSync.native(this.directory):this.directory);}
+ get root(){const root=runtimeRoot(existsSync(this.directory)?realpathSync.native(this.directory):this.directory);return existsSync(root)?realpathSync.native(root):root;}
  async status(){
-  const selected=runtimeSelection(this.directory),values=selected?runtimeValuesForStatus(selected,this.c.profile.values):this.c.profile.values;
+  const selected=runtimeSelection(this.directory,analysisDirectory(this.c)),values=selected?runtimeValuesForStatus(selected,this.c.profile.values):this.c.profile.values;
   const java=typeof values.java==='string'?values.java:undefined,home=typeof values.ghidraHome==='string'?values.ghidraHome:undefined;
   const missing=[];if(!java||!existsSync(java))missing.push('jdk');if(!home||!existsSync(join(home,'Ghidra/application.properties')))missing.push('ghidra');
   if(selected?.uninstalledAt)missing.push('uninstalled');
@@ -88,7 +89,7 @@ export class RuntimeManager {
   for(const parent of ['stages','checks']){
    let names:string[];try{names=await readdir(join(this.root,parent));}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
    for(const name of names){if(!/^[a-f0-9-]{36}$/.test(name))continue;
-    const root=join(this.root,parent,name,...(parent==='stages'?['validation']:[]));
+    const root=join(analysisDirectory(this.c),'runtime',parent,name,...(parent==='stages'?['validation']:[]));
     if(existsSync(join(root,'server/local.json'))){
      if(await realpath(root)!==resolve(root))fail('binding','Retained runtime probe moved outside its owned storage.');
      await stopLocalServer(root,this.c);
@@ -144,7 +145,7 @@ export class RuntimeManager {
  async uninstall(purgeCache=false){return withToolLock(this.directory,'ghidra',async()=>{
   await assertUnused(this.directory,'ghidra');
   await this.cleanupProbes();
-  const selected=runtimeSelection(this.directory);if(!selected)fail('configuration','No managed selection exists; externally configured profile paths are never removed.');
+  const selected=runtimeSelection(this.directory,analysisDirectory(this.c));if(!selected)fail('configuration','No managed selection exists; externally configured profile paths are never removed.');
   if(purgeCache&&selected.id){const receipt=object(JSON.parse(await readFile(join(this.root,'installations',selected.id,'ready.json'),'utf8')));
    for(const a of Array.isArray(receipt.archives)?receipt.archives:[]){const sha=String(object(a).sha256);if(!/^[a-f0-9]{64}$/.test(sha))fail('binding','Invalid cached component identity.');for(const ext of ['zip','tgz'])await rm(join(this.root,'cache',sha+'.'+ext),{force:true});}}
   if(managedGhidraDebugger()&&(await ghidraDebuggerInstaller(this.c).status()).state==='installed')await ghidraDebuggerInstaller(this.c).uninstall(purgeCache);
@@ -169,7 +170,7 @@ export class RuntimeManager {
  }
  async doctor(){
   await this.cleanupProbes();
-  const root=join(this.root,'checks',randomUUID()),values=runtimeValues(this.directory,this.c.profile.values);
+  const root=join(analysisDirectory(this.c),'runtime/checks',randomUUID()),values=runtimeValues(this.directory,this.c.profile.values,analysisDirectory(this.c));
   const inputs=await nativeInputs(values,undefined,this.c),native=await this.probe(inputs,root);let debuggerCheck:Record<string,unknown>={state:'host_specific'};
   if(managedGhidraDebugger())try{const selected=await ghidraDebuggerInstaller(this.c).selected();debuggerCheck={...(await ghidraDebuggerInstaller(this.c).doctor()),backend:'managed-lldb',installation:selected.id};}
   catch{debuggerCheck={state:'missing',backend:'managed-lldb',reason:'Run insight-cli ghidra install to prepare or repair its LLDB/Python runtime'};}

@@ -36,6 +36,9 @@ multi-agent guidance; `skill insight-ghidra`, `skill insight-ilspy` and
 installing npm binaries does not register them in an agent host. See
 [agent connection](references/agent-setup.md) for current setup and access requirements.
 
+Inspect `storage show --json` before relocating a profile. Use the supported
+[storage workflow](references/storage.md), preserving unknown operations and native folders.
+
 Use generated help as the syntax authority. Catalog metadata describes shipped capabilities;
 profile runtime readiness comes from the selected tool's `status`. Unavailable profile/IPC
 access means execution readiness is unknown. Preserve work and diagnose access before trying

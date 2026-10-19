@@ -1,5 +1,9 @@
 # Setup
 
+Inspect `storage show --json` and read [analysis storage](storage.md) before moving databases.
+Use `storage configure` for an empty profile or `storage migrate` for existing work. Factory
+control metadata and keyring identity stay in their original locations.
+
 Use Node 24+ and `ghidra install` to deliver Ghidra 12.1.2, JDK 21, native components and
 server support. See [managed runtime](managed-runtime.md) for download/install/offline archives,
 external executable paths, status/doctor and safe removal. Existing Factory profile `java` and

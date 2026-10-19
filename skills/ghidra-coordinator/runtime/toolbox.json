@@ -6,7 +6,9 @@
       "title": "insight-cli",
       "path": "SKILL.md",
       "resources": {
-        "references/agent-execution.md": "references/agent-execution.md"
+        "references/agent-execution.md": "references/agent-execution.md",
+        "references/storage.md": "references/storage.md",
+        "references/recovery.md": "references/recovery.md"
       }
     },
     {
@@ -16,7 +18,8 @@
       "resources": {
         "references/recovery.md": "references/recovery.md",
         "references/artifacts.md": "references/artifacts.md",
-        "references/agent-execution.md": "references/agent-execution.md"
+        "references/agent-execution.md": "references/agent-execution.md",
+        "references/storage.md": "references/storage.md"
       }
     },
     {
@@ -35,7 +38,8 @@
         "references/archive.md": "references/archive.md",
         "references/extensions-and-sync.md": "references/extensions-and-sync.md",
         "references/artifacts.md": "references/artifacts.md",
-        "references/agent-execution.md": "references/agent-execution.md"
+        "references/agent-execution.md": "references/agent-execution.md",
+        "references/storage.md": "references/storage.md"
       }
     },
     {
@@ -53,7 +57,9 @@
       "path": "skills/insight-artifacts/SKILL.md",
       "resources": {
         "references/artifacts.md": "references/artifacts.md",
-        "references/agent-execution.md": "references/agent-execution.md"
+        "references/agent-execution.md": "references/agent-execution.md",
+        "references/storage.md": "references/storage.md",
+        "references/recovery.md": "references/recovery.md"
       }
     },
     {

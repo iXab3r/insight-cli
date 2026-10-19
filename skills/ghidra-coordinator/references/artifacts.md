@@ -1,7 +1,7 @@
 # Save ordinary research materials
 
 `insight-cli artifacts save <path> --json` saves a file or a settled directory tree in
-the selected profile's AppData. It needs Factory Update permission and does not require
+the selected profile's [analysis storage](storage.md), which defaults to AppData. It needs Factory Update permission and does not require
 Ghidra, Java, authentication, target/session selectors or evidence metadata. Relative input
 paths resolve against the caller's working directory. Use `--help` for generated syntax.
 
