@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {stable,object,fail} from './model.js';
 import type {Workspace,ResearchTarget} from './workspace.js';
 import type {GhidraServer,ServerBinding} from './server.js';
+import {initialProgress,progressPhase,readInitialProgress} from './initial-progress.js';
 
 export const initialRoot=(workspace:Workspace,target:string)=>join(workspace.directory,'ghidra-native','initial',target);
 export async function initialIntent(workspace:Workspace,target:string){
@@ -12,6 +13,21 @@ export async function initialIntent(workspace:Workspace,target:string){
 }
 /** Immutable input/authority binding; private attempts and conditional first creation share it. */
 export async function initializeModel(workspace:Workspace,target:ResearchTarget,binding:ServerBinding,server:Pick<GhidraServer,'initialImport'|'initialPublication'>,fingerprint:string){
+  try{return await initialize(workspace,target,binding,server,fingerprint);}
+  catch(error){
+    try{
+    const progress=await readInitialProgress(workspace.directory,target.id);
+    // A busy or disconnected caller must not overwrite another live native worker's observation.
+    if(progress&&progress.state!=='complete'&&(progress.pid===process.pid||progress.workerAlive===false)){
+      const code=String((error as {code?:string}).code??'');
+      const state=code==='tool.timeout'?'timed_out':code==='tool.cancelled'?'cancelled':progress.state==='failed'||progress.state==='cancelled'?progress.state:'unknown';
+      await initialProgress(initialRoot(workspace,target.id),target.id,progress.phase,state);
+    }
+    }catch{/* Preserve the authoritative operation failure when observation storage also fails. */}
+    throw error;
+  }
+}
+async function initialize(workspace:Workspace,target:ResearchTarget,binding:ServerBinding,server:Pick<GhidraServer,'initialImport'|'initialPublication'>,fingerprint:string){
   const root=initialRoot(workspace,target.id);await mkdir(root,{recursive:true,mode:0o700});
   if(await realpath(root)!==resolve(root))fail('binding','Initial model storage moved outside its owned root.');
   const expected={schema:1,target:target.id,sha256:target.binarySha256,input:await workspace.artifacts.verify(target.input),
@@ -35,16 +51,18 @@ export async function initializeModel(workspace:Workspace,target:ResearchTarget,
   if(prepared.state!=='prepared')fail('unknown','Initial import did not establish a complete private snapshot.');
   const receipt=object(JSON.parse(await readFile(join(root,'import.json'),'utf8'))),name=receipt.snapshot;
   if(typeof name!=='string'||!/^attempt-[a-f0-9-]{36}\.gzf$/.test(name))fail('binding','Initial model snapshot receipt is malformed.');
-  const snapshot=await workspace.captureSnapshot(join(root,name));
+  const snapshot=await progressPhase(root,target.id,'snapshot-verification',()=>workspace.captureSnapshot(join(root,name)));
   if(snapshot.sha256!==receipt.snapshotSha256)fail('binding','Initial saved snapshot changed before publication.');
-  let result=await server.initialPublication(binding,root,'stage');
+  const publication=(operation:'stage'|'verify-stage'|'promote'|'verify')=>progressPhase(root,target.id,'publication-'+operation,()=>server.initialPublication(binding,root,operation));
+  let result=await publication('stage');
   if(result.state==='staged'){
-    const proof=await server.initialPublication(binding,root,'verify-stage');
+    const proof=await publication('verify-stage');
     if(proof.state!=='stage_verified'||proof.version!==1||proof.snapshotBuffersVerified!==true)fail('unknown','Independent initial staging readback did not establish the complete snapshot.');
-    result=await server.initialPublication(binding,root,'promote');
+    result=await publication('promote');
   }
   if(result.state!=='published'||result.version!==1||result.snapshotBuffersVerified!==true)fail('unknown','Initial publication requires reconciliation against its saved snapshot.');
-  const verified=await server.initialPublication(binding,root,'verify');
+  const verified=await publication('verify');
   if(verified.state!=='verified'||verified.version!==1||verified.snapshotBuffersVerified!==true)fail('unknown','Independent initial-model readback did not establish the complete saved buffers.');
   workspace.establishModel(target.id,1,snapshot);
+  await initialProgress(root,target.id,'complete','complete');
 }

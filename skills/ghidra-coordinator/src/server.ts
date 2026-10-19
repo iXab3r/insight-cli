@@ -134,11 +134,18 @@ export class GhidraServer {
   }
   async initialImport(root:string){
     const timeoutMilliseconds=ghidraBudget(this.c.profile.values,'import');
+    const report=async()=>{try{const p=object(JSON.parse(await readFile(join(root,'progress.json'),'utf8')));
+      const elapsed=Math.round((Date.now()-Date.parse(String(p.startedAt)))/1000);
+      this.c.progress(`Ghidra ${String(p.phase)}: ${elapsed}s${typeof p.total==='number'?`; task ${String(p.completed)}/${p.total}`:''}${p.message?`; ${String(p.message).replace(/[\r\n\x00-\x1f]/g,' ')}`:''}`);
+    }catch{/* Progress observation never changes the native operation's outcome. */}};
+    const timer=setInterval(()=>{void report();},5000);timer.unref();
     try{return await this.run('initial-import','InsightInitialImport',[root],{},undefined,[0],timeoutMilliseconds);}
     catch(error){if(error instanceof CliError)throw new CliError(error.message+' Initial import remains unproved. Increase profile initialImportSeconds and continue the original scope; incomplete private analysis restarts from the retained input.',
       {code:error.code,result:{phase:'initial-import',timeoutMilliseconds,budgetSetting:'initialImportSeconds',outcome:'unknown',diagnostics:error.result}});throw error;}
+    finally{clearInterval(timer);}
   }
   async initialPublication(binding:ServerBinding,root:string,operation:'stage'|'verify-stage'|'promote'|'verify'='stage'){
+    this.c.progress('Ghidra initial publication: '+operation);
     return this.run('initial-publication','db.InsightInitialPublication',[root,operation],await this.credentials(binding,operation.startsWith('verify')?'reader':'publisher'));
   }
   async publish(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
