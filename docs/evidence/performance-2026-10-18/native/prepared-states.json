@@ -1,0 +1,61 @@
+{
+  "stock": "Both stock version factors import the exact baseline prepared GZF, verified before/after use. Cross-package containers can differ; useful-result equivalence is checked separately.",
+  "snapshots": [
+    {
+      "label": "baseline",
+      "fixture": "tiny",
+      "analysis": false,
+      "inputSha256": "ccba645fee2e505c04eff6e7cee1457501a596cf71ca307f467846623f531832",
+      "snapshotSha256": "4a370b2d943043a9e6d1ee79f9efc6550cdbcce2cd5afd609b94231bf5c15f3a"
+    },
+    {
+      "label": "baseline",
+      "fixture": "tiny",
+      "analysis": true,
+      "inputSha256": "ccba645fee2e505c04eff6e7cee1457501a596cf71ca307f467846623f531832",
+      "snapshotSha256": "b9fdc0968b05b7b367926ecf05e1943e7400e996dfd846810ac290fbb7f7920e"
+    },
+    {
+      "label": "baseline",
+      "fixture": "large",
+      "analysis": false,
+      "inputSha256": "6b240b3d300f4cfdcaaa2d4ba5746398e8503561f2c9cc508d2880454442136b",
+      "snapshotSha256": "f6cbd8bef769414619f07435d703b1913cc6223ede374f625ada6a4e9d24df45"
+    },
+    {
+      "label": "baseline",
+      "fixture": "large",
+      "analysis": true,
+      "inputSha256": "6b240b3d300f4cfdcaaa2d4ba5746398e8503561f2c9cc508d2880454442136b",
+      "snapshotSha256": "38a56590d360ea35daecc7c23a27cefc9d035c9036c0632b13bfea597973ee31"
+    },
+    {
+      "label": "candidate",
+      "fixture": "tiny",
+      "analysis": false,
+      "inputSha256": "ccba645fee2e505c04eff6e7cee1457501a596cf71ca307f467846623f531832",
+      "snapshotSha256": "98a1a3560a3ac054df1e21bc5e0f704c3b5ab65749fb168bff97431f087924b0"
+    },
+    {
+      "label": "candidate",
+      "fixture": "tiny",
+      "analysis": true,
+      "inputSha256": "ccba645fee2e505c04eff6e7cee1457501a596cf71ca307f467846623f531832",
+      "snapshotSha256": "32e9639e74aec2f15c39266ac761d425de9e1920cc113aad0c7196f79373209d"
+    },
+    {
+      "label": "candidate",
+      "fixture": "large",
+      "analysis": false,
+      "inputSha256": "6b240b3d300f4cfdcaaa2d4ba5746398e8503561f2c9cc508d2880454442136b",
+      "snapshotSha256": "3c3ab4fe77db99e992cc7f5503efa46463186df7192a772f83a2c43efe0999c4"
+    },
+    {
+      "label": "candidate",
+      "fixture": "large",
+      "analysis": true,
+      "inputSha256": "6b240b3d300f4cfdcaaa2d4ba5746398e8503561f2c9cc508d2880454442136b",
+      "snapshotSha256": "eb185c7fd8c896b5e4da259479a607f8ef48bbc3453c40e6d47cb35d90e329c8"
+    }
+  ]
+}

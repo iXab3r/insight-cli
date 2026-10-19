@@ -1,0 +1,28 @@
+[
+  {
+    "name": "tiny",
+    "size": 2560,
+    "sha256": "ccba645fee2e505c04eff6e7cee1457501a596cf71ca307f467846623f531832",
+    "sourceSha256": "301149838ea67028ba6f6f807e61f9cafb2ff50a251e2d171615ee05e260c32d",
+    "exports": {
+      "main": "0x140001050",
+      "owned_add": "0x140001000",
+      "owned_data": "0x140002000",
+      "owned_hash": "0x140001010",
+      "owned_string": "0x140002100"
+    }
+  },
+  {
+    "name": "large",
+    "size": 83888640,
+    "sha256": "6b240b3d300f4cfdcaaa2d4ba5746398e8503561f2c9cc508d2880454442136b",
+    "sourceSha256": "831b17a5a0ecbece2b85591decdb3349f7635bd152475e48b2fb0ddcaa8f27b8",
+    "exports": {
+      "main": "0x140001050",
+      "owned_add": "0x140001000",
+      "owned_data": "0x140002000",
+      "owned_hash": "0x140001010",
+      "owned_string": "0x145002000"
+    }
+  }
+]

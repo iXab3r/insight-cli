@@ -29,5 +29,61 @@ The installed dependency inventory retains actual versions/integrities, includin
 baseline/candidate `qs` 6.16.1/6.16.0, Node type-package differences and candidate
 test-only tooling. Controlled component comparisons use the same installation;
 whole serial version phases are descriptive comparisons under host load.
-Full native results and attribution are pending; reduced smoke results are not
-substituted for the 30-warm / 5-cold protocol.
+The owner requested wrap-up on 2026-10-19 before the entire serial matrix finished.
+The [native report](native/report.md), [run status](native/run-status.json) and
+[raw requests](native/requests.jsonl) preserve the resulting **incomplete diagnostic
+run**, with the original 30-warm / 5-cold requirements unchanged. Reduced smoke
+results do not substitute for missing groups.
+
+Completed native evidence includes all baseline and candidate CLI/RPC reads
+(20 fresh native trials and 2,640 measured warm reads each), 20 separate cold RPC
+trials per version, and the stock Java 7/Python 6 parity matrix (1,200 warm reads).
+All 44 useful-result variants, including prepared first queries, agree. The
+independent memory oracle, 40 program-only script observations and 88 paired
+CLI/RPC case groups pass. There are 12,851 recorded requests, with no recorded
+failed or censored request. The next dispatched peer-open completed before the
+scheduler stopped; it has no synthetic timing row, as the stop ledger explains.
+
+Baseline persistence completed 120 measured cycles and concurrency completed
+30 measured rounds. Candidate persistence completed 30 tiny/no-analysis cycles
+and three tiny/analysis cycles; the next cycle only opened contexts. Candidate
+remaining persistence/concurrency, stock Java 6, native tracing and the final
+frozen-candidate traced/untraced functional proofs were not completed. Strict
+coverage is **575 of 732 groups**. Native trace attribution is unavailable from
+this run, rather than inferred from the component experiment.
+
+The predeclared read budget fails three p95 checks: tiny/analysis RPC strings
+229.18 to 389.22 ms, tiny/analysis RPC bounded undefined decode 238.06 to 330.16 ms,
+and tiny/no-analysis CLI missing-function lookup 1,857.74 to 2,488.37 ms. These
+samples remain included; budgets were not relaxed. For a descriptive improvement,
+tiny/analysis metadata p50 is 487.38 to 312.09 ms over CLI and 22.85 to 14.01 ms
+over RPC. Whole version phases are serial, so these are not causal speed ratios.
+
+One-minute host load ranged 4.39–58.56 on 10 logical CPUs (p50 9.83, p95 29.03).
+The owner explicitly authorized the occupied-host limitation. Full completeness
+and performance acceptance are **not passed**. All four owned candidate profiles
+have zero active contexts, unresolved operations and matching native processes;
+their servers are stopped. Unrelated processes and the shared public IPC owner
+were not stopped. Both installed runtime graph hashes were reverified unchanged.
+
+An archival PID-reuse error happened after the complete baseline contention
+measurement and cleanup. The original nonzero phase exit and unchanged raw-row
+hash remain recorded in the [recovery addendum](native/resume-addendum.json).
+The collector now reads process identity even when an old PID is inaccessible;
+it still refuses live or unverifiable owned backing stores. This housekeeping
+change is outside timed requests. Per-phase collector file hashes are retained.
+
+The shipped changes are the identical-byte hash algorithm, authenticated schema
+reuse with fresh cancellation/binding checks, removal of an unused metadata call,
+and the small read-only view guard. Remaining helper startup, independently saved
+effect inspection and publication readback are hypotheses for a future traced
+run. Any reusable inspection worker must retain artifact hashes, read-only DB
+access, authority checks, exact saved-effect verification and unknown-outcome
+recovery. Scheduling/progress issues #68/#69 remain separate.
+
+The frozen product source passed 230 facade tests (four platform skips), 45
+release/script tests and the isolated offline package proof. Final performance
+summary/storage tests pass 16/16; the final complete release/script suite passes
+47/47. Factory source `13b01dc` passed its macOS,
+Linux and Windows checks plus release dry-run. No merge or registry release was
+performed.

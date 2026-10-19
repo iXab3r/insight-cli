@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "resumedAt": "2026-10-18T21:41:33.048Z",
+  "collectorSource": "0790ad6",
+  "reason": "Baseline contention completed every declared sample and owned cleanup. Post-measurement archival encountered reused PID belonging to a different user. Read-only command identity checks now handle EPERM without treating it as absence.",
+  "rawBaselineConcurrencySha256": "abda726f228fa3ca36899f29836c9c2ab4ca8cf6922dc6a0c304100db5a51335",
+  "rawSamplesUnchanged": true,
+  "candidateGraph": "716ced78afe22b8b1f983d89aa1be74fa5889f759ac9ab8e097ec911ea912e32",
+  "baselineGraph": "f2cbc9c3583cade90beb71c0fec706ae837bbd0e93caef2619f44ad9dd55fced",
+  "archive": {
+    "archivedFiles": 2,
+    "retainedLogicalBytes": 170229760
+  },
+  "countsAndBudgetsChanged": false,
+  "originalFailedPhaseRetained": true
+}
