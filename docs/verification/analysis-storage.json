@@ -33,5 +33,28 @@
   "release": {
     "state": "not_published",
     "registryVerification": "pending"
+  },
+  "crossFilesystemCli": {
+    "schema": 1,
+    "status": "passed",
+    "scope": "installed public CLI copy/resume/file-readback",
+    "native": false,
+    "version": "0.2.0",
+    "inputSha256": "60cb5c12122992e52ca1b873bfe2cd78239a6688cac31226a5d92fd1008aa903",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "24.19.0",
+    "crossFilesystem": true,
+    "migratedBytes": 268533969,
+    "manifest": "b04530a25a21d74b4b03658e6df96225b47013d3070fe7239472dfce29f5853f",
+    "assertions": [
+      "installed public CLI and Factory profile/IPC",
+      "actual cross-filesystem copy",
+      "actual elected-owner SIGKILL while copying",
+      "ordinary-command freeze and durable resume",
+      "replacement-owner target and file readback",
+      "rollback refuses subsequent writes",
+      "verified source cleanup and retained aliases"
+    ]
   }
 }
