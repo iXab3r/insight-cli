@@ -35,6 +35,7 @@ export function queryDescription(path:string,fallback:string) {
   if(path==='/validate_data_type')return 'Resolve a type and report layout/alignment diagnostics without changing the program';
   if(path==='/get_entry_points')return 'Read external-entry metadata; report name/image-base candidates separately';
   if(path==='/list_globals')return 'Read structured global records with bounded symbol/reference scanning';
+  if(path==='/list_strings'||path==='/search_strings')return 'Search defined string data only, with bounded visited-data scan; undefined literals: analysis search-byte-patterns';
   if(path.startsWith('/emulate_'))return 'Bounded isolated x86/x64 emulation with explicit ABI and termination reason';
   return heuristics[path]?fallback+' (qualified '+heuristics[path]!.kind+'; not ground truth)':fallback;
 }

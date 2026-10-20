@@ -1,0 +1,112 @@
+# Toolkit benchmark repairs
+
+This work follows a private static-RE comparison. Reproductions here use generated, disposable
+fixtures only. Private inputs, addresses, observations and research reports do not belong in
+this repository. This is a repair checkpoint, not a completed rerun or a performance claim.
+
+## Existing behavior fixes
+
+**BB-01 — filtered function inspection.** The pinned native bulk endpoint always returns basic
+name/size metadata but filters `entry_point` with the requested fields. The adapter incorrectly
+required it even for `--fields decompiled_code,callees`. Inspection now permits its omission
+only when an explicit field selection excludes it. Default/full inspection, explicitly requested
+entry points, and simple get/decompile keep strict address validation. An unexpected malformed
+entry point still fails. Per-item outcomes, field filtering, Unicode windows, hashes, view guards,
+owner-host saves and existing single/bulk exit semantics remain intact.
+
+The public proof reproduced `invalid_native_shape` on installed 0.3.2 while direct decompile
+succeeded. The separately packed candidate passed single and mixed batch reads, a real call edge,
+continuation, JSON-RPC and saved manifest/hash checks. The candidate is a development artifact;
+the repository package version is not a production release declaration.
+
+**BB-03 — scan discoverability.** Generated help and validation errors now state the existing
+1–200000 visited-input scan bound. Result offsets skip matching rows rather than continuing
+coverage. Help explains the defined-string scope and points to the existing initialized-memory
+byte search for undefined literals. No new cursor, scan semantics or automatic analysis is added.
+
+**BB-06 — missing-function recovery.** Missing definitions suggest the existing bounded
+`functions decode` with explicit session/target and address. The message distinguishes read-only
+instruction decoding from defining functions, listing instructions or xrefs. Native diagnostics
+remain separately retained and bounded.
+
+Validation on 2026-10-20: the full offline suite passed 253 tests with four declared skips;
+all 31 release tests passed. The isolated packed-install test passed. Native acceptance passed
+the filtered inspection checks above, incomplete-zero/late-defined-string behavior, undefined
+literal byte search, and unseeded instruction recovery with unchanged context identity and no
+new function definition. The input digest remained unchanged and owned cleanup succeeded.
+The two process-identity supervisor tests require OS process inspection; the restricted sandbox
+denied that inspection, and the full suite was rerun with that access before recording success.
+
+Run the opt-in native proof against an isolated installed package:
+
+```sh
+node scripts/proof-filtered-inspection.mjs \
+  --cli <installed-package>/dist/src/bin.js \
+  --java <jdk>/bin/java --ghidra-home <ghidra> \
+  --root <fresh-short-absolute-directory> --ack-disposable
+```
+
+`--expect-broken` checks the historical inspection failure instead. The proof uses the same
+test-only Factory AppArguments storage seam as the existing public toolbox fixture. It generates
+a PE with two exported functions and a call edge; all program writes are confined to that fixture.
+It retains command receipts and closes its own context, server and isolated IPC owner. Initial
+open/analysis timings are setup costs, not matched warm-query performance measurements.
+
+## API proposal awaiting owner agreement
+
+The owner requested discussion and an example before any API expansion. The following surface
+is proposed, not implemented or promised by the current help/contracts.
+
+**BB-02 — navigation diagnostic.** Add a ReadOnly command:
+
+```sh
+insight-cli ghidra analysis navigation --session S --target T --max-scan 10000
+```
+
+It should report the original import policy separately from current observed metadata. Bounded
+function/body/instruction/reference/defined-string samples expose coverage and limits; a
+one-byte-body-heavy sample can produce a `sparse-metadata` assessment. Example fragment:
+
+```json
+{
+  "initialAnalysis": "none",
+  "functions": {"sampled": 128, "oneByteBodies": 121},
+  "scan": {"complete": false},
+  "assessment": "sparse-metadata"
+}
+```
+
+An analysis request/flag is provenance, not proof that every analyzer succeeded. Imported GZF
+contents may have unknown prior provenance. A complete diagnostic scan cannot prove semantic
+completeness. Neither this read nor `ready` should silently start expensive analysis.
+
+**BB-04 — controlled timing.** First instrument existing facade integration boundaries with
+correlated internal spans, without recording request payloads, code, credentials or personal
+paths. A fixed workload must declare cold/restored/warm state and use the same saved fixture.
+Report facade queue/open/native/validation/save boundaries actually observed. Client startup and
+IPC cannot be inferred by subtracting unrelated spans: their separate spans require an upstream
+Factory integration hook. Do not copy Factory ownership, add a second IPC host or optimize an
+unmeasured presumed bottleneck. A public trace flag/schema would need an explicit further example.
+
+**BB-05 — lifecycle diagnostic.** Add a ReadOnly, non-starting command:
+
+```sh
+insight-cli ghidra diagnostics lifecycle --session S --target T
+```
+
+Retain bounded start/restore/stop events with time, context identity and reason. Reasons describe
+what the facade actually knows: explicit close, view replacement, owner disposal, failed startup,
+or unknown. Existing receipts without a reason stay unknown. The current Factory host default
+idle timeout is 60000 ms; its shutdown disposes the facade, which stops authenticated native
+children. This establishes a possible mechanism, not the cause of historical PID changes.
+The Factory public dispose callback currently does not identify the host shutdown cause, so
+`owner_dispose` must not be falsely called `idle_timeout`. Keep the idle policy unchanged until
+controlled measurements justify a separately agreed change.
+
+## Repeat benchmark gate
+
+Finish the agreed repairs and installed native checks before dispatching two fresh agents. Use
+one shared task with only tool-routing differences, identical input and saved analysis state,
+and verify per-agent tool exposure before GO. Keep all failed attempts and setup time, measure
+the same phases, compare evidence quality and unresolved questions, and disclose any analysis,
+toolchain or workload differences. Do not give either fresh agent the earlier research answers.

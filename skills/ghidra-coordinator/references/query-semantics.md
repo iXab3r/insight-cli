@@ -51,6 +51,18 @@ finding. Narrow the query or raise its budget within the declared bound. Oversiz
 also stop a scan rather than silently claiming complete coverage. Returned string values are
 bounded; check truncation fields.
 
+`strings list` and `strings search` visit **defined data**, not every possible literal in memory.
+The visited-input budget includes non-string data. Zero matches with an incomplete scan means
+the searched prefix contains no matches; it does not establish absence. Increasing `--offset`
+only skips matching rows from that same scan and cannot reach a later unscanned string. These
+scans have no continuation cursor. Increase `--max-scan` up to 200000 when that covers the
+needed data. A narrower text filter alone does not skip earlier visited data or reach beyond
+that bound; use an explicitly addressed memory search when the needed region is known.
+For undefined ASCII/UTF-16 literals, encode the expected bytes and use
+`analysis search-byte-patterns --pattern <hex> --max-bytes <bytes>`; that separate initialized-
+memory search exposes `--scan-from`/`next_address` continuation. Byte matches still need
+interpretation and do not define string data or prove a stored xref exists.
+
 Bounded string/instruction regex search supports literals, escapes, anchors, character classes
 and at most one `.*` wildcard. Branching/nested repetition and unsupported patterns are rejected.
 Use the literal `strings search --contains` convenience when no regex is needed.

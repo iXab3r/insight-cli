@@ -46,6 +46,37 @@ test('function diagnostics survive one-shot and cli.execute without a mutation o
  assert.equal(reads,cases.length*2);
 });
 
+test('filtered function inspection accepts results without unrequested entry metadata while preserving CLI/RPC paging and failures',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
+ const source='return second(17);';let invalidEntry=false;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+  const backend=new Fake(workspace);backend.saved=async()=>{throw Error('Inspection must not save');};
+  backend.call=async(_scope,operation,p={})=>{
+   assert.equal(operation,'/get_functions');
+   const selected=String(p.fields??'').toLowerCase().split(',');
+   return {functions:Object.fromEntries(String(p.functions).split(',').map(selector=>[selector,selector==='missing'?{error:'Function not found: fixture'}:{
+    name:selector,size:32,...(selected.includes('entry_point')?{entry_point:invalidEntry?'not-an-address':entry}:{}),
+    ...(selected.includes('decompiled_code')?{decompiled_code:source}:{}),...(selected.includes('callees')?{callees:[]}:{}),
+   }])),requested:String(p.functions).split(',').length,count:2};
+  };return backend;
+ }}));
+ const input=join(f.root,'filtered.exe');await writeFile(input,'owned filtered inspection');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ await f.profileStore.setPermissions('default',['ReadOnly']);
+ const args=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','first,second,missing','--fields','decompiled_code,callees','--limit-chars','4'];
+ const result=await f.json(app,args) as any;
+ for(const selector of ['first','second']){assert.equal(result.value.functions[selector].status,'success');assert.equal(result.value.functions[selector].decompiled_code,'retu');assert.equal(result.value.functions[selector].entry_point,undefined);}
+ assert.equal(result.value.functions.missing.reason,'function_not_found');
+ assert.match(result.value.functions.missing.error,/functions decode --address <hex>/);assert.match(result.value.functions.missing.error,/does not create functions or xrefs/);
+ const [rpc]=await f.rpc(app,[args]) as any[];assert.deepEqual(rpc.result,result);
+ const next=await f.json(app,[...args,'--offset-chars','4','--expect-view',result.value.view.identity]) as any;
+ assert.equal(next.value.functions.first.decompiled_code,'rn s');assert.equal(next.value.functions.first.text.textSha256,result.value.functions.first.text.textSha256);
+ const single=await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','first','--fields','callees']) as any;
+ assert.equal(single.value.status,'success');assert.deepEqual(single.value.callees,[]);assert.equal(single.value.entry_point,undefined);
+ invalidEntry=true;
+ const malformed=await f.json(app,[...args,'--fields','entry_point,decompiled_code']) as any;
+ assert.equal(malformed.value.functions.first.reason,'invalid_native_shape');
+});
+
 test('bulk function windows preserve mixed outcomes, Unicode hashes, view guards and exact saved files',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace!:Workspace,modification=0,changeDuringRead=false;
  const source='a😀б'.repeat(20),short='return 1;';

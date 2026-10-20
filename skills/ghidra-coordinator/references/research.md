@@ -105,6 +105,11 @@ native, a sanitized diagnostic of at most 500 Unicode characters. Reasons distin
 `function_not_found`, `native_function_failure`, `selector_mismatch`, `invalid_native_shape`,
 `missing_signature` and `missing_decompiler_text`. Missing definitions remain failures; reads
 never create functions or run analysis. JSON-RPC `cli.execute` preserves the same error data.
+If executable bytes are known but the function is absent, use the read-only `functions decode`
+command below at the explicit address. A containing function with a one-byte body and missing
+stored xrefs can also indicate sparse metadata. Decode reveals bounded local instruction flow;
+it does not repair function boundaries or establish whole-function callers/callees. Defining
+functions or disassembling the listing requires a separate explicit Update operation.
 
 The existing `functions inspect` accepts 1–20 distinct names/addresses. Existing `--fields`
 remain valid; unknown fields fail before dispatch. Decompiled text uses per-item

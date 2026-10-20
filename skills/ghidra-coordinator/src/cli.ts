@@ -319,7 +319,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
           {flags:'--loader <name>',description:'Explicit installed loader name/ID from formats loaders'},
           {flags:'--loader-options <json>',description:'Named primitive SDK loader options, requiring --loader'}]}),
         command('strings','Read defined strings',[
-          command('search','Find literal text and usable addresses',({options:o},c)=>owner.selected(c).research.strings(scope(o),text(o.contains,4096),number(o.limit,100,1),number(o.offset,2147483647)),
+          command('search','Find literal text in defined string data; undefined literals: analysis search-byte-patterns',({options:o},c)=>owner.selected(c).research.strings(scope(o),text(o.contains,4096),number(o.limit,100,1),number(o.offset,2147483647)),
             {permission:Permission.ReadOnly,options:[...scoped,{flags:'--contains <text>',description:'Literal case-insensitive substring',required:true},...paged]}),
         ]),
         command('xrefs','Follow cross references',[

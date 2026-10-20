@@ -23,8 +23,8 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   const output:Record<string,unknown>=Object.create(null),saved:{name:string;content:string}[]=[];let remaining=options.total;
   for(const [index,selector]of selectors.entries()){
     let found:Record<string,unknown>;
-    try{found=functionResult({functions:{[selector]:functions[selector]}},selector);}
-    catch(error){if(!(error instanceof CliError))throw error;const detail=object(error.result);output[selector]={error:detail.nativeDiagnostic??error.message,...detail,status:detail.reason==='function_not_found'?'not_found':'failed'};continue;}
+    try{found=functionResult({functions:{[selector]:functions[selector]}},selector,{requireEntryPoint:!selectedFields.length||selectedFields.includes('entry_point')});}
+    catch(error){if(!(error instanceof CliError))throw error;const detail=object(error.result);output[selector]={error:detail.reason==='function_not_found'?error.message:detail.nativeDiagnostic??error.message,...detail,status:detail.reason==='function_not_found'?'not_found':'failed'};continue;}
     const row:Record<string,unknown>={...found,status:'success'};
     if(typeof row.decompiled_code==='string'){
       const source=row.decompiled_code,window=textWindow(source,options.saveDirectory?0:Math.min(options.limit,remaining),options.saveDirectory?0:options.offset,Boolean(object(row.truncation??{}).decompiled_code));
