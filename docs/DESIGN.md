@@ -52,6 +52,25 @@ and cannot separately infer client startup/IPC/response stages absent Factory ho
 [research reference](../skills/ghidra-coordinator/references/research.md) specifies bounds and
 interpretation. Diagnostic data resides in configured profile workspace storage.
 
+### Raw-byte code-reference candidates
+
+The owner approved narrow V1 on 2026-10-20 after independent API critique.
+`ghidra analysis code-references` is a ReadOnly x86-64 candidate scanner for explicit E8 rel32,
+RIP LEA, GPR MOV 88/89/8A/8B and FF /2 pointer-slot forms. It tests every start in initialized
+executable default-space memory and validates selected exact targets with native pseudo decode.
+It does not create Listing/functions/xrefs or follow indirect targets. Adjacent eligible blocks
+merge; holes do not. Entire instructions fit the inclusive byte range. Boundary evidence has
+three states and never establishes execution or callgraph completeness.
+
+Byte, candidate, deadline and result budgets have independent counters and a first-unchecked
+frontier. Stateless untrusted cursors bind normalized selectors/budgets and observed context,
+snapshot, generation, modification counter and process incarnation; selectors cannot change on
+continuation. Before/after observations occur inside one ordered context action. Changed views
+fail rather than mixing pages. No per-query state or save is introduced. The trusted native
+helper uses the existing script transport; user scripts retain Update/save/recovery semantics.
+The [sparse-navigation reference](../skills/ghidra-coordinator/references/sparse-navigation.md)
+defines exact forms, prefix exclusions, coverage, bounds and cursor interpretation.
+
 ### Profile analysis storage
 
 The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,

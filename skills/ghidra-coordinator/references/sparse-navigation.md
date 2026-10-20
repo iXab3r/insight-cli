@@ -6,9 +6,9 @@ the route from the actual observation before building a script or requesting bro
 
 All examples below need the same `--session S --target T --json`. Replace placeholder
 addresses with observed addresses in that input; symbols and offsets never transfer implicitly.
-Use generated help for exact flags. These are existing commands, not a new analysis API.
+Use generated help for exact flags.
 
-| Observation | Next existing command | What it establishes |
+| Observation | Next command | What it establishes |
 |---|---|---|
 |Empty navigation results / suspicious body sizes|`analysis navigation`|Bounded metadata samples and coverage; no analysis is started|
 |Known function entries, even without Listing|`functions inspect --functions 0xENTRY_A,0xENTRY_B --fields decompiled_code,callees --include-call-context false`|Up to20 compact decompiler observations; inspect each status and truncation|
@@ -54,8 +54,84 @@ advance memory coverage. A narrowed text filter does not skip earlier non-string
 Use `memory list` to identify initialized/executable blocks; do not assume a guessed block name
 or that the image-base address belongs to executable code.
 
-Byte matches are not validated code references. Existing xrefs only describe saved DB metadata.
-If this route cannot establish a needed RIP-relative or indirect reference, record that gap;
-these commands do not provide a raw-memory whole-program code-reference scanner. A constrained
-API for that would be a separate design decision. Arbitrary scripts remain potential writes
-with saved-state/recovery costs; a compile/transport error must not be blindly replayed.
+Byte matches are not validated code references. Existing xrefs describe saved DB metadata.
+For exact RIP-relative operands or direct CALL destinations, use the bounded ReadOnly candidate
+scanner below. Arbitrary scripts remain potential writes with saved-state/recovery costs;
+a compile/transport error must not be blindly replayed.
+
+## Raw-byte code-reference candidates (V1)
+
+```sh
+insight-cli ghidra analysis code-references --session S --target T \
+  --to 180080000,180080008 --forms call-rel32,lea-rip,mov-rip,call-rip-slot \
+  --scan-from 180000000 --scan-through 18002101f --limit 100 --json
+```
+
+`value.matches` contains instruction bytes, full length, operand index/width, exact target,
+form, native instruction text and boundary evidence. Example row:
+
+```json
+{"from":"180000060","to":"180080008","form":"call-rip-slot","bytes":"ff15a2ff0700","length":6,"operand_index":0,"operand_bits":64,"target_role":"pointer-slot","validation":"decoded","boundary":"unconfirmed","instruction":"CALL qword ptr [0x180080008]"}
+```
+
+Targets are
+1–64 distinct default-space unsigned 64-bit addresses, comma separated; they share one pass.
+Only x86 little-endian 64-bit languages with known 64-bit decode mode are supported. No code
+executes, and no Listing instructions, functions or xrefs are created. This does not follow
+register values, indirect callees, thunks, pointer contents or control flow.
+
+| Form | Supported encoding | Target role |
+|---|---|---|
+| `call-rel32` | E8 + signed rel32 | `direct-call-target` |
+| `lea-rip` | 8D, ModRM RIP-relative | `effective-address` |
+| `mov-rip` | GPR MOV 88/89/8A/8B, ModRM RIP-relative | `effective-address` |
+| `call-rip-slot` | FF /2, ModRM RIP-relative | `pointer-slot` |
+
+Forms default to all four; `--forms` restricts them. Legacy 66/26/2E/36/3E and REX prefixes
+are admitted only when the native full decode agrees with the constrained encoding/length.
+REX before a later legacy prefix is reset. Widths are explicit: `lea eax` and `lea rax` remain
+distinct. V1 excludes 67 address override, FS/GS, LOCK/REP, C6/C7 immediate MOV,
+MOVSX/MOVZX/MOVSXD and SIMD/VEX/EVEX **at that candidate start**. A later byte inside any
+instruction or immediate can independently decode as a supported candidate.
+
+Each byte offset is tested, including overlapping and prefix-alternative starts; advancement
+is one byte. `listing-confirmed` requires a matching stored instruction and compatible bytes,
+length and operand display. `listing-conflict` means overlap/disagreement with a stored
+instruction. `unconfirmed` means neither. Even listing-confirmed is not proof of execution,
+function membership or a complete call graph. LEA is an effective address, not a memory read.
+
+`--scan-through` is the inclusive final byte, and each match fits entirely inside the original
+range. Only initialized executable default-space memory is visited. Adjacent eligible blocks
+merge so an instruction may cross their boundary; holes, uninitialized blocks and non-executable
+memory never bridge. A complete scan only exhausts this declared eligible input/form set.
+
+`value.scan` reports `bytes_read` (including lookahead and rereads), `tested_starts`,
+`visited_candidates` (selected-form encoding prefilter hits, including target/decode rejects),
+`next_start` (first unchecked start), `complete`, `reason` and native `elapsed_ms`.
+The frontier can skip ineligible gaps; it does not assert that gap bytes were decoded.
+Reasons are `exhausted`, `byte_limit`, `candidate_limit`, `timeout` and `result_limit`.
+The native cooperative deadline is checked even in no-match regions. Compile/dispatch/view
+observation time is outside that deadline; it remains part of command wall time.
+
+Defaults: 4MiB bytes, 200000 candidates, 5 seconds and 100 matches. Maxima: 16MiB,
+1000000 candidates, 30 seconds and 1000 matches. Minimum byte budget is15, so a maximum-length
+x86 start can progress with its lookahead. No semantic completeness is implied by these limits.
+
+For an incomplete result, continue with the opaque stateless token:
+
+```sh
+insight-cli ghidra analysis code-references --session S --target T \
+  --cursor TOKEN --limit 1000 --max-bytes 8388608 --json
+```
+
+Cursor excludes `--to`, `--forms`, `--scan-from` and `--scan-through`; omitted controls inherit
+the previous page. It binds the normalized original query, frontier, algorithm version, selected
+context/snapshot/generation, native modification observation and process incarnation. Scope,
+format or version mismatch fails; view changes, including restoring the same snapshot in a new
+JVM, fail with `changed_view`. Start a new query after such a change. Before/after observations
+share the context's ordered action; a native modification guard additionally covers the scan.
+
+Tokens are unsigned, untrusted continuation parameters, not evidence that earlier offsets were
+scanned. There is no cursor registry, per-query snapshot or journal save. Retain page results
+if coverage evidence is needed. The trusted helper still uses the existing inline-script
+transport and incurs its compile/dispatch cost; arbitrary user scripts remain Update operations.

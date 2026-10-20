@@ -414,3 +414,16 @@ verified original copies. Cleanup intent disables rollback; interrupted cleanup 
 Stable old paths remain compatibility links. A stopped unknown-operation profile can migrate
 without replaying scripts/publications or declaring their effects applied. See the complete
 [storage contract](../skills/ghidra-coordinator/references/storage.md).
+
+### Sparse raw-byte code-reference search
+
+On an owned no-analysis x86-64 target, a researcher supplies 1–64 exact targets, an inclusive
+byte range and explicit supported forms to `ghidra analysis code-references`. ReadOnly CLI
+and JSON-RPC return the same candidate evidence, widths, boundary status, coverage counters and
+stateless cursor. A paged scan matches an unpaged scan without missing tail/overlapping starts.
+Adjacent executable initialized blocks admit a crossing decode; gaps and ineligible memory do
+not. Candidate/byte/result/deadline stops preserve the first unchecked start. Scope/selector
+conflicts fail before dispatch; a restored process invalidates the old cursor. Saved snapshot,
+generation and request journal remain unchanged during research reads. The disposable generated
+PE proof is `scripts/proof-code-references.mjs`; its matched script/API workload uses identical
+scanner code and inputs and reports wall time separately from native scan time.

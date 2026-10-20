@@ -16,7 +16,7 @@ import { nativeHelpers, nativeInputs,nativeJvmDirectories,nativeExtensionArgumen
 import { GhidraServer, type ServerBinding } from './server.js';
 import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState } from './workspace.js';
 import { type Artifact } from './artifacts.js';
-import { object, fail, text, version, stable } from './model.js';
+import { object, fail, text, version, stable, digest } from './model.js';
 import { HttpBridge } from './transport.js';
 import {scriptInventory,scriptPath} from './scripts.js';
 import {logicalPrograms} from './cross-results.js';
@@ -326,7 +326,10 @@ export class GhidraContexts {
     if(binding.context!==context.id)fail('binding','Context process binding changed.');
     return this.verified(binding,this.workspace.target(scope.target));
   }
-  async observation(scope:Scope){return this.call(scope,'/research_view');}
+  async observation(scope:Scope){
+    const record=await this.selected(scope);
+    return {...object(await this.call(scope,'/research_view')),incarnation:digest({pid:record.binding.pid,root:record.binding.root})};
+  }
   async call(scope: Scope, operation: string, parameters: Record<string,unknown> = {}): Promise<unknown> {
     if(Object.hasOwn(parameters,'program'))fail('invalid','Program routing is owned by the session and target selectors.');
     if(operation==='/set_variables'&&typeof parameters.variables!=='string')parameters={...parameters,variables:JSON.stringify(parameters.variables)};

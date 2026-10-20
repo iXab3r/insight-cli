@@ -13,6 +13,7 @@ import {transferResult} from './cross-results.js';
 import {CliError} from '@eyeauras/cli-factory';
 import {timed} from './internal-timing.js';
 import {navigationResult} from './context-diagnostics.js';
+import {inspectCodeReferences,type ReferenceRequest} from './code-references.js';
 
 export interface ResearchBackend {
   observation?(scope:Scope):Promise<unknown>;
@@ -259,6 +260,15 @@ export class Research {
       const observation=await backend.observation?.(selected);
       const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
       return inspectFunctions(backend,selected,parameters,options,view,observation);
+    });
+  }
+  async codeReferences(selected:Scope,request:ReferenceRequest){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      if(!backend.observation)fail('unsupported','Code-reference continuation requires native view observation.');
+      const context=this.workspace.context(selected),observation=await backend.observation(selected);
+      const view=digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation});
+      return inspectCodeReferences(backend,selected,request,view,observation);
     });
   }
   async navigation(selected:Scope,maximum:number){

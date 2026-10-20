@@ -46,6 +46,9 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
    and follow [sparse navigation](references/sparse-navigation.md). Try compact `functions inspect`
    at known entries before writing reconstruction scripts. `force-decompile` refreshes an
    existing entry; `decode` handles known bytes without an entry. Neither repairs stored xrefs.
+   `analysis code-references` scans explicit RIP/CALL byte forms for exact targets with bounded
+   coverage and a stateless cursor. Its decoded candidates retain boundary uncertainty; see the
+   sparse-navigation reference before treating a candidate as an actual code reference.
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
 5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.

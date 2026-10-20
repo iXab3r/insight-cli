@@ -19,6 +19,15 @@ operations. P3 adds managed ready-built SDK modules, native capability inventori
 plugin enablement and opt-in per-context synchronization; [its evidence](verification/api-gaps-p3.json)
 is separate from the historical reports. Those extensions do not change the 210 pinned operation mappings or eight controls.
 
+## Facade-owned byte reference candidates
+
+`ghidra analysis code-references` is an additional ReadOnly surface, independent of the pinned
+210 operation mappings. Its V1 contract is exact-target x86-64 E8 rel32, RIP LEA/GPR MOV and
+FF /2 pointer-slot candidates with native decode, explicit widths/boundary evidence, bounded
+coverage and stateless continuation. It does not broaden stored-xref or control-flow claims.
+See [candidate semantics](../skills/ghidra-coordinator/references/sparse-navigation.md) and
+[disposable evidence](verification/code-references.json).
+
 ## Completed combined evidence
 
 The [current full acceptance report](verification/full-facade-current.json) binds 33 passing native
