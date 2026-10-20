@@ -314,6 +314,43 @@ test('uncertain script save is not retried or adopted; explicit stopped-worker a
  assert.equal((await f.json(app,['ghidra','open',...args]) as Opened).state,'ready');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
 });
 
+test('proven inline compile/load rejection preserves pending work and replays the failure over CLI/RPC without saving',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
+ let workspace:Workspace,attempts=0,saves=0,stage='compile';
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const b=new Fake(w),save=b.saved.bind(b);b.saved=async s=>{saves++;return save(s);};
+  return Object.assign(b,{inlineScript:async()=>{attempts++;return {safe:true,response:{success:false,execution:{stage,userCode:'not_started',entrypointInvoked:false},diagnostic:{kind:'java-'+stage,message:'cannot find symbol'},compilerOutput:{text:'compiler diagnostic',truncated:false},console_output:'',outputTruncated:false}};}});
+ }}));
+ const exe=join(f.root,'inline.exe');await writeFile(exe,'owned inline fixture');const s=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened;
+ const scope=['--session',s.session,'--target',s.target];await f.json(app,['ghidra','comments','set',...scope,'--address',entry,'--kind','plate','--text','retained edit']);
+ const before=workspace!.context(s),savedBefore=saves;
+ for(const current of ['compile','load']){
+  stage=current;const args=['ghidra','scripts','run-inline',...scope,'--code','bad '+stage,'--request-id','rejected-'+stage];
+  const failed=await f.run(app,[...args,'--json']);assert.notEqual(failed.exitCode,0);const result=JSON.parse(failed.stdout);assert.equal(result.state,'rejected');assert.equal(result.contextState,'ready');assert.equal(result.execution.stage,stage);
+  const request=workspace!.scopedRequest(s,'rejected-'+stage)!;assert.equal(request.state,'failed');assert.deepEqual(workspace!.context(s),before);assert.equal(saves,savedBefore);
+  const calls=attempts;assert.deepEqual(JSON.parse((await f.run(app,[...args,'--json'])).stdout),result);
+  const [rpc]=await f.rpc(app,[args]) as any[];assert.equal(rpc.error.data.code,'coordinator.script.'+stage);assert.deepEqual(rpc.error.data.result,result);assert.equal(attempts,calls);
+  const read=await f.json(app,['ghidra','functions','inspect',...scope,'--function',entry]) as any;assert.equal(read.value.entry_point,entry);assert.equal(workspace!.unresolved(s).length,0);
+ }
+});
+
+test('inline initialization/constructor/runtime failures and lost replies stay unknown, without a second invocation',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace:Workspace,stage='initialize',attempts=0,saves=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const b=new Fake(w);b.saved=async()=>{saves++;throw Error('Must not save an uncertain script');};return Object.assign(b,{inlineScript:async()=>{
+   attempts++;if(stage==='lost')throw new CliError('Lost reply',{code:'coordinator.transport'});
+   return {safe:false,response:{success:false,execution:{stage,userCode:'may_have_started',entrypointInvoked:stage==='execute'?null:false},diagnostic:{kind:'java-'+stage,message:'fixture failure'},compilerOutput:{text:'',truncated:false},console_output:'external effect possible',outputTruncated:false}};
+  }});
+ }}));
+ const exe=join(f.root,'uncertain-inline.exe');await writeFile(exe,'owned uncertain inline fixture');
+ for(const current of ['initialize','construct','execute','lost']){
+  stage=current;const s=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened,args=['ghidra','scripts','run-inline','--session',s.session,'--target',s.target,'--code','fixture','--request-id','unknown-'+stage];
+  assert.notEqual((await f.run(app,[...args,'--json'])).exitCode,0);assert.equal(workspace!.scopedRequest(s,'unknown-'+stage)!.state,'unknown');
+  const calls=attempts;assert.notEqual((await f.run(app,[...args,'--json'])).exitCode,0);assert.equal(attempts,calls);assert.equal(saves,0);
+  assert.notEqual((await f.run(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function',entry,'--json'])).exitCode,0);
+ }
+});
+
 test('native budget settings can change after a failed import without invalidating saved research or its intent',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update'],values:{java:'fixture-runtime',initialImportSeconds:1}}]});let attempts=0;
  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{

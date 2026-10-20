@@ -57,6 +57,9 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
+   Java `scripts run-inline` returns bounded compile/load diagnostics. Only proven rejection
+   before user-code initialization leaves the context available; constructor/static initializer
+   failures and lost responses remain unknown. See the recovery reference for execution fields.
 7. Finish by closing each context you own with scoped `ghidra close`, preserving private work.
    If this profile's local server belongs exclusively to your investigation and all its contexts
    are closed, use `ghidra server stop`, then verify `ghidra status` has no remaining processes.

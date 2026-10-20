@@ -162,3 +162,48 @@ node scripts/proof-sparse-navigation.mjs \
 This validates a route already supported by the CLI; it is not a measured agent speedup or a
 whole-program sparse-code-reference scanner. BB-07 and the proposed constrained code-reference
 API remain separate decisions. No production release or new agent benchmark is implied.
+
+## BB-07 — Java inline compile/load diagnostics
+
+The owner approved and the [installed fixture proof](verification/inline-scripts.json) verifies
+the narrow V1. The existing Update-gated `ghidra scripts run-inline` now uses a facade-owned
+compiled executor. A fixed trusted shim uses the existing native transport; user source is
+compiled in a fresh attempt directory with annotation processing disabled. No Factory core,
+IPC host or upstream JAR was replaced. Class resolution is non-initializing, with an explicit
+user-code barrier before initialization and construction.
+
+Native facts are read from a versioned receipt bound to the attempt, request and source hash,
+after the executor acknowledgement. User console text cannot supply that proof. Compiler and
+console capture each retain at most32KiB before UTF-8 decoding, with explicit truncation;
+structured diagnostics retain at most100 entries with individually bounded messages and
+source-line mapping where possible. Attempts and failed sources stay in profile analysis storage.
+
+A compile/load rejection proven before user code starts becomes a terminal failed request and
+returns a nonzero `rejected` result with `contextState: ready`. It neither saves a new program
+snapshot nor changes the existing pending work. Same-ID retries return that failure; a changed
+source needs a new ID. Initialization/constructor/runtime failures and lost/malformed replies
+remain unknown even when `run()` was never entered. This is not a general script sandbox or a
+rule for clearing historical unknown attempts from their error strings.
+
+The generated sparse-PE reproduction of `getFunctionBefore(currentAddress)` returns
+`coordinator.script.compile`, `cannot find symbol`, and `sourceLine: 1`. Snapshot/generation
+remain unchanged, the request is failed, status stays ready, and the next navigation read works.
+The12 public native checks also cover non-initializing load rejection, missing default
+constructor, diagnostic overflow, same-ID replay, fresh classes, imports/args, initialization,
+construction and runtime sentinel writes, and console-proof spoofing. A separate real lost-reply
+test retains unknown with exactly one native dispatch despite an existing compile receipt.
+All fixture workers/servers were stopped and journals preserved; public-fixture cleanup passed.
+
+Final validation:264 offline tests passed with4 declared skips,19 focused tests passed,
+31 release checks passed, and isolated offline package install/relocation passed. Earlier
+fixture-runner errors and restricted/concurrent test failures are retained as limits in the proof;
+the final stable sequential run passed. This is a development candidate, not registry publication.
+
+```sh
+node scripts/proof-inline-scripts.mjs \
+  --package <isolated-installed-package> --java <jdk>/bin/java \
+  --ghidra-home <ghidra> --root <fresh-absolute-directory> --ack-disposable
+node scripts/proof-inline-loss.mjs \
+  --package <isolated-installed-package> --java <jdk>/bin/java \
+  --ghidra-home <ghidra> --root <another-fresh-directory> --ack-disposable
+```

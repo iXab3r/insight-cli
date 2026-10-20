@@ -26,6 +26,7 @@ import {readCallerGoal,awaitCaller} from './debugger-caller.js';
 import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
+import {runInline} from './inline-script.js';
 import {sdkWrites} from './sdk-contracts.js';
 import {initialIntent,initializeModel} from './initial-model.js';
 import {managedGhidraDebugger,prepareGhidraDebugger} from './ghidra-debugger-runtime.js';
@@ -329,6 +330,10 @@ export class GhidraContexts {
   async observation(scope:Scope){
     const record=await this.selected(scope);
     return {...object(await this.call(scope,'/research_view')),incarnation:digest({pid:record.binding.pid,root:record.binding.root})};
+  }
+  async inlineScript(scope:Scope,parameters:Record<string,unknown>,requestId:string){
+    const record=await this.selected(scope);
+    return runInline(record.http,record.binding.program,record.binding.root,parameters,requestId);
   }
   async call(scope: Scope, operation: string, parameters: Record<string,unknown> = {}): Promise<unknown> {
     if(Object.hasOwn(parameters,'program'))fail('invalid','Program routing is owned by the session and target selectors.');

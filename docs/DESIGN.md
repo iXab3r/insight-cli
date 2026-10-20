@@ -366,6 +366,18 @@ mergeable fields.
 
 ### Request identity and lost responses
 
+For Java `ghidra scripts run-inline`, the facade-owned native executor compiles each attempt
+separately with annotation processing disabled, resolves classes without initialization, then
+marks the user-code barrier before initialization/construction. A correlated versioned receipt
+can prove compile/load rejection before that barrier: the request becomes terminal failed,
+the public error result is `rejected`, and saved/pending context work is unchanged. Same-ID
+retries retrieve the retained failure. Source changes require a new request ID. Compiler and
+load diagnostics are bounded at collection and retained in the ordinary error result/journal.
+Console text is not proof. Initialization, constructor, framework/runtime failures and lost or
+unproved acknowledgements retain the existing unknown/frozen semantics. Old unknown attempts
+are not automatically cleared. The [recovery reference](../skills/ghidra-coordinator/references/recovery.md)
+defines execution-field uncertainty. This changes no Factory host, permissions or lifecycle.
+
 Changing commands accept an optional `--request-id`; API callers use the same command option
 through Factory. The service records a request's identity and intent before acknowledging effects.
 Within the selected profile, the same ID and same effective input identify the same request,

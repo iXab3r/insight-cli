@@ -16,6 +16,7 @@ import {navigationResult} from './context-diagnostics.js';
 import {inspectCodeReferences,type ReferenceRequest} from './code-references.js';
 
 export interface ResearchBackend {
+  inlineScript?(scope:Scope,parameters:Record<string,unknown>,requestId:string):Promise<{response:Record<string,unknown>;safe:boolean}>;
   observation?(scope:Scope):Promise<unknown>;
   sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
   archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
@@ -652,6 +653,10 @@ export class Research {
       const request=this.workspace.request(reserved.request.id);
       if(reserved.replay&&request.state!=='accepted') {
         if(request.state==='applied')return request.result;
+        if(operation==='/run_script_inline'&&request.state==='failed'&&object(request.result??{}).reason==='script_not_executed'){
+          const result=object(request.result),execution=object(result.execution);
+          fail('script.'+String(execution.stage),String(object(result.diagnostic).message),result);
+        }
         if(operation.startsWith('/sdk/')&&request.state==='failed'&&object(request.result??{}).state==='rejected')fail('rejected','This SDK transaction was rolled back and is not repeated.',request.result);
         fail('unknown','This saved-state operation retains an unresolved outcome; it is not re-executed.',request.result);
       }
@@ -662,7 +667,20 @@ export class Research {
         savedVerification:!!verifySaved});
       let savedSnapshot:Artifact|undefined,phase='operation';
       try {
-        const raw=await backend.call(selected,operation,parameters),response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
+        let raw:unknown;
+        if(operation==='/run_script_inline'&&backend.inlineScript){
+          const attempt=await backend.inlineScript(selected,parameters,request.id);raw=attempt.response;
+          if(attempt.response.success===false){
+            const result={...selected,requestId:request.callerId??request.id,state:attempt.safe?'rejected':'unknown',
+              contextState:attempt.safe?'ready':'needs_recovery',reason:attempt.safe?'script_not_executed':'script_execution_not_proven_complete',
+              execution:attempt.response.execution,diagnostic:attempt.response.diagnostic,diagnostics:attempt.response.diagnostics,
+              diagnosticsTruncated:attempt.response.diagnosticsTruncated,compilerOutput:attempt.response.compilerOutput,
+              output:attempt.response.console_output,outputTruncated:attempt.response.outputTruncated};
+            if(attempt.safe)this.workspace.recordRequest(request.id,'failed',result);
+            fail('script.'+String(object(attempt.response.execution).stage),String(object(attempt.response.diagnostic).message),result);
+          }
+        }else raw=await backend.call(selected,operation,parameters);
+        const response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
         if(['rejected','partial','failed','error'].includes(String(response.status))||response.success===false)
           fail('partial','Program operation reported a rejected or incomplete effect.');
         if(!verifySaved&&response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
@@ -672,6 +690,7 @@ export class Research {
           pendingChanges:scalars.length+complexChanges.length,value};
         this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges,scalars},result);return result;
       }catch(error){
+        if(operation==='/run_script_inline'&&this.workspace.request(request.id).state==='failed'&&object(this.workspace.request(request.id).result??{}).reason==='script_not_executed')throw error;
         if(operation.startsWith('/sdk/')&&String((error as {code?:unknown}).code).endsWith('.rejected')){
           this.workspace.recordRequest(request.id,'failed',{...selected,state:'rejected',reason:'native_transaction_rolled_back'});throw error;
         }
