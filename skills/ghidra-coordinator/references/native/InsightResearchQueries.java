@@ -111,6 +111,27 @@ public class InsightResearchQueries extends GhidraScript {
     candidates.add(map("address",currentProgram.getImageBase().toString(),"name","image_base","kind","image_base_candidate","confirmed",false,"provenance","program.image-base"));
     return map("entry_points",confirmed,"count",confirmed.size(),"candidates",candidates,"scan",scan(),"truncated",stopped,"semantics",map("kind","metadata","limitation","External-entry designation is Ghidra metadata, not proof of OS startup behavior; candidates are not confirmed entries."));
   }
+  Object navigation()throws Exception{
+    final int cap=128;int functions=0,oneByte=0,entryInstructions=0,instructions=0,references=0,data=0,strings=0;long bodyBytes=0;
+    var fs=currentProgram.getFunctionManager().getFunctions(true);
+    while(fs.hasNext()&&functions<cap){if(!visit())break;var f=fs.next();functions++;long size=f.getBody().getNumAddresses();bodyBytes+=size;if(size==1)oneByte++;if(currentProgram.getListing().getInstructionAt(f.getEntryPoint())!=null)entryInstructions++;}
+    boolean functionsComplete=!fs.hasNext();
+    var is=currentProgram.getListing().getInstructions(true);
+    while(is.hasNext()&&instructions<cap){if(!visit())break;is.next();instructions++;}boolean instructionsComplete=!is.hasNext();
+    var rs=currentProgram.getReferenceManager().getReferenceIterator(currentProgram.getMinAddress());
+    while(rs.hasNext()&&references<cap){if(!visit())break;rs.next();references++;}boolean referencesComplete=!rs.hasNext();
+    var ds=currentProgram.getListing().getDefinedData(true);
+    while(ds.hasNext()&&data<cap){if(!visit())break;var d=ds.next();data++;if(d.hasStringValue())strings++;}boolean dataComplete=!ds.hasNext();
+    boolean complete=functionsComplete&&instructionsComplete&&referencesComplete&&dataComplete;
+    String assessment=functions>0&&oneByte*5>=functions*4&&(functions-entryInstructions)*5>=functions*4?"sparse-metadata":functions==0&&instructions==0?"no-code-observed":"observed-metadata";
+    return map("functions",map("sampled",functions,"oneByteBodies",oneByte,"bodyBytes",bodyBytes,"entriesWithInstructions",entryInstructions,"complete",functionsComplete),
+      "instructions",map("sampled",instructions,"complete",instructionsComplete),"references",map("sampled",references,"complete",referencesComplete),
+      "definedData",map("sampled",data,"strings",strings,"complete",dataComplete),
+      "scan",map("visited",visited,"maximum",maxScan,"sampleLimitPerCategory",cap,"complete",complete,"reason",complete?"exhausted":stopped?"budget":"sample_limit"),
+      "assessment",assessment,"assessmentAlgorithm","one-byte-and-missing-entry-instruction-ratio-at-least-0.8-v1",
+      "recommendations",assessment.equals("sparse-metadata")||assessment.equals("no-code-observed")?List.of("Treat missing stored xrefs, strings and function containment as unknown; inspect known executable bytes with functions decode.","Consider an explicit bounded analysis/disassembly Update only when needed; this diagnostic does not run analyzers."):List.of("Use observed metadata for navigation; verify individual bodies and references for the question under study."),
+      "coverage","At most 128 inputs per category, in address order, sharing max-scan and a five-second deadline. References are stored DB references; strings count only sampled defined data. Observations and heuristics do not prove analysis or semantic completeness.");
+  }
   Object strings(boolean search)throws Exception{
     List<Object> rows=new PagedRows();String needle=str(search?"search_term":"filter","");Pattern regex=search?safeRegex(needle):null;String encoding=str("encoding","");int min=number("min_length",search?4:0,0,65536);var iter=currentProgram.getListing().getDefinedData(true);
     while(iter.hasNext()){if(!visit())break;var d=iter.next();if(!d.hasStringValue())continue;if(d.getLength()>65536){stopped=true;break;}String value=Objects.toString(d.getValue(),"");if(value.length()>8192){stopped=true;break;}String enc=d.getDataType().getName().toLowerCase(Locale.ROOT).contains("unicode")?"unicode":"ascii";
@@ -203,7 +224,7 @@ public class InsightResearchQueries extends GhidraScript {
     if(consumed==input.length&&available<maximum&&reason.equals("byte_limit"))reason="executable_block_end";
     return map("address",start.toString(),"language",language,"compiler",currentProgram.getCompilerSpec().getCompilerSpecID().toString(),"input_bytes",HexFormat.of().formatHex(input),"input_sha256",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(input)),"maximum_bytes",maximum,"maximum_instructions",maxInstructions,"instructions",rows,"consumed_bytes",consumed,"stop_reason",reason,"truncated",List.of("byte_limit","instruction_limit","truncated_instruction","executable_block_end").contains(reason),"semantics","Linear pseudo instructions in the selected program context; direct targets are computed from bytes, not function membership or stored xrefs.");
   }
-  Object execute(String operation)throws Exception{return switch(operation){case "/research_view"->map("modification",Long.toString(currentProgram.getModificationNumber()),"language",currentProgram.getLanguageID().toString(),"compiler",currentProgram.getCompilerSpec().getCompilerSpecID().toString());case "/decode_instructions"->decodeInstructions();case "/find_dead_code"->dead();case "/detect_crypto_constants"->bytes(true);case "/search_byte_patterns"->bytes(false);case "/get_valid_data_types"->types(true);case "/find_data_types"->types(false);case "/validate_data_type"->validateType();case "/validate_function_prototype"->validatePrototype();case "/get_entry_points"->entries();case "/list_globals"->globals();case "/list_strings"->strings(false);case "/search_strings"->strings(true);case "/search_instructions"->instructions();default->throw new IllegalArgumentException("Unknown native query");};}
+  Object execute(String operation)throws Exception{return switch(operation){case "/navigation_diagnostic"->navigation();case "/research_view"->map("modification",Long.toString(currentProgram.getModificationNumber()),"language",currentProgram.getLanguageID().toString(),"compiler",currentProgram.getCompilerSpec().getCompilerSpecID().toString());case "/decode_instructions"->decodeInstructions();case "/find_dead_code"->dead();case "/detect_crypto_constants"->bytes(true);case "/search_byte_patterns"->bytes(false);case "/get_valid_data_types"->types(true);case "/find_data_types"->types(false);case "/validate_data_type"->validateType();case "/validate_function_prototype"->validatePrototype();case "/get_entry_points"->entries();case "/list_globals"->globals();case "/list_strings"->strings(false);case "/search_strings"->strings(true);case "/search_instructions"->instructions();default->throw new IllegalArgumentException("Unknown native query");};}
   public void run()throws Exception{
     var request=JsonParser.parseString(new String(Base64.getDecoder().decode(getScriptArgs()[0]),StandardCharsets.UTF_8)).getAsJsonObject();p=request.getAsJsonObject("parameters");maxScan=number("max_scan",100000,1,200000);limit=number("limit",100,1,1000);offset=number("offset",0,0,2000000);deadline=System.nanoTime()+number("timeout_seconds",5,1,30)*1000000000L;
     boundedMonitor=TimeoutTaskMonitor.timeoutIn(number("timeout_seconds",5,1,30),TimeUnit.SECONDS,monitor);

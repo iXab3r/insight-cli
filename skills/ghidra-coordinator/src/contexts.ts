@@ -1,3 +1,4 @@
+import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
@@ -122,6 +123,7 @@ export class GhidraContexts {
         try {
           const info=await record.http.instance();
           if(info.pid!==binding.pid||info.tcp_port!==endpointPort)fail('binding','Context endpoint belongs to a different native process.');
+          if(context)await recordLifecycle(this.workspace,context,{at:new Date().toISOString(),event:'start',reason:'native_launch',pid:binding.pid});
           return record;
         } catch {await delay(100);}
       }
@@ -129,6 +131,10 @@ export class GhidraContexts {
     } catch(error) {
       if(child.exitCode===null&&child.signalCode===null)child.kill('SIGTERM');
       for(let i=0;i<100&&child.exitCode===null&&child.signalCode===null;i++)await delay(50);
+      if(context&&(child.exitCode!==null||child.signalCode!==null)){
+        const at=new Date().toISOString();await durable(join(root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret,at,reason:'startup_failed'});
+        await recordLifecycle(this.workspace,context,{at,event:'stop',reason:'startup_failed',pid:binding.pid});
+      }
       this.running.delete(root);throw error;
     }
   }
@@ -152,7 +158,7 @@ export class GhidraContexts {
       fail('binding','Opened native program does not match the target input bytes.');
     return object(await record.http.call('/get_metadata',{program:record.binding.program}));
   }
-  private async stopRecord(record: Running, ready = true, releaseCapacity = true) {
+  private async stopRecord(record: Running, ready = true, releaseCapacity = true, reason:StopReason='temporary_complete') {
     const {binding,child}=record;
     const childFinished=child&&child.pid===binding.pid&&(child.exitCode!==null||child.signalCode!==null);
     if(!childFinished&&alive(binding.pid)) {
@@ -168,7 +174,9 @@ export class GhidraContexts {
       if(alive(binding.pid))fail('busy','Owned context did not stop; its stage is retained.');
     }
     if(binding.mode==='gui')await this.debuggerReleased(binding);
-    await durable(join(binding.root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret});
+    const at=new Date().toISOString();
+    await durable(join(binding.root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret,at,reason});
+    if(binding.context)await recordLifecycle(this.workspace,binding.context,{at,event:'stop',reason,pid:binding.pid});
     if(releaseCapacity&&binding.context)this.capacity.slots.delete(binding.context);
     this.running.delete(binding.root);
   }
@@ -269,8 +277,10 @@ export class GhidraContexts {
       record.binding.baseRevision=context.baseRevision??this.workspace.model(context.target).sharedRevision;
       record.binding.viewEpoch=context.viewEpoch??0;
       await durable(join(root,'process.json'),record.binding);
-      await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);return record;
-    } catch(error){if(record)await this.stopRecord(record,false);else this.capacity.slots.delete(context.id);throw error;}
+      await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);
+      if(context.workingSnapshot)await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'restore',reason:'saved_snapshot',pid:record.binding.pid});
+      return record;
+    } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
   }
   async open(scope: Scope, request?: string): Promise<GhidraContext> {
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target);
@@ -288,7 +298,7 @@ export class GhidraContexts {
     }
     if(binding&&!stopped&&alive(binding.pid)&&((binding.viewEpoch??0)!==(context.viewEpoch??0)||
         binding.baseRevision!==context.baseRevision&&context.baseRevision!==undefined)) {
-      await this.stopRecord(await this.verified(binding,target),true,false);stopped=true;
+      await this.stopRecord(await this.verified(binding,target),true,false,'view_replaced');stopped=true;
     }
     if(binding&&!stopped&&alive(binding.pid)) {
       if(binding.context!==context.id)fail('binding','Native process belongs to a different working context.');
@@ -304,6 +314,7 @@ export class GhidraContexts {
     }
     const snapshot=context.workingSnapshot??model.sharedSnapshot;
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
+    if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
     await this.privateCopy(context,snapshot);
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
     return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,
@@ -470,7 +481,7 @@ public class ${name} extends GhidraScript {
     const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
     const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
     this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});
-    await this.stopRecord(record,true,false);
+    await this.stopRecord(record,true,false,'mode_changed');
     if(mode==='headless'){await this.privateCopy(this.workspace.context(scope),snapshot);return;}
     const gui=await this.launch(record.binding.root,this.workspace.target(scope.target),'context',record.binding.program,'gui',context.id);
     gui.binding.baseRevision=record.binding.baseRevision;gui.binding.viewEpoch=record.binding.viewEpoch;
@@ -613,7 +624,7 @@ public class ${name} extends GhidraScript {
     const context=this.workspace.context(scope),record=await this.selected(scope),snapshot=await this.capture(record);
     const debuggerState=record.binding.mode==='gui'&&context.debugger?.traces.length?await this.debuggerSaved(scope):context.debugger;
     const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
-    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record);
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record,true,true,'explicit_close');
   }
   async closed(scope:Scope) {
     const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');
@@ -736,7 +747,7 @@ public class ${name} extends GhidraScript {
     for(const record of [...this.running.values()]) {
       try {
         // Original child handles also permit cleanup of a failed, unready owned stage.
-        await cleanup.stopRecord(record,!record.child);
+        await cleanup.stopRecord(record,!record.child,true,'owner_dispose');
       } catch {failures++;}
     }
     if(failures)fail('busy','Some owned native stages could not be stopped; their receipts and saved work are retained.');

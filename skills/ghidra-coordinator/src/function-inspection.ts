@@ -4,6 +4,7 @@ import type {ResearchBackend} from './research.js';
 import type {Scope} from './workspace.js';
 import {fail,object,digest} from './model.js';
 import {functionResult} from './function-results.js';
+import {timed} from './internal-timing.js';
 import {textWindow} from './text-window.js';
 import {CliError} from '@eyeauras/cli-factory';
 
@@ -18,6 +19,7 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   if(options.expectView!==undefined&&options.expectView!==view.identity)fail('binding','Function continuation view changed.',{reason:'changed_view',view});
   const raw=object(await backend.call(scope,'/get_functions',{...parameters,functions:selectors.join(',')}));
   if(backend.observation&&digest(observation)!==digest(await backend.observation(scope)))fail('binding','Native view changed during bulk function inspection.',{reason:'changed_view',view});
+  return timed('adapter.normalize','functions.inspect',async()=>{
   const functions=object(raw.functions);
   if(Object.keys(functions).length!==selectors.length||selectors.some(s=>!Object.hasOwn(functions,s)))fail('partial','Bulk function selectors changed.');
   const output:Record<string,unknown>=Object.create(null),saved:{name:string;content:string}[]=[];let remaining=options.total;
@@ -43,9 +45,12 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   if(Buffer.byteLength(JSON.stringify(result))>1048576)fail('limit','Function response exceeds one MiB; narrow fields or selectors.');
   if(options.saveDirectory){
     // A fresh directory prevents overwrite and makes a partial filesystem failure observable.
-    const directory=resolve(options.saveDirectory);await mkdir(directory,{recursive:false});
+    await timed('adapter.save-text','functions.inspect',async()=>{
+    const directory=resolve(options.saveDirectory!);await mkdir(directory,{recursive:false});
     for(const file of saved)await writeFile(join(directory,file.name),file.content,{flag:'wx',mode:0o600});
     await writeFile(join(directory,'manifest.json'),JSON.stringify({...scope,value:result},null,2)+'\n',{flag:'wx',mode:0o600});
+    });
   }
   return {...scope,value:result};
+  });
 }

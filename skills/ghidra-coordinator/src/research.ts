@@ -11,6 +11,8 @@ import type {ScriptPage} from './scripts.js';
 import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 import {CliError} from '@eyeauras/cli-factory';
+import {timed} from './internal-timing.js';
+import {navigationResult} from './context-diagnostics.js';
 
 export interface ResearchBackend {
   observation?(scope:Scope):Promise<unknown>;
@@ -93,12 +95,12 @@ export class Research {
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
   async ordered<T>(selected: Scope, action: ()=>Promise<T>): Promise<T> {
     const key=this.workspace.context(selected).id,previous=this.tasks.get(key);
-    const task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const task=timed('facade.queue','research',async()=>{await previous?.catch(()=>{});}).then(action);
     this.tasks.set(key,task);
     try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   async boundary<T>(selected:Scope,action:()=>Promise<T>):Promise<T>{
-    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=timed('facade.queue','command',async()=>{await previous?.catch(()=>{});}).then(action);
     this.tasks.set(key,task);try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   status(selected: Scope) {
@@ -257,6 +259,13 @@ export class Research {
       const observation=await backend.observation?.(selected);
       const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
       return inspectFunctions(backend,selected,parameters,options,view,observation);
+    });
+  }
+  async navigation(selected:Scope,maximum:number){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      const value=navigationResult(await backend.call(selected,'/navigation_diagnostic',{max_scan:maximum}),maximum);
+      return {...selected,value:{...value,initialAnalysis:this.workspace.model(selected.target).settings.autoAnalyze?'requested':'none',priorAnalysis:'unknown',provenance:'Initial facade policy only; imported/saved metadata may have an unknown analysis history.'}};
     });
   }
   async xrefs(selected: Scope, at: string, limit: number, offset: number) {

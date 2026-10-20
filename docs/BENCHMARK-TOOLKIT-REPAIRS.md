@@ -52,18 +52,18 @@ a PE with two exported functions and a call edge; all program writes are confine
 It retains command receipts and closes its own context, server and isolated IPC owner. Initial
 open/analysis timings are setup costs, not matched warm-query performance measurements.
 
-## API proposal awaiting owner agreement
+## Approved diagnostic extension
 
-The owner requested discussion and an example before any API expansion. The following surface
-is proposed, not implemented or promised by the current help/contracts.
+The owner approved this plan on 2026-10-20 after discussion and concrete examples. The commands
+and internal measurements below are implemented; bounds are specified in the research reference.
 
-**BB-02 — navigation diagnostic.** Add a ReadOnly command:
+**BB-02 — navigation diagnostic.** The ReadOnly command:
 
 ```sh
 insight-cli ghidra analysis navigation --session S --target T --max-scan 10000
 ```
 
-It should report the original import policy separately from current observed metadata. Bounded
+It reports the original import policy separately from current observed metadata. Bounded
 function/body/instruction/reference/defined-string samples expose coverage and limits; a
 one-byte-body-heavy sample can produce a `sparse-metadata` assessment. Example fragment:
 
@@ -80,7 +80,7 @@ An analysis request/flag is provenance, not proof that every analyzer succeeded.
 contents may have unknown prior provenance. A complete diagnostic scan cannot prove semantic
 completeness. Neither this read nor `ready` should silently start expensive analysis.
 
-**BB-04 — controlled timing.** First instrument existing facade integration boundaries with
+**BB-04 — controlled timing.** Existing facade integration boundaries now have
 correlated internal spans, without recording request payloads, code, credentials or personal
 paths. A fixed workload must declare cold/restored/warm state and use the same saved fixture.
 Report facade queue/open/native/validation/save boundaries actually observed. Client startup and
@@ -88,13 +88,13 @@ IPC cannot be inferred by subtracting unrelated spans: their separate spans requ
 Factory integration hook. Do not copy Factory ownership, add a second IPC host or optimize an
 unmeasured presumed bottleneck. A public trace flag/schema would need an explicit further example.
 
-**BB-05 — lifecycle diagnostic.** Add a ReadOnly, non-starting command:
+**BB-05 — lifecycle diagnostic.** The ReadOnly, non-starting command:
 
 ```sh
 insight-cli ghidra diagnostics lifecycle --session S --target T
 ```
 
-Retain bounded start/restore/stop events with time, context identity and reason. Reasons describe
+The facade retains bounded start/restore/stop events with time and reason, scoped by context. Reasons describe
 what the facade actually knows: explicit close, view replacement, owner disposal, failed startup,
 or unknown. Existing receipts without a reason stay unknown. The current Factory host default
 idle timeout is 60000 ms; its shutdown disposes the facade, which stops authenticated native
@@ -110,3 +110,18 @@ one shared task with only tool-routing differences, identical input and saved an
 and verify per-agent tool exposure before GO. Keep all failed attempts and setup time, measure
 the same phases, compare evidence quality and unresolved questions, and disclose any analysis,
 toolchain or workload differences. Do not give either fresh agent the earlier research answers.
+
+## Diagnostic validation and measured limits
+
+The [generic native proof](verification/benchmark-toolkit-repairs.json) passed analyzed and
+seeded/no-analysis navigation, common work-budget exhaustion, non-starting lifecycle reads,
+explicit close, saved-snapshot restoration and actual owner disposal after a 70-second idle
+control. It verified nested correlated spans and unchanged fixture input bytes. No historical
+stop cause was reconstructed from that experiment.
+
+Across the nine fixed-workload calls, warm navigation took about 0.73–0.87 seconds externally
+and 0.18–0.28 seconds inside the facade handler. Around 0.55 seconds remained outside the
+observed handler boundary; startup/IPC/response cannot be split without Factory hooks. Native
+HTTP dominated measured handler time; adapter normalization and queues were negligible in this
+uncontended control. No IPC rewrite, lifecycle retention change or hypothetical speedup is
+claimed. The next upstream timing hook is still a separate contract decision.

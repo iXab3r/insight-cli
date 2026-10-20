@@ -1,5 +1,6 @@
 import { fail, object } from './model.js';
 import {parseDomainJson} from './json.js';
+import {timed} from './internal-timing.js';
 import {CliError} from '@eyeauras/cli-factory';
 
 export interface Descriptor { path: string; method: string; params: { name: string; source: string }[] }
@@ -14,6 +15,9 @@ export class HttpBridge {
     if(timeoutMilliseconds!==undefined&&(!Number.isSafeInteger(timeoutMilliseconds)||timeoutMilliseconds<1||timeoutMilliseconds>1800000))fail('invalid','Bridge timeout is outside the supported bound.');
   }
   private async request(path: string, method: string, query: Record<string, unknown>, body: Record<string, unknown>): Promise<unknown> {
+    return timed('native.http',path,()=>this.requestBody(path,method,query,body));
+  }
+  private async requestBody(path:string,method:string,query:Record<string,unknown>,body:Record<string,unknown>):Promise<unknown>{
     const url = new URL(path, this.endpoint);
     // Import includes synchronous auto-analysis. Keep discovery/ordinary requests short,
     // while allowing a real executable to finish its first analysis without losing the reply.

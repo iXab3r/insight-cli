@@ -52,6 +52,9 @@ import {RuntimeManager,runtimeCommands,runtimeProcesses} from './runtime-manager
 import {packageVersion} from './package-version.js';
 import {runtimeSelection} from './runtime-selection.js';
 import {AnalysisStorage,analysisDirectory} from './analysis-storage.js';
+import {contextDiagnosticCommands} from './context-diagnostics.js';
+import {traceCommand} from './internal-timing.js';
+import {timedBackend} from './timed-backend.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -98,7 +101,7 @@ class Owner {
         .catch(error=>{selected.backend=undefined;throw error;});
       const result=await selected.backend;
       if(result instanceof GhidraContexts)await managedExtensions(selected.workspace.directory);
-      return result instanceof GhidraContexts?result.fork(c):result;
+      return timedBackend(result instanceof GhidraContexts?result.fork(c):result);
     };
     const research=new Research(profile.workspace,backend,profile.tasks);
     return {workspace:profile.workspace,research,synchronization:new Synchronization(profile.workspace,research,async()=>{
@@ -184,6 +187,7 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
   const path=[...parents,entry.name.split(' ')[0]!],name=path.join(' ');
   const run=entry.run;
   return {...entry,...(entry.children?{children:entry.children.map(child=>scopedFailures(child,owner,path))}:{}),...(run?{run:async(input,c)=>{
+    const execute=async()=>{
     try{
       let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
       if(!selected)return await run(input,c);
@@ -204,6 +208,8 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
       const result=error.result&&typeof error.result==='object'&&!Array.isArray(error.result)?error.result:{};
       throw new CliError(error.message,{code:error.code,exitCode:error.exitCode,next:error.next,result:{...result,...selected}});
     }
+    };
+    return path[1]==='open'||input.options.session&&input.options.target?traceCommand(join(analysisDirectory(c),'workspace'),name,execute):execute();
   }}:{})};
 }
 
@@ -403,7 +409,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   };
   const commands=definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research)),[...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
+      mutationCommands(c=>owner.selected(c).research)),[...contextDiagnosticCommands(c=>owner.selected(c).research,c=>owner.selected(c).workspace),...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
         ...extensionCommands(c=>new Extensions(join(analysisDirectory(c),'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...runtimeCommands((c,action,quiescent)=>owner.runtime(c,action,quiescent)),...lifecycleCommands(c=>owner.selected(c).lifecycle,c=>new RuntimeManager(c).status()),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry);
   return {...definition,commands:[...(commands??[]).map(e=>storage.wrap(e)),storage.commands()]};
 }

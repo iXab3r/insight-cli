@@ -144,3 +144,36 @@ computed from instruction bytes, not proof of function membership or stored xref
 flow has no invented target. Decoding stops at terminal/unconditional flow, input/instruction
 bounds, undecodable/truncated bytes or unavailable context. Existing `disassemble-bytes` remains
 an Update operation with its original guards.
+
+## Navigation and lifecycle diagnostics
+
+`analysis navigation` uses the selected session/target and ReadOnly permission. It reports
+`initialAnalysis` (`none` or `requested`) as the original facade import policy, separately from
+the current metadata observations. Prior analysis history is unknown, including saved/imported
+databases. `ready` means the context opened; it does not establish analysis completeness.
+
+The diagnostic samples at most 128 functions, instructions, stored references and defined-data
+units per category, in address order, sharing `--max-scan` (default 10000, 1–200000) and a fixed
+five-second native deadline. Each category reports its own completion; top-level `scan` reports
+the visited sum, sample bound, completion and reason. Defined-string counts cover only sampled
+defined data. One-byte bodies together with missing entry instructions in at least 80% of the
+sample yield `sparse-metadata`; this is an explicit heuristic, not proof that a specific analysis
+pass failed. Normal instruction-bearing one-byte leaf functions alone do not trigger it.
+Use bounded decode for known executable addresses when metadata is sparse. The diagnostic does
+not run analyzers, define data, repair boundaries, save a snapshot or certify semantic completeness.
+
+`diagnostics lifecycle` reads retained start/restore/stop events and the current process receipt
+without starting or probing Ghidra. At most the latest 128 observations are retained. A stopped
+receipt can identify `explicit_close`, `view_replaced`, `mode_changed`, `startup_failed` or
+`owner_dispose`; historical receipts without reasons remain `unknown`. Owner disposal does not
+establish whether Factory exited due to idle, explicit stop, a signal or another cause. A current
+receipt without a matching stop receipt reports `unobserved`, not a claim that the PID is live.
+
+Internal correlated timing diagnostics live under profile workspace `diagnostics/timings.jsonl`,
+with one previous segment and an eight-MiB rotation threshold. They contain operation names,
+timestamps, correlation/parent IDs, duration and success/failure, not argv, source, payloads or
+exception text. They are an internal troubleshooting format, not a public trace API. Nested spans
+must not be added to their parents. `facade.command` starts at the handler and ends before Factory
+serializes the response; client startup, IPC and response overhead are not separately measured.
+Tracing is best-effort and cannot change program outcomes. Empty runtime readiness checks still
+avoid creating a research workspace. The Factory idle policy remains unchanged.

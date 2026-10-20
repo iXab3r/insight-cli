@@ -38,6 +38,20 @@ publication mechanisms, with its historical behavior recorded below. The agreed 
 are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
 [work items](WORK-ITEMS.md) retain the delivery contract and checkpoint history.
 
+### Navigation observations and lifecycle diagnostics
+
+The owner approved the benchmark diagnostic extension on 2026-10-20. ReadOnly
+`ghidra analysis navigation` separates the initial facade analysis policy from bounded current
+function/instruction/reference/defined-data observations. It does not run analysis or equate
+`ready`, counts, a complete sample or a heuristic assessment with semantic completeness.
+ReadOnly `ghidra diagnostics lifecycle` reads retained start/restore/stop observations without
+starting or probing Ghidra. Unknown historical causes stay unknown; owner disposal does not
+establish a Factory idle timeout. Factory retains IPC/lifecycle ownership and the idle policy.
+Internal correlated spans observe existing facade boundaries; they are not a public trace API
+and cannot separately infer client startup/IPC/response stages absent Factory hooks. The
+[research reference](../skills/ghidra-coordinator/references/research.md) specifies bounds and
+interpretation. Diagnostic data resides in configured profile workspace storage.
+
 ### Profile analysis storage
 
 The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,

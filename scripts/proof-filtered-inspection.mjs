@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
-const {values:o}=parseArgs({options:{cli:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},root:{type:'string'},'expect-broken':{type:'boolean'},'ack-disposable':{type:'boolean'}}});
+const {values:o}=parseArgs({options:{cli:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},root:{type:'string'},'expect-broken':{type:'boolean'},diagnostics:{type:'boolean'},'ack-disposable':{type:'boolean'}}});
 assert.equal(o['ack-disposable'],true);for(const key of ['cli','java','ghidra-home','root'])assert.ok(o[key],key);
 const root=resolve(o.root),cli=resolve(o.cli),exec=promisify(execFile),profile='filtered-proof';
 await mkdir(root);await mkdir(join(root,'appdata'));await mkdir(join(root,'local'));
@@ -21,9 +21,9 @@ const env={...process.env,NODE_OPTIONS:'--import '+pathToFileURL(preload).href};
 let scope,sequence=0;const calls=[],checks={};
 const sha=b=>createHash('sha256').update(b).digest('hex');
 async function call(args,{failure=false,global=false}={}){
- const started=performance.now();let r,code=0;
+ const started=performance.now(),startedAt=new Date().toISOString();let r,code=0;
  try{r=await exec(process.execPath,[cli,...(global?[]:['--profile',profile]),...args,'--json'],{env,cwd:root,timeout:600000,maxBuffer:4*1024**2});}catch(error){r=error;code=error.code;}
- const n=++sequence;await writeFile(join(root,n+'.stdout'),r.stdout??'');await writeFile(join(root,n+'.stderr'),r.stderr??'');calls.push({n,args,code,milliseconds:performance.now()-started});
+ const n=++sequence;await writeFile(join(root,n+'.stdout'),r.stdout??'');await writeFile(join(root,n+'.stderr'),r.stderr??'');calls.push({n,args,code,startedAt,milliseconds:performance.now()-started});
  assert.equal(code===0,!failure,'Inspect private transcript '+n);return JSON.parse(r.stdout);
 }
 const scoped=(args,options)=>call(['ghidra',...args,'--session',scope.session,'--target',scope.target],options);
@@ -59,6 +59,10 @@ try{
   const directory=join(root,'saved');const saved=(await scoped([...args,'--save-owner-directory',directory])).value;
   for(const name of ['first','second']){const row=saved.functions[name];assert.equal(sha(await readFile(row.savedText.file)),row.savedText.textSha256);assert.equal(row.entry_point,undefined);}
   assert.deepEqual(JSON.parse(await readFile(join(directory,'manifest.json'),'utf8')).value,saved);checks.savedManifest=true;
+  if(o.diagnostics){
+   const navigation=(await scoped(['analysis','navigation'])).value;assert.equal(navigation.initialAnalysis,'requested');assert.ok(navigation.functions.entriesWithInstructions>0);assert.ok(navigation.instructions.sampled>0);assert.ok(navigation.references.sampled>0);assert.equal(navigation.read_only.modification_unchanged,true);
+   const bounded=(await scoped(['analysis','navigation','--max-scan','1'])).value;assert.equal(bounded.scan.visited,1);assert.equal(bounded.scan.complete,false);checks.navigationAnalyzedAndBounded=true;
+  }
   const setup='import ghidra.app.script.GhidraScript; import ghidra.program.model.data.ByteDataType; public class OwnedSparseNavigation extends GhidraScript {public void run() throws Exception {var at=toAddr("180000000");var memory=currentProgram.getMemory();var block=memory.createInitializedBlock("owned-navigation",at,4096,(byte)0,monitor,false);block.setExecute(true);for(int i=0;i<32;i++)createData(at.add(i),ByteDataType.dataType);memory.setBytes(at.add(0x200),"OWNED_LATE_STRING\\0".getBytes(java.nio.charset.StandardCharsets.US_ASCII));createAsciiString(at.add(0x200));memory.setBytes(at.add(0x250),"OWNED_UNDEFINED\\0".getBytes(java.nio.charset.StandardCharsets.US_ASCII));memory.setByte(at.add(0x300),(byte)0xc3);}}';
   await scoped(['scripts','run-inline','--code',setup,'--request-id','owned-sparse-navigation']);
   const strings=['strings','list','--filter','OWNED_LATE_STRING'];
@@ -76,6 +80,25 @@ try{
   assert.equal(decoded.instructions[0].mnemonic.toLowerCase(),'ret');assert.equal(decoded.read_only.modification_unchanged,true);
   const after=(await scoped(['functions','inspect','--function','first','--fields','entry_point'])).value;assert.equal(after.view.identity,before.view.identity);
   const stillAbsent=(await scoped(['functions','inspect','--functions','180000300','--fields','decompiled_code'])).value.functions['180000300'];assert.equal(stillAbsent.reason,'function_not_found');assert.match(stillAbsent.error,/functions decode/);checks.unseededDecodeReadOnlyGuidance=true;
+  if(o.diagnostics){
+   const workload=[['functions','inspect','--functions','first,second','--fields','decompiled_code,callees'],['analysis','navigation'],['strings','list','--filter','OWNED_LATE_STRING']];const runs=[];
+   for(const state of ['warm','restored','warm']){
+    if(state==='restored'){
+     await scoped(['close']);const closed=await scoped(['diagnostics','lifecycle']);assert.equal(closed.lifecycle.latest.reason,'explicit_close');assert.ok(closed.lifecycle.events.some(e=>e.event==='start'));
+     await call(['ghidra','open','--target',scope.target,'--session',scope.session]);
+    }
+    for(const args of workload){await scoped(args);runs.push({state,command:args.slice(0,2).join(' '),milliseconds:calls.at(-1).milliseconds,startedAt:calls.at(-1).startedAt});}
+   }
+   const restored=await scoped(['diagnostics','lifecycle']);assert.ok(restored.lifecycle.events.some(e=>e.event==='restore'&&e.reason==='saved_snapshot'));checks.lifecycleCloseAndRestore=true;
+   const timingPath=join(root,'appdata','insight-cli',profile,'workspace','diagnostics','timings.jsonl');const spans=(await readFile(timingPath,'utf8')).trim().split('\n').map(line=>JSON.parse(line));
+   for(const phase of ['facade.command','facade.queue','context.open','backend.operation','native.http','adapter.normalize','adapter.save-text'])assert.ok(spans.some(row=>row.phase===phase),phase);
+   assert.ok(spans.every(row=>row.durationMs>=0));await writeFile(join(root,'fixed-workload.json'),JSON.stringify({runs,spans,limits:['External duration includes client/IPC/response overhead; no separate Factory spans are available.','Spans are nested; never sum parent and child duration.','Initial import is setup, outside this saved-fixture workload.']},null,2)+'\n');checks.correlatedFixedWorkload=true;
+   await new Promise(ok=>setTimeout(ok,70000));const idle=await scoped(['diagnostics','lifecycle']);assert.equal(idle.lifecycle.latest.reason,'owner_dispose');assert.equal(idle.lifecycle.ownerShutdownCause,'unknown');checks.actualIdleOwnerDisposal=true;
+   await scoped(['close']);
+   const sparse=join(root,'sparse.exe');await writeFile(sparse,Buffer.concat([await readFile(input),Buffer.from([0])]));scope=await call(['ghidra','open',sparse,'--session','new','--no-analysis']);
+   const navigation=(await scoped(['analysis','navigation'])).value;assert.equal(navigation.initialAnalysis,'none');assert.equal(navigation.instructions.sampled,0);assert.equal(navigation.assessment,'sparse-metadata');checks.navigationSeededSparse=true;
+  }
+
  }
  assert.equal(sha(await readFile(input)),inputHash);checks.inputUnchanged=true;
 }finally{

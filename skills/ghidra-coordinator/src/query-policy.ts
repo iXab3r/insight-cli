@@ -1,7 +1,7 @@
 import {fail,object} from './model.js';
 
 /** These operations have facade-owned, bounded native implementations. */
-export const nativeQueries=new Set(['/research_view','/decode_instructions','/find_dead_code','/detect_crypto_constants','/get_valid_data_types',
+export const nativeQueries=new Set(['/navigation_diagnostic','/research_view','/decode_instructions','/find_dead_code','/detect_crypto_constants','/get_valid_data_types',
   '/validate_data_type','/validate_function_prototype','/get_entry_points','/list_globals',
   '/list_strings','/search_strings','/find_data_types','/search_byte_patterns','/search_instructions',
   '/emulate_function','/emulate_hash_batch']);
