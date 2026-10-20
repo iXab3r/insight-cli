@@ -126,6 +126,11 @@ HTTP dominated measured handler time; adapter normalization and queues were negl
 uncontended control. No IPC rewrite, lifecycle retention change or hypothetical speedup is
 claimed. The next upstream timing hook is still a separate contract decision.
 
+The later [matched short-call experiment](CLI-OVERHEAD.md) compares one-shot with an existing
+persistent JSON-RPC frontend on identical disposable reads. It adds exact outer/handler timing,
+separate Factory validation controls and a proposed repair order; these controls do not replace
+the still-missing cross-process Factory boundary spans.
+
 ## BB-08 follow-up: existing sparse-navigation route
 
 The owner prioritized sparse navigation before the proposed script-stage diagnostics. No new

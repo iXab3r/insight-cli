@@ -1,0 +1,2663 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "date": "2026-10-20T18:08:29.300Z",
+  "scope": "Matched short read-only public CLI invocations; generated disposable sparse PE; warm owner/native context; no product optimization applied",
+  "sourceCommit": "a1daa4ab403b032edbb2efdcd54b7424a92477f0",
+  "artifact": {
+    "version": "0.2.0",
+    "distribution": "unchanged isolated packed development candidate verified by BB-07; not a registry release",
+    "sha256": "9319a58304d71526a3ce1fb7b375aee82945a00702fdf235c6d468b4b2345277",
+    "bytes": 5275708,
+    "build": "502e447d26d478465b873ae10600fd499256c29e69d000a8c8810289b1098a86",
+    "sourceIdentity": "Package was built on base 6f8339b with the BB-07 source hashes now committed at a1daa4a; see inline-scripts.json. This investigation changes only benchmark scripts/docs."
+  },
+  "platform": {
+    "node": "v26.4.0",
+    "os": "darwin",
+    "architecture": "arm64",
+    "ghidra": "12.1.2",
+    "java": "Homebrew OpenJDK 21",
+    "factoryCore": "0.4.1 pinned 0413409",
+    "factoryIpc": "0.1.0 pinned 7c403d8"
+  },
+  "input": {
+    "generated": "int main(void){return 7;}",
+    "sha256": "fdca662746889f32cb98cb1625f638962af9de78cc905f428685a1d048be05e8",
+    "initialAnalysis": "none",
+    "entryPoint": "0x140001000",
+    "workingSnapshotSha256": "c2ad4762229bb64ce673b6bdc4de2b7460e6890f0e7fed12f27f67b801328998"
+  },
+  "method": {
+    "clock": "parent performance.now; spawn-to-close for one-shot, write-to-complete-line for RPC",
+    "order": "alternating AB/BA and reversed operation order",
+    "warmup": "one of each operation/route excluded",
+    "owner": "same pre-existing warm Factory owner; public fixture helper keeps a quiescent second RPC connection",
+    "trace": "existing awaited facade spans; backend/native/context spans overlap; no additive phase claims",
+    "validation": "exact full result hashes, context generation/snapshot/request journal, input hash, owner and native process records unchanged",
+    "rounds": 24,
+    "measuredPerMode": 72,
+    "quantiles": "nearest-rank; 24 observations per operation/route; 12 per control",
+    "timedCallsExclude": "fixture setup, import, JVM startup, handshake, warmups, transcript writes, trace reads, agent/tool/reviewer latency",
+    "traceCorrelation": "Every native read produced exactly one completed facade.command trace; sequential before/after collection with no competing fixture requests",
+    "environment": "unchanged frozen installed candidate for both routes, same isolated profile and project, same 768 MiB native heap, default Factory idle policy unchanged",
+    "filesystem": "warm OS cache; no cache flush; shared host, not isolated CPU",
+    "controlTiming": "Controls run after matched workload; parts uses exact installed APIs but different dynamic import ordering. Do not add these controls to end-to-end quantiles or call a difference IPC."
+  },
+  "persistentConnectionStartupMs": 700.5514170000024,
+  "summary": {
+    "memory-32": {
+      "one-shot": {
+        "totalMs": {
+          "n": 24,
+          "min": 590.15625,
+          "p50": 716.1497499999969,
+          "p95": 873.1947499999951,
+          "max": 1111.145542000013,
+          "mean": 732.7807343333365
+        },
+        "handlerMs": {
+          "n": 24,
+          "min": 19.909499999994296,
+          "p50": 22.557583000001614,
+          "p95": 30.835166999997455,
+          "max": 37.936459000004106,
+          "mean": 23.921272625001013
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 10.134334000002127,
+          "p50": 11.43300000000454,
+          "p95": 15.333792000004905,
+          "max": 16.573292000000947,
+          "mean": 11.931465291667033
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 16.61579199996777,
+          "p50": 18.902040000015404,
+          "p95": 23.748126999991655,
+          "max": 29.898458000010578,
+          "mean": 19.667625166668888
+        },
+        "outsideHandlerMs": {
+          "n": 24,
+          "min": 569.320624999993,
+          "p50": 693.0669589999889,
+          "p95": 848.7788330000039,
+          "max": 1073.2090830000088,
+          "mean": 708.8594617083354
+        },
+        "afterOutputMs": {
+          "n": 24,
+          "min": 4.4288329999981215,
+          "p50": 5.177917000008165,
+          "p95": 7.484832999994978,
+          "max": 8.035332999992534,
+          "mean": 5.656845333334786
+        }
+      },
+      "persistent": {
+        "totalMs": {
+          "n": 24,
+          "min": 21.86875000000873,
+          "p50": 25.841499999994994,
+          "p95": 34.17174999999406,
+          "max": 41.23191699999734,
+          "mean": 27.68217370833281
+        },
+        "handlerMs": {
+          "n": 24,
+          "min": 19.262791000001016,
+          "p50": 22.03887499999837,
+          "p95": 30.461708000002545,
+          "max": 36.34024999999383,
+          "mean": 23.948953083333134
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 9.38795800000662,
+          "p50": 11.556958000001032,
+          "p95": 18.248959000004106,
+          "max": 20.246374999987893,
+          "mean": 12.428541708334402
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 15.83679200001643,
+          "p50": 18.44279099999403,
+          "p95": 26.510582000002614,
+          "max": 31.87149900001532,
+          "mean": 20.107918124998225
+        },
+        "outsideHandlerMs": {
+          "n": 24,
+          "min": 2.5592500000057044,
+          "p50": 3.3268329999991693,
+          "p95": 5.273541999995359,
+          "max": 5.626415999999153,
+          "mean": 3.7332206249996793
+        }
+      }
+    },
+    "inspect-entry": {
+      "one-shot": {
+        "totalMs": {
+          "n": 24,
+          "min": 897.8668340000004,
+          "p50": 1023.442458000005,
+          "p95": 1341.6185839999962,
+          "max": 1345.3655830000062,
+          "mean": 1090.597232666667
+        },
+        "handlerMs": {
+          "n": 24,
+          "min": 325.96941700000025,
+          "p50": 366.34249999999884,
+          "p95": 558.466042,
+          "max": 561.2443340000027,
+          "mean": 398.7455174166662
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 11.008834000007482,
+          "p50": 13.425208000000566,
+          "p95": 16.842624999997497,
+          "max": 22.65320799998881,
+          "mean": 13.654352458331536
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 314.7207519999647,
+          "p50": 353.8122509999812,
+          "p95": 545.3924949999928,
+          "max": 546.3747939999885,
+          "mean": 386.1430398333326
+        },
+        "outsideHandlerMs": {
+          "n": 24,
+          "min": 565.2992499999818,
+          "p50": 659.2771239999856,
+          "p95": 848.4207929999975,
+          "max": 891.9277080000029,
+          "mean": 691.8517152500008
+        },
+        "afterOutputMs": {
+          "n": 24,
+          "min": 4.481958999997005,
+          "p50": 5.45350000000326,
+          "p95": 7.745791000001191,
+          "max": 9.980041999995592,
+          "mean": 5.86661291666466
+        }
+      },
+      "persistent": {
+        "totalMs": {
+          "n": 24,
+          "min": 331.5298749999929,
+          "p50": 374.6744580000086,
+          "p95": 539.6470839999965,
+          "max": 570.7572079999954,
+          "mean": 408.59602779166653
+        },
+        "handlerMs": {
+          "n": 24,
+          "min": 327.7773750000051,
+          "p50": 371.26337500000955,
+          "p95": 535.6616249999934,
+          "max": 566.2154169999994,
+          "mean": 404.43303816666713
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 9.657833000004757,
+          "p50": 13.612833000006503,
+          "p95": 15.226874999993015,
+          "max": 19.713999999992666,
+          "mean": 13.440329874997891
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 316.23908200002916,
+          "p50": 361.02170599999954,
+          "p95": 512.7856259999971,
+          "max": 551.952329000007,
+          "mean": 391.6632225416615
+        },
+        "outsideHandlerMs": {
+          "n": 24,
+          "min": 2.618873999992502,
+          "p50": 3.583082999990438,
+          "p95": 6.44404200000281,
+          "max": 7.629790999984834,
+          "mean": 4.162989624999379
+        }
+      }
+    },
+    "context-status": {
+      "one-shot": {
+        "totalMs": {
+          "n": 24,
+          "min": 561.5397089999897,
+          "p50": 735.348874999996,
+          "p95": 994.4288329999981,
+          "max": 1302.398125000007,
+          "mean": 743.1290573333326
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "mean": 0
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "mean": 0
+        },
+        "afterOutputMs": {
+          "n": 24,
+          "min": 4.248291999989306,
+          "p50": 5.181249999994179,
+          "p95": 7.6447079999998095,
+          "max": 7.951207999998587,
+          "mean": 5.6221075833321565
+        }
+      },
+      "persistent": {
+        "totalMs": {
+          "n": 24,
+          "min": 2.144958000004408,
+          "p50": 3.4919579999987036,
+          "p95": 5.586291999992682,
+          "max": 6.4277080000028946,
+          "mean": 3.9390209166655645
+        },
+        "backendMs": {
+          "n": 24,
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "mean": 0
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "min": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0,
+          "mean": 0
+        }
+      }
+    }
+  },
+  "nativeOperations": {
+    "memory-32": {
+      "one-shot": {
+        "/mcp/instance_info": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 2.454249999995227,
+            "p50": 3.5441660000069533,
+            "p95": 4.794332999998005,
+            "max": 6.220084000000497,
+            "mean": 3.6967223749985956
+          }
+        },
+        "/mcp/schema": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 6.234375,
+            "p50": 6.916958000016166,
+            "p95": 8.301708999999391,
+            "max": 12.625958000004175,
+            "mean": 7.29227783333469
+          }
+        },
+        "/get_program_options": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 2.1972919999971054,
+            "p50": 3.802084000009927,
+            "p95": 5.09216600000218,
+            "max": 5.598915999988094,
+            "mean": 3.891723916667312
+          }
+        },
+        "/get_metadata": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 1.7032919999910519,
+            "p50": 3.1225830000039423,
+            "p95": 3.7166660000002594,
+            "max": 4.09108300000662,
+            "mean": 3.0940329583345374
+          }
+        },
+        "/read_memory": {
+          "countsPerCall": [
+            1
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 1.329208999995899,
+            "p50": 1.586790999994264,
+            "p95": 2.1634590000030585,
+            "max": 2.3541669999976875,
+            "mean": 1.6928680833337542
+          }
+        }
+      },
+      "persistent": {
+        "/mcp/instance_info": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 2.98354199998721,
+            "p50": 3.4987919999985024,
+            "p95": 4.1791250000096625,
+            "max": 4.574999999989814,
+            "mean": 3.5223054999972496
+          }
+        },
+        "/mcp/schema": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 6.007957999987411,
+            "p50": 6.957833000007668,
+            "p95": 10.338498999997682,
+            "max": 11.205166999992798,
+            "mean": 7.402267416665684
+          }
+        },
+        "/get_program_options": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 2.8481249999895226,
+            "p50": 3.5936250000231666,
+            "p95": 5.244751000005635,
+            "max": 5.406791000001249,
+            "mean": 3.8254407500022958
+          }
+        },
+        "/get_metadata": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 1.7841670000052545,
+            "p50": 2.9719590000022436,
+            "p95": 8.06358299999556,
+            "max": 8.754417000003741,
+            "mean": 3.5450694166647736
+          }
+        },
+        "/read_memory": {
+          "countsPerCall": [
+            1
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 1.4464589999988675,
+            "p50": 1.703125,
+            "p95": 2.592000000004191,
+            "max": 2.7102910000103293,
+            "mean": 1.8128350416682224
+          }
+        }
+      }
+    },
+    "inspect-entry": {
+      "one-shot": {
+        "/mcp/instance_info": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 8.437916000009864,
+            "p50": 10.551707999984501,
+            "p95": 14.841125000020838,
+            "max": 16.67083299998194,
+            "mean": 11.081756749998627
+          }
+        },
+        "/mcp/schema": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 15.491542000003392,
+            "p50": 21.475915999995777,
+            "p95": 28.930959000004805,
+            "max": 29.046374000012293,
+            "mean": 21.870378416668853
+          }
+        },
+        "/get_program_options": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 9.640792999998666,
+            "p50": 12.010622999994666,
+            "p95": 17.10396100000071,
+            "max": 18.873334000003524,
+            "mean": 12.793823249999454
+          }
+        },
+        "/get_metadata": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 7.4962500000110595,
+            "p50": 9.15724999998929,
+            "p95": 11.683165999973426,
+            "max": 12.131959999998799,
+            "mean": 9.553039749998485
+          }
+        },
+        "/run_script_inline": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 269.50512499999604,
+            "p50": 293.40441600000486,
+            "p95": 484.30370799999946,
+            "max": 487.2967500000086,
+            "mean": 329.1350069166674
+          }
+        },
+        "/get_functions": {
+          "countsPerCall": [
+            1
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 0.8277089999901364,
+            "p50": 1.7859170000010636,
+            "p95": 2.074917000005371,
+            "max": 2.258333000005223,
+            "mean": 1.7090347499997733
+          }
+        }
+      },
+      "persistent": {
+        "/mcp/instance_info": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 9.041042000011657,
+            "p50": 10.666539999976521,
+            "p95": 13.680706999992253,
+            "max": 14.741666999994777,
+            "mean": 11.06331366666412
+          }
+        },
+        "/mcp/schema": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 16.345041000007768,
+            "p50": 22.281747999993968,
+            "p95": 30.633874999999534,
+            "max": 30.7753759999905,
+            "mean": 22.816732375000658
+          }
+        },
+        "/get_program_options": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 8.39487500001269,
+            "p50": 11.529707999987295,
+            "p95": 17.829334000009112,
+            "max": 18.05504100001417,
+            "mean": 11.965550083333559
+          }
+        },
+        "/get_metadata": {
+          "countsPerCall": [
+            6
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 7.909083000005921,
+            "p50": 9.469459000014467,
+            "p95": 16.641792000009445,
+            "max": 16.853708999988157,
+            "mean": 10.658911333331465
+          }
+        },
+        "/run_script_inline": {
+          "countsPerCall": [
+            2
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 260.8477500000008,
+            "p50": 311.21612499999173,
+            "p95": 429.8377489999839,
+            "max": 487.06887400000414,
+            "mean": 333.2849841666648
+          }
+        },
+        "/get_functions": {
+          "countsPerCall": [
+            1
+          ],
+          "sumMs": {
+            "n": 24,
+            "min": 1.4782500000001164,
+            "p50": 1.8675840000069002,
+            "p95": 2.3536249999961,
+            "max": 2.959708000009414,
+            "mean": 1.8737309166669245
+          }
+        }
+      }
+    }
+  },
+  "paired": {
+    "memory-32": {
+      "savedMs": {
+        "n": 24,
+        "min": 568.2874999999913,
+        "p50": 688.0265409999993,
+        "p95": 831.9628329999978,
+        "max": 1081.8937920000171,
+        "mean": 705.0985606250036
+      },
+      "speedup": {
+        "n": 24,
+        "min": 21.177641340325057,
+        "p50": 25.898954628325143,
+        "p95": 32.85748520708463,
+        "max": 37.98560913450211,
+        "mean": 26.78480114914682
+      }
+    },
+    "inspect-entry": {
+      "savedMs": {
+        "n": 24,
+        "min": 523.1923759999918,
+        "p50": 653.9072510000115,
+        "p95": 833.810458999993,
+        "max": 858.096458,
+        "mean": 682.0012048750004
+      },
+      "speedup": {
+        "n": 24,
+        "min": 2.3262075630014514,
+        "p50": 2.6815157143567854,
+        "p95": 2.969287019183712,
+        "max": 3.088720384550595,
+        "mean": 2.688038807418638
+      }
+    },
+    "context-status": {
+      "savedMs": {
+        "n": 24,
+        "min": 557.2311259999842,
+        "p50": 732.1361250000045,
+        "p95": 989.9222080000036,
+        "max": 1299.6148329999996,
+        "mean": 739.1900364166671
+      },
+      "speedup": {
+        "n": 24,
+        "min": 117.5281122395397,
+        "p50": 197.93430957166203,
+        "p95": 285.59549091345434,
+        "max": 467.9344190248697,
+        "mean": 202.5605761922467
+      }
+    }
+  },
+  "totalWorkloadMs": {
+    "one-shot": 61596.168584000065,
+    "persistent": 10565.213337999958
+  },
+  "totalSpeedup": 5.830092267276497,
+  "controls": {
+    "bare": {
+      "totalMs": {
+        "n": 12,
+        "min": 27.420916999999463,
+        "p50": 28.076790999999503,
+        "p95": 33.536417000000256,
+        "max": 33.536417000000256,
+        "mean": 28.874434083333295
+      }
+    },
+    "preload": {
+      "totalMs": {
+        "n": 12,
+        "min": 40.184417000000394,
+        "p50": 42.57337499999994,
+        "p95": 48.003082999999606,
+        "max": 48.003082999999606,
+        "mean": 43.77826025000007
+      }
+    },
+    "local": {
+      "totalMs": {
+        "n": 12,
+        "min": 134.96945799999958,
+        "p50": 139.26362500000002,
+        "p95": 158.364959,
+        "max": 158.364959,
+        "mean": 141.67163891666664
+      }
+    },
+    "parts": {
+      "totalMs": {
+        "n": 12,
+        "min": 569.4048329999996,
+        "p50": 597.6802499999999,
+        "p95": 996.5286249999999,
+        "max": 996.5286249999999,
+        "mean": 660.3480798333333
+      },
+      "mainUptimeMs": {
+        "n": 12,
+        "min": 24.687583,
+        "p50": 26.293,
+        "p95": 42.918708,
+        "max": 42.918708,
+        "mean": 28.062267333333335
+      },
+      "importsMs": {
+        "n": 12,
+        "min": 65.966959,
+        "p50": 68.340417,
+        "p95": 136.703542,
+        "max": 136.703542,
+        "mean": 74.78869466666666
+      },
+      "definitionMs": {
+        "n": 12,
+        "min": 6.150333000000003,
+        "p50": 6.724250000000012,
+        "p95": 9.489417000000003,
+        "max": 9.489417000000003,
+        "mean": 7.0475797500000015
+      },
+      "applicationMs": {
+        "n": 12,
+        "min": 1.2426669999999973,
+        "p50": 1.488665999999995,
+        "p95": 3.301792000000006,
+        "max": 3.301792000000006,
+        "mean": 1.6534168333333312
+      },
+      "classifyMs": {
+        "n": 12,
+        "min": 7.728250000000003,
+        "p50": 8.659750000000003,
+        "p95": 14.332540999999992,
+        "max": 14.332540999999992,
+        "mean": 9.059329750000002
+      },
+      "packageValidationMs": {
+        "n": 12,
+        "min": 432.83574999999996,
+        "p50": 462.65041599999995,
+        "p95": 863.1486659999999,
+        "max": 863.1486659999999,
+        "mean": 517.88280875
+      },
+      "disposeMs": {
+        "n": 12,
+        "min": 0.19670799999994415,
+        "p50": 0.2255840000000262,
+        "p95": 0.3550000000000182,
+        "max": 0.3550000000000182,
+        "mean": 0.2436910833333362
+      },
+      "completionUptimeMs": {
+        "n": 12,
+        "min": 549.489167,
+        "p50": 577.937917,
+        "p95": 975.206,
+        "max": 975.206,
+        "mean": 639.9949791666667
+      }
+    }
+  },
+  "filesystemValidationProbe": {
+    "instrumented": true,
+    "excludedFromLatencyStats": true,
+    "durationMs": 945.93775,
+    "counts": {
+      "lstat": 1528,
+      "realpath": 221,
+      "open": 6100,
+      "fstat": 6100,
+      "read": 6116,
+      "close": 6100,
+      "scandir": 863
+    },
+    "bytesReturnedByRead": 47560080,
+    "scope": "Exact process.hrtime monotonic interval around installed readPackageBuildManifest; counts include root/dependency manifests and repeated file reads, not unique path count"
+  },
+  "checks": {
+    "exactFullJsonResultHashesAcrossAllReads": true,
+    "workingSnapshotUnchanged": true,
+    "contextGenerationUnchanged": true,
+    "requestJournalUnchanged": true,
+    "inputUnchanged": true,
+    "sameFactoryOwner": true,
+    "sameNativeContextAndServerRecords": true,
+    "cleanup": {
+      "passed": true,
+      "cleanup": []
+    },
+    "ownedProcessPidsAbsentAfterCleanup": true
+  },
+  "limits": [
+    "No separate observed Factory startup/IPC/parser/profile/render spans in baseline; outsideHandlerMs is a combined residual including awaited facade trace append.",
+    "Nested native/backend/context spans overlap; no additive interpretation.",
+    "Context status has no facade.command span; native timings there are not measured and zero denotes no captured native spans.",
+    "Persistent startup is one warm-owner connection sample, not a cold owner/JVM distribution.",
+    "CPU/FS instrumented controls are diagnostic and excluded from latency numbers.",
+    "The historical RE benchmark included agent/Python/tool-call costs and different data; its multi-second residual is not comparable as a pure CLI regression/speedup."
+  ],
+  "sourceHashes": {
+    "scripts/benchmark-cli-overhead.mjs": "fe6866a5255f36fc06bd394aec142b1612e9d28c909fa5005406b56f746cad8d",
+    "scripts/probe-cli-startup.mjs": "8888afd7179c6746b7e8e50ea6cf232290e88bf4010f6ca833b04d4a232ffac0"
+  },
+  "warmups": [
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 638.2524580000027,
+      "firstOutputMs": 633.1385000000009,
+      "afterOutputMs": 5.11395800000173,
+      "handlerMs": 27.364290999998047,
+      "backendMs": 13.673249999999825,
+      "nativeHttpMs": 22.1627079999962,
+      "outsideHandlerMs": 610.8881670000046,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 31.250625000000582,
+      "handlerMs": 26.084500000004482,
+      "backendMs": 12.792249999998603,
+      "nativeHttpMs": 21.524292000009154,
+      "outsideHandlerMs": 5.1661249999961,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1804.1865840000028,
+      "firstOutputMs": 1798.1317500000005,
+      "afterOutputMs": 6.054834000002302,
+      "handlerMs": 1204.0989589999954,
+      "backendMs": 24.163791999999376,
+      "nativeHttpMs": 1190.128334000001,
+      "outsideHandlerMs": 600.0876250000074,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 589.8431670000064,
+      "handlerMs": 585.353833000001,
+      "backendMs": 13.856957999996666,
+      "nativeHttpMs": 573.2216230000049,
+      "outsideHandlerMs": 4.489334000005329,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 733.3159579999992,
+      "firstOutputMs": 726.5669999999955,
+      "afterOutputMs": 6.748958000003768,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "warmup",
+      "round": -1,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.224333999998635,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    }
+  ],
+  "rows": [
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 725.0437500000044,
+      "firstOutputMs": 719.195667,
+      "afterOutputMs": 5.848083000004408,
+      "handlerMs": 28.338041999995767,
+      "backendMs": 10.788290999997116,
+      "nativeHttpMs": 21.783541999982845,
+      "outsideHandlerMs": 696.7057080000086,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 33.205667000001995,
+      "handlerMs": 29.45491700000275,
+      "backendMs": 15.303625000000466,
+      "nativeHttpMs": 25.637582999996084,
+      "outsideHandlerMs": 3.7507499999992433,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1335.2320409999957,
+      "firstOutputMs": 1327.4862499999945,
+      "afterOutputMs": 7.745791000001191,
+      "handlerMs": 561.2443340000027,
+      "backendMs": 13.664375000000291,
+      "nativeHttpMs": 546.3747939999885,
+      "outsideHandlerMs": 773.987706999993,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 570.7572079999954,
+      "handlerMs": 566.2154169999994,
+      "backendMs": 14.012750000001688,
+      "nativeHttpMs": 551.952329000007,
+      "outsideHandlerMs": 4.54179099999601,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 840.9809170000008,
+      "firstOutputMs": 834.8447500000038,
+      "afterOutputMs": 6.136166999996931,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 0,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.4375,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.618084000001545,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 782.4123749999999,
+      "firstOutputMs": 774.7676670000001,
+      "afterOutputMs": 7.6447079999998095,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 507.8081250000032,
+      "handlerMs": 503.2156249999971,
+      "backendMs": 14.812540999999328,
+      "nativeHttpMs": 490.85854199997266,
+      "outsideHandlerMs": 4.592500000006112,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1341.6185839999962,
+      "firstOutputMs": 1335.9024999999965,
+      "afterOutputMs": 5.716083999999682,
+      "handlerMs": 493.1977909999987,
+      "backendMs": 16.842624999997497,
+      "nativeHttpMs": 479.9838310000123,
+      "outsideHandlerMs": 848.4207929999975,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 33.67770900000323,
+      "handlerMs": 29.116167000000132,
+      "backendMs": 12.770958000000974,
+      "nativeHttpMs": 24.419247999991057,
+      "outsideHandlerMs": 4.561542000003101,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 1,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 831.6904579999973,
+      "firstOutputMs": 825.8534579999978,
+      "afterOutputMs": 5.836999999999534,
+      "handlerMs": 30.835166999997455,
+      "backendMs": 15.333792000004905,
+      "nativeHttpMs": 23.748126999991655,
+      "outsideHandlerMs": 800.8552909999999,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 816.9314999999988,
+      "firstOutputMs": 810.732041999996,
+      "afterOutputMs": 6.199458000002778,
+      "handlerMs": 26.315042000001995,
+      "backendMs": 13.485375000003842,
+      "nativeHttpMs": 21.900292000012996,
+      "outsideHandlerMs": 790.6164579999968,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 32.44437499999185,
+      "handlerMs": 27.26887500000157,
+      "backendMs": 14.218958999997994,
+      "nativeHttpMs": 23.31537600002048,
+      "outsideHandlerMs": 5.175499999990279,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1329.5140420000098,
+      "firstOutputMs": 1319.5340000000142,
+      "afterOutputMs": 9.980041999995592,
+      "handlerMs": 558.466042,
+      "backendMs": 13.928082999991602,
+      "nativeHttpMs": 545.3924949999928,
+      "outsideHandlerMs": 771.0480000000098,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 539.6470839999965,
+      "handlerMs": 535.6616249999934,
+      "backendMs": 19.713999999992666,
+      "nativeHttpMs": 512.7856259999971,
+      "outsideHandlerMs": 3.985459000003175,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 820.7832920000073,
+      "firstOutputMs": 814.9597090000025,
+      "afterOutputMs": 5.823583000004874,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 2,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.4919579999987036,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.4174999999959255,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 887.9325000000099,
+      "firstOutputMs": 879.9812920000113,
+      "afterOutputMs": 7.951207999998587,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 491.3476249999949,
+      "handlerMs": 486.35599999999977,
+      "backendMs": 14.532999999995809,
+      "nativeHttpMs": 472.89053900001454,
+      "outsideHandlerMs": 4.991624999995111,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1298.7351659999986,
+      "firstOutputMs": 1292.4467909999948,
+      "afterOutputMs": 6.288375000003725,
+      "handlerMs": 484.3358339999977,
+      "backendMs": 14.640208999990136,
+      "nativeHttpMs": 465.85254199996416,
+      "outsideHandlerMs": 814.3993320000009,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 30.597583999988274,
+      "handlerMs": 26.69345799999428,
+      "backendMs": 14.008333000005223,
+      "nativeHttpMs": 22.101372999997693,
+      "outsideHandlerMs": 3.904125999993994,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 3,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 826.7131660000014,
+      "firstOutputMs": 819.8115830000024,
+      "afterOutputMs": 6.901582999998936,
+      "handlerMs": 24.5795000000071,
+      "backendMs": 11.992917000010493,
+      "nativeHttpMs": 20.619334000031813,
+      "outsideHandlerMs": 802.1336659999943,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 772.4035830000066,
+      "firstOutputMs": 764.9187500000116,
+      "afterOutputMs": 7.484832999994978,
+      "handlerMs": 24.354707999998936,
+      "backendMs": 12.556874999994761,
+      "nativeHttpMs": 20.520708999989438,
+      "outsideHandlerMs": 748.0488750000077,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 29.97566700000607,
+      "handlerMs": 24.70212500001071,
+      "backendMs": 12.921291000006022,
+      "nativeHttpMs": 21.17575099998794,
+      "outsideHandlerMs": 5.273541999995359,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1263.0954589999892,
+      "firstOutputMs": 1256.6507920000004,
+      "afterOutputMs": 6.44466699998884,
+      "handlerMs": 450.3895000000048,
+      "backendMs": 13.562125000011292,
+      "nativeHttpMs": 438.03912300000957,
+      "outsideHandlerMs": 812.7059589999844,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 446.5454999999929,
+      "handlerMs": 438.91570900000806,
+      "backendMs": 15.115958000009414,
+      "nativeHttpMs": 422.8395799999562,
+      "outsideHandlerMs": 7.629790999984834,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 994.4288329999981,
+      "firstOutputMs": 987.3211659999943,
+      "afterOutputMs": 7.1076670000038575,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 4,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.5066249999945285,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.846957999994629,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 793.0168750000012,
+      "firstOutputMs": 787.9195000000036,
+      "afterOutputMs": 5.097374999997555,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 487.26912500000617,
+      "handlerMs": 480.82508300000336,
+      "backendMs": 14.615749999997206,
+      "nativeHttpMs": 468.2149170000048,
+      "outsideHandlerMs": 6.44404200000281,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1345.3655830000062,
+      "firstOutputMs": 1338.9653749999998,
+      "afterOutputMs": 6.400208000006387,
+      "handlerMs": 453.43787500000326,
+      "backendMs": 14.564499999993131,
+      "nativeHttpMs": 439.83554199998616,
+      "outsideHandlerMs": 891.9277080000029,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 41.23191699999734,
+      "handlerMs": 36.34024999999383,
+      "backendMs": 20.246374999987893,
+      "nativeHttpMs": 31.87149900001532,
+      "outsideHandlerMs": 4.891667000003508,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 5,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 873.1947499999951,
+      "firstOutputMs": 866.4460839999956,
+      "afterOutputMs": 6.748665999999503,
+      "handlerMs": 24.41591699999117,
+      "backendMs": 12.222125000000233,
+      "nativeHttpMs": 20.166041000018595,
+      "outsideHandlerMs": 848.7788330000039,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 782.6407080000063,
+      "firstOutputMs": 775.983625000008,
+      "afterOutputMs": 6.657082999998238,
+      "handlerMs": 25.105834000001778,
+      "backendMs": 12.85450000000128,
+      "nativeHttpMs": 21.34820800003945,
+      "outsideHandlerMs": 757.5348740000045,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 30.90058400000271,
+      "handlerMs": 27.072291999997105,
+      "backendMs": 11.810875000010128,
+      "nativeHttpMs": 19.213082000002032,
+      "outsideHandlerMs": 3.8282920000056038,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1202.9243750000023,
+      "firstOutputMs": 1196.0510420000064,
+      "afterOutputMs": 6.87333299999591,
+      "handlerMs": 440.8397499999992,
+      "backendMs": 15.01524999999674,
+      "nativeHttpMs": 423.7140020000079,
+      "outsideHandlerMs": 762.0846250000031,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 448.5986669999984,
+      "handlerMs": 445.11537499999395,
+      "backendMs": 14.157874999989872,
+      "nativeHttpMs": 432.6155399999843,
+      "outsideHandlerMs": 3.4832920000044396,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 775.2850410000101,
+      "firstOutputMs": 768.7047500000044,
+      "afterOutputMs": 6.580291000005673,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 6,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.973916000002646,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 6.4277080000028946,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 768.6644579999993,
+      "firstOutputMs": 761.9285000000091,
+      "afterOutputMs": 6.735957999990205,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 467.6236670000071,
+      "handlerMs": 464.2084579999937,
+      "backendMs": 13.980750000002445,
+      "nativeHttpMs": 451.9916189999785,
+      "outsideHandlerMs": 3.4152090000134194,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1227.6273330000113,
+      "firstOutputMs": 1222.173833000008,
+      "afterOutputMs": 5.45350000000326,
+      "handlerMs": 413.1877499999973,
+      "backendMs": 11.008834000007482,
+      "nativeHttpMs": 399.9673289999773,
+      "outsideHandlerMs": 814.439583000014,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 25.286582999993698,
+      "handlerMs": 22.03887499999837,
+      "backendMs": 10.850166999996873,
+      "nativeHttpMs": 18.26366699997743,
+      "outsideHandlerMs": 3.2477079999953276,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 7,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 676.0879590000113,
+      "firstOutputMs": 671.3714590000018,
+      "afterOutputMs": 4.716500000009546,
+      "handlerMs": 21.81462499999907,
+      "backendMs": 11.315624999988358,
+      "nativeHttpMs": 17.41170900000725,
+      "outsideHandlerMs": 654.2733340000123,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 639.1274580000027,
+      "firstOutputMs": 634.4352500000095,
+      "afterOutputMs": 4.692207999993116,
+      "handlerMs": 22.18316600000253,
+      "backendMs": 11.583624999999302,
+      "nativeHttpMs": 18.42795699997805,
+      "outsideHandlerMs": 616.9442920000001,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 24.05254099999729,
+      "handlerMs": 21.089749999999185,
+      "backendMs": 11.101292000006652,
+      "nativeHttpMs": 17.582417999990867,
+      "outsideHandlerMs": 2.9627909999981057,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1023.442458000005,
+      "firstOutputMs": 1018.2440829999978,
+      "afterOutputMs": 5.198375000007218,
+      "handlerMs": 414.75654199998826,
+      "backendMs": 22.65320799998881,
+      "nativeHttpMs": 402.2242080000142,
+      "outsideHandlerMs": 608.6859160000167,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 407.91016699999454,
+      "handlerMs": 404.58612500000163,
+      "backendMs": 13.594207999994978,
+      "nativeHttpMs": 392.7472029999626,
+      "outsideHandlerMs": 3.3240419999929145,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 706.6060839999991,
+      "firstOutputMs": 701.6912920000032,
+      "afterOutputMs": 4.914791999995941,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 8,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.511916999996174,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.2295419999863952,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 639.2371659999917,
+      "firstOutputMs": 634.4846249999973,
+      "afterOutputMs": 4.75254099999438,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 389.2287079999951,
+      "handlerMs": 385.25924999998824,
+      "backendMs": 11.059042000008048,
+      "nativeHttpMs": 368.8788729999651,
+      "outsideHandlerMs": 3.9694580000068527,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1053.5144169999985,
+      "firstOutputMs": 1047.1490420000046,
+      "afterOutputMs": 6.365374999993946,
+      "handlerMs": 389.8975419999915,
+      "backendMs": 15.991084000008414,
+      "nativeHttpMs": 377.91317199998593,
+      "outsideHandlerMs": 663.616875000007,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 28.379667000001064,
+      "handlerMs": 25.052834000001894,
+      "backendMs": 12.730750000002445,
+      "nativeHttpMs": 20.7932910000236,
+      "outsideHandlerMs": 3.3268329999991693,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 9,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 735.0037080000038,
+      "firstOutputMs": 730.0613330000051,
+      "afterOutputMs": 4.942374999998719,
+      "handlerMs": 20.126209000009112,
+      "backendMs": 11.238708000004408,
+      "nativeHttpMs": 16.700001999968663,
+      "outsideHandlerMs": 714.8774989999947,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 619.2754170000117,
+      "firstOutputMs": 614.6175840000069,
+      "afterOutputMs": 4.657833000004757,
+      "handlerMs": 22.089666999992914,
+      "backendMs": 11.283416999998735,
+      "nativeHttpMs": 18.576916999998502,
+      "outsideHandlerMs": 597.1857500000187,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 21.957500000004075,
+      "handlerMs": 19.262791000001016,
+      "backendMs": 10.7771250000078,
+      "nativeHttpMs": 16.404416000004858,
+      "outsideHandlerMs": 2.6947090000030585,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 994.1587909999944,
+      "firstOutputMs": 988.671291000006,
+      "afterOutputMs": 5.4874999999883585,
+      "handlerMs": 355.4974999999977,
+      "backendMs": 13.425208000000566,
+      "nativeHttpMs": 344.27424900003825,
+      "outsideHandlerMs": 638.6612909999967,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 427.3732089999976,
+      "handlerMs": 423.80045800001244,
+      "backendMs": 13.264291999992565,
+      "nativeHttpMs": 410.760792999994,
+      "outsideHandlerMs": 3.5727509999851463,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 814.9941249999974,
+      "firstOutputMs": 809.4040420000092,
+      "afterOutputMs": 5.590082999988226,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 10,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 5.376708999989205,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 2.78329200000735,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 1302.398125000007,
+      "firstOutputMs": 1295.8288750000065,
+      "afterOutputMs": 6.569250000000466,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 414.6648750000022,
+      "handlerMs": 409.8990410000115,
+      "backendMs": 12.734874999994645,
+      "nativeHttpMs": 393.3761230000382,
+      "outsideHandlerMs": 4.765833999990718,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1066.5783749999973,
+      "firstOutputMs": 1060.6983750000072,
+      "afterOutputMs": 5.879999999990105,
+      "handlerMs": 367.8785409999982,
+      "backendMs": 13.326707999993232,
+      "nativeHttpMs": 356.74674700001196,
+      "outsideHandlerMs": 698.6998339999991,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 29.25174999999581,
+      "handlerMs": 24.961834000001545,
+      "backendMs": 12.540999999997439,
+      "nativeHttpMs": 20.75516699999571,
+      "outsideHandlerMs": 4.289915999994264,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 11,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 1111.145542000013,
+      "firstOutputMs": 1103.811750000008,
+      "afterOutputMs": 7.333792000004905,
+      "handlerMs": 37.936459000004106,
+      "backendMs": 16.573292000000947,
+      "nativeHttpMs": 29.898458000010578,
+      "outsideHandlerMs": 1073.2090830000088,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 629.8267499999929,
+      "firstOutputMs": 624.2404999999999,
+      "afterOutputMs": 5.586249999993015,
+      "handlerMs": 21.524250000002212,
+      "backendMs": 11.582750000001397,
+      "nativeHttpMs": 18.617792999983067,
+      "outsideHandlerMs": 608.3024999999907,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 25.841499999994994,
+      "handlerMs": 21.238083000003826,
+      "backendMs": 10.818874999997206,
+      "nativeHttpMs": 17.896252000005916,
+      "outsideHandlerMs": 4.603416999991168,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 970.0205419999984,
+      "firstOutputMs": 964.6841249999998,
+      "afterOutputMs": 5.336416999998619,
+      "handlerMs": 350.68995800000266,
+      "backendMs": 12.107416999991983,
+      "nativeHttpMs": 340.1175009999861,
+      "outsideHandlerMs": 619.3305839999957,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 358.3785829999979,
+      "handlerMs": 354.9532499999914,
+      "backendMs": 11.607791999995243,
+      "nativeHttpMs": 343.9762079999782,
+      "outsideHandlerMs": 3.4253330000065034,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 617.6151660000032,
+      "firstOutputMs": 612.3065829999978,
+      "afterOutputMs": 5.308583000005456,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 12,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 5.255042000004323,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.050291999999899,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 571.9912080000067,
+      "firstOutputMs": 567.4369580000057,
+      "afterOutputMs": 4.554250000001048,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 347.83570800001326,
+      "handlerMs": 345.15979200000584,
+      "backendMs": 14.22149999999965,
+      "nativeHttpMs": 334.83724800001073,
+      "outsideHandlerMs": 2.675916000007419,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 985.5726670000004,
+      "firstOutputMs": 980.3922500000044,
+      "afterOutputMs": 5.180416999995941,
+      "handlerMs": 339.4533749999973,
+      "backendMs": 14.022207999994862,
+      "nativeHttpMs": 326.5421700000152,
+      "outsideHandlerMs": 646.119292000003,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 22.70891699999629,
+      "handlerMs": 19.971291000008932,
+      "backendMs": 10.186000000001513,
+      "nativeHttpMs": 16.921749999994063,
+      "outsideHandlerMs": 2.7376259999873582,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 13,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 666.3422500000015,
+      "firstOutputMs": 660.5612919999985,
+      "afterOutputMs": 5.780958000003011,
+      "handlerMs": 24.170957999987877,
+      "backendMs": 12.267249999989872,
+      "nativeHttpMs": 19.81016500001715,
+      "outsideHandlerMs": 642.1712920000136,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 614.642583000008,
+      "firstOutputMs": 609.4717079999973,
+      "afterOutputMs": 5.17087500001071,
+      "handlerMs": 22.335124999997788,
+      "backendMs": 11.43300000000454,
+      "nativeHttpMs": 18.963627000004635,
+      "outsideHandlerMs": 592.3074580000102,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 24.57179200000246,
+      "handlerMs": 21.680208000005223,
+      "backendMs": 11.932249999998021,
+      "nativeHttpMs": 18.44279099999403,
+      "outsideHandlerMs": 2.8915839999972377,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 944.989041000008,
+      "firstOutputMs": 939.8062080000091,
+      "afterOutputMs": 5.182832999998936,
+      "handlerMs": 343.06408300000476,
+      "backendMs": 11.228166000000783,
+      "nativeHttpMs": 333.2413749999978,
+      "outsideHandlerMs": 601.9249580000032,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 340.40454099999624,
+      "handlerMs": 336.8214580000058,
+      "backendMs": 15.226874999993015,
+      "nativeHttpMs": 324.22162599999865,
+      "outsideHandlerMs": 3.583082999990438,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 648.038916999998,
+      "firstOutputMs": 642.726708999995,
+      "afterOutputMs": 5.312208000003011,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 14,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.0091250000114087,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 2.144958000004408,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 612.5903330000001,
+      "firstOutputMs": 607.4090830000059,
+      "afterOutputMs": 5.181249999994179,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 331.5298749999929,
+      "handlerMs": 327.7773750000051,
+      "backendMs": 11.462459000002127,
+      "nativeHttpMs": 316.23908200002916,
+      "outsideHandlerMs": 3.7524999999877764,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1024.0030829999887,
+      "firstOutputMs": 1018.911957999997,
+      "afterOutputMs": 5.0911249999917345,
+      "handlerMs": 364.72595900000306,
+      "backendMs": 11.432874999998603,
+      "nativeHttpMs": 352.4521240000322,
+      "outsideHandlerMs": 659.2771239999856,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 24.21975000000384,
+      "handlerMs": 21.03895799999009,
+      "backendMs": 10.997917000000598,
+      "nativeHttpMs": 17.78766699998232,
+      "outsideHandlerMs": 3.180792000013753,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 15,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 687.0920830000105,
+      "firstOutputMs": 682.0912910000043,
+      "afterOutputMs": 5.000792000006186,
+      "handlerMs": 20.58170800001244,
+      "backendMs": 10.549792000005255,
+      "nativeHttpMs": 17.487292000005255,
+      "outsideHandlerMs": 666.510374999998,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 673.1086670000077,
+      "firstOutputMs": 667.9307499999995,
+      "afterOutputMs": 5.177917000008165,
+      "handlerMs": 22.557583000001614,
+      "backendMs": 11.266082999994978,
+      "nativeHttpMs": 19.18354100000579,
+      "outsideHandlerMs": 650.5510840000061,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 26.285415999998804,
+      "handlerMs": 20.65899999999965,
+      "backendMs": 11.556958000001032,
+      "nativeHttpMs": 16.827164999966044,
+      "outsideHandlerMs": 5.626415999999153,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 980.8551670000015,
+      "firstOutputMs": 974.9715830000059,
+      "afterOutputMs": 5.883583999995608,
+      "handlerMs": 366.34249999999884,
+      "backendMs": 15.447375000003376,
+      "nativeHttpMs": 353.8122509999812,
+      "outsideHandlerMs": 614.5126670000027,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 362.1534590000083,
+      "handlerMs": 355.88925000000745,
+      "backendMs": 13.612833000006503,
+      "nativeHttpMs": 341.93137799996475,
+      "outsideHandlerMs": 6.264209000000847,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 626.6214590000018,
+      "firstOutputMs": 621.8078749999986,
+      "afterOutputMs": 4.813584000003175,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 16,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 2.863832999995793,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 2.8774169999960577,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 586.6867089999869,
+      "firstOutputMs": 582.1428749999905,
+      "afterOutputMs": 4.543833999996423,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 363.5001670000056,
+      "handlerMs": 357.73799999999756,
+      "backendMs": 11.582083999994211,
+      "nativeHttpMs": 345.97495800000615,
+      "outsideHandlerMs": 5.7621670000080485,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1072.8907080000063,
+      "firstOutputMs": 1066.2663750000065,
+      "afterOutputMs": 6.624332999999751,
+      "handlerMs": 387.38937499999884,
+      "backendMs": 14.114124999992782,
+      "nativeHttpMs": 374.6937500000495,
+      "outsideHandlerMs": 685.5013330000074,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 28.123208999997587,
+      "handlerMs": 24.122749999994994,
+      "backendMs": 12.371041999998852,
+      "nativeHttpMs": 20.218750000014552,
+      "outsideHandlerMs": 4.000459000002593,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 17,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 716.1497499999969,
+      "firstOutputMs": 710.6716250000027,
+      "afterOutputMs": 5.478124999994179,
+      "handlerMs": 23.082791000008,
+      "backendMs": 10.816082999997889,
+      "nativeHttpMs": 18.757000000026892,
+      "outsideHandlerMs": 693.0669589999889,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 654.688249999992,
+      "firstOutputMs": 650.1060419999994,
+      "afterOutputMs": 4.582207999992534,
+      "handlerMs": 22.727167000004556,
+      "backendMs": 11.471374999993714,
+      "nativeHttpMs": 18.902040000015404,
+      "outsideHandlerMs": 631.9610829999874,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 23.373082999998587,
+      "handlerMs": 20.53104099999473,
+      "backendMs": 10.911582999993698,
+      "nativeHttpMs": 17.408290999999736,
+      "outsideHandlerMs": 2.8420420000038575,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 955.0748749999912,
+      "firstOutputMs": 949.7043750000012,
+      "afterOutputMs": 5.370499999989988,
+      "handlerMs": 354.41308300000674,
+      "backendMs": 11.81258300000627,
+      "nativeHttpMs": 342.42612200001895,
+      "outsideHandlerMs": 600.6617919999844,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 374.4344160000037,
+      "handlerMs": 371.26337500000955,
+      "backendMs": 12.361999999993714,
+      "nativeHttpMs": 360.77166499999294,
+      "outsideHandlerMs": 3.1710409999941476,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 735.348874999996,
+      "firstOutputMs": 728.1977919999918,
+      "afterOutputMs": 7.1510830000042915,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 18,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.2127499999915017,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 5.586291999992682,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 780.706291999988,
+      "firstOutputMs": 775.9952499999927,
+      "afterOutputMs": 4.711041999995359,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 342.0112499999959,
+      "handlerMs": 338.90291600000637,
+      "backendMs": 11.835874999989755,
+      "nativeHttpMs": 329.39837500001886,
+      "outsideHandlerMs": 3.1083339999895543,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 1005.101542000004,
+      "firstOutputMs": 1000.0130840000056,
+      "afterOutputMs": 5.088457999998354,
+      "handlerMs": 338.6763329999958,
+      "backendMs": 11.219541999991634,
+      "nativeHttpMs": 327.09987500001444,
+      "outsideHandlerMs": 666.4252090000082,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 24.404625000010128,
+      "handlerMs": 21.159124999991036,
+      "backendMs": 10.91241699999955,
+      "nativeHttpMs": 17.995999999984633,
+      "outsideHandlerMs": 3.245500000019092,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 19,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 672.2426670000132,
+      "firstOutputMs": 667.377708,
+      "afterOutputMs": 4.864959000013187,
+      "handlerMs": 20.54550000000745,
+      "backendMs": 10.357208000001265,
+      "nativeHttpMs": 16.761499000000185,
+      "outsideHandlerMs": 651.6971670000057,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 590.15625,
+      "firstOutputMs": 585.7274170000019,
+      "afterOutputMs": 4.4288329999981215,
+      "handlerMs": 20.835625000006985,
+      "backendMs": 11.075249999994412,
+      "nativeHttpMs": 17.169582999980776,
+      "outsideHandlerMs": 569.320624999993,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 21.86875000000873,
+      "handlerMs": 19.309500000003027,
+      "backendMs": 9.38795800000662,
+      "nativeHttpMs": 15.83679200001643,
+      "outsideHandlerMs": 2.5592500000057044,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 898.8680419999873,
+      "firstOutputMs": 894.3860829999903,
+      "afterOutputMs": 4.481958999997005,
+      "handlerMs": 333.5687920000055,
+      "backendMs": 12.612084000007599,
+      "nativeHttpMs": 321.5944999999774,
+      "outsideHandlerMs": 565.2992499999818,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 335.6098340000026,
+      "handlerMs": 332.31787499999336,
+      "backendMs": 9.657833000004757,
+      "nativeHttpMs": 322.36637300001166,
+      "outsideHandlerMs": 3.2919590000092285,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 607.6677919999929,
+      "firstOutputMs": 603.4195000000036,
+      "afterOutputMs": 4.248291999989306,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 20,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 2.706917000003159,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.308583000005456,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 561.5397089999897,
+      "firstOutputMs": 557.2607089999947,
+      "afterOutputMs": 4.278999999994994,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 332.0527909999946,
+      "handlerMs": 329.4339170000021,
+      "backendMs": 13.643708000003244,
+      "nativeHttpMs": 319.05750099997385,
+      "outsideHandlerMs": 2.618873999992502,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 985.9600420000061,
+      "firstOutputMs": 980.9557920000079,
+      "afterOutputMs": 5.004249999998137,
+      "handlerMs": 344.13591699999233,
+      "backendMs": 11.244374999994761,
+      "nativeHttpMs": 333.0385829999723,
+      "outsideHandlerMs": 641.8241250000137,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 25.45037500000035,
+      "handlerMs": 22.194082999994862,
+      "backendMs": 11.484207999994396,
+      "nativeHttpMs": 18.832707000008668,
+      "outsideHandlerMs": 3.2562920000054874,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 21,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 784.9772919999959,
+      "firstOutputMs": 780.2165839999943,
+      "afterOutputMs": 4.760708000001614,
+      "handlerMs": 19.909499999994296,
+      "backendMs": 10.134334000002127,
+      "nativeHttpMs": 16.61579199996777,
+      "outsideHandlerMs": 765.0677920000016,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 735.726999999999,
+      "firstOutputMs": 730.8490839999868,
+      "afterOutputMs": 4.877916000012192,
+      "handlerMs": 22.182874999998603,
+      "backendMs": 10.700250000008964,
+      "nativeHttpMs": 17.2444590000232,
+      "outsideHandlerMs": 713.5441250000003,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 22.391457999998238,
+      "handlerMs": 19.354959000003873,
+      "backendMs": 10.19608400001016,
+      "nativeHttpMs": 16.378416999985348,
+      "outsideHandlerMs": 3.0364989999943646,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 897.8668340000004,
+      "firstOutputMs": 893.3213339999929,
+      "afterOutputMs": 4.545500000007451,
+      "handlerMs": 325.96941700000025,
+      "backendMs": 11.050667000003159,
+      "nativeHttpMs": 314.7207519999647,
+      "outsideHandlerMs": 571.8974170000001,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 374.6744580000086,
+      "handlerMs": 370.5679589999927,
+      "backendMs": 11.429374999992433,
+      "nativeHttpMs": 361.02170599999954,
+      "outsideHandlerMs": 4.106499000015901,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 769.3456250000017,
+      "firstOutputMs": 764.4127089999965,
+      "afterOutputMs": 4.932916000005207,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 22,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 3.0552089999982854,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "persistent",
+      "operation": "context-status",
+      "totalMs": 4.844375000000582,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "one-shot",
+      "operation": "context-status",
+      "totalMs": 590.2054999999964,
+      "firstOutputMs": 585.2145829999936,
+      "afterOutputMs": 4.99091700000281,
+      "backendMs": 0,
+      "nativeHttpMs": 0,
+      "outputSha256": "bcbea2493ded48747fa37842371b500b6f255bccbfb9b2608ddd2ddf5812bec8"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "persistent",
+      "operation": "inspect-entry",
+      "totalMs": 344.945624999993,
+      "handlerMs": 341.50958299999184,
+      "backendMs": 14.330541999996058,
+      "nativeHttpMs": 330.209537000017,
+      "outsideHandlerMs": 3.43604200000118,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "one-shot",
+      "operation": "inspect-entry",
+      "totalMs": 971.3244170000107,
+      "firstOutputMs": 966.1483330000046,
+      "afterOutputMs": 5.176084000006085,
+      "handlerMs": 338.33462500000314,
+      "backendMs": 12.790832999991835,
+      "nativeHttpMs": 327.3759189999837,
+      "outsideHandlerMs": 632.9897920000076,
+      "outputSha256": "d4b177dc9600631b459f07a6c5068b59d4a907344cafe709927affbab9648277"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "persistent",
+      "operation": "memory-32",
+      "totalMs": 34.17174999999406,
+      "handlerMs": 30.461708000002545,
+      "backendMs": 18.248959000004106,
+      "nativeHttpMs": 26.510582000002614,
+      "outsideHandlerMs": 3.7100419999915175,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    },
+    {
+      "phase": "measured",
+      "round": 23,
+      "mode": "one-shot",
+      "operation": "memory-32",
+      "totalMs": 752.5260830000043,
+      "firstOutputMs": 744.4907500000118,
+      "afterOutputMs": 8.035332999992534,
+      "handlerMs": 25.563125000000582,
+      "backendMs": 13.473250000010012,
+      "nativeHttpMs": 21.40891699999338,
+      "outsideHandlerMs": 726.9629580000037,
+      "outputSha256": "35cc11a3e28a32e42d364db81758476501deff0d6d0777381aac623b78c3f834"
+    }
+  ]
+}
