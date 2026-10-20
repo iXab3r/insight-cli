@@ -21,7 +21,7 @@ milestone complete using prototype evidence alone or reopen confirmed owner choi
 Factory owns commands, output, profiles, secrets, permissions and IPC lifecycle. Do not copy
 its core or build helper. Helpers live canonically under the skill npm workspace. Add another
 CLI only for a real consumer. Factory owns profile configuration and AppData control state. Analysis data uses configured
-profile storage (AppData by default) and migration-owned compatibility paths; no checkout-local
+profile storage (the installation default for new profiles; AppData before configuration) and migration-owned compatibility paths; no checkout-local
 runtime state. Updates are disabled by default. Agents edit isolated working contexts;
 the service coordinates shared publication. A local lock cannot enforce server authorization.
 
