@@ -52,6 +52,21 @@ and cannot separately infer client startup/IPC/response stages absent Factory ho
 [research reference](../skills/ghidra-coordinator/references/research.md) specifies bounds and
 interpretation. Diagnostic data resides in configured profile workspace storage.
 
+### Persistent frontend and compact inspection
+
+The owner approved the narrow V1 on 2026-10-20. The packaged `persistent` module is a bounded
+client of Factory's existing `--json-rpc`/`cli.execute` stream: one child, ordered calls, original
+typed results/errors, explicit close, no reconnect or replay. It creates no host, profile store
+or IPC protocol. Factory dependencies and lifecycle remain unchanged.
+
+Only `functions inspect` uses the precompiled authenticated ReadOnly bridge endpoint
+`GET /insight/research-view/v1?program=...`. It returns versioned modification/language/compiler
+facts for an explicitly selected already-open program. Existing source/process verification,
+before/after comparison, incarnation and `view.identity` inputs remain authoritative. Missing,
+malformed or failed observations fail rather than weakening the guard. Other consumers retain
+their previous observation path. The additive pinned bridge patch and its source/build identity
+are retained in runtime provenance; the endpoint shares native auth and threading.
+
 ### Raw-byte code-reference candidates
 
 The owner approved narrow V1 on 2026-10-20 after independent API critique.

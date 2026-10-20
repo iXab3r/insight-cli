@@ -4,6 +4,8 @@ Measured on 2026-10-20 against the unchanged isolated BB-07 development package.
 JSON-RPC removes about 0.7 seconds per short invocation on this host. Across the identical
 72-command workload, measured request time fell from **61.60 s to 10.57 s (5.83×)**.
 This investigation adds reproducible benchmark tooling and evidence; the fixes below are proposed.
+The subsequent [persistent/inspect implementation](PERSISTENT-INSPECT.md) records the approved
+client and native-observation repair, final installed checks and a new counterbalanced comparison.
 The [machine-readable report](verification/cli-overhead.json) retains all 144 measured latencies,
 result hashes, quantiles, artifact identity, control measurements and limits.
 

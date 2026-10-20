@@ -5,6 +5,9 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 const native='runtime/native/';
 const sha=async path=>createHash('sha256').update(await readFile(path)).digest('hex');
+const bridgeProof=JSON.parse(await readFile('runtime/research-view.provenance.json','utf8'));
+assert.equal(await sha('runtime/GhidraMCP-7.0.0.jar'),bridgeProof.sha256,'Research-view bridge differs from its provenance');
+assert.equal(await sha('references/native/InsightResearchView.java'),bridgeProof.inputs['skills/ghidra-coordinator/references/native/InsightResearchView.java'],'Research-view native source changed; rebuild bridge and provenance');
 for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['deadline-alarm','deadline-alarm-darwin-universal.dylib']]){
  const proof=JSON.parse(await readFile(native+name+'.provenance.json','utf8'));
  assert.equal(await sha(native+name+'.c'),proof.sourceSha256,'Native deadline source changed; rebuild and review its provenance');

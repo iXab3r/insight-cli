@@ -18,6 +18,7 @@ import {inspectCodeReferences,type ReferenceRequest} from './code-references.js'
 export interface ResearchBackend {
   inlineScript?(scope:Scope,parameters:Record<string,unknown>,requestId:string):Promise<{response:Record<string,unknown>;safe:boolean}>;
   observation?(scope:Scope):Promise<unknown>;
+  inspectObservation?(scope:Scope):Promise<unknown>;
   sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
   archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
   debuggerStart?(scope:Scope):Promise<void>;
@@ -258,9 +259,10 @@ export class Research {
     return this.ordered(selected,async()=>{
       const backend=await this.backend();await backend.open(selected);
       const context=this.workspace.context(selected);
-      const observation=await backend.observation?.(selected);
+      const observe=backend.inspectObservation?()=>backend.inspectObservation!(selected):backend.observation?()=>backend.observation!(selected):undefined;
+      const observation=await observe?.();
       const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
-      return inspectFunctions(backend,selected,parameters,options,view,observation);
+      return inspectFunctions(backend,selected,parameters,options,view,observation,observe);
     });
   }
   async codeReferences(selected:Scope,request:ReferenceRequest){

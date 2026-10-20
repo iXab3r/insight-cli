@@ -8,3 +8,6 @@ since been substantially rewritten and extended; LaurieWired retains
 copyright over any portions of the original work that remain.
 
 Acknowledgments to all listed contributors in README.md.
+
+Insight facade modification, 2026-10-20: precompiled ReadOnly research-view service
+and one AnnotationScanner registration insertion. See research-view.provenance.json.

@@ -5,19 +5,25 @@ import {spawn,execFile} from 'node:child_process';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {createInterface} from 'node:readline';
+import {pathToFileURL} from 'node:url';
+import {setTimeout as delay} from 'node:timers/promises';
 import {DatabaseSync} from 'node:sqlite';
 import {createPublicFixture,digest} from './toolbox/public-fixture.mjs';
 import {nativeProofGuard} from './native-proof-guard.mjs';
 
-const {values:o}=parseArgs({options:{package:{type:'string'},root:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},rounds:{type:'string',default:'24'},'ack-disposable':{type:'boolean'}}});
+const {values:o}=parseArgs({options:{package:{type:'string'},root:{type:'string'},java:{type:'string'},'ghidra-home':{type:'string'},'persistent-client':{type:'string'},'round-gates':{type:'string'},label:{type:'string'},rounds:{type:'string',default:'24'},'ack-disposable':{type:'boolean'}}});
 nativeProofGuard(o['ack-disposable']);
 for(const key of ['package','root','java','ghidra-home'])assert.ok(o[key],key);
 const rounds=Number(o.rounds);assert.ok(Number.isSafeInteger(rounds)&&rounds>=4&&rounds<=100);
 const root=resolve(o.root);await mkdir(root);process.env.INSIGHT_NATIVE_DISPOSABLE='1';
+if(o['round-gates'])assert.match(o.label??'',/^(before|after)$/);
+const gateFile=name=>join(resolve(o['round-gates']),name);
+const waitGate=async name=>{for(;;){try{await readFile(gateFile('cancel'));throw Error('Paired workload cancelled');}catch(e){if(e.code!=='ENOENT')throw e;}try{await readFile(gateFile(name));return;}catch(e){if(e.code!=='ENOENT')throw e;}await delay(100);}};
 const f=await createPublicFixture(resolve(o.package),root),exec=promisify(execFile),rows=[],warmups=[],cleanup=[];
 const traceFile=join(f.appdata,'insight-cli',f.profile,'workspace/diagnostics/timings.jsonl');
 let scope,rpc,passed=false;
 const now=()=>performance.now();
+const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 const checkpoint=()=>{const db=new DatabaseSync(join(f.appdata,'insight-cli',f.profile,'workspace/workspace.sqlite'),{readOnly:true});try{
  const context=JSON.parse(db.prepare('SELECT data FROM contexts WHERE session=? AND target=?').get(scope.session,scope.target).data);
  return {generation:context.generation,snapshot:context.workingSnapshot,requests:db.prepare('SELECT id,state FROM requests WHERE context=? ORDER BY rowid').all(context.id)};
@@ -26,7 +32,12 @@ const traceRows=async()=>{try{return (await readFile(traceFile,'utf8')).trim().s
 const quantiles=values=>{const a=values.toSorted((x,y)=>x-y),at=p=>a[Math.ceil(p*a.length)-1];return {n:a.length,min:a[0],p50:at(.5),p95:at(.95),max:a.at(-1),mean:a.reduce((x,y)=>x+y,0)/a.length};};
 const union=spans=>{let total=0,end=-Infinity;for(const s of spans.toSorted((a,b)=>a.startedMs-b.startedMs)){const stop=s.startedMs+s.durationMs;total+=Math.max(0,stop-Math.max(end,s.startedMs));end=Math.max(end,stop);}return total;};
 
-function persistent(){
+async function persistent(){
+ if(o['persistent-client']){
+  const {connectInsight}=await import(pathToFileURL(resolve(o['persistent-client'])).href),started=now();
+  const client=await connectInsight({executable:process.execPath,arguments:[f.cli],cwd:f.project,env:f.environment});
+  return {started,async call(argv){const sent=now(),value=await client.execute(argv),received=now();return {value,received,totalMs:received-sent};},stop:()=>client.close()};
+ }
  const started=now(),child=spawn(process.execPath,[f.cli,'--json-rpc'],{cwd:f.project,env:f.environment,stdio:['pipe','pipe','pipe']});
  let id=0,stderr='';const pending=new Map();child.stderr.on('data',v=>stderr+=v);
  const lines=createInterface({input:child.stdout});lines.on('line',line=>{try{const response=JSON.parse(line),p=pending.get(response.id);if(!p)return;pending.delete(response.id);clearTimeout(p.timer);response.error?p.reject(Error(JSON.stringify(response.error))):p.resolve({value:response.result,received:now()});}catch(error){for(const p of pending.values())p.reject(error);}});
@@ -45,7 +56,11 @@ async function sample(mode,operation,round,phase='measured'){
  const traces=(await traceRows()).slice(before.length),commands=traces.filter(x=>x.phase==='facade.command');
  if(operation.native)assert.equal(commands.length,1,'Exactly one completed facade trace');else assert.equal(commands.length,0);
  const handlerMs=commands[0]?.durationMs,backendMs=union(traces.filter(x=>x.phase==='backend.operation')),nativeHttpMs=union(traces.filter(x=>x.phase==='native.http'));
- const row={phase,round,mode,operation:operation.name,totalMs:result.totalMs,firstOutputMs:result.firstOutputMs,afterOutputMs:result.afterOutputMs,handlerMs,backendMs,nativeHttpMs,outsideHandlerMs:handlerMs===undefined?undefined:result.totalMs-handlerMs,outputSha256:digest(Buffer.from(JSON.stringify(result.value))),trace:commands[0]?.trace};
+ // Cross-build fixtures have different scope/incarnation IDs; retain a second explicit content hash.
+ const comparable=structuredClone(result.value);delete comparable.session;delete comparable.target;
+ if(comparable.value?.view)delete comparable.value.view.identity;
+ if(phase==='warmup')await writeFile(join(root,operation.name+'-'+mode+'.json'),JSON.stringify(result.value,null,2)+'\n',{mode:0o600});
+ const row={phase,round,mode,operation:operation.name,totalMs:result.totalMs,firstOutputMs:result.firstOutputMs,afterOutputMs:result.afterOutputMs,handlerMs,backendMs,nativeHttpMs,outsideHandlerMs:handlerMs===undefined?undefined:result.totalMs-handlerMs,outputSha256:digest(Buffer.from(JSON.stringify(result.value))),comparableSha256:digest(Buffer.from(JSON.stringify(canonical(comparable)))),trace:commands[0]?.trace};
  const expected=warmups.find(x=>x.operation===operation.name);if(expected)assert.equal(row.outputSha256,expected.outputSha256,'Full JSON result must match across routes and repetitions');
  (phase==='measured'?rows:warmups).push(row);return result.value;
 }
@@ -58,18 +73,22 @@ try{
  const selected=['--session',scope.session,'--target',scope.target];
  const workload=[{name:'memory-32',native:true,argv:['ghidra','memory','read',...selected,'--address','0x140001000','--length','32']},{name:'inspect-entry',native:true,argv:['ghidra','functions','inspect',...selected,'--function','main','--fields','entry_point','--include-call-context','false']},{name:'context-status',native:false,argv:['sessions','status',scope.session,'--target',scope.target]}];
  const ownerBefore=await f.call(['ipc-server','status']),processesBefore=await f.call(['tools','processes','--tool','ghidra']),before=checkpoint();
- rpc=persistent();const handshake=await rpc.call(['profile','show']);const persistentStartupMs=handshake.received-rpc.started;
+ rpc=await persistent();const handshake=await rpc.call(['profile','show']);const persistentStartupMs=handshake.received-rpc.started;
  for(const operation of workload)for(const mode of ['one-shot','persistent'])await sample(mode,operation,-1,'warmup');
+ if(o['round-gates'])await writeFile(gateFile(o.label+'.ready'),'ready\n');
  // Counterbalance both route and operation order. Requests never overlap; each round is a pair.
  for(let round=0;round<rounds;round++){
+  if(o['round-gates'])await waitGate(o.label+'.'+round+'.go');
   for(const operation of round%2?[...workload].reverse():workload)for(const mode of round%2?['persistent','one-shot']:['one-shot','persistent'])await sample(mode,operation,round);
   await writeFile(join(root,'progress.json'),JSON.stringify({round:round+1,rounds,rows},null,2)+'\n',{mode:0o600});
   console.log('Completed paired round',round+1,'/',rounds);
+  if(o['round-gates'])await writeFile(gateFile(o.label+'.'+round+'.done'),'done\n');
  }
+ if(o['round-gates'])await waitGate('complete');
  const after=checkpoint(),ownerAfter=await f.call(['ipc-server','status']),processesAfter=await f.call(['tools','processes','--tool','ghidra']);assert.deepEqual(after,before);assert.deepEqual(ownerAfter,ownerBefore);assert.deepEqual(processesAfter,processesBefore);assert.equal(digest(await readFile(input)),inputHash);
  const summary={};for(const operation of workload){summary[operation.name]={};for(const mode of ['one-shot','persistent']){const selected=rows.filter(x=>x.operation===operation.name&&x.mode===mode);summary[operation.name][mode]=Object.fromEntries(['totalMs','handlerMs','backendMs','nativeHttpMs','outsideHandlerMs','afterOutputMs'].filter(k=>selected.every(x=>x[k]!==undefined)).map(k=>[k,quantiles(selected.map(x=>x[k]))]));}}
  await writeFile(join(root,'timings.jsonl'),(await readFile(traceFile)),{mode:0o600});
- await writeFile(join(root,'result.json'),JSON.stringify({schema:1,state:'passed',node:process.version,platform:process.platform,architecture:process.arch,rounds,packageRoot:f.packageRoot,packageBuild:JSON.parse(await readFile(join(f.packageRoot,'.cli-package-build.json'),'utf8')),inputHash,persistentStartupMs,scope,workload,ownerBefore,ownerAfter,processesBefore,processesAfter,before,after,warmups,rows,summary,method:{clock:'parent performance.now; spawn-to-close for one-shot, write-to-complete-line for RPC',order:'alternating AB/BA and reversed operation order',warmup:'one of each operation/route excluded',owner:'same pre-existing warm Factory owner; public fixture helper keeps a quiescent second RPC connection',trace:'existing awaited facade spans; backend/native/context spans overlap; no additive phase claims',validation:'exact full result hashes, context generation/snapshot/request journal, input hash, owner and native process records unchanged'}},null,2)+'\n',{mode:0o600});
+ await writeFile(join(root,'result.json'),JSON.stringify({schema:1,state:'passed',node:process.version,platform:process.platform,architecture:process.arch,rounds,packageRoot:f.packageRoot,persistentClient:o['persistent-client']??'inline control',packageBuild:JSON.parse(await readFile(join(f.packageRoot,'.cli-package-build.json'),'utf8')),inputHash,persistentStartupMs,scope,workload,ownerBefore,ownerAfter,processesBefore,processesAfter,before,after,warmups,rows,summary,method:{clock:'parent performance.now; spawn-to-close for one-shot, write-to-complete-line for RPC',order:'alternating AB/BA and reversed operation order',warmup:'one of each operation/route excluded',owner:'same pre-existing warm Factory owner; public fixture helper keeps a quiescent second RPC connection',trace:'existing awaited facade spans; backend/native/context spans overlap; no additive phase claims',validation:'exact full result hashes, context generation/snapshot/request journal, input hash, owner and native process records unchanged'}},null,2)+'\n',{mode:0o600});
  passed=true;
 }finally{
  if(rpc)try{await rpc.stop();}catch(e){cleanup.push(e.message);}

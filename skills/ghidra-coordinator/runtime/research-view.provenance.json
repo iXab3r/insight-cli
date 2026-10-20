@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "upstreamSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "upstreamGitArtifact": "6e4bfc9:skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar",
+  "sha256": "6288b37f28a98fc13108e09b5e97b527b7be298999722e320c6bf484f85361c3",
+  "inputs": {
+    "skills/ghidra-coordinator/references/native/InsightResearchView.java": "d71d7194ed99895e1198671c729211ae0974f839fa928897425ef78481bf6723",
+    "scripts/native/InstallResearchView.java": "f75231a5810c1eac79531025d35192cfb6841d938ee0d6d8686e0c315f287060",
+    "scripts/build-research-view-bridge.mjs": "c7ea114e7b894e222b998fcff35a8c7c6ca93e3060d98cea356e572094f20da3"
+  },
+  "asm": {
+    "version": "9.7.1",
+    "sha256": "8cadd43ac5eb6d09de05faecca38b917a040bb9139c7edeb4cc81c740b713281"
+  },
+  "jdk": "openjdk 21.0.11 2026-04-21\nOpenJDK Runtime Environment Homebrew (build 21.0.11)\nOpenJDK 64-Bit Server VM Homebrew (build 21.0.11, mixed mode, sharing)",
+  "change": "Add one annotated ReadOnly research-view service to the pinned AnnotationScanner constructor; all other class bytes unchanged except ZIP container metadata",
+  "endpoint": "/insight/research-view/v1"
+}

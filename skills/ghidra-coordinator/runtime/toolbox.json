@@ -8,7 +8,9 @@
       "resources": {
         "references/agent-execution.md": "references/agent-execution.md",
         "references/storage.md": "references/storage.md",
-        "references/recovery.md": "references/recovery.md"
+        "references/recovery.md": "references/recovery.md",
+        "references/persistent.md": "references/persistent.md",
+        "references/persistent-client.mjs": "dist/src/persistent-client.js"
       }
     },
     {
@@ -19,7 +21,9 @@
         "references/recovery.md": "references/recovery.md",
         "references/artifacts.md": "references/artifacts.md",
         "references/agent-execution.md": "references/agent-execution.md",
-        "references/storage.md": "references/storage.md"
+        "references/storage.md": "references/storage.md",
+        "references/persistent.md": "references/persistent.md",
+        "references/persistent-client.mjs": "dist/src/persistent-client.js"
       }
     },
     {
@@ -40,7 +44,9 @@
         "references/extensions-and-sync.md": "references/extensions-and-sync.md",
         "references/artifacts.md": "references/artifacts.md",
         "references/agent-execution.md": "references/agent-execution.md",
-        "references/storage.md": "references/storage.md"
+        "references/storage.md": "references/storage.md",
+        "references/persistent.md": "references/persistent.md",
+        "references/persistent-client.mjs": "dist/src/persistent-client.js"
       }
     },
     {

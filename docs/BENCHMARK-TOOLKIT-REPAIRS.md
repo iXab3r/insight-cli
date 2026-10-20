@@ -131,6 +131,10 @@ persistent JSON-RPC frontend on identical disposable reads. It adds exact outer/
 separate Factory validation controls and a proposed repair order; these controls do not replace
 the still-missing cross-process Factory boundary spans.
 
+The approved [persistent client and fast inspect observations](PERSISTENT-INSPECT.md) are
+implemented and verified separately, including installed headless/GUI fixtures and the same
+counterbalanced read workload. Factory itself remains unchanged.
+
 ## BB-08 follow-up: existing sparse-navigation route
 
 The owner prioritized sparse navigation before the proposed script-stage diagnostics. No new

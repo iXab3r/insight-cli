@@ -17,6 +17,10 @@ session/cell ID, await that same execution with the host's wait/poll facility un
 status and read its stdout/stderr. An empty first chunk is not a lost CLI response. Do not
 start another open or repeat a CPU mutation while the original command is still running.
 
+For research loops, use the packaged [persistent client](references/persistent.md) and keep
+one connection across queries. It uses the existing CLI transport and preserves typed errors;
+lost mutation replies still require request/status recovery.
+
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
 For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while

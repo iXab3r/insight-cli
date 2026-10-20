@@ -10,7 +10,7 @@ import {CliError} from '@eyeauras/cli-factory';
 
 export interface FunctionInspectionOptions {limit:number;offset:number;total:number;expectView?:string;saveDirectory?:string}
 const fields=new Set('signature classification return_type entry_point body_start body_end decompiled_code plate_comment comments labels tags parameters locals callers call_context callees xrefs disassembly jump_targets refs'.split(' '));
-export async function inspectFunctions(backend:ResearchBackend,scope:Scope,parameters:Record<string,unknown>,options:FunctionInspectionOptions,view:{revision?:string;identity:string},observation?:unknown){
+export async function inspectFunctions(backend:ResearchBackend,scope:Scope,parameters:Record<string,unknown>,options:FunctionInspectionOptions,view:{revision?:string;identity:string},observation?:unknown,observe?:()=>Promise<unknown>){
   if(options.saveDirectory!==undefined&&!isAbsolute(options.saveDirectory))fail('invalid','Save directory must be an absolute path on the owner host.');
   const selectors=String(parameters.functions||parameters.function||'').split(',').map(s=>s.trim());
   if(!selectors.length||selectors.length>20||selectors.some(s=>!s||s.length>128)||new Set(selectors).size!==selectors.length)fail('invalid','Select 1–20 distinct function names or addresses.');
@@ -18,7 +18,8 @@ export async function inspectFunctions(backend:ResearchBackend,scope:Scope,param
   if(selectedFields.some(s=>!fields.has(s)))fail('invalid','Unknown function field. Allowed fields: '+[...fields].join(', '));
   if(options.expectView!==undefined&&options.expectView!==view.identity)fail('binding','Function continuation view changed.',{reason:'changed_view',view});
   const raw=object(await backend.call(scope,'/get_functions',{...parameters,functions:selectors.join(',')}));
-  if(backend.observation&&digest(observation)!==digest(await backend.observation(scope)))fail('binding','Native view changed during bulk function inspection.',{reason:'changed_view',view});
+  const observeAfter=observe??(backend.observation?()=>backend.observation!(scope):undefined);
+  if(observeAfter&&digest(observation)!==digest(await observeAfter()))fail('binding','Native view changed during bulk function inspection.',{reason:'changed_view',view});
   return timed('adapter.normalize','functions.inspect',async()=>{
   const functions=object(raw.functions);
   if(Object.keys(functions).length!==selectors.length||selectors.some(s=>!Object.hasOwn(functions,s)))fail('partial','Bulk function selectors changed.');

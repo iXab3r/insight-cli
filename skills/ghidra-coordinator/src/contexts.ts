@@ -27,6 +27,7 @@ import {debuggerProgramMetadata} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
 import {runInline} from './inline-script.js';
+import {researchView} from './research-view.js';
 import {sdkWrites} from './sdk-contracts.js';
 import {initialIntent,initializeModel} from './initial-model.js';
 import {managedGhidraDebugger,prepareGhidraDebugger} from './ghidra-debugger-runtime.js';
@@ -330,6 +331,11 @@ export class GhidraContexts {
   async observation(scope:Scope){
     const record=await this.selected(scope);
     return {...object(await this.call(scope,'/research_view')),incarnation:digest({pid:record.binding.pid,root:record.binding.root})};
+  }
+  async inspectObservation(scope:Scope){
+    const record=await this.selected(scope);
+    const view=researchView(await record.http.call('/insight/research-view/v1',{program:record.binding.program}));
+    return {...view,incarnation:digest({pid:record.binding.pid,root:record.binding.root})};
   }
   async inlineScript(scope:Scope,parameters:Record<string,unknown>,requestId:string){
     const record=await this.selected(scope);

@@ -14,3 +14,4 @@ tests/**/*.feature.cs
 # Deterministic per-skill resource copies prepared from canonical references.
 skills/ghidra-coordinator/skills/*/references/
 skills/ghidra-coordinator/skill-bundle/
+skills/ghidra-coordinator/references/persistent-client.mjs
