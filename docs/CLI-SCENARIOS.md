@@ -417,7 +417,10 @@ as explicit merge; the request ID retrieves this workflow after owner replacemen
 
 ## Choose storage and resume a cross-volume migration
 
-Inspect `storage show --json`. An empty profile can use `storage configure --directory BASE`;
+Inspect `storage show --json`. Migration/configuration also select the base for new profiles;
+`--profile-only` preserves the previous default. Use `storage default --directory BASE` to
+select an already migrated base without moving initialized profiles. New profiles fail if
+that disk is missing, rather than creating local data. An empty profile can use `storage configure --directory BASE`;
 existing work uses `storage migrate --directory BASE --dry-run` then the same command without
 `--dry-run`. Both require Update and append `insight-cli/<profile>` to BASE. Close this profile's
 contexts and stop owned servers/processes first; other active profiles are preserved.

@@ -1,10 +1,19 @@
 # Analysis storage and migration
 
 `storage show --json` reports effective profile storage, availability, active file/byte usage,
-exact included trees and retained migration. The default is Factory profile AppData. No
-checkout, environment or automatic disk fallback changes it. The non-secret setting is
-`analysisDirectory` in Factory's profile (`profile show` also displays it). Use storage commands
-to change it safely.
+exact included trees, retained migration and installation default base. Before selecting a
+base, storage starts in Factory profile AppData. `configure` and `migrate` select that base
+for subsequent new/empty profiles as well as moving the current profile. Add `--profile-only`
+to keep the installation default unchanged. The effective root appends `insight-cli/<profile>`.
+Initialized profiles keep their existing locations when the default changes; profiles with
+ordinary AppData analysis trees stay there until explicitly migrated.
+
+The per-profile non-secret `analysisDirectory` setting remains in Factory's profile. The
+installation default is bound storage-control metadata beside Factory's profile store, paired
+with ownership metadata on the chosen base. It is not an environment or checkout setting.
+Missing/replaced storage fails before creating analysis data; there is no system-disk fallback.
+New profiles initialize on their first ordinary command, durably bind their own empty directory,
+and keep permanent compatibility paths. `storage show` remains passive.
 
 ```sh
 insight-cli permissions grant Update
@@ -29,7 +38,20 @@ user-selected outputs outside these trees keep their locations.
 
 Factory keeps profiles, permissions, IPC election/socket, migration-control metadata and
 application logs in current-user AppData. Secrets stay in the OS keyring. Credential/profile
-identities do not change. Updating/installing npm never migrates a profile automatically.
+identities do not change. Updating/installing npm preserves existing profile locations and does not select a disk on its own.
+
+## Select a default after an earlier migration
+
+For installations migrated with an older CLI, select their existing mounted base once:
+
+```sh
+insight-cli storage default --directory "/mnt/analysis volume" --json
+```
+
+This Update operation changes the installation default without moving existing data. Future
+profiles inherit it without repeating configuration. The base cannot be inside a profile data
+root or overlap Factory control storage. A base owned by another installation is rejected.
+A missing volume or replaced base/ownership marker is never adopted automatically.
 
 ## Move an existing profile
 
@@ -44,7 +66,7 @@ insight-cli storage migrate --directory "/mnt/analysis volume" --json
 insight-cli storage show --json
 ```
 
-Dry-run checks separation, destination contents, access, conservative capacity and quiescence
+Dry-run reports whether it would select the installation default and checks separation, destination contents, access, conservative capacity and quiescence
 without reserving/copying a migration. Source/destination/configuration roots cannot be equal
 or nested. Destination symlink roots, escaping source links, special files, unresolved links
 and inventories above one million entries or 128 directory levels are rejected. Internal
@@ -72,7 +94,9 @@ file, rechecks capacity and finishes the retained transaction. Source and destin
 anchor identities are bound durably. Missing/replaced volumes fail without creating a system-disk
 fallback; mount the original volume before resuming.
 
-Rollback restores retained source and the prior Factory setting. After activation it requires
+Rollback restores retained source and the prior Factory setting. The installation default stays
+selected because subsequent profiles may already use it; a resumed older migration cannot
+overwrite a newer default selection. After activation it requires
 an unchanged destination and a verified retained source. Native reopening or later findings can
 make rollback unsafe, in which case it refuses and preserves both copies. Use forward migration
 to another empty base after using the new location. A rolled-back destination remains for manual
@@ -97,3 +121,7 @@ before starting another. This release provides no nonempty-destination adoption,
 synchronization, live-DB snapshotting or network-filesystem guarantees. POSIX directory fsync
 is used. Windows has file fsync and rename/junction semantics; Node cannot fsync directories
 there, and internal symlinks can require OS privileges.
+
+Empty-profile initialization resumes automatically on its next command after interruption. Its
+retained source contains no analysis entries, so the CLI cleans only that owned empty backup
+automatically. Migration of existing data always retains its source for explicit cleanup.

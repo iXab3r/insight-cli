@@ -128,7 +128,7 @@ The canonical npm helper and its progressive skill live in `skills/ghidra-coordi
 package is `@eyeauras/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared
 IPC ownership. Update permission starts disabled. Factory control state stays in profile AppData; `storage` can relocate the complete
-analysis/runtime trees to a selected volume. See [storage](skills/ghidra-coordinator/references/storage.md).
+analysis/runtime trees to a selected volume and make it the default for new profiles. See [storage](skills/ghidra-coordinator/references/storage.md).
 
 Configure Java 21 and Ghidra 12.1.2 as described in
 [setup](skills/ghidra-coordinator/references/setup.md). Omit `server` for managed local startup;

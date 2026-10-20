@@ -43,8 +43,21 @@ are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
 The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,
 permissions, keyring identity and IPC. `storage show`, `configure`, `migrate --dry-run`, `migrate`,
 `resume`, `rollback` and `cleanup` manage the non-secret `analysisDirectory` setting through
-Factory ProfileStore, without another config or host. Defaults preserve existing AppData paths;
-a custom base appends application and exact profile name.
+Factory ProfileStore, without another profile parser or host. Migration/configuration also
+select an installation default base for subsequent new/empty profiles (`--profile-only` opts
+out). `storage default` selects an existing base without moving initialized profiles. A custom
+base appends application and exact profile name. Legacy ordinary AppData analysis trees remain
+local until explicitly migrated; initialized profiles retain their own binding.
+
+The shared base lives in bound storage-control metadata beside Factory profiles, with an
+installation-bound ownership marker and directory identity on the storage base. New profiles
+validate it before a durable empty initialization through the existing migration transaction.
+Interrupted empty initialization resumes on the next ordinary command; only its owned empty
+backup is automatically cleaned. Missing/replaced disks fail before any analysis write, with
+no AppData fallback. Commands capture their effective location; a concurrent default change
+cannot redirect ongoing work. Journaled default intents use revisions so recovery cannot
+replace a later selection. Profile rollback preserves the shared selection because newer
+profiles may already be using it.
 
 The complete workspace/materials/temp/runtime trees move, including native/context DBs, local
 server repositories, snapshots, unknown-operation journals, temporary verification/execution
