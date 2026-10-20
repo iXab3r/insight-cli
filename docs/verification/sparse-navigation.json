@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "date": "2026-10-20",
+  "kind": "installed-public-CLI-generated-no-analysis-x86-64-PE",
+  "artifact": "f10720e7c9925aed3c4c27a34ee8039815481ceea6eca81dcb5840f93825a6f9",
+  "native": {"ghidra": "12.1.2", "ghidraMcp": "7.0.0"},
+  "checks": {
+    "seededSparse": true,
+    "sparseFilteredBatch": true,
+    "existingEntryTransientDecompile": true,
+    "decompileDoesNotRepairListing": true,
+    "absentEntryUsesDecode": true,
+    "undefinedLiteralAndContinuation": true,
+    "readsPreserveSavedViewAndJournal": true,
+    "inputUnchanged": true
+  },
+  "callsIncludingSetupAndCleanup": 25,
+  "offline": {"passed": 256, "skipped": 4, "releasePassed": 31},
+  "packedInstall": true,
+  "cleanup": [],
+  "limits": [
+    "One generated PE and an explicitly created disposable block; no full-program or agent speedup claim.",
+    "Update was revoked during research reads; fixture setup and owned cleanup required Update.",
+    "Force-decompile retains pinned upstream work limits, not bounded decode semantics or persistent Listing repair.",
+    "Readback checked context generation, saved snapshot and request count independently in the fixture journal.",
+    "No new API surface, arbitrary-script readonly bypass or game-specific input was introduced."
+  ]
+}

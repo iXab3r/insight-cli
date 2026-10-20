@@ -42,6 +42,10 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
    function addresses, then inspect/decompile. Decompilation defaults to a 16000-character
    window; page with `--limit-chars`/`--offset-chars` and retain `textSha256`. Native
    truncation remains explicit even at the end of the observed text. See [research](references/research.md).
+   If strings/xrefs are empty or function bodies are one byte, run `analysis navigation`
+   and follow [sparse navigation](references/sparse-navigation.md). Try compact `functions inspect`
+   at known entries before writing reconstruction scripts. `force-decompile` refreshes an
+   existing entry; `decode` handles known bytes without an entry. Neither repairs stored xrefs.
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
 5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.

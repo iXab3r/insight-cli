@@ -3,7 +3,8 @@ import {fail} from './model.js';
 const record=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function functionFailure(selector:string,reason:string,diagnostic?:unknown):never {
   const nativeDiagnostic=typeof diagnostic==='string'?Array.from(diagnostic.replace(/[\u0000-\u001f\u007f-\u009f]/g,' ')).slice(0,500).join(''):undefined;
-  const recovery=reason==='function_not_found'?' For known executable bytes without a function definition, use ghidra functions decode --address <hex> --max-bytes 64 --max-instructions 16 with the same session/target. Decode is read-only and does not create functions or xrefs.':'';
+  const recovery=reason==='function_not_found'?' For known executable bytes without a function definition, use ghidra functions decode --address <hex> --max-bytes 64 --max-instructions 16 with the same session/target. Decode is read-only and does not create functions or xrefs.':
+    reason==='native_function_failure'||reason==='missing_decompiler_text'?' For an existing function entry, try ghidra functions force-decompile --function <entry> with the same session/target. This refreshes decompiler output, not Listing instructions or stored xrefs; use functions decode for bounded local bytes.':'';
   fail('partial','Function inspection failed: '+reason+'.'+recovery,{selector,reason,...(nativeDiagnostic?{nativeDiagnostic}:{})});
 }
 export function functionResult(value:unknown,selector:string,options:{requireEntryPoint?:boolean}={}){

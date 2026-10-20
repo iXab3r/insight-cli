@@ -43,7 +43,13 @@ test('function diagnostics survive one-shot and cli.execute without a mutation o
   if(result.nativeDiagnostic){assert.ok(Array.from(result.nativeDiagnostic).length<=500);assert.ok(!result.nativeDiagnostic.includes('\0'));}
   const [rpc]=await f.rpc(app,[argv]) as any[];assert.equal(rpc.error.data.result.reason,reason);
  }
- assert.equal(reads,cases.length*2);
+ response=cases[1]![0];
+ const bulkArgs=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions',entry,'--fields','decompiled_code'];
+ const bulk=await f.json(app,bulkArgs) as any,failed=bulk.value.functions[entry];
+ assert.equal(failed.status,'failed');assert.equal(failed.nativeDiagnostic,'Decompiler failed');
+ assert.match(failed.error,/functions force-decompile --function <entry>/);assert.match(failed.error,/not Listing instructions or stored xrefs/);
+ const [bulkRpc]=await f.rpc(app,[bulkArgs]) as any[];assert.deepEqual(bulkRpc.result,bulk);
+ assert.equal(reads,cases.length*2+2);
 });
 
 test('filtered function inspection accepts results without unrequested entry metadata while preserving CLI/RPC paging and failures',async t=>{

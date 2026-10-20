@@ -125,3 +125,40 @@ observed handler boundary; startup/IPC/response cannot be split without Factory 
 HTTP dominated measured handler time; adapter normalization and queues were negligible in this
 uncontended control. No IPC rewrite, lifecycle retention change or hypothetical speedup is
 claimed. The next upstream timing hook is still a separate contract decision.
+
+## BB-08 follow-up: existing sparse-navigation route
+
+The owner prioritized sparse navigation before the proposed script-stage diagnostics. No new
+command, flag, result field or scanner was added. The packaged Ghidra entry point now branches
+to a [sparse-navigation recipe](../skills/ghidra-coordinator/references/sparse-navigation.md).
+Generated help, existing decompiler-failure guidance and navigation recommendations distinguish
+known function entries, executable bytes without entries, and undefined literals.
+Batch inspection preserves its facade recovery message alongside the separate bounded native
+diagnostic instead of replacing the next step with only the native failure text; CLI/RPC agree.
+
+Try compact `functions inspect --fields decompiled_code,callees` at known entries first.
+Use existing `force-decompile --function <entry>` when a fresh native decompiler pass is needed,
+and bounded `decode` when no function entry exists. A transient decompile does not populate
+Listing instructions or stored xrefs. Undefined literals use initialized-memory byte search
+with explicit `next_address` continuation. The recipe preserves upstream work-limit warnings
+and does not infer a complete call graph from missing xrefs or local decode.
+
+The [installed native proof](verification/sparse-navigation.json) used a generated no-analysis
+x86-64 PE and a separately created disposable block. With Update revoked, a compact batch
+returned both function bodies, cache refresh succeeded at an existing entry, an absent entry
+remained absent, bounded decode recovered its local instructions, and a byte-search continuation
+found an undefined literal beyond its first window. Listing remained empty. Saved snapshot,
+context generation, request count and input digest were unchanged; owned cleanup passed.
+The test uses the existing test-only Factory AppData seam, not another product IPC host.
+
+Run it against an isolated installed package:
+
+```sh
+node scripts/proof-sparse-navigation.mjs \
+  --package <installed-package-root> --java <jdk>/bin/java \
+  --ghidra-home <ghidra> --root <fresh-short-absolute-directory> --ack-disposable
+```
+
+This validates a route already supported by the CLI; it is not a measured agent speedup or a
+whole-program sparse-code-reference scanner. BB-07 and the proposed constrained code-reference
+API remain separate decisions. No production release or new agent benchmark is implied.

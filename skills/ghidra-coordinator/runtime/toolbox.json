@@ -29,6 +29,7 @@
       "resources": {
         "references/setup.md": "references/setup.md",
         "references/research.md": "references/research.md",
+        "references/sparse-navigation.md": "references/sparse-navigation.md",
         "references/query-semantics.md": "references/query-semantics.md",
         "references/native-workflows.md": "references/native-workflows.md",
         "references/recovery.md": "references/recovery.md",

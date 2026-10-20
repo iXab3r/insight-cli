@@ -17,6 +17,10 @@ Open input with `insight-cli ghidra open ./client.exe --session new --json`. Sto
 `session` and `target` as the explicit scope for every later research call. Names are display
 labels; equal filenames or addresses in different inputs do not select the same object.
 
+If the database has missing strings/xrefs, one-byte function bodies or no Listing instructions,
+use [sparse navigation](sparse-navigation.md) before following the metadata-only route below.
+It distinguishes existing entries, undefined code and undefined literals using existing commands.
+
 Use `ghidra strings search --contains config.json`, then `ghidra xrefs to --address <string>`.
 Reference results include a containing function address when available. Pass that address to
 `ghidra functions get` or `ghidra functions decompile`. Add the same session/target selectors and
@@ -110,6 +114,14 @@ command below at the explicit address. A containing function with a one-byte bod
 stored xrefs can also indicate sparse metadata. Decode reveals bounded local instruction flow;
 it does not repair function boundaries or establish whole-function callers/callees. Defining
 functions or disassembling the listing requires a separate explicit Update operation.
+For a known existing entry, try compact `functions inspect` first; use
+`functions force-decompile --function <entry>` to refresh stale/failed decompiler output.
+Its result is `value.decompiled`, and its pinned upstream work bound is not guaranteed.
+Successful transient decompilation can coexist with an empty Listing and missing stored xrefs.
+It does not create an absent function or repair its saved body. Avoid repeating it merely to
+populate `functions disassemble`; use bounded `decode` for local instruction corroboration.
+Per-item inspection failures retain the facade recovery message in `error` and the bounded
+native explanation separately in `nativeDiagnostic`; use stable `reason` for classification.
 
 The existing `functions inspect` accepts 1–20 distinct names/addresses. Existing `--fields`
 remain valid; unknown fields fail before dispatch. Decompiled text uses per-item
@@ -159,7 +171,9 @@ the visited sum, sample bound, completion and reason. Defined-string counts cove
 defined data. One-byte bodies together with missing entry instructions in at least 80% of the
 sample yield `sparse-metadata`; this is an explicit heuristic, not proof that a specific analysis
 pass failed. Normal instruction-bearing one-byte leaf functions alone do not trigger it.
-Use bounded decode for known executable addresses when metadata is sparse. The diagnostic does
+Follow [sparse navigation](sparse-navigation.md): known function entries can use compact inspection
+and cache refresh; executable bytes without an entry use bounded decode, undefined literals use
+byte search and explicit continuation. The diagnostic does
 not run analyzers, define data, repair boundaries, save a snapshot or certify semantic completeness.
 
 `diagnostics lifecycle` reads retained start/restore/stop events and the current process receipt

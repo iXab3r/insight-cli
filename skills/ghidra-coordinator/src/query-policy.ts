@@ -28,6 +28,9 @@ const heuristics:Record<string,{kind:string;algorithm:string;limitations:string[
 ]}]));
 
 export function queryDescription(path:string,fallback:string) {
+  if(path==='/force_decompile')return 'Refresh decompiler output for an existing function entry; does not repair Listing or create functions';
+  if(path==='/disassemble_function')return 'Read stored Listing instructions; for sparse/undefined code use functions decode';
+  if(path==='/get_functions')return 'Inspect 1–20 functions; compact code/call edges: --fields decompiled_code,callees';
   if(path==='/find_dead_code')return 'Find blocks unreachable in the bounded static CFG; unresolved flow is reported';
   if(path==='/detect_crypto_constants')return 'Match versioned constant-table signatures within an explicit byte budget';
   if(path==='/get_valid_data_types')return 'Enumerate actually resolvable program/builtin types, with provenance and scan limits';
