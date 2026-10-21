@@ -99,3 +99,25 @@ test('ENOSPC before release retains unknown close and provides scoped recovery u
   ended=true;
   const result=await f.json(app,['ghidra','close',...select,'--request-id',request.id]) as {state:string};assert.equal(result.state,'closed');assert.equal(releases,1);
 });
+
+
+test('generated save ID retrieves its retained snapshot under automatic publication without another workflow',async t=>{
+  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let backend:SessionBackend,opens=0,saves=0,failed=false;
+  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+    backend=new SessionBackend(workspace);const complete=workspace.completeSavedRequest.bind(workspace),open=backend.open.bind(backend),saved=backend.saved.bind(backend);
+    workspace.completeSavedRequest=(...args:Parameters<typeof complete>)=>{if(workspace.request(args[1]).operation==='ghidra.save'&&!failed){failed=true;throw Object.assign(Error('Synthetic save acknowledgment disk full'),{code:'ENOSPC'});}return complete(...args);};
+    backend.open=async(...args)=>{opens++;return open(...args);};backend.saved=async selected=>{saves++;return saved(selected);};return backend;
+  }}));
+  const exe=join(f.root,'fixture.exe');await writeFile(exe,'synthetic automatic save recovery');
+  const who=await f.json(app,['ghidra','open',exe,'--session','new']) as {session:string;target:string},select=['--session',who.session,'--target',who.target];
+  await f.json(app,['ghidra','comments','set',...select,'--address','1000','--kind','eol','--text','private']);
+  await f.json(app,['ghidra','sync-policy','set',...select,'--publish','after-save','--refresh','manual']);
+  assert.equal((await f.run(app,['ghidra','save',...select])).exitCode,1);
+  const request=backend!.workspace.unresolved(who)[0]!,before={opens,saves};
+  const shadow=backend!.workspace.reserveAdministration('ghidra.automatic',{session:who.session,target:who.target},request.id).request;
+  backend!.workspace.administrationState(shadow.id,'unknown',{phase:'local'});
+  const external=backend!.workspace.unresolvedSessionAdministration(who.session).map(row=>row.id);
+  const result=await f.json(app,['ghidra','save',...select,'--request-id',request.id]) as {state:string;pendingChanges:number};
+  assert.equal(result.state,'saved');assert.equal(result.pendingChanges,1);assert.deepEqual({opens,saves},before);assert.equal(backend!.publications,0);
+  assert.equal(backend!.workspace.request(request.id).state,'applied');assert.deepEqual(backend!.workspace.unresolvedSessionAdministration(who.session).map(row=>row.id),external);
+});
