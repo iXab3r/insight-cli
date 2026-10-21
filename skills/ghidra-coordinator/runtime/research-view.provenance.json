@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "upstreamSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
+  "upstreamGitArtifact": "6e4bfc9:skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar",
+  "sha256": "f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32",
+  "inputs": {
+    "skills/ghidra-coordinator/references/native/InsightResearchView.java": "78bd25f8a3d7a1bc640938d8497cd581c2c178915ae6003b19dceda507c34df2",
+    "skills/ghidra-coordinator/references/native/InsightStringAnchors.java": "e496ec2a28a57eb1447b11e3d0ec6d918f2d543857643b0e6c9f6c2a905b7f9d",
+    "skills/ghidra-coordinator/references/native/InsightAnchorScan.java": "2197d6dedd133d229a58876f8d164faaf178902646dea7bb4540197bacfcf105",
+    "skills/ghidra-coordinator/references/native/InsightFunctionBoundaries.java": "61eab3948186597ad22396eb029d61d2ddeb89a77d3969ea41ead55a38deb651",
+    "skills/ghidra-coordinator/references/native/InsightPeRanges.java": "2e82a7b2e908f29f6e68f6491549981cc709012186096a60ce10d5b15f29712b",
+    "scripts/native/InstallResearchView.java": "bf0a3e54f789eb14319cc14ce89d8fb78459be500fe53576eddb4b9d02c02f12",
+    "scripts/build-research-view-bridge.mjs": "490c6b3628be07da5afb3d7ae9efc6d216d139bf779ec38aa32233b2b563cfb8"
+  },
+  "asm": {
+    "version": "9.7.1",
+    "sha256": "8cadd43ac5eb6d09de05faecca38b917a040bb9139c7edeb4cc81c740b713281"
+  },
+  "jdk": "openjdk 21.0.11 2026-04-21\nOpenJDK Runtime Environment Homebrew (build 21.0.11)\nOpenJDK 64-Bit Server VM Homebrew (build 21.0.11, mixed mode, sharing)",
+  "change": "Add annotated ReadOnly services for research-view, indexed function entries raw string anchors and PE runtime boundaries to the pinned AnnotationScanner constructor; all other upstream class bytes unchanged except ZIP container metadata",
+  "endpoint": "/insight/research-view/v1",
+  "endpoints": [
+    "/insight/research-view/v1",
+    "/insight/function-entries/v1",
+    "/insight/string-anchors/v1",
+    "/insight/function-boundaries/v1"
+  ]
+}

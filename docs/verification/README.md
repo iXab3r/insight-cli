@@ -531,3 +531,11 @@ constructs the path from its parent/name before readback and protected-checkout 
 owned canonical-program checkout survives repository-wide termination, while an ordinary
 fixture checkout is terminated and verified absent. The fixture releases only its recorded
 checkout afterward. This checkpoint follows the query-variant corrections.
+
+The [raw-byte reference V1 receipt](code-references.json) records 21 passing checks on a generated
+sparse PE, matched byte/candidate coverage, stateless cursor guards and 12 paired script/API
+workloads with alternate order. Median external duration is 4.068s versus 1.676s; the scanner
+algorithm is identical. Native HTTP work increases because of two view observations, while the
+ReadOnly route avoids the Update save/verification workflow. The controlled-clock deadline
+fixture is separate from natural-clock timings. Offline/packed evidence and unrelated flaky
+subprocess failures remain explicit; this focused receipt does not replace the full release gate.

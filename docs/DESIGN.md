@@ -38,6 +38,92 @@ publication mechanisms, with its historical behavior recorded below. The agreed 
 are in [CLI scenarios](CLI-SCENARIOS.md); [the milestone plan](PLAN.md) and
 [work items](WORK-ITEMS.md) retain the delivery contract and checkpoint history.
 
+### Navigation observations and lifecycle diagnostics
+
+The owner approved the benchmark diagnostic extension on 2026-10-20. ReadOnly
+`ghidra analysis navigation` separates the initial facade analysis policy from bounded current
+function/instruction/reference/defined-data observations. It does not run analysis or equate
+`ready`, counts, a complete sample or a heuristic assessment with semantic completeness.
+ReadOnly `ghidra diagnostics lifecycle` reads retained start/restore/stop observations without
+starting or probing Ghidra. Unknown historical causes stay unknown; owner disposal does not
+establish a Factory idle timeout. Factory retains IPC/lifecycle ownership and the idle policy.
+Internal correlated spans observe existing facade boundaries; they are not a public trace API
+and cannot separately infer client startup/IPC/response stages absent Factory hooks. The
+[research reference](../skills/ghidra-coordinator/references/research.md) specifies bounds and
+interpretation. Diagnostic data resides in configured profile workspace storage.
+
+### Persistent frontend and compact inspection
+
+The owner approved the narrow V1 on 2026-10-20. The packaged `persistent` module is a bounded
+client of Factory's existing `--json-rpc`/`cli.execute` stream: one child, ordered calls, original
+typed results/errors, explicit close, no reconnect or replay. It creates no host, profile store
+or IPC protocol. Factory dependencies and lifecycle remain unchanged.
+
+`functions inspect` and `strings anchors` use the precompiled authenticated ReadOnly bridge endpoint
+`GET /insight/research-view/v1?program=...`. It returns versioned modification/language/compiler
+facts for an explicitly selected already-open program. Existing source/process verification,
+before/after comparison, incarnation and `view.identity` inputs remain authoritative. Missing,
+malformed or failed observations fail rather than weakening the guard. Other consumers retain
+their previous observation path. The additive pinned bridge patch and its source/build identity
+are retained in runtime provenance; the endpoint shares native auth and threading.
+
+### Raw-byte code-reference candidates
+
+The owner approved narrow V1 on 2026-10-20 after independent API critique.
+`ghidra analysis code-references` is a ReadOnly x86-64 candidate scanner for explicit E8 rel32,
+RIP LEA, GPR MOV 88/89/8A/8B and FF /2 pointer-slot forms. It tests every start in initialized
+executable default-space memory and validates selected exact targets with native pseudo decode.
+It does not create Listing/functions/xrefs or follow indirect targets. Adjacent eligible blocks
+merge; holes do not. Entire instructions fit the inclusive byte range. Boundary evidence has
+three states and never establishes execution or callgraph completeness.
+
+Byte, candidate, deadline and result budgets have independent counters and a first-unchecked
+frontier. Stateless untrusted cursors bind normalized selectors/budgets and observed context,
+snapshot, generation, modification counter and process incarnation; selectors cannot change on
+continuation. Before/after observations occur inside one ordered context action. Changed views
+fail rather than mixing pages. No per-query state or save is introduced. The trusted native
+helper uses the existing script transport; user scripts retain Update/save/recovery semantics.
+The [sparse-navigation reference](../skills/ghidra-coordinator/references/sparse-navigation.md)
+defines exact forms, prefix exclusions, coverage, bounds and cursor interpretation.
+
+### Sparse function-entry inspection
+
+After independent API approval on 2026-10-20, `functions inspect` has an explicit
+`--resolve-address containing-or-preceding --max-entry-distance <bytes>` mode. It accepts
+1–20 default-space hexadecimal addresses, prioritizes exact entries and recorded containment,
+then considers only the nearest preceding known entry in the same initialized executable
+memory block within 1–65536 bytes. That fallback is a navigation candidate, never inferred
+function membership. Ordinary inspection retains its existing selection behavior.
+
+One precompiled authenticated native batch lookup uses indexed function queries, without a
+table scan, function creation, Listing repair or save. An ordered before/after view guard spans
+lookup and deduplicated inspection; returned entries are checked against the selected facts.
+Each original selector retains resolution metadata and selected entry regardless of projected
+fields or read failure. Aliases share native work but consume the existing text budget in
+original selector order. Current paging, hashes and owner-save rules remain. See
+[sparse entries](SPARSE-FUNCTION-ENTRIES.md) for the contract and disposable verification.
+
+### Sparse PE runtime-region evidence
+
+After independent API review, `functions inspect --resolve-address containing-or-pe-runtime`
+compares recorded Ghidra functions with fully validated current mapped PE32+/AMD64 runtime ranges.
+Unavailable/malformed/incomplete table reads retain DB facts and prevent automatic selection;
+conflicts and missing runtime entries retain evidence without creating functions. A runtime region
+never proves instruction boundaries or whole-function semantic membership. The precompiled
+ReadOnly endpoint has batch byte/deadline bounds, ordered failed-dispatch view guards and no cache,
+analysis, save or Factory changes. See [V1 contract](SPARSE-FUNCTION-BOUNDARIES.md) for selection,
+coverage, limitations and disposable matched-workload verification.
+
+### Raw string anchors
+
+After independent API approval, `ghidra strings anchors` searches one literal using explicit
+ASCII/UTF-16LE encodings within an inclusive range of initialized default-space bytes.
+Adjacent blocks merge; holes do not. Raw address/encoding pairs remain separate from bounded
+NUL-delimited candidate context and its decoding/completeness. An authenticated precompiled
+ReadOnly service, ordered native view guards and a stateless untrusted cursor provide bounded
+paging without analysis, definitions, save or Factory changes. See the
+[V1 contract](SPARSE-STRING-ANCHORS.md) for exact recovery, budgets and benchmark method.
+
 ### Profile analysis storage
 
 The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,
@@ -355,6 +441,18 @@ multi-change publication and incoming refresh; they do not make non-scalar chang
 mergeable fields.
 
 ### Request identity and lost responses
+
+For Java `ghidra scripts run-inline`, the facade-owned native executor compiles each attempt
+separately with annotation processing disabled, resolves classes without initialization, then
+marks the user-code barrier before initialization/construction. A correlated versioned receipt
+can prove compile/load rejection before that barrier: the request becomes terminal failed,
+the public error result is `rejected`, and saved/pending context work is unchanged. Same-ID
+retries retrieve the retained failure. Source changes require a new request ID. Compiler and
+load diagnostics are bounded at collection and retained in the ordinary error result/journal.
+Console text is not proof. Initialization, constructor, framework/runtime failures and lost or
+unproved acknowledgements retain the existing unknown/frozen semantics. Old unknown attempts
+are not automatically cleared. The [recovery reference](../skills/ghidra-coordinator/references/recovery.md)
+defines execution-field uncertainty. This changes no Factory host, permissions or lifecycle.
 
 Changing commands accept an optional `--request-id`; API callers use the same command option
 through Factory. The service records a request's identity and intent before acknowledging effects.

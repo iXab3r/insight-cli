@@ -1,0 +1,391 @@
+{
+  "schema": 1,
+  "date": "2026-10-20",
+  "kind": "installed-public-CLI-generated-disposable-sparse-PE",
+  "artifact": "a33814aac4e7ee8f039f81c587c301007132da6d17fb1e09a6c95ab7359f99cf",
+  "native": {
+    "ghidra": "12.1.2",
+    "ghidraMcp": "7.0.0",
+    "jdk": 21,
+    "platform": "darwin-arm64"
+  },
+  "implementationSha256": {
+    "skills/ghidra-coordinator/src/code-references.ts": "cf7e8bccd393d5b3b8e877ca24ef2a4e2189c81c9cee7022379ffd66c0cb0a9a",
+    "skills/ghidra-coordinator/references/native/InsightCodeReferences.java": "73ae74da69a708ff85a4268fbeba0340f198872cb7e35011068e103a67b5fef2",
+    "skills/ghidra-coordinator/src/research.ts": "2108e7b92923e716790200e20813c5ec6dae5af658f74173f0698f92a13cf605",
+    "skills/ghidra-coordinator/src/contexts.ts": "240e85e626827de69606d7eb8d6372dc3010a0fef10c3547499f54d07c99170e"
+  },
+  "checks": {
+    "sparseFixture": true,
+    "fullCoverage": true,
+    "formsWidthsAndNegativeDisplacements": true,
+    "excludedEncodings": true,
+    "nativePrefixAgreement": true,
+    "boundaryEvidence": true,
+    "overlappingStarts": true,
+    "formSelection": true,
+    "bytePaginationNoLossOrDuplicates": true,
+    "resultPagination": true,
+    "candidatePagination": true,
+    "adjacentBlocksGapsAndIneligibleMemory": true,
+    "inclusiveEndRequiresWholeInstruction": true,
+    "noMatchWallClockCoverage": true,
+    "cursorSelectorConflict": true,
+    "non64ModeRejected": true,
+    "readsPreserveSnapshotGenerationAndJournal": true,
+    "deterministicNativeDeadlineAndFrontier": true,
+    "matchedWorkloads": true,
+    "cursorRejectsRestoredIncarnation": true,
+    "inputUnchanged": true
+  },
+  "cleanup": [],
+  "callsIncludingSetupAndCleanup": 72,
+  "matchedWorkload": {
+    "before": "Existing Update scripts run-inline route; exact same scanner source, parameters and prepared program bytes.",
+    "after": "New ReadOnly analysis code-references route, with before/after view observations.",
+    "pairs": 12,
+    "order": "One script-first and one API-first pair per density/target set; one shared warm disposable context.",
+    "ranges": {
+      "sparseBytes": 135200,
+      "denseBytes": 16384
+    },
+    "controls": {
+      "forms": [
+        "call-rel32",
+        "lea-rip",
+        "mov-rip",
+        "call-rip-slot"
+      ],
+      "maxBytes": 4194304,
+      "maxCandidates": 200000,
+      "timeoutSeconds": 5,
+      "limit": 1000
+    },
+    "beforeMedianMs": 4068.221,
+    "afterMedianMs": 1676.238,
+    "ratioOfMedians": 2.427,
+    "medianPairedRatio": 2.246,
+    "beforeScanMedianMs": 33.742,
+    "afterScanMedianMs": 38.808,
+    "cases": [
+      {
+        "density": "sparse",
+        "targets": 1,
+        "pairs": 2,
+        "matches": 21,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMedianMs": 3852.166,
+        "afterMedianMs": 1335.057,
+        "ratioOfMedians": 2.885
+      },
+      {
+        "density": "sparse",
+        "targets": 16,
+        "pairs": 2,
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMedianMs": 4715.349,
+        "afterMedianMs": 2306.917,
+        "ratioOfMedians": 2.044
+      },
+      {
+        "density": "sparse",
+        "targets": 64,
+        "pairs": 2,
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMedianMs": 3501.987,
+        "afterMedianMs": 1676.238,
+        "ratioOfMedians": 2.089
+      },
+      {
+        "density": "dense",
+        "targets": 1,
+        "pairs": 2,
+        "matches": 8,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMedianMs": 4771.719,
+        "afterMedianMs": 1613.956,
+        "ratioOfMedians": 2.957
+      },
+      {
+        "density": "dense",
+        "targets": 16,
+        "pairs": 2,
+        "matches": 128,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMedianMs": 3847.782,
+        "afterMedianMs": 1628.608,
+        "ratioOfMedians": 2.363
+      },
+      {
+        "density": "dense",
+        "targets": 64,
+        "pairs": 2,
+        "matches": 512,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMedianMs": 3469.368,
+        "afterMedianMs": 1636.81,
+        "ratioOfMedians": 2.12
+      }
+    ],
+    "samples": [
+      {
+        "density": "sparse",
+        "targetCount": 1,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 21,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 3286.643,
+        "afterMs": 1421.191,
+        "beforeScanMs": 52.915,
+        "afterScanMs": 51.637
+      },
+      {
+        "density": "sparse",
+        "targetCount": 16,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 4338.96,
+        "afterMs": 2003.228,
+        "beforeScanMs": 61.401,
+        "afterScanMs": 57.06
+      },
+      {
+        "density": "sparse",
+        "targetCount": 64,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 3083.791,
+        "afterMs": 1612.73,
+        "beforeScanMs": 47.288,
+        "afterScanMs": 52.338
+      },
+      {
+        "density": "dense",
+        "targetCount": 1,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 8,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 4146.275,
+        "afterMs": 1425.177,
+        "beforeScanMs": 22.658,
+        "afterScanMs": 15.203
+      },
+      {
+        "density": "dense",
+        "targetCount": 16,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 128,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 3335.096,
+        "afterMs": 1308.579,
+        "beforeScanMs": 19.498,
+        "afterScanMs": 16.511
+      },
+      {
+        "density": "dense",
+        "targetCount": 64,
+        "repetition": 0,
+        "order": "script-first",
+        "matches": 512,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 2948.569,
+        "afterMs": 1331.72,
+        "beforeScanMs": 23.517,
+        "afterScanMs": 21.992
+      },
+      {
+        "density": "sparse",
+        "targetCount": 1,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 21,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 4417.688,
+        "afterMs": 1248.924,
+        "beforeScanMs": 42.084,
+        "afterScanMs": 46.351
+      },
+      {
+        "density": "sparse",
+        "targetCount": 16,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 5091.738,
+        "afterMs": 2610.606,
+        "beforeScanMs": 65.549,
+        "afterScanMs": 62.445
+      },
+      {
+        "density": "sparse",
+        "targetCount": 64,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 22,
+        "testedStarts": 135200,
+        "visitedCandidates": 26,
+        "beforeMs": 3920.183,
+        "afterMs": 1739.745,
+        "beforeScanMs": 53.254,
+        "afterScanMs": 70.185
+      },
+      {
+        "density": "dense",
+        "targetCount": 1,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 8,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 5397.162,
+        "afterMs": 1802.736,
+        "beforeScanMs": 18.798,
+        "afterScanMs": 18.849
+      },
+      {
+        "density": "dense",
+        "targetCount": 16,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 128,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 4360.468,
+        "afterMs": 1948.638,
+        "beforeScanMs": 22.715,
+        "afterScanMs": 25.204
+      },
+      {
+        "density": "dense",
+        "targetCount": 64,
+        "repetition": 1,
+        "order": "api-first",
+        "matches": 512,
+        "testedStarts": 16384,
+        "visitedCandidates": 512,
+        "beforeMs": 3990.166,
+        "afterMs": 1941.899,
+        "beforeScanMs": 25.4,
+        "afterScanMs": 31.265
+      }
+    ],
+    "phases": {
+      "before": {
+        "facade.command": {
+          "medianMsPerCommand": 3022.797,
+          "totalSpans": 12
+        },
+        "context.open": {
+          "medianMsPerCommand": 13.744,
+          "totalSpans": 12
+        },
+        "backend.operation": {
+          "medianMsPerCommand": 228.14,
+          "totalSpans": 12
+        },
+        "context.save": {
+          "medianMsPerCommand": 57.679,
+          "totalSpans": 12
+        },
+        "native.http": {
+          "medianMsPerCommand": 287.181,
+          "totalSpans": 180
+        }
+      },
+      "after": {
+        "facade.command": {
+          "medianMsPerCommand": 787.192,
+          "totalSpans": 12
+        },
+        "context.open": {
+          "medianMsPerCommand": 17.355,
+          "totalSpans": 12
+        },
+        "backend.operation": {
+          "medianMsPerCommand": 229.367,
+          "totalSpans": 12
+        },
+        "context.save": {
+          "medianMsPerCommand": 0.0,
+          "totalSpans": 0
+        },
+        "native.http": {
+          "medianMsPerCommand": 771.538,
+          "totalSpans": 324
+        }
+      }
+    }
+  },
+  "validation": {
+    "codeReferenceContractTests": {
+      "passed": 5
+    },
+    "offlineFullBeforeAdditionalWrapTest": {
+      "passed": 260,
+      "skipped": 4,
+      "failed": 0
+    },
+    "offlineLatestWithWrapTest": {
+      "passed": 260,
+      "skipped": 4,
+      "failed": 1,
+      "failure": "Existing ILSpy subprocess fixture timed out after 30 seconds; it passed in the earlier complete run. No ILSpy implementation or fixture change is part of this feature."
+    },
+    "releaseSerial": {
+      "passed": 29,
+      "failed": 2,
+      "failures": [
+        "Existing synthetic publication upload fixture timeout",
+        "Existing synthetic lost-response publication fixture timeout"
+      ]
+    },
+    "releasePublicationFocused": {
+      "passed": 5,
+      "failed": 0
+    },
+    "packedInstall": {
+      "npmCiOffline": true,
+      "assertionsPassed": true,
+      "hostWorkaround": "macOS dlopen/fcntl stalled on a fresh keyring addon inode before CLI execution. Byte-identical copy to a new inode allowed the assertions and native run. Signature, bytes, Factory and keyring policy were unchanged."
+    },
+    "coverage": {
+      "sourceOperations": 210,
+      "bridgeControls": 8,
+      "publicLeaves": 418
+    }
+  },
+  "limits": [
+    "One generated x86-64 PE and small explicit byte ranges; no full-program, historical R2 script, Ghidra-MCP comparison or fresh-agent speedup claim.",
+    "Two pairs per density/target set are descriptive, not a calibrated performance distribution. External wall includes client/IPC/response overhead.",
+    "The scanner algorithm is identical on both routes. Scan medians do not establish an algorithmic speedup or regression.",
+    "The new route avoids the Update saved-state workflow. It has zero context.save spans but more HTTP/helper work (three inline helper calls per command versus one). Snapshot inspection has no separate span, so its exact duration is not claimed.",
+    "Spans are nested; phase and HTTP medians must not be summed with parent duration. Compile/dispatch remain, and are not separately measured.",
+    "The natural 8MiB no-match region may exhaust before the 1-second deadline. A separately compiled fixture copy with only the monotonic clock replaced verifies the native timeout/frontier branch; it is an explicit Update fixture script and excluded from timings and ReadOnly journal assertions.",
+    "Update was revoked for ReadOnly invariants; setup, controlled-clock fixture and script baseline explicitly use Update.",
+    "Full release gate remains non-green because of the recorded unrelated subprocess timeouts, despite successful focused reruns."
+  ]
+}

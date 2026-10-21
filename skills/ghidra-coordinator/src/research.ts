@@ -1,6 +1,8 @@
 import {textWindow} from './text-window.js';
 import {functionResult,functionFailure} from './function-results.js';
 import {inspectFunctions,type FunctionInspectionOptions} from './function-inspection.js';
+import {entryRequest} from './function-entries.js';
+import {inspectAnchors,type AnchorRequest} from './string-anchors.js';
 import type { Artifact } from './artifacts.js';
 import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
 import { Workspace } from './workspace.js';
@@ -11,9 +13,14 @@ import type {ScriptPage} from './scripts.js';
 import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
 import {CliError} from '@eyeauras/cli-factory';
+import {timed} from './internal-timing.js';
+import {navigationResult} from './context-diagnostics.js';
+import {inspectCodeReferences,type ReferenceRequest} from './code-references.js';
 
 export interface ResearchBackend {
+  inlineScript?(scope:Scope,parameters:Record<string,unknown>,requestId:string):Promise<{response:Record<string,unknown>;safe:boolean}>;
   observation?(scope:Scope):Promise<unknown>;
+  inspectObservation?(scope:Scope):Promise<unknown>;
   sdkFile?(operation:string,p:Record<string,unknown>):Promise<Record<string,unknown>>;
   archivePayloads?(scope:Scope,p:Record<string,unknown>):Promise<unknown>;
   debuggerStart?(scope:Scope):Promise<void>;
@@ -93,12 +100,12 @@ export class Research {
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
   async ordered<T>(selected: Scope, action: ()=>Promise<T>): Promise<T> {
     const key=this.workspace.context(selected).id,previous=this.tasks.get(key);
-    const task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const task=timed('facade.queue','research',async()=>{await previous?.catch(()=>{});}).then(action);
     this.tasks.set(key,task);
     try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   async boundary<T>(selected:Scope,action:()=>Promise<T>):Promise<T>{
-    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
+    const key='command:'+this.workspace.context(selected).id,previous=this.tasks.get(key),task=timed('facade.queue','command',async()=>{await previous?.catch(()=>{});}).then(action);
     this.tasks.set(key,task);try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
   status(selected: Scope) {
@@ -254,12 +261,41 @@ export class Research {
     });
   }
   async inspectFunctions(selected:Scope,parameters:Record<string,unknown>,options:FunctionInspectionOptions){
+    const lookup=entryRequest(parameters,options);
     return this.ordered(selected,async()=>{
       const backend=await this.backend();await backend.open(selected);
       const context=this.workspace.context(selected);
-      const observation=await backend.observation?.(selected);
+      const observe=backend.inspectObservation?()=>backend.inspectObservation!(selected):backend.observation?()=>backend.observation!(selected):undefined;
+      if(lookup&&!observe)fail('unsupported','Address resolution requires guarded native observations.');
+      const observation=await observe?.();
       const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
-      return inspectFunctions(backend,selected,parameters,options,view,observation);
+      return inspectFunctions(backend,selected,parameters,options,view,observation,observe);
+    });
+  }
+  async stringAnchors(selected:Scope,request:AnchorRequest){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      const observe=backend.inspectObservation?()=>backend.inspectObservation!(selected):backend.observation?()=>backend.observation!(selected):undefined;
+      if(!observe)fail('unsupported','String anchors require guarded native observations.');
+      const context=this.workspace.context(selected),observation=await observe();
+      const view=digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation});
+      return inspectAnchors(backend,selected,request,view,observation,observe);
+    });
+  }
+  async codeReferences(selected:Scope,request:ReferenceRequest){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      if(!backend.observation)fail('unsupported','Code-reference continuation requires native view observation.');
+      const context=this.workspace.context(selected),observation=await backend.observation(selected);
+      const view=digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation});
+      return inspectCodeReferences(backend,selected,request,view,observation);
+    });
+  }
+  async navigation(selected:Scope,maximum:number){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      const value=navigationResult(await backend.call(selected,'/navigation_diagnostic',{max_scan:maximum}),maximum);
+      return {...selected,value:{...value,initialAnalysis:this.workspace.model(selected.target).settings.autoAnalyze?'requested':'none',priorAnalysis:'unknown',provenance:'Initial facade policy only; imported/saved metadata may have an unknown analysis history.'}};
     });
   }
   async xrefs(selected: Scope, at: string, limit: number, offset: number) {
@@ -639,6 +675,10 @@ export class Research {
       const request=this.workspace.request(reserved.request.id);
       if(reserved.replay&&request.state!=='accepted') {
         if(request.state==='applied')return request.result;
+        if(operation==='/run_script_inline'&&request.state==='failed'&&object(request.result??{}).reason==='script_not_executed'){
+          const result=object(request.result),execution=object(result.execution);
+          fail('script.'+String(execution.stage),String(object(result.diagnostic).message),result);
+        }
         if(operation.startsWith('/sdk/')&&request.state==='failed'&&object(request.result??{}).state==='rejected')fail('rejected','This SDK transaction was rolled back and is not repeated.',request.result);
         fail('unknown','This saved-state operation retains an unresolved outcome; it is not re-executed.',request.result);
       }
@@ -649,7 +689,20 @@ export class Research {
         savedVerification:!!verifySaved});
       let savedSnapshot:Artifact|undefined,phase='operation';
       try {
-        const raw=await backend.call(selected,operation,parameters),response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
+        let raw:unknown;
+        if(operation==='/run_script_inline'&&backend.inlineScript){
+          const attempt=await backend.inlineScript(selected,parameters,request.id);raw=attempt.response;
+          if(attempt.response.success===false){
+            const result={...selected,requestId:request.callerId??request.id,state:attempt.safe?'rejected':'unknown',
+              contextState:attempt.safe?'ready':'needs_recovery',reason:attempt.safe?'script_not_executed':'script_execution_not_proven_complete',
+              execution:attempt.response.execution,diagnostic:attempt.response.diagnostic,diagnostics:attempt.response.diagnostics,
+              diagnosticsTruncated:attempt.response.diagnosticsTruncated,compilerOutput:attempt.response.compilerOutput,
+              output:attempt.response.console_output,outputTruncated:attempt.response.outputTruncated};
+            if(attempt.safe)this.workspace.recordRequest(request.id,'failed',result);
+            fail('script.'+String(object(attempt.response.execution).stage),String(object(attempt.response.diagnostic).message),result);
+          }
+        }else raw=await backend.call(selected,operation,parameters);
+        const response=raw&&typeof raw==='object'&&!Array.isArray(raw)?object(raw):{output:raw};
         if(['rejected','partial','failed','error'].includes(String(response.status))||response.success===false)
           fail('partial','Program operation reported a rejected or incomplete effect.');
         if(!verifySaved&&response.success!==true&&response.status!=='success')fail('partial','Program operation did not acknowledge its effect.');
@@ -659,6 +712,7 @@ export class Research {
           pendingChanges:scalars.length+complexChanges.length,value};
         this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,complexChanges,scalars},result);return result;
       }catch(error){
+        if(operation==='/run_script_inline'&&this.workspace.request(request.id).state==='failed'&&object(this.workspace.request(request.id).result??{}).reason==='script_not_executed')throw error;
         if(operation.startsWith('/sdk/')&&String((error as {code?:unknown}).code).endsWith('.rejected')){
           this.workspace.recordRequest(request.id,'failed',{...selected,state:'rejected',reason:'native_transaction_rolled_back'});throw error;
         }

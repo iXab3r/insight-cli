@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "date": "2026-10-20",
+  "kind": "generated-disposable-PE-public-CLI",
+  "artifact": "8cca8d690cb36b1c45055378ed3c0f0ebf87f4aa13376d8bf049916c6390dc33",
+  "checks": {
+    "requestedEntryPoint": true,
+    "directDecompile": true,
+    "filteredMixedBatchAndCallEdge": true,
+    "single": true,
+    "paging": true,
+    "rpc": true,
+    "savedManifest": true,
+    "navigationAnalyzedAndBounded": true,
+    "lateStringAndIncompleteZero": true,
+    "undefinedLiteralByteSearch": true,
+    "unseededDecodeReadOnlyGuidance": true,
+    "lifecycleCloseAndRestore": true,
+    "correlatedFixedWorkload": true,
+    "actualIdleOwnerDisposal": true,
+    "navigationSeededSparse": true,
+    "inputUnchanged": true
+  },
+  "cleanup": [],
+  "fixedWorkload": [
+    {
+      "state": "warm",
+      "command": "functions inspect",
+      "milliseconds": 1356.4456250000076
+    },
+    {
+      "state": "warm",
+      "command": "analysis navigation",
+      "milliseconds": 733.6525410000031
+    },
+    {
+      "state": "warm",
+      "command": "strings list",
+      "milliseconds": 787.3057919999992
+    },
+    {
+      "state": "restored",
+      "command": "functions inspect",
+      "milliseconds": 2078.383958000006
+    },
+    {
+      "state": "restored",
+      "command": "analysis navigation",
+      "milliseconds": 867.7650829999911
+    },
+    {
+      "state": "restored",
+      "command": "strings list",
+      "milliseconds": 831.7181659999915
+    },
+    {
+      "state": "warm",
+      "command": "functions inspect",
+      "milliseconds": 1446.6912500000035
+    },
+    {
+      "state": "warm",
+      "command": "analysis navigation",
+      "milliseconds": 772.1045830000076
+    },
+    {
+      "state": "warm",
+      "command": "strings list",
+      "milliseconds": 779.211249999993
+    }
+  ],
+  "limits": [
+    "External duration includes client/IPC/response overhead; no separate Factory spans are available.",
+    "Spans are nested; never sum parent and child duration.",
+    "Initial import is setup, outside this saved-fixture workload.",
+    "One generic fixture and three workload passes, not a calibrated performance distribution.",
+    "Factory idle observation establishes owner disposal in this control; historical benchmark causes remain unknown."
+  ]
+}

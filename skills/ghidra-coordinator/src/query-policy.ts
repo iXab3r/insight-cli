@@ -1,7 +1,7 @@
 import {fail,object} from './model.js';
 
 /** These operations have facade-owned, bounded native implementations. */
-export const nativeQueries=new Set(['/research_view','/decode_instructions','/find_dead_code','/detect_crypto_constants','/get_valid_data_types',
+export const nativeQueries=new Set(['/code_references','/navigation_diagnostic','/research_view','/decode_instructions','/find_dead_code','/detect_crypto_constants','/get_valid_data_types',
   '/validate_data_type','/validate_function_prototype','/get_entry_points','/list_globals',
   '/list_strings','/search_strings','/find_data_types','/search_byte_patterns','/search_instructions',
   '/emulate_function','/emulate_hash_batch']);
@@ -28,6 +28,9 @@ const heuristics:Record<string,{kind:string;algorithm:string;limitations:string[
 ]}]));
 
 export function queryDescription(path:string,fallback:string) {
+  if(path==='/force_decompile')return 'Refresh decompiler output for an existing function entry; does not repair Listing or create functions';
+  if(path==='/disassemble_function')return 'Read stored Listing instructions; for sparse/undefined code use functions decode';
+  if(path==='/get_functions')return 'Inspect 1–20 functions; compact code/call edges: --fields decompiled_code,callees';
   if(path==='/find_dead_code')return 'Find blocks unreachable in the bounded static CFG; unresolved flow is reported';
   if(path==='/detect_crypto_constants')return 'Match versioned constant-table signatures within an explicit byte budget';
   if(path==='/get_valid_data_types')return 'Enumerate actually resolvable program/builtin types, with provenance and scan limits';
@@ -35,6 +38,7 @@ export function queryDescription(path:string,fallback:string) {
   if(path==='/validate_data_type')return 'Resolve a type and report layout/alignment diagnostics without changing the program';
   if(path==='/get_entry_points')return 'Read external-entry metadata; report name/image-base candidates separately';
   if(path==='/list_globals')return 'Read structured global records with bounded symbol/reference scanning';
+  if(path==='/list_strings'||path==='/search_strings')return 'Search defined string data only, with bounded visited-data scan; undefined literals: strings anchors';
   if(path.startsWith('/emulate_'))return 'Bounded isolated x86/x64 emulation with explicit ABI and termination reason';
   return heuristics[path]?fallback+' (qualified '+heuristics[path]!.kind+'; not ground truth)':fallback;
 }

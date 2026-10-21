@@ -14,6 +14,9 @@ request/status recovery, never blind retry.
 
 Answer the user's research question with inspectable materials. Agents choose the
 investigation; insight-cli supplies applications such as `ghidra` and `artifacts`.
+
+For repeated facade queries, retain one [persistent client](references/persistent.md) in the
+agent runtime across calls. Follow its typed command errors and uncertain-transport recovery.
 External tools need no insight-cli adapter. Installing this package does not register
 the skill or change agent settings. `insight-cli skill insight-re` locates this file.
 

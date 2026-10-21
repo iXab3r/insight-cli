@@ -13,6 +13,24 @@ import {CliError} from '@eyeauras/cli-factory';
 import {createHash} from 'node:crypto';
 
 const entry='140001000';
+test('opt-in address resolution is ReadOnly over CLI/RPC and rejects invalid policies before probing the backend',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace!:Workspace,opens=0,reads=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const backend=new Fake(w),open=backend.open.bind(backend);backend.open=async(...args)=>{opens++;return open(...args);};
+  backend.call=async(_s,op,p={})=>{reads++;
+   if(op==='/insight/function-entries/v1')return {protocol:'insight-function-entries-v1',modification:'42',items:{'140001008':{status:'resolved',kind:'preceding-entry-candidate',entryPoint:entry,recordedBodyContainsAddress:false,distanceBytes:8}}};
+   assert.equal(op,'/get_functions');assert.equal(p.functions,entry);return {functions:{[entry]:{name:'fixture',entry_point:entry,decompiled_code:'return 7;'}}};
+  };return Object.assign(backend,{inspectObservation:async()=>({modification:'42'})});
+ }}));
+ const input=join(f.root,'entry.exe');await writeFile(input,'owned entry fixture');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ await f.profileStore.setPermissions('default',['ReadOnly']);const args=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','140001008','--fields','decompiled_code'];
+ const before=workspace.context(s),opened=opens;
+ for(const flags of [['--resolve-address','containing-or-preceding'],['--max-entry-distance','8'],['--resolve-address','nearest','--max-entry-distance','8'],['--resolve-address','containing-or-preceding','--max-entry-distance','65537']])assert.notEqual((await f.run(app,[...args,...flags,'--json'])).exitCode,0);
+ assert.equal(reads,0);assert.equal(opens,opened);
+ const argv=[...args,'--resolve-address','containing-or-preceding','--max-entry-distance','4096'],one=await f.json(app,argv) as any;
+ assert.equal(one.value.functions['140001008'].entry_point,entry);assert.equal(one.value.functions['140001008'].resolution.kind,'preceding-entry-candidate');
+ const [rpc]=await f.rpc(app,[argv]) as any[];assert.deepEqual(rpc.result,one);assert.deepEqual(workspace.context(s),before);assert.equal(reads,4);
+});
 test('decode uses ReadOnly scope and the same bounded native operation over CLI and RPC',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});const calls:unknown[]=[];let saves=0;
  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
@@ -43,7 +61,44 @@ test('function diagnostics survive one-shot and cli.execute without a mutation o
   if(result.nativeDiagnostic){assert.ok(Array.from(result.nativeDiagnostic).length<=500);assert.ok(!result.nativeDiagnostic.includes('\0'));}
   const [rpc]=await f.rpc(app,[argv]) as any[];assert.equal(rpc.error.data.result.reason,reason);
  }
- assert.equal(reads,cases.length*2);
+ response=cases[1]![0];
+ const bulkArgs=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions',entry,'--fields','decompiled_code'];
+ const bulk=await f.json(app,bulkArgs) as any,failed=bulk.value.functions[entry];
+ assert.equal(failed.status,'failed');assert.equal(failed.nativeDiagnostic,'Decompiler failed');
+ assert.match(failed.error,/functions force-decompile --function <entry>/);assert.match(failed.error,/not Listing instructions or stored xrefs/);
+ const [bulkRpc]=await f.rpc(app,[bulkArgs]) as any[];assert.deepEqual(bulkRpc.result,bulk);
+ assert.equal(reads,cases.length*2+2);
+});
+
+test('filtered function inspection accepts results without unrequested entry metadata while preserving CLI/RPC paging and failures',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
+ const source='return second(17);';let invalidEntry=false;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+  const backend=new Fake(workspace);backend.saved=async()=>{throw Error('Inspection must not save');};
+  backend.call=async(_scope,operation,p={})=>{
+   assert.equal(operation,'/get_functions');
+   const selected=String(p.fields??'').toLowerCase().split(',');
+   return {functions:Object.fromEntries(String(p.functions).split(',').map(selector=>[selector,selector==='missing'?{error:'Function not found: fixture'}:{
+    name:selector,size:32,...(selected.includes('entry_point')?{entry_point:invalidEntry?'not-an-address':entry}:{}),
+    ...(selected.includes('decompiled_code')?{decompiled_code:source}:{}),...(selected.includes('callees')?{callees:[]}:{}),
+   }])),requested:String(p.functions).split(',').length,count:2};
+  };return backend;
+ }}));
+ const input=join(f.root,'filtered.exe');await writeFile(input,'owned filtered inspection');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ await f.profileStore.setPermissions('default',['ReadOnly']);
+ const args=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','first,second,missing','--fields','decompiled_code,callees','--limit-chars','4'];
+ const result=await f.json(app,args) as any;
+ for(const selector of ['first','second']){assert.equal(result.value.functions[selector].status,'success');assert.equal(result.value.functions[selector].decompiled_code,'retu');assert.equal(result.value.functions[selector].entry_point,undefined);}
+ assert.equal(result.value.functions.missing.reason,'function_not_found');
+ assert.match(result.value.functions.missing.error,/functions decode --address <hex>/);assert.match(result.value.functions.missing.error,/does not create functions or xrefs/);
+ const [rpc]=await f.rpc(app,[args]) as any[];assert.deepEqual(rpc.result,result);
+ const next=await f.json(app,[...args,'--offset-chars','4','--expect-view',result.value.view.identity]) as any;
+ assert.equal(next.value.functions.first.decompiled_code,'rn s');assert.equal(next.value.functions.first.text.textSha256,result.value.functions.first.text.textSha256);
+ const single=await f.json(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function','first','--fields','callees']) as any;
+ assert.equal(single.value.status,'success');assert.deepEqual(single.value.callees,[]);assert.equal(single.value.entry_point,undefined);
+ invalidEntry=true;
+ const malformed=await f.json(app,[...args,'--fields','entry_point,decompiled_code']) as any;
+ assert.equal(malformed.value.functions.first.reason,'invalid_native_shape');
 });
 
 test('bulk function windows preserve mixed outcomes, Unicode hashes, view guards and exact saved files',async t=>{
@@ -275,6 +330,43 @@ test('uncertain script save is not retried or adopted; explicit stopped-worker a
  request=workspace!.scopedRequest(selected,'script-save')!;assert.equal(request.state,'failed');assert.ok((request.result as {previousResult:unknown}).previousResult);
  assert.notEqual((await f.run(app,[...run,'--json'])).exitCode,0);assert.equal(scripts,1);assert.equal(saves,1);
  assert.equal((await f.json(app,['ghidra','open',...args]) as Opened).state,'ready');assert.deepEqual(workspace!.context(selected).workingSnapshot,before);
+});
+
+test('proven inline compile/load rejection preserves pending work and replays the failure over CLI/RPC without saving',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
+ let workspace:Workspace,attempts=0,saves=0,stage='compile';
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const b=new Fake(w),save=b.saved.bind(b);b.saved=async s=>{saves++;return save(s);};
+  return Object.assign(b,{inlineScript:async()=>{attempts++;return {safe:true,response:{success:false,execution:{stage,userCode:'not_started',entrypointInvoked:false},diagnostic:{kind:'java-'+stage,message:'cannot find symbol'},compilerOutput:{text:'compiler diagnostic',truncated:false},console_output:'',outputTruncated:false}};}});
+ }}));
+ const exe=join(f.root,'inline.exe');await writeFile(exe,'owned inline fixture');const s=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened;
+ const scope=['--session',s.session,'--target',s.target];await f.json(app,['ghidra','comments','set',...scope,'--address',entry,'--kind','plate','--text','retained edit']);
+ const before=workspace!.context(s),savedBefore=saves;
+ for(const current of ['compile','load']){
+  stage=current;const args=['ghidra','scripts','run-inline',...scope,'--code','bad '+stage,'--request-id','rejected-'+stage];
+  const failed=await f.run(app,[...args,'--json']);assert.notEqual(failed.exitCode,0);const result=JSON.parse(failed.stdout);assert.equal(result.state,'rejected');assert.equal(result.contextState,'ready');assert.equal(result.execution.stage,stage);
+  const request=workspace!.scopedRequest(s,'rejected-'+stage)!;assert.equal(request.state,'failed');assert.deepEqual(workspace!.context(s),before);assert.equal(saves,savedBefore);
+  const calls=attempts;assert.deepEqual(JSON.parse((await f.run(app,[...args,'--json'])).stdout),result);
+  const [rpc]=await f.rpc(app,[args]) as any[];assert.equal(rpc.error.data.code,'coordinator.script.'+stage);assert.deepEqual(rpc.error.data.result,result);assert.equal(attempts,calls);
+  const read=await f.json(app,['ghidra','functions','inspect',...scope,'--function',entry]) as any;assert.equal(read.value.entry_point,entry);assert.equal(workspace!.unresolved(s).length,0);
+ }
+});
+
+test('inline initialization/constructor/runtime failures and lost replies stay unknown, without a second invocation',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace:Workspace,stage='initialize',attempts=0,saves=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const b=new Fake(w);b.saved=async()=>{saves++;throw Error('Must not save an uncertain script');};return Object.assign(b,{inlineScript:async()=>{
+   attempts++;if(stage==='lost')throw new CliError('Lost reply',{code:'coordinator.transport'});
+   return {safe:false,response:{success:false,execution:{stage,userCode:'may_have_started',entrypointInvoked:stage==='execute'?null:false},diagnostic:{kind:'java-'+stage,message:'fixture failure'},compilerOutput:{text:'',truncated:false},console_output:'external effect possible',outputTruncated:false}};
+  }});
+ }}));
+ const exe=join(f.root,'uncertain-inline.exe');await writeFile(exe,'owned uncertain inline fixture');
+ for(const current of ['initialize','construct','execute','lost']){
+  stage=current;const s=await f.json(app,['ghidra','open',exe,'--session','new']) as Opened,args=['ghidra','scripts','run-inline','--session',s.session,'--target',s.target,'--code','fixture','--request-id','unknown-'+stage];
+  assert.notEqual((await f.run(app,[...args,'--json'])).exitCode,0);assert.equal(workspace!.scopedRequest(s,'unknown-'+stage)!.state,'unknown');
+  const calls=attempts;assert.notEqual((await f.run(app,[...args,'--json'])).exitCode,0);assert.equal(attempts,calls);assert.equal(saves,0);
+  assert.notEqual((await f.run(app,['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--function',entry,'--json'])).exitCode,0);
+ }
 });
 
 test('native budget settings can change after a failed import without invalidating saved research or its intent',async t=>{
