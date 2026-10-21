@@ -15,7 +15,7 @@ export interface NativeInputs {
   debuggerWheels:string[];
   extensionRoots?:string[];serverClasspath?:string;
 }
-export const pinnedMcpJar = '6288b37f28a98fc13108e09b5e97b527b7be298999722e320c6bf484f85361c3';
+export const pinnedMcpJar = 'f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32';
 export const packagedMcpJar=fileURLToPath(new URL('../../runtime/GhidraMCP-7.0.0.jar',import.meta.url));
 /** Ghidra has its own cache/settings overrides in addition to Java's home/tmp properties. */
 export const nativeJvmDirectories=(root:string)=>['-Duser.home='+root,'-Djava.io.tmpdir='+root,

@@ -59,7 +59,7 @@ client of Factory's existing `--json-rpc`/`cli.execute` stream: one child, order
 typed results/errors, explicit close, no reconnect or replay. It creates no host, profile store
 or IPC protocol. Factory dependencies and lifecycle remain unchanged.
 
-Only `functions inspect` uses the precompiled authenticated ReadOnly bridge endpoint
+`functions inspect` and `strings anchors` use the precompiled authenticated ReadOnly bridge endpoint
 `GET /insight/research-view/v1?program=...`. It returns versioned modification/language/compiler
 facts for an explicitly selected already-open program. Existing source/process verification,
 before/after comparison, incarnation and `view.identity` inputs remain authoritative. Missing,
@@ -85,6 +85,44 @@ fail rather than mixing pages. No per-query state or save is introduced. The tru
 helper uses the existing script transport; user scripts retain Update/save/recovery semantics.
 The [sparse-navigation reference](../skills/ghidra-coordinator/references/sparse-navigation.md)
 defines exact forms, prefix exclusions, coverage, bounds and cursor interpretation.
+
+### Sparse function-entry inspection
+
+After independent API approval on 2026-10-20, `functions inspect` has an explicit
+`--resolve-address containing-or-preceding --max-entry-distance <bytes>` mode. It accepts
+1–20 default-space hexadecimal addresses, prioritizes exact entries and recorded containment,
+then considers only the nearest preceding known entry in the same initialized executable
+memory block within 1–65536 bytes. That fallback is a navigation candidate, never inferred
+function membership. Ordinary inspection retains its existing selection behavior.
+
+One precompiled authenticated native batch lookup uses indexed function queries, without a
+table scan, function creation, Listing repair or save. An ordered before/after view guard spans
+lookup and deduplicated inspection; returned entries are checked against the selected facts.
+Each original selector retains resolution metadata and selected entry regardless of projected
+fields or read failure. Aliases share native work but consume the existing text budget in
+original selector order. Current paging, hashes and owner-save rules remain. See
+[sparse entries](SPARSE-FUNCTION-ENTRIES.md) for the contract and disposable verification.
+
+### Sparse PE runtime-region evidence
+
+After independent API review, `functions inspect --resolve-address containing-or-pe-runtime`
+compares recorded Ghidra functions with fully validated current mapped PE32+/AMD64 runtime ranges.
+Unavailable/malformed/incomplete table reads retain DB facts and prevent automatic selection;
+conflicts and missing runtime entries retain evidence without creating functions. A runtime region
+never proves instruction boundaries or whole-function semantic membership. The precompiled
+ReadOnly endpoint has batch byte/deadline bounds, ordered failed-dispatch view guards and no cache,
+analysis, save or Factory changes. See [V1 contract](SPARSE-FUNCTION-BOUNDARIES.md) for selection,
+coverage, limitations and disposable matched-workload verification.
+
+### Raw string anchors
+
+After independent API approval, `ghidra strings anchors` searches one literal using explicit
+ASCII/UTF-16LE encodings within an inclusive range of initialized default-space bytes.
+Adjacent blocks merge; holes do not. Raw address/encoding pairs remain separate from bounded
+NUL-delimited candidate context and its decoding/completeness. An authenticated precompiled
+ReadOnly service, ordered native view guards and a stateless untrusted cursor provide bounded
+paging without analysis, definitions, save or Factory changes. See the
+[V1 contract](SPARSE-STRING-ANCHORS.md) for exact recovery, budgets and benchmark method.
 
 ### Profile analysis storage
 

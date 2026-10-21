@@ -9,5 +9,7 @@ copyright over any portions of the original work that remain.
 
 Acknowledgments to all listed contributors in README.md.
 
-Insight facade modification, 2026-10-20: precompiled ReadOnly research-view service
+Insight facade modification, 2026-10-20: precompiled ReadOnly research-view, indexed function-entry and raw string-anchor services
 and one AnnotationScanner registration insertion. See research-view.provenance.json.
+
+The additive ReadOnly function-boundaries service reads current mapped PE32+/AMD64 runtime ranges; it does not create functions or reconstruct semantic membership. Source and exact build inputs are recorded in research-view.provenance.json.

@@ -19,7 +19,10 @@ labels; equal filenames or addresses in different inputs do not select the same 
 
 If the database has missing strings/xrefs, one-byte function bodies or no Listing instructions,
 use [sparse navigation](sparse-navigation.md) before following the metadata-only route below.
-It distinguishes existing entries, undefined code and undefined literals using existing commands.
+It distinguishes existing entries, undefined code and undefined literals. For raw literals,
+use `strings anchors --text Widget --encodings ascii,utf16le --scan-from START --scan-through END`,
+then explicit batched code references and function inspection. Candidate context remains
+separate from exact match addresses; coverage, decoding, caps and cursor are explained there.
 
 Use `ghidra strings search --contains config.json`, then `ghidra xrefs to --address <string>`.
 Reference results include a containing function address when available. Pass that address to
@@ -146,6 +149,32 @@ host, including through JSON-RPC; it is never silently a client-host path. An ex
 is rejected. A filesystem failure can leave a partial new directory without a completed manifest;
 retain it for inspection and choose a fresh directory for another explicit save.
 
+For sparse interior addresses, opt in to
+`functions inspect --functions <hex-addresses> --resolve-address containing-or-preceding --max-entry-distance 4096`.
+The distance is required (1–65536 bytes), applies only to fallback and is rejected without the
+mode. Names/address-space prefixes are not accepted in this mode. Exact entries and recorded
+body containment take precedence in valid default-space memory, including non-executable or
+uninitialized blocks. Otherwise the nearest previous known entry is considered only inside
+the same initialized executable memory block as the query.
+No byte search, analysis or function creation is performed.
+
+Every resolved row retains `entry_point` and `resolution`, even if `--fields` omits entry metadata
+or the function read fails. Kinds are `exact-entry`, `recorded-containing` and
+`preceding-entry-candidate`. `recordedBodyContainsAddress` is actual stored body membership,
+not semantic proof. `distanceBytes` is zero for exact entries and the positive offset for
+preceding candidates; it is omitted for recorded containment, whose body can precede its entry.
+`status: success` means the selected function was read, not that the query belongs to it.
+
+`--functions` preserves original selector spelling as keys, including hexadecimal aliases.
+Selected entries are deduplicated for native reads, but inline text is charged for every
+original row in selector order. Each saved row keeps its mapping; owner-save paths remain
+per-selector. `--function` retains the existing single-row result/error behavior. Policy misses
+are per-item `not_found` with `address_out_of_range`,
+`address_not_in_initialized_executable_block`, `no_preceding_entry`, `entry_outside_block` or
+`entry_distance_exceeded`; these do not claim that code or an unknown function is absent.
+The before/after guard covers both lookup and inspection, and native selector/entry mismatches
+fail. Existing view continuation/text hashes, text windows and result/file bounds still apply.
+
 `functions decode --address <address> --max-bytes 64 --max-instructions 16` uses Ghidra pseudo
 instructions without defining listing instructions, functions or xrefs, running analyzers or
 saving state. It requires initialized executable memory and currently supports x86 language
@@ -191,3 +220,9 @@ must not be added to their parents. `facade.command` starts at the handler and e
 serializes the response; client startup, IPC and response overhead are not separately measured.
 Tracing is best-effort and cannot change program outcomes. Empty runtime readiness checks still
 avoid creating a research workspace. The Factory idle policy remains unchanged.
+
+For sparse PE32+/AMD64 interior addresses, `functions inspect --resolve-address
+containing-or-pe-runtime --max-unwind-bytes 4194304` uses fully validated current mapped runtime
+regions and independent recorded-body facts. Conflicting or missing entries remain partial with
+evidence; incomplete/malformed/unavailable metadata prevents automatic selection. This is not
+semantic function reconstruction; see [sparse navigation](sparse-navigation.md).

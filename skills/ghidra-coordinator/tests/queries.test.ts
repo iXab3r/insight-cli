@@ -42,7 +42,7 @@ test('static query leaves use typed domain flags, explicit scope, shared API def
   const schema=JSON.parse(await readFile(new URL('../../references/queries.json',import.meta.url),'utf8')) as {tools:{command:string;path:string}[]};
   assert.equal(schema.tools.length,74);assert.equal(new Set(schema.tools.map(t=>t.command)).size,74);
   const help=await f.run(app,['ghidra','types','find-data-types','--help']);assert.equal(help.exitCode,0);assert.match(help.stdout,/--pattern/);assert.doesNotMatch(help.stdout,/--program\b/);
-  const stringsHelp=await f.run(app,['ghidra','strings','list','--help']);assert.match(stringsHelp.stdout,/defined string data/);assert.match(stringsHelp.stdout,/1–200000/);assert.match(stringsHelp.stdout,/does not continue an\s+incomplete scan/);assert.match(stringsHelp.stdout,/search-byte-patterns/);
+  const stringsHelp=await f.run(app,['ghidra','strings','list','--help']);assert.match(stringsHelp.stdout,/defined string data/);assert.match(stringsHelp.stdout,/1–200000/);assert.match(stringsHelp.stdout,/does not continue an\s+incomplete scan/);assert.match(stringsHelp.stdout,/strings anchors/);
   const scanError=await f.run(app,['ghidra','strings','list',...selected,'--max-scan','200001','--json']);assert.notEqual(scanError.exitCode,0);assert.match(scanError.stderr,/between 1 and 200000 visited inputs/);
   backendResult.count=-1;
   const failed=await f.run(app,[...query,'--json']);assert.notEqual(failed.exitCode,0);

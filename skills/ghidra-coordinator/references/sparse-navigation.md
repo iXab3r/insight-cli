@@ -12,9 +12,10 @@ Use generated help for exact flags.
 |---|---|---|
 |Empty navigation results / suspicious body sizes|`analysis navigation`|Bounded metadata samples and coverage; no analysis is started|
 |Known function entries, even without Listing|`functions inspect --functions 0xENTRY_A,0xENTRY_B --fields decompiled_code,callees --include-call-context false`|Up to20 compact decompiler observations; inspect each status and truncation|
+|Interior code addresses with sparse saved bodies|`functions inspect --functions 0xCODE_A,0xCODE_B --resolve-address containing-or-preceding --max-entry-distance 4096 --fields entry_point,decompiled_code --include-call-context false`|One guarded lookup+inspection; a preceding entry is explicitly a candidate, not established containment|
 |Stale/failed decompilation at a known entry|`functions force-decompile --function 0xENTRY`|Fresh native decompiler output in `value.decompiled`; no function creation or Listing repair|
 |Known executable bytes, no function entry|`functions decode --address 0xCODE --max-bytes 64 --max-instructions 16`|Bounded local instructions/direct targets, input hash and stop reason; no persistent definitions|
-|Expected literal absent from defined strings|`analysis search-byte-patterns --pattern '53 50 41 52 53 45' --scan-from 0xREGION --max-bytes 1048576`|Initialized-memory byte matches and explicit coverage, not string definitions or code references|
+|Expected literal absent from defined strings|`strings anchors --text SPARSE --encodings ascii,utf16le --scan-from 0xREGION_START --scan-through 0xREGION_END`|Exact raw hits plus separate bounded NUL candidate context, explicit coverage and stateless cursor|
 
 ## Follow existing entries first
 
@@ -26,6 +27,14 @@ and supports mixed outcomes, text paging and owner-host saves. For large output,
 [research](research.md) for Unicode windows, view guards and native truncation.
 Empty `callees` or xrefs on a sparse database do not prove that the decompiled function
 has no calls. Keep decompiler observations distinct from stored-reference coverage.
+
+For known interior addresses, the explicit resolution mode avoids the separate name/prefix
+search. It accepts addresses only and requires the distance bound. Inspect `resolution.kind`
+for every result: `exact-entry`, `recorded-containing`, or `preceding-entry-candidate`.
+Recorded containment is a database fact, not validated source membership. The fallback may
+point into unrelated padding, split code or an incorrect prior function. It is not a repair.
+Exact/recorded containment take precedence; the distance limit applies only to fallback.
+See [research](research.md) for mixed outcomes, original selector keys and shared budgets.
 
 Use `force-decompile` when a fresh decompiler pass is needed. It does not accept the inspect
 text-window/save flags; its ordinary query response is capped at1MiB and reports the pinned
@@ -47,7 +56,20 @@ Persistent Listing/entry/body repair is a separate explicit Update operation in 
 context, followed by saved readback. Consult `functions create`, `functions disassemble-bytes`
 and their generated help rather than an unbounded all-function reconstruction script.
 
-For literal search, encode ASCII/UTF-16 as appropriate; the example searches ASCII `SPARSE`.
+For literal search, prefer `strings anchors` with explicit encodings and both inclusive bounds.
+It searches raw initialized bytes, merges adjacent initialized blocks, and never bridges a hole.
+Read `matchAddress` as the exact target; a nullable candidate `start` is a separate observation.
+NUL candidates are not semantic strings. `textFrom` is the preview address; `complete`,
+boundary evidence and `decoding` qualify it. Invalid or capped context keeps the raw hit.
+Continue using `value.cursor`; only page budgets can change. `scan.complete` refers to search
+coverage, not complete candidate text. Context/prefetch/rereads consume `max-bytes` (minimum
+32768), and the default payload cap is 1024 bytes. Retain all `(address,encoding)` pairs,
+including overlaps and UTF-16 at odd addresses. It performs no definitions, analysis or save.
+Then pass selected exact match addresses to one batched `analysis code-references`, and
+selected code addresses to `functions inspect` with the explicit resolution mode above.
+
+For arbitrary masked binary patterns, encode ASCII/UTF-16 as appropriate with the existing
+`analysis search-byte-patterns`; for example `--pattern '53 50 41 52 53 45'` is ASCII `SPARSE`.
 Quote spaced hex patterns. Read `complete`, `scanned_bytes`, `next_address` and the bounds;
 continue with `--scan-from <next_address>`. `--offset` on defined-string results does not
 advance memory coverage. A narrowed text filter does not skip earlier non-string defined data.
@@ -135,3 +157,17 @@ Tokens are unsigned, untrusted continuation parameters, not evidence that earlie
 scanned. There is no cursor registry, per-query snapshot or journal save. Retain page results
 if coverage evidence is needed. The trusted helper still uses the existing inline-script
 transport and incurs its compile/dispatch cost; arbitrary user scripts remain Update operations.
+
+## PE runtime regions for sparse function inspection
+
+Use `ghidra functions inspect --functions <addresses> --resolve-address containing-or-pe-runtime`
+when PE32+/AMD64 runtime metadata can replace manual preceding-entry checks.
+`--max-unwind-bytes` bounds returned header/table bytes across the batch (default4194304,
+1–16777216); lookup has a fixed5-second cooperative deadline. It reads current mapped headers
+at the actual image base and the whole declared Exception Directory, without a file fallback,
+section-name assumption, analysis or function creation. Unavailable/malformed/incomplete lookup
+blocks selection and retains DB facts; `boundary_conflict` and `runtime_entry_not_defined` retain
+validated bounds. A runtime region does not prove instruction boundaries, semantic membership
+or whole-function bounds; leaf routines may have no record. No preceding fallback is used.
+Batch unresolved rows are partial; a single unresolved selector returns a partial CLI error
+with lookup/view/evidence. Guards cover failed dispatch; existing text paging/save rules apply.

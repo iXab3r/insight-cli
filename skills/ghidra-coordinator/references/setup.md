@@ -11,7 +11,7 @@ external executable paths, status/doctor and safe removal. Existing Factory prof
 The package contains the verified GhidraMCP 7.0.0 bridge, its Apache-2.0 license/notice and
 artifact provenance. Its pinned functionality catalog is from source
 `57e37a8bf388b1279cff46378f85be1554548f61`, with SHA256
-`6288b37f28a98fc13108e09b5e97b527b7be298999722e320c6bf484f85361c3`.
+`f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32`.
 `mcpJar` optionally selects another copy of those exact verified bytes. Runtime startup needs no
 bridge/Factory source checkout or Python MCP bridge. Packaged native helper sources compile
 against the installed Ghidra/JDK.

@@ -1,6 +1,8 @@
 import {textWindow} from './text-window.js';
 import {functionResult,functionFailure} from './function-results.js';
 import {inspectFunctions,type FunctionInspectionOptions} from './function-inspection.js';
+import {entryRequest} from './function-entries.js';
+import {inspectAnchors,type AnchorRequest} from './string-anchors.js';
 import type { Artifact } from './artifacts.js';
 import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
 import { Workspace } from './workspace.js';
@@ -256,13 +258,25 @@ export class Research {
     });
   }
   async inspectFunctions(selected:Scope,parameters:Record<string,unknown>,options:FunctionInspectionOptions){
+    const lookup=entryRequest(parameters,options);
     return this.ordered(selected,async()=>{
       const backend=await this.backend();await backend.open(selected);
       const context=this.workspace.context(selected);
       const observe=backend.inspectObservation?()=>backend.inspectObservation!(selected):backend.observation?()=>backend.observation!(selected):undefined;
+      if(lookup&&!observe)fail('unsupported','Address resolution requires guarded native observations.');
       const observation=await observe?.();
       const view={revision:revision(context.baseRevision),identity:digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation})};
       return inspectFunctions(backend,selected,parameters,options,view,observation,observe);
+    });
+  }
+  async stringAnchors(selected:Scope,request:AnchorRequest){
+    return this.ordered(selected,async()=>{
+      const backend=await this.backend();await backend.open(selected);
+      const observe=backend.inspectObservation?()=>backend.inspectObservation!(selected):backend.observation?()=>backend.observation!(selected):undefined;
+      if(!observe)fail('unsupported','String anchors require guarded native observations.');
+      const context=this.workspace.context(selected),observation=await observe();
+      const view=digest({target:selected.target,context:context.id,generation:context.generation,snapshot:context.workingSnapshot,epoch:context.viewEpoch??0,observation});
+      return inspectAnchors(backend,selected,request,view,observation,observe);
     });
   }
   async codeReferences(selected:Scope,request:ReferenceRequest){

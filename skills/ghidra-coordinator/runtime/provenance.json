@@ -1,7 +1,7 @@
 {
   "artifact": "GhidraMCP-7.0.0.jar",
   "version": "7.0.0",
-  "sha256": "6288b37f28a98fc13108e09b5e97b527b7be298999722e320c6bf484f85361c3",
+  "sha256": "f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32",
   "source": "https://github.com/bethington/ghidra-mcp",
   "catalogCommit": "57e37a8bf388b1279cff46378f85be1554548f61",
   "catalogSha256": "ebdaa9195ec2ea55fb706107bba1ee3732abd2eda783ed67a6ccc7359fdc5c66",
@@ -14,6 +14,12 @@
   "insightPatch": {
     "receipt": "research-view.provenance.json",
     "upstreamSha256": "7084e2fda16dc779dd05398e48821ff3f9ace4d32757ea143b257b39689e5fbd",
-    "endpoint": "/insight/research-view/v1"
+    "endpoint": "/insight/research-view/v1",
+    "endpoints": [
+      "/insight/research-view/v1",
+      "/insight/function-entries/v1",
+      "/insight/string-anchors/v1",
+      "/insight/function-boundaries/v1"
+    ]
   }
 }

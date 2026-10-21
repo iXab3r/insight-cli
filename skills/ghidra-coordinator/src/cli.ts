@@ -53,6 +53,7 @@ import {packageVersion} from './package-version.js';
 import {runtimeSelection} from './runtime-selection.js';
 import {AnalysisStorage,analysisDirectory} from './analysis-storage.js';
 import {codeReferenceCommands} from './code-references.js';
+import {stringAnchorCommands} from './string-anchors.js';
 import {contextDiagnosticCommands} from './context-diagnostics.js';
 import {traceCommand} from './internal-timing.js';
 import {timedBackend} from './timed-backend.js';
@@ -410,7 +411,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
   };
   const commands=definition.commands?.map(entry=>entry.name==='ghidra'?
     scopedFailures({...entry,children:extendQueries(extendQueries(extendQueries(entry.children??[],queryCommands(c=>owner.selected(c).research)),
-      mutationCommands(c=>owner.selected(c).research)),[...codeReferenceCommands(c=>owner.selected(c).research),...contextDiagnosticCommands(c=>owner.selected(c).research,c=>owner.selected(c).workspace),...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
+      mutationCommands(c=>owner.selected(c).research)),[...codeReferenceCommands(c=>owner.selected(c).research),...stringAnchorCommands(c=>owner.selected(c).research),...contextDiagnosticCommands(c=>owner.selected(c).research,c=>owner.selected(c).workspace),...sdkCommands(c=>owner.selected(c).research),...sdkFileCommands(c=>owner.selected(c).sdkFiles),...trackingCommands(c=>owner.selected(c).tracking),...crossCommands(c=>owner.selected(c).research),...administrationCommands(c=>owner.selected(c).administration,options.backend?undefined:async c=>{const status=await new RuntimeManager(c).status();return status.state==='not_ready'?{...status.server,connected:false,state:'runtime_not_ready',missing:status.missing}:undefined;}),
         ...extensionCommands(c=>new Extensions(join(analysisDirectory(c),'workspace'))),...extensionInventoryCommands(c=>owner.selected(c).backend),...pluginCommands(c=>owner.selected(c).ui),...synchronizationCommands(c=>owner.selected(c).synchronization),...utilityCommands(),...runtimeCommands((c,action,quiescent)=>owner.runtime(c,action,quiescent)),...lifecycleCommands(c=>owner.selected(c).lifecycle,c=>new RuntimeManager(c).status()),...projectCommands(c=>owner.selected(c).projects),...uiCommands(c=>owner.selected(c).ui),...debuggerCommands(c=>owner.selected(c).debugger),...archiveCommands(c=>owner.selected(c).archive)])},owner):entry);
   return {...definition,commands:[...(commands??[]).map(e=>storage.wrap(e)),storage.commands()]};
 }

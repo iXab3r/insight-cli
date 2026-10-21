@@ -13,6 +13,24 @@ import {CliError} from '@eyeauras/cli-factory';
 import {createHash} from 'node:crypto';
 
 const entry='140001000';
+test('opt-in address resolution is ReadOnly over CLI/RPC and rejects invalid policies before probing the backend',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace!:Workspace,opens=0,reads=0;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:w=>{
+  workspace=w;const backend=new Fake(w),open=backend.open.bind(backend);backend.open=async(...args)=>{opens++;return open(...args);};
+  backend.call=async(_s,op,p={})=>{reads++;
+   if(op==='/insight/function-entries/v1')return {protocol:'insight-function-entries-v1',modification:'42',items:{'140001008':{status:'resolved',kind:'preceding-entry-candidate',entryPoint:entry,recordedBodyContainsAddress:false,distanceBytes:8}}};
+   assert.equal(op,'/get_functions');assert.equal(p.functions,entry);return {functions:{[entry]:{name:'fixture',entry_point:entry,decompiled_code:'return 7;'}}};
+  };return Object.assign(backend,{inspectObservation:async()=>({modification:'42'})});
+ }}));
+ const input=join(f.root,'entry.exe');await writeFile(input,'owned entry fixture');const s=await f.json(app,['ghidra','open',input,'--session','new']) as Opened;
+ await f.profileStore.setPermissions('default',['ReadOnly']);const args=['ghidra','functions','inspect','--session',s.session,'--target',s.target,'--functions','140001008','--fields','decompiled_code'];
+ const before=workspace.context(s),opened=opens;
+ for(const flags of [['--resolve-address','containing-or-preceding'],['--max-entry-distance','8'],['--resolve-address','nearest','--max-entry-distance','8'],['--resolve-address','containing-or-preceding','--max-entry-distance','65537']])assert.notEqual((await f.run(app,[...args,...flags,'--json'])).exitCode,0);
+ assert.equal(reads,0);assert.equal(opens,opened);
+ const argv=[...args,'--resolve-address','containing-or-preceding','--max-entry-distance','4096'],one=await f.json(app,argv) as any;
+ assert.equal(one.value.functions['140001008'].entry_point,entry);assert.equal(one.value.functions['140001008'].resolution.kind,'preceding-entry-candidate');
+ const [rpc]=await f.rpc(app,[argv]) as any[];assert.deepEqual(rpc.result,one);assert.deepEqual(workspace.context(s),before);assert.equal(reads,4);
+});
 test('decode uses ReadOnly scope and the same bounded native operation over CLI and RPC',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});const calls:unknown[]=[];let saves=0;
  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{

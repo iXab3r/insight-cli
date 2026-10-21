@@ -1,0 +1,413 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "date": "2026-10-20",
+  "scope": "Opt-in sparse entry resolution fused into existing functions inspect; ordinary mode unchanged; Factory unchanged.",
+  "review": {
+    "api": {
+      "verdict": "APPROVE_WITH_NONBLOCKING_NOTES",
+      "artifact": "sparse-entry-api-review.md"
+    },
+    "implementation": {
+      "verdict": "APPROVE",
+      "artifact": "sparse-entry-implementation-review.md",
+      "correctedBlocker": "B1: memory eligibility gate moved after exact/recorded lookup; native nonexec/uninitialized fixtures pass."
+    }
+  },
+  "builds": {
+    "before": {
+      "packageBuild": {
+        "version": 1,
+        "artifact": "47932a3951b353e60247a0dead1d4341cade384c758cbf00449bf1d64d04edfb"
+      },
+      "bridgeSha256": "6288b37f28a98fc13108e09b5e97b527b7be298999722e320c6bf484f85361c3"
+    },
+    "after": {
+      "packageBuild": {
+        "version": 1,
+        "artifact": "358ffa7a34ac85ee138ce1eba13297b018659a1e163ebb4de84b277386b38feb"
+      },
+      "bridgeSha256": "f65f7013910119f4888f1aca6f20708da7ab79780f38386daf1da5cab675c775"
+    }
+  },
+  "baselineCommit": "18e3473f51231d6fc62a49e212d0c1b1ccf736b9",
+  "persistentClientSha256": "e6f0628dbe513fb568f3e7ad306bf5fe31757d403459dfb77363fb376c72d8e8",
+  "bridgeReproducibility": {
+    "builds": 2,
+    "byteIdentical": true,
+    "sha256": "f65f7013910119f4888f1aca6f20708da7ab79780f38386daf1da5cab675c775"
+  },
+  "checks": {
+    "matchedNative": {
+      "exactSparseAndNoncontiguousContainment": true,
+      "recordedFunctionsBeforeFallbackBlockAndDistanceGates": true,
+      "distanceBlocksHolesAndIneligibleMemory": true,
+      "invalidOptions": true,
+      "aliasProjectionAndBudget": true,
+      "viewContinuation": true,
+      "crossBuildSelectedEntriesAndText": true,
+      "beforeReadOnlyState": true,
+      "afterReadOnlyState": true
+    },
+    "nativeGuards": {
+      "inclusiveDistanceAndAllMissSkipsInspection": true,
+      "editLookup": true,
+      "lostLookup": true,
+      "malformedLookup": true,
+      "wrongEntry": true,
+      "pid": true,
+      "program": true,
+      "lostView": true,
+      "savedContextAvailableAndUnchanged": true,
+      "authAndExplicitAlreadyOpenProgram": true,
+      "native32BitAddressRange": true,
+      "restartRejectsOldViewBeforeLookup": true
+    },
+    "readOnlyAfterSetup": true,
+    "cleanup": []
+  },
+  "offline": {
+    "suite": {
+      "tests": 282,
+      "passed": 278,
+      "skipped": 4,
+      "failed": 0
+    },
+    "focused": {
+      "tests": 27,
+      "passed": 27
+    },
+    "release": {
+      "tests": 33,
+      "passed": 33
+    },
+    "coverage": {
+      "sourceOperations": 210,
+      "bridgeControls": 8,
+      "publicLeaves": 418
+    },
+    "packedInstall": "passed; skill/resources, profile/JSON/RPC, permission denial, spaces/Unicode"
+  },
+  "workload": {
+    "roundsPerBuild": 24,
+    "orderedAddresses": [
+      "180001008",
+      "180001009",
+      "180001028",
+      "180001048"
+    ],
+    "inputSha256": "fdca662746889f32cb98cb1625f638962af9de78cc905f428685a1d048be05e8",
+    "extraKnownNoiseEntries": 2048,
+    "uniqueSelectedEntries": 3,
+    "includeCallContext": false,
+    "fields": [
+      "entry_point",
+      "decompiled_code"
+    ],
+    "limitCharacters": 4000,
+    "totalCharacters": 16000,
+    "maxEntryDistance": 4096,
+    "oneWarmupPerBuild": true,
+    "order": "alternating before/after and after/before, no overlap",
+    "before": "batch miss -> one bounded same-prefix search -> deduplicated exact-entry batch",
+    "after": "one fused opt-in batch",
+    "equivalence": "selected entries, names, complete observed decompiled text, SHA256, Unicode lengths and truncation flags match every pair; original-address aliases preserved",
+    "disagreements": 0
+  },
+  "summary": {
+    "before": {
+      "workloads": 24,
+      "requests": 72,
+      "elapsedMs": {
+        "n": 24,
+        "p50": 844.5647089999984,
+        "p95": 1006.098874999996,
+        "sum": 21027.777418000012
+      },
+      "nativeHttp": 1128,
+      "getFunctions": 48,
+      "entryLookup": 0
+    },
+    "after": {
+      "workloads": 24,
+      "requests": 24,
+      "elapsedMs": {
+        "n": 24,
+        "p50": 767.8838340000075,
+        "p95": 841.9586249999993,
+        "sum": 18557.69295700002
+      },
+      "nativeHttp": 576,
+      "getFunctions": 24,
+      "entryLookup": 24
+    }
+  },
+  "improvementPercent": {
+    "medianElapsed": 9.079336868193844,
+    "totalElapsed": 11.746769104021293,
+    "cliRequests": 66.66666666666667,
+    "nativeHttp": 48.93617021276596
+  },
+  "nativeHttpDurationMs": {
+    "before": {
+      "/mcp/instance_info": {
+        "n": 240,
+        "p50": 1.8650830000115093,
+        "p95": 2.83816700000898,
+        "sum": 476.33058000006713
+      },
+      "/mcp/schema": {
+        "n": 240,
+        "p50": 3.6628749999945285,
+        "p95": 5.988582999998471,
+        "sum": 956.355755000026
+      },
+      "/get_program_options": {
+        "n": 240,
+        "p50": 1.9751669999968726,
+        "p95": 3.657500000001164,
+        "sum": 548.4057140000223
+      },
+      "/get_metadata": {
+        "n": 240,
+        "p50": 1.671875,
+        "p95": 2.593208999998751,
+        "sum": 427.3952020002034
+      },
+      "/insight/research-view/v1": {
+        "n": 96,
+        "p50": 1.6205419999896549,
+        "p95": 2.6225000000122236,
+        "sum": 170.60850100006792
+      },
+      "/get_functions": {
+        "n": 48,
+        "p50": 17.129750000007334,
+        "p95": 780.2266659999877,
+        "sum": 17269.224703999906
+      },
+      "/find_functions": {
+        "n": 24,
+        "p50": 3.6491249999962747,
+        "p95": 4.9331660000025295,
+        "sum": 93.73087099997792
+      }
+    },
+    "after": {
+      "/mcp/instance_info": {
+        "n": 120,
+        "p50": 1.819792000009329,
+        "p95": 2.460124999997788,
+        "sum": 231.43271100004495
+      },
+      "/mcp/schema": {
+        "n": 120,
+        "p50": 3.639999999999418,
+        "p95": 5.420874999996158,
+        "sum": 467.86641899999086
+      },
+      "/get_program_options": {
+        "n": 120,
+        "p50": 1.9669169999979204,
+        "p95": 3.237208999998984,
+        "sum": 258.5811620000095
+      },
+      "/get_metadata": {
+        "n": 120,
+        "p50": 1.6874170000082813,
+        "p95": 2.5606669999979204,
+        "sum": 215.82908499995392
+      },
+      "/insight/research-view/v1": {
+        "n": 48,
+        "p50": 1.4959170000074664,
+        "p95": 1.9902500000025611,
+        "sum": 76.95974800002296
+      },
+      "/insight/function-entries/v1": {
+        "n": 24,
+        "p50": 1.8087919999961741,
+        "p95": 2.7182920000050217,
+        "sum": 45.283668000032776
+      },
+      "/get_functions": {
+        "n": 24,
+        "p50": 694.8320830000011,
+        "p95": 766.3253330000007,
+        "sum": 16838.763583999993
+      }
+    }
+  },
+  "pairedElapsedMs": [
+    {
+      "round": 0,
+      "before": 900.5245830000058,
+      "after": 797.2652500000113
+    },
+    {
+      "round": 1,
+      "before": 910.6509170000063,
+      "after": 781.4363750000048
+    },
+    {
+      "round": 2,
+      "before": 882.8483750000014,
+      "after": 779.7591250000114
+    },
+    {
+      "round": 3,
+      "before": 855.5043339999975,
+      "after": 775.9934999999969
+    },
+    {
+      "round": 4,
+      "before": 844.5647089999984,
+      "after": 776.4852080000128
+    },
+    {
+      "round": 5,
+      "before": 873.0689169999969,
+      "after": 775.8360410000023
+    },
+    {
+      "round": 6,
+      "before": 851.5448330000072,
+      "after": 774.6684160000004
+    },
+    {
+      "round": 7,
+      "before": 815.8985419999954,
+      "after": 756.5289579999953
+    },
+    {
+      "round": 8,
+      "before": 825.4715829999914,
+      "after": 767.8838340000075
+    },
+    {
+      "round": 9,
+      "before": 831.6314589999965,
+      "after": 745.7086249999993
+    },
+    {
+      "round": 10,
+      "before": 833.8892079999932,
+      "after": 751.9549580000021
+    },
+    {
+      "round": 11,
+      "before": 999.2412080000067,
+      "after": 841.9586249999993
+    },
+    {
+      "round": 12,
+      "before": 1205.0073330000014,
+      "after": 865.5828340000007
+    },
+    {
+      "round": 13,
+      "before": 1006.098874999996,
+      "after": 803.8432909999974
+    },
+    {
+      "round": 14,
+      "before": 968.0236670000013,
+      "after": 813.721292000002
+    },
+    {
+      "round": 15,
+      "before": 863.0547089999891,
+      "after": 775.9150419999787
+    },
+    {
+      "round": 16,
+      "before": 817.5825000000186,
+      "after": 744.8264999999956
+    },
+    {
+      "round": 17,
+      "before": 848.1357500000158,
+      "after": 756.3648749999993
+    },
+    {
+      "round": 18,
+      "before": 819.8218329999945,
+      "after": 752.0419580000162
+    },
+    {
+      "round": 19,
+      "before": 806.7605829999957,
+      "after": 746.7728329999954
+    },
+    {
+      "round": 20,
+      "before": 830.3234999999986,
+      "after": 739.1419579999929
+    },
+    {
+      "round": 21,
+      "before": 808.9205409999995,
+      "after": 740.5206670000043
+    },
+    {
+      "round": 22,
+      "before": 815.2701670000097,
+      "after": 747.739916999999
+    },
+    {
+      "round": 23,
+      "before": 813.9392919999955,
+      "after": 745.7428749999963
+    }
+  ],
+  "method": {
+    "clock": "performance.now, retained client calls; excludes setup, warmups and trace-file reads. Includes per-command raw receipt persistence consistently in both routes.",
+    "content": "exact comparison of selected entries/name/decompile/hash/length/truncation; excludes scope/native revision identities",
+    "spanInterpretation": "Native HTTP spans include upstream dispatch; /get_functions includes decompilation but does not isolate decompiler CPU or per-function invocations. Nested facade/backend/native spans must not be summed as disjoint phases.",
+    "controlSeam": "Official Factory testing runtime fetch seam over a real isolated native bridge. PID/source/malformed/lost facts are injected; comment edit and native restart are actual owned operations.",
+    "addressRangeFixture": "Separate generated PE32 with an explicitly saved one-byte function; inclusive/exclusive distance and out-of-range checks pass.",
+    "limits": [
+      "One generated sparse PE and warm persistent clients; not a new PoE benchmark and not agent reasoning/tool-approval time.",
+      "Same host; a separate disposable guard worker was being prepared during the A/B run, so timing is observational, not an isolated host guarantee.",
+      "Previous workflow gets a favorable bounded single regex search from a known name prefix; no claim about all real discovery workloads.",
+      "Fewer CLI/native requests do not reduce unique selected functions to decompile; upstream decompiler CPU remains unbounded by these options.",
+      "Exact and recorded containment remain database metadata; a preceding candidate never establishes semantic membership.",
+      "An earlier exploratory candidate/proof is excluded: review found B1; its initial cleanup lacked Update, subsequently recovered through owned close/stop and permission revocation. Only corrected candidate with empty cleanup errors is accepted."
+    ]
+  },
+  "sourceSha256": {
+    "scripts/proof-function-entries.mjs": "ebf3e5205aada3e249d911fed6fbb4ee48d4d243513567723f763f2d44862b19",
+    "scripts/proof-function-entry-guards.mjs": "4f4f5c32edabb33fde8eca0bd219ad5910346b14089b14e1e783942b323cbcca",
+    "skills/ghidra-coordinator/src/function-entries.ts": "e8253033422efdb67a3f6f907f282d63c9d40b84bfe4556b7849f41b565689e4",
+    "skills/ghidra-coordinator/src/function-inspection.ts": "6260471cbde8e5eb7d915858e1b9ba2db772ad03e6b2644f990770234c02e099",
+    "skills/ghidra-coordinator/src/research.ts": "5f8a7a13059ba4bb2fd03ffd421e1a4f0d208b5147a582f78eefe9cdd00e7db7",
+    "skills/ghidra-coordinator/src/queries.ts": "3be96b931f07f9841961a43a79232e8e800610646d3a6932db91c6881aeedb93",
+    "skills/ghidra-coordinator/references/native/InsightResearchView.java": "78bd25f8a3d7a1bc640938d8497cd581c2c178915ae6003b19dceda507c34df2"
+  },
+  "evidenceSha256": {
+    "matched": {
+      "result.json": "eddda0596c670a0154192c307e942d87d87b07531dee4ee0df66eab4f07a9c20",
+      "cleanup.json": "a90f878e11fea05c1f905525cb907a947b5541dc074850226d8c5b9b0b158cd6",
+      "before/requests.json": "cc0b1106d67d5d826af0143c0a2e361d91fe8f49ce2b153cd382e4a17f73797c",
+      "after/requests.json": "e0d9bdaf022712e5dc5dba4613b369c83888e506a2bc488f40e4a1de58e800b7",
+      "before/timings.json": "6fdb310eab09a1ab5fe4038610d34afb3f112f74fb316225d97f4dcfbb231b8a",
+      "after/timings.json": "d1e9639d4124c458fc618b3330617c34141186894a958b12be105307efe0690e"
+    },
+    "guards": {
+      "report.json": "57998c9346f0fb252c44b28e834491be98abb7cd7cfe807df66790a13388a0b6",
+      "cleanup.json": "a90f878e11fea05c1f905525cb907a947b5541dc074850226d8c5b9b0b158cd6"
+    },
+    "tests": {
+      "final-all-tests-host.log": "69556a016992d4bad90ccd40802dc53eefb285a3c5c26cdb543a6849780bbac0",
+      "final-focused.log": "552ea25a829be7d9e5c2b5580253c311f91c78d964ce8ca15cdc5c02fa226245",
+      "final-release-tests.log": "1a75b7a625e69819caff767e69f23a434faa0077d34d9e2326f55f6dd50f94e3",
+      "final-coverage.log": "a1ef3a33ae52fbc17d23503afe0591303097202c98791f51412943b47fbfbe3f",
+      "final-package-proof.log": "208c73ff745dc22850bc2e1558ec8d6a19252c939123361e4b35b5ac5483f62b"
+    }
+  },
+  "privateEvidenceSets": {
+    "matched": "insight-entry-native-20261020-v3",
+    "guards": "insight-entry-guards-20261020-v4",
+    "note": "Full local raw receipts retained outside the repository; public receipt contains hashes and portable facts only."
+  }
+}
