@@ -1,86 +1,58 @@
 # insight-cli
 
-CLI/API for reverse engineering with durable sessions, isolated Ghidra contexts,
-explicit merge/refresh and ordinary saved files. Agents choose the investigation.
+A CLI/API for reverse-engineering agents. Spend more time understanding a program and
+less time managing Ghidra processes or writing scripts around missing analysis metadata.
+
+- Search raw strings and code references, and inspect functions in sparse Ghidra databases.
+- Give each agent an isolated research context, with saved work and explicit merge/refresh.
+- Use structured JSON results and a persistent client for sequences of research calls.
 
 ## Install
 
-Use Node.js 24 or newer:
+Requires **Node.js 24+**:
 
 ```sh
 npm install --global @eyeauras/insight-cli
-insight-cli --help
-insight-cli skill insight-re
-```
-
-The executable is `insight-cli`. Its global npm executable directory must be on PATH.
-No source checkout, TypeScript build or separate Factory installation is required.
-The pinned Factory IPC runtime is a normal npm dependency fetched from an immutable
-GitHub tarball URL; installation therefore needs npm registry and GitHub access.
-Use `insight-cli ghidra install` to deliver the pinned Ghidra/JDK/native/server runtime.
-External Ghidra launchers and Java paths are also supported.
-`insight-cli ilspy install` delivers ILSpy and its private .NET runtime for managed-code
-research. Tool downloads use pinned assets retained in our GitHub Releases.
-Use `insight-cli tools processes` to inspect owned executions across tools.
-Help, skill discovery and saving ordinary files do not need Ghidra or Java.
-
-Downloading a tool does not expose it in an agent's tool list. Connect the packaged skills
-to your agent host, or explicitly give the agent the path returned by `insight-cli skill
-insight-re --json`. See [agent setup](references/agent-setup.md) for tested project-local
-Codex setup and a practical usability check. Installation leaves agent settings unchanged.
-
-## Discover the toolbox
-
-```sh
-insight-cli tools list --json
-insight-cli tools show die --json
-insight-cli skill insight-die --json
-```
-
-The catalog describes the adapters and their packaged skills before any runtime is downloaded.
-Use each tool's `status` to check the selected profile, then follow its skill and generated help.
-The toolbox includes Ghidra, ILSpy, 7-Zip, LLVM utilities, DiE, LLDB, Frida, WinDbg, strace and .NET dump/stack/trace; platform
-and capability limits are explicit per tool. A partial classification or a failed native process
-is not a complete finding. Preserve useful output in ordinary project files and checkpoint it
-with `artifacts save` when useful. Existing project RE instructions retain precedence.
-
-## Start
-
-```sh
 insight-cli profile create local
-insight-cli --profile local permissions grant Update
-insight-cli --profile local ghidra install
-insight-cli --profile local ghidra status
-insight-cli --profile local ghidra open ./client.exe --session new --json
+insight-cli profile set-default local
+insight-cli permissions grant Update
+insight-cli ghidra install
 ```
 
-Retain the returned `session` and `target` and supply both on research calls:
+The last command downloads and verifies compatible Ghidra and JDK runtimes. No source
+checkout or separate Java installation is needed. See [runtime setup](https://github.com/iXab3r/insight-cli/blob/main/skills/ghidra-coordinator/references/managed-runtime.md)
+for existing installations and offline setup.
+
+For an AI agent, [connect the packaged skills](https://github.com/iXab3r/insight-cli/blob/main/skills/ghidra-coordinator/references/agent-setup.md).
+For repeated API calls, use the [persistent client](https://github.com/iXab3r/insight-cli/blob/main/skills/ghidra-coordinator/references/persistent.md).
+
+## Quick example
+
+Open a binary in a new private research context:
 
 ```sh
-insight-cli --profile local ghidra strings search --session <session> --target <target> --contains config.json --json
-insight-cli --profile local ghidra functions decompile --session <session> --target <target> --address <entry> --json
-insight-cli --profile local ghidra merge --session <session> --target <target> --json
+insight-cli ghidra open ./client.exe --session new --json
 ```
 
-Another agent uses `--session new` for its own context on the same input. It receives
-published changes with `ghidra refresh`; local work and conflicts remain explicit.
-Managed local startup needs no separately configured Ghidra Server.
-
-Save a completed project file or folder when a retained checkpoint is useful:
+Reuse the returned session and target IDs in place of `SESSION` and `TARGET`:
 
 ```sh
-insight-cli --profile local artifacts save ./analysis --json
+insight-cli ghidra strings anchors --session SESSION --target TARGET \
+  --text config --encodings ascii,utf16le --json
+insight-cli sessions status SESSION --target TARGET --json
 ```
 
-The response returns an ordinary saved path and digest. Follow existing project RE
-rules, formats and evidence locations; the packaged RE skill fills unspecified gaps.
-Installation does not register skills or change agent settings. Use `insight-cli skill`
-and `insight-cli skill insight-re` to locate packaged instructions and references.
+The search reads raw literal bytes, so it does not require defined Ghidra strings.
+Results include scan coverage and a continuation cursor when incomplete. New imports
+skip full automatic analysis by default; add `--analysis` to the first `open` to opt in.
+Continue with the [research guide](https://github.com/iXab3r/insight-cli/blob/main/skills/ghidra-coordinator/references/research.md).
 
-Full documentation and verification: [GitHub](https://github.com/iXab3r/insight-cli).
-License: MIT. The bundled GhidraMCP bridge has its own Apache-2.0 license and notice.
+## Benchmarks
 
-Runtime management, local archives and external paths: [managed runtime](references/managed-runtime.md).
-The host debugger and OS permissions are checked separately by `ghidra doctor`.
+In a fresh-agent PoE 2 investigation, installed insight-cli 0.4.0 with its persistent
+client finished in **16:35**, versus **19:43** through Ghidra MCP: **15.9% less wall time**,
+with comparable core findings. This is one adaptive research pair, not a general speed guarantee.
 
-Static .NET commands and ordinary output files: [ILSpy](references/ilspy.md).
+[Benchmarks](https://github.com/iXab3r/insight-cli/blob/main/BENCHMARKS.md) includes phases, earlier runs and comparison limits.
+[Development history and detailed reports](https://github.com/iXab3r/insight-cli/blob/main/docs/PROJECT-HISTORY.md) covers architecture,
+acceptance, other experiments and releases. See [Contributing](https://github.com/iXab3r/insight-cli/blob/main/CONTRIBUTING.md) for development.
