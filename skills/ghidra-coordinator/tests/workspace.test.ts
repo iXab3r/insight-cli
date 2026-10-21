@@ -148,6 +148,17 @@ test('request retries retain recorded outcomes and never claim an unresolved ope
   assert.throws(() => restarted.startRequest(running.request.id), /already started/);
   restarted.recordRequest(running.request.id, 'unknown', {...context, state: 'unknown'});
   assert.equal(store.reserveRequest(context, 'ghidra.comments.set', {address: '140001000', text: 'private'}, 'edit-1').request.state, 'unknown');
+  const sql = new DatabaseSync(join(directory, 'workspace.sqlite'));
+  try {
+    const shadow = {...running.request, id: 'q_blocked_retry', callerId: running.request.id, state: 'accepted'};
+    sql.prepare('INSERT INTO requests SELECT ?, ?, hash, context, ?, ? FROM requests WHERE id=?')
+      .run(shadow.id, shadow.callerId, shadow.state, JSON.stringify(shadow), running.request.id);
+  } finally { sql.close(); }
+  assert.equal(store.reserveRequest(context, 'ghidra.comments.set', {address: '140001000', text: 'private'}, running.request.id).request.id, running.request.id);
+  assert.equal(store.request('q_blocked_retry').state, 'accepted');
+  assert.throws(() => store.reserveRequest(context, 'ghidra.comments.set', {address: '140001000', text: 'different'}, running.request.id), /different effective input/);
+  const other = store.reserveOpen(target.id, 'new', settings).context;
+  assert.throws(() => store.reserveRequest(other, 'ghidra.comments.set', {address: '140001000', text: 'private'}, running.request.id), /different effective input/);
   assert.throws(() => store.reserveRequest(context, 'ghidra.comments.set', {address: '140001000', text: 'different'}, 'edit-1'), /different effective input/);
   const result = {session: context.session, target: target.id, state: 'applied'};
   store.recordRequest(running.request.id, 'applied', result);

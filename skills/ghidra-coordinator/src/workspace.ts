@@ -213,7 +213,10 @@ export class Workspace {
     if (callerId === undefined) return;
     if(this.db.prepare('SELECT id FROM administration_requests WHERE caller_id=?').get(id(callerId)))
       fail('idempotency','Request ID already identifies a profile administration operation.');
-    const row = this.db.prepare('SELECT id,hash FROM requests WHERE caller_id=?').get(id(callerId));
+    // A previous build may have reserved a blocked retry under this generated ID.
+    // The recorded identity still selects its original intent, not that newer caller ID.
+    const row = this.db.prepare('SELECT id,hash FROM requests WHERE id=?').get(id(callerId))
+      ?? this.db.prepare('SELECT id,hash FROM requests WHERE caller_id=?').get(id(callerId));
     if (!row) return;
     if (row.hash !== intentHash) fail('idempotency', 'Request ID was already used with different effective input.');
     return this.request(String(row.id));

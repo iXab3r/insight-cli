@@ -361,8 +361,10 @@ through Factory. The service records a request's identity and intent before ackn
 Within the selected profile, the same ID and same effective input identify the same request,
 including initial `open --session new` before the session ID is known. Reuse with different input
 fails. A retry retrieves the prior result or its current unresolved state rather than repeating
-the operation. Without a caller-provided ID, each invocation is a new intent; ordinary workflows
-remain unchanged.
+the operation. Scoped request retries also accept the generated request ID shown by status;
+the original operation, scope and effective input must still match. Save/close retries run
+evidence-based reconciliation directly, without opening or closing another native context.
+Without a caller-provided ID, each invocation is a new intent; ordinary workflows remain unchanged.
 
 An unknown or partially completed request must not be reported as successful or executed again
 merely because its caller retries. Reconciliation can establish a terminal result; otherwise the
