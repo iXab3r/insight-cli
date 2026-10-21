@@ -21,6 +21,31 @@ For research loops, use the packaged [persistent client](references/persistent.m
 one connection across queries. It uses the existing CLI transport and preserves typed errors;
 lost mutation replies still require request/status recovery.
 
+New targets import **without automatic analysis**. Reuse existing selectors/projects before
+opening another copy; `ghidra open --session <session> --target <target>` preserves its bound
+load settings, including older analysis choices. `--no-analysis` makes the fast choice explicit;
+`--analysis` opts into a full analysis only during the first import of a new target.
+After a fast import, use scoped `ghidra analysis run` to process pending analysis, or
+`ghidra analysis reanalyze` to deliberately queue full reanalysis. These are saved private
+mutations; merge deliberately. For a narrow question prefer bounded function disassembly,
+function creation and decompilation first; inspect help for the exact operation.
+
+For long first opens, `ghidra progress --session <session> --target <target> --json`
+reads retained progress without starting Java or repeating the operation. It reports the
+current stage, elapsed time, heartbeat age and native task message/counters when available;
+those counters belong to the current task, not the whole import. Human output also reports
+progress through Factory; `--json` keeps one final JSON result on stdout and stays quiet.
+If the execution host yields, keep its same running execution and inspect progress every
+5-10 seconds when useful; relay stage changes or meaningful stalls, and do other independent
+work. Do not silently extend waits to minutes or start a second import. Until selectors are
+returned, use the existing `sessions list/status` and `tools processes` inventory to locate the
+reserved scope. A stale heartbeat, dead worker or unknown result is not completion: inspect
+`sessions status` and recovery before continuing. Pre-upgrade workers have no progress record;
+null progress means unavailable, never success. Progress is observational, not a completion receipt. This command tracks first open only;
+its old complete record does not describe later `analysis run`/`reanalyze` operations.
+`operation: initial-model` completes after verified shared-model publication; the private
+session context can still be opening. Inspect `sessions status` for context readiness.
+
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
 For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while

@@ -1,4 +1,5 @@
 import {runTool,type RunContext} from './tool-runtime/run.js';
+import {javaClasspathArguments} from './tool-runtime/java-arguments.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, readdir, mkdir, open, rename, rm, realpath, stat } from 'node:fs/promises';
 import { basename, delimiter, dirname, isAbsolute, join,relative,sep } from 'node:path';
@@ -120,7 +121,7 @@ export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:R
   try {
     const executable=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':'')),args=['-proc:none','-cp',inputs.classpath,'-d',temporary,...names.map(name=>join(sources,name))];
     if(c)await runTool(c,{tool:'ghidra',role:'compile-helpers',installation:inputs.fingerprint,executable,arguments:args,timeoutMs:60000,maxOutputBytes:262144});
-    else await run(executable,args,{timeout:60000,maxBuffer:262144});
+    else await run(executable,await javaClasspathArguments(temporary,'ghidra',executable,args),{timeout:60000,maxBuffer:262144});
     const complete = await open(join(temporary, 'complete'), 'wx', 0o600);
     try { await complete.writeFile(key); await complete.sync(); } finally { await complete.close(); }
     try { await rename(temporary, classes); }

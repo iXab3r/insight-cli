@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
-import type {CommandContext} from '@eyeauras/cli-factory';
+import {command,type CommandContext} from '@eyeauras/cli-factory';
 import {mkdir,readFile,writeFile,lstat,realpath,rm,symlink,rename} from 'node:fs/promises';
 import {join} from 'node:path';
-import {AnalysisStorage} from '../src/analysis-storage.js';
+import {AnalysisStorage,analysisDirectory} from '../src/analysis-storage.js';
 import {createInsightCli} from '../src/cli.js';
 import {Workspace} from '../src/workspace.js';
 import {SessionBackend} from './fixtures/session-backend.js';
@@ -100,10 +100,12 @@ test('pending private snapshots and unknown request/publication identities survi
   const dbBefore=await readFile(join(source,'workspace/workspace.sqlite'));
   await storage.migrate(c,base);
   assert.deepEqual(await readFile(join(destination,'workspace/workspace.sqlite')),dbBefore,'Migration does not rewrite durable research state');
-  const reopened=new Workspace(join(destination,'workspace'),'default');t.after(()=>reopened.close());
-  assert.deepEqual(reopened.request(request.id),beforeRequest);assert.deepEqual(reopened.activePublication(target.id),beforePublication);assert.deepEqual(reopened.context(who),beforeContext);
-  assert.equal(await readFile(await reopened.artifacts.verify(candidate),'utf8'),JSON.stringify({names:{'1000':'retained'},comments:{},opaque:'candidate'}));
-  assert.equal((await f.profileStore.get()).values.analysisDirectory,destination);
+  const reopened=new Workspace(join(destination,'workspace'),'default');
+  try{
+    assert.deepEqual(reopened.request(request.id),beforeRequest);assert.deepEqual(reopened.activePublication(target.id),beforePublication);assert.deepEqual(reopened.context(who),beforeContext);
+    assert.equal(await readFile(await reopened.artifacts.verify(candidate),'utf8'),JSON.stringify({names:{'1000':'retained'},comments:{},opaque:'candidate'}));
+    assert.equal((await f.profileStore.get()).values.analysisDirectory,destination);
+  }finally{reopened.close();}
 });
 test('resume binds the destination filesystem anchor and never recreates an unmounted location',async t=>{
   const {c,storage,base,destination}=await setup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});
@@ -171,9 +173,11 @@ test('managed runtime authority and a closed native receipt reopen after paths m
   const id='b'.repeat(64),home=join(source,'runtime/installations',id,'ghidra');await mkdir(home,{recursive:true});
   const selection={schema:1,mode:'managed',id,ghidraHome:home,java:'/synthetic/java',fingerprint:'a'.repeat(64),selectedAt:'fixture'};await atomicWrite(join(source,'runtime/selection.json'),selection);w.close();
   await storage.migrate(c,base);assert.deepEqual(runtimeSelection(source,destination),selection);
-  const reopened=new Workspace(join(destination,'workspace'),'default');t.after(()=>reopened.close());
-  const backend=new GhidraContexts(reopened,{fingerprint:'a'.repeat(64)} as NativeInputs,{...c,profile:await f.profileStore.get()});
-  assert.equal(await backend.closed({session:opened.context.session,target:target.id}),true);
+  const reopened=new Workspace(join(destination,'workspace'),'default');
+  try{
+    const backend=new GhidraContexts(reopened,{fingerprint:'a'.repeat(64)} as NativeInputs,{...c,profile:await f.profileStore.get()});
+    assert.equal(await backend.closed({session:opened.context.session,target:target.id}),true);
+  }finally{reopened.close();}
 });
 test('active/unverified processes and escaping symlinks prevent migration without changing profile',async t=>{
   const {f,c,storage,source,base}=await setup(t);
@@ -206,4 +210,117 @@ test('interrupted cleanup rejects an ordinary replacement directory with the sam
   const j=JSON.parse(await readFile(join(source,'storage/migration.json'),'utf8')),retained=join(source,'.storage-retained',j.id);
   await rename(retained,retained+'-original');await mkdir(retained);await writeFile(join(retained,'foreign'),'preserve unrelated bytes');
   await assert.rejects(storage.resume(selected),/replaced/);assert.equal(await readFile(join(retained,'foreign'),'utf8'),'preserve unrelated bytes');
+});
+
+async function emptySetup(t:Parameters<typeof createCliFixture>[0],checkpoint?:(phase:string)=>Promise<void>){
+  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']},{name:'other',permissions:['ReadOnly','Update']}]});
+  const c={appArguments:f.appArguments,profile:await f.profileStore.get(),signal:new AbortController().signal,cwd:f.root,environment:{},fetch:globalThis.fetch} as unknown as CommandContext;
+  const storage=new AnalysisStorage(f.profileStore,async()=>{},checkpoint),base=join(f.root,'external volume Ω');await mkdir(base);
+  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:()=>{throw Error('Storage must never request native authentication');}}));
+  return {f,c,storage,base,app};
+}
+test('migration establishes an installation default inherited by newly created profiles after owner restart',async t=>{
+  const {f,c,storage,base}=await setup(t);await storage.migrate(c,base);
+  const app=f.createApplication(runtime=>createInsightCli({runtime}));
+  await f.json(app,['profile','create','fresh']);await f.json(app,['--profile','fresh','permissions','grant','Update']);
+  const show=await f.json(app,['--profile','fresh','storage','show']) as {directory:string;defaultBaseDirectory:string};
+  const destination=join(base,'insight-cli','fresh');assert.equal(show.directory,destination);assert.equal(show.defaultBaseDirectory,base);
+  assert.equal((await f.profileStore.get('fresh')).values.analysisDirectory,undefined,'Passive show does not initialize data');await assert.rejects(lstat(destination));
+  const input=join(f.root,'fresh finding');await writeFile(input,'new profile finding');
+  const saved=await f.json(app,['--profile','fresh','artifacts','save',input]) as {path:string};
+  assert.ok(saved.path.startsWith(join(destination,'materials')));assert.equal(await readFile(saved.path,'utf8'),'new profile finding');
+  assert.equal((await f.profileStore.get('fresh')).values.analysisDirectory,destination);
+  const imported=await f.json(app,['--profile','fresh','targets','add',input]) as {target:string};assert.ok(imported.target);
+  const reopened=f.createApplication(runtime=>createInsightCli({runtime}));
+  assert.ok(JSON.stringify(await f.json(reopened,['--profile','fresh','targets','list'])).includes(imported.target));
+  assert.equal(await readFile(join(base,'insight-cli','default','workspace/native database/program.db'),'utf8'),'native database bytes');
+});
+test('changing the default preserves initialized profiles and isolates subsequent profiles',async t=>{
+  const {f,app,storage,c,base}=await emptySetup(t);await storage.setDefault(c,base);
+  const input=join(f.root,'input');await writeFile(input,'isolated');
+  const first=await f.json(app,['artifacts','save',input]) as {path:string};
+  const second=join(f.root,'second disk');await mkdir(second);await storage.setDefault(c,second);
+  const again=await f.json(app,['artifacts','save',input]) as {path:string};assert.ok(again.path.startsWith(join(base,'insight-cli','default','materials')));assert.equal(await readFile(first.path,'utf8'),'isolated');
+  const other=await f.json(app,['--profile','other','artifacts','save',input]) as {path:string};
+  assert.ok(other.path.startsWith(join(second,'insight-cli','other','materials')));assert.notEqual(other.path,first.path);
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,join(base,'insight-cli','default'));
+});
+for(const replacement of [false,true])test('missing or replaced shared storage blocks new writes without fallback: '+replacement,async t=>{
+  const {f,app,storage,c,base}=await emptySetup(t);await storage.setDefault(c,base);await rename(base,base+'-original');if(replacement)await mkdir(base);
+  const shown=await f.json(app,['storage','show']) as {availability:string};assert.equal(shown.availability,'storage.unavailable');
+  const result=await f.run(app,['targets','list','--json']);assert.notEqual(result.exitCode,0);assert.match(result.stderr,/missing or changed/);
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,undefined);
+  for(const tree of ['workspace','materials','temp','runtime'])await assert.rejects(lstat(join(c.appArguments.AppDataDirectory,tree)));
+  await assert.rejects(lstat(join(base,'insight-cli')));
+});
+test('legacy AppData content and explicit AppData overrides remain readable after setting a default',async t=>{
+  const {f,c,storage,source,base}=await setup(t);await mkdir(base);await storage.setDefault(c,base);
+  const app=f.createApplication(runtime=>createInsightCli({runtime}));
+  assert.equal((await f.json(app,['storage','show']) as {directory:string}).directory,source);
+  await f.json(app,['targets','list']);assert.equal((await f.profileStore.get()).values.analysisDirectory,undefined);
+  assert.equal(await readFile(join(source,'workspace/native database/program.db'),'utf8'),'native database bytes');
+  await f.profileStore.set('other',{analysisDirectory:null});
+  const other=await f.json(app,['--profile','other','storage','show']) as {directory:string};assert.ok(!other.directory.startsWith(base));
+  await f.json(app,['--profile','other','targets','list']);assert.equal((await f.profileStore.get('other')).values.analysisDirectory,null);
+});
+test('profile-only migration and dry-run leave the shared default unchanged',async t=>{
+  const {f,c,storage,base}=await setup(t),app=f.createApplication(runtime=>createInsightCli({runtime}));
+  const plan=await f.json(app,['storage','migrate','--directory',base,'--dry-run']) as {setsInstallationDefault:boolean};assert.equal(plan.setsInstallationDefault,true);
+  await assert.rejects(lstat(join(c.appArguments.RoamingAppDataDirectory,'.analysis-storage-default.json')));
+  await f.json(app,['storage','migrate','--directory',base,'--profile-only']);
+  await assert.rejects(lstat(join(c.appArguments.RoamingAppDataDirectory,'.analysis-storage-default.json')));
+  assert.equal((await f.json(app,['--profile','other','storage','show']) as {defaultBaseDirectory:unknown}).defaultBaseDirectory,null);
+});
+test('a later default selection wins over an interrupted older migration',async t=>{
+  const {c,storage,base,f}=await setup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});
+  await assert.rejects(storage.migrate(c,base),/interrupted/);
+  const newer=join(f.root,'newer disk');await mkdir(newer);await new AnalysisStorage(f.profileStore,async()=>{}).setDefault(c,newer);
+  const resumed=await new AnalysisStorage(f.profileStore,async()=>{}).resume(c) as {installationDefault:string};assert.equal(resumed.installationDefault,'superseded');
+  assert.equal((await storage.show({...c,profile:await f.profileStore.get()})).defaultBaseDirectory,newer);
+});
+for(const phase of ['reserved','aliases-installed','profile-switched'])test('interrupted empty-profile initialization resumes on the next ordinary command: '+phase,async t=>{
+  let once=true;const {f,c,storage,base,app}=await emptySetup(t,async at=>{if(at===phase&&once){once=false;throw Error('disposable init interruption');}});
+  await storage.setDefault(c,base);
+  const entry=storage.wrap(command('probe','Disposable storage read',async()=>({ok:true})));
+  await assert.rejects(async()=>entry.run!({args:{},options:{}},c),/disposable init interruption/);
+  await f.json(app,['targets','list']);
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,join(base,'insight-cli','default'));
+  const j=JSON.parse(await readFile(join(c.appArguments.AppDataDirectory,'storage/migration.json'),'utf8'));assert.equal(j.state,'cleaned');assert.equal(j.bytes,0);
+});
+test('a disk removed after automatic reservation is never recreated during recovery',async t=>{
+  const {f,c,storage,base,app}=await emptySetup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});await storage.setDefault(c,base);
+  const entry=storage.wrap(command('probe','Disposable storage read',async()=>({ok:true})));
+  await assert.rejects(async()=>entry.run!({args:{},options:{}},c),/interrupted/);await rename(base,base+'-original');await mkdir(base);
+  assert.notEqual((await f.run(app,['targets','list','--json'])).exitCode,0);await assert.rejects(lstat(join(base,'insight-cli')));
+  await assert.rejects(lstat(join(c.appArguments.AppDataDirectory,'workspace')));
+});
+test('fresh initialization refuses foreign destination data and a storage root owned by another installation',async t=>{
+  const {f,c,storage,base,app}=await emptySetup(t);await storage.setDefault(c,base);
+  const destination=join(base,'insight-cli','default');await mkdir(destination,{recursive:true});await writeFile(join(destination,'foreign'),'preserve foreign bytes');
+  assert.notEqual((await f.run(app,['targets','list','--json'])).exitCode,0);assert.equal(await readFile(join(destination,'foreign'),'utf8'),'preserve foreign bytes');
+  const second=await emptySetup(t);await assert.rejects(second.storage.setDefault(second.c,base),/another application/);
+});
+test('an active command keeps its selected default while another profile changes the installation setting',async t=>{
+  const {f,c,storage,base}=await emptySetup(t);await storage.setDefault(c,base);
+  let ready!:()=>void,release!:()=>void;const started=new Promise<void>(r=>ready=r),pending=new Promise<void>(r=>release=r);
+  const entry=storage.wrap(command('probe','Disposable storage read',async(_i,current)=>{const before=analysisDirectory(current);ready();await pending;return {before,after:analysisDirectory(current)};}));
+  const result=entry.run!({args:{},options:{}},c);await started;
+  const newer=join(f.root,'newer disk');await mkdir(newer);await storage.setDefault(c,newer);release();
+  const value=await result as {before:string;after:string};assert.equal(value.before,join(base,'insight-cli','default'));assert.equal(value.after,value.before);
+});
+
+for(const laterSelection of [false,true])test('lost default-selection acknowledgement is idempotent and respects later intent: '+laterSelection,async t=>{
+  const {f,c,storage,base}=await setup(t,async phase=>{if(phase==='default-selected')throw Error('lost default reply');});
+  await assert.rejects(storage.migrate(c,base),/lost default reply/);
+  const recovery=new AnalysisStorage(f.profileStore,async()=>{}),newer=join(f.root,'newer disk');
+  if(laterSelection){await mkdir(newer);await recovery.setDefault(c,newer);}
+  await recovery.resume(c);
+  assert.equal((await recovery.show({...c,profile:await f.profileStore.get()})).defaultBaseDirectory,laterSelection?newer:base);
+  assert.equal(await readFile(join(base,'insight-cli','default','workspace/native database/program.db'),'utf8'),'native database bytes');
+});
+test('lost default acknowledgement cannot adopt a replacement base on resume',async t=>{
+  const {f,c,storage,base}=await setup(t,async phase=>{if(phase==='default-selected')throw Error('lost default reply');});
+  await assert.rejects(storage.migrate(c,base),/lost default reply/);await rename(base,base+'-original');await mkdir(base);
+  const newer=join(f.root,'newer disk');await mkdir(newer);const recovery=new AnalysisStorage(f.profileStore,async()=>{});await recovery.setDefault(c,newer);
+  await assert.rejects(recovery.resume(c),/replaced|volume|directory/);await assert.rejects(lstat(join(base,'insight-cli')));
 });

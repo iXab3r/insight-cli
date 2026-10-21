@@ -388,3 +388,20 @@ test('native budget settings can change after a failed import without invalidati
  await Promise.all([f.json(app,['ghidra','budgets','set','--initial-import-seconds','1800']),f.json(app,['ghidra','budgets','set','--save-seconds','60'])]);
  const concurrent=await f.profileStore.get('default');assert.equal(concurrent.values.initialImportSeconds,1800);assert.equal(concurrent.values.saveSeconds,60);assert.equal(concurrent.values.java,'fixture-runtime');
 });
+
+
+test('initial analysis is explicit and continuation preserves bound settings',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let workspace!:Workspace;
+ const app=f.createApplication(runtime=>createInsightCli({runtime,backend:value=>{workspace=value;return new Fake(value);}}));
+ for(const [suffix,flags,expected]of [['default',[],false],['off',['--no-analysis'],false],['on',['--analysis'],true]] as const){
+  const input=join(f.root,suffix+'.exe');await writeFile(input,suffix);
+  const result=await f.run(app,['ghidra','open',input,'--session','new',...flags,'--json']);assert.equal(result.exitCode,0,result.stderr);
+  const opened=JSON.parse(result.stdout);assert.equal(workspace.model(opened.target).settings.autoAnalyze,expected);
+  const next=await f.json(app,['ghidra','open','--session',opened.session,'--target',opened.target]) as Opened;
+  assert.equal(next.target,opened.target);assert.equal(workspace.model(opened.target).settings.autoAnalyze,expected);
+  const changed=await f.run(app,['ghidra','open','--session',opened.session,'--target',opened.target,...(expected?['--no-analysis']:['--analysis']),'--json']);
+  assert.notEqual(changed.exitCode,0);assert.equal(workspace.model(opened.target).settings.autoAnalyze,expected);
+  const progress=await f.json(app,['ghidra','progress','--session',opened.session,'--target',opened.target]) as any;
+  assert.equal(progress.progress,null);
+ }
+});

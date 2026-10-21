@@ -61,6 +61,11 @@ An unavailable tool is a concrete gap; continue supported work without inventing
 
 When using `insight-cli ghidra`, read the skill returned by `insight-cli skill insight-ghidra` and generated help. Open through
 `insight-cli ghidra open <input> --session new --json` and retain the returned selectors.
+New inputs import without full automatic analysis. Reuse retained targets/contexts; opt into
+initial `--analysis` only when needed. After a fast open, scoped `ghidra analysis run` or
+`analysis reanalyze` performs explicit analysis. For a long first open, inspect `ghidra progress`
+at 5-10 second intervals and report meaningful stage changes; keep the original execution
+and continue independent research while it runs. See the Ghidra skill for progress limits.
 Every scoped call supplies both `--session` and `--target`. Independent agents use
 different sessions; callers sharing selectors use one ordered context.
 

@@ -23,6 +23,8 @@ class InsightInitialImport {
                 JsonObject s=new JsonObject();s.addProperty("intentHash",InsightInitialJournal.hash(root.resolve("intent.json")));
                 s.addProperty("phase","importing");s.addProperty("pid",ProcessHandle.current().pid());s.addProperty("snapshot","attempt-"+UUID.randomUUID()+".gzf");
                 Path attempt=root.resolve(InsightInitialJournal.text(s,"snapshot")+".json");InsightInitialJournal.write(attempt,s);InsightInitialJournal.write(journal,s);
+                try(var progress=new InsightImportProgress(root,InsightInitialJournal.text(p,"target"))){
+                progress.phase("runtime-initialization");
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 JsonObject settings=p.getAsJsonObject("settings"),request=new JsonObject();
                 request.addProperty("input",input.toString());request.addProperty("output",root.resolve(InsightInitialJournal.text(s,"snapshot")).toString());
@@ -31,10 +33,14 @@ class InsightInitialImport {
                 if(settings.has("compilerSpec"))request.add("compiler_spec",settings.get("compilerSpec"));
                 if(settings.has("imageBase"))request.add("image_base",settings.get("imageBase"));
                 if(settings.has("loaderOptions"))request.add("options",settings.get("loaderOptions"));
-                JsonObject metadata=new Gson().toJsonTree(InsightSdkFiles.importProgram(request)).getAsJsonObject();
+                JsonObject metadata;
+                try{metadata=new Gson().toJsonTree(InsightSdkFiles.importProgram(request,progress)).getAsJsonObject();}
+                catch(Throwable failure){progress.state(progress.isCancelled()?"cancelled":"failed");throw failure;}
+                progress.phase("snapshot-verification");
                 Path file=root.resolve(InsightInitialJournal.text(s,"snapshot"));InsightInitialJournal.sync(file);
                 s.add("metadata",metadata);s.addProperty("snapshotSha256",InsightInitialJournal.hash(file));s.addProperty("phase","prepared");InsightInitialJournal.write(attempt,s);InsightInitialJournal.write(journal,s);
-                InsightInitialJournal.prepared(root);out.println("{\"state\":\"prepared\"}");
+                InsightInitialJournal.prepared(root);progress.state("prepared");out.println("{\"state\":\"prepared\"}");
+                }
             }
             System.exit(0);
         }catch(Throwable failure){failure.printStackTrace(System.err);out.println("{\"state\":\"failed\"}");System.exit(1);}

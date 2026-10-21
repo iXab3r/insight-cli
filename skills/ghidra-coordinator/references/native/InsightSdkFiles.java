@@ -54,14 +54,17 @@ class InsightSdkFiles {
             return Map.of("supported",rows,"all_loader_names",LoaderService.getAllLoaderNames());
         }
     }
-    static Object importProgram(JsonObject p) throws Exception {
+    static void phase(TaskMonitor monitor,String phase)throws Exception{if(monitor instanceof InsightImportProgress progress)progress.phase(phase);}
+    static Object importProgram(JsonObject p) throws Exception {return importProgram(p,TaskMonitor.DUMMY);}
+    static Object importProgram(JsonObject p,TaskMonitor monitor) throws Exception {
+        phase(monitor,"import");
         String selected=text(p,"loader");Object consumer=new Object();Loader loader=null;
         if(selected.isEmpty()){
             Language language=text(p,"language").isEmpty()?null:DefaultLanguageService.getLanguageService().getLanguage(new LanguageID(text(p,"language")));
             CompilerSpec compiler=language==null?null:text(p,"compiler_spec").isEmpty()?language.getDefaultCompilerSpec():language.getCompilerSpecByID(new CompilerSpecID(text(p,"compiler_spec")));
-            var loaded=language==null?AutoImporter.importByUsingBestGuess(Path.of(text(p,"input")).toFile(),null,"/",consumer,new MessageLog(),TaskMonitor.DUMMY):
-                AutoImporter.importByLookingForLcs(Path.of(text(p,"input")).toFile(),null,"/",language,compiler,consumer,new MessageLog(),TaskMonitor.DUMMY);
-            try{if(loaded==null||loaded.size()!=1)throw new IllegalArgumentException("Expected one imported program");return saveImport(loaded.getPrimaryDomainObject(),p,"automatic");}
+            var loaded=language==null?AutoImporter.importByUsingBestGuess(Path.of(text(p,"input")).toFile(),null,"/",consumer,new MessageLog(),monitor):
+                AutoImporter.importByLookingForLcs(Path.of(text(p,"input")).toFile(),null,"/",language,compiler,consumer,new MessageLog(),monitor);
+            try{if(loaded==null||loaded.size()!=1)throw new IllegalArgumentException("Expected one imported program");return saveImport(loaded.getPrimaryDomainObject(),p,"automatic",monitor);}
             finally{if(loaded!=null)loaded.release(consumer);}
         }
         for(Loader candidate:ClassSearcher.getInstances(Loader.class))if(candidate.getClass().getName().equals(selected)||candidate.getClass().getSimpleName().equals(selected)||candidate.getName().equals(selected)){
@@ -77,24 +80,24 @@ class InsightSdkFiles {
             Language effectiveLanguage=language;if(effectiveLanguage==null&&selectedSpec.getLanguageCompilerSpec()!=null)effectiveLanguage=DefaultLanguageService.getLanguageService().getLanguage(selectedSpec.getLanguageCompilerSpec().languageID);
             var options=configured(loader.getDefaultOptions(provider,selectedSpec,null,false,false),optionValues(p),effectiveLanguage==null?null:effectiveLanguage.getAddressFactory());
             String error=loader.validateOptions(provider,selectedSpec,options,null);if(error!=null)throw new IllegalArgumentException("Native loader rejected options: "+error);
-            var settings=new Loader.ImporterSettings(provider,"OwnedInput",null,"/",false,selectedSpec,options,consumer,new MessageLog(),TaskMonitor.DUMMY);
+            var settings=new Loader.ImporterSettings(provider,"OwnedInput",null,"/",false,selectedSpec,options,consumer,new MessageLog(),monitor);
             var result=loader.load(settings);
             if(result==null)throw new IllegalStateException("Native loader did not return a program");
             try {
                 if(result.size()!=1||!(result.getPrimaryDomainObject() instanceof Program))throw new IllegalArgumentException("Loader must produce one program per explicit target");
-                return saveImport((Program)result.getPrimaryDomainObject(),p,loader.getClass().getName());
+                return saveImport((Program)result.getPrimaryDomainObject(),p,loader.getClass().getName(),monitor);
             } finally {result.release(consumer);}
         }
     }
-    static Object saveImport(Program program,JsonObject p,String loader)throws Exception{
+    static Object saveImport(Program program,JsonObject p,String loader,TaskMonitor monitor)throws Exception{
         boolean analyze=p.has("auto_analyze")&&p.get("auto_analyze").getAsBoolean();
-        if(analyze){ghidra.app.script.GhidraScriptUtil.acquireBundleHostReference();int tx=program.startTransaction("Initial analysis");boolean success=false;
-            try{AutoAnalysisManager analysis=AutoAnalysisManager.getAnalysisManager(program);analysis.initializeOptions();analysis.reAnalyzeAll(null);analysis.startAnalysis(TaskMonitor.DUMMY);success=true;}
+        if(analyze){phase(monitor,"analysis");ghidra.app.script.GhidraScriptUtil.acquireBundleHostReference();int tx=program.startTransaction("Initial analysis");boolean success=false;
+            try{AutoAnalysisManager analysis=AutoAnalysisManager.getAnalysisManager(program);analysis.initializeOptions();analysis.reAnalyzeAll(null);analysis.startAnalysis(monitor);monitor.checkCancelled();success=true;}
             finally{program.endTransaction(tx,success);ghidra.app.script.GhidraScriptUtil.releaseBundleHostReference();}}
         if(p.has("image_base")){int tx=program.startTransaction("Initial image base");boolean success=false;
             try{program.setImageBase(program.getAddressFactory().getDefaultAddressSpace().getAddress(new BigInteger(text(p,"image_base"),16).longValue()),true);success=true;}
             finally{program.endTransaction(tx,success);}}
-        program.saveToPackedFile(Path.of(text(p,"output")).toFile(),TaskMonitor.DUMMY);
+        phase(monitor,"save");program.saveToPackedFile(Path.of(text(p,"output")).toFile(),monitor);monitor.checkCancelled();
         return Map.of("state","imported","loader",loader,"language",program.getLanguageID().toString(),"base_address",program.getImageBase().toString(),
             "compiler",program.getCompilerSpec().getCompilerSpecID().toString(),"sha256",program.getExecutableSHA256(),"auto_analyzed",analyze);
     }

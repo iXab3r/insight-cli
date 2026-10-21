@@ -128,7 +128,7 @@ The canonical npm helper and its progressive skill live in `skills/ghidra-coordi
 package is `@eyeauras/insight-cli`, with executable `insight-cli`. Factory supplies one command tree
 for help, human/JSON output and `cli.execute`, plus profiles, OS credentials, permissions and shared
 IPC ownership. Update permission starts disabled. Factory control state stays in profile AppData; `storage` can relocate the complete
-analysis/runtime trees to a selected volume. See [storage](skills/ghidra-coordinator/references/storage.md).
+analysis/runtime trees to a selected volume and make it the default for new profiles. See [storage](skills/ghidra-coordinator/references/storage.md).
 
 Configure Java 21 and Ghidra 12.1.2 as described in
 [setup](skills/ghidra-coordinator/references/setup.md). Omit `server` for managed local startup;
@@ -183,3 +183,7 @@ Managed Ghidra delivery: [runtime commands and ownership](skills/ghidra-coordina
 Version 0.2.0 is published on npm as `latest`. The manual release workflow passes build,
 OIDC publication and a fresh registry global installation; the archive matches the native-tested
 candidate byte for byte. See [release verification](docs/verification/npm-release-0.2.0.json).
+
+New Ghidra targets import without full automatic analysis; opt in with `ghidra open --analysis`.
+Use scoped `ghidra analysis run` or `analysis reanalyze` later when needed.
+`ghidra progress --session <id> --target <id> --json` reads first-open progress without launching Ghidra.

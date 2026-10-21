@@ -57,6 +57,7 @@ import {stringAnchorCommands} from './string-anchors.js';
 import {contextDiagnosticCommands} from './context-diagnostics.js';
 import {traceCommand} from './internal-timing.js';
 import {timedBackend} from './timed-backend.js';
+import {readInitialProgress} from './initial-progress.js';
 
 export interface Options {
   runtime?: CliRuntime;
@@ -288,6 +289,10 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
+        command('progress','Read initial-model import/publication progress without starting Ghidra',async({options:o},c)=>{
+          const selected=owner.selected(c),who=scope(o);selected.workspace.context(who);
+          return {...who,progress:await readInitialProgress(selected.workspace.directory,who.target)};
+        },{permission:Permission.ReadOnly,options:scoped}),
         command('budgets','Inspect or configure native execution budgets',[
           command('show','Read effective per-request native budgets',(_invocation,c)=>({profile:c.profile.name,initialImportSeconds:ghidraBudget(c.profile.values,'import')/1000,saveSeconds:ghidraBudget(c.profile.values,'save')/1000}),{permission:Permission.ReadOnly}),
           command('set','Configure subsequent native requests without invalidating retained research',async({options:o},c)=>{
@@ -312,7 +317,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
           const selected=owner.selected(c),target=args.input?(await selected.workspace.importTarget(resolve(c.cwd,text(args.input,4096)))).id:id(o.target);
           let previous;
           try{previous=selected.workspace.model(target).settings;}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
-          const settings={...previous,autoAnalyze:o.analysis===false?false:previous?.autoAnalyze??true,
+          const settings={...previous,autoAnalyze:typeof o.analysis==='boolean'?o.analysis:previous?.autoAnalyze??false,
             ...(o.language?{language:text(o.language)}:{}),...(o.compilerSpec?{compilerSpec:text(o.compilerSpec)}:{}),
             ...(o.imageBase?{imageBase:text(o.imageBase)}:{}),...(o.loader?{loader:text(o.loader,512)}:{}),
             ...(o.loaderOptions!==undefined?{loaderOptions:object(parseDomainJson(text(o.loaderOptions,16000))) as Record<string,string|number|boolean>}:{})};
@@ -320,7 +325,8 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.Update,options:[{flags:'--session <id>',description:'Use new for independent work, or an existing session',required:true},
           {flags:'--target <id>',description:'Continue existing input instead of supplying a file'},request,
           {flags:'--mode <mode>',description:'Request headless or gui; continuation preserves current mode'},
-          {flags:'--no-analysis',description:'Skip initial automatic analysis'},
+          {flags:'--analysis',description:'Opt in to full initial automatic analysis (new targets only)'},
+          {flags:'--no-analysis',description:'Skip initial automatic analysis (the default for new targets)'},
           {flags:'--language <id>',description:'Explicit initial loader language'},
           {flags:'--compiler-spec <id>',description:'Explicit initial compiler specification'},
           {flags:'--image-base <address>',description:'Initial image base'},

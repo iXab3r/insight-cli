@@ -7,11 +7,12 @@ import {atomicWrite,readJson,toolProfileBusy} from './tool-runtime/store.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
 import {runtimeProcesses} from './runtime-manager.js';
 import {digest} from './model.js';
+import {analysisTrees,inheritedStorage,legacyAnalysis,storageDefault,validateStorageDefault,checkStorageDefaultBase,writeStorageDefault,type StorageDefault} from './analysis-default.js';
+export {analysisTrees} from './analysis-default.js';
 
 // Move the complete runtime tree too: installation stages must share a filesystem with
 // installations, and both native checks and process runs can contain large generated DBs.
 // Stable aliases preserve references in immutable native journals, selections and results.
-export const analysisTrees=['workspace','materials','temp','runtime'];
 const terminal=(state:string)=>['committed','rolled_back','cleaned'].includes(state);
 const inside=(parent:string,child:string)=>{const r=relative(parent,child);return r===''||!isAbsolute(r)&&r!=='..'&&!r.startsWith('..'+sep);};
 function fail(code:string,message:string):never{throw new CliError(message,{code:'storage.'+code});}
@@ -24,7 +25,8 @@ async function sync(path:string,directory=false){
 }
 export function analysisDirectory(c:Pick<CommandContext,'profile'|'appArguments'>):string{
   const value=c.profile.values.analysisDirectory;
-  if(value===undefined||value===null)return c.appArguments.AppDataDirectory;
+  if(value===null)return c.appArguments.AppDataDirectory;
+  if(value===undefined){const shared=storageDefault(c);return shared&&!legacyAnalysis(c)?join(shared.base,c.appArguments.AppName,c.profile.name):c.appArguments.AppDataDirectory;}
   if(typeof value!=='string'||!isAbsolute(value)||value!==resolve(value))fail('configuration','Invalid analysis directory in the Factory profile.');
   return value;
 }
@@ -35,6 +37,7 @@ interface Journal {
   state:'copying'|'verified'|'activating'|'committed'|'rolling_back'|'rolled_back'|'cleaning'|'cleaned';
   entries:Entry[];trees:string[];manifest:string;createdAt:string;bytes:number;files:number;
   rollbackUnactivated?:boolean;
+  automatic?:boolean;defaultBinding?:StorageDefault;defaultBaseIdentity?:string;makeDefault?:boolean;defaultPreviousRevision?:string|null;defaultApplied?:boolean;defaultSuperseded?:boolean;
   targetIdentity?:string;backupIdentity?:string;backupParentIdentity?:string;
 }
 function stamp(st:import('node:fs').BigIntStats){return [st.dev,st.ino,st.mode,st.size,st.mtimeNs,st.ctimeNs].join(':');}
@@ -87,6 +90,9 @@ export class AnalysisStorage {
       !isAbsolute(j.source)||!isAbsolute(j.destination)||inside(j.source,j.destination)||inside(j.destination,j.source)||
       !isAbsolute(j.destinationAnchor)||!inside(j.destinationAnchor,j.destination)||typeof j.sourceIdentity!=='string'||typeof j.destinationIdentity!=='string'||
       !['copying','verified','activating','committed','rolling_back','rolled_back','cleaning','cleaned'].includes(j.state)||
+      ['automatic','makeDefault','defaultApplied','defaultSuperseded'].some(k=>{const v=j[k as keyof Journal];return v!==undefined&&typeof v!=='boolean';})||
+      j.defaultPreviousRevision!==undefined&&j.defaultPreviousRevision!==null&&!/^[-a-f0-9]{36}$/.test(j.defaultPreviousRevision)||
+      j.automatic&&(!j.defaultBinding||j.makeDefault||j.files!==0||j.bytes!==0||loadEntries&&j.entries.length!==0)||
       !Array.isArray(j.trees)||j.trees.some(t=>!analysisTrees.includes(t))||!Array.isArray(j.entries)||
       j.entries.some(e=>!j.trees.some(t=>e.path===t||e.path.startsWith(t+'/'))||e.path.split('/').some(p=>p==='..'||p==='.'||p===''))||
       !/^[a-f0-9]{64}$/.test(j.manifest)||loadEntries&&j.manifest!==digest(content(j.entries)))fail('journal','Migration journal failed its profile/path/integrity binding; preserve it.');
@@ -96,11 +102,13 @@ export class AnalysisStorage {
     const manifest=join(this.control(c),'manifests',j.id+'.json');if(!await present(manifest))await atomicWrite(manifest,j.entries);
     const {entries,...record}=j;await atomicWrite(join(this.control(c),'migration.json'),record);
   }
-  private async validate(c:CommandContext){
+  private async validate(c:CommandContext,initializing=false){
     const root=analysisDirectory(c),j=await this.journal(c);
     if(j&&!terminal(j.state))fail('pending','Migration is incomplete. Use storage show, resume or rollback before research.');
     if(j&&['committed','cleaned'].includes(j.state)&&root!==j.destination)fail('configuration','Factory profile and committed migration differ; preserve both and inspect storage show.');
     if(root===c.appArguments.AppDataDirectory)return;
+    const shared=inheritedStorage(c);
+    if(shared&&!j){if(!initializing)validateStorageDefault(c,shared);return;}
     const marker=await readJson<{schema:number;binding:string}>(join(root,'.insight-analysis.json'));
     if(!marker||marker.schema!==1||marker.binding!==await this.binding(c)||await realpath(root)!==root)
       fail('unavailable','Configured analysis storage is missing or changed; mount its volume. No fallback was created.');
@@ -114,9 +122,39 @@ export class AnalysisStorage {
   wrap(entry:CommandDefinition):CommandDefinition{
     const run=entry.run;return {...entry,...(entry.children?{children:entry.children.map(e=>this.wrap(e))}:{}),...(run?{run:async(input,c)=>{
       const key=c.appArguments.AppDataDirectory;if(this.changing.has(key))fail('busy','Storage migration is in progress.');
+      const prepared=await this.prepare(c);
+      if(this.changing.has(key))fail('busy','Storage migration is in progress.');
       this.active.set(key,(this.active.get(key)??0)+1);
-      try{await this.validate(c);return await run(input,c);}finally{const n=this.active.get(key)!-1;if(n)this.active.set(key,n);else this.active.delete(key);}
+      try{await this.validate(prepared);return await run(input,prepared);}finally{const n=this.active.get(key)!-1;if(n)this.active.set(key,n);else this.active.delete(key);}
     }}:{})};
+  }
+  private async prepare(c:CommandContext):Promise<CommandContext>{
+    const j=await this.journal(c),shared=inheritedStorage(c);
+    if(j?.automatic&&!['cleaned','rolled_back'].includes(j.state)){
+      await this.resume(c);c={...c,profile:await this.store(c).get(c.profile.name)};
+    }else if(!j&&shared){
+      validateStorageDefault(c,shared);
+      await this.migrate(c,shared.base,false,true,true,shared);
+      c={...c,profile:await this.store(c).get(c.profile.name)};
+    }
+    // One command keeps its selected root even if another profile changes the default.
+    return {...c,profile:{...c.profile,values:{...c.profile.values,analysisDirectory:analysisDirectory(c)}}};
+  }
+  private async defaultBase(c:CommandContext,directory:unknown,existingOnly=false){
+    if(typeof directory!=='string'||!isAbsolute(directory)||/[\0\r\n]/.test(directory))fail('path','Supply an absolute destination base directory.');
+    const base=await canonicalFuture(resolve(directory)),app=await canonicalFuture(c.appArguments.RoamingAppDataDirectory);
+    if(inside(app,base)||inside(base,app))fail('path','The installation storage base and Factory configuration root must be separate, non-nested directories.');
+    for(const profile of (await this.store(c).list()).profiles){
+      if(typeof profile.values.analysisDirectory!=='string')continue;
+      const root=await canonicalFuture(profile.values.analysisDirectory);
+      if(inside(root,base))fail('path','The installation storage base cannot be nested inside a profile analysis directory.');
+    }
+    if(existingOnly&&!await present(base))fail('path','Choose an existing mounted storage base directory.');
+    await checkStorageDefaultBase(c,base);return base;
+  }
+  async setDefault(c:CommandContext,directory:unknown){
+    const base=await this.defaultBase(c,directory,true),result=await writeStorageDefault(c,base);
+    return {...result,defaultDirectory:join(base,c.appArguments.AppName,c.profile.name),appliesTo:'new and empty profiles; initialized profile locations are preserved'};
   }
   busy(directory:string){return this.changing.has(directory);}
   private async exclusive<T>(c:CommandContext,action:()=>Promise<T>){
@@ -130,7 +168,7 @@ export class AnalysisStorage {
   }
   private async preflight(c:CommandContext,directory:unknown){
     if(typeof directory!=='string'||!isAbsolute(directory)||/[\0\r\n]/.test(directory))fail('path','Supply an absolute destination base directory.');
-    const source=await canonicalFuture(analysisDirectory(c)),destination=await canonicalFuture(join(resolve(directory),c.appArguments.AppName,c.profile.name));
+    const source=await canonicalFuture(inheritedStorage(c)?c.appArguments.AppDataDirectory:analysisDirectory(c)),destination=await canonicalFuture(join(resolve(directory),c.appArguments.AppName,c.profile.name));
     const app=await canonicalFuture(c.appArguments.RoamingAppDataDirectory);
     if(inside(source,destination)||inside(destination,source)||inside(app,destination)||inside(destination,app))fail('path','Source, destination and profile configuration roots must be separate, non-nested directories.');
     const current=await this.journal(c);if(current&&!['cleaned','rolled_back'].includes(current.state))fail('pending','Finish or roll back the current migration; clean its retained source before starting another.');
@@ -144,21 +182,25 @@ export class AnalysisStorage {
     return {source,destination,destinationAnchor:parent,destinationIdentity:await directoryIdentity(parent),bytes,entries:entries.length,availableBytes:available.toString(),requiredBytes:(BigInt(bytes)+reserve).toString(),trees:analysisTrees,sourceRetained:true,compatibilityPathsRetained:true};
   }
   async show(c:CommandContext){
-    const j=await this.journal(c),root=analysisDirectory(c);let usage:unknown,availability='available';
+    const j=await this.journal(c),root=analysisDirectory(c),shared=storageDefault(c);let usage:unknown,availability='available';
     try{await this.validate(c);const entries=await inventory(root,analysisTrees,false,c.signal);usage={files:entries.filter(e=>e.kind==='file').length,bytes:entries.reduce((n,e)=>n+e.size,0)};}
     catch(error){availability=error instanceof CliError?error.code:((error as NodeJS.ErrnoException).code??'unavailable');}
-    return {profile:c.profile.name,directory:root,configuration:'Factory profile analysisDirectory',defaultDirectory:c.appArguments.AppDataDirectory,availability,usage,
+    return {profile:c.profile.name,directory:root,configuration:c.profile.values.analysisDirectory!==undefined?'Factory profile analysisDirectory':shared&&root!==c.appArguments.AppDataDirectory?'Installation storage default':'Factory profile AppData',defaultBaseDirectory:shared?.base??null,defaultDirectory:shared?join(shared.base,c.appArguments.AppName,c.profile.name):c.appArguments.AppDataDirectory,availability,usage,
       trees:analysisTrees,appData:c.appArguments.AppDataDirectory,included:['snapshots, immutable inputs, native projects and local server repositories','tool execution/verification working data','runtime installations, acquisition caches, selections and process receipts'],excluded:['profiles, permissions, IPC, logs and OS keyring secrets'],
       migration:j?{id:j.id,state:j.state,source:j.source,destination:j.destination,manifest:j.manifest,bytes:j.bytes,files:j.files,retainedSource:join(j.source,'.storage-retained',j.id),retainedSourceBytes:j.state==='committed'?j.bytes:0,progress:await readJson(join(this.control(c),'progress.json'))}:null};
   }
-  async migrate(c:CommandContext,directory:unknown,dryRun=false,emptyOnly=false){return this.exclusive(c,async()=>{
-    await this.validate(c);const plan=await this.preflight(c,directory);if(dryRun)return {state:'preflight',...plan};
+  async migrate(c:CommandContext,directory:unknown,dryRun=false,emptyOnly=false,profileOnly=false,automatic?:StorageDefault){return this.exclusive(c,async()=>{
+    await this.validate(c,true);if(automatic)validateStorageDefault(c,automatic);const plan=await this.preflight(c,directory);
+    if(automatic){validateStorageDefault(c,automatic);if(plan.destination!==join(automatic.base,c.appArguments.AppName,c.profile.name))fail('binding','Automatic initialization changed its destination.');}
+    if(!profileOnly)await this.defaultBase(c,directory);
+    if(dryRun)return {state:'preflight',setsInstallationDefault:!profileOnly,...plan};
     if(emptyOnly&&plan.entries)fail('data','This profile already has analysis data. Use storage migrate --directory to preserve it.');
     const entries=await inventory(plan.source,analysisTrees,true,c.signal),id=randomUUID();
+    if(emptyOnly&&entries.length)fail('data','Analysis appeared during empty-profile initialization; no migration was started.');
     const binding=await this.binding(c);
     const j:Journal={schema:1,id,profile:c.profile.name,binding,source:plan.source,destination:plan.destination,
       sourceIdentity:await directoryIdentity(plan.source),destinationAnchor:plan.destinationAnchor,destinationIdentity:plan.destinationIdentity,
-      previous:typeof c.profile.values.analysisDirectory==='string'?c.profile.values.analysisDirectory:null,state:'copying',entries,trees:[...analysisTrees],manifest:digest(content(entries)),createdAt:new Date().toISOString(),bytes:entries.reduce((n,e)=>n+e.size,0),files:entries.filter(e=>e.kind==='file').length};
+      previous:typeof c.profile.values.analysisDirectory==='string'?c.profile.values.analysisDirectory:null,automatic:Boolean(automatic),defaultBinding:automatic,makeDefault:!profileOnly,defaultPreviousRevision:storageDefault(c)?.revision??null,state:'copying',entries,trees:[...analysisTrees],manifest:digest(content(entries)),createdAt:new Date().toISOString(),bytes:entries.reduce((n,e)=>n+e.size,0),files:entries.filter(e=>e.kind==='file').length};
     // Reserve durably before any destination or source changes. All ordinary commands now freeze.
     await this.save(c,j);await this.checkpoint?.('reserved');return this.continue(c,j);
   });}
@@ -175,9 +217,23 @@ export class AnalysisStorage {
       fail('volume','A migration volume changed or disappeared. Mount the original volume before resuming; no fallback was created.');
     if(await canonicalFuture(j.destination)!==j.destination||j.targetIdentity&&await directoryIdentity(j.destination)!==j.targetIdentity)
       fail('binding','Destination directory was replaced; no migration write was made.');
+    if(j.defaultBinding)validateStorageDefault(c,j.defaultBinding);
+    if(j.defaultBaseIdentity&&await directoryIdentity(dirname(dirname(j.destination)))!==j.defaultBaseIdentity)fail('volume','The selected storage base directory was replaced.');
     if(j.state==='rolling_back')return this.restore(c,j);
     if(j.state==='cleaning')return this.finishCleanup(c,j);
-    if(terminal(j.state))return this.show(c);
+    if(terminal(j.state)&&!(j.automatic&&j.state==='committed'))return this.show(c);
+    if(j.makeDefault&&!j.defaultApplied){
+      const base=dirname(dirname(j.destination));
+      if(await canonicalFuture(base)!==base)fail('binding','Storage default base was replaced.');
+      await mkdir(base,{recursive:true,mode:0o700});
+      if(await directoryIdentity(j.destinationAnchor)!==j.destinationIdentity)fail('volume','The default storage volume changed.');
+      if(!j.defaultBaseIdentity){j.defaultBaseIdentity=await directoryIdentity(base);await this.save(c,j);}
+      const result=await writeStorageDefault(c,base,j.id,j.defaultPreviousRevision??null);
+      await this.checkpoint?.('default-selected');
+      j.defaultApplied=true;j.defaultSuperseded=result.state==='superseded';
+      if(!j.defaultSuperseded)j.defaultBinding=result.binding;
+      await this.save(c,j);
+    }
     if(j.state==='copying'){
       await privateDirectory(j.destination);
       if(!j.targetIdentity){
@@ -260,7 +316,11 @@ export class AnalysisStorage {
       j.state='committed';await this.save(c,j);
       await atomicWrite(join(this.control(c),'progress.json'),{completed:j.entries.length,total:j.entries.length,phase:'committed'});
     }
-    return {state:j.state,id:j.id,directory:j.destination,manifest:j.manifest,sourceRetained:true,rollback:'storage rollback',cleanup:'storage cleanup'};
+    if(j.automatic&&j.state==='committed'){
+      if(j.entries.length)fail('binding','Automatic profile initialization cannot delete existing analysis.');
+      j.state='cleaning';await this.save(c,j);return this.finishCleanup(c,j);
+    }
+    return {state:j.state,id:j.id,directory:j.destination,manifest:j.manifest,sourceRetained:true,defaultBaseDirectory:storageDefault(c)?.base??null,installationDefault:j.makeDefault?(j.defaultSuperseded?'superseded':'configured'):'unchanged',rollback:'storage rollback',cleanup:'storage cleanup'};
   }
   async resume(c:CommandContext){return this.exclusive(c,async()=>{const j=await this.journal(c,true);if(!j)fail('missing','No migration journal exists.');return this.continue(c,j);});}
   async rollback(c:CommandContext){return this.exclusive(c,async()=>{
@@ -317,10 +377,11 @@ export class AnalysisStorage {
     if(!await present(root)&&allowAbsent)return;
     if(await directoryIdentity(root)!==j.backupIdentity)fail('binding','Retained source directory was replaced; no deletion or restore was attempted.');
   }
-  commands(){const directory={flags:'--directory <path>',description:'Absolute base directory; app name and profile are appended',required:true};return command('storage','Inspect and migrate profile analysis data',[
+  commands(){const profileOnly={flags:'--profile-only',description:'Keep the installation default unchanged; move only this profile'};const directory={flags:'--directory <path>',description:'Absolute base directory; app name and profile are appended',required:true};return command('storage','Inspect and migrate profile analysis data',[
     command('show','Show effective analysis storage, usage and retained migration',(_i,c)=>this.show(c),{permission:Permission.ReadOnly}),
-    command('configure','Choose storage for a profile with no analysis data',({options:o},c)=>this.migrate(c,o.directory,false,true),{permission:Permission.Update,options:[directory]}),
-    command('migrate','Copy and verify all analysis data, retain source, then switch storage',({options:o},c)=>this.migrate(c,o.directory,Boolean(o.dryRun)),{permission:Permission.Update,options:[directory,{flags:'--dry-run',description:'Read-only path, capacity and quiescence preflight; create no migration'}]}),
+    command('default','Set the installation storage base for new profiles; preserve existing data locations',({options:o},c)=>this.setDefault(c,o.directory),{permission:Permission.Update,options:[directory]}),
+    command('configure','Choose storage for an empty profile and subsequent new profiles',({options:o},c)=>this.migrate(c,o.directory,false,true,Boolean(o.profileOnly)),{permission:Permission.Update,options:[directory,profileOnly]}),
+    command('migrate','Copy and verify all analysis data, retain source, then switch storage',({options:o},c)=>this.migrate(c,o.directory,Boolean(o.dryRun),false,Boolean(o.profileOnly)),{permission:Permission.Update,options:[directory,profileOnly,{flags:'--dry-run',description:'Read-only path, capacity and quiescence preflight; create no migration'}]}),
     command('resume','Resume the retained copy/activation or rollback without replaying research',(_i,c)=>this.resume(c),{permission:Permission.Update}),
     command('rollback','Restore retained source; refuse after any destination content changes',(_i,c)=>this.rollback(c),{permission:Permission.Update}),
     command('cleanup','Delete verified retained source copies; retain compatibility paths permanently',(_i,c)=>this.cleanup(c),{permission:'Destructive'}),
