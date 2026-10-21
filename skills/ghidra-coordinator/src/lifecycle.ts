@@ -1,4 +1,4 @@
-import {command,Permission,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
+import {command,Permission,CliError,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {Research,scope,type ResearchBackend} from './research.js';
 import {Workspace,type Scope,type DebuggerState} from './workspace.js';
 import {id,fail,object,digest} from './model.js';
@@ -17,9 +17,18 @@ export class Lifecycle {
   async change(selected:Scope,operation:'save'|'close',callerId?:string) {
     const reserved=this.workspace.reserveRequest(selected,'ghidra.'+operation,{},callerId);
     return this.research.ordered(selected,async()=>{
-      const request=this.workspace.request(reserved.request.id);
-      if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;fail('unknown','This lifecycle outcome is retained; it is not re-executed.',request.result);}
-      const backend=await this.backend(),unresolved=this.workspace.unresolved(selected);
+      let request=this.workspace.request(reserved.request.id),backend:ResearchBackend|undefined;
+      if(reserved.replay&&['running','unknown'].includes(request.state)){
+        backend=await this.backend();await this.research.reconcileRequests(selected,backend);request=this.workspace.request(request.id);
+      }
+      if(reserved.replay&&request.state!=='accepted'){
+        if(request.state==='applied')return request.result;
+        throw new CliError('This lifecycle outcome remains unresolved; inspect its retained worker before retrieving it again.',{
+          code:'coordinator.unknown',result:{...selected,state:request.state,requestId:request.callerId??request.id},
+          next:[['sessions','status',selected.session,'--target',selected.target],
+            ...(operation==='close'?[['tools','processes','--tool','ghidra','--session',selected.session,'--target',selected.target]]:[['ghidra','open','--session',selected.session,'--target',selected.target]])]});
+      }
+      backend??=await this.backend();const unresolved=this.workspace.unresolved(selected);
       const closingExternal=operation==='close'&&unresolved.length>0&&unresolved.every(intent=>['debugger','ui'].includes(String(object(intent.execution??{}).kind)));
       const alreadyEnded=closingExternal&&backend.closed?await backend.closed(selected):false;
       if(!closingExternal)await backend.open(selected);const before=this.workspace.context(selected);

@@ -146,10 +146,13 @@ export class Research {
       const request=this.workspace.request(reserved.request.id);
       if(request.state==='applied')return opened(request.result);
       if(reserved.replay&&request.state!=='accepted')throw new CliError('This open retains an unproved outcome; inspect the retained context before continuing.',{code:'coordinator.unknown',result:retained(request.state),next});
-      if(this.workspace.unresolved(reserved.context).some(other=>other.id!==request.id)) {
+      const unresolved=this.workspace.unresolved(reserved.context).filter(other=>other.id!==request.id);
+      if(unresolved.length) {
         const result={session:reserved.context.session,target,state:'blocked'};
         this.workspace.recordRequest(request.id,'failed',result);
-        fail('blocked','This context retains an unproved effect; continuation did not start a second operation.',result);
+        const close=unresolved.find(other=>other.operation==='ghidra.close');
+        throw new CliError('This context retains an unproved effect; continuation did not start a second operation.',{
+          code:'coordinator.blocked',result,next:close?[['ghidra','close','--session',reserved.context.session,'--target',target,'--request-id',close.callerId??close.id]]:next});
       }
       this.workspace.startRequest(request.id);
       try {
@@ -355,6 +358,9 @@ export class Research {
     const key='shared:'+target,previous=this.tasks.get(key),task=(previous?previous.catch(()=>{}):Promise.resolve()).then(action);
     this.tasks.set(key,task);try{return await task;}finally{if(this.tasks.get(key)===task)this.tasks.delete(key);}
   }
+  async reconcileRequests(selected:Scope,backend:ResearchBackend) {
+    return this.sharedOrder(selected.target,()=>this.reconcile(selected,backend));
+  }
   private async reconcile(selected:Scope,backend:ResearchBackend) {
     const active=this.workspace.activePublication(selected.target);
     if(active) {
@@ -436,7 +442,7 @@ export class Research {
       }
       if(execution?.kind==='close'&&backend.closed) {
         try{if(!await backend.closed(selected))continue;const current=this.workspace.context(selected);
-          this.workspace.completeSavedRequest(selected,request.id,current.generation,{},
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{state:'stopped'},
             {...selected,state:'closed',pendingChanges:count(current)});
         }catch{/* A stopped metadata flag alone never proves process release. */}
         continue;

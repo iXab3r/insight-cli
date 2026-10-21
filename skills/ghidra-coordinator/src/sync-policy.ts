@@ -25,6 +25,8 @@ export class Synchronization {
   async execute(selected:Scope,path:string,input:Record<string,unknown>,run:(requestId:string)=>Promise<unknown>){
     const configured=this.workspace.context(selected).syncPolicy??manualPolicy;
     const caller=input.requestId===undefined?undefined:id(input.requestId);
+    const recorded=caller?this.workspace.scopedRequest(selected,caller):undefined;
+    if(caller&&recorded?.id===caller)return run(caller);
     const previous=caller?this.workspace.administrationByCaller(caller):undefined;
     if(!previous&&(configured.publish==='manual'&&configured.refresh==='manual'||input.requestId!==undefined&&this.workspace.requestByCaller(id(input.requestId))))return run(input.requestId===undefined?'':id(input.requestId));
     if(previous&&previous.operation!=='ghidra.automatic')fail('idempotency','Request ID already identifies another profile administration operation.');

@@ -24,6 +24,25 @@ establishes that the old owned bootstrap worker has ended, then uses an authorit
 probe. An absent canonical item permits private preparation; an existing first version requires
 independent readback. The old project, intent and original session/target remain preserved.
 
+## Interrupted save or close
+
+After restoring profile storage, inspect the selected session and target with
+`sessions status <session> --target <target>`. Retry the original save/close with the
+same `--request-id`. If the original command had no caller ID, use the generated
+`unresolvedRequests[].id` from status. This retrieves the original intent instead of
+creating another close. A verified stopped worker lets close report `state: closed`
+and retain the acknowledged private snapshot and pending changes; it sends no new save,
+open, close or publication. Reopen the same session/target afterward.
+
+If release cannot be proved, the command still fails with `coordinator.unknown`
+and gives scoped status/process inspection commands. An authenticated live worker is not
+closed again automatically. Retain its project and journals. After inspecting its retained
+work, an operator may terminate that exact owned headless worker through
+`tools processes kill <process>` with Destructive permission, accepting loss of any
+unacknowledged in-memory work. Do not kill by guessed PID/port or stop the shared server.
+Retrieve the same close request after that worker has ended. An unavailable endpoint or
+changed process receipt is not proof of release; preserve the binding for investigation.
+
 If a response was lost, inspect `sessions status <session> --target <target>`. Never infer
 `applied` from a connection failure. A changing command's optional request ID binds one effective
 intent inside the profile. Repeating the same ID/input retrieves its recorded outcome or
