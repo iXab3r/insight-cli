@@ -5,12 +5,16 @@ sessions live above tool namespaces; an agent uses `insight-cli ghidra ...` with
 and target identifiers. The service owns processes, routing, saved views and publication mechanics.
 Agents choose the investigation and interpret results.
 
+See [Benchmarks](BENCHMARKS.md) for why this tooling helps: in a fresh-agent PoE 2
+investigation, installed insight-cli 0.4.0 finished in **16:35** versus **19:43** through
+Ghidra MCP, with comparable core findings. The report includes phases, earlier runs and
+the limits of that comparison.
+
 The [shared tool runtime](docs/TOOL-RUNTIME.md) development slice includes Ghidra, ILSpy, 7-Zip, LLVM, DiE, LLDB, Frida, WinDbg, ProcMon, dnSpyEx, TShark, mitmproxy, strace and .NET diagnostics with pinned
 distributions (GitHub mirrors or explicit Microsoft-only acquisition), private runtime dependencies, common lifecycle and owned process controls.
-Toolbox additions remain under development in [draft PR #55](https://github.com/iXab3r/insight-cli/pull/55);
-the registry package has not been updated by these source commits.
-[Native acceptance](docs/TOOL-RUNTIME-ACCEPTANCE.md) covers the packed globally installed
-candidate; npm publication remains a separate manual release. See the
+These adapters were integrated through [PR #55](https://github.com/iXab3r/insight-cli/pull/55).
+[Native acceptance](docs/TOOL-RUNTIME-ACCEPTANCE.md) records packed/global installation checks;
+npm publication uses a separate manual release. See the
 [new-tool author guide](docs/ADDING-TOOLS.md) to add another adapter.
 
 The package includes an [RE workflow skill](skills/ghidra-coordinator/skills/insight-re/SKILL.md)
@@ -180,9 +184,9 @@ into root sessions or exposed as public worker/proposal commands. Existing RE en
 not adopted or modified by the facade.
 
 Managed Ghidra delivery: [runtime commands and ownership](skills/ghidra-coordinator/references/managed-runtime.md).
-Version 0.2.0 is published on npm as `latest`. The manual release workflow passes build,
-OIDC publication and a fresh registry global installation; the archive matches the native-tested
-candidate byte for byte. See [release verification](docs/verification/npm-release-0.2.0.json).
+Version 0.4.0 was published through the manual release workflow, including build,
+OIDC publication and a fresh registry global installation. See the
+[release run](https://github.com/iXab3r/insight-cli/actions/runs/39523296992).
 
 New Ghidra targets import without full automatic analysis; opt in with `ghidra open --analysis`.
 Use scoped `ghidra analysis run` or `analysis reanalyze` later when needed.
