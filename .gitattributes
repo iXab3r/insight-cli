@@ -21,3 +21,13 @@ skills/ghidra-coordinator/runtime/managed/insight-heap/notices/* -text -whitespa
 skills/ghidra-coordinator/runtime/native/binary/* text eol=lf
 skills/ghidra-coordinator/runtime/native/binary/insight-binary-* -text
 skills/ghidra-coordinator/runtime/native/binary/notices/* -text -whitespace
+
+# Preserve the byte-exact inputs bound to the reviewed research bridge on Windows.
+skills/ghidra-coordinator/references/native/InsightResearchView.java text eol=lf
+skills/ghidra-coordinator/references/native/InsightStringAnchors.java text eol=lf
+skills/ghidra-coordinator/references/native/InsightAnchorScan.java text eol=lf
+skills/ghidra-coordinator/references/native/InsightFunctionBoundaries.java text eol=lf
+skills/ghidra-coordinator/references/native/InsightPeRanges.java text eol=lf
+scripts/native/InstallResearchView.java text eol=lf
+scripts/build-research-view-bridge.mjs text eol=lf
+skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar -text
