@@ -1,4 +1,5 @@
 import {runNpm} from './npm-command.mjs';
+import {packageReadme} from './sync-package-readme.mjs';
 // Locked offline pack/install proof. npm ci setup populates the ordinary artifact cache.
 import assert from 'node:assert/strict';import{execFile}from'node:child_process';import{promisify}from'node:util';import{mkdtemp,mkdir,readFile,writeFile,rm,realpath}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{createHash}from'node:crypto';import{fileURLToPath,pathToFileURL}from'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile);
@@ -30,6 +31,8 @@ try{
  lock.packages['node_modules/@eyeauras/insight-cli']={version:cli.version,resolved:packageFile,integrity:'sha512-'+createHash('sha512').update(await readFile(join(artifacts,pack.filename))).digest('base64'),dependencies:cli.dependencies,engines:cli.engines,bin:cli.bin,license:cli.license};
  await writeFile(join(install,'package.json'),JSON.stringify(manifest));await writeFile(join(install,'package-lock.json'),JSON.stringify(lock));
  await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:60000,maxBuffer:262144});
+ const installedReadme=await readFile(join(install,'node_modules/@eyeauras/insight-cli/README.md'),'utf8');
+ assert.equal(installedReadme.replaceAll('\r\n','\n'),packageReadme(await readFile(join(root,'README.md'),'utf8')),'Installed npm README must match the root README with GitHub links');
  const isolatedEnvironment=join(install,'isolated-environment.mjs');
  await writeFile(isolatedEnvironment,`import{AppArguments}from'@eyeauras/cli-factory';import{join}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';const original=AppArguments.CurrentEnvironment;const root=${JSON.stringify(endpointData)};AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:root,EnvironmentLocalAppData:root});`);
  const hostedHelp=await exec(process.execPath,['--import',pathToFileURL(isolatedEnvironment).href,join(install,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),'--help'],{cwd:install,timeout:30000,maxBuffer:262144});

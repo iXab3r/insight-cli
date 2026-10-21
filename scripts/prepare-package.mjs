@@ -1,8 +1,10 @@
 import {writePackageBuildManifest} from '@eyeauras/cli-factory-ipc/build';
 import {prepareToolbox} from './prepare-toolbox.mjs';
+import {checkPackageReadme} from './sync-package-readme.mjs';
 import {chmod,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+await checkPackageReadme();
 const native='runtime/native/';
 const sha=async path=>createHash('sha256').update(await readFile(path)).digest('hex');
 const bridgeProof=JSON.parse(await readFile('runtime/research-view.provenance.json','utf8'));
