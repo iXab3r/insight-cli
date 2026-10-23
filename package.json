@@ -12,6 +12,7 @@
     "test:release": "node scripts/tool-catalog.mjs --check && node --test scripts/tests/*.test.mjs",
     "test:coverage": "node scripts/audit-coverage.mjs --summary",
     "pack:cli": "node scripts/pack-cli.mjs",
+    "cache:factory": "node scripts/factory-bundle.mjs --cache",
     "test:package": "node scripts/test-package.mjs",
     "automation": "node scripts/run-automation.mjs",
     "test:acceptance": "node scripts/run-automation.mjs test --suite acceptance --tag offline --property RestoreLockedMode=true",

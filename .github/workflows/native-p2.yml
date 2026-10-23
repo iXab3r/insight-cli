@@ -45,6 +45,7 @@ jobs:
           if ($IsWindows) { Expand-Archive $archive $destination } else { New-Item -ItemType Directory $destination; & unzip -q $archive -d $destination; if ($LASTEXITCODE) { throw 'SDK extraction failed' } }
           "INSIGHT_NATIVE_HOME=$(Join-Path $destination 'ghidra_12.1.2_PUBLIC')" >> $env:GITHUB_ENV
       - run: npm ci --ignore-scripts
+      - run: npm run cache:factory
       - run: npm test
       - run: npm run test:package
       - name: Selected native SDK, VT and FID/BSim workflows
