@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "date": "2026-10-21",
+  "scope": "Sparse current mapped PE32+/AMD64 runtime-region inspection V1",
+  "contract": "SPARSE-FUNCTION-BOUNDARIES.md",
+  "independentReview": {
+    "context": "fresh agent, no history inherited",
+    "api": "pe-boundaries-api-review.md",
+    "implementation": "pe-boundaries-implementation-review.md",
+    "verdict": "approved after fixes; independent native result audit separate",
+    "results": "pe-boundaries-results-review.md",
+    "resultScope": "All48 measured summary rows and5 raw receipts checked; no native rerun or exhaustive raw output/package certification"
+  },
+  "identity": {
+    "gitHead": "18e3473f51231d6fc62a49e212d0c1b1ccf736b9",
+    "workingTree": "previous approved changes and this V1 remain uncommitted",
+    "builds": [
+      {
+        "label": "before",
+        "manifest": {
+          "version": 1,
+          "artifact": "28243ecbcec0822f248978a2dc966bf87ffdda89773a60f55c2decdab1345778"
+        }
+      },
+      {
+        "label": "after",
+        "manifest": {
+          "version": 1,
+          "artifact": "7a92211cc577784d2272f818305716046be12e9275174a819af647871bb7aea6"
+        }
+      }
+    ],
+    "bridgeSha256": "f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32",
+    "persistentClientSha256": "e6f0628dbe513fb568f3e7ad306bf5fe31757d403459dfb77363fb376c72d8e8",
+    "identicalPersistentClient": true,
+    "reproducibleBridge": true,
+    "bridgeReceipt": "../../skills/ghidra-coordinator/runtime/research-view.provenance.json",
+    "harnessSha256": "15b003e5b1ae9916ae1d3bb575d73385c17e861139409fc600a1a35b8f2122f8",
+    "inputPeSha256": "b2a55cf216b32e53a245b4ba18fe4d9cccff63cfbddd05dea708ce58fad62683"
+  },
+  "verification": {
+    "nativeCore": {
+      "assertions": 92,
+      "fixture": "scripts/native/TestPeRanges.java",
+      "scope": "generated current-memory arrays, including U64 exclusive end and rebasing"
+    },
+    "offline": {
+      "tests": 290,
+      "passedInSandbox": 284,
+      "skipped": 4,
+      "sandboxFailures": 2,
+      "failures": "tool-supervisor identity/child verification requires ps; unchanged suite retried outside sandbox",
+      "supervisorRetry": {
+        "tests": 7,
+        "passed": 7
+      },
+      "release": {
+        "tests": 33,
+        "passed": 33
+      },
+      "focusedInspectionTests": {
+        "tests": 9,
+        "passed": 9
+      },
+      "coverageAudit": {
+        "sourceOperations": 210,
+        "bridgeControls": 8,
+        "publicLeaves": 419
+      }
+    },
+    "installedPackage": {
+      "passed": true,
+      "checks": "offline pack/install, spaces/Unicode relocation, skill/resources, profile/JSON/RPC and permission denial",
+      "artifact": "7a92211cc577784d2272f818305716046be12e9275174a819af647871bb7aea6"
+    },
+    "nativeSparsePe": {
+      "halfOpenAdjacentMissingEntryAndConflict": true,
+      "leafNoRecordNeverClaimsPrecedingMembership": true,
+      "incompleteNotAbsence": true,
+      "malformedDiscardsCandidatesAndRetainsDb": true,
+      "validatedAbsentStillAllowsDb": true,
+      "equivalentFullEvidenceAndText": true,
+      "beforeReadOnlyNativeAndSavedState": true,
+      "afterReadOnlyNativeAndSavedState": true,
+      "unmappedHeadersNoHistoricalFallback": true
+    },
+    "nativeGuards": {
+      "explicitDbAndRuntimeAgreement": true,
+      "editLookup": true,
+      "lostLookup": true,
+      "editLostLookup": true,
+      "malformedLookup": true,
+      "wrongEntry": true,
+      "pid": true,
+      "program": true,
+      "lostView": true,
+      "savedContextAvailableAndUnchanged": true,
+      "authAndExplicitAlreadyOpenProgram": true,
+      "restartRejectsOldViewBeforeLookup": true
+    },
+    "readOnly": "native view fingerprint, saved context and request journal unchanged during measured reads; fixture setup/controls/close outside measurement",
+    "cleanup": {
+      "matchedWorkload": {
+        "cleanup": []
+      },
+      "guards": {
+        "cleanup": []
+      }
+    }
+  },
+  "matchedWorkload": {
+    "rounds": 24,
+    "selectors": 4,
+    "selectedEntries": 3,
+    "recordsValidatedPerWorkload": 1024,
+    "headerTableBytesPerWorkload": 12496,
+    "equivalentEvidence": true,
+    "canonicalContentSha256": "2a9075aa1fa945a211dff8f16379c89381198c95aba45fbb4d03ca68843d4cee",
+    "everyMeasuredPairAndWarmupEqual": true,
+    "summary": {
+      "before": {
+        "workloads": 24,
+        "requests": 192,
+        "nativeHttp": 2328,
+        "bytesRead": 299904,
+        "elapsedMs": {
+          "n": 24,
+          "p50": 992.0408329999773,
+          "p95": 1051.1753750000207,
+          "sum": 23898.210458000045
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "p50": 912.386913000053,
+          "p95": 953.5507880001096,
+          "sum": 21918.53335100069
+        }
+      },
+      "after": {
+        "workloads": 24,
+        "requests": 24,
+        "nativeHttp": 576,
+        "bytesRead": 299904,
+        "elapsedMs": {
+          "n": 24,
+          "p50": 761.3489999999874,
+          "p95": 775.1101670000062,
+          "sum": 18244.240667000005
+        },
+        "nativeHttpMs": {
+          "n": 24,
+          "p50": 747.3784159999632,
+          "p95": 761.8389569999417,
+          "sum": 17884.88885799999
+        }
+      }
+    },
+    "improvementPercent": {
+      "p50": 23.254267901691815,
+      "p95": 26.262526174569977,
+      "sum": 23.658548831246673
+    },
+    "requestsPerWorkload": {
+      "before": 8,
+      "after": 1
+    },
+    "nativeHttpPerWorkload": {
+      "before": 97,
+      "after": 24
+    },
+    "method": {
+      "clock": "performance.now retained persistent workload, includes client calls and parsing/assertions; excludes setup,warmup,trace reads and raw-receipt persistence (flushed after each timed workload)",
+      "order": "alternating AB/BA, serial",
+      "baseline": "timed current memory map/header/directory/whole-table readbacks + independent full JS validation + original-selector old indexed resolver (metadata only, discard preceding candidates) + deduplicated selected-entry inspect",
+      "after": "one guarded precompiled resolver+inspect request",
+      "equivalence": "Same 4 query addresses, 3 selected sparse entries, complete 1024-record validation, raw runtime-range evidence, DB absence, decompile/hash/length/truncation. Fixture oracle only asserts output.",
+      "limitations": "One generated AMD64 sparse PE, mapped current headers and one bounded map page, warm persistent clients, shared host. Combined call-count/native precompilation effect; not attribution to fusion alone, cold startup or agent reasoning. Special failure/budget/deadline behavior tested separately."
+    },
+    "candidateFasterPairs": 24
+  },
+  "retainedEvidence": {
+    "archive": "ignored private .workspace/benchmarks/pe-boundaries-v1-20261021",
+    "rawMatchedResultSha256": "c437f8d008ba94b03877efcb1b228ffb9eea0d56bc3ae3302335c44e1c7ce528",
+    "rawGuardsResultSha256": "240ae25dc6de79bc57419100ef3ad525e100b36364e625a05eb200e1f8cba809",
+    "permissions": "directories0700, regular files0600; no profile credentials copied into tracked evidence"
+  },
+  "excludedAttempts": [
+    {
+      "attempt": "first setup preflight",
+      "reason": "linker default image base disagreed with setup constant; script failed after owned memory edits",
+      "recovery": "worker absent in owned inventory; precise request abandoned with outcome unknown, journal and original snapshot retained; Destructive revoked; restored context and server closed",
+      "measurement": "excluded"
+    },
+    {
+      "attempt": "initial matched trial",
+      "reason": "test-side timing included raw receipt persistence and plain-query DB baseline; final trial uses indexed metadata resolver and defers disk writes",
+      "measurement": "excluded"
+    },
+    {
+      "attempt": "final guard first assertion",
+      "reason": "fixture with explicit base supplies a real runtime record; correct kind is pe-runtime-range with exact DB fact, oracle fixed",
+      "measurement": "excluded; no product change"
+    },
+    {
+      "attempt": "package --help timeout",
+      "reason": "one isolated read-only hosted help smoke timed out; fresh isolated identical artifact pack/install smoke passed",
+      "measurement": "excluded; Factory unchanged"
+    }
+  ],
+  "limits": [
+    "One synthetic imported sparse AMD64 PE/current-memory fixture and a matching separate guard PE, warm persistent clients on shared host.",
+    "Runtime regions do not establish instruction starts, execution, semantic membership or whole source-level functions; leaves can lack records.",
+    "Current initialized mapped headers required; no original-file/FileBytes fallback. No chained-unwind reconstruction or function/Listing creation.",
+    "Lookup deadline cooperative, not hard Ghidra/decompiler timeout. Exceptional memory reads without reported counts leave bytesRead a lower bound and return no accepted range.",
+    "Combined request reduction, current-byte parsing/native precompilation and transport effects; no attribution to fusion alone, cold startup, Factory improvements, agent reasoning or a new game benchmark."
+  ]
+}

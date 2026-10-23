@@ -5,6 +5,11 @@
   "description": "Agent-facing durable sessions and isolated Ghidra research contexts",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {"types":"./dist/src/index.d.ts","default":"./dist/src/index.js"},
+    "./persistent": {"types":"./dist/src/persistent-client.d.ts","default":"./dist/src/persistent-client.js"},
+    "./*":"./*"
+  },
   "bin": {
     "insight-cli": "./dist/src/bin.js"
   },

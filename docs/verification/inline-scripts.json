@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "state": "passed",
+  "date": "2026-10-20T17:51:53.712176+00:00",
+  "scope": "BB-07 Java inline compile/load diagnostics and proven non-execution; disposable fixtures only",
+  "baseCommit": "6f8339b47c527a39a7475049478063caa3024f56",
+  "sourceHashes": {
+    "skills/ghidra-coordinator/src/inline-script.ts": "3b2ae3e08d11e5ca0536fba08a8dbfd2ba6e9676d335fd9f18f3b94beadafa29",
+    "skills/ghidra-coordinator/src/research.ts": "6965ece87ec3c4aa54d46bceb85efd07d435efb2dc4f3150c971dc807b7540dc",
+    "skills/ghidra-coordinator/src/contexts.ts": "603ae48cbdba61d89ed9779b1e520f5f5135043ab363724318582e3eed95a6a2",
+    "skills/ghidra-coordinator/references/native/InsightInlineExecutor.java": "05229a2bc87c552e9c04b4dade528f2c251c536d564af88d10d0ff47c18aa1a3",
+    "skills/ghidra-coordinator/references/native/InsightInlineScript.java": "196359164e695635ba3df7d9a322b3ba852551d5ac9e0d449b07391a572e0278",
+    "skills/ghidra-coordinator/references/recovery.md": "34316900eac62fab5b6ca123f5b45b6b1edb807b8e939973e82fcd252020e388",
+    "skills/ghidra-coordinator/skills/insight-ghidra/SKILL.md": "8cd14485fa7787590a9a25c9c48ac0bf496398642a92ea22171c4331826332ca",
+    "skills/ghidra-coordinator/tests/inline-script.test.ts": "b5a0111040ff5a0f9d3344ced386f01fd7b5346f754bc73707bb3e6b38d01397",
+    "skills/ghidra-coordinator/tests/research-cli.test.ts": "f3081d2e1c888e18eb7c00dab12475fe8fabe59a93c4eabead44cc7e062a7458",
+    "scripts/proof-inline-scripts.mjs": "876c7c0575bc397918a28b6ec6626fb0aab5dfcacf725dc6a4878a3a263cdf78",
+    "scripts/proof-inline-loss.mjs": "760059ce4a8d2978249a0482441b9d78cd3c705002a31839024ba8323186d77e",
+    "scripts/test-package.mjs": "9825a00d5e2aeaa75065558ea528d627638b514f33db0109ba9e245c634b9c12"
+  },
+  "installedArtifact": {
+    "file": "eyeauras-insight-cli-0.2.0.tgz",
+    "sha256": "9319a58304d71526a3ce1fb7b375aee82945a00702fdf235c6d468b4b2345277",
+    "bytes": 5275708,
+    "version": "0.2.0",
+    "distribution": "isolated packed development candidate; no registry publication"
+  },
+  "platform": {
+    "os": "macOS arm64",
+    "ghidra": "12.1.2",
+    "jdk": "Homebrew OpenJDK21",
+    "nativeMcp": "7.0.0 unchanged bundled artifact",
+    "node": "v26.4.0"
+  },
+  "offline": {
+    "total": 268,
+    "passed": 264,
+    "skipped": 4,
+    "failed": 0,
+    "execution": "final sequential stable build; OS access for fixture PID verification"
+  },
+  "targeted": {
+    "passed": 19,
+    "failed": 0
+  },
+  "release": {
+    "passed": 31,
+    "failed": 0
+  },
+  "package": "offline isolated install and spaces/Unicode relocation passed",
+  "nativeChecks": {
+    "benchmarkCompileDiagnosticAndAccessibleContext": true,
+    "rejectedReplayDoesNotExecuteOrSave": true,
+    "loadRejectionDoesNotInitialize": true,
+    "constructorResolutionBeforeInitialization": true,
+    "boundedCompilerDiagnostics": true,
+    "correctedRequestAndFreshClassLoader": true,
+    "importsAndArgs": true,
+    "initializeFailureRetainsUnknown": true,
+    "constructFailureRetainsUnknown": true,
+    "consoleCannotForgeNonExecution": true,
+    "executeFailureRetainsUnknown": true,
+    "inputUnchanged": true
+  },
+  "nativeCleanup": [],
+  "lostReply": {
+    "nativeDispatches": 1,
+    "unknownRetained": true,
+    "workerAndServerDisposed": true
+  },
+  "benchmarkReproduction": {
+    "source": "currentProgram.getFunctionManager().getFunctionBefore(currentAddress);",
+    "exitCode": 1,
+    "result": {
+      "session": "S",
+      "target": "T",
+      "requestId": "benchmark-getFunctionBefore",
+      "state": "rejected",
+      "contextState": "ready",
+      "reason": "script_not_executed",
+      "execution": {
+        "stage": "compile",
+        "userCode": "not_started",
+        "entrypointInvoked": false
+      },
+      "diagnostic": {
+        "messageTruncated": false,
+        "kind": "java-compile",
+        "message": "cannot find symbol\n  symbol:   method getFunctionBefore(ghidra.program.model.address.Address)\n  location: interface ghidra.program.model.listing.FunctionManager"
+      },
+      "diagnostics": [
+        {
+          "severity": "error",
+          "code": "compiler.err.cant.resolve.location.args",
+          "message": "cannot find symbol\n  symbol:   method getFunctionBefore(ghidra.program.model.address.Address)\n  location: interface ghidra.program.model.listing.FunctionManager",
+          "messageTruncated": false,
+          "line": 4,
+          "column": 36,
+          "sourceLine": 1,
+          "generatedWrapper": true
+        }
+      ],
+      "diagnosticsTruncated": false,
+      "compilerOutput": {
+        "truncated": false,
+        "text": "Inline.java:4:36: ERROR: cannot find symbol\n  symbol:   method getFunctionBefore(ghidra.program.model.address.Address)\n  location: interface ghidra.program.model.listing.FunctionManager\n",
+        "maximumBytes": 32768
+      },
+      "output": "",
+      "outputTruncated": false
+    },
+    "nextStatus": "ready",
+    "nextRead": "analysis navigation succeeded",
+    "snapshotAndGenerationUnchanged": true,
+    "requestState": "failed",
+    "sameRequestReplay": "same failure without another execution/save",
+    "errorCode": "coordinator.script.compile"
+  },
+  "limits": [
+    "One generated no-analysis x86-64 PE on macOS; no production/game program used.",
+    "V1 covers Java scripts run-inline. File/Python script behavior remains conservative.",
+    "entrypointInvoked null during framework execution means run() entry was not independently observed.",
+    "Initialization/constructor/runtime failures and unproved/lost acknowledgements remain unknown. No classification from exception strings or program snapshot equality.",
+    "The separate receipt is executor output, not a sandbox against adversarial same-JVM Java.",
+    "Intermediate source-smoke was invalidated by an edit; its context/server were later closed. Earlier runner attempts had fixture-only println(int), input-length and ESM import errors; all results retained privately.",
+    "Initial parallel restricted offline run had ILSpy timeout and process-inspection failures; a focused retry overlapped a rebuild. Final stable sequential suite and isolated ILSpy check passed."
+  ]
+}

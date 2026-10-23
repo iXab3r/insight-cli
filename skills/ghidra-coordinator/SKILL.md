@@ -15,6 +15,9 @@ request/status recovery, never blind retry.
 Read the project's RE instructions and existing findings first. They own tool choices,
 evidence layout, formats and source of truth. These skills fill the remaining gaps.
 
+For repeated research calls, retain one [persistent CLI client](references/persistent.md)
+in the agent's long-lived runtime. Reuse it across calls to avoid repeated frontend startup.
+
 1. Run `insight-cli tools list --json` to discover the capabilities shipped in this version.
    The catalog works before profile configuration, downloads or IPC startup. A downloaded
    runtime is not needed to discover what a tool does.

@@ -48,6 +48,23 @@ If a response was lost, inspect `sessions status <session> --target <target>`. N
 intent inside the profile. Repeating the same ID/input retrieves its recorded outcome or
 unresolved state; changing input under that ID fails. Without an ID, calls are new intentions.
 
+For Java `scripts run-inline`, a versioned native executor records compilation, non-initializing
+class resolution, initialization, construction and framework execution separately. A correlated
+receipt proving `userCode: not_started` and `entrypointInvoked: false` before initialization
+produces `state: rejected` with a terminal failed request. The context remains available and
+its prior saved/pending work is unchanged. The CLI exits nonzero; the error result retains
+bounded compiler/load diagnostics. Repeating that request ID retrieves the same rejection;
+corrected source requires a new ID. Each attempt has isolated source/classes under profile
+analysis storage, with annotation processing disabled and no reuse of older inline classes.
+
+Initialization or constructor failure can have effects even when `run()` was never called.
+These failures, framework/runtime failures and missing/malformed/lost acknowledgements remain
+unknown. During framework execution `entrypointInvoked: null` means actual `run()` entry was
+not independently observed. Console text cannot establish non-execution. This is not a sandbox
+for adversarial same-JVM Java, and existing unknown script attempts are not reclassified from
+their exception strings or an unchanged program snapshot. File/Python scripts retain their
+existing conservative recovery semantics.
+
 An unknown or partial effect retains its request intent, snapshots and native stage. Open the
 same tuple to reconcile supported outcomes. A committed merge is verified against its recorded
 server version and complete saved buffers through independent read authority; it is never

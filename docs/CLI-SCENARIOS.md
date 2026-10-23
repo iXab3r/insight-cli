@@ -436,3 +436,53 @@ verified original copies. Cleanup intent disables rollback; interrupted cleanup 
 Stable old paths remain compatibility links. A stopped unknown-operation profile can migrate
 without replaying scripts/publications or declaring their effects applied. See the complete
 [storage contract](../skills/ghidra-coordinator/references/storage.md).
+
+### Sparse raw-byte code-reference search
+
+On an owned no-analysis x86-64 target, a researcher supplies 1–64 exact targets, an inclusive
+byte range and explicit supported forms to `ghidra analysis code-references`. ReadOnly CLI
+and JSON-RPC return the same candidate evidence, widths, boundary status, coverage counters and
+stateless cursor. A paged scan matches an unpaged scan without missing tail/overlapping starts.
+Adjacent executable initialized blocks admit a crossing decode; gaps and ineligible memory do
+not. Candidate/byte/result/deadline stops preserve the first unchecked start. Scope/selector
+conflicts fail before dispatch; a restored process invalidates the old cursor. Saved snapshot,
+generation and request journal remain unchanged during research reads. The disposable generated
+PE proof is `scripts/proof-code-references.mjs`; its matched script/API workload uses identical
+scanner code and inputs and reports wall time separately from native scan time.
+
+### Sparse interior-address inspection
+
+An owned sparse database has a known function entry at `180001000` but a saved one-byte body.
+An agent has observed instruction address `18000108c`. Ordinary inspection remains a not-found
+read; an explicit `functions inspect --functions 18000108c --resolve-address containing-or-preceding
+--max-entry-distance 4096 --fields entry_point,decompiled_code --include-call-context false`
+returns the selected entry and `resolution.kind=preceding-entry-candidate`, distance 140 and
+`recordedBodyContainsAddress=false`. That is navigation evidence, not established membership.
+The same guarded call can resolve 20 addresses with mixed policy misses. Shared entries are
+read once; original result rows still consume the shared text budget. See the
+[sparse entry contract](SPARSE-FUNCTION-ENTRIES.md).
+
+### Raw literal discovery in a sparse database
+
+An owned no-analysis PE has literal bytes but no defined strings. `ghidra strings anchors
+--text Widget --encodings ascii,utf16le --scan-from START --scan-through END` returns exact
+interior raw hits and separate bounded candidate text, retaining overlaps, both encodings and
+odd-address UTF-16. Adjacent initialized blocks admit crossing hits; holes/uninitialized memory
+do not. Missing/invalid context preserves hits. Page byte/candidate/result/deadline stops keep
+the first unchecked pair in a stateless cursor. Old views fail before dispatch; changed views,
+lost replies and malformed facts fail without replay. CLI/RPC share ReadOnly behavior and do
+not change saved context or request journal. [Contract](SPARSE-STRING-ANCHORS.md) and
+`scripts/proof-string-anchors.mjs` define recovery and the matched persistent before/after proof.
+
+### Inspect current PE runtime regions in a sparse program
+
+```sh
+insight-cli ghidra functions inspect --session S --target T --functions 180100008,180100028 \
+  --resolve-address containing-or-pe-runtime --max-unwind-bytes 4194304 \
+  --fields entry_point,decompiled_code --include-call-context false --json
+```
+
+The whole current mapped PE32+/AMD64 Exception Directory is validated before any runtime entry
+is accepted. DB conflicts/missing entries retain evidence; unavailable/incomplete/malformed
+metadata prevents automatic selection. Runtime regions do not prove semantic whole-function
+bounds or instruction starts; leaves can have no record. See [contract](SPARSE-FUNCTION-BOUNDARIES.md).

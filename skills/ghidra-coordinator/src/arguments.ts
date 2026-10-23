@@ -20,8 +20,8 @@ export function parsed(p:Parameter,value:unknown):unknown {
       /^(max_steps|max_functions|num_examples|context_instructions|call_context_limit|call_context_lines|depth)$/.test(p.name)&&result<0)
       fail('invalid',`${flag(p.name)} is outside its supported query range.`);
     if(p.name==='timeout_seconds'&&(result<1||result>1800))fail('invalid','timeout-seconds must be between 1 and 1800.');
-    if(p.name==='max_scan'&&(result<1||result>200000)||p.name==='max_bytes'&&(result<1||result>16777216))
-      fail('invalid',`${flag(p.name)} is outside its supported work budget.`);
+    if(p.name==='max_scan'&&(result<1||result>200000))fail('invalid','max-scan must be between 1 and 200000 visited inputs; result offset does not advance scan coverage.');
+    if(p.name==='max_bytes'&&(result<1||result>16777216))fail('invalid','max-bytes must be between 1 and 16777216 bytes.');
     return result;
   }
   if(['json','object','array','any'].includes(p.type)) {
@@ -40,7 +40,10 @@ export function option(p:Parameter):OptionDefinition {
   const value=p.default;
   const defaultValue=value===undefined||value===''&&!p.allowEmpty?undefined:parsed(p,value);
   return {flags:`--${flag(p.name)} <${p.type==='json'?'json':p.type}>`,
-    description:p.semantic==='function_ref'?'Function name or explicit address':p.semantic==='address'?'Explicit hexadecimal address':
+    description:p.name==='max_scan'?'Maximum visited inputs, 1–200000; independent of result offset':
+      p.name==='max_bytes'?'Maximum searched bytes, 1–16777216':
+      p.name==='offset'&&p.default!=='-1'?'Skip matching result rows; does not continue an incomplete scan':
+      p.semantic==='function_ref'?'Function name or explicit address':p.semantic==='address'?'Explicit hexadecimal address':
       `${flag(p.name)} (${p.type}${p.name==='limit'?', 1–1000':p.name==='length'?', 1–65536 bytes':''})`,
     ...(p.required?{required:true}:{}),...(defaultValue===undefined?{}:{defaultValue}),
     ...(['json','object','array','any'].includes(p.type)?{}:{parse:(value:string)=>parsed(p,value)})};

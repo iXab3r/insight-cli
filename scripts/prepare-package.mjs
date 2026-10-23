@@ -1,10 +1,15 @@
 import {writePackageBuildManifest} from '@eyeauras/cli-factory-ipc/build';
 import {prepareToolbox} from './prepare-toolbox.mjs';
+import {checkPackageReadme} from './sync-package-readme.mjs';
 import {chmod,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+await checkPackageReadme();
 const native='runtime/native/';
 const sha=async path=>createHash('sha256').update(await readFile(path)).digest('hex');
+const bridgeProof=JSON.parse(await readFile('runtime/research-view.provenance.json','utf8'));
+assert.equal(await sha('runtime/GhidraMCP-7.0.0.jar'),bridgeProof.sha256,'Research-view bridge differs from its provenance');
+for(const [path,expected]of Object.entries(bridgeProof.inputs))if(path.startsWith('skills/ghidra-coordinator/'))assert.equal(await sha(path.slice('skills/ghidra-coordinator/'.length)),expected,'Bridge native source changed; rebuild bridge and provenance: '+path);
 for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['deadline-alarm','deadline-alarm-darwin-universal.dylib']]){
  const proof=JSON.parse(await readFile(native+name+'.provenance.json','utf8'));
  assert.equal(await sha(native+name+'.c'),proof.sourceSha256,'Native deadline source changed; rebuild and review its provenance');

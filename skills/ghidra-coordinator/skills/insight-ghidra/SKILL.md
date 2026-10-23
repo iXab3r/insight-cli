@@ -17,6 +17,9 @@ session/cell ID, await that same execution with the host's wait/poll facility un
 status and read its stdout/stderr. An empty first chunk is not a lost CLI response. Do not
 start another open or repeat a CPU mutation while the original command is still running.
 
+For research loops, use the packaged [persistent client](references/persistent.md) and keep
+one connection across queries. It uses the existing CLI transport and preserves typed errors;
+lost mutation replies still require request/status recovery.
 
 New targets import **without automatic analysis**. Reuse existing selectors/projects before
 opening another copy; `ghidra open --session <session> --target <target>` preserves its bound
@@ -68,6 +71,13 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
    function addresses, then inspect/decompile. Decompilation defaults to a 16000-character
    window; page with `--limit-chars`/`--offset-chars` and retain `textSha256`. Native
    truncation remains explicit even at the end of the observed text. See [research](references/research.md).
+   If strings/xrefs are empty or function bodies are one byte, run `analysis navigation`
+   and follow [sparse navigation](references/sparse-navigation.md). Try compact `functions inspect`
+   at known entries before writing reconstruction scripts. `force-decompile` refreshes an
+   existing entry; `decode` handles known bytes without an entry. Neither repairs stored xrefs.
+   `analysis code-references` scans explicit RIP/CALL byte forms for exact targets with bounded
+   coverage and a stateless cursor. Its decoded candidates retain boundary uncertainty; see the
+   sparse-navigation reference before treating a candidate as an actual code reference.
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
 5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.
@@ -76,6 +86,9 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.
+   Java `scripts run-inline` returns bounded compile/load diagnostics. Only proven rejection
+   before user-code initialization leaves the context available; constructor/static initializer
+   failures and lost responses remain unknown. See the recovery reference for execution fields.
 7. Finish by closing each context you own with scoped `ghidra close`, preserving private work.
    If this profile's local server belongs exclusively to your investigation and all its contexts
    are closed, use `ghidra server stop`, then verify `ghidra status` has no remaining processes.
