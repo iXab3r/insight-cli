@@ -4,6 +4,7 @@ import {mkdir,open,rename,rm,stat,chmod,lstat} from 'node:fs/promises';
 import {dirname,join,resolve,posix} from 'node:path';
 import {pipeline} from 'node:stream/promises';
 import {Readable} from 'node:stream';
+import {setTimeout as delay} from 'node:timers/promises';
 import * as tar from 'tar';
 import * as zip from 'yauzl';
 import {fail} from '../model.js';
@@ -55,7 +56,17 @@ export async function cacheArtifact(artifact:ToolArtifact,cache:string,fetcher:t
   try{for await(const chunk of response.body as unknown as AsyncIterable<Uint8Array>){signal.throwIfAborted();if((size+=chunk.byteLength)>(artifact.size??2*1024**3))fail('limit','Runtime download exceeds two GiB.');hash.update(chunk);await handle.writeFile(chunk);}await handle.sync();}finally{await handle.close();}
   if(artifact.size!==undefined&&size!==artifact.size)fail('binding','Downloaded runtime archive has an unexpected size.');
   if(hash.digest('hex')!==artifact.sha256)fail('binding','Downloaded runtime archive failed its pinned SHA256 check.');
-  await rename(temporary,path);return path;
+  // Windows can briefly deny replacement while another downloader publishes the same key.
+  // Retry the atomic rename only; never unlink the verified destination to make room.
+  for(let attempt=0;;attempt++){
+   signal.throwIfAborted();
+   try{await rename(temporary,path);break;}
+   catch(error){
+    if(process.platform!=='win32'||attempt===5||!['EPERM','EACCES','EBUSY'].includes((error as NodeJS.ErrnoException).code??''))throw error;
+    await delay(10*2**attempt,undefined,{signal});
+   }
+  }
+  return path;
  }finally{await rm(temporary,{force:true});}
 }
 

@@ -21,7 +21,7 @@ test('Ghidra and one-shot definitions share Factory lifecycle, permission gates 
  assert.throws(()=>tool('bad',[{id:'a',version:'1',artifacts:[],dependencies:['missing']}]),/Unknown/);
 });
 test('shared cache validates cancellation and declared size without activating partial bytes',async t=>{
- const {mkdtemp,rm,stat}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const {mkdtemp,rm,stat,readFile,readdir}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
  const {cacheArtifact}=await import('../src/tool-runtime/archives.js');
  const root=await mkdtemp(join(tmpdir(),'tool-cache-'));t.after(()=>rm(root,{recursive:true,force:true}));
  const a={name:'fixture',url:'https://example.invalid/tool',sha256:'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',size:5,format:'zip' as const,root:'.',license:'Fixture'};
@@ -32,6 +32,8 @@ test('shared cache validates cancellation and declared size without activating p
  await assert.rejects(stat(join(root,a.sha256+'.zip')));
  const results=await Promise.all([cacheArtifact(a,root,fetcher,new AbortController().signal),cacheArtifact(a,root,fetcher,new AbortController().signal)]);
  assert.equal(results[0],results[1]);
+ assert.equal(await readFile(results[0]!,'utf8'),'hello');
+ assert.deepEqual(await readdir(root),[a.sha256+'.zip']);
 });
 
 test('installation fingerprints survive staging relocation and an aliased parent without admitting escaping links',async t=>{

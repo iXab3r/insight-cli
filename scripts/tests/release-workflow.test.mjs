@@ -9,7 +9,7 @@ import {createHash} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 const exec=promisify(execFile);
-const workflow=await readFile(new URL('../../.github/workflows/release-npm.yml',import.meta.url),'utf8');
+const workflow=(await readFile(new URL('../../.github/workflows/release-npm.yml',import.meta.url),'utf8')).replaceAll('\r\n','\n');
 const section=workflow.split('- name: Publish once using OIDC and verify registry integrity\n')[1];
 assert.ok(section,'Publication step is present');
 const body=section.split("<<'NODE'\n")[1].split('\n          NODE')[0];
