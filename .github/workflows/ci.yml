@@ -10,6 +10,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm run cache:factory
       - run: npm test
       - run: npm run test:package
       - run: git diff --exit-code
@@ -29,6 +30,8 @@ jobs:
       - run: npm run build
       - name: Windows platform secret storage
         run: node --test skills/ghidra-coordinator/dist/tests/platform-secrets.test.js
+      - run: npm run cache:factory
+      - run: npm run test:package
       - name: Portable storage migration and runtime regression
         run: node --test skills/ghidra-coordinator/dist/tests/analysis-storage.test.js skills/ghidra-coordinator/dist/tests/runtime-manager.test.js skills/ghidra-coordinator/dist/tests/tool-installation.test.js
       - name: Real java and javac long-classpath regression

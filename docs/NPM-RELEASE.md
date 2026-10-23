@@ -33,14 +33,21 @@ permissions, opening inputs and research. `insight-cli ghidra install` delivers 
 Java 21 and local server support; external installations remain supported. Help, skill discovery
 and ordinary file saves need neither.
 
-The package pins published Factory Core 0.4.1 and MCP SDK 1.32.1. Factory IPC 0.1.0 is the
-verified official prepared artifact, fetched by npm from an immutable GitHub tarball URL.
-[Provenance](../vendor/provenance.json) binds the URL, source commit, license and SHA-256.
-Both npm registry and GitHub access are needed at install time. No separate archive must be
-installed manually, and no separate IPC registry release is made by this consumer.
-Partial IPC bundling was rejected during preflight because incomplete dependency trees left
-missing transitive modules in a fresh global install. The release uses ordinary dependency
-resolution, including platform-specific keyring packages selected by npm.
+Build dependencies pin prepared Factory Core 0.5.2 and IPC 0.1.0 to immutable GitHub archives.
+[Core provenance](../vendor/factory-core-fcb793f.json) and [IPC provenance](../vendor/provenance.json)
+bind their source commit, license and SHA-256. The distribution bundles the complete locked
+CLI runtime dependency tree, including these exact Factory packages. Its Factory dependencies use exact versions,
+so global `npm list --all` does not depend on URL metadata that npm drops in global installs.
+No Factory registry publication is required. MCP SDK remains pinned to 1.32.1.
+
+Bundling uses a standalone staging directory because npm workspace packing omits hoisted
+dependencies. The acquisition step caches every keyring platform binary; each is checked
+against the lockfile's SHA-512 and included in the archive. A package built on Windows therefore
+also carries the Linux and macOS binaries. Bundled dependencies retain their package metadata
+and licenses. The larger archive installs offline without GitHub, the npm registry or a
+populated npm cache. Partial bundles are unsupported: the package gate installs into a fresh
+global prefix with an empty npm cache, checks the tree, and compares both installed Factory
+payloads against the prepared archives.
 
 ## Prepare and publish
 
@@ -48,14 +55,16 @@ Run from a clean checkout using the locked dependencies:
 
 ```sh
 npm ci --ignore-scripts
+npm run cache:factory
 npm test
 npm run test:package
 npm run pack:cli
 npm publish ./artifacts/eyeauras-insight-cli-0.2.0.tgz --access public --ignore-scripts
 ```
 
-Publish the inspected archive, not an unbuilt workspace. The prepack build prepares Factory's
-package manifest after TypeScript compilation. The archive includes the CLI/API, both skills,
+Publish the inspected archive from `npm run pack:cli`, not a raw workspace pack. This command
+builds TypeScript, prepares the complete Factory bundle offline, and calls Factory's canonical
+build-manifest helper for the staged package. The archive includes the CLI/API, both skills,
 references/native helpers, GhidraMCP bridge/license/notice and README. Source tests, private
 research files and dependency credentials are excluded. Future versions must update package
 and CLI/skill versions together and repeat the install proof. Never overwrite an existing

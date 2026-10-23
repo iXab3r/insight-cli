@@ -103,6 +103,7 @@ jobs:
       - name: Apply the reserved version to package and skills
         run: node scripts/release-version.mjs apply
       - run: npm ci --ignore-scripts
+      - run: npm run cache:factory
       - run: npm test
       - run: npm run test:package
       - run: npm run pack:cli

@@ -1,5 +1,8 @@
 import {runNpm} from './npm-command.mjs';
 import {packageReadme} from './sync-package-readme.mjs';
+import {packCli} from './factory-bundle.mjs';
+import {x as extractTar} from 'tar';
+import {readdir} from 'node:fs/promises';
 // Locked offline pack/install proof. npm ci setup populates the ordinary artifact cache.
 import assert from 'node:assert/strict';import{execFile}from'node:child_process';import{promisify}from'node:util';import{mkdtemp,mkdir,readFile,writeFile,rm,realpath}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{createHash}from'node:crypto';import{fileURLToPath,pathToFileURL}from'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile);
@@ -11,12 +14,12 @@ const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-fc
 for(const record of [provenance,coreProvenance])assert.equal(createHash('sha256').update(await readFile(join(root,'vendor',record.file))).digest('hex'),record.sha256);
 try{
  const artifacts=join(install,'artifacts');await mkdir(artifacts);
- const pack=JSON.parse((await runNpm(['pack','--ignore-scripts','--json','--workspace','@eyeauras/insight-cli','--pack-destination',artifacts],{cwd:root})).stdout)[0];
+ const {packed:pack,manifest:cli}=await packCli(artifacts);
  if(process.platform!=='win32')assert.equal(pack.files.find(file=>file.path==='dist/src/bin.js')?.mode&0o777,0o755,'Packed CLI entrypoint must be executable on a clean POSIX build');
  const files=new Set(pack.files.map(f=>f.path));for(const path of ['dist/src/code-references.js','references/native/InsightCodeReferences.java','dist/src/ilspy.js','dist/src/ghidra-processes.js','dist/src/tool-runtime/launch-worker.js','dist/src/tool-runtime/supervisor.js','dist/src/tool-runtime/installer.js','runtime/tool-catalog.json','references/ilspy.md','references/native/InsightInitialJournal.java','references/native/InsightInitialImport.java','references/native/InsightInitialPublication.java','dist/src/initial-model.js','references/extensions-and-sync.md','references/native/InsightExtensions.java','references/native/InsightPlugins.java','dist/src/extensions.js','dist/src/sync-policy.js','references/native-workflows.md','references/native/InsightSdkTools.java','references/native/InsightSdkTypes.java','references/native/InsightSdkScript.java','references/native/InsightSdkFiles.java','references/native/InsightFunctionDatabases.java','references/native/InsightVersionTracking.java','references/native/InsightTraceTools.java','references/native/InsightNativeReceipt.java','dist/src/sdk.js','dist/src/sdk-files.js','dist/src/sdk-contracts.js','dist/src/version-tracking.js','references/native/InsightResearchQueries.java','references/native/InsightEmulation.java','dist/src/query-policy.js','dist/src/native-queries.js','dist/src/memory-inputs.js','README.md','SKILL.md','references/debugger.md','references/archive.md','dist/src/debugger.js','dist/src/debugger-supervisor.js','dist/src/debugger-results.js','dist/src/archive.js','dist/src/archive-contract.js','references/native/InsightTraceState.java','references/native/InsightTraceInspect.java','references/native/InsightStartDebugger.java','references/native/InsightStopDebugger.java','references/native/InsightPythonWheels.java','references/native/InsightArchivePayloads.java','references/setup.md','references/research.md','references/recovery.md','references/queries.json','references/mutations.json','runtime/GhidraMCP-7.0.0.jar','runtime/GhidraMCP-LICENSE','runtime/GhidraMCP-NOTICE','runtime/provenance.json','references/InsightRepositoryProbe.java','references/native/InsightGuiMain.java','references/native/InsightHeadlessMain.java','references/native/InsightServerMain.java','references/native/InsightSnapshotPublisher.java','references/native/InsightSnapshotFields.java','references/native/InsightPublicationRecovery.java','references/native/InsightBlockTransfer.java','LICENSE','dist/src/bin.js','dist/src/queries.js','dist/src/mutations.js','dist/src/scripts.js','references/native/InsightSnapshotInspect.java','references/native/InsightApplyDocumentation.java','dist/src/data-effects.js','dist/src/documentation-effects.js','dist/src/mutation-inputs.js','dist/src/cross.js','dist/src/cross-results.js','.cli-package-build.json'])assert.ok(files.has(path),path);
  for(const path of ['dist/src/inline-script.js','references/native/InsightInlineExecutor.java','references/native/InsightInlineScript.java','dist/src/persistent-client.js','dist/src/persistent-client.d.ts','dist/src/research-view.js','dist/src/function-entries.js','dist/src/function-boundaries.js','references/native/InsightFunctionBoundaries.java','references/native/InsightPeRanges.java','dist/src/string-anchors.js','references/native/InsightAnchorScan.java','references/native/InsightStringAnchors.java','references/native/InsightResearchView.java','runtime/research-view.provenance.json'])assert.ok(files.has(path),path);
  for(const path of ['dist/src/analysis-default.js','dist/src/analysis-storage.js'])assert.ok(files.has(path),path);
- assert.ok([...files].every(f=>!f.includes('/tests/')&&(!f.endsWith('.ts')||f.endsWith('.d.ts'))));
+ assert.ok([...files].filter(f=>!f.startsWith('node_modules/')).every(f=>!f.includes('/tests/')&&(!f.endsWith('.ts')||f.endsWith('.d.ts'))));
  for(const path of ['dist/src/runtime-manager.js','dist/src/runtime-selection.js','dist/src/runtime-catalog.js','dist/src/tool-runtime/archives.js','references/managed-runtime.md','references/native/InsightRuntimeDoctor.java','skills/insight-re/SKILL.md','references/artifacts.md','dist/src/saved-materials.js'])assert.ok(files.has(path),path);
  const toolbox=JSON.parse(await readFile(join(root,'skills/ghidra-coordinator/runtime/toolbox.json'),'utf8'));
  assert.ok(files.has('skill-bundle/manifest.json'));
@@ -26,24 +29,57 @@ try{
  const manifest={name:'isolated-insight-proof',version:'1.0.0',private:true,type:'module',dependencies:{'@eyeauras/insight-cli':packageFile},devDependencies:sourcePackage.devDependencies};
  lock.name=manifest.name;lock.version=manifest.version;lock.packages['']=manifest;
  for(const [name,item]of Object.entries(lock.packages)){if(item.link||name.startsWith('skills/'))delete lock.packages[name];}
- const cli=JSON.parse(await readFile(join(root,'skills/ghidra-coordinator/package.json'),'utf8'));
- for(const record of [provenance,coreProvenance])assert.equal(cli.dependencies[record.package],record.url,'Runtime dependency must match the recorded immutable artifact');
+ const sourceCli=JSON.parse(await readFile(join(root,'skills/ghidra-coordinator/package.json'),'utf8'));
+ for(const record of [provenance,coreProvenance]){
+  assert.equal(sourceCli.dependencies[record.package],record.url,'Build dependency must match the recorded immutable artifact');
+  assert.equal(cli.dependencies[record.package],record.version);
+  assert.ok(cli.bundleDependencies.includes(record.package));
+ }
  lock.packages['node_modules/@eyeauras/insight-cli']={version:cli.version,resolved:packageFile,integrity:'sha512-'+createHash('sha512').update(await readFile(join(artifacts,pack.filename))).digest('base64'),dependencies:cli.dependencies,engines:cli.engines,bin:cli.bin,license:cli.license};
  await writeFile(join(install,'package.json'),JSON.stringify(manifest));await writeFile(join(install,'package-lock.json'),JSON.stringify(lock));
- await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:60000,maxBuffer:262144});
+ await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:300000,maxBuffer:262144});
+ // Global npm ignores lockfiles. This is where URL-only Factory dependencies
+ // previously reported ELSPROBLEMS despite having the correct deployed bytes.
+ const globalPrefix=join(proof,'global spaces-Ω');
+ await mkdir(globalPrefix);
+ // A cold Windows install extracts thousands of files, including every platform's
+ // native payload. Keep a bounded deadline without treating disk latency as failure.
+ await runNpm(['install','--global','--prefix',globalPrefix,'--cache',join(proof,'empty-npm-cache'),'--offline','--no-update-notifier','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:300000,maxBuffer:262144});
+ await runNpm(['ls','--global','--prefix',globalPrefix,'--all','--json'],{cwd:install,timeout:30000,maxBuffer:1048576});
+ const globalModules=(await runNpm(['root','--global','--prefix',globalPrefix],{cwd:install})).stdout.trim();
+ const globalCli=join(globalModules,'@eyeauras/insight-cli');
+ async function sameFiles(expected,actual){
+  for(const entry of await readdir(expected,{withFileTypes:true})){
+   const from=join(expected,entry.name),to=join(actual,entry.name);
+   if(entry.isDirectory())await sameFiles(from,to);
+   else assert.deepEqual(await readFile(to),await readFile(from),'Global Factory bytes differ from prepared archive: '+entry.name);
+  }
+ }
+ for(const record of [provenance,coreProvenance]){
+  const expected=join(proof,record.file+'.unpacked');await mkdir(expected);
+  await extractTar({file:join(root,'vendor',record.file),cwd:expected});
+  await sameFiles(join(expected,'package'),join(globalCli,'node_modules',record.package));
+ }
+ const globalEnvironment=join(proof,'global-environment.mjs');
+ await writeFile(globalEnvironment,`import{AppArguments}from ${JSON.stringify(pathToFileURL(join(globalCli,'node_modules/@eyeauras/cli-factory/dist/src/index.js')).href)};const original=AppArguments.CurrentEnvironment;AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:${JSON.stringify(endpointData)},EnvironmentLocalAppData:${JSON.stringify(endpointData)}});`);
+ const globalArgs=['--import',pathToFileURL(globalEnvironment).href,join(globalCli,'dist/src/bin.js')];
+ try{
+  const globalHelp=await exec(process.execPath,[...globalArgs,'--help'],{cwd:proof,timeout:30000,maxBuffer:262144});
+  assert.match(globalHelp.stdout,/insight-cli/);
+ }finally{await exec(process.execPath,[...globalArgs,'ipc-server','stop'],{cwd:proof,timeout:30000,maxBuffer:262144});}
  const installedReadme=await readFile(join(install,'node_modules/@eyeauras/insight-cli/README.md'),'utf8');
  assert.equal(installedReadme.replaceAll('\r\n','\n'),packageReadme(await readFile(join(root,'README.md'),'utf8')),'Installed npm README must match the root README with GitHub links');
  const isolatedEnvironment=join(install,'isolated-environment.mjs');
- await writeFile(isolatedEnvironment,`import{AppArguments}from'@eyeauras/cli-factory';import{join}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';const original=AppArguments.CurrentEnvironment;const root=${JSON.stringify(endpointData)};AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:root,EnvironmentLocalAppData:root});`);
+ await writeFile(isolatedEnvironment,`import{AppArguments}from'./node_modules/@eyeauras/insight-cli/node_modules/@eyeauras/cli-factory/dist/src/index.js';import{join}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';const original=AppArguments.CurrentEnvironment;const root=${JSON.stringify(endpointData)};AppArguments.CurrentEnvironment=()=>({...original(),EnvironmentAppData:root,EnvironmentLocalAppData:root});`);
  const hostedHelp=await exec(process.execPath,['--import',pathToFileURL(isolatedEnvironment).href,join(install,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),'--help'],{cwd:install,timeout:30000,maxBuffer:262144});
  assert.match(hostedHelp.stdout,/insight-cli/);
  await exec(process.execPath,['--import',pathToFileURL(isolatedEnvironment).href,join(install,'node_modules/@eyeauras/insight-cli/dist/src/bin.js'),'ipc-server','stop'],{cwd:install,timeout:30000,maxBuffer:262144});
- const fixture=join(install,'proof.mjs');await writeFile(fixture,`import test from'node:test';import assert from'node:assert/strict';import{createCliFixture}from'@eyeauras/cli-factory/testing';import{createInsightCli}from'@eyeauras/insight-cli';import{readFile}from'node:fs/promises';import{createHash}from'node:crypto';import{packagedMcpJar,pinnedMcpJar}from'./node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js';test('installed skill and commands without source checkout',async t=>{assert.ok(packagedMcpJar.includes('node_modules'));assert.equal(createHash('sha256').update(await readFile(packagedMcpJar)).digest('hex'),pinnedMcpJar);const f=await createCliFixture(t,{applicationId:'insight-cli'});const app=f.createApplication(runtime=>createInsightCli({runtime}));const skill=await f.json(app,['skill']);assert.ok(skill.path.includes('node_modules'));assert.ok((await readFile(skill.path,'utf8')).includes('insight-cli '+${JSON.stringify(cli.version)}));const replies=await f.rpc(app,[['targets','list'],['sessions','list']]);assert.equal(replies.length,2);assert.equal(replies[0].result.items.length,0);assert.equal(replies[1].result.items.length,0);const extensions=await f.json(app,['ghidra','extensions','list']);assert.equal(extensions.items.length,0);const policyHelp=await f.run(app,['ghidra','sync-policy','set','--help']);assert.equal(policyHelp.exitCode,0);assert.match(policyHelp.stdout,/after-edit/);const denied=await f.run(app,['ghidra','open','missing.exe','--session','new','--json']);assert.notEqual(denied.exitCode,0);assert.match(denied.stderr,/permission/i);const missing=await f.run(app,['ghidra','functions','get','--session','s_missing','--address','140001000','--json']);assert.notEqual(missing.exitCode,0);assert.match(missing.stderr,/target/);});`);
+ const fixture=join(install,'proof.mjs');await writeFile(fixture,`import test from'node:test';import assert from'node:assert/strict';import{createCliFixture}from'./node_modules/@eyeauras/insight-cli/node_modules/@eyeauras/cli-factory/dist/src/testing.js';import{createInsightCli}from'@eyeauras/insight-cli';import{readFile}from'node:fs/promises';import{createHash}from'node:crypto';import{packagedMcpJar,pinnedMcpJar}from'./node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js';test('installed skill and commands without source checkout',async t=>{assert.ok(packagedMcpJar.includes('node_modules'));assert.equal(createHash('sha256').update(await readFile(packagedMcpJar)).digest('hex'),pinnedMcpJar);const f=await createCliFixture(t,{applicationId:'insight-cli'});const app=f.createApplication(runtime=>createInsightCli({runtime}));const skill=await f.json(app,['skill']);assert.ok(skill.path.includes('node_modules'));assert.ok((await readFile(skill.path,'utf8')).includes('insight-cli '+${JSON.stringify(cli.version)}));const replies=await f.rpc(app,[['targets','list'],['sessions','list']]);assert.equal(replies.length,2);assert.equal(replies[0].result.items.length,0);assert.equal(replies[1].result.items.length,0);const extensions=await f.json(app,['ghidra','extensions','list']);assert.equal(extensions.items.length,0);const policyHelp=await f.run(app,['ghidra','sync-policy','set','--help']);assert.equal(policyHelp.exitCode,0);assert.match(policyHelp.stdout,/after-edit/);const denied=await f.run(app,['ghidra','open','missing.exe','--session','new','--json']);assert.notEqual(denied.exitCode,0);assert.match(denied.stderr,/permission/i);const missing=await f.run(app,['ghidra','functions','get','--session','s_missing','--address','140001000','--json']);assert.notEqual(missing.exitCode,0);assert.match(missing.stderr,/target/);});`);
  await exec(process.execPath,['--test',fixture],{cwd:install,timeout:30000,maxBuffer:262144});
  const researchProof=join(install,'research-proof.mjs');
  await writeFile(researchProof,`import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createCliFixture} from '@eyeauras/cli-factory/testing';
+import {createCliFixture} from './node_modules/@eyeauras/insight-cli/node_modules/@eyeauras/cli-factory/dist/src/testing.js';
 import {createInsightCli} from '@eyeauras/insight-cli';
 import {mkdir,writeFile,readFile,stat,realpath} from 'node:fs/promises';
 import {join} from 'node:path';
@@ -66,5 +102,5 @@ test('relocated RE skill and ordinary materials without native runtime',async t=
  assert.equal(await readFile(replies[0].result.path,'utf8'),'');
 });`);
  await exec(process.execPath,['--test',researchProof],{cwd:install,timeout:30000,maxBuffer:262144});
- console.log('Packed isolated install: skill/resources, profile/JSON/RPC, permission denial and spaces/Unicode PASS');
+ console.log('Packed isolated/global installs: clean npm ls, exact Factory payloads, skill/resources, profile/JSON/RPC, permission denial and spaces/Unicode PASS');
 }finally{await rm(endpointData,{recursive:true,force:true});if(keep)console.log('Retained owned installed package:',install);else await rm(proof,{recursive:true,force:true});}
