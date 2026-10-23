@@ -84,7 +84,6 @@ export class GhidraContexts {
     if((await nativeInputs(this.c.profile.values,this.workspace.directory,this.c)).fingerprint!==this.inputs.fingerprint)
       fail('binding','Native runtime inputs changed; stop the owner before using a different build.');
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
-    await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs,this.c);
     let debuggerEnvironment:Record<string,string>={},debuggerPython:string|undefined,debuggerRuntime:SelectedTool|undefined;
     if(mode==='gui'){
@@ -105,6 +104,7 @@ export class GhidraContexts {
     const main=mode==='gui'?'InsightGuiMain':'InsightHeadlessMain';
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
+    try{await this.c.secrets.set(tokenSecret,token);}catch(error){await log.close();throw error;}
     let binding!:ProcessBinding;
     const child=await launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
@@ -135,10 +135,8 @@ export class GhidraContexts {
     } catch(error) {
       if(child.exitCode===null&&child.signalCode===null)child.kill('SIGTERM');
       for(let i=0;i<100&&child.exitCode===null&&child.signalCode===null;i++)await delay(50);
-      if(context&&(child.exitCode!==null||child.signalCode!==null)){
-        const at=new Date().toISOString();await durable(join(root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret,at,reason:'startup_failed'});
-        await recordLifecycle(this.workspace,context,{at,event:'stop',reason:'startup_failed',pid:binding.pid});
-      }
+      if(child.exitCode!==null||child.signalCode!==null)
+        await this.stopRecord(record,false,true,'startup_failed');
       this.running.delete(root);throw error;
     }
   }
@@ -321,8 +319,8 @@ export class GhidraContexts {
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
     if(binding&&!alive(binding.pid)){
-      if(binding.context!==context.id||binding.target!==scope.target||binding.runtimeFingerprint!==this.inputs.fingerprint)
-        fail('binding','Retired native credential belongs to a different context or runtime.');
+      if(binding.context!==context.id||binding.target!==scope.target)
+        fail('binding','Retired native credential belongs to a different context.');
       await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
     }
     await this.privateCopy(context,snapshot);
