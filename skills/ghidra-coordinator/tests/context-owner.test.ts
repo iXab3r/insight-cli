@@ -34,6 +34,10 @@ test('inventory ignores a proven reused worker PID before resolving a removed ta
   await assert.rejects((backend as any).inventory(),/Removed target lookup/);
  }
  await writeFile(recordPath,JSON.stringify(record));await (backend as any).inventory();
+ await writeFile(recordPath,JSON.stringify({...record,state:'exited'}));
+ await assert.rejects((backend as any).inventory(),/Removed target lookup/,'Terminal state without completion evidence is ambiguous');
+ await writeFile(recordPath,JSON.stringify({...record,state:'exited',endedAt:new Date().toISOString()}));
+ await (backend as any).inventory();
  assert.equal(await readFile(path,'utf8'),bytes,'Inventory must preserve recovery journals');
  process.kill(process.pid,0);
 });
