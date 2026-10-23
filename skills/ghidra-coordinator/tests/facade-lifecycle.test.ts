@@ -1,3 +1,4 @@
+import {CliError} from '@eyeauras/cli-factory';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
@@ -120,4 +121,23 @@ test('generated save ID retrieves its retained snapshot under automatic publicat
   const result=await f.json(app,['ghidra','save',...select,'--request-id',request.id]) as {state:string;pendingChanges:number};
   assert.equal(result.state,'saved');assert.equal(result.pendingChanges,1);assert.deepEqual({opens,saves},before);assert.equal(backend!.publications,0);
   assert.equal(backend!.workspace.request(request.id).state,'applied');assert.deepEqual(backend!.workspace.unresolvedSessionAdministration(who.session).map(row=>row.id),external);
+});
+
+test('open continuation reports its recovery cause and retains the original unknown request',async t=>{
+  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});let backend:SessionBackend,attempts=0,failOpen=true;
+  const app=f.createApplication(runtime=>createInsightCli({runtime,backend:workspace=>{
+    backend=new SessionBackend(workspace);const open=backend.open.bind(backend);
+    backend.open=async(scope,request)=>{attempts++;if(failOpen)throw new CliError('Native context ownership mismatch',{code:'coordinator.binding'});return open(scope,request);};return backend;
+  }}));
+  const input=join(f.root,'fixture.exe');await writeFile(input,'synthetic input, never executed');
+  const first=await f.run(app,['ghidra','open',input,'--session','new','--json']);assert.equal(first.exitCode,1);
+  const who=JSON.parse(first.stdout),select=['--session',who.session,'--target',who.target];
+  const original=backend!.workspace.unresolved(who)[0]!;
+  const again=await f.run(app,['ghidra','open',...select,'--json']);assert.equal(again.exitCode,1);
+  assert.match(again.stderr,/Native context ownership mismatch/);assert.doesNotMatch(again.stderr,/unproved effect/);
+  assert.deepEqual(backend!.workspace.unresolved(who).map(row=>row.id),[original.id]);assert.equal(attempts,2);
+  const status=await f.json(app,['sessions','status',who.session,'--target',who.target]) as {ghidra:{state:string}};
+  assert.equal(status.ghidra.state,'needs_recovery');
+  failOpen=false;assert.equal((await f.json(app,['ghidra','open',...select]) as {state:string}).state,'ready');
+  assert.equal(backend!.workspace.request(original.id).state,'applied');assert.equal(backend!.publications,0);
 });

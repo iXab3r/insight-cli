@@ -1,3 +1,4 @@
+import {ownedDirectory} from './directory-identity.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -9,7 +10,7 @@ import { type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdir, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
 import {constants} from 'node:fs';
-import { join, delimiter, sep, resolve, dirname } from 'node:path';
+import { join, delimiter, sep, resolve, dirname, basename } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeHelpers, nativeInputs,nativeJvmDirectories,nativeExtensionArguments, type NativeInputs } from './native-inputs.js';
@@ -142,7 +143,7 @@ export class GhidraContexts {
   }
   private async verified(binding: ProcessBinding, target: ResearchTarget, verifySource = true): Promise<Running> {
     const root=await realpath(binding.root);
-    if(!root.startsWith(resolve(this.directory())+sep)||binding.target!==target.id||binding.runtimeFingerprint!==this.inputs.fingerprint)
+    if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||binding.target!==target.id||binding.runtimeFingerprint!==this.inputs.fingerprint)
       fail('binding','Native context receipt does not match its profile, target or runtime.');
     if(stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))
       fail('binding','Native context receipt changed.');
@@ -183,7 +184,7 @@ export class GhidraContexts {
     this.running.delete(binding.root);
   }
   private async debuggerReleased(binding:ProcessBinding){
-    const root=await realpath(binding.root);if(!root.startsWith(resolve(this.directory())+sep)||
+    const root=await realpath(binding.root);if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Debugger lifetime binding moved outside its owned context.');
     const directory=join(root,'debugger-supervisors'),deadline=Date.now()+15000;
     for(;;){let names:string[];try{names=await readdir(directory);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
@@ -643,7 +644,7 @@ public class ${name} extends GhidraScript {
   async closed(scope:Scope) {
     const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');
     const binding=JSON.parse(await readFile(path,'utf8')) as ProcessBinding,root=await realpath(binding.root);
-    if(!root.startsWith(resolve(this.directory())+sep)||binding.context!==context.id||binding.target!==scope.target||
+    if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
       if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;
