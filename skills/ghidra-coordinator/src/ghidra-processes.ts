@@ -1,6 +1,7 @@
+import {sameDirectory,ownedDirectory,projectPathWithin} from './directory-identity.js';
 import {runtimeSelection} from './runtime-selection.js';
 import type {CommandContext} from '@eyeauras/cli-factory';
-import {join,resolve,relative,sep} from 'node:path';
+import {join,resolve,relative,sep,dirname} from 'node:path';
 import {readFile,readdir,realpath} from 'node:fs/promises';
 import {serverIdentity,stopLocalServer} from './server.js';
 import {HttpBridge} from './transport.js';
@@ -12,25 +13,29 @@ import {analysisDirectory} from './analysis-storage.js';
 async function ownedPath(c:CommandContext,path:unknown){
  if(typeof path!=='string')fail('binding','Tool resource moved outside this profile.');
  const supplied=resolve(path),profile=resolve(c.appArguments.AppDataDirectory),canonical=await realpath(profile),analysis=await realpath(analysisDirectory(c));
- const base=supplied.startsWith(profile+sep)?profile:supplied.startsWith(canonical+sep)?canonical:supplied.startsWith(analysis+sep)?analysis:undefined;
+ let base:string|undefined;
+ for(let at=dirname(supplied);;at=dirname(at)){
+  try{if(sameDirectory(at,canonical)||sameDirectory(at,analysis)){base=at;break;}}catch{}
+  if(at===dirname(at))break;
+ }
  if(!base)fail('binding','Tool resource moved outside this profile.');
- // Keep Factory's raw AppData identity in process records, but compare native resources
- // under its canonical profile. Accept the parent alias, never a replaced child link.
- const suffix=relative(base,supplied),expected=base===analysis?supplied:['workspace','runtime','materials','temp'].some(tree=>suffix===tree||suffix.startsWith(tree+sep))?join(analysis,suffix):join(canonical,suffix);
- if(await realpath(supplied)!==expected)fail('binding','Tool resource moved outside this profile.');return expected;
+ const suffix=relative(base,supplied),analysisTree=['workspace','runtime','materials','temp'].some(tree=>suffix===tree||suffix.startsWith(tree+sep));
+ const owner=sameDirectory(base,analysis)&&!sameDirectory(base,canonical)||analysisTree?analysis:canonical;
+ if(!ownedDirectory(supplied,owner,suffix.split(sep)))fail('binding','Tool resource moved outside this profile.');
+ return join(owner,suffix);
 }
 export async function verifyGhidraProcess(r:ProcessRecord,c:CommandContext):Promise<boolean|undefined>{
  try{
   if(r.metadata?.serverDirectory){const directory=await ownedPath(c,r.metadata.serverDirectory),local=JSON.parse(await readFile(join(directory,'server/local.json'),'utf8'));return Number((await serverIdentity(local,c)).pid)===r.pid;}
   if(r.metadata?.debuggerReceipt){const path=await ownedPath(c,r.metadata.debuggerReceipt),row=JSON.parse(await readFile(path,'utf8')),root=await ownedPath(c,r.metadata.contextRoot),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
-   if(row.root!==root||row.ownerToken!==binding.tokenSecret||row.guiPid!==binding.pid||!Number.isSafeInteger(row.identityPort)||row.identityPort<1||row.identityPort>65535)return false;
+   if(!sameDirectory(row.root,root)||row.ownerToken!==binding.tokenSecret||row.guiPid!==binding.pid||!Number.isSafeInteger(row.identityPort)||row.identityPort<1||row.identityPort>65535)return false;
    const token=await c.secrets.require(binding.tokenSecret),response=await c.fetch('http://127.0.0.1:'+row.identityPort+'/identity',{redirect:'error',signal:AbortSignal.timeout(1000),headers:{Authorization:'Bearer '+token}});
    const body=await response.text();if(!response.ok||body.length>4096)return false;const info=JSON.parse(body);return info.id===row.id&&info.pid===row.supervisorPid&&(r.role==='debugger'?info.childPid===r.pid:info.pid===r.pid);
   }
   if(r.metadata?.contextRoot){const root=await ownedPath(c,r.metadata.contextRoot),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
-   if(binding.root!==root||binding.pid!==r.pid||binding.runtimeFingerprint!==r.installation||binding.target!==r.target)return false;
+   if(!sameDirectory(binding.root,root)||binding.pid!==r.pid||binding.runtimeFingerprint!==r.installation||binding.target!==r.target)return false;
    const token=await c.secrets.require(binding.tokenSecret),info=await new HttpBridge(binding.endpoint,c.fetch,undefined,token,1500).instance();
-   return info.pid===r.pid&&info.tcp_port===Number(new URL(binding.endpoint).port)&&String(info.project_path??'').startsWith(root+sep);
+   return info.pid===r.pid&&info.tcp_port===Number(new URL(binding.endpoint).port)&&projectPathWithin(info.project_path,binding.root);
   }
   return undefined;
  }catch{return false;}

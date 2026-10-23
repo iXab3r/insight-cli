@@ -1,4 +1,4 @@
-import {ownedDirectory} from './directory-identity.js';
+import {ownedDirectory,projectPathWithin} from './directory-identity.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -151,7 +151,7 @@ export class GhidraContexts {
     const http=new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save'));
     const info=await http.instance();
     if(info.pid!==binding.pid||info.tcp_port!==Number(new URL(binding.endpoint).port)||
-        !String(info.project_path??'').startsWith(root+sep))fail('binding','Live context PID, endpoint or project no longer matches its receipt.');
+        !projectPathWithin(info.project_path,binding.root))fail('binding','Live context PID, endpoint or project no longer matches its receipt.');
     const record={...this.running.get(root),binding,http};this.running.set(root,record);
     if(verifySource)await this.source(record,target);return record;
   }
