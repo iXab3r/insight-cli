@@ -7,7 +7,7 @@ const keep=process.argv.includes('--keep-installed');
 const proof=await realpath(await mkdtemp(join(tmpdir(),'ip-'))),install=join(proof,'installed spaces-Ω');await mkdir(install);
 const endpointData=await realpath(await mkdtemp(join(process.platform==='win32'?tmpdir():'/tmp','ip-control-')));
 const provenance=JSON.parse(await readFile(join(root,'vendor/provenance.json'),'utf8'));
-const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-0413409.json'),'utf8'));
+const coreProvenance=JSON.parse(await readFile(join(root,'vendor/factory-core-fcb793f.json'),'utf8'));
 for(const record of [provenance,coreProvenance])assert.equal(createHash('sha256').update(await readFile(join(root,'vendor',record.file))).digest('hex'),record.sha256);
 try{
  const artifacts=join(install,'artifacts');await mkdir(artifacts);

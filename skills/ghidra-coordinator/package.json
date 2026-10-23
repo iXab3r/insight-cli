@@ -29,8 +29,8 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/b0d2805ef97face11ab131e8aa39b34216eefaf0/vendor/factory-core-0413409.tgz",
-    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/f47f6d14e8aadc6b6778a6e3627bbb08909521d2/vendor/factory-ipc-7c403d8.tgz",
+    "@eyeauras/cli-factory": "https://raw.githubusercontent.com/iXab3r/insight-cli/2d2a6006d1f83a54a4c645307f187bfd1fae4a74/vendor/factory-core-fcb793f.tgz",
+    "@eyeauras/cli-factory-ipc": "https://raw.githubusercontent.com/iXab3r/insight-cli/2d2a6006d1f83a54a4c645307f187bfd1fae4a74/vendor/factory-ipc-fcb793f.tgz",
     "@modelcontextprotocol/sdk": "1.32.1",
     "tar": "7.5.22",
     "yauzl": "3.4.0"

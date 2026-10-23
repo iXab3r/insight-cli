@@ -4,7 +4,7 @@ import {spawn,execFile} from 'node:child_process';import {promisify}from'node:ut
 import {mkdir,mkdtemp,readFile,writeFile,readdir,open,realpath,cp,rm}from'node:fs/promises';
 import {join,resolve,delimiter}from'node:path';import{tmpdir}from'node:os';import{createHash,randomUUID}from'node:crypto';import{setTimeout as delay}from'node:timers/promises';
 import {createServer}from'node:net';
-import {AppArguments,ProfileStore,KeyringSecretStore,ProfileSecrets}from'@eyeauras/cli-factory';
+import {AppArguments,ProfileStore,PlatformSecretStore,ProfileSecrets}from'@eyeauras/cli-factory';
 import {HttpBridge}from'../skills/ghidra-coordinator/dist/src/transport.js';
 import {fileURLToPath} from 'node:url';
 const source=fileURLToPath(new URL('../',import.meta.url));
@@ -30,7 +30,7 @@ async function startJava(label,argv,env={}){const path=join(root,label);await mk
 async function waitServer(child,label){for(let i=0;i<1200;i++){if(child.exitCode!==null)throw Error('Owned disposable server exited');try{if((await readFile(join(root,label,'runtime.log'),'utf8')).includes('Command watcher started'))return;}catch{}await delay(100);}throw Error('Disposable server readiness timeout');}
 async function stop(child){if(!child||child.exitCode!==null||child.signalCode!==null)return;child.kill('SIGTERM');await Promise.race([new Promise(ok=>child.once('exit',ok)),delay(5000).then(()=>{child.kill('SIGKILL');return new Promise(ok=>child.once('exit',ok));})]);}
 async function bootstrap(){const p=await port();const child=await startJava('bootstrap',['-Xmx768m','com.xebyte.headless.GhidraMCPHeadlessServer','--bind','127.0.0.1','--port',String(p)],{GHIDRA_SERVER_HOST:'127.0.0.1',GHIDRA_SERVER_PORT:String(basePort),GHIDRA_SERVER_USER:'publisher',GHIDRA_SERVER_PASSWORD:'changeme',GHIDRA_MCP_SHARED_PROJECT_DIR:join(root,'bootstrap'),GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_ALLOW_SCRIPTS:'0'});const http=new HttpBridge(`http://127.0.0.1:${p}`);for(let i=0;i<600;i++){try{const info=await http.instance();assert.equal(info.pid,child.pid);return {http,child};}catch{if(child.exitCode!==null)throw Error('Bootstrap JVM exited');await delay(100);}}throw Error('Bootstrap readiness timeout');}
-const keyring=new KeyringSecretStore(),secrets=new ProfileSecrets(keyring,applicationId,'default');
+const keyring=new PlatformSecretStore(appArguments),secrets=new ProfileSecrets(keyring,applicationId,'default');
 const store=new ProfileStore({applicationId,appArguments});
 const values={server:serverOrigin,readerUser:'reader',publisherUser:'publisher',java,ghidraHome,mcpJar:jar,mcpJarSha256:createHash('sha256').update(await readFile(jar)).digest('hex'),python:resolve(options.python),bridgeDirectory:resolve(options['bridge-directory'])};
 await store.set('default',values);await store.setPermissions('default',['ReadOnly','Update']);
@@ -174,7 +174,7 @@ try{
  server=await startJava('server-restart',['-Xmx512m','ghidra.server.remote.GhidraServer','-i','127.0.0.1','-ip','127.0.0.1','-p'+basePort,'-a0','-u',serverData]);await waitServer(server,'server-restart');
  for(const target of matrixTargets){const reader=await invoke(['workers','start',target.id,target.repository+'-fresh']);const http=new HttpBridge(reader.endpoint);for(const f of findings.filter(f=>f.targetId===target.id)){const r=await http.call('/get_comment',{program:target.programPath,address:f.address});assert.equal(r.eol,f.after);}assert.equal((await http.call('/get_comment',{program:target.programPath,address:sentinels[target.repository]})).eol,'Untouched synthetic sentinel');const h=await http.call('/server/version_history',{path:target.programPath});assert.equal(h.count,2);await invoke(['workers','stop',reader.id]);}
  await runFaults();
- receipt={schema:1,scope:'disposable PE scoped comments',ghidra:'12.1.2',mcpJarSha256:values.mcpJarSha256,targets:2,readers:4,independentBridges:4,findings:4,concurrentCallers:3,publishedBatches:2,serverRestartVerified:true,sentinelPreserved:true,nativeKeyring:true,readerLifecycleVerified:true,nativeFaultPhases:faultPhases,limitations:['tiny fixtures only','no native DB merge','recoverable staged calls, no atomic remote batch',...(options.faults?['pre-intent checkouts retained for explicit operator cleanup']:['native fault injection not requested'])]};
+ receipt={schema:1,scope:'disposable PE scoped comments',ghidra:'12.1.2',mcpJarSha256:values.mcpJarSha256,targets:2,readers:4,independentBridges:4,findings:4,concurrentCallers:3,publishedBatches:2,serverRestartVerified:true,sentinelPreserved:true,nativeSecretStore:process.platform==='win32'?'dpapi':'keyring',readerLifecycleVerified:true,nativeFaultPhases:faultPhases,limitations:['tiny fixtures only','no native DB merge','recoverable staged calls, no atomic remote batch',...(options.faults?['pre-intent checkouts retained for explicit operator cleanup']:['native fault injection not requested'])]};
 }finally{
  if(ownerBin){try{await invoke(['ipc-server','stop']);}catch{}}
  const cleaned=await cleanupOwnedProcesses();if(receipt){receipt.retainedOwnedProcessesStopped=cleaned;receipt.bridgeCleanupVerified=true;}

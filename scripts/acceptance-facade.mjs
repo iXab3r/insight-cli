@@ -1,6 +1,6 @@
 import {p3Inputs} from './native-p3-inputs.mjs';
 import {runNpm} from './npm-command.mjs';
-// Owned installed-package CLI/IPC acceptance; all native data and keyring accounts are disposable.
+// Owned installed-package CLI/IPC acceptance; all native data and secret-store accounts are disposable.
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -9,7 +9,7 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash,randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
-import {AppArguments,ProfileStore,KeyringSecretStore,ProfileSecrets} from '@eyeauras/cli-factory';
+import {AppArguments,ProfileStore,PlatformSecretStore,ProfileSecrets} from '@eyeauras/cli-factory';
 const source=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile),options={};
 for(let i=2;i<process.argv.length;i++) {
   const arg=process.argv[i];if(arg==='--ack-disposable')options.ack=true;else if(arg==='--faults')options.faults=true;else if(arg==='--automatic-faults')options.automaticFaults=true;
@@ -90,7 +90,7 @@ try {
   assert.equal(await read(b),'B overlap');assert.equal(await read(ah),'A helper');
   const conflicted=await invoke(['sessions','status',b.session,'--target',b.target]);assert.equal(conflicted.ghidra.conflicts[0].local,'B overlap');
   await invoke(['ipc-server','stop']);
-  const nativeSecrets=new KeyringSecretStore(),secrets=new ProfileSecrets(nativeSecrets,applicationId,'default');
+  const nativeSecrets=new PlatformSecretStore(appArguments),secrets=new ProfileSecrets(nativeSecrets,applicationId,'default');
   const {GhidraServer}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/server.js'));
   const {nativeInputs}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js'));
   const context={profile:{name:'default',values},environment:{PATH:process.env.PATH},signal:new AbortController().signal,fetch,secrets};
@@ -172,7 +172,7 @@ finally {
     {GhidraContexts}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/contexts.js')),
     {Workspace}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/workspace.js')),
     {nativeInputs}=await import(join(scratch,'node_modules/@eyeauras/insight-cli/dist/src/native-inputs.js'));
-  const secrets=new ProfileSecrets(new KeyringSecretStore(),applicationId,'default');
+  const secrets=new ProfileSecrets(new PlatformSecretStore(appArguments),applicationId,'default');
   const context={profile:{name:'default',values},environment:{PATH:process.env.PATH},signal:new AbortController().signal,fetch,secrets};
   const inputs=await nativeInputs(values),workspace=new Workspace(join(directory,'workspace'),'default'),native=new GhidraContexts(workspace,inputs,context);
   try {
@@ -185,6 +185,6 @@ finally {
     await new GhidraServer(workspace.directory,inputs,context).stop();
   } finally {workspace.close();}
   let keys=[];try{keys=(await readFile(join(directory,'secret-keys.jsonl'),'utf8')).trim().split('\n').filter(Boolean).map(JSON.parse);}catch(error){if(error.code!=='ENOENT')throw error;}
-  const keyring=new KeyringSecretStore();for(const key of keys)await keyring.delete(key.service,key.account);
+  const keyring=new PlatformSecretStore(appArguments);for(const key of keys)await keyring.delete(key.service,key.account);
 }
 if(receipt){await writeFile(join(scratch,'sanitized-receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));}

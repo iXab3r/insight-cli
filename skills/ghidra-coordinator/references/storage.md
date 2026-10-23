@@ -37,7 +37,8 @@ installation staging and activation must share a filesystem. External tool insta
 user-selected outputs outside these trees keep their locations.
 
 Factory keeps profiles, permissions, IPC election/socket, migration-control metadata and
-application logs in current-user AppData. Secrets stay in the OS keyring. Credential/profile
+application logs in current-user AppData. Secrets use Windows DPAPI encrypted files under each Factory profile’s AppData `secrets/`
+directory, macOS Keychain or the Linux system keyring. Analysis migration excludes these stores. Credential/profile
 identities do not change. Updating/installing npm preserves existing profile locations and does not select a disk on its own.
 
 ## Select a default after an earlier migration

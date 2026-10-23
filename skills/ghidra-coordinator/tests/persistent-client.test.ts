@@ -9,7 +9,7 @@ import {connectInsight,InsightCommandError,InsightTransportError} from '../src/p
 test('new persistent subpath preserves root and legacy deep-path resolution for import and require',()=>{
  const require=createRequire(import.meta.url);
  for(const [name,file]of [['@eyeauras/insight-cli','index.js'],['@eyeauras/insight-cli/persistent','persistent-client.js'],['@eyeauras/insight-cli/dist/src/persistent-client.js','persistent-client.js']]){
-  assert.ok(require.resolve(name!).endsWith('/dist/src/'+file));assert.ok(import.meta.resolve(name!).endsWith('/dist/src/'+file));
+  assert.ok(require.resolve(name!).endsWith(join('dist','src',file!)));assert.ok(import.meta.resolve(name!).endsWith('/dist/src/'+file));
  }
 });
 

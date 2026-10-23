@@ -1,7 +1,7 @@
 // Installed facade acceptance wrapper. Fault barriers are absent from the shipped runtime.
 import {readFileSync,writeFileSync,appendFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {AppArguments,KeyringSecretStore} from '@eyeauras/cli-factory';
+import {AppArguments,PlatformSecretStore} from '@eyeauras/cli-factory';
 import {runHosted} from '@eyeauras/cli-factory-ipc';
 import {createDefinition} from '@eyeauras/insight-cli';
 import {GhidraContexts} from '@eyeauras/insight-cli/dist/src/contexts.js';
@@ -9,7 +9,7 @@ import {nativeInputs} from '@eyeauras/insight-cli/dist/src/native-inputs.js';
 
 const config=JSON.parse(readFileSync(new URL('./fixture-config.json',import.meta.url),'utf8'));
 const appArguments=new AppArguments(config.appArguments),directory=appArguments.AppDataDirectory;
-const nativeSecrets=new KeyringSecretStore();
+const nativeSecrets=new PlatformSecretStore(appArguments);
 const secretStore={get:(...args)=>nativeSecrets.get(...args),delete:(...args)=>nativeSecrets.delete(...args),
   set(service,account,value){
     appendFileSync(join(directory,'secret-keys.jsonl'),JSON.stringify({service,account})+'\n',{mode:0o600});

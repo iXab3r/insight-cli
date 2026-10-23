@@ -75,7 +75,7 @@ async function canonicalFuture(path:string):Promise<string>{
 async function existingParent(path:string):Promise<string>{return await present(path)?path:existingParent(dirname(path));}
 async function directoryIdentity(path:string){const st=await lstat(path,{bigint:true});if(!st.isDirectory()||await realpath(path)!==path)fail('volume','Migration volume or directory was replaced.');return [st.dev,st.ino].join(':');}
 
-/** Factory remains the only owner of profiles, settings, keyring and IPC admission. */
+/** Factory remains the only owner of profiles, settings, secrets and IPC admission. */
 export class AnalysisStorage {
   private active=new Map<string,number>();private changing=new Set<string>();
   constructor(private readonly storeOverride:ProfileStoreContract|undefined,private readonly release:(c:CommandContext)=>Promise<void>,private readonly checkpoint?:(phase:string)=>Promise<void>){}
@@ -186,7 +186,7 @@ export class AnalysisStorage {
     try{await this.validate(c);const entries=await inventory(root,analysisTrees,false,c.signal);usage={files:entries.filter(e=>e.kind==='file').length,bytes:entries.reduce((n,e)=>n+e.size,0)};}
     catch(error){availability=error instanceof CliError?error.code:((error as NodeJS.ErrnoException).code??'unavailable');}
     return {profile:c.profile.name,directory:root,configuration:c.profile.values.analysisDirectory!==undefined?'Factory profile analysisDirectory':shared&&root!==c.appArguments.AppDataDirectory?'Installation storage default':'Factory profile AppData',defaultBaseDirectory:shared?.base??null,defaultDirectory:shared?join(shared.base,c.appArguments.AppName,c.profile.name):c.appArguments.AppDataDirectory,availability,usage,
-      trees:analysisTrees,appData:c.appArguments.AppDataDirectory,included:['snapshots, immutable inputs, native projects and local server repositories','tool execution/verification working data','runtime installations, acquisition caches, selections and process receipts'],excluded:['profiles, permissions, IPC, logs and OS keyring secrets'],
+      trees:analysisTrees,appData:c.appArguments.AppDataDirectory,included:['snapshots, immutable inputs, native projects and local server repositories','tool execution/verification working data','runtime installations, acquisition caches, selections and process receipts'],excluded:['profiles, permissions, IPC, logs and platform secrets'],
       migration:j?{id:j.id,state:j.state,source:j.source,destination:j.destination,manifest:j.manifest,bytes:j.bytes,files:j.files,retainedSource:join(j.source,'.storage-retained',j.id),retainedSourceBytes:j.state==='committed'?j.bytes:0,progress:await readJson(join(this.control(c),'progress.json'))}:null};
   }
   async migrate(c:CommandContext,directory:unknown,dryRun=false,emptyOnly=false,profileOnly=false,automatic?:StorageDefault){return this.exclusive(c,async()=>{
