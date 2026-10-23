@@ -3,7 +3,7 @@
 import {readFile,writeFile,appendFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
-import {AppArguments,KeyringSecretStore} from '@eyeauras/cli-factory';
+import {AppArguments,PlatformSecretStore} from '@eyeauras/cli-factory';
 import {runHosted} from '@eyeauras/cli-factory-ipc';
 import {createDefinition} from '@eyeauras/insight-cli/dist/src/prototype-cli.js';
 import {GhidraRuntime} from '@eyeauras/insight-cli/dist/src/ghidra.js';
@@ -11,7 +11,7 @@ import {GhidraRuntime} from '@eyeauras/insight-cli/dist/src/ghidra.js';
 const config=JSON.parse(await readFile(new URL('./fixture-config.json',import.meta.url),'utf8'));
 const appArguments=new AppArguments(config.appArguments);
 const directory=appArguments.AppDataDirectory;
-const native=new KeyringSecretStore();
+const native=new PlatformSecretStore(appArguments);
 const secretStore={
   get:(service,account)=>native.get(service,account),
   delete:(service,account)=>native.delete(service,account),

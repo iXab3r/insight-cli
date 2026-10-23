@@ -2,7 +2,27 @@
 
 Inspect `storage show --json` and read [analysis storage](storage.md) before moving databases.
 Use `storage configure` for an empty profile or `storage migrate` for existing work. Factory
-control metadata and keyring identity stay in their original locations.
+control metadata and secret-store identity stay in their original locations.
+
+## Windows secret-store upgrade
+
+Factory Core 0.5.2 uses DPAPI CurrentUser encrypted files under each profile's Factory
+AppData `secrets/` directory. macOS Keychain and Linux keyring behavior is unchanged.
+Windows Credential Manager entries are retained but are neither read nor migrated automatically.
+Existing profiles, permissions and analysis data remain in place.
+
+Before replacing an older Windows installation, close its owned contexts and stop its IPC owner
+using that installation. External-server reader/publisher passwords and archive tokens must be
+stored again through `auth login --role reader|publisher|archive --password-stdin` for each profile.
+For an existing managed local server, retain its storage and restore the exact credentials named
+by its `workspace/server/local.json` binding into the new Factory store before reuse. This includes
+its reader/publisher passwords, keystore password and identity token; logging in with an external
+role cannot replace them. Retained worker bindings likewise need their original referenced secrets
+until normal verified cleanup completes. Do not delete server data, regenerate credentials for an
+initialized repository, or discard journals to bypass a missing-secret error. This upgrade does
+not provide a Credential Manager import command.
+
+## Runtime setup
 
 Use Node 24+ and `ghidra install` to deliver Ghidra 12.1.2, JDK 21, native components and
 server support. See [managed runtime](managed-runtime.md) for download/install/offline archives,

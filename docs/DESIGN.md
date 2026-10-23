@@ -127,7 +127,7 @@ paging without analysis, definitions, save or Factory changes. See the
 ### Profile analysis storage
 
 The owner changed AppData-only placement in issue #76. Factory still owns profiles/settings,
-permissions, keyring identity and IPC. `storage show`, `configure`, `migrate --dry-run`, `migrate`,
+permissions, secret-store identity and IPC. `storage show`, `configure`, `migrate --dry-run`, `migrate`,
 `resume`, `rollback` and `cleanup` manage the non-secret `analysisDirectory` setting through
 Factory ProfileStore, without another profile parser or host. Migration/configuration also
 select an installation default base for subsequent new/empty profiles (`--profile-only` opts
@@ -147,8 +147,8 @@ profiles may already be using it.
 
 The complete workspace/materials/temp/runtime trees move, including native/context DBs, local
 server repositories, snapshots, unknown-operation journals, temporary verification/execution
-state and runtime installations/caches. Factory control metadata, application logs and keyring
-secrets stay in their current locations. Missing configured storage fails without fallback.
+state and runtime installations/caches. Factory control metadata, application logs and platform
+secrets stay outside analysis storage. Missing configured storage fails without fallback.
 [Storage](../skills/ghidra-coordinator/references/storage.md) defines scope and filesystem limits.
 
 A quiescent profile freezes ordinary commands before copying. Hash verification, source-stability
@@ -485,8 +485,8 @@ object in the ordinary research workflow.
 
 One public agent repository ships real TypeScript/Node CLIs and version-matched skills. Each
 executable helper has one canonical source under `skills/<product>` as an npm workspace.
-No speculative product packages are generated. Factory 0.4.1 supplies the command tree, output,
-profiles, keyring, permissions and RPC. Reusable IPC/package identity is implemented in Factory
+No speculative product packages are generated. The prepared Factory 0.5.2 build supplies the command tree, output,
+profiles, secrets, permissions and RPC. Reusable IPC/package identity is implemented in Factory
 under its issue #50, as agreed with the owner in #49; no product-specific host exists here.
 
 ### Ownership

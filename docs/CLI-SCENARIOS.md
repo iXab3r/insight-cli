@@ -427,7 +427,7 @@ contexts and stop owned servers/processes first; other active profiles are prese
 
 The complete workspace/materials/temp/runtime trees move, including snapshots, native DBs,
 local repositories, unknown requests/candidates, temporary verification data, runtime installs
-and caches. Factory settings/permissions/IPC/logs and OS keyring secrets keep their locations.
+and caches. Factory settings/permissions/IPC/logs and platform secrets keep their locations.
 
 An interrupted move freezes research. `storage resume` verifies retained copies and continues;
 `storage rollback` restores source only when this cannot discard post-migration writes.

@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 
 test('owned LLDB frame view removes only a zero-span stale prefix matching the live CPU',()=>{
- const source=readFileSync(new URL('../../skills/ghidra-coordinator/references/native/InsightPythonWheels.java',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../../skills/ghidra-coordinator/references/native/InsightPythonWheels.java',import.meta.url),'utf8').replaceAll('\r\n','\n');
  const blocks=[...source.matchAll(/    utilSource\+="""\n([\s\S]*?)    """;/g)].map(m=>m[1].split('\n').map(line=>line.replace(/^ {4}/,'')).join('\n'));
  assert.equal(blocks.length,2);
  const aliases=source.match(/    String registerAliases="""\n([\s\S]*?)    """;/)?.[1].split('\n').map(line=>line.replace(/^ {4}/,'')).join('\n');
