@@ -52,7 +52,9 @@ export async function packCli(destination){
   await mkdir(stage);await mkdir(downloads);
   const pkg=await json(join(source,'package.json')),lock=await json(join(root,'package-lock.json'));
   for(const file of ['package.json',...pkg.files])await cp(join(source,file),join(stage,file),{recursive:true});
-  pkg.bundleDependencies=factoryNames;
+  // Bundle the whole locked runtime graph. Otherwise a fresh global install still
+  // needs registry metadata for unbundled ranges, which npm ci does not cache.
+  pkg.bundleDependencies=Object.keys(pkg.dependencies);
   for(const [index,name] of factoryNames.entries()){
    const proof=await json(join(root,'vendor',index===0?'factory-core-fcb793f.json':'provenance.json'));
    assert.equal(proof.package,name);assert.equal(pkg.dependencies[name],proof.url);
@@ -76,7 +78,7 @@ export async function packCli(destination){
   await writePackageBuildManifest(stage);
   const result=await runNpm(['pack','--ignore-scripts','--json','--pack-destination',destination],{cwd:stage,timeout:60000,maxBuffer:8*1024*1024});
   const packed=JSON.parse(result.stdout)[0];
-  for(const name of factoryNames)assert.ok(packed.bundled.includes(name),'Missing Factory bundle: '+name);
+  for(const name of pkg.bundleDependencies)assert.ok(packed.bundled.includes(name),'Missing runtime bundle: '+name);
   for(const {path} of await platformPackages(lock))assert.ok(packed.bundled.includes(path.slice('node_modules/'.length)),'Missing portable native bundle: '+path);
   return {packed,manifest:pkg};
  }finally{await rm(work,{recursive:true,force:true});}

@@ -35,8 +35,8 @@ and ordinary file saves need neither.
 
 Build dependencies pin prepared Factory Core 0.5.2 and IPC 0.1.0 to immutable GitHub archives.
 [Core provenance](../vendor/factory-core-fcb793f.json) and [IPC provenance](../vendor/provenance.json)
-bind their source commit, license and SHA-256. The distribution bundles these exact packages
-and their complete runtime dependency trees. Its Factory dependencies use exact versions,
+bind their source commit, license and SHA-256. The distribution bundles the complete locked
+CLI runtime dependency tree, including these exact Factory packages. Its Factory dependencies use exact versions,
 so global `npm list --all` does not depend on URL metadata that npm drops in global installs.
 No Factory registry publication is required. MCP SDK remains pinned to 1.32.1.
 
@@ -44,9 +44,9 @@ Bundling uses a standalone staging directory because npm workspace packing omits
 dependencies. The acquisition step caches every keyring platform binary; each is checked
 against the lockfile's SHA-512 and included in the archive. A package built on Windows therefore
 also carries the Linux and macOS binaries. Bundled dependencies retain their package metadata
-and licenses. The larger archive needs no GitHub access during installation; unbundled
-dependencies still require the npm registry or a populated npm cache. Partial bundles are
-unsupported: the package gate checks a fresh global tree and compares both installed Factory
+and licenses. The larger archive installs offline without GitHub, the npm registry or a
+populated npm cache. Partial bundles are unsupported: the package gate installs into a fresh
+global prefix with an empty npm cache, checks the tree, and compares both installed Factory
 payloads against the prepared archives.
 
 ## Prepare and publish

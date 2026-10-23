@@ -41,7 +41,8 @@ try{
  // Global npm ignores lockfiles. This is where URL-only Factory dependencies
  // previously reported ELSPROBLEMS despite having the correct deployed bytes.
  const globalPrefix=join(proof,'global spaces-Ω');
- await runNpm(['install','--global','--prefix',globalPrefix,'--offline','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:60000,maxBuffer:262144});
+ await mkdir(globalPrefix);
+ await runNpm(['install','--global','--prefix',globalPrefix,'--cache',join(proof,'empty-npm-cache'),'--offline','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:60000,maxBuffer:262144});
  await runNpm(['ls','--global','--prefix',globalPrefix,'--all','--json'],{cwd:install,timeout:30000,maxBuffer:1048576});
  const globalModules=(await runNpm(['root','--global','--prefix',globalPrefix],{cwd:install})).stdout.trim();
  const globalCli=join(globalModules,'@eyeauras/insight-cli');
