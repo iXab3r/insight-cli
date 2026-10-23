@@ -3,7 +3,35 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {releaseStoppedContextCredential} from '../src/context-credential.js';
+import {releaseStoppedContextCredential,launchContextCredential} from '../src/context-credential.js';
+import {launchProcess} from '../src/tool-runtime/supervisor.js';
+import type {ChildProcess} from 'node:child_process';
+
+test('real supervisor cancellation and missing-executable preflight allocate no context credential',async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'insight-credential-preflight-'));
+ t.after(()=>rm(directory,{recursive:true,force:true}));
+ let writes=0;
+ for(const aborted of [false,true]){
+  const controller=new AbortController();if(aborted)controller.abort();
+  await assert.rejects(launchContextCredential({set:async()=>{writes++;}},'context-fixture','fixture-token',
+   onSpawn=>launchProcess(directory,{tool:'ghidra',role:'fixture',installation:'fixture'},join(directory,'missing-executable'),[],
+    {stdio:'ignore'},{signal:controller.signal,onSpawn}),
+   async()=>assert.fail('No child may bind'),async()=>assert.fail('No child may retire')));
+ }
+ assert.equal(writes,0);
+});
+
+test('post-spawn credential failure retires only a proven terminal original child',async()=>{
+ for(const stopped of [false,true]){
+  const state={exitCode:null as number|null,signalCode:null},child=state as ChildProcess;
+  let bound=0,retired=0;
+  await assert.rejects(launchContextCredential({set:async()=>{assert.equal(bound,1);throw Error('store failure');}},
+   'context-fixture','fixture-token',async onSpawn=>{
+    try{await onSpawn(child);}catch(error){if(stopped)state.exitCode=1;throw error;}return child;
+   },async()=>{bound++;},async original=>{assert.equal(original,child);retired++;}),/store failure/);
+  assert.equal(retired,stopped?1:0);
+ }
+});
 
 test('retired context credential release requires exact owned stopped receipt and no live PID',async t=>{
  const directory=await mkdtemp(join(tmpdir(),'insight-context-credential-'));

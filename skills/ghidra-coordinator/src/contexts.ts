@@ -1,5 +1,5 @@
 import {ownedDirectory,projectPathWithin} from './directory-identity.js';
-import {releaseStoppedContextCredential} from './context-credential.js';
+import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -104,20 +104,24 @@ export class GhidraContexts {
     const main=mode==='gui'?'InsightGuiMain':'InsightHeadlessMain';
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
-    try{await this.c.secrets.set(tokenSecret,token);}catch(error){await log.close();throw error;}
     let binding!:ProcessBinding;
-    const child=await launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
+    let child:Awaited<ReturnType<typeof launchProcess>>;
+    try{
+    child=await launchContextCredential(this.c.secrets,tokenSecret,token,onSpawn=>launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
           INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
-          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn:async spawned=>{
+          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn}),async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
         binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,...(debuggerPython?{debuggerPython}:{}),...(debuggerRuntime?{debuggerRuntime}:{}),target:target.id,
           ...(context?{context,session:this.workspace.contextById(context).session}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
         await durable(join(root,'process.json'),binding);
-      }});
-    child.on('error',()=>{});child.unref();await log.close();
+      },async spawned=>{
+        if(binding)await this.stopRecord({binding,child:spawned,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token)},false,true,'startup_failed');
+      });
+    }finally{await log.close();}
+    child.on('error',()=>{});child.unref();
     if(!child.pid)fail('launch','Owned Ghidra context could not be launched.');
     const record={binding,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save')),child};
     this.running.set(root,record);

@@ -2,6 +2,19 @@ import {readFile,realpath} from 'node:fs/promises';
 import {join,basename} from 'node:path';
 import {ownedDirectory} from './directory-identity.js';
 import {fail,object,stable} from './model.js';
+import type {ChildProcess} from 'node:child_process';
+
+/** Bind the real child before allocating its credential; preserve uncertain children. */
+export async function launchContextCredential<T extends ChildProcess>(secrets:{set(name:string,value:string):Promise<void>},
+ name:string,token:string,start:(onSpawn:(child:T)=>Promise<void>)=>Promise<T>,
+ bind:(child:T)=>Promise<void>,retire:(child:T)=>Promise<void>):Promise<T>{
+ let child:T|undefined;
+ try{return await start(async spawned=>{child=spawned;await bind(spawned);await secrets.set(name,token);});}
+ catch(error){
+  if(child&&(child.exitCode!==null||child.signalCode!==null))await retire(child);
+  throw error;
+ }
+}
 
 export interface ContextCredentialBinding {
  root:string;kind:string;target:string;context?:string;pid:number;tokenSecret:string;runtimeFingerprint:string;
