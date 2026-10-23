@@ -43,4 +43,6 @@ test('native project locators accept both verified root spellings but reject par
  assert.equal(projectPathWithin(join(alias,'view'),alias),true);assert.equal(projectPathWithin(join(owner,'view'),alias),true);
  assert.equal(projectPathWithin(join(root,'foreign/view'),alias),false);assert.equal(projectPathWithin(join(alias,'../foreign/view'),alias),false);
  assert.equal(projectPathWithin(undefined,alias),false);assert.equal(projectPathWithin('relative',alias),false);
+ const foreign=join(root,'foreign');await mkdir(join(foreign,'view'),{recursive:true});await symlink(foreign,join(owner,'escape'),process.platform==='win32'?'junction':'dir');
+ assert.equal(projectPathWithin(join(alias,'escape/view'),alias),false);assert.equal(projectPathWithin(join(alias,'escape/not-created'),alias),false);assert.equal(projectPathWithin(join(alias,'escape'),alias),false);
 });
