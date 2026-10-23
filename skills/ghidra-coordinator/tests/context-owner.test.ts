@@ -8,6 +8,45 @@ import {createCliFixture} from '@eyeauras/cli-factory/testing';
 import {Workspace} from '../src/workspace.js';
 import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
+import {randomUUID} from 'node:crypto';
+
+test('stopped launch-failure workers release their own credentials before a current binding exists',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
+ const secrets=new Map([['server-permanent','fixture-server-secret']]);
+ const backend=new GhidraContexts({directory} as Workspace,{} as NativeInputs,
+  {secrets:{delete:async(name:string)=>{secrets.delete(name);}}} as unknown as CommandContext);
+ for(let n=0;n<3;n++){
+  const root=join(directory,'ghidra-native','shared','target','stage'+n);await mkdir(root,{recursive:true});
+  const child=spawn(process.execPath,['-e','process.exit(0)'],{stdio:'ignore'});
+  await new Promise<void>((resolve,reject)=>{child.once('exit',()=>resolve());child.once('error',reject);});
+  const tokenSecret='context-'+randomUUID();secrets.set(tokenSecret,'fixture-ephemeral-secret');
+  const binding={pid:child.pid!,endpoint:'http://127.0.0.1:1',root,target:'target',mode:'headless',
+   program:'/program',kind:'shared',tokenSecret,runtimeFingerprint:'fixture'};
+  await writeFile(join(root,'process.json'),JSON.stringify(binding));
+  await (backend as any).stopRecord({binding,child},false,true,'startup_failed');
+  assert.deepEqual([...secrets.keys()],['server-permanent']);
+  const stopped=JSON.parse(await readFile(join(root,'stopped.json'),'utf8'));
+  assert.equal(stopped.reason,'startup_failed');assert.equal(stopped.tokenSecret,tokenSecret);
+ }
+});
+
+test('a retired previous-runtime binding does not prevent restoring its saved context',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
+ const scope={session:'session',target:'target'},context={id:'context-id',generation:0,workingSnapshot:{fixture:true}};
+ const root=join(directory,'ghidra-native','context',context.id,'stage');await mkdir(root,{recursive:true});
+ const binding={root,kind:'context',context:context.id,target:scope.target,pid:123456789,mode:'headless',
+  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime'};
+ await writeFile(join(root,'process.json'),JSON.stringify(binding));
+ await writeFile(join(root,'stopped.json'),JSON.stringify({pid:binding.pid,tokenSecret:binding.tokenSecret}));
+ await writeFile(join(root,'..','current.json'),JSON.stringify(binding));
+ let copied=0,released=0;
+ const workspace={directory,context:()=>context,target:()=>({id:'target'}),unresolved:()=>[],
+  model:()=>({sharedRevision:1}),saveContext:()=>context} as unknown as Workspace;
+ const backend=new GhidraContexts(workspace,{fingerprint:'new-runtime'} as NativeInputs,
+  {secrets:{delete:async(name:string)=>{assert.equal(name,binding.tokenSecret);released++;}}} as unknown as CommandContext);
+ (backend as any).privateCopy=async()=>{copied++;};
+ await backend.open(scope);assert.equal(copied,1);assert.equal(released,1);
+});
 
 test('a replacement context owner authenticates and releases an unread owned child during disposal',async t=>{
   let workspace:Workspace;const f=await createCliFixture({after:action=>t.after(async()=>{workspace?.close();await (action as ()=>Promise<void>)();})},{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
@@ -19,13 +58,13 @@ test('a replacement context owner authenticates and releases an unread owned chi
   t.after(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');});
   assert.ok(child.pid);
   const binding={pid:child.pid,endpoint:'http://127.0.0.1:19091',root,target:target.id,context:scope.id,mode:'headless',
-    program:'/program',kind:'context',tokenSecret:'owned-fixture-token',runtimeFingerprint:'a'.repeat(64)};
+    program:'/program',kind:'context',tokenSecret:'context-11111111-1111-4111-8111-111111111111',runtimeFingerprint:'a'.repeat(64)};
   await writeFile(join(root,'process.json'),JSON.stringify(binding));
   await writeFile(join(directory,'ghidra-native/context',scope.id,'current.json'),JSON.stringify(binding));
-  let authenticated=0;
+  let authenticated=0,released=0;
   const invocation=new AbortController();invocation.abort();
   const context={profile:{name:'default',values:{}},signal:invocation.signal,environment:{},
-    secrets:{require:async()=> 'fixture-private-token'},fetch:async(_input:unknown,init?:RequestInit)=>{
+    secrets:{require:async()=> 'fixture-private-token',delete:async(name:string)=>{assert.equal(name,binding.tokenSecret);released++;}},fetch:async(_input:unknown,init?:RequestInit)=>{
       assert.equal((init!.headers as Record<string,string>).Authorization,'Bearer fixture-private-token');authenticated++;
       assert.equal(init!.signal!.aborted,false,'Cleanup cannot reuse the cancelled invocation signal');
       return Response.json({pid:child.pid,tcp_port:19091,project_path:join(root,'view')});
@@ -35,6 +74,7 @@ test('a replacement context owner authenticates and releases an unread owned chi
   await replacement.dispose();assert.ok(authenticated>=2,'Inventory and cleanup must each verify the owned endpoint');
   const stopped=JSON.parse(await readFile(join(root,'stopped.json'),'utf8'));assert.equal(stopped.pid,child.pid);
   assert.throws(()=>process.kill(child.pid!,0),/ESRCH/);
+  assert.equal(released,1,'The verified stopped worker releases only its own ephemeral credential');
 });
 
 test('a GUI replacement ignores an earlier stop as proof and independently verifies the current owned process',async t=>{

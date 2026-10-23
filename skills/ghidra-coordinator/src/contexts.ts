@@ -1,4 +1,5 @@
 import {ownedDirectory,projectPathWithin} from './directory-identity.js';
+import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -83,7 +84,6 @@ export class GhidraContexts {
     if((await nativeInputs(this.c.profile.values,this.workspace.directory,this.c)).fingerprint!==this.inputs.fingerprint)
       fail('binding','Native runtime inputs changed; stop the owner before using a different build.');
     const endpointPort=await port(),tokenSecret='context-'+randomUUID(),token=randomBytes(32).toString('hex');
-    await this.c.secrets.set(tokenSecret,token);
     const classes=await nativeHelpers(this.workspace.directory,this.inputs,this.c);
     let debuggerEnvironment:Record<string,string>={},debuggerPython:string|undefined,debuggerRuntime:SelectedTool|undefined;
     if(mode==='gui'){
@@ -105,18 +105,23 @@ export class GhidraContexts {
     const args=mode==='gui'?[root,'view',String(endpointPort)]:['--bind','127.0.0.1','--port',String(endpointPort)];
     const log=await open(join(root,'runtime.log'),'a',0o600);
     let binding!:ProcessBinding;
-    const child=await launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
+    let child:Awaited<ReturnType<typeof launchProcess>>;
+    try{
+    child=await launchContextCredential(this.c.secrets,tokenSecret,token,onSpawn=>launchProcess(this.c.appArguments.AppDataDirectory,{tool:'ghidra',role:mode==='gui'?'gui':kind,installation:this.inputs.fingerprint,target:target.id,session:context?this.workspace.contextById(context).session:undefined,metadata:{contextRoot:root}},this.inputs.java,['-Xmx768m','-Djava.awt.headless='+String(mode!=='gui'),'-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
           INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
-          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn:async spawned=>{
+          GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn}),async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
         binding={toolProcessId:spawned.toolProcessId,pid:spawned.pid,endpoint:`http://127.0.0.1:${endpointPort}`,root,...(debuggerPython?{debuggerPython}:{}),...(debuggerRuntime?{debuggerRuntime}:{}),target:target.id,
           ...(context?{context,session:this.workspace.contextById(context).session}:{}),kind,mode,program,tokenSecret,runtimeFingerprint:this.inputs.fingerprint};
         await durable(join(root,'process.json'),binding);
-      }});
-    child.on('error',()=>{});child.unref();await log.close();
+      },async spawned=>{
+        if(binding)await this.stopRecord({binding,child:spawned,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token)},false,true,'startup_failed');
+      });
+    }finally{await log.close();}
+    child.on('error',()=>{});child.unref();
     if(!child.pid)fail('launch','Owned Ghidra context could not be launched.');
     const record={binding,http:new HttpBridge(binding.endpoint,this.c.fetch,this.c.signal,token,undefined,ghidraBudget(this.c.profile.values,'save')),child};
     this.running.set(root,record);
@@ -134,10 +139,8 @@ export class GhidraContexts {
     } catch(error) {
       if(child.exitCode===null&&child.signalCode===null)child.kill('SIGTERM');
       for(let i=0;i<100&&child.exitCode===null&&child.signalCode===null;i++)await delay(50);
-      if(context&&(child.exitCode!==null||child.signalCode!==null)){
-        const at=new Date().toISOString();await durable(join(root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret,at,reason:'startup_failed'});
-        await recordLifecycle(this.workspace,context,{at,event:'stop',reason:'startup_failed',pid:binding.pid});
-      }
+      if(child.exitCode!==null||child.signalCode!==null)
+        await this.stopRecord(record,false,true,'startup_failed');
       this.running.delete(root);throw error;
     }
   }
@@ -182,6 +185,7 @@ export class GhidraContexts {
     if(binding.context)await recordLifecycle(this.workspace,binding.context,{at,event:'stop',reason,pid:binding.pid});
     if(releaseCapacity&&binding.context)this.capacity.slots.delete(binding.context);
     this.running.delete(binding.root);
+    await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
   }
   private async debuggerReleased(binding:ProcessBinding){
     const root=await realpath(binding.root);if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||
@@ -318,6 +322,11 @@ export class GhidraContexts {
     const snapshot=context.workingSnapshot??model.sharedSnapshot;
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
+    if(binding&&!alive(binding.pid)){
+      if(binding.context!==context.id||binding.target!==scope.target)
+        fail('binding','Retired native credential belongs to a different context.');
+      await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
+    }
     await this.privateCopy(context,snapshot);
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
     return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,
