@@ -1,4 +1,5 @@
 import {ownedDirectory,projectPathWithin} from './directory-identity.js';
+import {releaseStoppedContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
@@ -182,6 +183,7 @@ export class GhidraContexts {
     if(binding.context)await recordLifecycle(this.workspace,binding.context,{at,event:'stop',reason,pid:binding.pid});
     if(releaseCapacity&&binding.context)this.capacity.slots.delete(binding.context);
     this.running.delete(binding.root);
+    await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
   }
   private async debuggerReleased(binding:ProcessBinding){
     const root=await realpath(binding.root);if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||
@@ -318,6 +320,11 @@ export class GhidraContexts {
     const snapshot=context.workingSnapshot??model.sharedSnapshot;
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
+    if(binding&&!alive(binding.pid)){
+      if(binding.context!==context.id||binding.target!==scope.target||binding.runtimeFingerprint!==this.inputs.fingerprint)
+        fail('binding','Retired native credential belongs to a different context or runtime.');
+      await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
+    }
     await this.privateCopy(context,snapshot);
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
     return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,

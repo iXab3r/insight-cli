@@ -19,13 +19,13 @@ test('a replacement context owner authenticates and releases an unread owned chi
   t.after(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');});
   assert.ok(child.pid);
   const binding={pid:child.pid,endpoint:'http://127.0.0.1:19091',root,target:target.id,context:scope.id,mode:'headless',
-    program:'/program',kind:'context',tokenSecret:'owned-fixture-token',runtimeFingerprint:'a'.repeat(64)};
+    program:'/program',kind:'context',tokenSecret:'context-11111111-1111-4111-8111-111111111111',runtimeFingerprint:'a'.repeat(64)};
   await writeFile(join(root,'process.json'),JSON.stringify(binding));
   await writeFile(join(directory,'ghidra-native/context',scope.id,'current.json'),JSON.stringify(binding));
-  let authenticated=0;
+  let authenticated=0,released=0;
   const invocation=new AbortController();invocation.abort();
   const context={profile:{name:'default',values:{}},signal:invocation.signal,environment:{},
-    secrets:{require:async()=> 'fixture-private-token'},fetch:async(_input:unknown,init?:RequestInit)=>{
+    secrets:{require:async()=> 'fixture-private-token',delete:async(name:string)=>{assert.equal(name,binding.tokenSecret);released++;}},fetch:async(_input:unknown,init?:RequestInit)=>{
       assert.equal((init!.headers as Record<string,string>).Authorization,'Bearer fixture-private-token');authenticated++;
       assert.equal(init!.signal!.aborted,false,'Cleanup cannot reuse the cancelled invocation signal');
       return Response.json({pid:child.pid,tcp_port:19091,project_path:join(root,'view')});
@@ -35,6 +35,7 @@ test('a replacement context owner authenticates and releases an unread owned chi
   await replacement.dispose();assert.ok(authenticated>=2,'Inventory and cleanup must each verify the owned endpoint');
   const stopped=JSON.parse(await readFile(join(root,'stopped.json'),'utf8'));assert.equal(stopped.pid,child.pid);
   assert.throws(()=>process.kill(child.pid!,0),/ESRCH/);
+  assert.equal(released,1,'The verified stopped worker releases only its own ephemeral credential');
 });
 
 test('a GUI replacement ignores an earlier stop as proof and independently verifies the current owned process',async t=>{
