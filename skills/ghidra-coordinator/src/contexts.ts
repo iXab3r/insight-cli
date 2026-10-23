@@ -1,8 +1,8 @@
-import {ownedDirectory,projectPathWithin} from './directory-identity.js';
+import {ownedDirectory,projectPathWithin,sameDirectory} from './directory-identity.js';
 import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
 import {ghidraBudget} from './budgets.js';
-import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
+import {launchProcess,terminateProcess,processStatus} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
 import {verifyGhidraProcess} from './ghidra-processes.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
@@ -185,7 +185,19 @@ export class GhidraContexts {
     if(binding.context)await recordLifecycle(this.workspace,binding.context,{at,event:'stop',reason,pid:binding.pid});
     if(releaseCapacity&&binding.context)this.capacity.slots.delete(binding.context);
     this.running.delete(binding.root);
-    await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
+    await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive,()=>this.retiredWorker(binding));
+  }
+  private async retiredWorker(binding:ProcessBinding):Promise<boolean>{
+    if(!binding.toolProcessId)return false;
+    try{
+      const row=await processStatus(this.c.appArguments.AppDataDirectory,binding.toolProcessId);
+      return ['exited','failed'].includes(row.state)&&row.strongIdentity===true&&
+        typeof row.endedAt==='string'&&Number.isFinite(Date.parse(row.endedAt))&&
+        row.id===binding.toolProcessId&&row.tool==='ghidra'&&row.pid===binding.pid&&
+        row.target===binding.target&&row.session===binding.session&&
+        row.role===(binding.mode==='gui'?'gui':binding.kind)&&row.installation===binding.runtimeFingerprint&&
+        typeof row.metadata?.contextRoot==='string'&&sameDirectory(row.metadata.contextRoot,binding.root);
+    }catch{return false;}
   }
   private async debuggerReleased(binding:ProcessBinding){
     const root=await realpath(binding.root);if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||
@@ -322,10 +334,10 @@ export class GhidraContexts {
     const snapshot=context.workingSnapshot??model.sharedSnapshot;
     if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
-    if(binding&&!alive(binding.pid)){
+    if(binding&&(stopped||!alive(binding.pid))){
       if(binding.context!==context.id||binding.target!==scope.target)
         fail('binding','Retired native credential belongs to a different context.');
-      await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive);
+      await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive,()=>this.retiredWorker(binding));
     }
     await this.privateCopy(context,snapshot);
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});

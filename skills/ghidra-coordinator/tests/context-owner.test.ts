@@ -2,13 +2,45 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 import type {CommandContext} from '@eyeauras/cli-factory';
 import {createCliFixture} from '@eyeauras/cli-factory/testing';
 import {Workspace} from '../src/workspace.js';
 import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
 import {randomUUID} from 'node:crypto';
+import {digest} from '../src/model.js';
+
+test('a terminal supervised worker releases its credential after its PID is reused without stopping the new process',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
+ const scope={session:'session',target:'target'},context={id:'context-id',generation:0,workingSnapshot:{fixture:true}};
+ const root=join(directory,'ghidra-native','context',context.id,'stage');await mkdir(root,{recursive:true});
+ const id=randomUUID(),processRoot=join(f.root,'runtime','runs',id);await mkdir(processRoot,{recursive:true});
+ await mkdir(join(f.root,'runtime','processes'),{recursive:true});
+ const binding={root,kind:'context',context:context.id,target:scope.target,session:scope.session,pid:process.pid,mode:'headless',
+  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime',toolProcessId:id};
+ await writeFile(join(root,'process.json'),JSON.stringify(binding));
+ await writeFile(join(root,'stopped.json'),JSON.stringify({pid:binding.pid,tokenSecret:binding.tokenSecret}));
+ await writeFile(join(root,'..','current.json'),JSON.stringify(binding));
+ const receipt={schema:1,id,tool:'ghidra',role:'context',installation:binding.runtimeFingerprint,root:processRoot,
+  profileBinding:digest(resolve(f.root)),state:'exited',pid:binding.pid,target:scope.target,session:scope.session,
+  identity:'retired-original-birth',strongIdentity:true,endedAt:new Date().toISOString(),metadata:{contextRoot:root}};
+ const recordPath=join(f.root,'runtime','processes',id+'.json');await writeFile(recordPath,JSON.stringify(receipt));
+ let copied=0,released=0;
+ const workspace={directory,context:()=>context,target:()=>({id:'target'}),unresolved:()=>[],
+  model:()=>({sharedRevision:1}),saveContext:()=>context} as unknown as Workspace;
+ const backend=new GhidraContexts(workspace,{fingerprint:'new-runtime'} as NativeInputs,
+  {appArguments:{AppDataDirectory:f.root},secrets:{delete:async(name:string)=>{assert.equal(name,binding.tokenSecret);released++;}}} as unknown as CommandContext);
+ (backend as any).privateCopy=async()=>{copied++;};
+ for(const changed of [{target:'foreign'},{role:'gui'},{installation:'foreign'},{session:'foreign'},
+   {pid:process.pid+1},{strongIdentity:false},{endedAt:undefined},{metadata:{contextRoot:directory}},{state:'unverified'}]){
+  await writeFile(recordPath,JSON.stringify({...receipt,...changed}));
+  assert.equal(await (backend as any).retiredWorker(binding),false);
+ }
+ await writeFile(recordPath,JSON.stringify(receipt));
+ await backend.open(scope);assert.equal(copied,1);assert.equal(released,1);
+ process.kill(process.pid,0); // The unrelated current process was never terminated.
+});
 
 test('stopped launch-failure workers release their own credentials before a current binding exists',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');

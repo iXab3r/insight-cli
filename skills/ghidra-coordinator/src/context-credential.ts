@@ -22,9 +22,8 @@ export interface ContextCredentialBinding {
 
 /** Release one retired worker credential, never inventory or sweep the OS store. */
 export async function releaseStoppedContextCredential(directory:string,binding:ContextCredentialBinding,
- secrets:{delete(name:string):Promise<void>},alive:(pid:number)=>boolean):Promise<boolean>{
- // No process or absent/mismatched stop evidence means no release authority.
- if(alive(binding.pid))return false;
+ secrets:{delete(name:string):Promise<void>},alive:(pid:number)=>boolean,retired?:()=>Promise<boolean>):Promise<boolean>{
+ // A matching stop receipt is required even when the supervisor proves retirement.
  const root=await realpath(binding.root);
  if(!ownedDirectory(root,directory,[binding.kind,binding.context??binding.target,basename(root)])||
     !/^context-[a-f0-9-]{36}$/.test(binding.tokenSecret)||
@@ -34,8 +33,10 @@ export async function releaseStoppedContextCredential(directory:string,binding:C
  try{stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));}
  catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return false;throw error;}
  if(stopped.pid!==binding.pid||stopped.tokenSecret!==binding.tokenSecret)return false;
+ const ended=async()=>!alive(binding.pid)||await retired?.()===true;
+ if(!await ended())return false;
  // The parent lane serializes context reuse. Check liveness again after disk reads.
- if(alive(binding.pid))return false;
+ if(!await ended())return false;
  await secrets.delete(binding.tokenSecret);
  return true;
 }
