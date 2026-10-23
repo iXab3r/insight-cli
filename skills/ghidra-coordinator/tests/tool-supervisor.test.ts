@@ -89,4 +89,5 @@ test('terminal receipts retain their outcome through a proven profile alias, ign
  assert.equal((await processStatus(profile,id)).state,'exited');await assertUnused(profile,'fixture');
  const other=join(root,'other');await mkdir(other);await atomicWrite(join(other,'runtime/processes',id+'.json'),row);
  assert.equal((await processStatus(other,id)).state,'unverified');await assert.rejects(assertUnused(other,'fixture'),/active or unverified/);
+ for(const malformed of [null,undefined,42]){await atomicWrite(join(profile,'runtime/processes',id+'.json'),{...row,root:malformed});assert.equal((await processStatus(profile,id)).state,'unverified');}
 });

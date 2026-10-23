@@ -89,8 +89,8 @@ export async function processStatus(directory:string,id:string,verify?:Ownership
  const record=await readJson<ProcessRecord>(join(directory,'runtime/processes',id+'.json'));if(!record||record.id!==id)throw new CliError('Unknown tool process.',{code:'tool.process.missing'});
  if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory))){
   // Retain the recorded spelling/digest, but prove its owner is this same directory.
-  const recorded=resolve(record.root,'../../..');let alias=false;
-  try{alias=record.root===join(recorded,'runtime/runs',id)&&record.profileBinding===digest(recorded)&&sameDirectory(recorded,directory);}catch{}
+  let alias=false;
+  try{const recorded=resolve(record.root,'../../..');alias=record.root===join(recorded,'runtime/runs',id)&&record.profileBinding===digest(recorded)&&sameDirectory(recorded,directory);}catch{}
   if(!alias)return {...record,state:'unverified',phase:'profile_binding_changed'};
  }
  const finishing=owned.get(ownedKey(directory,id));if(finishing&&(finishing.child.exitCode!==null||finishing.child.signalCode!==null)){await finishing.closed;return processStatus(directory,id,verify);}
