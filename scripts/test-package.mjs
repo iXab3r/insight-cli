@@ -37,12 +37,14 @@ try{
  }
  lock.packages['node_modules/@eyeauras/insight-cli']={version:cli.version,resolved:packageFile,integrity:'sha512-'+createHash('sha512').update(await readFile(join(artifacts,pack.filename))).digest('base64'),dependencies:cli.dependencies,engines:cli.engines,bin:cli.bin,license:cli.license};
  await writeFile(join(install,'package.json'),JSON.stringify(manifest));await writeFile(join(install,'package-lock.json'),JSON.stringify(lock));
- await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:60000,maxBuffer:262144});
+ await runNpm(['ci','--offline','--ignore-scripts','--no-audit','--no-fund'],{cwd:install,timeout:300000,maxBuffer:262144});
  // Global npm ignores lockfiles. This is where URL-only Factory dependencies
  // previously reported ELSPROBLEMS despite having the correct deployed bytes.
  const globalPrefix=join(proof,'global spaces-Ω');
  await mkdir(globalPrefix);
- await runNpm(['install','--global','--prefix',globalPrefix,'--cache',join(proof,'empty-npm-cache'),'--offline','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:60000,maxBuffer:262144});
+ // A cold Windows install extracts thousands of files, including every platform's
+ // native payload. Keep a bounded deadline without treating disk latency as failure.
+ await runNpm(['install','--global','--prefix',globalPrefix,'--cache',join(proof,'empty-npm-cache'),'--offline','--no-update-notifier','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:300000,maxBuffer:262144});
  await runNpm(['ls','--global','--prefix',globalPrefix,'--all','--json'],{cwd:install,timeout:30000,maxBuffer:1048576});
  const globalModules=(await runNpm(['root','--global','--prefix',globalPrefix],{cwd:install})).stdout.trim();
  const globalCli=join(globalModules,'@eyeauras/insight-cli');

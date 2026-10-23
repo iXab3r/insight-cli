@@ -68,7 +68,7 @@ export async function packCli(destination){
   lock.name=pkg.name;lock.version=pkg.version;lock.packages['']=pkg;
   for(const [name,item] of Object.entries(lock.packages))if(item.link||name.startsWith('skills/'))delete lock.packages[name];
   await writeFile(join(stage,'package-lock.json'),JSON.stringify(lock,null,2)+'\n');
-  await runNpm(['ci','--offline','--ignore-scripts','--omit=dev','--no-audit','--no-fund'],{cwd:stage,timeout:60000,maxBuffer:1024*1024});
+  await runNpm(['ci','--offline','--ignore-scripts','--omit=dev','--no-audit','--no-fund'],{cwd:stage,timeout:300000,maxBuffer:1024*1024});
   for(const {path,archive} of await platformArchives(lock,downloads,true)){
    await mkdir(join(stage,path),{recursive:true});
    await extractTar({file:archive,cwd:join(stage,path),strip:1});
@@ -76,7 +76,7 @@ export async function packCli(destination){
   // Invalidate npm's install-tree cache after adding the other platform payloads.
   await rm(join(stage,'node_modules/.package-lock.json'),{force:true});
   await writePackageBuildManifest(stage);
-  const result=await runNpm(['pack','--ignore-scripts','--json','--pack-destination',destination],{cwd:stage,timeout:60000,maxBuffer:8*1024*1024});
+  const result=await runNpm(['pack','--ignore-scripts','--json','--pack-destination',destination],{cwd:stage,timeout:300000,maxBuffer:8*1024*1024});
   const packed=JSON.parse(result.stdout)[0];
   for(const name of pkg.bundleDependencies)assert.ok(packed.bundled.includes(name),'Missing runtime bundle: '+name);
   for(const {path} of await platformPackages(lock))assert.ok(packed.bundled.includes(path.slice('node_modules/'.length)),'Missing portable native bundle: '+path);
