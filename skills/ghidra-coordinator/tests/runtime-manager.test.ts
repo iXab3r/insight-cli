@@ -144,3 +144,13 @@ test('vendor-only acquisition is explicit, pinned and cacheable without an impli
  const other=await mkdtemp(join(tmpdir(),'vendor-mismatch-'));t.after(()=>rm(other,{recursive:true,force:true}));
  await assert.rejects(cacheArtifact({...artifact,sha256:'f'.repeat(64)},other,fetcher,signal,false,true),/pinned SHA256/);assert.equal(requests,2);
 });
+
+test('runtime cleanup accepts a proven alias and rejects an inner validation-stage escape',async t=>{
+ const {RuntimeManager}=await import('../src/runtime-manager.js'),root=await temporary(t),profile=join(root,'profile'),alias=join(root,'alias'),id='a'.repeat(8)+'-aaaa-aaaa-aaaa-'+ 'a'.repeat(12);
+ await mkdir(profile);await symlink(profile,alias,process.platform==='win32'?'junction':'dir');
+ const context={appArguments:{AppDataDirectory:profile},profile:{name:'default',values:{analysisDirectory:alias}}} as any,manager=new RuntimeManager(context) as any;
+ const stage=join(profile,'runtime/stages',id),validation=join(stage,'validation');await runtimeWrite(join(validation,'server/local.json'),{phase:'seeded'});
+ await manager.cleanupProbes();
+ await rm(validation,{recursive:true});const outside=join(root,'outside');await runtimeWrite(join(outside,'server/local.json'),{phase:'seeded'});await symlink(outside,validation,process.platform==='win32'?'junction':'dir');
+ await assert.rejects(manager.cleanupProbes(),/outside its owned storage/);
+});

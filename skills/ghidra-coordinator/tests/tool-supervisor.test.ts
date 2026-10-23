@@ -80,3 +80,14 @@ test('an exited collector does not permit removal while its native deadline chil
  const before=await processStatus(root,parent.toolProcessId);assert.equal(before.state,'unverified');assert.equal(before.phase,'native_children_pending');await assert.rejects(assertUnused(root,'fixture'),/active or unverified/);await assert.rejects(terminateProcess(root,parent.toolProcessId,true),/unverified/);assert.equal(helper.exitCode,null);
  helper.kill('SIGTERM');await closed;assert.equal((await processStatus(root,parent.toolProcessId)).state,'exited');await assertUnused(root,'fixture');
 });
+
+test('terminal receipts retain their outcome through a proven profile alias, ignoring a reused PID',async t=>{
+ const {mkdir,symlink}=await import('node:fs/promises'),{randomUUID}=await import('node:crypto'),{digest}=await import('../src/model.js');
+ const root=await fixture(t),profile=join(root,'profile'),alias=join(root,'alias'),id=randomUUID();await mkdir(profile);await symlink(profile,alias,process.platform==='win32'?'junction':'dir');
+ const row={schema:1,id,tool:'fixture',role:'completed',installation:'fixture',state:'exited',outcome:'completed',exitCode:0,executable:process.execPath,root:join(alias,'runtime/runs',id),profileBinding:digest(alias),pid:process.pid,ownerPid:process.pid,gated:false,createdAt:'fixture',endedAt:'fixture'};
+ await atomicWrite(join(profile,'runtime/processes',id+'.json'),row);
+ assert.equal((await processStatus(profile,id)).state,'exited');await assertUnused(profile,'fixture');
+ const other=join(root,'other');await mkdir(other);await atomicWrite(join(other,'runtime/processes',id+'.json'),row);
+ assert.equal((await processStatus(other,id)).state,'unverified');await assert.rejects(assertUnused(other,'fixture'),/active or unverified/);
+ for(const malformed of [null,undefined,42]){await atomicWrite(join(profile,'runtime/processes',id+'.json'),{...row,root:malformed});assert.equal((await processStatus(profile,id)).state,'unverified');}
+});
