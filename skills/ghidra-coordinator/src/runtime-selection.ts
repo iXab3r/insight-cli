@@ -1,3 +1,4 @@
+import {sameDirectory,ownedDirectory} from './directory-identity.js';
 import {readFileSync,existsSync,realpathSync} from 'node:fs';
 import {join,isAbsolute,resolve} from 'node:path';
 import {fail,object,digest} from './model.js';
@@ -14,11 +15,11 @@ export function runtimeSelection(directory:string,analysis=directory):RuntimeSel
     // alias such as /tmp -> /private/tmp. Accept that same profile, never an inner escape.
     let profile:string,recorded:string,owned:string,home:string|undefined,retained=false;
     try{profile=realpathSync.native(directory);recorded=realpathSync.native(recordedProfile);owned=realpathSync.native(analysis);
-      if(recorded!==profile&&recorded!==owned){const marker=object(JSON.parse(readFileSync(join(recorded,'.insight-analysis.json'),'utf8')));retained=marker.schema===1&&marker.binding===digest(profile);}
-      if(realpathSync.native(runtimeRoot(directory))!==join(owned,'runtime')||realpathSync.native(runtimeRoot(recordedProfile))!==join(owned,'runtime'))fail('binding','Managed runtime root differs from its configured analysis owner.');
+      if(!sameDirectory(recorded,profile)&&!sameDirectory(recorded,owned)){const marker=object(JSON.parse(readFileSync(join(recorded,'.insight-analysis.json'),'utf8')));retained=marker.schema===1&&marker.binding===digest(profile);}
+      if(!ownedDirectory(runtimeRoot(directory),owned,['runtime'])||!ownedDirectory(runtimeRoot(recordedProfile),owned,['runtime']))fail('binding','Managed runtime root differs from its configured analysis owner.');
       if(existsSync(value.ghidraHome))home=realpathSync.native(value.ghidraHome);}
     catch{fail('binding','Managed runtime profile ownership could not be verified.');}
-    if(recorded!==profile&&recorded!==owned&&!retained||home!==undefined&&home!==join(runtimeRoot(owned),'installations',id,'ghidra'))fail('binding','Managed runtime moved outside its owned installation.');
+    if(!sameDirectory(recorded,profile)&&!sameDirectory(recorded,owned)&&!retained||home!==undefined&&!ownedDirectory(home,owned,['runtime','installations',id,'ghidra']))fail('binding','Managed runtime moved outside its owned installation.');
   }
   return value as unknown as RuntimeSelection;
 }

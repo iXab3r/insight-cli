@@ -141,8 +141,12 @@ export class Research {
     return this.ordered(reserved.context,async()=>{
       if(this.workspace.request(reserved.request.id).state==='applied')return opened(this.workspace.request(reserved.request.id).result);
       let backend:ResearchBackend;
-      try{backend=await this.backend();await this.sharedOrder(target,()=>this.reconcile({session:reserved.context.session,target},backend));}
-      catch(error){throw openingFailure(error,this.workspace.request(reserved.request.id).state);}
+      try{backend=await this.backend();await this.sharedOrder(target,()=>this.reconcile({session:reserved.context.session,target},backend,true));}
+      catch(error){
+        const request=this.workspace.request(reserved.request.id);
+        if(request.state==='accepted')this.workspace.recordRequest(request.id,'failed',retained('blocked'));
+        throw openingFailure(error,this.workspace.request(request.id).state);
+      }
       const request=this.workspace.request(reserved.request.id);
       if(request.state==='applied')return opened(request.result);
       if(reserved.replay&&request.state!=='accepted')throw new CliError('This open retains an unproved outcome; inspect the retained context before continuing.',{code:'coordinator.unknown',result:retained(request.state),next});
@@ -361,7 +365,7 @@ export class Research {
   async reconcileRequests(selected:Scope,backend:ResearchBackend) {
     return this.sharedOrder(selected.target,()=>this.reconcile(selected,backend));
   }
-  private async reconcile(selected:Scope,backend:ResearchBackend) {
+  private async reconcile(selected:Scope,backend:ResearchBackend,reportOpenFailure=false) {
     const active=this.workspace.activePublication(selected.target);
     if(active) {
       if(active.state==='preparing')this.workspace.rejectPublication(active.id,{session:active.session,target:active.target,state:'not_published',applied:0});
@@ -390,7 +394,7 @@ export class Research {
           const context=this.workspace.context(selected),result={...selected,state:'ready',baseRevision:revision(context.baseRevision),
             sharedRevision:revision(this.workspace.model(selected.target).sharedRevision),pendingChanges:count(context)};
           this.workspace.completeSavedRequest(selected,request.id,context.generation,{},result);
-        }catch{/* Saved/native evidence remains unresolved; no new intent is executed. */}
+        }catch(error){if(reportOpenFailure)throw error;/* Status retains unresolved evidence without dispatching another intent. */}
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
