@@ -5,7 +5,7 @@ import {mkdtemp,mkdir,symlink,rm,realpath,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {realpathSync} from 'node:fs';
-import {sameDirectory,ownedDirectory} from '../src/directory-identity.js';
+import {sameDirectory,ownedDirectory,projectPathWithin} from '../src/directory-identity.js';
 
 test('directory aliases retain ownership while sibling roots and inner escapes fail',async t=>{
   const root=await realpath(await mkdtemp(join(tmpdir(),'insight-identity-')));t.after(()=>rm(root,{recursive:true,force:true}));
@@ -35,4 +35,12 @@ test('distinct canonical spellings require matching nonzero directory file IDs',
   assert.equal(ownedDirectory(join(alias,'runtime/installations',id,'ghidra'),owner,['runtime','installations',id,'ghidra']),true);
   assert.deepEqual(runtimeSelection(owner),selected);assert.deepEqual(runtimeSelection(alias),selected);
   t.mock.restoreAll();
+});
+
+test('native project locators accept both verified root spellings but reject parent traversal',async t=>{
+ const root=await realpath(await mkdtemp(join(tmpdir(),'insight-project-')));t.after(()=>rm(root,{recursive:true,force:true}));
+ const owner=join(root,'owned'),alias=join(root,'projection');await mkdir(owner);await symlink(owner,alias,process.platform==='win32'?'junction':'dir');
+ assert.equal(projectPathWithin(join(alias,'view'),alias),true);assert.equal(projectPathWithin(join(owner,'view'),alias),true);
+ assert.equal(projectPathWithin(join(root,'foreign/view'),alias),false);assert.equal(projectPathWithin(join(alias,'../foreign/view'),alias),false);
+ assert.equal(projectPathWithin(undefined,alias),false);assert.equal(projectPathWithin('relative',alias),false);
 });

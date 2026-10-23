@@ -61,3 +61,17 @@ test('a GUI replacement ignores an earlier stop as proof and independently verif
   const exited=new Promise<void>(resolve=>child.once('exit',()=>resolve()));child.kill('SIGTERM');await exited;
   assert.equal(await backend.closed(scope),true,'The recorded current PID actually exited; no stale stop receipt is used as proof');
 });
+
+test('native process authentication accepts a profile projection and rejects foreign ownership or PID',async t=>{
+ const {mkdtemp,mkdir,symlink,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{verifyGhidraProcess}=await import('../src/ghidra-processes.js');
+ const directory=await mkdtemp(join(tmpdir(),'insight-auth-alias-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const profile=join(directory,'profile'),alias=join(directory,'projection'),other=join(directory,'other');await mkdir(profile);await mkdir(other);await symlink(profile,alias,process.platform==='win32'?'junction':'dir');
+ const root=join(alias,'workspace/ghidra-native/context/id/stage');await mkdir(root,{recursive:true});
+ const binding={pid:process.pid,endpoint:'http://127.0.0.1:19091',root,target:'fixture',runtimeFingerprint:'fixture-runtime',program:'/program',tokenSecret:'fixture-token'};
+ await writeFile(join(root,'process.json'),JSON.stringify(binding));let pid=process.pid,requests=0;
+ const context={appArguments:{AppDataDirectory:profile},profile:{name:'default',values:{analysisDirectory:null}},secrets:{require:async()=> 'synthetic-private-token'},fetch:async(_input:unknown,init:RequestInit)=>{assert.equal((init.headers as Record<string,string>).Authorization,'Bearer synthetic-private-token');requests++;return Response.json({pid,tcp_port:19091,project_path:join(root,'view')});}} as any;
+ const record={pid:process.pid,target:'fixture',installation:'fixture-runtime',metadata:{contextRoot:root}} as any;
+ assert.equal(await verifyGhidraProcess(record,context),true);assert.equal(requests,1);
+ pid++;assert.equal(await verifyGhidraProcess(record,context),false);
+ const foreign={...context,appArguments:{AppDataDirectory:other}};assert.equal(await verifyGhidraProcess(record,foreign),false);
+});
