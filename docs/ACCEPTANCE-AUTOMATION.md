@@ -31,6 +31,7 @@ net10 and use the root SDK selection. NuGet dependencies have committed lockfile
 ```sh
 git submodule update --init tests/vendor/EyeAuras.Automation
 npm ci --ignore-scripts
+npm run cache:factory
 npm run build
 npm run automation -- list --suite acceptance
 npm run test:acceptance
