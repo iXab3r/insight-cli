@@ -5,6 +5,7 @@ import {ghidraBudget} from './budgets.js';
 import {launchProcess,terminateProcess,processStatus} from './tool-runtime/supervisor.js';
 import {runTool} from './tool-runtime/run.js';
 import {verifyGhidraProcess} from './ghidra-processes.js';
+import {processIdentity} from './tool-runtime/identity.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
 import {runtimeProcesses} from './runtime-manager.js';
 import { type ChildProcess } from 'node:child_process';
@@ -805,11 +806,29 @@ public class ${name} extends GhidraScript {
         stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
       if(!stopped&&alive(binding.pid)) {
+        if(binding.mode==='headless'&&await this.retiredInventoryWorker(binding))continue;
         // A replacement owner must also release contexts it has not read yet.
         // PID existence alone grants no authority: authenticate the complete receipt.
         await this.verified(binding,this.workspace.target(binding.target),false);
         this.capacity.slots.add(entry.name);
       }else if(binding.mode==='gui')await this.debuggerReleased(binding);
     }
+  }
+  private async retiredInventoryWorker(binding:ProcessBinding):Promise<boolean>{
+    if(!binding.toolProcessId)return false;
+    try{
+      const row=await processStatus(this.c.appArguments.AppDataDirectory,binding.toolProcessId);
+      // Read-only retirement evidence: old locators may no longer exist. Exact
+      // persisted locator equality is sufficient here; it never authorizes a signal.
+      if(row.id!==binding.toolProcessId||row.tool!=='ghidra'||row.role!==binding.kind||
+        row.pid!==binding.pid||row.target!==binding.target||row.session!==binding.session||
+        row.installation!==binding.runtimeFingerprint||row.strongIdentity!==true||
+        typeof row.identity!=='string'||!row.identity||typeof row.metadata?.contextRoot!=='string'||
+        resolve(row.metadata.contextRoot)!==resolve(binding.root))return false;
+      if(['exited','failed'].includes(row.state)&&typeof row.endedAt==='string'&&Number.isFinite(Date.parse(row.endedAt)))return true;
+      if(row.phase!=='pid_identity_changed')return false;
+      const current=await processIdentity(binding.pid);
+      return current?.strong===true&&current.birth!==row.identity;
+    }catch{return false;}
   }
 }

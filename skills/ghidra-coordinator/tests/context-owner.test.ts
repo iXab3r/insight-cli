@@ -10,6 +10,37 @@ import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
 import {randomUUID} from 'node:crypto';
 import {digest} from '../src/model.js';
+import {processIdentity} from '../src/tool-runtime/identity.js';
+
+test('inventory ignores a proven reused worker PID before resolving a removed target, retaining its journal',async t=>{
+ const identity=await processIdentity(process.pid);if(!identity?.strong){t.skip('Requires strong OS process birth identity');return;}
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
+ const root=join(f.root,'previous-installation','missing-stage'),context='old-context',id=randomUUID();
+ const receiptDirectory=join(directory,'ghidra-native/context',context);await mkdir(receiptDirectory,{recursive:true});
+ const binding={root,context,kind:'context',mode:'headless',target:'removed-target',session:'old-session',pid:process.pid,
+  toolProcessId:id,runtimeFingerprint:'old-runtime',tokenSecret:'old-token-reference'};
+ const path=join(receiptDirectory,'current.json'),bytes=JSON.stringify(binding);await writeFile(path,bytes);
+ await mkdir(join(f.root,'runtime/processes'),{recursive:true});
+ const processRoot=join(f.root,'runtime/runs',id);await mkdir(processRoot,{recursive:true});
+ const record={schema:1,id,tool:'ghidra',role:'context',installation:binding.runtimeFingerprint,root:processRoot,
+  profileBinding:digest(resolve(f.root)),state:'running',pid:process.pid,target:binding.target,session:binding.session,
+  identity:'different-original-worker-birth',strongIdentity:true,metadata:{contextRoot:root}};
+ const recordPath=join(f.root,'runtime/processes',id+'.json');
+ const workspace={directory,target:()=>{throw Error('Removed target lookup');}} as unknown as Workspace;
+ const backend=new GhidraContexts(workspace,{} as NativeInputs,{appArguments:{AppDataDirectory:f.root}} as CommandContext);
+ for(const changed of [{target:'foreign'},{session:'foreign'},{role:'gui'},{installation:'foreign'},
+  {strongIdentity:false},{identity:identity.birth},{metadata:{contextRoot:directory}}]){
+  await writeFile(recordPath,JSON.stringify({...record,...changed}));
+  await assert.rejects((backend as any).inventory(),/Removed target lookup/);
+ }
+ await writeFile(recordPath,JSON.stringify(record));await (backend as any).inventory();
+ await writeFile(recordPath,JSON.stringify({...record,state:'exited'}));
+ await assert.rejects((backend as any).inventory(),/Removed target lookup/,'Terminal state without completion evidence is ambiguous');
+ await writeFile(recordPath,JSON.stringify({...record,state:'exited',endedAt:new Date().toISOString()}));
+ await (backend as any).inventory();
+ assert.equal(await readFile(path,'utf8'),bytes,'Inventory must preserve recovery journals');
+ process.kill(process.pid,0);
+});
 
 test('a terminal supervised worker releases its credential after its PID is reused without stopping the new process',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
