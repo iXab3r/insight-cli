@@ -1,3 +1,4 @@
+import {ownedDirectory} from './directory-identity.js';
 import {runTool} from './tool-runtime/run.js';
 import {analysisDirectory} from './analysis-storage.js';
 import {type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
@@ -91,7 +92,7 @@ export class RuntimeManager {
    for(const name of names){if(!/^[a-f0-9-]{36}$/.test(name))continue;
     const root=join(analysisDirectory(this.c),'runtime',parent,name,...(parent==='stages'?['validation']:[]));
     if(existsSync(join(root,'server/local.json'))){
-     if(await realpath(root)!==resolve(root))fail('binding','Retained runtime probe moved outside its owned storage.');
+     if(!ownedDirectory(root,analysisDirectory(this.c),['runtime',parent,name,...(parent==='stages'?['validation']:[])]))fail('binding','Retained runtime probe moved outside its owned storage.');
      await stopLocalServer(root,this.c);
     }
    }

@@ -1,3 +1,4 @@
+import {sameDirectory} from '../directory-identity.js';
 import {spawn,type ChildProcess,type SpawnOptions} from 'node:child_process';
 import {access,mkdir,readdir} from 'node:fs/promises';
 import {constants} from 'node:fs';
@@ -86,7 +87,12 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
 export async function processStatus(directory:string,id:string,verify?:OwnershipVerifier):Promise<ProcessRecord>{
  if(!/^[a-f0-9-]{36}$/.test(id))throw new CliError('Invalid process identity.',{code:'tool.process.invalid'});
  const record=await readJson<ProcessRecord>(join(directory,'runtime/processes',id+'.json'));if(!record||record.id!==id)throw new CliError('Unknown tool process.',{code:'tool.process.missing'});
- if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory)))return {...record,state:'unverified',phase:'profile_binding_changed'};
+ if(record.root!==join(directory,'runtime/runs',id)||record.profileBinding!==digest(resolve(directory))){
+  // Retain the recorded spelling/digest, but prove its owner is this same directory.
+  const recorded=resolve(record.root,'../../..');let alias=false;
+  try{alias=record.root===join(recorded,'runtime/runs',id)&&record.profileBinding===digest(recorded)&&sameDirectory(recorded,directory);}catch{}
+  if(!alias)return {...record,state:'unverified',phase:'profile_binding_changed'};
+ }
  const finishing=owned.get(ownedKey(directory,id));if(finishing&&(finishing.child.exitCode!==null||finishing.child.signalCode!==null)){await finishing.closed;return processStatus(directory,id,verify);}
  let children:Awaited<ReturnType<typeof nativeChildren>>;
  try{children=await nativeChildren(record);}catch{return {...record,state:'unverified',phase:'native_children_unverified'};}
