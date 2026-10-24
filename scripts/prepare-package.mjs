@@ -15,6 +15,11 @@ for(const [name,binary]of [['deadline-exec','deadline-exec-darwin-arm64'],['dead
  assert.equal(await sha(native+name+'.c'),proof.sourceSha256,'Native deadline source changed; rebuild and review its provenance');
  assert.equal(await sha(native+binary),proof.sha256,'Native deadline binary differs from its provenance');
 }
+const processProof=JSON.parse(await readFile(native+'process-identity.provenance.json','utf8'));
+assert.equal(await sha(native+'process-identity-darwin.c'),processProof.sourceSha256,'Process identity source changed; rebuild its provenance');
+const processBinary=native+'process-identity-darwin-'+processProof.architecture;
+assert.equal(await sha(processBinary),processProof.sha256,'Process identity binary differs from its provenance');
+await chmod(processBinary,0o755);
 const job=JSON.parse(await readFile(native+'windows-job/provenance.json','utf8'));
 for(const [name,expected]of Object.entries({...job.inputs,'Insight.WindowsJob.dll':job.sha256,'windows-job.ps1':job.launcherSha256}))assert.equal(await sha(native+'windows-job/'+name),expected,'Windows job source/binary differs from its provenance: '+name);
 const dnspy=JSON.parse(await readFile(native+'dnspy-extension/provenance.json','utf8'));

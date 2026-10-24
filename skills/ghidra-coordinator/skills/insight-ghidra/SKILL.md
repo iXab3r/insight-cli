@@ -48,6 +48,9 @@ session context can still be opening. Inspect `sessions status` for context read
 
 Use `ghidra status` to inspect runtime readiness; `ghidra install` delivers the pinned runtime.
 For static managed C#/IL research, locate `insight-cli skill insight-ilspy`.
+For an unresponsive headless backend, continue the same session/target with `ghidra open`;
+the facade authenticates and retires eligible hung workers, restoring acknowledged private work.
+Uncertain mutation/publication outcomes remain blocked; see [recovery](references/recovery.md).
 For owned process inventory use `tools processes`; `stop` saves Ghidra contexts, while
 `kill` explicitly interrupts verified owned work and preserves its journals.
 For archives, external launchers, server lifecycle or removal, read [managed runtime](references/managed-runtime.md).

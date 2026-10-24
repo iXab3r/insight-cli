@@ -24,6 +24,23 @@ establishes that the old owned bootstrap worker has ended, then uses an authorit
 probe. An absent canonical item permits private preparation; an existing first version requires
 independent readback. The old project, intent and original session/target remain preserved.
 
+## Unresponsive headless backend
+
+Continue the same session/target with ordinary `ghidra open` or a research read. When the
+backend fails its identity preflight, the facade verifies the acknowledged private snapshot
+and independently authenticates the exact worker before retiring it and restoring that snapshot.
+This automatic retirement is limited to headless contexts without uncertain mutations, active
+publication or a connected debugger. A failed health preflight is never permission to repeat a
+script, save or publication. Journals, original projects and acknowledged pending edits remain.
+Lifecycle diagnostics record `backend_unresponsive` followed by snapshot restoration.
+
+On macOS ARM64 the packaged read-only kernel helper checks the same-user process, executable,
+private root and digest of its unique context token without entering the JVM. It emits no token,
+argument list or environment values. PID birth and profile bindings remain independently checked.
+A missing/unreadable/mismatched proof stays blocked; never kill by port, basename or guessed PID.
+Other platforms retain their existing ownership authentication; this does not claim equivalent
+hang recovery where no independent proof is available. No compiler is required on installation.
+
 ## Interrupted save or close
 
 After restoring profile storage, inspect the selected session and target with

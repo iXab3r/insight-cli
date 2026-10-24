@@ -7,11 +7,11 @@ import type {Workspace,Scope} from './workspace.js';
 import {object,fail,stable} from './model.js';
 import {selectedOptions} from './arguments.js';
 
-export type StopReason='explicit_close'|'view_replaced'|'mode_changed'|'owner_dispose'|'startup_failed'|'temporary_complete'|'legacy_cleanup'|'unknown';
+export type StopReason='explicit_close'|'view_replaced'|'mode_changed'|'owner_dispose'|'startup_failed'|'temporary_complete'|'legacy_cleanup'|'backend_unresponsive'|'unknown';
 type Event={at:string;event:'start'|'restore'|'stop';reason:string;pid:number};
 const writes=new Map<string,Promise<void>>();
 const journal=(workspace:Workspace,context:string)=>join(workspace.directory,'diagnostics','lifecycle',context+'.json');
-const reasons=new Set(['explicit_close','view_replaced','mode_changed','owner_dispose','startup_failed','temporary_complete','legacy_cleanup','unknown','native_launch','saved_snapshot']);
+const reasons=new Set(['explicit_close','view_replaced','mode_changed','owner_dispose','startup_failed','temporary_complete','legacy_cleanup','unknown','native_launch','saved_snapshot','backend_unresponsive']);
 async function events(path:string):Promise<Event[]>{
  try{const rows=JSON.parse(await readFile(path,'utf8'));
   if(!Array.isArray(rows)||rows.length>128||rows.some(row=>!row||typeof row.at!=='string'||row.at.length>64||!Number.isFinite(Date.parse(row.at))||!['start','restore','stop'].includes(row.event)||!reasons.has(row.reason)||!Number.isSafeInteger(row.pid)||row.pid<1))fail('binding','Retained lifecycle observations are malformed.');
