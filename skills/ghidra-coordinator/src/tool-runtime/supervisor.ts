@@ -8,7 +8,7 @@ import {randomUUID} from 'node:crypto';
 import {Writable} from 'node:stream';
 import {setTimeout as delay} from 'node:timers/promises';
 import {CliError} from '@eyeauras/cli-factory';
-import {atomicWrite,readJson,toolRoot,withToolLock} from './store.js';
+import {atomicWrite,readJson,toolRoot,withToolLock,prepareRunRoot} from './store.js';
 import {processIdentity} from './identity.js';
 import {javaClasspathArguments} from './java-arguments.js';
 import {digest} from '../model.js';
@@ -44,7 +44,7 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
  return withToolLock(directory,spec.tool,async()=>{
   control.signal?.throwIfAborted();toolRoot(directory,spec.tool);if(!isAbsolute(executable))throw new CliError('Tool executable must be absolute.',{code:'tool.configuration'});
   const id=control.id??randomUUID();if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Invalid process identity');
-  const root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');await mkdir(root,{recursive:true,mode:0o700});
+  const root=join(directory,'runtime/runs',id),path=join(directory,'runtime/processes',id+'.json');await prepareRunRoot(directory,id);
   const gated=process.platform!=='win32'&&typeof process.execve==='function';
   const record:ProcessRecord={schema:1,id,...spec,state:'starting',executable,root,ownerPid:process.pid,profileBinding:digest(resolve(directory)),gated,phase:'reserved',createdAt:new Date().toISOString()};
   await atomicWrite(path,record);try{control.signal?.throwIfAborted();await access(executable,process.platform==='win32'?constants.F_OK:constants.X_OK);}catch(error){Object.assign(record,{state:'failed',phase:'preflight_failed'});await atomicWrite(path,record);throw error;}
@@ -145,5 +145,5 @@ export async function registerExistingProcess(directory:string,spec:ProcessSpec,
  if(!await verify(record))throw new CliError('Existing process did not authenticate as the owned tool.',{code:'tool.process.unverified'});
  if((await processIdentity(pid))?.birth!==identity.birth)throw new CliError('Existing process identity changed during registration.',{code:'tool.process.unverified'});
  const previous=await readJson<ProcessRecord>(path);if(previous)return id;
- await mkdir(root,{recursive:true,mode:0o700});await atomicWrite(path,record);return id;
+ await prepareRunRoot(directory,id);await atomicWrite(path,record);return id;
 }

@@ -1,4 +1,4 @@
-import {writeFile} from 'node:fs/promises';
+import {writeFile,realpath} from 'node:fs/promises';
 import {join,win32} from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -29,7 +29,7 @@ export async function javaClasspathArguments(root:string,tool:string,executable:
  if(executable.length*2+args.reduce((n,arg)=>n+arg.length*2+3,3)<=28000)return args;
  const index=args.findIndex(arg=>arg==='-cp'||arg==='-classpath'||arg==='--class-path');
  if(index<0||args[index+1]===undefined)return args;
- const path=join(root,'java-classpath.args');
+ const path=join(await realpath(root),'java-classpath.args');
  const content='-classpath\n'+quoteJavaArgument(args[index+1]!)+'\n';
  const bytes=/^java\.exe$/i.test(win32.basename(executable))&&process.platform==='win32'?await encodeJavaLauncherFile(content):Buffer.from(content,'utf8');
  await writeFile(path,bytes,{flag:'wx',mode:0o600});

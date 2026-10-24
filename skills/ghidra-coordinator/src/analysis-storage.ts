@@ -160,8 +160,9 @@ export class AnalysisStorage {
   private async exclusive<T>(c:CommandContext,action:()=>Promise<T>){
     const key=c.appArguments.AppDataDirectory;if(this.changing.has(key)||this.active.get(key)||toolProfileBusy(key))fail('busy','Finish active commands before storage migration.');
     this.changing.add(key);try{
-      const processes=(await listProcesses(key)).filter(p=>!['exited','failed'].includes(p.state));
-      const native=await runtimeProcesses(key);
+      let processes:Awaited<ReturnType<typeof listProcesses>>,native:Awaited<ReturnType<typeof runtimeProcesses>>;
+      try{processes=(await listProcesses(key)).filter(p=>!['exited','failed'].includes(p.state));native=await runtimeProcesses(key);}
+      catch(error){throw new CliError('Cannot verify storage process inventory. Inspect storage show and preserve legacy compatibility paths before retrying.',{code:'storage.inventory',cause:error,next:[['storage','show']]});}
       if(processes.length||native.length)throw new CliError('Close the profile contexts and stop its owned server/processes before migration. Unverified lifetimes also block copying.',{code:'storage.busy',result:{processes,native},next:[['tools','processes']]});
       await this.release(c);return await action();
     }finally{this.changing.delete(key);}
@@ -221,7 +222,12 @@ export class AnalysisStorage {
     if(j.defaultBaseIdentity&&await directoryIdentity(dirname(dirname(j.destination)))!==j.defaultBaseIdentity)fail('volume','The selected storage base directory was replaced.');
     if(j.state==='rolling_back')return this.restore(c,j);
     if(j.state==='cleaning')return this.finishCleanup(c,j);
-    if(terminal(j.state)&&!(j.automatic&&j.state==='committed'))return this.show(c);
+    if(terminal(j.state)&&!(j.automatic&&j.state==='committed')){
+      const selected={...c,profile:await this.store(c).get(c.profile.name)};
+      await this.validate(selected);const status=await this.show(selected);
+      if(status.availability!=='available')throw new CliError('Completed migration storage is unavailable. Inspect storage show before retrying.',{code:'storage.unavailable',next:[['storage','show']]});
+      return status;
+    }
     if(j.makeDefault&&!j.defaultApplied){
       const base=dirname(dirname(j.destination));
       if(await canonicalFuture(base)!==base)fail('binding','Storage default base was replaced.');
@@ -322,7 +328,48 @@ export class AnalysisStorage {
     }
     return {state:j.state,id:j.id,directory:j.destination,manifest:j.manifest,sourceRetained:true,defaultBaseDirectory:storageDefault(c)?.base??null,installationDefault:j.makeDefault?(j.defaultSuperseded?'superseded':'configured'):'unchanged',rollback:'storage rollback',cleanup:'storage cleanup'};
   }
-  async resume(c:CommandContext){return this.exclusive(c,async()=>{const j=await this.journal(c,true);if(!j)fail('missing','No migration journal exists.');return this.continue(c,j);});}
+  private async repairBinding(c:CommandContext,j:Journal){
+    if(!['committed','cleaned'].includes(j.state))fail('repair','Profile repair requires a completed migration. Resume the pending transaction without --repair-profile.');
+    if(await directoryIdentity(j.source)!==j.sourceIdentity||await canonicalFuture(j.destination)!==j.destination||!j.targetIdentity||await directoryIdentity(j.destination)!==j.targetIdentity)
+      fail('binding','Migration source or destination identity changed. Preserve both copies; profile repair was refused.');
+    if(await directoryIdentity(j.destinationAnchor)!==j.destinationIdentity)fail('volume','Migration destination volume changed. Profile repair was refused.');
+    if(j.defaultBinding)validateStorageDefault(c,j.defaultBinding);
+    if(j.defaultBaseIdentity&&await directoryIdentity(dirname(dirname(j.destination)))!==j.defaultBaseIdentity)fail('volume','Storage base changed. Profile repair was refused.');
+    const marker=await readJson<{schema:number;id:string;binding:string;profile:string}>(join(j.destination,'.insight-analysis.json'));
+    if(marker?.schema!==1||marker.id!==j.id||marker.binding!==j.binding||marker.profile!==j.profile)
+      fail('binding','Destination ownership does not match the retained migration. Profile repair was refused.');
+    for(const tree of analysisTrees){
+      const target=join(j.destination,tree),alias=join(j.source,tree);
+      try{
+        if(await canonicalFuture(target)!==target||!(await lstat(target)).isDirectory()||!(await lstat(alias)).isSymbolicLink()||await realpath(alias)!==target)
+          fail('aliases','A migration compatibility path changed. Preserve the conflicting path and restore its recorded destination before profile repair.');
+      }catch(error){
+        if(error instanceof CliError)throw error;
+        throw new CliError('Cannot verify a migration compatibility path. Preserve both copies before profile repair.',{code:'storage.aliases',cause:error});
+      }
+    }
+    const setting=c.profile.values.analysisDirectory;
+    if(setting!==undefined&&setting!==null&&setting!==j.previous&&setting!==j.source&&setting!==j.destination)
+      fail('configuration','The profile selects a different storage location. Preserve it; automatic profile repair was refused.');
+  }
+  async resume(c:CommandContext,repairProfile=false){
+    const j=await this.journal(c,true);if(!j)fail('missing','No migration journal exists.');
+    // Diagnose a terminal profile mismatch before scanning legacy native paths.
+    if(['committed','cleaned'].includes(j.state)){
+      if(repairProfile)await this.repairBinding(c,j);
+      else if(analysisDirectory(c)!==j.destination)throw new CliError('Factory profile and completed migration differ. Verify and restore the profile with storage resume --repair-profile.',{code:'storage.configuration',next:[['storage','resume','--repair-profile']]});
+    }else if(repairProfile)fail('repair','Profile repair requires a completed migration. Resume without --repair-profile.');
+    return this.exclusive(c,async()=>{
+      if(repairProfile){
+        c={...c,profile:await this.store(c).get(c.profile.name)};
+        await this.repairBinding(c,j);
+        await this.store(c).set(c.profile.name,{analysisDirectory:j.destination});
+        await sync(join(c.appArguments.RoamingAppDataDirectory,'profiles.json'));
+        c={...c,profile:await this.store(c).get(c.profile.name)};
+      }
+      return this.continue(c,j);
+    });
+  }
   async rollback(c:CommandContext){return this.exclusive(c,async()=>{
     const j=await this.journal(c,true);if(!j)fail('missing','No migration journal exists.');
     if(j.state==='cleaned'||j.state==='cleaning')fail('retention','Retained source cleanup has begun. Resume cleanup; rollback can no longer restore a complete source.');
@@ -382,7 +429,7 @@ export class AnalysisStorage {
     command('default','Set the installation storage base for new profiles; preserve existing data locations',({options:o},c)=>this.setDefault(c,o.directory),{permission:Permission.Update,options:[directory]}),
     command('configure','Choose storage for an empty profile and subsequent new profiles',({options:o},c)=>this.migrate(c,o.directory,false,true,Boolean(o.profileOnly)),{permission:Permission.Update,options:[directory,profileOnly]}),
     command('migrate','Copy and verify all analysis data, retain source, then switch storage',({options:o},c)=>this.migrate(c,o.directory,Boolean(o.dryRun),false,Boolean(o.profileOnly)),{permission:Permission.Update,options:[directory,profileOnly,{flags:'--dry-run',description:'Read-only path, capacity and quiescence preflight; create no migration'}]}),
-    command('resume','Resume the retained copy/activation or rollback without replaying research',(_i,c)=>this.resume(c),{permission:Permission.Update}),
+    command('resume','Resume migration, or explicitly repair its completed profile binding',({options:o},c)=>this.resume(c,Boolean(o.repairProfile)),{permission:Permission.Update,options:[{flags:'--repair-profile',description:'Restore a completed migration setting after verifying destination ownership and compatibility paths'}]}),
     command('rollback','Restore retained source; refuse after any destination content changes',(_i,c)=>this.rollback(c),{permission:Permission.Update}),
     command('cleanup','Delete verified retained source copies; retain compatibility paths permanently',(_i,c)=>this.cleanup(c),{permission:'Destructive'}),
   ]);}

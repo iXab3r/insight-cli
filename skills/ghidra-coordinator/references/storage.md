@@ -84,6 +84,17 @@ those links or their profile/source ancestors manually after migrating.
 
 ## Interruptions, uncertainty and retention
 
+If a completed migration no longer agrees with the Factory profile setting, ordinary
+commands and `storage resume` fail. After inspecting `storage show`, explicitly restore
+the setting with `storage resume --repair-profile --json`. This Update operation verifies
+the journal, source/destination identities, destination ownership and every compatibility
+link before changing only `analysisDirectory`. Later destination research is preserved;
+the old migration manifest is not used to roll it back. A different selected location,
+missing volume or replaced compatibility path blocks repair. Preserve conflicting paths
+and restore the recorded links before retrying; repair never deletes or merges them.
+Process-inventory failures are reported as `storage.inventory` with the original cause
+available under `--verbose`. A terminal unavailable migration is never a successful resume.
+
 ```sh
 insight-cli storage resume --json
 insight-cli storage rollback --json

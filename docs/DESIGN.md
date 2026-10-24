@@ -159,6 +159,12 @@ Cleanup records irreversible intent before removing the original copy. Later wri
 forward migration instead of a stale rollback. Stopped profiles with unknown operations can
 migrate without replay, forced abandonment or changed outcomes.
 
+When a completed migration disagrees with a restored Factory profile snapshot, `resume`
+fails with an actionable configuration error. Explicit `resume --repair-profile` restores
+only the setting after verifying retained ownership, filesystem identities and every
+compatibility link. It preserves later destination writes and refuses conflicting paths;
+it does not roll back, merge or delete research to reconcile configuration.
+
 ### Toolbox discovery and packaged instructions
 
 The product keeps one capability/skill inventory in `runtime/toolbox.json`. `tools list` and
