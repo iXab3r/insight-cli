@@ -1,16 +1,30 @@
 import {mkdir,open,rename,rm,readFile,readdir,lstat,realpath} from 'node:fs/promises';
-import {createReadStream} from 'node:fs';
-import {dirname,join,resolve,relative,sep} from 'node:path';
+import {createReadStream,existsSync} from 'node:fs';
+import {dirname,basename,join,resolve,relative,sep} from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {CliError} from '@eyeauras/cli-factory';
 import {fail} from '../model.js';
 
 export async function atomicWrite(path:string,value:unknown){
- await mkdir(dirname(path),{recursive:true,mode:0o700});const temporary=path+'.new-'+randomUUID(),file=await open(temporary,'wx',0o600);
+ const parent=await physicalDirectory(dirname(path)),target=join(parent,basename(path));
+ await mkdir(parent,{recursive:true,mode:0o700});const temporary=target+'.new-'+randomUUID(),file=await open(temporary,'wx',0o600);
  try{await file.writeFile(JSON.stringify(value,null,2)+'\n');await file.sync();}finally{await file.close();}
- await rename(temporary,path);
- if(process.platform!=='win32'){const parent=await open(dirname(path),'r');try{await parent.sync();}finally{await parent.close();}}
+ await rename(temporary,target);
+ if(process.platform!=='win32'){const handle=await open(parent,'r');try{await handle.sync();}finally{await handle.close();}}
+}
+
+async function physicalDirectory(path:string):Promise<string>{
+ try{return await realpath(path);}catch(error){
+  if((error as NodeJS.ErrnoException).code!=='ENOENT'||dirname(path)===path)throw error;
+  return join(await physicalDirectory(dirname(path)),basename(path));
+ }
+}
+
+/** Create new run folders through the physical runtime, retaining logical receipt identity. */
+export async function prepareRunRoot(directory:string,id:string){
+ const runtime=join(directory,'runtime');if(!existsSync(runtime))await mkdir(runtime,{recursive:true,mode:0o700});
+ await mkdir(join(await realpath(runtime),'runs',id),{recursive:true,mode:0o700});
 }
 export async function readJson<T>(path:string):Promise<T|undefined>{try{return JSON.parse(await readFile(path,'utf8')) as T;}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}}
 export function toolRoot(directory:string,tool:string){if(!/^[a-z][a-z0-9-]*$/.test(tool))fail('invalid','Invalid tool identity.');return tool==='ghidra'?join(directory,'runtime'):join(directory,'runtime','tools',tool);}

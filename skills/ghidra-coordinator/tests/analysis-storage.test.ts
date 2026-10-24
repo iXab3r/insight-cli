@@ -180,9 +180,13 @@ test('changed source before activation can roll back without losing the new byte
   assert.equal(await readFile(join(source,'workspace/native database/program.db'),'utf8'),'new source bytes');
 });
 test('the normal native launch gate accepts configured runtime storage without weakening child containment',async t=>{
-  const {f,c,storage,base}=await setup(t);await storage.migrate(c,base);
+  const {f,c,storage,source,base,destination}=await setup(t);await storage.migrate(c,base);
   const result=await runTool(c,{tool:'fixture',role:'storage-test',executable:process.execPath,arguments:['-e','process.stdout.write("owned native readback")'],timeoutMs:10000});
   assert.equal(result.stdout,'owned native readback');
+  assert.equal(await readFile(join(destination,'runtime/runs',result.process,'stdout.log'),'utf8'),'owned native readback');
+  const {processStatus}=await import('../src/tool-runtime/supervisor.js');
+  const receipt=await processStatus(source,result.process);assert.equal(receipt.state,'exited');
+  assert.equal(receipt.root,join(source,'runtime/runs',result.process),'Physical IO must preserve the logical ownership contract');
 });
 test('resume rejects replaced destination roots and parents before making a write', {skip:process.platform==='win32'},async t=>{
   const {f,c,storage,base,destination}=await setup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});
