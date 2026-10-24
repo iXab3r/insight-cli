@@ -24,6 +24,63 @@ async function setup(t:Parameters<typeof createCliFixture>[0],checkpoint?:(phase
   const base=join(f.root,'new volume Ω'),destination=join(base,'insight-cli','default');
   return {f,c,storage,source,base,destination};
 }
+
+test('completed migration profile drift fails resume and explicit repair preserves newer data and other settings',async t=>{
+  const {f,c,storage,source,base,destination}=await setup(t);
+  await storage.migrate(c,base,false,false,true);
+  await writeFile(join(destination,'workspace','newer-work'),'preserve later research');
+  await f.profileStore.set('default',{analysisDirectory:undefined,maxContexts:7});
+  const stale={...c,profile:await f.profileStore.get()};
+  await assert.rejects(storage.resume(stale),e=>(e as {code:string}).code==='storage.configuration');
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,undefined);
+  const result=await storage.resume(stale,true) as {availability:string};
+  assert.equal(result.availability,'available');
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,destination);
+  assert.equal((await f.profileStore.get()).values.maxContexts,7);
+  assert.equal((await f.profileStore.get('other')).values.analysisDirectory,undefined);
+  assert.equal(await readFile(join(destination,'workspace','newer-work'),'utf8'),'preserve later research');
+  const j=JSON.parse(await readFile(join(source,'storage/migration.json'),'utf8'));
+  assert.equal(await readFile(join(source,'.storage-retained',j.id,'workspace/native database/program.db'),'utf8'),'native database bytes');
+  assert.equal((await storage.resume({...c,profile:await f.profileStore.get()},true) as {availability:string}).availability,'available');
+});
+
+for(const damage of ['alias','marker','foreign-profile','destination'] as const)test('profile repair refuses '+damage+' without discarding either copy',async t=>{
+  const {f,c,storage,source,base,destination}=await setup(t);await storage.migrate(c,base);
+  await f.profileStore.set('default',{analysisDirectory:undefined});
+  if(damage==='alias'){
+    await rm(join(source,'workspace'));await mkdir(join(source,'workspace'));await writeFile(join(source,'workspace','conflict'),'keep conflict');
+  }else if(damage==='marker')await atomicWrite(join(destination,'.insight-analysis.json'),{schema:1,id:'foreign',binding:'foreign',profile:'other'});
+  else if(damage==='foreign-profile')await f.profileStore.set('default',{analysisDirectory:join(f.root,'different-profile')});
+  else {await rename(destination,destination+'-retained');await mkdir(destination);}
+  const before=(await f.profileStore.get()).values.analysisDirectory;
+  await assert.rejects(storage.resume({...c,profile:await f.profileStore.get()},true));
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,before);
+  const retained=damage==='destination'?destination+'-retained':destination;
+  assert.equal(await readFile(join(retained,'workspace/native database/program.db'),'utf8'),'native database bytes');
+  if(damage==='alias')assert.equal(await readFile(join(source,'workspace','conflict'),'utf8'),'keep conflict');
+});
+
+test('public resume reports profile drift as failure and repair remains permission gated',async t=>{
+  const {f,c,storage,base}=await setup(t);await storage.migrate(c,base,false,false,true);await f.profileStore.set('default',{analysisDirectory:undefined});
+  const app=f.createApplication(runtime=>createInsightCli({runtime}));
+  const result=await f.run(app,['storage','resume','--json']);assert.notEqual(result.exitCode,0);assert.match(result.stderr,/repair-profile/);
+  const repaired=await f.json(app,['storage','resume','--repair-profile']) as {availability:string};assert.equal(repaired.availability,'available');
+  await f.profileStore.set('default',{analysisDirectory:undefined});
+  await f.profileStore.setPermissions('default',['ReadOnly']);
+  const denied=await f.run(app,['storage','resume','--repair-profile','--json']);assert.notEqual(denied.exitCode,0);assert.match(denied.stderr,/permission/i);
+  assert.equal((await f.profileStore.get()).values.analysisDirectory,undefined);
+});
+
+test('explicit repair supports cleaned migrations and refuses pending transactions without changing profile',async t=>{
+  const a=await setup(t);await a.storage.migrate(a.c,a.base,false,false,true);
+  await a.storage.cleanup({...a.c,profile:await a.f.profileStore.get()});
+  await a.f.profileStore.set('default',{analysisDirectory:null});
+  assert.equal((await a.storage.resume({...a.c,profile:await a.f.profileStore.get()},true) as {availability:string}).availability,'available');
+  const b=await setup(t,async phase=>{if(phase==='reserved')throw Error('interrupted');});
+  await assert.rejects(b.storage.migrate(b.c,b.base),/interrupted/);
+  await assert.rejects(b.storage.resume(b.c,true),e=>(e as {code:string}).code==='storage.repair');
+  assert.equal((await b.f.profileStore.get()).values.analysisDirectory,undefined);
+});
 test('public configuration preserves Factory profile isolation, old defaults and exact artifact readback',async t=>{
   const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']},{name:'other',permissions:['ReadOnly']}]});
   const app=f.createApplication(runtime=>createInsightCli({runtime})),base=join(f.root,'storage Ω');
