@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "license": "MIT",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "compiler": "Apple clang version 17.0.0 (clang-1700.3.19.1)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin",
+  "sourceSha256": "f147da90168123783593f06461c78aea9e4b6ac326b7bdd003da1b0765a06265",
+  "sha256": "8d7a15c925ba49b8bea5280c94c03c5a9e39ac33f408ad6dcc068af095e796f4",
+  "flags": [
+    "-arch",
+    "arm64",
+    "-mmacosx-version-min=13.0",
+    "-O2",
+    "-g0",
+    "-Werror",
+    "-Wno-deprecated-declarations"
+  ]
+}

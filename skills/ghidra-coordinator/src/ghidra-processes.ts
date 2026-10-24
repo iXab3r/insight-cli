@@ -1,3 +1,4 @@
+import {nativeProcessProof} from './tool-runtime/native-process-proof.js';
 import {sameDirectory,ownedDirectory,projectPathWithin} from './directory-identity.js';
 import {runtimeSelection} from './runtime-selection.js';
 import type {CommandContext} from '@eyeauras/cli-factory';
@@ -34,7 +35,10 @@ export async function verifyGhidraProcess(r:ProcessRecord,c:CommandContext):Prom
   }
   if(r.metadata?.contextRoot){const root=await ownedPath(c,r.metadata.contextRoot),binding=JSON.parse(await readFile(join(root,'process.json'),'utf8'));
    if(!sameDirectory(binding.root,root)||binding.pid!==r.pid||binding.runtimeFingerprint!==r.installation||binding.target!==r.target)return false;
-   const token=await c.secrets.require(binding.tokenSecret),info=await new HttpBridge(binding.endpoint,c.fetch,undefined,token,1500).instance();
+   const token=await c.secrets.require(binding.tokenSecret);
+   // A headless JVM may be unable to serve HTTP while the kernel still proves its token, executable and private context root.
+   if(binding.mode==='headless'&&await nativeProcessProof(r.pid!,r.executable,root,token))return true;
+   const info=await new HttpBridge(binding.endpoint,c.fetch,undefined,token,1500).instance();
    return info.pid===r.pid&&info.tcp_port===Number(new URL(binding.endpoint).port)&&projectPathWithin(info.project_path,binding.root);
   }
   return undefined;

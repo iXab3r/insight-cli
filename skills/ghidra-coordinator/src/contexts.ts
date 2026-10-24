@@ -304,7 +304,7 @@ export class GhidraContexts {
   }
   async open(scope: Scope, request?: string): Promise<GhidraContext> {
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target);
-    if(this.workspace.unresolved(scope).some(intent=>intent.id!==request))
+    if(this.workspace.unresolved(scope).some(intent=>intent.id!==request&&intent.operation!=='ghidra.open'))
       fail('blocked','This context retains an unresolved operation; reconcile its recorded outcome before continuing.');
     let binding: ProcessBinding|undefined;
     try {binding=JSON.parse(await readFile(join(this.directory(),'context',context.id,'current.json'),'utf8'));}
@@ -322,7 +322,8 @@ export class GhidraContexts {
     }
     if(binding&&!stopped&&alive(binding.pid)) {
       if(binding.context!==context.id)fail('binding','Native process belongs to a different working context.');
-      await this.verified(binding,target);return context;
+      try{await this.verified(binding,target);return context;}
+      catch(error){if(!await this.retireUnresponsive(scope,binding,error))throw error;stopped=true;}
     }
     if(binding?.mode==='gui')await this.debuggerReleased(binding);
     let model=context.workingSnapshot?this.workspace.model(target.id):await this.model(target);
@@ -344,6 +345,22 @@ export class GhidraContexts {
     if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
     return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,
       baseSnapshot:snapshot,workingSnapshot:snapshot});
+  }
+  private async retireUnresponsive(scope:Scope,binding:ProcessBinding,error:unknown):Promise<boolean>{
+    const failure=error as {code?:string;result?:{operation?:string}};
+    if(!['coordinator.timeout','coordinator.transport'].includes(failure.code??'')||failure.result?.operation!=='/mcp/instance_info'||
+       binding.mode!=='headless'||!binding.toolProcessId)return false;
+    const context=this.workspace.context(scope);
+    if(!context.workingSnapshot||context.debugger?.connected||this.workspace.activePublication(scope.target)||
+       this.workspace.unresolved(scope).some(intent=>intent.operation!=='ghidra.open'))return false;
+    // Verify acknowledged bytes before retiring anything. Unknown mutations stay blocked.
+    await this.workspace.artifacts.verify(context.workingSnapshot);
+    const row=await processStatus(this.c.appArguments.AppDataDirectory,binding.toolProcessId,r=>verifyGhidraProcess(r,this.c));
+    if(row.state!=='running'||row.pid!==binding.pid||row.tool!=='ghidra'||row.role!=='context'||row.session!==scope.session||
+       row.target!==scope.target||row.installation!==binding.runtimeFingerprint||row.metadata?.contextRoot!==binding.root)return false;
+    await terminateProcess(this.c.appArguments.AppDataDirectory,binding.toolProcessId,true,r=>verifyGhidraProcess(r,this.c));
+    await this.stopRecord({binding,http:new HttpBridge(binding.endpoint)},false,true,'backend_unresponsive');
+    return true;
   }
   private async selected(scope: Scope): Promise<Running> {
     const context=this.workspace.context(scope);
