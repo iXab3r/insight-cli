@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,readFile,readdir,rm,writeFile,copyFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,readdir,rm,writeFile,copyFile,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,delimiter} from 'node:path';
 import {javaClasspathArguments,quoteJavaArgument,encodeJavaLauncherFile} from '../src/tool-runtime/java-arguments.js';
@@ -20,7 +20,7 @@ test('only long Windows Ghidra java/javac classpaths move into an exclusive owne
   const cp=(i===1?'C:\\space Ω\\lib\\':'C:\\space #\\lib\\').repeat(2600);
   const original=['-Xmx768m',flag,cp,'Main','literal "quote"','@application-argument'];
   const actual=await javaClasspathArguments(run,'ghidra',i===1?'C:\\jdk\\JAVAC.EXE':'C:\\jdk\\java.exe',original,'win32');
-  assert.deepEqual(actual,['-Xmx768m','@'+join(run,'java-classpath.args'),'Main','literal "quote"','@application-argument']);
+  assert.deepEqual(actual,['-Xmx768m','@'+join(await realpath(run),'java-classpath.args'),'Main','literal "quote"','@application-argument']);
   assert.equal(await readFile(join(run,'java-classpath.args'),'utf8'),'-classpath\n'+quoteJavaArgument(cp)+'\n');
   assert.equal(original[2],cp);
   await assert.rejects(javaClasspathArguments(run,'ghidra',i===1?'C:\\jdk\\javac.exe':'C:\\jdk\\java.exe',original,'win32'),{code:'EEXIST'});
