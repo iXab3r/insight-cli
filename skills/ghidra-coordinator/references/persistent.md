@@ -15,6 +15,8 @@ const cli = await connectInsight({
   arguments: [installedBin],
   cwd: projectDirectory
 });
+// If reporting READY, first await a discovery RPC on this connection.
+await cli.execute(['--profile', profile, 'tools', 'list']);
 const result = await cli.execute([
   '--profile', profile,
   'ghidra', 'functions', 'inspect', '--session', session, '--target', target,
@@ -44,6 +46,18 @@ Node runtime flags, with Node flags before the bin. Put `--profile <name>` in **
 `execute(argv)` call as shown above. Adding profile flags to the frontend launch exits with
 usage error before any request is dispatched. `env` optionally supplies the child environment.
 There is no shell or separate profile/config.
+
+A consumer that prints `READY` should first await an acknowledged RPC on that same connection,
+as in the metadata call above. `connectInsight()` alone warrants a `SPAWNED` label. Discovery
+confirms that the frontend reached Factory and returned a result; it does not start Ghidra or
+prove native context readiness. Handle its failure before reporting readiness, preserve
+`name`, `message`, `dispatched` and `termination` in the diagnostic receipt, and do not resend
+research calls automatically. A later transport failure still requires ordinary outcome checks.
+
+The helper code comes from the module actually imported by the consumer. Merging a newer
+client into source does not update an older installed package or a long-lived imported module.
+Check the installed version and loaded module when new diagnostic fields are absent; keep
+original failure receipts rather than treating a new connection as recovery evidence.
 
 `execute(argv)` returns the CLI result unchanged, without a JSON-RPC envelope. Calls are queued
 in admission order. Native work can be long: await the original promise through the agent host's
