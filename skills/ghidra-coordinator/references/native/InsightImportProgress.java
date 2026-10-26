@@ -28,10 +28,10 @@ class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable 
             // Preserve observations only; an analysis checkpoint requires its own prepared snapshot.
             InsightInitialJournal.write(root.resolve("progress-history-"+UUID.randomUUID()+".json"),saved);
         }
-        emit();
-        heartbeat.scheduleAtFixedRate(new TimerTask(){public void run(){try{emit();}catch(Throwable failure){writeFailure=failure;}}},2000,2000);
+        observe();
+        heartbeat.scheduleAtFixedRate(new TimerTask(){public void run(){try{observe();}catch(Throwable failure){writeFailure=failure;}}},2000,2000);
     }
-    synchronized void phase(String value)throws Exception{phase=value;setMessage("");initialize(0);setIndeterminate(true);emit();}
+    synchronized void phase(String value)throws Exception{phase=value;setMessage("");initialize(0);setIndeterminate(true);observe();}
     public synchronized void setMessage(String value){message=Objects.toString(value,"");}
     public synchronized String getMessage(){return message;}
     public synchronized void initialize(long maximum){completed=0;total=maximum;indeterminate=maximum<=0;}
@@ -42,7 +42,12 @@ class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable 
     public synchronized long getMaximum(){return total;}
     public synchronized void setIndeterminate(boolean value){indeterminate=value;}
     public synchronized boolean isIndeterminate(){return indeterminate;}
-    synchronized void state(String value)throws Exception{state=value;emit();}
+    synchronized void state(String value)throws Exception{state=value;observe();}
+    // Observation I/O must never invalidate a completed import or its prepared receipt.
+    private synchronized void observe()throws Exception{
+        try{emit();writeFailure=null;}
+        catch(java.io.IOException failure){writeFailure=failure;}
+    }
     private synchronized void emit()throws Exception{
         JsonObject p=new JsonObject();p.addProperty("schema",1);p.addProperty("target",target);p.addProperty("phase",phase);p.addProperty("state",state);
         if(attempt!=null)p.addProperty("attempt",attempt);
@@ -51,5 +56,5 @@ class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable 
         if(!isIndeterminate()&&getMaximum()>0){p.addProperty("completed",getProgress());p.addProperty("total",getMaximum());}
         InsightInitialJournal.write(root.resolve("progress.json"),p);
     }
-    public synchronized void close()throws Exception{heartbeat.cancel();if(state.equals("running"))state=isCancelled()?"cancelled":"failed";emit();if(writeFailure!=null)throw new java.io.IOException("Progress persistence failed",writeFailure);}
+    public synchronized void close()throws Exception{heartbeat.cancel();if(state.equals("running"))state=isCancelled()?"cancelled":"failed";observe();if(writeFailure!=null)System.err.println("Initial import progress is unavailable; native completion receipts remain authoritative.");}
 }
