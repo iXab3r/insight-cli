@@ -59,7 +59,7 @@ client of Factory's existing `--json-rpc`/`cli.execute` stream: one child, order
 typed results/errors, explicit close, no reconnect or replay. It creates no host, profile store
 or IPC protocol. Factory dependencies and lifecycle remain unchanged. Connection creation
 confirms frontend spawn, without a readiness command. Transport errors preserve dispatch
-uncertainty and, after exit, retain exit/signal metadata plus a recognized fixed startup
+uncertainty and, after exit, retain exit/signal metadata plus a recognized fixed transport
 explanation; raw stderr is not exposed. These observations never establish a command outcome.
 
 `functions inspect` and `strings anchors` use the precompiled authenticated ReadOnly bridge endpoint

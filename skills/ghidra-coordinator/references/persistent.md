@@ -55,8 +55,8 @@ reconnect/retry. Factory permissions, command validation, IDs and native budgets
 * `connectInsight()` confirms that the frontend process spawned; it does not perform a
   readiness command or promise compatibility with the current Factory owner.
 * `InsightTransportError.termination`, when the frontend has exited, reports its `exitCode`,
-  `signal`, and a recognized `startupFailure` category when available. The error message
-  includes the fixed startup explanation and exit information, without raw stderr. These
+  `signal`, and a recognized `reason` category when available. The error message
+  includes the fixed transport explanation and exit information, without raw stderr. These
   observations diagnose transport failure; they do not establish a command's outcome.
 * `InsightTransportError.dispatched === true` means the request was handed to the stream and its
   acknowledgment is unavailable; it does not prove execution. Changing commands require their
@@ -66,7 +66,7 @@ reconnect/retry. Factory permissions, command validation, IDs and native budgets
 
 The client bounds each response line to four MiB, validates IDs and envelopes, and fails the
 connection on malformed, uncorrelated or oversized replies. It classifies recognized Factory
-startup errors from a small rolling stderr window, clears that window on process exit, and
+transport errors from a small rolling stderr window, clears that window on process exit, and
 exposes only fixed explanations and exit metadata. Read command-level diagnostics from their
 typed results and the existing profile diagnostic locations.
 
