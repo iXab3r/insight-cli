@@ -32,7 +32,8 @@ import {nativeQuery} from './native-queries.js';
 import {runInline} from './inline-script.js';
 import {researchView} from './research-view.js';
 import {sdkWrites} from './sdk-contracts.js';
-import {initialIntent,initializeModel} from './initial-model.js';
+import {initialRoot,initialIntent,initializeModel,validateInitialIntent} from './initial-model.js';
+import {initialProgress} from './initial-progress.js';
 import {managedGhidraDebugger,prepareGhidraDebugger} from './ghidra-debugger-runtime.js';
 import type {SelectedTool} from './tool-runtime/installer.js';
 
@@ -257,7 +258,30 @@ export class GhidraContexts {
   private async initialModel(target: ResearchTarget) {
     const model=this.workspace.model(target.id);if(model.state==='ready')return;
     const server=this.server(),binding=await server.ensure();
-    if(!await initialIntent(this.workspace,target.id)){
+    if(this.workspace.activePublication(target.id))fail('blocked','Shared publication requires reconciliation before initial-model recovery.');
+    const intent=await initialIntent(this.workspace,target.id);
+    if(intent){
+      await validateInitialIntent(this.workspace,target,binding,this.inputs.fingerprint,undefined,true);
+      if(intent.runtimeFingerprint!==this.inputs.fingerprint){
+        const root=initialRoot(this.workspace,target.id);
+        const result=await server.initialRecovery(binding,root,this.inputs.fingerprint);
+        if(result.state==='busy')fail('busy','The retained initial-model worker is still active.');
+        if(result.state==='candidate'){
+          const receipt=text(result.receipt);if(!/^canonical-[a-f0-9-]{36}\.json$/.test(receipt))fail('binding','Invalid canonical recovery receipt.');
+          const proof=await server.initialRecovery(binding,root,this.inputs.fingerprint,receipt);
+          if(proof.state!=='verified'||proof.version!==result.version||proof.snapshotBuffersVerified!==true||proof.snapshot!==result.snapshot||
+              typeof proof.snapshot!=='string'||!/^canonical-[a-f0-9-]{36}\.gzf$/.test(proof.snapshot))
+            fail('unknown','Canonical model changed or independent recovery readback remains unproved.');
+          const snapshot=await this.workspace.captureSnapshot(join(root,proof.snapshot));
+          if(snapshot.sha256!==proof.snapshotSha256)fail('binding','Recovered canonical snapshot changed.');
+          this.workspace.establishModel(target.id,version(proof.version),snapshot);
+          await initialProgress(root,target.id,'complete','complete');return;
+        }
+        if(result.state!=='absent'||result.root!=='runtime-'+this.inputs.fingerprint)fail('unknown','Retained initial-model outcome requires reconciliation.');
+        await initializeModel(this.workspace,target,binding,server,this.inputs.fingerprint,join(root,String(result.root)));return;
+      }
+    }
+    if(!intent){
       // Old builds imported into an unversioned local shared-project stage. First stop
       // its authenticated worker; a failed probe is never treated as authoritative absence.
       if(model.state==='unknown')await this.retireLegacyBootstrap(target);

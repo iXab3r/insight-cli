@@ -41,6 +41,14 @@ A missing/unreadable/mismatched proof stays blocked; never kill by port, basenam
 Other platforms retain their existing ownership authentication; this does not claim equivalent
 hang recovery where no independent proof is available. No compiler is required on installation.
 
+A bridge/runtime upgrade can also be continued in the original scope. The old immutable
+intent remains retained. Recovery checks input/settings/authority, stopped native ownership
+and publication journals first. Existing canonical research is recovered from its latest
+committed revision through independent exact-version/full-buffer readback; private pending
+edits stay private. A revision change or live checkout blocks adoption. Only an authoritative
+absent path permits a separately journaled preparation under the current verified runtime,
+using the original lock and conditional creation. An unknown publication still freezes recovery.
+
 ## Interrupted save or close
 
 After restoring profile storage, inspect the selected session and target with

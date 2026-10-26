@@ -31,6 +31,15 @@ public class InsightInitialJournal {
         if(p.get("schema").getAsInt()!=1||!text(p,"target").matches("t_[a-f0-9]{32}")||!text(p,"id").matches("[a-f0-9-]{36}")||!text(p,"sha256").matches("[a-f0-9]{64}"))throw new SecurityException("Invalid initial-model identity");
         return p;
     }
+    /** Upgraded preparations share the original attempt's native lock. */
+    public static Path lockRoot(Path root)throws Exception{
+        JsonObject p=intent(root);if(!p.has("recoveryOf"))return root;
+        Path parent=root.getParent();JsonObject original=intent(parent);
+        if(!root.getFileName().toString().equals("runtime-"+text(p,"runtimeFingerprint"))||!text(p,"recoveryOf").equals(hash(parent.resolve("intent.json"))))throw new SecurityException("Recovery ancestry changed");
+        JsonObject expected=original.deepCopy();expected.add("id",p.get("id"));expected.add("runtimeFingerprint",p.get("runtimeFingerprint"));expected.add("recoveryOf",p.get("recoveryOf"));
+        if(!expected.equals(p))throw new SecurityException("Recovery immutable identity changed");
+        return parent;
+    }
     public static JsonObject prepared(Path root)throws Exception{
         JsonObject p=intent(root),s=read(root.resolve("import.json"));
         if(!text(s,"intentHash").equals(hash(root.resolve("intent.json")))||!text(s,"phase").equals("prepared"))throw new SecurityException("Import is not prepared");

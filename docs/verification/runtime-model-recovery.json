@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "issue": "https://eyeauras.myjetbrains.com/youtrack/issue/POE-1312",
+  "state": "passed",
+  "date": "2026-10-26",
+  "sourceBaseRevision": "f16cbe2",
+  "scope": "Incomplete initial-model recovery after a bridge/runtime fingerprint upgrade; no change to fingerprint schema or public commands",
+  "offline": {
+    "command": "npm test",
+    "facade": {
+      "tests": 351,
+      "passed": 333,
+      "skipped": 18,
+      "failed": 0
+    },
+    "release": {
+      "tests": 33,
+      "passed": 27,
+      "skipped": 6,
+      "failed": 0
+    },
+    "prerequisites": [
+      "Node 24",
+      "Python 3 available as python3 (including isolated -I execution)"
+    ]
+  },
+  "native": {
+    "command": "node --test skills/ghidra-coordinator/dist/tests/runtime-model-recovery-native.test.js",
+    "optIn": [
+      "INSIGHT_TEST_JAVA",
+      "INSIGHT_TEST_GHIDRA_HOME"
+    ],
+    "platform": "win32-x64",
+    "ghidra": "12.1.2",
+    "jdk": "21",
+    "fixture": "New temporary local repository with generated raw x86 bytes; dedicated reader/publisher credentials and server; fixture server stopped after test",
+    "passed": true,
+    "assertions": [
+      "Old live import prevents recovery",
+      "Unknown initial publication prevents absent-path preparation",
+      "Repeated absence preparation retains identical child intent and original parent intent",
+      "Concurrent native preparations share the original OS lock",
+      "Conditional staging/promotion establishes exactly R1",
+      "Real committed R2, R3 and R4 annotations remain in canonical history",
+      "Held exclusive checkout blocks independent readback",
+      "Revision advance between candidate export and verification rejects stale candidate",
+      "Two session recoveries share model initialization and adopt latest R4",
+      "Saved private pending edits remain unchanged",
+      "Independent JVM verifies exact DB identity and complete saved buffers",
+      "Latest annotation is independently read from captured snapshot; final server history is R4 with no checkout"
+    ]
+  },
+  "package": {
+    "command": "npm run test:package",
+    "passed": true,
+    "scope": "Isolated/global fixture installs, locked Factory payloads, relocatable skills/resources, profiles, JSON/RPC, permissions and Unicode paths"
+  },
+  "productionBoundary": {
+    "installedUserCliUpdated": false,
+    "originalProfileRecovered": false,
+    "originalProfileInspectedReadOnly": true,
+    "originalIntentsAndAttemptsUnchanged": true,
+    "registryPublication": false,
+    "note": "Source and fixture installation acceptance do not deploy the fix into the user global CLI. No production research writes or private logs are included."
+  }
+}

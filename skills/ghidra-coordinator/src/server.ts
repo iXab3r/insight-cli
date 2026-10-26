@@ -6,7 +6,7 @@ import type { CommandContext } from '@eyeauras/cli-factory';
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import {type ChildProcess } from 'node:child_process';
 import { readFile, mkdir, open, rename, readdir, stat, chmod, realpath } from 'node:fs/promises';
-import { delimiter, dirname, join, resolve } from 'node:path';
+import { basename, delimiter, dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fail, object, stable, text, digest } from './model.js';
@@ -132,9 +132,12 @@ export class GhidraServer {
   async programStatus(binding:ServerBinding,path:string) {
     return this.run('program-status','InsightRepositoryProbe',[binding.repository,path,'reader'],await this.credentials(binding,'reader'));
   }
+  async initialRecovery(binding:ServerBinding,root:string,fingerprint:string,receipt=''){
+    return this.run('initial-recovery','db.InsightInitialRecovery',[root,fingerprint,receipt],await this.credentials(binding,'reader'));
+  }
   async initialImport(root:string){
     const timeoutMilliseconds=ghidraBudget(this.c.profile.values,'import');
-    const report=async()=>{try{const p=object(JSON.parse(await readFile(join(root,'progress.json'),'utf8')));
+    const report=async()=>{try{const p=object(JSON.parse(await readFile(join(/^runtime-[a-f0-9]{64}$/.test(basename(root))?dirname(root):root,'progress.json'),'utf8')));
       const elapsed=Math.round((Date.now()-Date.parse(String(p.startedAt)))/1000);
       this.c.progress(`Ghidra ${String(p.phase)}: ${elapsed}s${typeof p.total==='number'?`; task ${String(p.completed)}/${p.total}`:''}${p.message?`; ${String(p.message).replace(/[\r\n\x00-\x1f]/g,' ')}`:''}`);
     }catch{/* Progress observation never changes the native operation's outcome. */}};

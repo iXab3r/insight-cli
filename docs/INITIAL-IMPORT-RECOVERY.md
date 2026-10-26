@@ -52,6 +52,29 @@ back. A proven-owned incomplete direct create with synthetic `<Recovered>` histo
 moved to quarantine without deletion before staging a complete result. A foreign identity,
 ordinary conflicting history, active check-in or changed input/settings remains blocked.
 
+## Runtime upgrades
+
+A packaged bridge replacement changes the verified runtime fingerprint even when the
+Ghidra/JDK version labels stay the same. Continuation validates the original immutable
+input, settings and reader/publisher authority before recovering under the selected runtime.
+It keeps the original intent, attempts, unknown requests and private snapshots.
+
+An upgraded incomplete import first requires the old native worker to be stopped and the
+initial lock to be available. Existing canonical research is exported at its latest committed
+revision (including R3 and later), then a separate read-only JVM compares its database identity
+and every saved buffer against that exact revision. Revision/file identity changes, active
+check-ins, retained checkouts and unresolved publication identity block adoption. An original
+lost initial publication must also match its exact R1 snapshot; latest history alone is not proof.
+Private pending changes are not replaced by this shared-model recovery.
+
+Authoritative absence permits an immutable child preparation journal bound to the original
+intent hash and current runtime fingerprint. It shares the original native lock and uses the
+existing independently verified staging and conditional move to the absent canonical path.
+A prior unknown publication cannot be bypassed by preparing with another runtime. Interrupted
+current-runtime preparation resumes in its own retained journal; no original intent is rewritten.
+The current bridge remains pinned by content, and changing runtime files in place is rejected.
+This recovery does not require retaining an executable copy of an earlier npm bridge.
+
 ## Long initial analysis
 
 Initial import/analysis defaults to 3600 seconds. Use `ghidra budgets set --initial-import-seconds <seconds>` (1–86400) before opening a long input, or after a

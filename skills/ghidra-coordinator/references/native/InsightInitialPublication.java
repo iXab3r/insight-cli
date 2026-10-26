@@ -54,7 +54,7 @@ class InsightInitialPublication {
     public static void main(String[] args){var out=System.out;System.setOut(System.err);
         try{
             Path root=Path.of(args[0]);String operation=args[1];boolean readOnly=operation.startsWith("verify");JsonObject p=InsightInitialJournal.intent(root);
-            try(var channel=FileChannel.open(root.resolve("lock"),StandardOpenOption.CREATE,StandardOpenOption.WRITE);var lock=channel.tryLock()){
+            try(var channel=FileChannel.open(InsightInitialJournal.lockRoot(root).resolve("lock"),StandardOpenOption.CREATE,StandardOpenOption.WRITE);var lock=channel.tryLock()){
                 if(lock==null){out.println("{\"state\":\"busy\"}");System.exit(0);}
                 JsonObject saved=InsightInitialJournal.prepared(root);Path snapshot=root.resolve(text(saved,"snapshot")),journalPath=root.resolve("publication.json");
                 JsonObject j=Files.exists(journalPath)?InsightInitialJournal.read(journalPath):null;
