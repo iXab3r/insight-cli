@@ -57,7 +57,10 @@ interpretation. Diagnostic data resides in configured profile workspace storage.
 The owner approved the narrow V1 on 2026-10-20. The packaged `persistent` module is a bounded
 client of Factory's existing `--json-rpc`/`cli.execute` stream: one child, ordered calls, original
 typed results/errors, explicit close, no reconnect or replay. It creates no host, profile store
-or IPC protocol. Factory dependencies and lifecycle remain unchanged.
+or IPC protocol. Factory dependencies and lifecycle remain unchanged. Connection creation
+confirms frontend spawn, without a readiness command. Transport errors preserve dispatch
+uncertainty and, after exit, retain exit/signal metadata plus a recognized fixed startup
+explanation; raw stderr is not exposed. These observations never establish a command outcome.
 
 `functions inspect` and `strings anchors` use the precompiled authenticated ReadOnly bridge endpoint
 `GET /insight/research-view/v1?program=...`. It returns versioned modification/language/compiler

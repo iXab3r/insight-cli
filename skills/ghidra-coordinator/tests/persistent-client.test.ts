@@ -45,3 +45,36 @@ test('spawn failure and invalid argv do not dispatch',async t=>{
  await assert.rejects(connectInsight({executable:join(tmpdir(),'nonexistent-insight-'+process.pid)}),(e:unknown)=>e instanceof InsightTransportError&&!e.dispatched);
  const {cli}=await fixture(t,`process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:r.id,result:1})+String.fromCharCode(10));`);await assert.rejects(cli.execute(['\0']),TypeError);await cli.close();
 });
+
+
+test('startup rejection retains sanitized reason and exit while queued work stays undispatched',async t=>{
+ const {root,cli}=await fixture(t,`await new Promise(resolve=>process.stderr.write('synthetic-private-marker:'+ 'x'.repeat(16384)+'\\n',resolve));await new Promise(resolve=>process.stderr.write('Host build/protocol mismatch ',resolve));await new Promise(resolve=>process.stderr.write('or closing. Run ipc-server status/stop before retrying.\\n',resolve));process.exit(1);`);
+ const results=await Promise.allSettled([cli.execute(['changing','--request-id','owned']),cli.execute(['queued'])]);
+ assert.equal(results[0]!.status,'rejected');assert.equal(results[1]!.status,'rejected');
+ const first=(results[0] as PromiseRejectedResult).reason,queued=(results[1] as PromiseRejectedResult).reason;
+ assert.ok(first instanceof InsightTransportError);assert.equal(first.dispatched,true);
+ assert.ok(queued instanceof InsightTransportError);assert.equal(queued.dispatched,false);
+ for(const error of [first,queued]){
+  assert.deepEqual(error.termination,{exitCode:1,signal:null,startupFailure:'host_incompatible'});
+  assert.ok(Object.isFrozen(error.termination));assert.match(error.message,/host build\/protocol|host build/);assert.match(error.message,/exit 1/);
+  assert.doesNotMatch(error.message,/synthetic-private-marker|xxxxx|status\/stop/);
+ }
+ await assert.rejects(cli.close(),(e:unknown)=>e instanceof InsightTransportError&&e.termination?.startupFailure==='host_incompatible');
+ await assert.rejects(cli.execute(['later']),(e:unknown)=>e instanceof InsightTransportError&&!e.dispatched&&e.termination?.exitCode===1&&/host build/.test(e.message));
+ assert.equal((await readFile(join(root,'received'),'utf8')).trim().split('\n').length,1);
+});
+
+test('an exited frontend exposes exit details before any execute without exposing arbitrary stderr',async t=>{
+ for(const known of [false,true]){
+  const root=await mkdtemp(join(tmpdir(),'insight-rpc-startup-'));t.after(()=>rm(root,{recursive:true,force:true}));const bin=join(root,'child.mjs');
+  const diagnostic=known?'The --json-rpc transport must be started without a CLI command.':'synthetic-private-marker:never-export-this';
+  await writeFile(bin,`await new Promise(resolve=>process.stderr.write(${JSON.stringify(diagnostic)},resolve));process.exit(${known?2:7});`);
+  const cli=await connectInsight({executable:process.execPath,arguments:[bin]});
+  await assert.rejects(cli.close(),(e:unknown)=>e instanceof InsightTransportError&&!e.dispatched&&e.termination?.exitCode===(known?2:7));
+  await assert.rejects(cli.execute(['not-sent']),(e:unknown)=>{
+   assert.ok(e instanceof InsightTransportError);assert.equal(e.dispatched,false);assert.equal(e.termination?.signal,null);
+   assert.equal(e.termination?.startupFailure,known?'invalid_rpc_launch':undefined);assert.doesNotMatch(e.message,/synthetic-private-marker|never-export-this/);
+   assert.match(e.message,known?/without CLI command or profile flags/:/exit 7/);return true;
+  });
+ }
+});
