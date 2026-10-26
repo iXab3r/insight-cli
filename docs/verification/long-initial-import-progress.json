@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "issue": "https://eyeauras.myjetbrains.com/youtrack/issue/POE-1312",
+  "date": "2026-10-26",
+  "sourceBaseRevision": "140e145a6806dbdf19fee592eb2b2f6891aac9c5",
+  "scope": "Long initial-import observation and safe same-scope continuation; execution budget remains bounded profile policy, with no partial-analysis checkpoint claim",
+  "changes": [
+    "Passive CLI/RPC progress bypasses the active context research boundary while retaining normal profile/permission/storage checks",
+    "Timeout/cancellation/error observations preserve the last native worker PID, message, task counters, indeterminate flag and attempt",
+    "New native preparation archives the previous observation before writing new progress and tags new progress with its private attempt"
+  ],
+  "checks": {
+    "offlineCommand": "npm test",
+    "facade": {
+      "tests": 353,
+      "passed": 335,
+      "skipped": 18,
+      "failed": 0
+    },
+    "release": {
+      "tests": 33,
+      "passed": 27,
+      "skipped": 6,
+      "failed": 0
+    },
+    "package": {
+      "command": "npm run test:package",
+      "passed": true
+    },
+    "native": {
+      "command": "node --test skills/ghidra-coordinator/dist/tests/initial-progress-native.test.js",
+      "platform": "win32-x64",
+      "ghidra": "12.1.2",
+      "jdk": "21",
+      "fixture": "Generated raw x86 input in a disposable private temporary directory",
+      "passed": true,
+      "assertions": [
+        "Real analysis/no-analysis import completes with a prepared snapshot",
+        "Native monitor messages/counters/cancellation persist",
+        "Previous timed-out observation is archived byte-equivalently as JSON values before a new attempt",
+        "New observation attempt matches its import receipt snapshot"
+      ]
+    }
+  },
+  "boundaries": [
+    "The default wall-clock budget remains one hour; the existing supported profile policy allows up to 86400 seconds without changing immutable model load settings",
+    "A worker stopped before its prepared snapshot has no resumable analysis DB checkpoint; retry imports privately from the same immutable input and retains prior receipts",
+    "Progress history is observation evidence, never publication or saved-program proof",
+    "Original-profile recovery and its chosen larger budget are monitored separately; disposable acceptance alone does not establish that production research is ready",
+    "No original profile data, logs, secrets, or binary inputs are included in this report"
+  ]
+}

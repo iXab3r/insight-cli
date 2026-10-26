@@ -194,6 +194,9 @@ function scopedFailures(entry:CommandDefinition,owner:Owner,parents:string[]=[])
     try{
       let selected;try{selected=scope(input.options);if(selected.session==='new')selected=undefined;}catch{}
       if(!selected)return await run(input,c);
+      // Progress reads an atomic observation; it must remain available while open
+      // holds this context's research boundary for a long native import.
+      if(path[1]==='progress')return await run(input,c);
       const services=owner.selected(c);
       // First open of an already known target reserves its context inside Research.open.
       // Existing contexts still use the command boundary to order automatic sync phases.

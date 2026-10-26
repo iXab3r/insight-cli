@@ -23,7 +23,7 @@ class InsightInitialImport {
                 JsonObject s=new JsonObject();s.addProperty("intentHash",InsightInitialJournal.hash(root.resolve("intent.json")));
                 s.addProperty("phase","importing");s.addProperty("pid",ProcessHandle.current().pid());s.addProperty("snapshot","attempt-"+UUID.randomUUID()+".gzf");
                 Path attempt=root.resolve(InsightInitialJournal.text(s,"snapshot")+".json");InsightInitialJournal.write(attempt,s);InsightInitialJournal.write(journal,s);
-                try(var progress=new InsightImportProgress(InsightInitialJournal.lockRoot(root),InsightInitialJournal.text(p,"target"))){
+                try(var progress=new InsightImportProgress(InsightInitialJournal.lockRoot(root),InsightInitialJournal.text(p,"target"),InsightInitialJournal.text(s,"snapshot"))){
                 progress.phase("runtime-initialization");
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 JsonObject settings=p.getAsJsonObject("settings"),request=new JsonObject();

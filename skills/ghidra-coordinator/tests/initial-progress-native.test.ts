@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,readdir,rm} from 'node:fs/promises';
 import {join,delimiter,dirname} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
@@ -23,8 +23,10 @@ test('native first import honors explicit analysis and persists real monitor mes
  for(const analyze of [false,true]){
   const at=join(root,String(analyze));await mkdir(at);const input=join(at,'fixture.bin');const bytes=Buffer.from('554889e5b82a0000005dc3','hex');await writeFile(input,bytes);
   await writeFile(join(at,'intent.json'),JSON.stringify({schema:1,id:'00000000-0000-0000-0000-000000000000',target,sha256:createHash('sha256').update(bytes).digest('hex'),input,settings:{autoAnalyze:analyze,loader:'BinaryLoader',language:'x86:LE:64:default',compilerSpec:'windows',loaderOptions:{'Base Address':'0x10000','File Offset':'0x0','Length':'0xb'}}}));
+  const previous={schema:1,target,phase:'analysis',state:'timed_out',pid:2147483647,startedAt:'2026-10-26T00:00:00Z',updatedAt:'2026-10-26T01:00:00Z',message:'Previous analyzer',completed:7,total:23,indeterminate:false};await writeFile(join(at,'progress.json'),JSON.stringify(previous));
   const result=await run(java!,['-Djava.awt.headless=true','-Dghidra.home='+home!,...nativeJvmDirectories(at),'-cp',cp,'InsightInitialImport',at],{timeout:60000,maxBuffer:1024*1024});
   assert.deepEqual(JSON.parse(result.stdout),{state:'prepared'});const receipt=JSON.parse(await readFile(join(at,'import.json'),'utf8'));
-  assert.equal(receipt.metadata.auto_analyzed,analyze);assert.equal(JSON.parse(await readFile(join(at,'progress.json'),'utf8')).state,'prepared');
+  assert.equal(receipt.metadata.auto_analyzed,analyze);const observed=JSON.parse(await readFile(join(at,'progress.json'),'utf8'));assert.equal(observed.state,'prepared');assert.equal(observed.attempt,receipt.snapshot);
+  const history=(await readdir(at)).filter(name=>/^progress-history-[a-f0-9-]{36}\.json$/.test(name));assert.equal(history.length,1);assert.deepEqual(JSON.parse(await readFile(join(at,history[0]!),'utf8')),previous);
  }
 });
