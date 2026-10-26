@@ -11,7 +11,7 @@ class InsightInitialImport {
     public static void main(String[] args){var out=System.out;System.setOut(System.err);
         try{
             Path root=Path.of(args[0]);JsonObject p=InsightInitialJournal.intent(root);
-            try(var channel=FileChannel.open(root.resolve("lock"),StandardOpenOption.CREATE,StandardOpenOption.WRITE);var lock=channel.tryLock()){
+            try(var channel=FileChannel.open(InsightInitialJournal.lockRoot(root).resolve("lock"),StandardOpenOption.CREATE,StandardOpenOption.WRITE);var lock=channel.tryLock()){
                 if(lock==null){out.println("{\"state\":\"busy\"}");System.exit(0);}
                 Path journal=root.resolve("import.json");
                 if(Files.exists(journal)&&InsightInitialJournal.text(InsightInitialJournal.read(journal),"phase").equals("prepared")){
@@ -23,7 +23,7 @@ class InsightInitialImport {
                 JsonObject s=new JsonObject();s.addProperty("intentHash",InsightInitialJournal.hash(root.resolve("intent.json")));
                 s.addProperty("phase","importing");s.addProperty("pid",ProcessHandle.current().pid());s.addProperty("snapshot","attempt-"+UUID.randomUUID()+".gzf");
                 Path attempt=root.resolve(InsightInitialJournal.text(s,"snapshot")+".json");InsightInitialJournal.write(attempt,s);InsightInitialJournal.write(journal,s);
-                try(var progress=new InsightImportProgress(root,InsightInitialJournal.text(p,"target"))){
+                try(var progress=new InsightImportProgress(InsightInitialJournal.lockRoot(root),InsightInitialJournal.text(p,"target"))){
                 progress.phase("runtime-initialization");
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 JsonObject settings=p.getAsJsonObject("settings"),request=new JsonObject();
