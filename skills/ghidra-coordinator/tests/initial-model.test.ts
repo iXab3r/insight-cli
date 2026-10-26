@@ -68,11 +68,11 @@ test('a stopped timed-out or cancelled import keeps its phase and honest termina
  for(const [code,state]of [['tool.timeout','timed_out'],['tool.cancelled','cancelled']] as const){
   const f=await fixture(t);
   f.server.initialImport=async root=>{
-   await writeFile(join(root,'progress.json'),JSON.stringify({schema:1,target:f.target.id,phase:'analysis',state:'running',pid:2147483647,startedAt:new Date(Date.now()-1000).toISOString(),updatedAt:new Date().toISOString()}));
+   await writeFile(join(root,'progress.json'),JSON.stringify({schema:1,target:f.target.id,phase:'analysis',state:'running',pid:2147483647,message:'Scalar Operand References',completed:173,total:500,indeterminate:false,startedAt:new Date(Date.now()-1000).toISOString(),updatedAt:new Date().toISOString()}));
    throw new CliError('Synthetic native termination',{code});
   };
   await assert.rejects(initializeModel(f.workspace,f.target,binding,f.server,'runtime'),/Synthetic native termination/);
-  const observed=await readInitialProgress(f.workspace.directory,f.target.id);assert.equal(observed.state,state);assert.equal(observed.phase,'analysis');assert.equal(f.workspace.model(f.target.id).state,'unknown');assert.equal(f.counts().published,0);
+  const observed=await readInitialProgress(f.workspace.directory,f.target.id);assert.equal(observed.state,state);assert.equal(observed.phase,'analysis');assert.equal(observed.pid,2147483647);assert.equal(observed.message,'Scalar Operand References');assert.equal(observed.completed,173);assert.equal(observed.total,500);assert.equal(observed.indeterminate,false);assert.equal(f.workspace.model(f.target.id).state,'unknown');assert.equal(f.counts().published,0);
  }
 });
 test('a busy continuation never overwrites another live initial worker progress',async t=>{

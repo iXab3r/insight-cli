@@ -78,7 +78,10 @@ This recovery does not require retaining an executable copy of an earlier npm br
 ## Long initial analysis
 
 Initial import/analysis defaults to 3600 seconds. Use `ghidra budgets set --initial-import-seconds <seconds>` (1–86400) before opening a long input, or after a
-failed worker has stopped, then continue the original session/target. For example:
+failed worker has stopped, then continue the original session/target. The default is a wall-clock
+limit, not an inactivity detector: a progressing analyzer can legitimately exceed it. Select a
+larger bounded execution budget for a large input before retrying; the same setting can allow
+up to 24 hours. This changes neither auto-analysis nor the bound loader settings. For example:
 
 ```sh
 insight-cli --profile research ghidra budgets set --initial-import-seconds 7200
@@ -87,7 +90,13 @@ insight-cli --profile research ghidra open --session <session> --target <target>
 
 The budget is execution policy, separate from immutable auto-analysis/load settings.
 Existing profiles need no new target or profile to raise it. Timeout diagnostics retain
-phase, effective milliseconds, setting name and process diagnostics. An incomplete attempt
+phase, effective milliseconds, setting name and process diagnostics. The terminal progress
+observation keeps the native worker PID, last analyzer message and task counters. `ghidra progress`
+remains readable while the same context has a long-running open; it does not wait for that
+context's research boundary or reconcile its requests. Before a new native attempt starts,
+the previous observation is retained as `progress-history-<uuid>.json`, and new observations
+identify their private attempt. These files are observations, not resumable program checkpoints.
+An incomplete attempt
 still restarts private analysis from the retained immutable input; there is no partial-analysis
 checkpoint. Only the existing complete, hashed receipt and independent full-buffer readback
 permit initial publication. A longer deadline does not make an incomplete snapshot valid.

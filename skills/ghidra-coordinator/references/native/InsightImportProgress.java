@@ -8,7 +8,8 @@ import java.util.*;
 /** A bounded observation channel, never a completion receipt or an overall percentage. */
 class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable {
     private final Path root;
-    private final String target,started=Instant.now().toString();
+    private final String target,attempt;
+    private final String started=Instant.now().toString();
     private final Timer heartbeat=new Timer("insight-import-progress",true);
     private String phase="starting",state="running";
     private String message="";
@@ -16,7 +17,18 @@ class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable 
     private boolean indeterminate=true;
     private volatile Throwable writeFailure;
     InsightImportProgress(Path root,String target)throws Exception{
-        super(true);this.root=root;this.target=target;emit();
+        this(root,target,null);
+    }
+    InsightImportProgress(Path root,String target,String attempt)throws Exception{
+        super(true);this.root=root;this.target=target;this.attempt=attempt;
+        Path previous=root.resolve("progress.json");
+        if(Files.exists(previous)){
+            JsonObject saved=InsightInitialJournal.read(previous);
+            if(saved.get("schema").getAsInt()!=1||!target.equals(saved.get("target").getAsString()))throw new SecurityException("Initial progress binding changed");
+            // Preserve observations only; an analysis checkpoint requires its own prepared snapshot.
+            InsightInitialJournal.write(root.resolve("progress-history-"+UUID.randomUUID()+".json"),saved);
+        }
+        emit();
         heartbeat.scheduleAtFixedRate(new TimerTask(){public void run(){try{emit();}catch(Throwable failure){writeFailure=failure;}}},2000,2000);
     }
     synchronized void phase(String value)throws Exception{phase=value;setMessage("");initialize(0);setIndeterminate(true);emit();}
@@ -33,6 +45,7 @@ class InsightImportProgress extends TaskMonitorAdapter implements AutoCloseable 
     synchronized void state(String value)throws Exception{state=value;emit();}
     private synchronized void emit()throws Exception{
         JsonObject p=new JsonObject();p.addProperty("schema",1);p.addProperty("target",target);p.addProperty("phase",phase);p.addProperty("state",state);
+        if(attempt!=null)p.addProperty("attempt",attempt);
         p.addProperty("pid",ProcessHandle.current().pid());p.addProperty("startedAt",started);p.addProperty("updatedAt",Instant.now().toString());
         p.addProperty("indeterminate",isIndeterminate());String message=Objects.toString(getMessage(),"");p.addProperty("message",message.substring(0,Math.min(message.length(),1024)));
         if(!isIndeterminate()&&getMaximum()>0){p.addProperty("completed",getProgress());p.addProperty("total",getMaximum());}

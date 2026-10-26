@@ -17,10 +17,16 @@ export async function readInitialProgress(directory:string,target:string){
 }
 export async function initialProgress(root:string,target:string,phase:string,state='running'){
   await mkdir(root,{recursive:true,mode:0o700});
-  let startedAt=new Date().toISOString();
-  try{const previous=JSON.parse(await readFile(join(root,'progress.json'),'utf8'));if(previous.target===target)startedAt=previous.startedAt;}
+  let startedAt=new Date().toISOString(),previous:Record<string,unknown>|undefined;
+  try{const saved=JSON.parse(await readFile(join(root,'progress.json'),'utf8'));if(saved.schema===1&&saved.target===target){previous=saved;startedAt=saved.startedAt;}}
   catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-  await atomicWrite(join(root,'progress.json'),{schema:1,target,phase,state,pid:process.pid,startedAt,updatedAt:new Date().toISOString(),indeterminate:true});
+  // A terminal observation describes the worker's last task, not a fresh owner task.
+  // Keep its counters/message/PID so timeout handling cannot erase native progress.
+  const retained:Record<string,unknown>={};
+  if(state!=='running'&&previous?.phase===phase)for(const key of ['pid','message','completed','total','indeterminate'])
+    if(previous[key]!==undefined)retained[key]=previous[key];
+  await atomicWrite(join(root,'progress.json'),{schema:1,target,phase,state,pid:process.pid,startedAt,indeterminate:true,
+    ...(previous?.attempt===undefined?{}:{attempt:previous.attempt}),...retained,updatedAt:new Date().toISOString()});
 }
 export async function progressPhase<T>(root:string,target:string,phase:string,action:()=>Promise<T>){
   await initialProgress(root,target,phase);

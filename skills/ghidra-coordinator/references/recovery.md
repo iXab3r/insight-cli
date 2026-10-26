@@ -9,7 +9,11 @@ First-import recovery uses the same scoped `ghidra open` or the original request
 Import/analysis writes a private snapshot and completion receipt before any initial publication.
 If its worker is still running, continuation reports busy; wait and continue the same scope.
 If that worker stopped before completing its receipt, continuation can repeat private analysis
-from the immutable input while retaining previous attempts. A completed snapshot is reused.
+from the immutable input while retaining previous attempts. A progressing analyzer can exceed the
+default one-hour wall-clock budget: after verifying that worker has stopped, use `ghidra budgets set
+--initial-import-seconds <seconds>` (up to 86400), then continue the same session/target. No partial
+analysis checkpoint is implied. Terminal progress retains the last native message/counters; a new
+attempt archives the previous observation as `progress-history-<uuid>.json`. A completed snapshot is reused.
 Initial publication first creates a uniquely named staging object. A separate read-only process
 verifies its complete saved DB buffers before a conditional server move to the absent canonical
 path. It never checks in a new version of an existing canonical item. Lost promotion replies

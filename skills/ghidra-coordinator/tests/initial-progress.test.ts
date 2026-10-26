@@ -27,3 +27,18 @@ test('phase heartbeat observes a live operation and original failure remains the
  await assert.rejects(progressPhase(f.root,f.target,'publication-verify',async()=>{const p=await readInitialProgress(f.directory,f.target);assert.equal(p.phase,'publication-verify');assert.equal(p.workerAlive,true);throw failure;}),error=>error===failure);
  await initialProgress(f.root,f.target,'publication-verify','unknown');const p=await readInitialProgress(f.directory,f.target);assert.equal(p.state,'unknown');assert.equal(p.phase,'publication-verify');
 });
+
+
+test('terminal failure preserves the last native task counters, worker identity and attempt',async t=>{
+ const f=await fixture(t),startedAt=new Date(Date.now()-3600000).toISOString();
+ const previous={schema:1,target:f.target,phase:'analysis',state:'running',pid:2147483647,startedAt,updatedAt:new Date(Date.now()-1000).toISOString(),
+  attempt:'attempt-00000000-0000-0000-0000-000000000000.gzf',message:'Scalar Operand References',completed:173,total:500,indeterminate:false};
+ await writeFile(join(f.root,'progress.json'),JSON.stringify(previous));
+ for(const state of ['timed_out','cancelled','failed','unknown']){
+  await initialProgress(f.root,f.target,'analysis',state);const observed=await readInitialProgress(f.directory,f.target);
+  for(const key of ['pid','startedAt','attempt','message','completed','total','indeterminate'])assert.equal(observed[key],previous[key as keyof typeof previous]);
+  assert.equal(observed.state,state);assert.equal(observed.workerAlive,false);
+ }
+ await initialProgress(f.root,f.target,'snapshot-verification');const next=await readInitialProgress(f.directory,f.target);
+ assert.equal(next.message,undefined);assert.equal(next.completed,undefined);assert.equal(next.indeterminate,true);assert.equal(next.pid,process.pid);assert.equal(next.attempt,previous.attempt);
+});
