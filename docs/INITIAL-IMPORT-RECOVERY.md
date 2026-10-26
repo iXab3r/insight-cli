@@ -101,6 +101,14 @@ still restarts private analysis from the retained immutable input; there is no p
 checkpoint. Only the existing complete, hashed receipt and independent full-buffer readback
 permit initial publication. A longer deadline does not make an incomplete snapshot valid.
 
+Progress heartbeat, phase and terminal observation writes are diagnostic. An I/O failure replacing
+`progress.json` cannot invalidate a completed private import or its prepared snapshot receipt.
+A transient failure is cleared after a later successful observation; persistent observation failure
+is reported privately while authoritative import and publication checks still run. Initial intent,
+previous-observation retention and native completion receipts keep their existing validation.
+If an older build reports a progress-persistence failure after preparing its snapshot, continue the
+original scope: its validated prepared receipt reuses that full saved analysis without reimport.
+
 ## Real CLI acceptance
 
 [Evidence](verification/initial-import-recovery.json) records recovery of the actual earlier

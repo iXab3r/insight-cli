@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "issue": "https://eyeauras.myjetbrains.com/youtrack/issue/POE-1312",
+  "date": "2026-10-26",
+  "sourceBaseRevision": "3d0f4d84df36af6bbcf9606c130de0d6fd063d6f",
+  "problem": "A transient Windows AccessDeniedException replacing progress.json remained sticky and caused monitor close to reject a complete prepared import; direct phase/state observation I/O could also abort preparation.",
+  "change": "Progress heartbeat/phase/terminal replacement IOException is diagnostic. Successful observation clears the failure; a persistent terminal observation failure emits a private warning. Import intents, previous-observation retention, prepared receipts, native locks and publication proofs remain unchanged.",
+  "checks": {
+    "offline": {
+      "failed": 0,
+      "facadeSkipped": 18,
+      "releasePassed": 27,
+      "facadePassed": 335,
+      "releaseSkipped": 6
+    },
+    "packagePassed": true,
+    "native": {
+      "passed": true,
+      "jdk": "21",
+      "assertions": [
+        "Transient heartbeat I/O followed by restored observation finishes prepared",
+        "Real import with permanently blocked progress replacement still prepares and hashes its full snapshot",
+        "Analysis and no-analysis native imports retain previous observations and attempt identity"
+      ],
+      "ghidra": "12.1.2"
+    },
+    "negativeControl": "Same transient-heartbeat regression fails on the released base with Progress persistence failed; candidate source restored byte-exactly"
+  },
+  "production": {
+    "originalScopePreserved": true,
+    "analysisSeconds": 5041,
+    "preparedSnapshotBytes": 319573098,
+    "preparedSnapshotSha256": "645c9c51106c11c37b91c8f44fdd03243c15d841e5e1cfd2dcef70aca77e9767",
+    "preparedReceiptIndependentlyHashed": true,
+    "continuedWithoutRepeatingAnalysis": true,
+    "openState": "ready",
+    "baseRevision": "R1",
+    "sharedRevision": "R1",
+    "pendingChanges": 0,
+    "unresolvedRequests": 0,
+    "canonicalHistoryVersions": [
+      1
+    ],
+    "supportedFunctionReadPassed": true,
+    "runtime": "Previously installed release; code fix validated separately in disposable native fixtures"
+  },
+  "boundaries": [
+    "Progress observations never establish completion or a database checkpoint",
+    "No publication guard, identity setting, immutable intent or previous attempt was weakened or removed",
+    "No private logs, binary input or personal paths are included"
+  ]
+}
