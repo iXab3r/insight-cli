@@ -10,8 +10,13 @@ The package exports a small stdio client, independent of the facade's eager impo
 import {connectInsight, InsightCommandError, InsightTransportError}
   from '@eyeauras/insight-cli/persistent';
 
-const cli = await connectInsight({executable: 'insight-cli', cwd: projectDirectory});
+const cli = await connectInsight({
+  executable: nodeExecutable,
+  arguments: [installedBin],
+  cwd: projectDirectory
+});
 const result = await cli.execute([
+  '--profile', profile,
   'ghidra', 'functions', 'inspect', '--session', session, '--target', target,
   '--function', 'main', '--fields', 'entry_point', '--include-call-context', 'false'
 ]);
@@ -22,9 +27,20 @@ When package-name resolution is unavailable in the agent host, dynamically impor
 [`persistent-client.mjs`](persistent-client.mjs) beside this reference by its absolute file URL.
 It is generated from the same canonical package module. In a persistent REPL retain `cli` as a
 binding across tool invocations. A new Node process per query does not retain this connection.
-For an explicit installed bin, use `{executable: process.execPath, arguments: [installedBin], cwd}`.
-`env` optionally supplies the child environment. There is no shell or separate profile/config.
-Use existing `--profile` argv flags when selecting a profile explicitly.
+Here `installedBin` is the absolute installed `dist/src/bin.js` path and `nodeExecutable` is
+the Node executable used for this shared installation. Factory includes the Node version,
+platform and architecture in its build identity. Use the same Node version and installed
+artifact as the existing owner; an agent host's `process.execPath` or `PATH` can select a
+different Node installation. `ipc-server status` reports the owner's build; a matching CLI
+package version alone does not establish compatibility. A shared owner does not need to be
+stopped merely to connect a client through the matching Node runtime.
+
+The helper appends `--json-rpc` to its launch arguments. Factory requires that transport
+flag to be the entire CLI invocation: `arguments` contains only the installed bin and any
+Node runtime flags, with Node flags before the bin. Put `--profile <name>` in **every**
+`execute(argv)` call as shown above. Adding profile flags to the frontend launch exits with
+usage error before any request is dispatched. `env` optionally supplies the child environment.
+There is no shell or separate profile/config.
 
 `execute(argv)` returns the CLI result unchanged, without a JSON-RPC envelope. Calls are queued
 in admission order. Native work can be long: await the original promise through the agent host's
