@@ -33,7 +33,10 @@ platform and architecture in its build identity. Use the same Node version and i
 artifact as the existing owner; an agent host's `process.execPath` or `PATH` can select a
 different Node installation. `ipc-server status` reports the owner's build; a matching CLI
 package version alone does not establish compatibility. A shared owner does not need to be
-stopped merely to connect a client through the matching Node runtime.
+stopped merely to connect a client through the matching Node runtime. An idle owner may
+exit and a later caller may start a new owner with a different Node installation: a previously
+matching executable is not a permanent profile binding. Use one agreed Node runtime across
+the shared clients, and inspect the current owner again after a compatibility failure.
 
 The helper appends `--json-rpc` to its launch arguments. Factory requires that transport
 flag to be the entire CLI invocation: `arguments` contains only the installed bin and any
@@ -49,6 +52,12 @@ reconnect/retry. Factory permissions, command validation, IDs and native budgets
 
 * `InsightCommandError.rpc` preserves the JSON-RPC error code, message and data, including typed
   CLI error results. A command failure leaves a healthy connection usable for the next command.
+* `connectInsight()` confirms that the frontend process spawned; it does not perform a
+  readiness command or promise compatibility with the current Factory owner.
+* `InsightTransportError.termination`, when the frontend has exited, reports its `exitCode`,
+  `signal`, and a recognized `reason` category when available. The error message
+  includes the fixed transport explanation and exit information, without raw stderr. These
+  observations diagnose transport failure; they do not establish a command's outcome.
 * `InsightTransportError.dispatched === true` means the request was handed to the stream and its
   acknowledgment is unavailable; it does not prove execution. Changing commands require their
   existing request-ID/status recovery. The client never resends them.
@@ -56,9 +65,10 @@ reconnect/retry. Factory permissions, command validation, IDs and native budgets
   after a transport failure. Reconnection is an explicit new connection, not an implicit replay.
 
 The client bounds each response line to four MiB, validates IDs and envelopes, and fails the
-connection on malformed, uncorrelated or oversized replies. It drains stderr without retaining
-arbitrary native diagnostics in memory. Read command-level diagnostics from their typed results
-and the existing profile diagnostic locations.
+connection on malformed, uncorrelated or oversized replies. It classifies recognized Factory
+transport errors from a small rolling stderr window, clears that window on process exit, and
+exposes only fixed explanations and exit metadata. Read command-level diagnostics from their
+typed results and the existing profile diagnostic locations.
 
 Finish owned Ghidra contexts with the normal scoped commands, following the project's shared
 server policy. Then `await cli.close()` drains already admitted requests and ends this stdio

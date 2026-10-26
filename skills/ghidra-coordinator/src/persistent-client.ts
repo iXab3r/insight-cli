@@ -4,12 +4,27 @@ import {StringDecoder} from 'node:string_decoder';
 export class InsightCommandError extends Error {
   constructor(readonly rpc:{code:number;message:string;data?:unknown}){super(rpc.message);this.name='InsightCommandError';}
 }
-export class InsightTransportError extends Error {
-  constructor(message:string,readonly dispatched:boolean){super(message);this.name='InsightTransportError';}
+export interface InsightTransportTermination {
+  readonly exitCode:number|null;
+  readonly signal:NodeJS.Signals|null;
+  readonly reason?:'host_incompatible'|'host_closing'|'host_startup_timeout'|'invalid_rpc_launch'|'host_build_invalid'|'ipc_disconnected';
 }
+export class InsightTransportError extends Error {
+  constructor(message:string,readonly dispatched:boolean,readonly termination?:InsightTransportTermination){super(message);this.name='InsightTransportError';}
+}
+const transportDiagnostics=[
+  ['host_incompatible','Host build/protocol mismatch or closing.','Factory rejected the host build/protocol or it is closing.'],
+  ['host_incompatible','Host build mismatch.','Factory rejected the host build.'],
+  ['host_incompatible','Existing host build mismatch or closing.','Factory rejected the host build or it is closing.'],
+  ['host_closing','Host is closing; no command was sent.','Factory reports that the host is closing.'],
+  ['host_startup_timeout','CLI host startup timed out; no command was sent.','Factory host startup timed out.'],
+  ['invalid_rpc_launch','The --json-rpc transport must be started without a CLI command.','Start the JSON-RPC transport without CLI command or profile flags.'],
+  ['host_build_invalid','CLI host could not validate its build.','Factory could not validate the installed build.'],
+  ['ipc_disconnected','IPC invocation failed; command outcome may be unknown. No replay was attempted.','Factory lost the IPC invocation; the command outcome may be unknown.']
+] as const;
 export interface InsightConnectionOptions {
   executable:string;
-  /** For example [installedBin] with executable: process.execPath. No shell is used. */
+  /** For example [installedBin] after selecting the shared Node runtime. No shell is used. */
   arguments?:readonly string[];
   cwd?:string;
   env?:NodeJS.ProcessEnv;
@@ -25,11 +40,21 @@ export async function connectInsight(options:InsightConnectionOptions):Promise<I
   const maximum=4*1024**2,decoder=new StringDecoder('utf8');let buffer='',bytes=0,sequence=0,accepting=true,failed=false,ended=false;
   let closePromise:Promise<void>|undefined,tail:Promise<unknown>=Promise.resolve();
   const pending=new Map<number,{resolve:(v:unknown)=>void;reject:(e:unknown)=>void}>();
-  // Drain diagnostics without retaining arbitrary stderr, paths, tokens or unbounded output.
-  child.stderr.resume();
+  // Classify fixed transport diagnostics through a bounded window; never expose raw stderr.
+  const diagnosticDecoder=new StringDecoder('utf8');let diagnosticWindow='',recognizedDiagnostic:typeof transportDiagnostics[number]|undefined;
+  let termination:InsightTransportTermination|undefined;
+  child.stderr.on('data',(chunk:Buffer)=>{
+    const text=diagnosticWindow+diagnosticDecoder.write(chunk);
+    recognizedDiagnostic??=transportDiagnostics.find(([,message])=>text.includes(message));
+    diagnosticWindow=text.slice(-512);
+  });
+  const transportError=(message:string,dispatched:boolean)=>new InsightTransportError(
+    message+(recognizedDiagnostic?' '+recognizedDiagnostic[2]:'')+(termination?' ('+(termination.signal?'signal '+termination.signal:'exit '+termination.exitCode)+').':''),
+    dispatched,termination
+  );
   const fail=(message:string)=>{
     if(failed)return;failed=true;accepting=false;
-    for(const p of pending.values())p.reject(new InsightTransportError(message,true));pending.clear();
+    for(const p of pending.values())p.reject(transportError(message,true));pending.clear();
     child.stdin.destroy();child.stdout.destroy();
   };
   child.on('error',()=>fail('Persistent CLI process failed.'));
@@ -38,9 +63,10 @@ export async function connectInsight(options:InsightConnectionOptions):Promise<I
   child.stdin.on('error',()=>fail('Persistent CLI input was lost; inspect request/status before retrying a changing command.'));
   const exited=new Promise<void>((resolve,reject)=>{
     child.once('close',(code,signal)=>{
-      ended=true;
-      if(code!==0||signal||pending.size||buffer.trim()){fail('Persistent CLI closed without a complete acknowledged response.');reject(new InsightTransportError('Persistent CLI transport ended unexpectedly.',false));}
-      else if(failed)reject(new InsightTransportError('Persistent CLI transport failed.',false));else resolve();
+      ended=true;diagnosticWindow='';
+      termination=Object.freeze({exitCode:code,signal,...(recognizedDiagnostic?{reason:recognizedDiagnostic[0]}:{})});
+      if(code!==0||signal||pending.size||buffer.trim()){fail('Persistent CLI closed without a complete acknowledged response.');reject(transportError('Persistent CLI transport ended unexpectedly.',false));}
+      else if(failed)reject(transportError('Persistent CLI transport failed.',false));else resolve();
     });
   });void exited.catch(()=>{});
   child.stdout.on('data',(chunk:Buffer)=>{
@@ -62,10 +88,10 @@ export async function connectInsight(options:InsightConnectionOptions):Promise<I
   return {
     execute<T=unknown>(argv:readonly string[]):Promise<T>{
       if(!Array.isArray(argv)||argv.length>512||argv.some(x=>typeof x!=='string'||x.includes('\0'))||Buffer.byteLength(JSON.stringify(argv))>1024**2)return Promise.reject(new TypeError('argv must be a bounded array of strings without NUL.'));
-      if(!accepting||failed||ended)return Promise.reject(new InsightTransportError('Persistent CLI connection is closed.',false));
+      if(!accepting||failed||ended)return Promise.reject(transportError('Persistent CLI connection is closed.',false));
       const args=[...argv];
       const request=tail.then(()=>{
-        if(failed||ended)throw new InsightTransportError('Persistent CLI connection was lost before dispatch.',false);
+        if(failed||ended)throw transportError('Persistent CLI connection was lost before dispatch.',false);
         const id=++sequence;
         return new Promise<unknown>((resolve,reject)=>{
           pending.set(id,{resolve,reject});
