@@ -40,7 +40,8 @@
         "Previous timed-out observation is archived byte-equivalently as JSON values before a new attempt",
         "New observation attempt matches its import receipt snapshot"
       ]
-    }
+    },
+    "progressQueueNegativeControl": "Holding an existing-scope continuation: CLI/RPC progress passes with the fix; removing only its boundary bypass in temporary compiled code makes the same regression fail with Progress queued behind initial open; original compiled bytes restored"
   },
   "boundaries": [
     "The default wall-clock budget remains one hour; the existing supported profile policy allows up to 86400 seconds without changing immutable model load settings",
