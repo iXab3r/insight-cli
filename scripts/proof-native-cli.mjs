@@ -230,22 +230,35 @@ try{
  assert.equal(older.version,2);assert.equal(newest.version,finalVersion);assert.notEqual(older.fingerprint,newest.fingerprint);
  // An unchanged close releases its checkout; collection releases one left by an ended owner and keeps real work.
  const serverCheckouts=async()=>(await server.nativeRead(binding,{operation:'latest',path:'/'+a.target+'.bin',sourceSha})).checkouts.map(c=>c.id);
+ // A shared repository lists every target; another target's server item is not local work.
+ const otherInput=join(f.root,'other.bin');await writeFile(otherInput,Buffer.alloc(0x200,0x90));
+ const other=await cli(['ghidra','open',otherInput,'--session','new','--loader','ghidra.app.util.opinion.BinaryLoader','--language','x86:LE:64:default','--image-base','1000','--loader-options','{"Base Address":"0"}']);
+ // Its first analysis is private work until published.
+ assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'retained');await cli(['ghidra','open',...select(other)]);await cli(['ghidra','merge',...select(other)]);
+ await cli(['ghidra','open',...select(other)]);assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'released');
  await cli(['ghidra','open',...select(a)]);const unchanged=context(a).nativeCheckout;assert.equal(unchanged.baseVersion,finalVersion);
  assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');assert.equal(context(a).nativeCheckout.state,'dropped');
  assert.deepEqual(await serverCheckouts(),[retained.nativeCheckout.checkoutId]);assert.ok(!(await readdir(unchanged.root)).includes('view.rep'));
+ // A file below a subfolder exists only in this project and must keep it.
+ await cli(['ghidra','open',...select(a)]);const nested=context(a).nativeCheckout;
+ await script(a,'import ghidra.app.script.GhidraScript;import ghidra.program.database.ProgramDB; public class NestedFile extends GhidraScript {public void run()throws Exception {var root=currentProgram.getDomainFile().getParent().getProjectData().getRootFolder();var p=new ProgramDB("nested",currentProgram.getLanguage(),currentProgram.getCompilerSpec(),this);try{root.createFolder("owned").createFile("nested",p,monitor);}finally{p.release(this);}}}');
+ assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'retained');assert.ok((await readdir(nested.root)).includes('view.rep'));
+ const nestedClosed=await server.nativeCheckout(binding,{root:nested.root,owner:JSON.parse(await readFile(join(nested.root,'native-owner.json'))),operation:'status',fileId:nested.fileId,checkoutId:nested.checkoutId});
+ assert.ok(nestedClosed.projectFiles.includes('owned/nested'));assert.ok(!nestedClosed.projectFiles.includes(other.target+'.bin'));
+ const g=await cli(['ghidra','open',input,'--session','new']);
  const closedWork=await cli(['ghidra','close',...select(d)]);assert.equal(closedWork.checkout,'retained');
- await cli(['ghidra','open',...select(a)]);const abandoned=context(a).nativeCheckout;await app.dispose();app=createApplication();
+ await cli(['ghidra','open',...select(g)]);const abandoned=context(g).nativeCheckout;await app.dispose();app=createApplication();
  const abandonedPid=JSON.parse(await readFile(join(abandoned.root,'process.json'))).pid;
  for(let i=0;i<600;i++){try{process.kill(abandonedPid,0);}catch{break;}await new Promise(ok=>setTimeout(ok,100));}
- const planned=await cli(['ghidra','gc','--dry-run']);assert.equal(planned.categories['native-checkouts'].items,1);assert.ok((await readdir(abandoned.root)).includes('view.rep'));
- assert.deepEqual((await serverCheckouts()).sort(),[retained.nativeCheckout.checkoutId,abandoned.checkoutId].sort());
- const collected=await cli(['ghidra','gc']);assert.equal(collected.categories['native-checkouts'].items,1);assert.equal(context(a).nativeCheckout.state,'dropped');
- assert.deepEqual(await serverCheckouts(),[retained.nativeCheckout.checkoutId]);assert.ok(!(await readdir(abandoned.root)).includes('view.rep'));
+ const planned=await cli(['ghidra','gc','--dry-run']);assert.ok(planned.categories['native-checkouts'].items>=1);assert.ok((await readdir(abandoned.root)).includes('view.rep'));
+ assert.deepEqual((await serverCheckouts()).sort(),[retained.nativeCheckout.checkoutId,nested.checkoutId,abandoned.checkoutId].sort());
+ const collected=await cli(['ghidra','gc']);assert.equal(collected.categories['native-checkouts'].items,1);assert.equal(context(g).nativeCheckout.state,'dropped');
+ assert.deepEqual((await serverCheckouts()).sort(),[retained.nativeCheckout.checkoutId,nested.checkoutId].sort());assert.ok(!(await readdir(abandoned.root)).includes('view.rep'));
  assert.equal((await cli(['ghidra','gc'])).bytes,0);
  await cli(['ghidra','open',...select(d)]);assert.equal((await cli(['ghidra','functions','get',...select(d),'--address','1000'])).name,'second_conflict');
  assert.equal(context(d).nativeCheckout.checkoutId,retained.nativeCheckout.checkoutId);
- await cli(['ghidra','open',...select(a)]);assert.equal((await cli(['ghidra','functions','get',...select(a),'--address','1000'])).name,'first_conflict');
- assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');
+ await cli(['ghidra','open',...select(g)]);assert.equal((await cli(['ghidra','functions','get',...select(g),'--address','1000'])).name,'first_conflict');
+ assert.equal((await cli(['ghidra','close',...select(g)])).checkout,'released');
  const collection={planned,collected};
  for(const [path,expected]of Object.entries(sourceHashes))assert.equal(hash(await readFile(path.startsWith('../scripts/')?new URL('./'+path.slice('../scripts/'.length),import.meta.url):join(sourceRoot,path))),expected,'Source changed during acceptance');
  receipt={schema:1,scope:options['global-entry']?'Actual global CLI entrypoint with isolated environment/profile':'main Factory CLI with default production backend',installedIpc:options.installed===true,

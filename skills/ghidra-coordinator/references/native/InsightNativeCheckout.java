@@ -54,6 +54,26 @@ public final class InsightNativeCheckout {
             "language",p.getLanguageID().toString(),"compiler",p.getCompilerSpec().getCompilerSpecID().toString(),"imageBase",p.getImageBase().toString());}
         finally{p.release(CONSUMER);}
     }
+    /** Every file with local bytes, at any depth; unmodified server items have none. */
+    static void local(DomainFolder folder,Set<String> names){
+        for(DomainFile f:folder.getFiles())if(!f.isVersioned()||f.isCheckedOut()||f.isHijacked()||f.canRecover())names.add(f.getPathname().substring(1));
+        for(DomainFolder child:folder.getFolders())if(!child.isLinked())local(child,names);
+    }
+    static boolean released(Path root,JsonObject q)throws Exception {
+        Path path=root.resolve("released.json");if(!Files.exists(path))return false;
+        var released=JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+        return text(released,"state").equals("released")&&released.get("checkoutId").equals(q.get("checkoutId"))&&
+            released.get("fingerprint").equals(q.get("fingerprint"))&&released.get("version").equals(q.get("verifiedVersion"));
+    }
+    static void deleteReleased(Path root,ProjectLocator locator)throws Exception {
+        for(Path target:List.of(locator.getProjectDir().toPath(),locator.getMarkerFile().toPath())){
+            if(!Files.exists(target,LinkOption.NOFOLLOW_LINKS))continue;
+            require(!Files.isSymbolicLink(target)&&target.toRealPath().getParent().equals(root),"Native deletion escaped owned project");
+            List<Path> entries;try(var walk=Files.walk(target)){entries=walk.sorted(Comparator.reverseOrder()).toList();}
+            for(Path entry:entries){require(entry.toRealPath(LinkOption.NOFOLLOW_LINKS).startsWith(root)&&!Files.readAttributes(entry,java.nio.file.attribute.BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).isOther(),"Native deletion met a link");Files.deleteIfExists(entry);}
+        }
+        require(!locator.getMarkerFile().exists()&&!locator.getProjectDir().exists(),"Native project remains");
+    }
     static void history(RepositoryAdapter repository,String path,Map<String,Object> out)throws Exception {
         String name=path.substring(1);
         out.put("versions",Arrays.stream(repository.getVersions("/",name)).map(v->Map.of("version",v.getVersion(),"comment",Objects.toString(v.getComment(),""))).toList());
@@ -77,12 +97,11 @@ public final class InsightNativeCheckout {
             RepositoryAdapter repository=server.server().getRepository(text(owner,"repository"));repository.connect();
             require(repository.getUser().hasWritePermission()&&repository.getUser().getName().equals(System.getenv("GHIDRA_SERVER_USER")),"Publisher authority required");
             ProjectLocator locator=new ProjectLocator(root.toString(),"view");Projects manager=new Projects();
-            if(operation.equals("drop")&&!locator.getMarkerFile().exists()&&!locator.getProjectDir().exists()){
-                var released=JsonParser.parseString(Files.readString(root.resolve("released.json"))).getAsJsonObject();
-                require(text(released,"state").equals("released")&&released.get("checkoutId").equals(q.get("checkoutId"))&&released.get("fingerprint").equals(q.get("fingerprint"))&&
-                    released.get("version").equals(q.get("verifiedVersion")),"Owned deletion receipt differs");
+            // After a proved release the project is never reopened: an interrupted deletion can leave it unreadable.
+            if((operation.equals("release")||operation.equals("drop"))&&released(root,q)){
                 require(Arrays.stream(repository.getCheckouts("/",name)).noneMatch(c->c.getCheckoutId()==q.get("checkoutId").getAsLong()),"Owned checkout remains");
-                repository.disconnect();server.disconnect();output.println("{\"state\":\"dropped\"}");System.exit(0);
+                if(operation.equals("drop"))deleteReleased(root,locator);
+                repository.disconnect();server.disconnect();output.println("{\"state\":\""+(operation.equals("drop")?"dropped":"released")+"\"}");System.exit(0);
             }
             if(operation.equals("create")&&!locator.getMarkerFile().exists())project=manager.createProject(locator,repository,false);
             else project=manager.openProject(locator,false,false);
@@ -161,13 +180,7 @@ public final class InsightNativeCheckout {
                 require(Arrays.stream(repository.getCheckouts("/",name)).noneMatch(c->c.getCheckoutId()==q.get("checkoutId").getAsLong()),"Owned checkout remains");
                 release.put("state","released");write(releaseFile,release);out.put("state","released");
             }else if(operation.equals("drop")){
-                require(!file.isCheckedOut(),"Live or unpublished checkout cannot be deleted");
-                var released=JsonParser.parseString(Files.readString(root.resolve("released.json"))).getAsJsonObject();
-                require(text(released,"state").equals("released")&&released.get("checkoutId").equals(q.get("checkoutId"))&&released.get("version").equals(q.get("verifiedVersion"))&&released.get("fingerprint").equals(q.get("fingerprint")),"Verified release receipt differs");
-                require(Arrays.stream(repository.getCheckouts("/",name)).noneMatch(c->c.getCheckoutId()==q.get("checkoutId").getAsLong()),"Owned checkout remains");
-                for(Path target:List.of(locator.getProjectDir().toPath(),locator.getMarkerFile().toPath()))require(target.toRealPath().getParent().equals(root),"Native deletion escaped owned project");
-                project.close();project=null;require(manager.deleteProject(locator),"Native project deletion failed");
-                require(!locator.getMarkerFile().exists()&&!locator.getProjectDir().exists(),"Native project remains");out.put("state","dropped");
+                require(false,"Verified release receipt differs");
             }else if(operation.equals("inspect")||operation.equals("fields")||operation.equals("export")){
                 require(saved(file,owner).get("fingerprint").equals(text(q,"fingerprint")),"Saved native view changed");
                 ProgramDB p=(ProgramDB)file.getDomainObject(CONSUMER,false,false,MONITOR);
@@ -181,7 +194,8 @@ public final class InsightNativeCheckout {
             }else require(operation.equals("create")||operation.equals("status"),"Unknown native operation");
             if(project!=null){
                 out.put("saved",saved(file,owner));out.put("modified",file.modifiedSinceCheckout());out.put("fileId",file.getFileID());out.put("checkedOut",file.isCheckedOut());
-                out.put("projectFiles",Arrays.stream(project.getProjectData().getRootFolder().getFiles()).map(DomainFile::getName).sorted().toList());
+                out.put("recoverable",file.canRecover());
+                var local=new TreeSet<String>();local(project.getProjectData().getRootFolder(),local);out.put("projectFiles",local);
                 if(file.isCheckedOut()){out.put("checkoutId",file.getCheckoutStatus().getCheckoutId());out.put("baseVersion",file.getCheckoutStatus().getCheckoutVersion());}
             }
             history(repository,path,out);out.putIfAbsent("state","ready");out.put("guiWindows",java.awt.Window.getWindows().length);

@@ -31,6 +31,9 @@ compiler, image base and initialized memory bytes are bound before writing. Exis
 checkouts or publication attempts block promotion. A foreign nonempty engine marker is
 refused. Operators must exclude older snapshot writers during and after conversion.
 
+With `--all`, a target with an unresolved publication is reported as
+`publication_unresolved` and skipped; selecting that target directly is refused.
+
 Promotion uses an ordinary Ghidra checkout and transaction to add the native engine
 marker, followed by normal native check-in with a unique migration history marker.
 Version 1 and older repository history remain intact. The writer refuses a changed head;

@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,mkdir,link,access,readdir}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{randomUUID}from'node:crypto';
+import {mkdtemp,writeFile,readFile,mkdir,link,access,readdir,symlink,utimes}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{randomUUID}from'node:crypto';
 import{Workspace,type GhidraContext}from'../src/workspace.js';import{collectStorage,type CollectionPort}from'../src/storage-gc.js';
+import{GhidraContexts}from'../src/contexts.js';import type{NativeInputs}from'../src/native-inputs.js';import type{CommandContext}from'@eyeauras/cli-factory';
 import{createCliFixture}from'@eyeauras/cli-factory/testing';import{createInsightCli}from'../src/cli.js';import{SessionBackend}from'./fixtures/session-backend.js';
 const exists=(path:string)=>access(path).then(()=>true,()=>false);
 async function fixture(t:test.TestContext){
@@ -12,11 +13,11 @@ async function fixture(t:test.TestContext){
   return workspace.saveContext(context,context.generation,{state:'stopped',baseRevision:1,baseSnapshot:base,workingSnapshot:working});};
  const context=open();workspace.establishModel(target.id,1,base);
  /** One abandoned detached working root as the superseded engine left it. */
- const stage=async(owner:GhidraContext,options:{stopped?:boolean;pid?:number;programs?:number;native?:boolean}={})=>{
-  const at=join(workspace.directory,'ghidra-native','context',owner.id,randomUUID()),pid=options.pid??999999;
+ const stage=async(owner:GhidraContext,options:{stopped?:boolean;pid?:number;programs?:number;native?:boolean;mode?:string;reason?:string;kind?:string}={})=>{
+  const at=join(workspace.directory,'ghidra-native',options.kind??'context',options.kind?owner.target:owner.id,randomUUID()),pid=options.pid??999999;
   await mkdir(join(at,'view.rep','idata','00'),{recursive:true});await mkdir(join(at,'exports'));await mkdir(join(at,'ghidra'));
-  await writeFile(join(at,'process.json'),JSON.stringify({pid,tokenSecret:'owned',kind:'context',context:owner.id,target:owner.target}));
-  if(options.stopped!==false)await writeFile(join(at,'stopped.json'),JSON.stringify({pid,tokenSecret:'owned'}));
+  await writeFile(join(at,'process.json'),JSON.stringify({pid,tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
+  if(options.stopped!==false)await writeFile(join(at,'stopped.json'),JSON.stringify({pid,tokenSecret:'owned',reason:options.reason??'explicit_close'}));
   if(options.native)await writeFile(join(at,'native-owner.json'),'{}');
   for(let i=0;i<(options.programs??1);i++)await writeFile(join(at,'view.rep','idata','00','0000000'+i+'.prp'),'program');
   await writeFile(join(at,'view.rep','idata','00','db.1.gbf'),'database');await writeFile(join(at,'view.gpr'),'');
@@ -103,4 +104,75 @@ for(const outcome of ['released','retained','refused'] as const)test('close repo
  const input=join(f.root,'owned.bin');await writeFile(input,'close fixture');const s=await f.json(app,['ghidra','open',input,'--session','new']) as {session:string;target:string};
  const closed=await f.json(app,['ghidra','close','--session',s.session,'--target',s.target]) as {state:string;checkout:string};
  assert.equal(closed.state,'closed');assert.equal(closed.checkout,outcome==='released'?'released':'retained');
+});
+
+test('a project without proof that its last save was captured is retained',async t=>{
+ const f=await fixture(t),crashed=await f.stage(f.context,{stopped:false}),gui=await f.stage(f.context,{mode:'gui',reason:'owner_dispose'}),closedGui=await f.stage(f.context,{mode:'gui'});
+ const dispose=await f.stage(f.context,{reason:'owner_dispose'});
+ const result=await collectStorage(f.workspace,f.port,false);
+ for(const root of [crashed,gui]){assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')),root);assert.ok(result.retained.some(r=>r.path===join(root,'view.rep')));}
+ for(const root of [closedGui,dispose])assert.equal(await exists(join(root,'view.rep')),false);
+});
+test('a context without a saved or migrated view keeps its project',async t=>{
+ const f=await fixture(t),stage=await f.stage(f.context);f.workspace.saveContext(f.context,f.workspace.context(f.context).generation,{workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined});
+ await collectStorage(f.workspace,f.port,false);assert.ok(await exists(join(stage,'view.rep')));
+ const journal=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(journal,{recursive:true});await writeFile(join(journal,f.context.id+'-detached.json'),'{}');
+ await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(stage,'view.rep')),false);
+});
+test('candidates of a target with an unsettled context keep their merge evidence',async t=>{
+ const f=await fixture(t),candidate=await f.stage(f.context,{kind:'candidate'}),shared=await f.stage(f.context,{kind:'shared'});
+ const r=f.workspace.reserveRequest(f.context,'ghidra.merge',{}).request;f.workspace.startRequest(r.id);f.workspace.recordRequest(r.id,'unknown',{state:'unknown'});
+ await collectStorage(f.workspace,f.port,false);
+ assert.ok(await exists(join(candidate,'view.rep')));assert.equal((await readdir(join(candidate,'exports'))).length,2);assert.equal(await exists(join(shared,'view.rep')),false);
+});
+test('a checkout referenced by another unresolved operation is not released',async t=>{
+ const f=await fixture(t),a=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),b=f.open();
+ const path=join(f.root,randomUUID());await writeFile(path,JSON.stringify({source:'checkout',checkout:a.nativeCheckout}));const receipt=await f.workspace.captureNative(path);
+ const r=f.workspace.reserveRequest(b,'/merge_program_documentation',{}).request;f.workspace.startRequest(r.id,{kind:'transfer',sourceSnapshot:receipt});f.workspace.recordRequest(r.id,'unknown',{});
+ assert.equal(f.workspace.checkoutReferenced(a),true);const result=await collectStorage(f.workspace,f.port,false);
+ assert.deepEqual(f.released,[]);assert.ok(result.retained.some(x=>x.path===a.nativeCheckout!.root));
+ f.workspace.recordRequest(r.id,'failed',{});assert.equal(f.workspace.checkoutReferenced(a),false);
+});
+test('linked owned subdirectories are never followed',async t=>{
+ const f=await fixture(t),stage=await f.stage(f.context),outside=join(f.root,'outside');await mkdir(outside);await writeFile(join(outside,'shared.gzf'),'foreign');
+ const root=join(f.workspace.directory,'ghidra-native','context',f.context.id,randomUUID());await mkdir(root);
+ await writeFile(join(root,'process.json'),await readFile(join(stage,'process.json')));await writeFile(join(root,'stopped.json'),await readFile(join(stage,'stopped.json')));
+ await symlink(outside,join(root,'exports'),'junction');await collectStorage(f.workspace,f.port,false);assert.equal(await readFile(join(outside,'shared.gzf'),'utf8'),'foreign');
+});
+test('recent pending captures are left to their owner; stale ones are reclaimed',async t=>{
+ const f=await fixture(t),at=join(f.workspace.directory,'artifacts'),fresh=join(at,'pending-'+randomUUID()),stale=join(at,'pending-'+randomUUID()),unrowed=join(at,'c'.repeat(64)+'.gzf');
+ for(const path of [fresh,stale,unrowed])await writeFile(path,'capture');await utimes(stale,new Date(0),new Date(0));
+ await collectStorage(f.workspace,f.port,false);assert.ok(await exists(fresh));assert.ok(await exists(unrowed));assert.equal(await exists(stale),false);
+});
+test('version-tracking owners and unfinished publications root their snapshots',async t=>{
+ const f=await fixture(t),vt=await f.snapshot('vt'),published=await f.snapshot('published');
+ const at=join(f.workspace.directory,'version-tracking','v_owned');await mkdir(at,{recursive:true});await writeFile(join(at,'owner.json'),JSON.stringify({source:vt}));
+ await collectStorage(f.workspace,f.port,false);await f.workspace.artifacts.verify(vt);assert.equal(await exists(f.workspace.artifacts.path(published)),false);
+});
+test('native release verifies Ghidra status, local files, recovery data and uncertainty before disposal',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'server',version:1,fileId:'file',fingerprint:'a'.repeat(64)}));const base=await f.workspace.captureNative(path);
+ const current=f.workspace.saveContext(c,f.workspace.context(c).generation,{baseSnapshot:base});
+ const backend=new GhidraContexts(f.workspace,{} as NativeInputs,{} as CommandContext);let closed=true;const operations:string[]=[];
+ const clean={state:'ready',checkedOut:true,modified:false,recoverable:false,fileId:'file',checkoutId:3,baseVersion:1,saved:{fingerprint:'a'.repeat(64)},projectFiles:[c.target+'.bin']};
+ let observed:Record<string,unknown>=clean;
+ Object.assign(backend,{closed:async()=>closed,nativeOperation:async(_c:unknown,op:string)=>{operations.push(op);return op==='status'?observed:{state:op==='release'?'released':'dropped'};}});
+ for(const changed of [{modified:true},{recoverable:true},{recoverable:undefined},{checkoutId:4},{baseVersion:2},{checkedOut:false},{state:'unknown'},{saved:{fingerprint:'b'.repeat(64)}},{projectFiles:[c.target+'.bin','Traces/owned']},{projectFiles:undefined}]){
+  observed={...clean,...changed};assert.equal(await backend.releaseUnchanged(c),false,JSON.stringify(changed));
+ }
+ observed=clean;closed=false;assert.equal(await backend.releaseUnchanged(c),false);closed=true;
+ const r=f.workspace.reserveRequest(c,'debugger.launch',{}).request;f.workspace.startRequest(r.id);f.workspace.recordRequest(r.id,'failed',{outcome:'unknown'});
+ assert.equal(await backend.releaseUnchanged(c),false);assert.ok(operations.every(op=>op==='status'));
+ f.workspace.uncertainOutcome=()=>false;operations.length=0;
+ assert.equal(await backend.releaseUnchanged(c),true);assert.deepEqual(operations,['status','release','drop']);
+ assert.equal(f.workspace.context(current).nativeCheckout!.state,'dropped');assert.equal(await backend.releaseUnchanged(c),false);
+});
+test('an interrupted disposal stays verified and resumes on the next release',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'server',version:1,fileId:'file',fingerprint:'a'.repeat(64)}));const base=await f.workspace.captureNative(path);
+ f.workspace.saveContext(c,f.workspace.context(c).generation,{baseSnapshot:base,workingSnapshot:base,nativeCheckout:{...c.nativeCheckout!,state:'verified'}});
+ const backend=new GhidraContexts(f.workspace,{} as NativeInputs,{} as CommandContext);let drop='unknown';
+ Object.assign(backend,{closed:async()=>true,nativeOperation:async(_c:unknown,op:string)=>({state:op==='release'?'released':drop})});
+ await assert.rejects(backend.releaseUnchanged(c),/deletion remains unproved/);assert.equal(f.workspace.context(c).nativeCheckout!.state,'verified');
+ drop='dropped';assert.equal(await backend.releaseUnchanged(c),true);assert.equal(f.workspace.context(c).nativeCheckout!.state,'dropped');
 });

@@ -155,3 +155,13 @@ test('an unproved older revision keeps the detached context',async t=>{
  const latest=f.port.probe;f.port.probe=async(target,revision)=>{if(revision)throw Error('unavailable');return {...await latest(target),version:3};};
  assert.equal((await migrateLegacy(f.workspace,f.port,f.target.id,false)).retainedContexts,1);assert.equal(f.conversions,0);
 });
+
+test('an unresolved publication blocks only its own target, and an uncertain context is never converted',async t=>{
+ const f=await fixture(t);const active=f.workspace.activePublication.bind(f.workspace);f.workspace.activePublication=()=>({id:'q'}) as never;
+ const all=await migrateLegacy(f.workspace,f.port,undefined,false);assert.equal(all.items[0]!.state,'publication_unresolved');assert.equal(f.runs,0);
+ await assert.rejects(migrateLegacy(f.workspace,f.port,f.target.id,false),/Publication must be reconciled/);f.workspace.activePublication=active;
+ f.workspace.saveContext(f.context,f.workspace.context(f.context).generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
+ const r=f.workspace.reserveRequest(f.context,'/run_script_inline',{}).request;f.workspace.startRequest(r.id);f.workspace.recordRequest(r.id,'failed',{outcome:'unknown'});
+ assert.equal((await migrateLegacy(f.workspace,f.port,f.target.id,false)).retainedContexts,1);assert.equal(f.conversions,0);
+ assert.throws(()=>f.workspace.resetMigratedContext(f.context),/Only an unchanged detached/);
+});

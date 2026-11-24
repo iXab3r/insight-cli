@@ -297,6 +297,17 @@ export class Workspace {
       return typeof local.fingerprint==='string'&&local.fingerprint===base.fingerprint;
     }catch{return false;}
   }
+  /** Another context's unresolved operation may still need this checkout's private view. */
+  checkoutReferenced(context:GhidraContext):boolean {
+    const root=context.nativeCheckout?.root,seen=new Set<string>();if(!root)return false;
+    for(const row of this.db.prepare("SELECT data FROM requests WHERE context<>? AND state IN ('running','unknown')").all(context.id))
+      for(const match of String(row.data).matchAll(/native:([a-f0-9]{64})/g))seen.add(match[1]!);
+    for(const sha of seen)try{
+      const value=JSON.parse(readFileSync(join(this.directory,'artifacts',sha+'.json'),'utf8'));
+      if(value.source==='checkout'&&value.checkout?.root===root)return true;
+    }catch{return true;}
+    return false;
+  }
   /** Applied requests keep their results; their superseded before-images are not recovery inputs. */
   artifactRoots():Set<string> {
     const roots=new Set<string>(),scan=(value:string)=>{for(const match of value.matchAll(/(?:input|snapshot|native):[a-f0-9]{64}/g))roots.add(match[0]);};
@@ -311,7 +322,7 @@ export class Workspace {
   /** A detached context proved equal to a server version continues from a lazy native checkout. */
   resetMigratedContext(scope:Scope) {
     const context=this.context(scope);
-    if(context.nativeCheckout||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||this.unresolved(scope).length)
+    if(context.nativeCheckout||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||context.debugger?.connected||this.unresolved(scope).length||this.uncertainOutcome(scope))
       fail('blocked','Only an unchanged detached context can be reset by migration.');
     this.writeContext(scope,context.generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,viewEpoch:(context.viewEpoch??0)+1});
   }

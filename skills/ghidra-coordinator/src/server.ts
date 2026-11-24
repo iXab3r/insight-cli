@@ -179,6 +179,11 @@ export class GhidraServer {
     this.c.progress('Ghidra initial publication: '+operation);
     return this.run('initial-publication','db.InsightInitialPublication',[root,operation],await this.credentials(binding,operation.startsWith('verify')?'reader':'publisher'));
   }
+  async recoverPublication(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
+    return this.run('recover-publication','db.InsightPublicationRecovery',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],
+      {...await this.credentials(binding,'reader'),INSIGHT_PUBLISHER_USER:binding.publisherUser,
+        INSIGHT_PUBLISHER_PASSWORD:await this.c.secrets.require(binding.publisherSecret)});
+  }
   private async authority(binding: ServerBinding) {
     for (const role of ['reader','publisher'] as const) {
       const result = await this.run('verify-' + role, 'InsightServerProbe', [binding.repository,role], await this.credentials(binding,role));

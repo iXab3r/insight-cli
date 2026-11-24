@@ -49,10 +49,11 @@ export async function migrateLegacy(workspace:Workspace,port:MigrationPort,selec
   if(selected)targets.push(workspace.target(selected));else for(let offset=0;;offset+=100){const page=workspace.targets(100,offset);targets.push(...page);if(page.length<100)break;}
   const contexts:GhidraContext[]=[];
   for(let offset=0;;offset+=100){const sessions=workspace.sessions(100,offset);for(const session of sessions)for(let at=0;;at+=100){const page=workspace.contexts(session.id,100,at);contexts.push(...page.filter(c=>targets.some(t=>t.id===c.target)));if(page.length<100)break;}if(sessions.length<100)break;}
-  for(const target of targets)if(workspace.activePublication(target.id))fail('blocked','Publication must be reconciled before migration.');
+  if(selected&&workspace.activePublication(selected))fail('blocked','Publication must be reconciled before migration.');
   for(const context of contexts)if(!await port.closed(context))fail('busy','Close the original context worker before migration.',{session:context.session,target:context.target});
   const binding=await port.binding(),items=[];
   for(const target of targets){
+    if(workspace.activePublication(target.id)){items.push({target:target.id,state:'publication_unresolved',reason:'Reconcile the retained publication, then repeat migration for this target.',contexts:[]});continue;}
     let model:ReturnType<Workspace['model']>;
     try{model=workspace.model(target.id);}catch(error){if((error as {code?:string}).code!=='coordinator.notFound')throw error;items.push({target:target.id,state:'no_ghidra_model',contexts:[]});continue;}
     if(target.input.kind!=='input'||target.input.sha256!==target.binarySha256||target.input.size!==target.size)fail('binding','Migration input artifact and target source identity differ.');
@@ -106,7 +107,8 @@ export async function migrateLegacy(workspace:Workspace,port:MigrationPort,selec
       const record:Record<string,unknown>={session:original.session,target:target.id,snapshot,state:'retained',reason:'Packed detached work has no provable native checkout ancestry/change sets; native conversion is refused. No scalar or script replay was performed.'};
       const observed=inspections.get(snapshot.id)??await port.write({operation:'snapshot',snapshot:retained});
       const matches=(v:Record<string,unknown>|undefined)=>v!==undefined&&observed.fingerprint===v.fingerprint&&observed.programIdentity===v.programIdentity;
-      const clean=!original.scalars.length&&!original.complexChanges.length&&!original.debugger?.traces.length&&!workspace.unresolved(original).length;
+      const clean=!original.scalars.length&&!original.complexChanges.length&&!original.debugger?.traces.length&&!original.debugger?.connected&&
+        original.state!=='needs_recovery'&&!workspace.unresolved(original).length&&!workspace.uncertainOutcome(original);
       let equal=accepted.some(matches);
       if(!equal&&clean&&original.baseRevision&&original.baseRevision<Number(value.version))equal=matches(await exact(original.baseRevision));
       if(observed.sourceSha!==target.binarySha256){record.reason='Detached snapshot source SHA256 differs from its target; snapshot and context retained.';}
