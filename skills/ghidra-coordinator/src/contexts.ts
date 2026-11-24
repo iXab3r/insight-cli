@@ -535,6 +535,8 @@ export class GhidraContexts {
     try{await readFile(join(this.directory(),'context',context.id,'checkout.json'));}
     catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;pending=false;}
     if(pending||context.nativeCheckout)fail('blocked','A native checkout belongs to this context; it is not detached work.');
+    // A worker whose owner died before its current receipt is still found by its process receipt.
+    if((await runtimeProcesses(dirname(this.workspace.directory))).some(p=>p.kind!=='server'&&(p.sessionContext??context.id)===context.id))return false;
     return this.neverStartedOrClosed(context);
   }
   async collect(dryRun:boolean){

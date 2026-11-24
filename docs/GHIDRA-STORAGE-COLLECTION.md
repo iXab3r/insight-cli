@@ -62,10 +62,12 @@ reopens the project, so an interrupted deletion resumes on the next close, open 
 whose outcome is unknown. It starts no Ghidra, replays nothing and publishes nothing. A
 journal `legacy-migrations/<target>/<context>-discarded-<request>.json` first keeps the original
 context and its unresolved requests; the requests then become terminal `failed / discarded`
-with their previous result. The next `ghidra gc` removes the stopped detached projects, even
+and cannot run again; their previous outcomes stay in the journal. The journal records intent: a
+refused discard may leave one without effect. The next `ghidra gc` removes the stopped detached projects, even
 without a capture receipt, and the snapshots that only this context's unfinished or failed
 requests named. Reported results of applied requests and artifacts named elsewhere stay.
-The next open of the same session and target takes a native checkout. Native checkouts,
+The next open of the same session and target takes a native checkout once the target is
+migrated. Native checkouts,
 pending checkout creations, live workers, connected debuggers and unresolved publications
 are refused.
 

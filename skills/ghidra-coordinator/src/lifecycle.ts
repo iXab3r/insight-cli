@@ -112,10 +112,11 @@ export class Lifecycle {
       const current=this.workspace.context(selected);
       if(current.nativeCheckout)fail('unsupported','This context uses a native checkout; use ghidra changes discard.');
       if(this.workspace.activePublication(selected.target))fail('blocked','Publication must be reconciled before discarding detached work.');
+      if(this.workspace.model(selected.target).state!=='ready')fail('blocked','Initial publication of this model must be reconciled before discarding detached work.');
       if(current.debugger?.connected)fail('busy','Close the live debugger context before discarding it.');
       const backend=await this.backend();
       if(!backend.detachedStopped||!await backend.detachedStopped(selected))fail('busy','The detached worker must be stopped before its work is discarded.');
-      const unresolved=this.workspace.unresolved(selected).filter(pending=>pending.id!==request.id);
+      const unresolved=this.workspace.unfinished(selected).filter(pending=>pending.id!==request.id);
       const root=join(this.workspace.directory,'legacy-migrations',selected.target);await mkdir(root,{recursive:true,mode:0o700});
       await migrationDurable(join(root,current.id+'-discarded-'+request.id+'.json'),{schema:1,request:request.id,original:current,unresolved});
       if(request.state==='accepted')this.workspace.startRequest(request.id,{kind:'legacy-discard',generation:current.generation});

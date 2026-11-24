@@ -190,20 +190,30 @@ test('a discarded legacy context loses its work, journals it, and gc reclaims it
  const life=new Lifecycle(f.workspace,{ordered:async(_:unknown,a:()=>Promise<unknown>)=>a()} as never,async()=>backend as never);
  await assert.rejects(life.discardLegacy(f.context,false),/acknowledge-lost-work/);
  await assert.rejects(life.discardLegacy(f.context,true,'drop'),/must be stopped/);assert.equal(f.workspace.request(pending.id).state,'unknown');
- stopped=true;const result=await life.discardLegacy(f.context,true,'drop') as Record<string,unknown>;
+ const late=await f.snapshot('closed after the refusal');await request(f,'failed',late,{outcome:'unknown'});const reserved=f.workspace.reserveRequest(f.context,'/set_function_prototype',{name:'reserved'}).request;
+ for(let i=0;i<101;i++)await request(f,'unknown',before,{state:'unknown'});
+ const model=f.workspace.model(f.target.id),read=f.workspace.model.bind(f.workspace);f.workspace.model=()=>({...model,state:'unknown'});stopped=true;await assert.rejects(life.discardLegacy(f.context,true,'drop'),/Initial publication/);f.workspace.model=read;
+ const result=await life.discardLegacy(f.context,true,'drop') as Record<string,unknown>;
  assert.equal(result.state,'discarded');assert.equal(result.discardedChanges,1);assert.deepEqual(await life.discardLegacy(f.context,true,'drop'),result);assert.equal(opened,0);
  const after=f.workspace.context(f.context);assert.equal(after.state,'stopped');assert.equal(after.workingSnapshot,undefined);assert.equal(after.debugger,undefined);assert.deepEqual(after.complexChanges,[]);
  const settled=f.workspace.request(pending.id);assert.equal(settled.state,'failed');assert.equal((settled.result as {state:string}).state,'discarded');
  const journals=await readdir(join(f.workspace.directory,'legacy-migrations',f.target.id));assert.equal(journals.length,1);
  const journal=JSON.parse(await readFile(join(f.workspace.directory,'legacy-migrations',f.target.id,journals[0]!),'utf8'));
- assert.equal(journal.original.workingSnapshot.id,f.working.id);assert.equal(journal.unresolved[0].id,pending.id);
+ assert.equal(journal.original.workingSnapshot.id,f.working.id);assert.equal(journal.unresolved.find((q:{id:string})=>q.id===pending.id).result.state,'unknown');
  await collectStorage(f.workspace,f.port,false);
- assert.equal(await exists(join(stage,'view.rep')),false);assert.equal(await exists(f.workspace.artifacts.path(before)),false);assert.equal(await exists(f.workspace.artifacts.path(old)),false);
+ assert.equal(await exists(join(stage,'view.rep')),false);assert.equal(await exists(f.workspace.artifacts.path(before)),false);assert.equal(await exists(f.workspace.artifacts.path(old)),false);assert.equal(await exists(f.workspace.artifacts.path(late)),false);assert.equal(f.workspace.uncertainOutcome(f.context),false);
  await f.workspace.artifacts.verify(shown);await f.workspace.artifacts.verify(f.working);
  for(const kept of [live,many,otherStage])assert.ok(await exists(join(kept,'view.rep')),kept);
  const native=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));await assert.rejects(life.discardLegacy(native,true),/native checkout/);
- await request(f,'unknown',f.working,{state:'unknown'});assert.ok(f.workspace.unresolved(f.context).length);
- const later=await collectStorage(f.workspace,f.port,false);assert.ok(later.retained.some(r=>r.path.endsWith(f.context.id)));
+ assert.equal(f.workspace.request(reserved.id).state,'failed');assert.throws(()=>f.workspace.startRequest(reserved.id),/already started/);
+ const evidence=await f.snapshot('later evidence');await request(f,'failed',evidence,{outcome:'unknown'});assert.equal(f.workspace.uncertainOutcome(f.context),true);
+ await request(f,'unknown',evidence,{state:'unknown'});assert.ok(f.workspace.unresolved(f.context).length);
+ const later=await collectStorage(f.workspace,f.port,false);assert.ok(later.retained.some(r=>r.path.endsWith(f.context.id)));await f.workspace.artifacts.verify(evidence);
+});
+test('a pending native checkout is never discarded as detached work',async t=>{
+ const f=await fixture(t),backend=new GhidraContexts(f.workspace,{} as NativeInputs,{} as CommandContext),parent=join(f.workspace.directory,'ghidra-native','context',f.context.id);
+ await mkdir(parent,{recursive:true});assert.equal(await backend.detachedStopped(f.context),true);
+ await writeFile(join(parent,'checkout.json'),'{}');await assert.rejects(backend.detachedStopped(f.context),/native checkout belongs/);
 });
 test('a checkout whose worker never started is released natively instead of failing on its missing receipt',async t=>{
  const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));
