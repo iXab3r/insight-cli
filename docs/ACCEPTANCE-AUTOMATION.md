@@ -94,13 +94,9 @@ command duration includes subprocess startup and teardown; scenario duration inc
 steps and scenario cleanup. Runner build/restore time is separate from those measurements.
 Failed executions remain failures even when process cleanup succeeds.
 
-Automation is private while insight-cli is public. The separate
-[`gherkin-integration` workflow](../.github/workflows/acceptance.yml) is manually dispatched
-and requires a repository secret `AUTOMATION_READ_TOKEN` with read-only Contents access
-to `iXab3r/EyeAuras.Automation`. It checks out the exact gitlink commit and uploads selected
-receipts/TRX only, excluding dependency assemblies and build trees. This integration does
-not create a token, publish private source, or claim an automatically running Gherkin CI
-gate. Existing push/PR offline CI remains independent of that private dependency.
+Automation is private while insight-cli is public, so Gherkin acceptance runs locally at the exact
+gitlink commit. Retain selected receipts/TRX only, excluding dependency assemblies and build trees.
+The Vivarium offline gate is independent of that private dependency and is not a Gherkin gate.
 
 ## Business hierarchy and parallel throughput
 

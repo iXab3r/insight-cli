@@ -12,7 +12,7 @@ import {runNpm} from './npm-command.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url)),args=process.argv.slice(2),exec=promisify(execFile);
 assert.ok(args.includes('--ack-disposable'),'Explicit disposable-fixture acknowledgment required');
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]),'Full GUI/keyring acceptance is local only');
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]),'Full GUI/keyring acceptance is local only');
 const directory=await mkdtemp(join(tmpdir(),'insight-full-'));
 console.log('Owned full acceptance diagnostics:',directory);
 const runners=[

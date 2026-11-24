@@ -9,7 +9,7 @@ additional repository, GUI and debugger invariants.
 1. Inventory the real executable and runtime dependencies on each supported OS/architecture.
    Pin exact distributions and redistribution materials in `scripts/tool-distributions/`.
    Review licenses, embedded notices and corresponding source/build materials, including
-   transitive packages. Supply the manifest/asset recipe to the manual `tool-release` workflow.
+   transitive packages. Publish the manifest/asset recipe with `node scripts/tool-release.mjs <recipe> <directory> --publish`.
    It verifies draft assets by download before publishing an immutable non-latest tool release.
    Use a new `-rN` identity when any byte changes; do not replace published assets.
 2. Regenerate `runtime/tool-catalog.json` with `node scripts/tool-catalog.mjs` after publication.

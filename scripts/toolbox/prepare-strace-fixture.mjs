@@ -4,5 +4,5 @@ await writeFile(source,'#include <unistd.h>\n#include <stdio.h>\n#include <fcntl
 execFileSync('cc',['-O0',source,'-o',executable]);await writeFile(settings,'owned-report Pending37');
 const artifacts=join(root,'packed'),prefix=join(root,'global');await mkdir(artifacts);const pack=JSON.parse((await runNpm(['pack','--ignore-scripts','--json','--workspace','@eyeauras/insight-cli','--pack-destination',artifacts],{cwd:resolve('.')})).stdout)[0];await runNpm(['install','--global','--prefix',prefix,'--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{timeout:180000});
 const packageRoot=join(prefix,'lib/node_modules/@eyeauras/insight-cli'),manifest=join(root,'manifest.json');await writeFile(manifest,JSON.stringify({packageRoot,straceArchive:process.env.INSIGHT_STRACE_ARCHIVE,nativeLinuxWorker:executable,nativeLinuxSettings:settings}));
-if(process.env.GITHUB_ENV){const {appendFile}=await import('node:fs/promises');await appendFile(process.env.GITHUB_ENV,'INSIGHT_TOOLBOX_MANIFEST='+manifest+'\n');}
+console.log('INSIGHT_TOOLBOX_MANIFEST='+manifest);
 console.log('Prepared globally installed candidate and owned Linux worker:',root);

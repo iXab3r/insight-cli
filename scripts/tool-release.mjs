@@ -103,9 +103,7 @@ export async function mirror(recipe,directory,publish=false){
  const file=await open(join(directory,'manifest.json'),'w',0o600);try{await file.writeFile(manifest);}finally{await file.close();}
  const assets=[...recipe.assets,manifestAsset];
  if(!publish){for(const a of recipe.assets)await acquire(a,directory,fetch,recipe.assets);return {state:'prepared',tag:recipe.tag,assets:assets.length};}
- if(process.env.GITHUB_ACTIONS==='true'){
-  if(process.env.TOOL_RELEASE_IMMUTABLE_READY!=='true')throw Error('Repository immutability setup is not confirmed');
- }else if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
+ if(api(`repos/${recipe.repository}/immutable-releases`).enabled!==true)throw Error('Immutable releases must be enabled before publication');
  let current=release(recipe);
  if(current&&!current.draft){
   current=await readback(recipe,assets,directory,false);
@@ -115,7 +113,7 @@ export async function mirror(recipe,directory,publish=false){
  for(const a of recipe.assets)await acquire(a,directory,fetch,recipe.assets);
  if(!current){
   // An unknown create response ends this invocation; a later invocation reconciles by exact tag.
-  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',process.env.GITHUB_SHA??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);
+  gh('release','create',recipe.tag,'--repo',recipe.repository,'--draft','--latest=false','--target',execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),'--title',recipe.title,'--notes',recipe.redistribution);
   current=await waitFor(()=>release(recipe),Boolean);
  }
  if(current.draft){

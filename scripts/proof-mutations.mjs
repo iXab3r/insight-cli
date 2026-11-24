@@ -12,7 +12,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 const options={};for(let i=2;i<process.argv.length;i++){const arg=process.argv[i];if(arg==='--ack-disposable')options.ack=true;
   else if(arg.startsWith('--')&&process.argv[i+1])options[arg.slice(2)]=process.argv[++i];else throw Error('Invalid proof argument');}
-assert.equal(options.ack,true);assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.equal(options.ack,true);assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 for(const key of ['java','ghidra-home','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 const sourceFiles=['src/mutations.ts','src/mutation-effects.ts','src/research.ts','src/contexts.ts','src/server.ts','src/native-inputs.ts','src/arguments.ts','src/json.ts','src/transport.ts','references/mutations.json','references/native/InsightSnapshotInspect.java'];
 const sourceHashes=Object.fromEntries(await Promise.all(sourceFiles.map(async file=>[file,createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+file,import.meta.url))).digest('hex')])));

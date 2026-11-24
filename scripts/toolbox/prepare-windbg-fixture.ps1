@@ -1,6 +1,6 @@
 # Only owned native inputs and Microsoft bytes on a disposable Windows runner.
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
-$root=Join-Path $env:RUNNER_TEMP 'insight-windbg-native';New-Item -ItemType Directory -Force $root | Out-Null
+$root=Join-Path ([System.IO.Path]::GetTempPath()) 'insight-windbg-native';New-Item -ItemType Directory -Force $root | Out-Null
 $bundle=Join-Path $root 'windbg.msixbundle'
 Invoke-WebRequest 'https://windbg.download.prss.microsoft.com/dbazure/prod/1-2610-1001-0/windbg.msixbundle' -OutFile $bundle
 if((Get-FileHash $bundle -Algorithm SHA256).Hash.ToLowerInvariant() -ne '4662ae17bc0dc77db987b89cccea32c30058baa06268f861d09e0ab4e4f45c20'){throw 'WinDbg archive differs'}
@@ -27,4 +27,4 @@ $text=$stdout.GetAwaiter().GetResult();$err=$stderr.GetAwaiter().GetResult()
 if($p.ExitCode -ne 0 -or !(Test-Path $dump) -or $text -notmatch '(?s)INSIGHT_ADDRESS=.*?\b([0-9a-fA-F]{8}`?[0-9a-fA-F]{8})\b'){throw ('Owned native dump creation failed: '+$text+$err)}
 $address='0x'+$Matches[1].Replace('`','')
 @{root=$root;bundle=$bundle;dump=$dump;symbols=(Join-Path $root 'InsightOwnedNative.pdb');cdb=$cdb;address=$address} | ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $root 'fixture.json')
-"INSIGHT_WINDBG_FIXTURE=$(Join-Path $root 'fixture.json')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+"INSIGHT_WINDBG_FIXTURE=$(Join-Path $root 'fixture.json')" | Write-Output

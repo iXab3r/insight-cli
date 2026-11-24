@@ -1,7 +1,7 @@
 # Only explicitly owned managed research inputs and unmodified upstream bytes.
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($env:INSIGHT_NATIVE_DISPOSABLE -ne '1'){throw 'Disposable scope must be explicit'}
-$root=Join-Path $env:RUNNER_TEMP 'insight-dnspy-cli spaces-Ω';New-Item -ItemType Directory -Force $root|Out-Null
+$root=Join-Path ([System.IO.Path]::GetTempPath()) 'insight-dnspy-cli spaces-Ω';New-Item -ItemType Directory -Force $root|Out-Null
 $archive=Join-Path $root 'dnSpy.zip';Invoke-WebRequest 'https://github.com/dnSpyEx/dnSpy/releases/download/v6.6.0/dnSpy-net-win64.zip' -OutFile $archive
 if((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne '8ed48f165dc355e869f3a0037ad4f9216147f995a5ae0258b296eeef1f73aab0'){throw 'Upstream dnSpyEx archive differs'}
 [IO.Compression.ZipFile]::ExtractToDirectory($archive,(Join-Path $root 'external'))
@@ -21,4 +21,4 @@ $core=Join-Path $root 'core';New-Item -ItemType Directory $core|Out-Null
 & dotnet build (Join-Path $core 'Core.csproj') --configuration Release --output (Join-Path $core 'out') --nologo;if($LASTEXITCODE){throw 'Owned Core fixture compile failed'}
 $coreModule=Join-Path $core 'out/OwnedCoreProbe.dll';$coreMethod='0x'+([Reflection.Assembly]::LoadFile($coreModule)).GetType('OwnedResearch').GetMethod('QuoteTotal').MetadataToken.ToString('x8')
 @{root=$root;archive=$archive;executable=(Join-Path $root 'external/dnSpy.exe');researchInput=$researchInput;method=$method;settingsMethod=$settings;coreExe=(Join-Path $core 'out/OwnedCoreProbe.exe');coreModule=$coreModule;coreMethod=$coreMethod;coreRuntimeConfig=(Join-Path $core 'out/OwnedCoreProbe.runtimeconfig.json');coreDeps=(Join-Path $core 'out/OwnedCoreProbe.deps.json')}|ConvertTo-Json|Set-Content -Encoding utf8 (Join-Path $root 'fixture.json')
-"INSIGHT_DNSPY_FIXTURE=$(Join-Path $root 'fixture.json')"|Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+"INSIGHT_DNSPY_FIXTURE=$(Join-Path $root 'fixture.json')" | Write-Output

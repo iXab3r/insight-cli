@@ -13,7 +13,7 @@ import {promisify} from 'node:util';
 const options={},argv=process.argv.slice(2);
 for(let i=0;i<argv.length;i++){if(argv[i]==='--ack-disposable')options.ack=true;else if(argv[i].startsWith('--')&&argv[i+1])options[argv[i].slice(2)]=argv[++i];else throw Error('Invalid proof argument');}
 assert.equal(options.ack,true);
-assert.ok(!Object.keys(process.env).some(key=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
+assert.ok(!Object.keys(process.env).some(key=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
 for(const key of ['ghidra-home','java','mcp-jar','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 test('native saved-state and scalar three-way merge',async()=>{
  const values={java:options.java,ghidraHome:options['ghidra-home'],mcpJar:options['mcp-jar']};

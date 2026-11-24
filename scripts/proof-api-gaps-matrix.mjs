@@ -9,7 +9,7 @@ import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 const root=fileURLToPath(new URL('../',import.meta.url)),args=process.argv.slice(2),exec=promisify(execFile);
 assert.ok(args.includes('--ack-disposable'));
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 const directory=await mkdtemp(join(tmpdir(),'insight-gap-matrix-'));
 async function inputs(){
  const files=['package.json','package-lock.json','vendor/provenance.json'];

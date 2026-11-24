@@ -1,15 +1,12 @@
 # npm distribution
 
-For the manual GitHub Actions build/release and its one-time authorization, see
-[Release CI](RELEASE-CI.md). Its build-only mode also supplies an inspected package artifact.
-The workflow now increments patch by default and keeps the selected version across re-runs;
-minor, major and the exact source version are explicit choices. The 0.2.0 receipts below remain
-historical evidence of the initial CI publication.
+For the Vivarium verification and staged release, see [Release CI](RELEASE-CI.md). The receipts below
+remain historical evidence of releases made through an earlier, removed pipeline.
 
 The recorded 0.2.0 release includes [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md).
 The historical 0.1.0 receipt and executable proof remain below. Run the historical
 `proof-global-package.mjs` only with its matching 0.1.0 executable/artifact; current releases use
-the manual CI build, publication and global-install gate.
+the Vivarium build, staged publication and global-install gate.
 
 The owner authorized npm publication, global installation and verification on 2026-10-16.
 The package is `@eyeauras/insight-cli`; its executable and application ID stay `insight-cli`.
@@ -59,10 +56,9 @@ npm run cache:factory
 npm test
 npm run test:package
 npm run pack:cli
-npm publish ./artifacts/eyeauras-insight-cli-0.2.0.tgz --access public --ignore-scripts
 ```
 
-Publish the inspected archive from `npm run pack:cli`, not a raw workspace pack. This command
+Release the inspected archive from `npm run pack:cli`, not a raw workspace pack. This command
 builds TypeScript, prepares the complete Factory bundle offline, and calls Factory's canonical
 build-manifest helper for the staged package. The archive includes the CLI/API, both skills,
 references/native helpers, GhidraMCP bridge/license/notice and README. Source tests, private
@@ -74,7 +70,7 @@ Authentication is npm's normal browser login/2FA, outside package code. It grant
 runtime permissions. Verify the served version's SHA-1/integrity against the exact local tarball
 before claiming publication, then install that exact version from the registry using `-g`.
 
-## Published 0.2.0 and manual CI
+## Published 0.2.0
 
 [`@eyeauras/insight-cli@0.2.0`](https://www.npmjs.com/package/@eyeauras/insight-cli/v/0.2.0)
 is published with `latest=0.2.0`. [Verification](verification/npm-release-0.2.0.json) binds
@@ -82,18 +78,13 @@ source commit `a8479eec06eead393d434486311fddb7eb403303` to the exact native-tes
 1,005,214 bytes, 174 files, SHA-256
 `ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab`.
 Registry SHA-1/SHA-512 match, and the npm provenance statement identifies that commit and
-[release run 38960073085](https://github.com/iXab3r/insight-cli/actions/runs/38960073085).
+release run 38960073085.
 
-The workflow's build, OIDC publication and fresh Linux registry global-install jobs all pass.
+The build, publication and fresh Linux registry global-install jobs all pass.
 The ordinary macOS global installation also uses the registry, with a fresh cache and user npm
 config disabled; all 174 installed files match the inspected archive. Version/help, installed
 RE skill and managed-runtime command discovery pass. Native Ghidra acceptance is inherited
 only through exact artifact equality; its separate scope and platform boundaries remain intact.
-
-The one-time npm Trusted Publisher targets `iXab3r/insight-cli`, `release-npm.yml` and environment
-`npm-release`. That environment permits main only, with no extra review gate; `NPM_RELEASE_READY`
-is true. No npm token is stored in GitHub. Use **Actions → Release npm → Run workflow**, main,
-publish checked. Build-only remains available by unchecking publish.
 
 ## Local global native build 0.5.9
 

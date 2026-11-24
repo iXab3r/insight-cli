@@ -5,10 +5,10 @@
 [Auto-version evidence](release-auto-version.json) covers default patch selection to 0.2.1,
 global preview installation, a full re-run with the same reservation and byte-identical archive,
 and a verify-only re-run using the previous build's exact artifact ID. All three attempts of
-[run 38964728835](https://github.com/iXab3r/insight-cli/actions/runs/38964728835) pass. Six version
+run 38964728835 pass. Six version
 and five publication tests pass in addition to the 154 application tests and package gate.
 This is a preview/retry proof; it does not publish another npm version or rebind native coverage.
-[Release CI](../RELEASE-CI.md) explains patch/minor/major/none and missing-reservation behavior.
+That pipeline was removed; [Release CI](../RELEASE-CI.md) describes the current one.
 
 ## Managed runtime delivery and external launcher
 
@@ -25,13 +25,13 @@ The same archive is now published as 0.2.0; registry and native proof are bound 
 ## Published npm package and actual global installation
 
 [`@eyeauras/insight-cli@0.2.0`](npm-release-0.2.0.json) is public on npm with `latest=0.2.0`.
-The [manual release run](https://github.com/iXab3r/insight-cli/actions/runs/38960073085) passes
-build, OIDC publication and fresh Linux registry global installation. Its archive SHA-256 is
+The recorded release passes
+build, publication and fresh Linux registry global installation. Its archive SHA-256 is
 `ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab`, identical to the native-tested
 candidate. Registry integrity matches; the decoded npm provenance identifies source
 `a8479eec06eead393d434486311fddb7eb403303` and the same workflow run. The actual macOS global
 registry install also matches all 174 packaged files. 154 application tests plus five offline
-publication cases pass. [Release CI](../RELEASE-CI.md) documents the button, authorization and re-runs.
+publication cases pass. [Release CI](../RELEASE-CI.md) documents the current release.
 
 The following evidence is historical for 0.1.0:
 
@@ -208,7 +208,7 @@ own resources; no existing user project or instance is selected.
 104 passing offline tests, all eight passing local native groups and an additional real SDK
 response-loss case (one actual mutation, independent saved readback, no replay). The 25 focused
 SDK/VT/FID/BSim/live-trace cases pass, as do P0/P1, existing mutations, debugger and installed IPC.
-[Windows/Linux CI](https://github.com/iXab3r/insight-cli/actions/runs/38797117575) passes all three
+Windows/Linux CI passes all three
 headless native groups on each OS, including 104 offline tests and isolated package installation.
 That run identifies commit `0c9b140d85d81fa828b1033b0f11cb2a1b914ec1`; its runtime source, schemas,
 individual OS runners and workflow are identical to the local candidate. The later candidate
@@ -226,9 +226,8 @@ budgets and incomplete responses. This is a selected scale case, not an arbitrar
 benchmark or an entire-SDK coverage denominator.
 
 `scripts/proof-p2-matrix.mjs` runs SDK, VT, FID/BSim, live/trace, P0/P1, mutation, debugger and
-installed-package regressions sequentially, checking source identity between groups. The separate
-`disposable-native-p2` workflow requires an explicit manual dispatch or an opt-in commit marker
-on the development branch; ordinary CI stays offline. The selected headless OS lane uses the
+installed-package regressions sequentially, checking source identity between groups. CI stays
+offline and refuses native proofs. The recorded headless OS lane uses the
 official Ghidra 12.1.2 archive with its published SHA-256. GUI/LLDB native acceptance remains macOS.
 Runtime resources, source hashes and receipts establish each evidence scope; old reports retain
 their original identity. See [agent contracts](../../skills/ghidra-coordinator/references/native-workflows.md)

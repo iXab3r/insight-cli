@@ -170,10 +170,7 @@ without repeating effects.
 
 ## Packaging and releases
 
-The manual [Release npm workflow](https://github.com/iXab3r/insight-cli/actions/workflows/release-npm.yml)
-provides the same build checks, an archive/receipt artifact and optional registry publication.
-It selects the next patch by default; minor/major and an exact source-version mode are available.
-See [release setup and re-runs](RELEASE-CI.md).
+Vivarium verifies `main` and runs the manual staged npm release. See [release setup](RELEASE-CI.md).
 
 Build prepared artifacts with `npm run pack:cli`. The tarball also installs by itself:
 
@@ -203,9 +200,7 @@ into root sessions or exposed as public worker/proposal commands. Existing RE en
 not adopted or modified by the facade.
 
 Managed Ghidra delivery: [runtime commands and ownership](../skills/ghidra-coordinator/references/managed-runtime.md).
-Version 0.4.0 was published through the manual release workflow, including build,
-OIDC publication and a fresh registry global installation. See the
-[release run](https://github.com/iXab3r/insight-cli/actions/runs/39523296992).
+Version 0.4.0 was published with a fresh registry global installation.
 
 New Ghidra targets import without full automatic analysis; opt in with `ghidra open --analysis`.
 Use scoped `ghidra analysis run` or `analysis reanalyze` later when needed.
