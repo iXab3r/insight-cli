@@ -3,7 +3,7 @@ name: insight-capture
 description: Capture one explicitly authorized native program run, exact stdout/stderr and declared file snapshots through insight-cli capture, then inspect or compare retained reports without replay. Use for controlled input/output research, preserving original files and interrupted or unknown outcomes.
 ---
 
-# Insight Capture 0.6.1
+# Insight Capture 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

@@ -3,7 +3,7 @@ name: insight-frida
 description: Observe native call arguments/results or inspect runtime modules and exports in an explicitly selected authorized process with bounded Frida scripts. Use insight-cli frida to corroborate static findings with actual execution on macOS ARM64.
 ---
 
-# Insight Frida 0.6.1
+# Insight Frida 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

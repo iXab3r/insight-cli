@@ -22,6 +22,7 @@ export interface ResearchBackend {
   migrate?(target:string|undefined,dryRun:boolean):Promise<unknown>;
   collect?(dryRun:boolean):Promise<unknown>;
   releaseUnchanged?(scope:Scope):Promise<boolean>;
+  detachedStopped?(scope:Scope):Promise<boolean>;
   updateNative?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}>;
   recoverUpdate?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}|{state:'unknown'}>;
   publishNative?(publication:Publication):Promise<{state:'published';revision:number;snapshot?:Artifact}|{state:'conflict';applied:0;conflict?:string}>;

@@ -55,6 +55,24 @@ compatible runtime or extension change. A Ghidra version that must upgrade the p
 database refuses to open it; the project is retained. Deletion after a proved release never
 reopens the project, so an interrupted deletion resumes on the next close, open or `gc`.
 
+## Giving up detached work
+
+`ghidra changes discard-legacy --session <id> --target <id> --acknowledge-lost-work`
+(Destructive) drops one stopped detached context of an older engine, including operations
+whose outcome is unknown. It starts no Ghidra, replays nothing and publishes nothing. A
+journal `legacy-migrations/<target>/<context>-discarded-<request>.json` first keeps the original
+context and its unresolved requests; the requests then become terminal `failed / discarded`
+and cannot run again; their previous outcomes stay in the journal. The journal records intent: a
+refused discard may leave one without effect. The next `ghidra gc` removes the stopped detached projects, even
+without a capture receipt, and the snapshots that only this context's unfinished or failed
+requests named. Reported results of applied requests and artifacts named elsewhere stay.
+The next open of the same session and target takes a native checkout once the target is
+migrated. Native checkouts,
+pending checkout creations, live workers, connected debuggers and unresolved publications
+are refused.
+
+## Upgrading with detached work
+
 Finish detached work with the release that created it: merge or discard pending edits,
 reconcile unknown operations and close workers before upgrading. The current engine never
 saves into a detached worker. An interrupted snapshot publication can still be reconciled by

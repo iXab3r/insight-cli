@@ -3,7 +3,7 @@ name: insight-ghidra
 description: Inspect or edit native binaries with Ghidra through insight-cli; use isolated contexts, multi-agent merge/refresh, server, GUI or debugger workflows. Choose this for static native behavior and references, not C# recovery from managed IL.
 ---
 
-# Insight Ghidra 0.6.1
+# Insight Ghidra 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

@@ -3,7 +3,7 @@ name: insight-interop
 description: Trace a .NET P/Invoke declaration to an explicitly supplied native library export and Ghidra function through insight-cli ilspy query, binary query and scoped ghidra APIs. Use for managed/native linkage evidence while keeping static correspondence separate from observed loading or execution.
 ---
 
-# Insight Interop 0.6.1
+# Insight Interop 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

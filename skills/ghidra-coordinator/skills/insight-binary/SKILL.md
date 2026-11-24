@@ -3,7 +3,7 @@ name: insight-binary
 description: Query structured PE, ELF and thin Mach-O headers, sections, imports and exports, or make an explicitly guarded new PE subsystem copy through insight-cli binary. Use for scoped binary structure, linkage and copy-only header edits without target execution.
 ---
 
-# Insight Binary 0.6.1
+# Insight Binary 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized
