@@ -3,7 +3,7 @@ name: insight-re
 description: Investigate shipped programs and binary artifacts with insight-cli and other available tools; retain ordinary research files, coordinate independent agents and publish Ghidra annotations. Use for reverse engineering behavior, not ordinary source-repository browsing.
 ---
 
-# Insight RE 0.6.1
+# Insight RE 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

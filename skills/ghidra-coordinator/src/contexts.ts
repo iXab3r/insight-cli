@@ -516,7 +516,7 @@ export class GhidraContexts {
   async releaseUnchanged(scope:Scope):Promise<boolean>{
     const context=this.workspace.context(scope),checkout=context.nativeCheckout;
     if(!checkout||checkout.state==='dropped'||checkout.conflict||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||context.debugger?.connected||
-      this.workspace.activePublication(scope.target)?.session===scope.session||!this.workspace.unchangedNative(context)||this.workspace.uncertainOutcome(scope)||this.workspace.checkoutReferenced(context)||!await this.closed(scope))return false;
+      this.workspace.activePublication(scope.target)?.session===scope.session||!this.workspace.unchangedNative(context)||this.workspace.uncertainOutcome(scope)||this.workspace.checkoutReferenced(context)||!await this.neverStartedOrClosed(context))return false;
     if(checkout.state==='verified'){await this.dropNative(scope);return true;}
     const base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8'))),observed=await this.nativeOperation(checkout,'status');
     if(base.source!=='server'||base.version!==checkout.baseVersion||observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.recoverable!==false||observed.fileId!==checkout.fileId||
@@ -528,6 +528,14 @@ export class GhidraContexts {
   private async neverStartedOrClosed(c:GhidraContext){
     try{await readFile(join(this.directory(),'context',c.id,'current.json'));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return true;throw e;}
     return this.closed(c);
+  }
+  /** A pending checkout intent may own a server checkout, so it is never treated as detached work. */
+  async detachedStopped(scope:Scope):Promise<boolean>{
+    const context=this.workspace.context(scope);let pending=true;
+    try{await readFile(join(this.directory(),'context',context.id,'checkout.json'));}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;pending=false;}
+    if(pending||context.nativeCheckout)fail('blocked','A native checkout belongs to this context; it is not detached work.');
+    return this.neverStartedOrClosed(context);
   }
   async collect(dryRun:boolean){
     return collectStorage(this.workspace,{closed:c=>this.neverStartedOrClosed(c),release:c=>this.releaseUnchanged(c)},dryRun,message=>this.c.progress(message));

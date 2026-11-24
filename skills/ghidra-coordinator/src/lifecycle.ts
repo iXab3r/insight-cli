@@ -1,9 +1,12 @@
 import {command,Permission,CliError,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {Research,scope,type ResearchBackend} from './research.js';
-import {Workspace,type Scope,type DebuggerState} from './workspace.js';
+import {Workspace,legacyDiscardOperation,type Scope,type DebuggerState} from './workspace.js';
 import {id,fail,object,digest} from './model.js';
 import {selectedOptions} from './arguments.js';
 import type {Artifact} from './artifacts.js';
+import {mkdir} from 'node:fs/promises';
+import {join} from 'node:path';
+import {migrationDurable} from './legacy-migration.js';
 export class Lifecycle {
   constructor(private readonly workspace:Workspace,private readonly research:Research,private readonly backend:()=>Promise<ResearchBackend>){}
   async health(selected:Scope) {
@@ -97,6 +100,29 @@ export class Lifecycle {
       this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:context.baseSnapshot,state:'stopped',viewEpoch:(context.viewEpoch??0)+1,scalars:[],complexChanges:[]},result);return result;
     });
   }
+  /** Gives up detached work that has no native continuation. Nothing is replayed or published; a journal keeps its identity. */
+  async discardLegacy(selected:Scope,acknowledged:boolean,callerId?:string) {
+    if(!acknowledged)fail('invalid','Explicit --acknowledge-lost-work is required.');
+    const reserved=this.workspace.reserveRequest(selected,legacyDiscardOperation,{},callerId);
+    return this.research.ordered(selected,async()=>{
+      const request=this.workspace.request(reserved.request.id);
+      if(request.state==='applied')return request.result;
+      // The database transaction is the only effect, so an interrupted run is simply repeated.
+      if(!['accepted','running'].includes(request.state))fail('unknown','Legacy discard did not complete; repeat it with a new request.',request.result);
+      const current=this.workspace.context(selected);
+      if(current.nativeCheckout)fail('unsupported','This context uses a native checkout; use ghidra changes discard.');
+      if(this.workspace.activePublication(selected.target))fail('blocked','Publication must be reconciled before discarding detached work.');
+      if(current.debugger?.connected)fail('busy','Close the live debugger context before discarding it.');
+      const backend=await this.backend();
+      if(!backend.detachedStopped||!await backend.detachedStopped(selected))fail('busy','The detached worker must be stopped before its work is discarded.');
+      const unresolved=this.workspace.unresolved(selected).filter(pending=>pending.id!==request.id);
+      const root=join(this.workspace.directory,'legacy-migrations',selected.target);await mkdir(root,{recursive:true,mode:0o700});
+      await migrationDurable(join(root,current.id+'-discarded-'+request.id+'.json'),{schema:1,request:request.id,original:current,unresolved});
+      if(request.state==='accepted')this.workspace.startRequest(request.id,{kind:'legacy-discard',generation:current.generation});
+      return this.workspace.discardLegacy(selected,request.id,current.generation,{...selected,state:'discarded',discardedChanges:current.scalars.length+current.complexChanges.length,
+        discardedRequests:unresolved.map(pending=>pending.callerId??pending.id),...(current.workingSnapshot?{discardedSha256:current.workingSnapshot.sha256}:{}),pendingChanges:0});
+    });
+  }
   async saveAll(session:string,callerId?:string) {
     this.workspace.session(session);const reserved=this.workspace.reserveAdministration('session.ghidra.save',{session},callerId),request=this.workspace.administration(reserved.request.id);
     if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;fail('unknown','Session save outcomes are retained and are not repeated.',request.result);}
@@ -114,7 +140,9 @@ export class Lifecycle {
 export function lifecycleCommands(service:(context:CommandContext)=>Lifecycle,runtimeStatus?:(context:CommandContext)=>Promise<unknown>):CommandDefinition[] {
   return [command('changes','Manage unpublished edits in the selected context',[
     command('discard','Retain native keep data, discard private edits and check out the current server version',({options:o},c)=>service(c).discard(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
-      {permission:'Destructive',options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the same local discard result'}]})]),
+      {permission:'Destructive',options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the same local discard result'}]}),
+    command('discard-legacy','Give up detached work of an older engine; gc then reclaims it and the next open starts a native checkout',({options:o},c)=>service(c).discardLegacy(scope(o),Boolean(o.acknowledgeLostWork),o.requestId===undefined?undefined:id(o.requestId)),
+      {permission:'Destructive',options:[...selectedOptions,{flags:'--acknowledge-lost-work',description:'Accept that unpublished edits and unknown outcomes of this context are dropped'},{flags:'--request-id <id>',description:'Retrieve the same discard result'}]})]),
     command('save-all','Save every Ghidra context in the explicit session; outcomes are per context',({options:o},c)=>service(c).saveAll(id(o.session),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:Permission.Update,options:[{flags:'--session <id>',description:'Explicit session whose contexts are saved',required:true},{flags:'--request-id <id>',description:'Retrieve the recorded session save outcomes'}]}),
     command('status','Inspect the installed runtime, or verify a selected context',({options:o},c)=>{

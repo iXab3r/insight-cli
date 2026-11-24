@@ -3,7 +3,7 @@ name: insight-dotnet-dump
 description: Capture a managed heap dump or inspect compatible .NET dumps with SOS to recover waiting stacks, objects, fields and retention evidence.
 ---
 
-# Insight .NET Dump 0.6.1
+# Insight .NET Dump 0.6.2
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

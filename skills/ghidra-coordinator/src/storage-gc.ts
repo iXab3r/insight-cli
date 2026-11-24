@@ -118,9 +118,11 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     }catch(error){keep(checkout.root,'Native release was refused: '+String((error as Error).message).slice(0,300));}
   }
 
-  const known=new Set(contexts.map(c=>c.id)),captured=new Set<string>();
+  const known=new Set(contexts.map(c=>c.id)),captured=new Set<string>(),discarded=new Set<string>();
   for(const context of contexts)if(context.workingSnapshot)captured.add(context.id);
     else try{await access(join(workspace.directory,'legacy-migrations',context.target,context.id+'-detached.json'));captured.add(context.id);}catch(error){if(!missing(error))throw error;}
+  // Only detached roots are reached by the project rule, and a discarded context holds no others.
+  for(const context of contexts)if(workspace.legacyDiscarded(context))discarded.add(context.id);
   for(const kind of ['context','shared','candidate'] as const){
     const parent=join(native,kind);
     for(const owner of await directories(parent)){
@@ -146,8 +148,9 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         await remove(join(root,'saved.gzf'),'duplicate-exports');
         // Facade edits are captured as they complete; a GUI save is captured only by an explicit close.
         const stop=worker&&await stopReceipt(root,worker);
-        if(!stop||worker.mode!=='headless'&&stop.reason!=='explicit_close'){keep(join(root,'view.rep'),'Project has no clean stop receipt that proves capture.');continue;}
-        if(kind==='context'&&!captured.has(owner)){keep(join(root,'view.rep'),'Project has no verified saved or migrated view.');continue;}
+        const given=kind==='context'&&discarded.has(owner);
+        if(!given&&(!stop||worker?.mode!=='headless'&&stop.reason!=='explicit_close')){keep(join(root,'view.rep'),'Project has no clean stop receipt that proves capture.');continue;}
+        if(kind==='context'&&!given&&!captured.has(owner)){keep(join(root,'view.rep'),'Project has no verified saved or migrated view.');continue;}
         if(!await soleProgram(root)){keep(join(root,'view.rep'),'Project holds additional files.');continue;}
         for(const file of ['view.rep','view.gpr','view.lock','view.lock~'])await remove(join(root,file),'detached-projects');
       }

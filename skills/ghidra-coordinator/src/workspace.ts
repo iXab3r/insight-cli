@@ -96,6 +96,7 @@ function page(limit: number, offset: number) {
 }
 
 /** Profile root state, deliberately separate from the earlier coordinator.sqlite journals. */
+export const legacyDiscardOperation='ghidra.changes.discard-legacy';
 export class Workspace {
   readonly directory: string;
   readonly artifacts: Artifacts;
@@ -283,9 +284,29 @@ export class Workspace {
   }
   allContexts():GhidraContext[] {return this.db.prepare('SELECT data FROM contexts ORDER BY rowid').all().map(row=>JSON.parse(String(row.data)));}
   allArtifacts():Artifact[] {return this.db.prepare('SELECT data FROM artifacts ORDER BY rowid').all().map(row=>JSON.parse(String(row.data)));}
+  /** Rowid of the last completed legacy discard; earlier unfinished intents of that context own no evidence. */
+  private legacyDiscard(context:string):number {
+    return Number(this.db.prepare("SELECT MAX(rowid) AS at FROM requests WHERE context=? AND state='applied' AND json_extract(data,'$.operation')=?").get(context,legacyDiscardOperation)?.at??0);
+  }
+  legacyDiscarded(context:GhidraContext):boolean {return this.legacyDiscard(context.id)>0;}
+  /** Explicitly gives up one detached context: its outcomes become terminal and stay readable, its work is dropped. */
+  discardLegacy(scope:Scope,request:string,generation:number,result:Record<string,unknown>) {
+    return this.transaction(()=>{
+      const context=this.context(scope),intent=this.request(request);
+      if(context.generation!==generation||context.nativeCheckout||this.activePublication(scope.target)||context.debugger?.connected||
+        intent.context!==context.id||intent.operation!==legacyDiscardOperation||intent.state!=='running')fail('blocked','Only an unchanged, stopped detached context can be discarded.');
+      for(const pending of this.unresolved(scope))if(pending.id!==request)
+        this.writeRequest(pending.id,'failed',{...scope,state:'discarded',reason:'explicit_legacy_discard',previousResult:pending.result??null});
+      if(this.unresolved(scope).some(pending=>pending.id!==request))fail('limit','Too many unresolved operations to discard at once.');
+      this.writeContext(scope,generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,debugger:undefined,
+        scalars:[],complexChanges:[],viewEpoch:(context.viewEpoch??0)+1});
+      return this.writeRequest(request,'applied',result).result;
+    });
+  }
   /** An abandoned or otherwise unknown terminal effect keeps all of its native evidence. */
   uncertainOutcome(scope:Scope):boolean {
-    return this.db.prepare("SELECT data FROM requests WHERE context=? AND state='failed'").all(this.context(scope).id)
+    const context=this.context(scope).id;
+    return this.db.prepare("SELECT data FROM requests WHERE context=? AND state='failed' AND rowid>?").all(context,this.legacyDiscard(context))
       .some(row=>(JSON.parse(String(row.data)).result as {outcome?:unknown}|undefined)?.outcome==='unknown');
   }
   /** Receipt-only comparison; native state is verified separately before any release. */
@@ -314,8 +335,9 @@ export class Workspace {
     for(const table of ['targets','sessions','ghidra_models','contexts','administration_requests'])
       for(const row of this.db.prepare('SELECT data FROM '+table).all())scan(String(row.data));
     for(const row of this.db.prepare("SELECT data FROM publications WHERE state<>'verified'").all())scan(String(row.data));
-    for(const row of this.db.prepare('SELECT state,data FROM requests').all())
-      scan(row.state==='applied'?stable(JSON.parse(String(row.data)).result??null):String(row.data));
+    const discarded=new Map<string,number>(),cutoff=(context:string)=>{let at=discarded.get(context);if(at===undefined)discarded.set(context,at=this.legacyDiscard(context));return at;};
+    for(const row of this.db.prepare('SELECT rowid AS at,context,state,data FROM requests').all())
+      if(row.state==='applied'||Number(row.at)>=cutoff(String(row.context)))scan(row.state==='applied'?stable(JSON.parse(String(row.data)).result??null):String(row.data));
     return roots;
   }
   forgetArtifact(artifact:string) {this.db.prepare('DELETE FROM artifacts WHERE id=?').run(artifact);}

@@ -72,7 +72,8 @@ Other detached contexts are explicitly reported as `retained`, including their s
 target, immutable snapshot, observed identity and reason. Arbitrary private changes are
 not converted by scalar or script replay. Their original snapshot, pending changes,
 requests and context remain untouched and available for a future native ancestry-aware
-conversion. A source mismatch is a concrete refusal, even if filenames are equal.
+conversion. An owner who does not want that work can drop it explicitly with
+[`changes discard-legacy`](GHIDRA-STORAGE-COLLECTION.md#giving-up-detached-work). A source mismatch is a concrete refusal, even if filenames are equal.
 
 After a verified promotion, an old unresolved `ghidra.open` with no private snapshot,
 checkout, edits, traces or active worker can be completed as `failed / not_opened`.
