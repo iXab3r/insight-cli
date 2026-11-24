@@ -81,3 +81,6 @@ export function finding(value: unknown): Finding {
     ...(o.resolves === undefined ? {} : { resolves: id(o.resolves) }),
   };
 }
+
+/** Diagnostic field identity; no merge policy. */
+export const fieldKey=(change:{address:string;field:string})=>change.address+'@'+change.field;

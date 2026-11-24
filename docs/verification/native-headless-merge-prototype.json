@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "scope": "native headless multi-agent merge prototype",
+  "platform": "win32",
+  "ghidra": "12.1.2",
+  "agents": 3,
+  "normalIndependentCheckouts": true,
+  "functionsAndSignaturesCombined": true,
+  "structureChangesCombined": true,
+  "nativeDivergentMerges": 2,
+  "conflictRefused": true,
+  "conflictingLocalWorkRetained": true,
+  "unpublishedCopyDropRefused": true,
+  "independentServerReadback": true,
+  "guiWindows": 0,
+  "upstreamListingSha256": "3b6ce2e22fd414d6cc63ce2a3be6c533f13524b9513767b932f6da8f2d9326d6",
+  "patchedListingSha256": "27661df23e426a9b3d5394f78d98251046b2b58825a68e1de1fc10ac9312a09e",
+  "uiSeamPatches": 3,
+  "upstreamProjectFileSha256": "aafc9c66f42ce12c3f0e7847529d982545b4f760dd570db482133578e9d531e2",
+  "patchedProjectFileSha256": "0d31998e7ed4eb19f14f4688cff86fb6998c14e2faafc2e3977e82787595bc43",
+  "headlessGuardPatches": 2,
+  "copiesDropped": 3,
+  "upstreamProgramContextSha256": "f2a57f5100de73f980fab99a8ba1d79cf8ecee6257ba32686b78f3512e4c67bb",
+  "patchedProgramContextSha256": "0a373e43e0abe74d51fbc0a0df749ffe43fac314b7875cefa90e18f73746f4db",
+  "programContextUiPatches": 1,
+  "upstreamExternalMergerSha256": "76aa623434213057e936c8abef1539844c41c30361891b4398665d673574f519",
+  "patchedExternalMergerSha256": "4ba69a3036b5e8662ee2d8f16e61da6cb26691ce8e057f0bd8c99819d3ec8eee",
+  "externalUiPatches": 2,
+  "sourceHashes": {
+    "ProgramMultiUserMergeManager.java": "462bc2efd107f61079dae67d4031655bd621abf26b3e2169d21ad5510fbc7a92",
+    "NativeMergeFixture.java": "bbd8450b2f89eb467569f8d49d9425f51909a7f3b6d74cec3decaf660425be91",
+    "proof-native-merge.mjs": "158cb5b4f62cbb5f588e7384feeca2835e169d3f239737f469f80613d458ca47"
+  },
+  "startedAt": "2026-10-26T19:26:57.953Z",
+  "finishedAt": "2026-10-26T19:28:24.544Z",
+  "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+  "runtimeJarCount": 154,
+  "installedJarsUnchanged": true,
+  "limitations": [
+    "Synthetic small native program; not production acceptance",
+    "Test-only classpath driver, two headless guards and UI-only listing seams patched",
+    "No conflict resolution or migration/GC implemented",
+    "No public CLI integration or publication authorization proof"
+  ],
+  "ownedNativeProcessesExited": true,
+  "classification": "Historical initial research evidence; superseded by the extended prototype, not acceptance of current sources",
+  "sourceBaseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+  "observations": {
+    "checkoutBaseVersions": [
+      1,
+      1,
+      1
+    ],
+    "headVersionsBeforeCheckin": [
+      1,
+      2,
+      3
+    ],
+    "nativeMergeInvocationsPerCheckin": [
+      0,
+      1,
+      1
+    ],
+    "resolverPhases": [
+      "Memory Block Merger",
+      "Program Tree Merger",
+      "Data Type Merger",
+      "Program Context Registers Merger",
+      "Function Tag Merger",
+      "Listing Merger",
+      "External Program Merger",
+      "Property List Merger"
+    ],
+    "independentlyVerifiedCombinedVersion": 4,
+    "versionAfterAcceptedConflictAuthor": 5,
+    "versionAfterRejectedConflictingCheckin": 5,
+    "unresolvedRecordedFunctionTypeFieldsFullyCompared": true,
+    "unresolvedCheckoutIdentityAndBasePreserved": true,
+    "successfulProjectsDropped": 3,
+    "unresolvedProjectDropRejected": true
+  },
+  "evidence": {
+    "directoryName": "native-merge-proof-cchBpe",
+    "receiptSha256": "67e98ea4b6a6eb7df1fa00a7d7431c78eb750bc2f332ec6cde31a0fd88f47931",
+    "resultsSha256": "93aa2cb66732f2e8cd470ab0d637b1eb2445331fd3b489ba3dfffbcfcdbc343f",
+    "runtimeInventorySha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd"
+  },
+  "reproduction": {
+    "command": "node scripts/proof-native-merge.mjs --ack-disposable --ghidra-home GHIDRA_12_1_2_HOME --java JDK21_JAVA --mcp-jar GHIDRA_MCP_JAR --output-base EXISTING_DISPOSABLE_BASE",
+    "notes": "Historical source snapshot is required to reproduce this exact receipt. The current runner implements the extended prototype. All software paths are read-only; no product profile is opened."
+  },
+  "exclusions": [
+    "No changes to ec2-native",
+    "No production CLI/runtime integration",
+    "No migration or garbage collection",
+    "No separate-user publication authority proof",
+    "No forced conflict resolution",
+    "No crash/owner-loss acceptance"
+  ],
+  "historicalSources": {
+    "directoryName": "native-merge-proof-cchBpe/sources",
+    "note": "Exact initial sources are archived with that disposable run. sourceHashes describe those archived sources, not current repository files."
+  },
+  "supersededBy": "native-headless-merge-extended.json"
+}

@@ -97,6 +97,10 @@ class InsightSdkFiles {
         if(p.has("image_base")){int tx=program.startTransaction("Initial image base");boolean success=false;
             try{program.setImageBase(program.getAddressFactory().getDefaultAddressSpace().getAddress(new BigInteger(text(p,"image_base"),16).longValue()),true);success=true;}
             finally{program.endTransaction(tx,success);}}
+        if(p.has("native_model")&&p.get("native_model").getAsBoolean()){
+            int tx=program.startTransaction("Native publication protocol");
+            try{program.getOptions("Insight").setString("Publication Engine","native-checkout-v1");}finally{program.endTransaction(tx,true);}
+        }
         phase(monitor,"save");program.saveToPackedFile(Path.of(text(p,"output")).toFile(),monitor);monitor.checkCancelled();
         return Map.of("state","imported","loader",loader,"language",program.getLanguageID().toString(),"base_address",program.getImageBase().toString(),
             "compiler",program.getCompilerSpec().getCompilerSpecID().toString(),"sha256",program.getExecutableSHA256(),"auto_analyzed",analyze);

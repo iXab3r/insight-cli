@@ -7,11 +7,10 @@ resolution, qualified heuristics, supported emulation ABIs and memory/signature 
 separate outcome for each input. It does not publish. A partial result preserves completed saves;
 repeating the same request ID retrieves those outcomes without another pass.
 
-`ghidra changes discard --session <id> --target <id>` explicitly removes that context's pending
-program edits, retains its former private snapshot and restores its own opening base. It requires
-Destructive permission. Other sessions and the shared revision remain unchanged; use explicit
-refresh to receive a newer shared base afterward. Close a live debugger before discarding static
-edits. The saved trace remains separate from the program's opening snapshot.
+`ghidra changes discard --session <id> --target <id>` requires Destructive permission.
+For native contexts it retains Ghidra's `.keep` when work is dirty, releases the old checkout
+and checks out the current server version in the same project. It does not publish. Close a
+live debugger first. Legacy detached contexts require explicit migration and are retained.
 
 Open input with `insight-cli ghidra open ./client.exe --session new --json`. Store the returned
 `session` and `target` as the explicit scope for every later research call. Names are display
@@ -39,23 +38,25 @@ text) represents a null/absent comment. Successful edits are checked by readback
 `applied`. A later read sees the local result; another session remains independent. These edits
 do not publish themselves. Use `ghidra merge` to publish the selected context explicitly.
 
-Another session retains its view until `ghidra refresh`. Refresh receives safe shared changes and
-preserves local work. An overlapping field retains original/local/shared values; merge publishes
-nothing while any conflict remains. Resolve that field with its ordinary setter,
-`--resolve-conflict --expect-shared <observed value>` (or `--expect-shared-null` for an absent
-comment). A later shared change invalidates the decision and preserves your work.
+Another session retains its saved native checkout until `ghidra refresh`. The service stops the
+worker and calls native Update on that same project: checkout identity survives, the base advances,
+and local changes merge through Ghidra. Native conflicts reject the whole Update and retain the
+original working copy/base. Status reports the native conflict description. The legacy scalar
+`--resolve-conflict` option is unsupported for native decisions; no coordinator winner is invented.
 
-Types, signatures and memory edits are saved as complete private program state. They publish
-when the shared base is unchanged. After divergence, unproved structural categories remain a
-conflict: retain the old session, open a new session on the current target, and transfer the desired
-work through ordinary operations. A script is not replayed as a merge algorithm.
+Types, signatures, structures and other analysis edits use Ghidra's stock resolvers and native
+checkout change sets. Divergence alone is not a category conflict. `ghidra merge` performs native
+Update, then journaled check-in. Independent read-only history/exact-version buffer verification
+precedes release/drop of the successful native project. Continued work receives a fresh checkout;
+worker/owner restart before publication reopens the same project without packed-snapshot import.
 
-The editing groups include types/categories/layouts, labels/references, properties/bookmarks,
-memory flags, functions/variables/tags and batch comments/documentation. Factory's `Destructive`
-gate covers deletion and replacement operations separately from ordinary Update. These broader
-edits currently use complete saved-state publication; their grouping does not grant scalar merge
-semantics. Boolean fields use explicit values; the no-return setter calls its flag `--non-returning`
-to keep it distinct from CLI negation syntax.
+Ordinary saves retain the native DB and lightweight saved-view receipts. Full packed exports are
+for initial import and explicit consumers such as export, cross-program comparison and VT.
+`receivedChanges` on native refresh counts a received program revision transition; pending scalar
+and opaque operation records are diagnostic, not merge semantics. Memory layout and language
+changes still require native exclusive access. The editing groups include types/categories/layouts,
+labels/references, properties/bookmarks, memory flags, functions/variables/tags and documentation.
+Factory's Destructive gate remains separate from ordinary Update.
 
 `ghidra scripts list` returns stable `installation:` and `context:` script IDs. Pass an exact ID to
 `ghidra scripts run --script-name <id>`, or source to `ghidra scripts run-inline --code <source>`.

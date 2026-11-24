@@ -21,7 +21,7 @@ export class SdkFiles {
   }
   async exporters(selected:Scope){return this.research.ordered(selected,async()=>{
     const backend=await this.backend();if(!backend.sdkFile)fail('configuration','Native SDK file workflows are unavailable.');await backend.open(selected);
-    const snapshot=await backend.saved(selected);return {...selected,value:await backend.sdkFile('exporters',{snapshot:await this.workspace.artifacts.verify(snapshot)})};
+    const snapshot=await backend.saved(selected);return {...selected,value:await backend.sdkFile('exporters',{snapshot:(backend.snapshotFile?await backend.snapshotFile(snapshot):await this.workspace.artifacts.verify(snapshot))})};
   });}
   private async copy(files:ExportFile[],directory:string,recovery=false){
     try{await mkdir(directory,{mode:0o700});}catch(error){if(!recovery||(error as NodeJS.ErrnoException).code!=='EEXIST')throw error;}
@@ -49,7 +49,7 @@ export class SdkFiles {
   async databaseQuery(selected:Scope,operation:'fid-query'|'bsim-query',database:string,p:Record<string,unknown>){
     const artifact=await this.workspace.artifacts.capture(database,'input');if(artifact.size>268435456)fail('limit','Function database exceeds 256 MiB.');
     return this.research.ordered(selected,async()=>{const backend=await this.backend();if(!backend.sdkFile)fail('configuration','Native function databases are unavailable.');await backend.open(selected);
-      const snapshot=await backend.saved(selected),value=await backend.sdkFile(operation,{...p,database:await this.workspace.artifacts.verify(artifact),snapshot:await this.workspace.artifacts.verify(snapshot)});
+      const snapshot=await backend.saved(selected),value=await backend.sdkFile(operation,{...p,database:await this.workspace.artifacts.verify(artifact),snapshot:(backend.snapshotFile?await backend.snapshotFile(snapshot):await this.workspace.artifacts.verify(snapshot))});
       return {...selected,databaseSha256:artifact.sha256,sourceSnapshotSha256:snapshot.sha256,value};
     });
   }
@@ -76,7 +76,7 @@ export class SdkFiles {
       this.workspace.startRequest(request.id,{kind:'sdk-file',operation,snapshot,generation:current.generation});
       try{
         const filename=operation==='archive-export'?'types.gdt':operation==='fid-build'?'database.fidb':operation==='bsim-build'?'database.mv.db':'program.out';
-        const value=await backend.sdkFile(operation,{...parameters,request_id:request.id,receipt:join(stage,'native-result.json'),snapshot:await this.workspace.artifacts.verify(snapshot),output:join(outputs,filename)});
+        const value=await backend.sdkFile(operation,{...parameters,request_id:request.id,receipt:join(stage,'native-result.json'),snapshot:(backend.snapshotFile?await backend.snapshotFile(snapshot):await this.workspace.artifacts.verify(snapshot)),output:join(outputs,filename)});
         if(value.state!=='exported')fail('partial','Native exporter did not establish a completed output.');
         const completed=await this.completedOutput(stage,request.id,operation),files=completed.files;
         if(stable(completed.value)!==stable(value))fail('partial','Native file reply differs from its durable receipt.');

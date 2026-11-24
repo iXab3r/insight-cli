@@ -4,7 +4,7 @@ import { open, mkdir, link, unlink, realpath, lstat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fail } from './model.js';
 
-export type ArtifactKind = 'input' | 'snapshot';
+export type ArtifactKind = 'input' | 'snapshot' | 'native';
 export interface Artifact {
   id: string;
   kind: ArtifactKind;
@@ -18,10 +18,10 @@ export class Artifacts {
   constructor(readonly directory: string) {}
 
   path(value: Artifact): string {
-    if (!['input', 'snapshot'].includes(value.kind) || !/^[a-f0-9]{64}$/.test(value.sha256) ||
+    if (!['input', 'snapshot','native'].includes(value.kind) || !/^[a-f0-9]{64}$/.test(value.sha256) ||
         value.id !== `${value.kind}:${value.sha256}` || !Number.isSafeInteger(value.size) ||
         value.size < 1 || value.size > maximumBytes) fail('artifact', 'Saved artifact reference is malformed.');
-    return join(this.directory, 'artifacts', `${value.sha256}.${value.kind === 'snapshot' ? 'gzf' : 'bin'}`);
+    return join(this.directory, 'artifacts', `${value.sha256}.${value.kind === 'snapshot' ? 'gzf' : value.kind==='native'?'json':'bin'}`);
   }
 
   private async ownedDirectory(): Promise<string> {
@@ -60,7 +60,7 @@ export class Artifacts {
   }
 
   async capture(source: string, kind: ArtifactKind): Promise<Artifact> {
-    if (!['input', 'snapshot'].includes(kind)) fail('artifact', 'Unsupported artifact kind.');
+    if (!['input', 'snapshot','native'].includes(kind)) fail('artifact', 'Unsupported artifact kind.');
     const directory = await this.ownedDirectory();
     const temporary = join(directory, 'pending-' + randomUUID());
     const input = await open(source, constants.O_RDONLY);

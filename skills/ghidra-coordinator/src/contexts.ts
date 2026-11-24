@@ -1,3 +1,4 @@
+import {migrateLegacy} from './legacy-migration.js';
 import {ownedDirectory,projectPathWithin,sameDirectory} from './directory-identity.js';
 import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
@@ -10,14 +11,14 @@ import type { CommandContext } from '@eyeauras/cli-factory';
 import {runtimeProcesses} from './runtime-manager.js';
 import { type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
-import { mkdir, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
+import { mkdir,mkdtemp, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile } from 'node:fs/promises';
 import {constants} from 'node:fs';
 import { join, delimiter, sep, resolve, dirname, basename } from 'node:path';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeHelpers, nativeInputs,nativeJvmDirectories,nativeExtensionArguments, type NativeInputs } from './native-inputs.js';
 import { GhidraServer, type ServerBinding } from './server.js';
-import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState } from './workspace.js';
+import { Workspace, type ResearchTarget, type Scope, type GhidraContext, type ScalarChange, type Publication,type DebuggerState,type NativeCheckout } from './workspace.js';
 import { type Artifact } from './artifacts.js';
 import { object, fail, text, version, stable, digest } from './model.js';
 import { HttpBridge } from './transport.js';
@@ -62,6 +63,7 @@ async function port() {
 
 /** Isolated native contexts. This layer has no agent-facing instance/worker selector. */
 export class GhidraContexts {
+  readonly nativeEngine='native-checkout-v1' as const;
   constructor(private readonly workspace: Workspace, private readonly inputs: NativeInputs,
     private readonly c: CommandContext, private readonly running = new Map<string,Running>(),
     private readonly modelTasks = new Map<string,Promise<void>>(),
@@ -70,6 +72,42 @@ export class GhidraContexts {
   fork(c: CommandContext) {return new GhidraContexts(this.workspace,this.inputs,c,this.running,this.modelTasks,this.ownedServer.fork(c),this.capacity);}
   private directory() {return join(this.workspace.directory,'ghidra-native');}
   private server() {return this.ownedServer;}
+  async migrate(target:string|undefined,dryRun:boolean){
+    const server=this.server(),binding=await server.ensure();
+    const stopped=await server.nativeMigration(binding,{operation:'quiescence',nativeRoot:this.directory()});
+    if(stopped.state!=='verified')fail('busy','Retained native worker or initial-model lock is unproved; migration is refused.');
+    return migrateLegacy(this.workspace,{
+      binding:async()=>({origin:binding.origin,repository:binding.repository,runtimeFingerprint:this.inputs.fingerprint}),
+      probe:t=>server.nativeRead(binding,{operation:'migration-probe',path:programPath(t.id),sourceSha:t.binarySha256}),
+      write:q=>server.nativeMigration(binding,q),
+      verify:async(t,owner,candidate)=>{
+        const result=await server.nativeRead(binding,{operation:'verify',path:programPath(t.id),sourceSha:t.binarySha256,fileId:owner.fileId,version:Number(owner.version)+1,marker:owner.marker,fingerprint:candidate.fingerprint});
+        if(result.state!=='verified'||result.version!==Number(owner.version)+1)fail('unknown','Migration independent exact-version readback is unproved; check-in will not be retried.');
+        const exact=await server.nativeRead(binding,{operation:'migration-probe',path:programPath(t.id),sourceSha:t.binarySha256,version:Number(owner.version)+1,fileId:owner.fileId});
+        if(exact.programIdentity!==owner.programIdentity)fail('binding','Migrated program bytes or load identity differ.');
+        const original=await server.nativeRead(binding,{operation:'migration-probe',path:programPath(t.id),sourceSha:t.binarySha256,version:owner.version,fileId:owner.fileId});
+        if(original.engine!==''||original.fingerprint!==owner.fingerprint||original.programIdentity!==owner.programIdentity)fail('binding','Pre-migration repository version changed.');
+      },
+      adopt:async t=>{const view=await this.serverView(t),model=this.workspace.model(t);if(model.state==='ready')this.observeNativeShared(t,view);else this.workspace.establishModel(t,view.revision,view.snapshot);},
+      knownCheckouts:async(t,rows)=>{
+        for(const row of rows){const id=object(row).id;let checkout:NativeCheckout|undefined;
+          for(let offset=0;;offset+=100){const sessions=this.workspace.sessions(100,offset);for(const s of sessions)for(let at=0;;at+=100){const contexts=this.workspace.contexts(s.id,100,at);for(const c of contexts)if(c.target===t.id&&c.nativeCheckout?.state==='active'&&c.nativeCheckout.checkoutId===id)checkout=c.nativeCheckout;if(contexts.length<100)break;}if(sessions.length<100)break;}
+          if(!checkout)return false;const status=await this.nativeOperation(checkout,'status');
+          if(status.state!=='ready'||status.checkedOut!==true||status.checkoutId!==id||status.fileId!==checkout.fileId)return false;
+        }return true;
+      },
+      recoverOpen:async c=>{
+        const parent=join(this.directory(),'context',c.id),pending=join(parent,'checkout.json');let intent:Record<string,unknown>;
+        try{intent=object(JSON.parse(await readFile(pending,'utf8')));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e;}
+        const root=await realpath(text(intent.root)),owner=object(intent.owner);
+        if(!ownedDirectory(root,this.directory(),['context',c.id,basename(root)])||owner.context!==c.id||owner.target!==c.target||owner.sourceSha!==this.workspace.target(c.target).binarySha256||owner.origin!==binding.origin||owner.repository!==binding.repository||owner.path!==programPath(c.target)||stable(JSON.parse(await readFile(join(root,'native-owner.json'),'utf8')))!==stable(owner))fail('binding','Failed open creation intent changed; its project is retained.');
+        const retained=join(this.workspace.directory,'legacy-migrations',c.target,'recovered-opens',c.id);await mkdir(retained,{recursive:true,mode:0o700});
+        await durable(join(retained,'recovery.json'),{schema:1,context:c.id,intent,requests:this.workspace.unresolved(c),reason:'No acknowledged private work; all server checkouts independently accounted. Failed creation project retained; next open uses a fresh native checkout in the same session/target.'});
+        await rename(pending,join(retained,'checkout-'+randomUUID()+'.json'));
+      },
+      closed:async c=>{try{await readFile(join(this.directory(),'context',c.id,'current.json'));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return true;throw e;}return this.closed(c);},convert:async c=>{await this.createNative(c);}
+    },target,dryRun);
+  }
   async administration(operation:string,parameters:Record<string,unknown>) {
     if(operation==='stop'){
       if(this.c.profile.values.server)fail('authorization','External server lifecycle is owned by its operator. Use server disconnect.');
@@ -79,7 +117,9 @@ export class GhidraContexts {
   }
   async sdkFile(operation:string,parameters:Record<string,unknown>){return this.server().sdkFile(operation,parameters);}
   private async prepareRoot(kind: ProcessBinding['kind'], target: string, context?: string) {
-    const root=join(this.directory(),kind,context??target,randomUUID());await mkdir(root,{recursive:true,mode:0o700});return root;
+    const parent=join(this.directory(),kind,context??target);await mkdir(parent,{recursive:true,mode:0o700});
+    // Atomic short suffix: Windows CreateProcess rejects long cwd even when filesystem APIs accept it.
+    return mkdtemp(join(parent,'w-'));
   }
   private async launch(root: string, target: ResearchTarget, kind: ProcessBinding['kind'], program: string,
     mode: ToolMode, context?: string, credentials: Record<string,string> = {}): Promise<Running> {
@@ -113,6 +153,7 @@ export class GhidraContexts {
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],
       {cwd:root,detached:true,windowsHide:true,stdio:['ignore',log.fd,log.fd],
         env:{PATH:this.c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,XDG_RUNTIME_DIR:root,
+          ...(process.platform==='win32'?{SystemRoot:process.env.SystemRoot,WINDIR:process.env.WINDIR,ComSpec:process.env.ComSpec,TEMP:root,TMP:root,USERPROFILE:root,LOCALAPPDATA:root,APPDATA:root}:{}),
           INSIGHT_TOOL_APPDATA:this.c.appArguments.AppDataDirectory,GHIDRA_MCP_AUTH_TOKEN:token,GHIDRA_MCP_FILE_ROOT:root,GHIDRA_MCP_SHARED_PROJECT_DIR:root,
           GHIDRA_MCP_ALLOW_SCRIPTS:'1',...debuggerEnvironment,...credentials}},{signal:this.c.signal,onSpawn}),async spawned=>{
         if(!spawned.pid)fail('launch','Owned context did not obtain a PID.');
@@ -222,11 +263,55 @@ export class GhidraContexts {
   private async capture(record: Running): Promise<Artifact> {
     const result=object(await record.http.call('/save_program',{program:record.binding.program}));
     if(result.success!==true)fail('save','Private program save was not acknowledged.');
+    if(record.binding.kind==='context'){
+      const context=this.workspace.contextById(record.binding.context!);
+      if(!context.nativeCheckout||context.nativeCheckout.root!==record.binding.root)fail('binding','Working context has no native checkout ownership.');
+      const saved=object(await this.nativeView(record,{operation:'fingerprint'}));
+      return this.nativeReceipt(context.nativeCheckout,saved);
+    }
     const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
     const name='saved-'+randomUUID()+'.gzf';
     const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:output,output_name:name}));
     if(exported.success!==true)fail('save','Saved private snapshot export was not acknowledged.');
     return this.workspace.captureSnapshot(join(output,name));
+  }
+  private async nativeView(record:Running,parameters:Record<string,unknown>){
+    const name='InsightNativeView_'+randomUUID().replaceAll('-',''),source=await readFile(new URL('../../references/native/InsightNativeView.java',import.meta.url),'utf8');
+    const response=object(await record.http.call('/run_script_inline',{program:record.binding.program,
+      code:source.replace('public class InsightNativeView ','public class '+name+' '),args:Buffer.from(JSON.stringify(parameters),'utf8').toString('base64')}));
+    if(response.success!==true||typeof response.console_output!=='string')fail('partial','Saved native view inspection did not complete.');
+    const matches=[...response.console_output.matchAll(/^INSIGHT_NATIVE:(.+)$/gm)];if(matches.length!==1)fail('partial','Native saved-view result is missing.');
+    return object(JSON.parse(matches[0]![1]!)).value;
+  }
+  private async nativeReceipt(checkout:NativeCheckout,saved:Record<string,unknown>):Promise<Artifact>{
+    if(saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||typeof saved.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(saved.fingerprint))fail('binding','Saved native view differs from its checkout identity/base.');
+    const path=join(checkout.root,'saved-view.json');await durable(path,{schema:1,engine:this.nativeEngine,source:'checkout',checkout,...saved});return this.workspace.captureNative(path);
+  }
+  private async serverView(targetId:string,versionNumber?:number):Promise<{revision:number;snapshot:Artifact;value:Record<string,unknown>}>{
+    const server=this.server(),binding=await server.ensure(),target=this.workspace.target(targetId);
+    const value=await server.nativeRead(binding,{operation:'latest',path:programPath(targetId),sourceSha:target.binarySha256,...(versionNumber?{version:versionNumber}:{})});
+    if(value.state!=='verified'||typeof value.fileId!=='string'||typeof value.fingerprint!=='string')fail('binding','Native shared model is unverified or requires an explicit legacy migration.');
+    const revision=version(value.version),root=join(this.directory(),'shared-views',targetId);await mkdir(root,{recursive:true,mode:0o700});
+    const path=join(root,'current.json');await durable(path,{schema:1,engine:this.nativeEngine,source:'server',target:targetId,origin:binding.origin,repository:binding.repository,path:programPath(targetId),
+      sourceSha:target.binarySha256,runtimeFingerprint:this.inputs.fingerprint,version:revision,fileId:value.fileId,fingerprint:value.fingerprint});
+    return {revision,snapshot:await this.workspace.captureNative(path),value};
+  }
+  private observeNativeShared(target:string,shared:{revision:number;snapshot:Artifact}){
+    const model=this.workspace.model(target);
+    // A context's exact immutable base can predate another context's observation.
+    if(model.state==='ready'&&shared.revision>=(model.sharedRevision??1))this.workspace.observeShared(target,shared.revision,shared.snapshot);
+  }
+  private async nativeOwner(checkout:NativeCheckout){
+    const root=await realpath(checkout.root),context=this.workspace.contextById(checkout.context);
+    if(!ownedDirectory(root,this.directory(),['context',context.id,basename(root)])||checkout.runtimeFingerprint!==this.inputs.fingerprint)fail('binding','Native checkout moved or its runtime changed.');
+    const owner=object(JSON.parse(await readFile(join(root,'native-owner.json'),'utf8'))),binding=await this.server().ensure();
+    if(context.nativeCheckout?.root!==checkout.root||owner.context!==context.id||owner.target!==context.target||owner.origin!==binding.origin||owner.repository!==binding.repository||owner.path!==programPath(context.target)||owner.sourceSha!==this.workspace.target(context.target).binarySha256||owner.runtimeFingerprint!==this.inputs.fingerprint)
+      fail('binding','Native checkout owner/server binding changed.');
+    return {root,owner,binding};
+  }
+  private async nativeOperation(checkout:NativeCheckout,operation:string,parameters:Record<string,unknown>={}){
+    const {root,owner,binding}=await this.nativeOwner(checkout);
+    return this.server().nativeCheckout(binding,{root,owner,operation,fileId:checkout.fileId,checkoutId:checkout.checkoutId,...parameters});
   }
   private async shared(target: ResearchTarget, binding: ServerBinding): Promise<Running> {
     const root=await this.prepareRoot('shared',target.id);
@@ -308,15 +393,14 @@ export class GhidraContexts {
     this.capacity.slots.add(context.id);
     let record: Running|undefined;
     try {
-      const target=this.workspace.target(context.target),root=await this.prepareRoot('context',target.id,context.id);
-      const file=join(root,'saved.gzf');await link(await this.workspace.artifacts.verify(snapshot),file);
-      record=await this.launch(root,target,'context','/program','headless',context.id);
-      const project=object(await record.http.call('/create_project',{parentDir:root,name:'view'}));
-      if(project.success!==true)fail('launch','Private context project creation was not acknowledged.');
-      const imported=object(await record.http.call('/import_program',{gzf_path:file,target_folder:'/',target_name:'program',overwrite:false}));
-      if(imported.success!==true)fail('launch','Private context snapshot import was not acknowledged.');
+      const target=this.workspace.target(context.target),checkout=context.nativeCheckout;
+      if(!checkout||checkout.state!=='active')fail('binding','An active native checkout is required.');
+      await this.nativeOwner(checkout);const root=checkout.root;
+      record=await this.launch(root,target,'context',checkout.path,'headless',context.id);
+      const project=object(await record.http.call('/open_project',{path:join(root,'view.gpr')}));
+      if(project.success===false)fail('launch','Native working project could not be reopened.');
       const opened=object(await record.http.call('/open_program',{path:record.binding.program}));
-      if(opened.path!==record.binding.program||opened.read_only===true)fail('binding','Private context did not open its writable saved view.');
+      if(opened.path!==record.binding.program||opened.read_only===true)fail('binding','Native checkout did not open its saved writable program.');
       await this.verified(record.binding,target);
       record.binding.baseRevision=context.baseRevision??this.workspace.model(context.target).sharedRevision;
       record.binding.viewEpoch=context.viewEpoch??0;
@@ -325,6 +409,146 @@ export class GhidraContexts {
       if(context.workingSnapshot)await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'restore',reason:'saved_snapshot',pid:record.binding.pid});
       return record;
     } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
+  }
+  private async createNative(scope:Scope):Promise<GhidraContext>{
+    const context=this.workspace.context(scope),target=this.workspace.target(scope.target),server=this.server(),binding=await server.ensure();
+    const parent=join(this.directory(),'context',context.id);await mkdir(parent,{recursive:true,mode:0o700});
+    const pending=join(parent,'checkout.json');let intent:Record<string,unknown>|undefined;
+    try{intent=object(JSON.parse(await readFile(pending,'utf8')));}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    if(!intent||intent.root===context.nativeCheckout?.root){
+      const root=await this.prepareRoot('context',target.id,context.id),owner={schema:1,protocol:this.nativeEngine,context:context.id,target:target.id,
+        sourceSha:target.binarySha256,origin:binding.origin,repository:binding.repository,path:programPath(target.id),runtimeFingerprint:this.inputs.fingerprint};
+      await durable(join(root,'native-owner.json'),owner);intent={root,owner};await durable(pending,intent);
+    }
+    const root=await realpath(text(intent.root,4096)),owner=object(intent.owner);
+    if(!ownedDirectory(root,this.directory(),['context',context.id,basename(root)])||owner.context!==context.id||owner.target!==target.id||owner.runtimeFingerprint!==this.inputs.fingerprint||
+       owner.origin!==binding.origin||owner.repository!==binding.repository||owner.path!==programPath(target.id)||owner.sourceSha!==target.binarySha256)fail('binding','Retained checkout creation binding changed.');
+    const value=await server.nativeCheckout(binding,{root,owner,operation:'create'});
+    if(value.state!=='ready'||value.checkedOut!==true||!Number.isSafeInteger(value.checkoutId)||typeof value.fileId!=='string')fail('unknown','Native checkout creation remains unproved; its original project is retained.');
+    const checkout:NativeCheckout={schema:1,context:context.id,root,fileId:value.fileId,checkoutId:Number(value.checkoutId),baseVersion:version(value.baseVersion),
+      origin:binding.origin,repository:binding.repository,path:programPath(target.id),runtimeFingerprint:this.inputs.fingerprint,state:'active'};
+    const shared=await this.serverView(scope.target,checkout.baseVersion),snapshot=await this.nativeReceipt(checkout,object(value.saved));
+    this.observeNativeShared(scope.target,shared);
+    return this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:checkout,baseRevision:checkout.baseVersion,baseSnapshot:shared.snapshot,workingSnapshot:snapshot});
+  }
+  async updateNative(scope:Scope,request:string){
+    await this.open(scope,request);let context=this.workspace.context(scope);
+    const record=await this.selected(scope);await this.capture(record);await this.stopRecord(record,true,true,'view_replaced');
+    const checkout=context.nativeCheckout!;
+    const value=await this.nativeOperation(checkout,'update',{request});
+    return this.applyNativeUpdate(scope,request,value,checkout.baseVersion);
+  }
+  private async applyNativeUpdate(scope:Scope,request:string,value:Record<string,unknown>,previousBase:number){
+    let context=this.workspace.context(scope);const checkout=context.nativeCheckout!;
+    if(value.state==='unknown')fail('unknown','Native Update outcome is unknown; retain this project and its operation journal.');
+    if(value.state==='conflict'){
+      const message=text(value.conflict,16000);this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...checkout,conflict:{request,message}}});
+      return {state:'conflict' as const,conflict:message,revision:checkout.baseVersion};
+    }
+    if(value.state!=='updated'||value.checkoutId!==checkout.checkoutId)fail('binding','Native Update did not preserve checkout identity.');
+    const next={...checkout,baseVersion:version(value.baseVersion)};delete next.conflict;
+    const snapshot=await this.nativeReceipt(next,object(value.saved));
+    const shared=await this.serverView(scope.target,next.baseVersion);this.observeNativeShared(scope.target,shared);
+    context=this.workspace.saveContext(scope,context.generation,{nativeCheckout:next,state:'stopped',workingSnapshot:snapshot,baseSnapshot:shared.snapshot,baseRevision:next.baseVersion,viewEpoch:(context.viewEpoch??0)+1});
+    return {state:value.modified===true?'ready' as const:'empty' as const,revision:next.baseVersion,snapshot,sharedSnapshot:shared.snapshot,
+      receivedChanges:Number(next.baseVersion!==previousBase),nativeMergeInvocations:Number(value.nativeMergeInvocations??0)};
+  }
+  async recoverUpdate(scope:Scope,request:string){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout;
+    if(!checkout||checkout.state!=='active'||!await this.closed(scope))return {state:'unknown' as const};
+    let journal:Record<string,unknown>;
+    try{journal=object(JSON.parse(await readFile(join(checkout.root,'operations',request+'-update.json'),'utf8')));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
+    const q=object(journal.request),value=journal.result===undefined?undefined:object(journal.result),{owner}=await this.nativeOwner(checkout);
+    if(q.request!==request||q.root!==checkout.root||q.fileId!==checkout.fileId||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||!value)return {state:'unknown' as const};
+    const observed=await this.nativeOperation(checkout,'status');
+    if(observed.state!=='ready'||observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==value.baseVersion||object(observed.saved).fingerprint!==object(value.saved).fingerprint)return {state:'unknown' as const};
+    return this.applyNativeUpdate(scope,request,value,version(journal.baseVersion));
+  }
+  async publishNative(publication:Publication){
+    const context=this.workspace.context(publication),checkout=context.nativeCheckout;
+    if(!checkout||checkout.state!=='active')fail('binding','Native publication has no active checkout.');
+    const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(publication.snapshot),'utf8')));
+    if(saved.engine!==this.nativeEngine||saved.source!=='checkout'||object(saved.checkout).root!==checkout.root||saved.fileId!==checkout.fileId)fail('binding','Publication differs from its prepared native project.');
+    const value=await this.nativeOperation(checkout,'checkin',{request:publication.id,fingerprint:text(saved.fingerprint),expectedVersion:publication.expectedRevision});
+    if(value.state==='conflict')return {state:'conflict' as const,applied:0 as const,conflict:String(value.conflict)};
+    if(value.state!=='checked_in'||value.baseVersion!==publication.expectedRevision+1)fail('unknown','Native check-in outcome requires independent reconciliation; the project is retained.');
+    const verified=await this.recover(publication);
+    if(verified.state!=='verified')fail('unknown','Native history and independent exact-buffer readback do not yet establish publication.');
+    return {state:'published' as const,revision:verified.revision,snapshot:verified.snapshot};
+  }
+  async dropNative(scope:Scope){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout;
+    if(!checkout||checkout.state==='dropped')return;
+    if(checkout.state!=='verified')fail('blocked','Only a verified native publication can dispose its project.');
+    const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
+    if(shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId)fail('binding','Verified native disposal reference changed.');
+    const parameters={verifiedVersion:checkout.baseVersion,fingerprint:text(shared.fingerprint)};
+    const released=await this.nativeOperation(checkout,'release',parameters);
+    if(released.state!=='released')fail('unknown','Publication is verified but checkout release remains unproved; its project is retained.');
+    const dropped=await this.nativeOperation(checkout,'drop',parameters);
+    if(dropped.state!=='dropped')fail('unknown','Publication is verified but project deletion remains unproved.');
+    this.workspace.saveContext(scope,context.generation,{nativeCheckout:{...checkout,state:'dropped'},state:'stopped'});
+  }
+  async finishEmptyNative(scope:Scope){
+    const context=this.workspace.context(scope);if(!context.nativeCheckout)fail('binding','Native checkout is absent.');
+    if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope);return;}
+    // No new server version; the independent base view must equal all saved local buffers.
+    const local=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.workingSnapshot!),'utf8'))),base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
+    if(local.fingerprint!==base.fingerprint)fail('binding','An unchanged native checkout differs from its shared base.');
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...context.nativeCheckout,state:'verified'},workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
+    await this.dropNative(scope);
+  }
+  async recoverEmptyNative(scope:Scope,request:string){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout;
+    if(!checkout||!['verified','dropped'].includes(checkout.state))return {state:'unknown' as const};
+    let journal:Record<string,unknown>;
+    try{journal=object(JSON.parse(await readFile(join(checkout.root,'operations',request+'-update.json'),'utf8')));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
+    const q=object(journal.request),result=object(journal.result??{}),{owner}=await this.nativeOwner(checkout);
+    const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
+    if(q.request!==request||q.root!==checkout.root||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||result.modified!==false||
+      result.baseVersion!==checkout.baseVersion||shared.source!=='server'||shared.fileId!==checkout.fileId||shared.fingerprint!==object(result.saved).fingerprint)return {state:'unknown' as const};
+    await this.dropNative(scope);return {state:'verified' as const,revision:checkout.baseVersion};
+  }
+  async discardNative(scope:Scope,request:string){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout;
+    if(!checkout||checkout.state!=='active'||!await this.closed(scope))fail('busy','Native discard requires its saved, stopped working copy.');
+    const value=await this.nativeOperation(checkout,'discard',{request});
+    if(value.state!=='discarded'||!Number.isSafeInteger(value.checkoutId)||value.checkoutId===checkout.checkoutId)fail('unknown','Native discard is unproved; its project and journal remain retained.');
+    return this.applyNativeDiscard(scope,value);
+  }
+  async recoverDiscardNative(scope:Scope,request:string,original:NativeCheckout){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout;
+    if(!original||!checkout||checkout.state!=='active'||checkout.root!==original.root||!await this.closed(scope))return {state:'unknown' as const};
+    const binding=(c:NativeCheckout)=>{const {checkoutId,baseVersion,conflict,...rest}=c;return rest;};
+    if(stable(binding(checkout))!==stable(binding(original)))return {state:'unknown' as const};
+    let journal:Record<string,unknown>;
+    try{journal=object(JSON.parse(await readFile(join(original.root,'operations',request+'-discard.json'),'utf8')));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
+    const q=object(journal.request),value=object(journal.result??{}),{owner}=await this.nativeOwner(original);
+    if(q.operation!=='discard'||q.request!==request||q.root!==original.root||q.fileId!==original.fileId||q.checkoutId!==original.checkoutId||stable(q.owner)!==stable(owner)||
+      value.state!=='discarded'||!Number.isSafeInteger(value.checkoutId)||Number(value.checkoutId)<0||value.checkoutId===original.checkoutId||value.modified!==false||
+      !Number.isSafeInteger(value.baseVersion)||Number(value.baseVersion)<original.baseVersion)return {state:'unknown' as const};
+    if(checkout.checkoutId!==original.checkoutId&&checkout.checkoutId!==value.checkoutId||
+      checkout.baseVersion!==(checkout.checkoutId===original.checkoutId?original.baseVersion:value.baseVersion))return {state:'unknown' as const};
+    const next={...checkout,checkoutId:Number(value.checkoutId),baseVersion:Number(value.baseVersion)};
+    const observed=await this.nativeOperation(next,'status'),checkouts=observed.checkouts;
+    if(observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.fileId!==next.fileId||observed.checkoutId!==next.checkoutId||observed.baseVersion!==next.baseVersion||
+      object(observed.saved).fingerprint!==object(value.saved).fingerprint||!Array.isArray(checkouts)||
+      checkouts.some(c=>object(c).id===original.checkoutId)||!checkouts.some(c=>object(c).id===next.checkoutId&&object(c).version===next.baseVersion)||
+      typeof value.retainedKeepFile!=='string'||value.retainedKeepFile!==''&&(value.retainedKeepFile!==basename(next.path)+'.keep'||!Array.isArray(observed.projectFiles)||!observed.projectFiles.includes(value.retainedKeepFile)))return {state:'unknown' as const};
+    return {state:'verified' as const,...await this.applyNativeDiscard(scope,value)};
+  }
+  private async applyNativeDiscard(scope:Scope,value:Record<string,unknown>){
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout!;
+    if(value.modified!==false)fail('unknown','Native discard did not establish an unchanged checkout.');
+    const next={...checkout,checkoutId:Number(value.checkoutId),baseVersion:version(value.baseVersion)};delete next.conflict;
+    const shared=await this.serverView(scope.target,next.baseVersion),snapshot=await this.nativeReceipt(next,object(value.saved));
+    if(shared.value.fingerprint!==object(value.saved).fingerprint)fail('unknown','Discarded checkout differs from independent server readback.');
+    this.observeNativeShared(scope.target,shared);
+    this.workspace.saveContext(scope,context.generation,{nativeCheckout:next,state:'stopped',baseRevision:next.baseVersion,baseSnapshot:shared.snapshot,workingSnapshot:snapshot,scalars:[],complexChanges:[],viewEpoch:(context.viewEpoch??0)+1});
+    return {baseRevision:next.baseVersion,retainedKeepFile:String(value.retainedKeepFile)};
   }
   async open(scope: Scope, request?: string): Promise<GhidraContext> {
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target);
@@ -350,26 +574,20 @@ export class GhidraContexts {
       catch(error){if(!await this.retireUnresponsive(scope,binding,error))throw error;stopped=true;}
     }
     if(binding?.mode==='gui')await this.debuggerReleased(binding);
-    let model=context.workingSnapshot?this.workspace.model(target.id):await this.model(target);
-    if(!context.workingSnapshot) {
-      // A new session begins at the actual server revision, including external publications.
-      // Existing contexts keep their saved private view until an explicit refresh.
-      const shared=await this.latest(target.id);
-      model=this.workspace.observeShared(target.id,shared.revision,shared.snapshot);
-    }
-    const snapshot=context.workingSnapshot??model.sharedSnapshot;
-    if(!snapshot||!model.sharedRevision)fail('binding','Canonical target has no saved base.');
+    if(context.workingSnapshot&&!context.nativeCheckout)fail('migration','This context contains legacy detached work; run ghidra migrate --target '+scope.target+' --dry-run, then ghidra migrate --target '+scope.target+'. Its data is retained.');
+    if(!context.nativeCheckout)await this.model(target);
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
     if(binding&&(stopped||!alive(binding.pid))){
-      if(binding.context!==context.id||binding.target!==scope.target)
-        fail('binding','Retired native credential belongs to a different context.');
+      if(binding.context!==context.id||binding.target!==scope.target)fail('binding','Retired native credential belongs to another context.');
       await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive,()=>this.retiredWorker(binding));
     }
-    await this.privateCopy(context,snapshot);
-    if(context.workingSnapshot)return this.workspace.saveContext(scope,context.generation,{state:'ready'});
-    return this.workspace.saveContext(scope,context.generation,{state:'ready',baseRevision:model.sharedRevision,
-      baseSnapshot:snapshot,workingSnapshot:snapshot});
+    let current=this.workspace.context(scope);
+    if(current.nativeCheckout?.state==='verified'){await this.dropNative(scope);current=this.workspace.context(scope);}
+    if(!current.nativeCheckout||current.nativeCheckout.state==='dropped')current=await this.createNative(scope);
+    await this.privateCopy(current,current.workingSnapshot!);
+    return this.workspace.saveContext(scope,current.generation,{state:'ready'});
   }
+
   private async retireUnresponsive(scope:Scope,binding:ProcessBinding,error:unknown):Promise<boolean>{
     const failure=error as {code?:string;result?:{operation?:string}};
     if(!['coordinator.timeout','coordinator.transport'].includes(failure.code??'')||failure.result?.operation!=='/mcp/instance_info'||
@@ -485,7 +703,31 @@ public class ${name} extends GhidraScript {
       parameters={...parameters,parameters:{...p,input_path:path}};
     }
     const request=join(root,'request.json');await durable(request,parameters);
+    if(snapshot.kind==='native')return object(await this.inspectNative(snapshot,'inspect',{parameters}));
     const result=await this.server().inspect(await this.workspace.artifacts.verify(snapshot),request);return object(result.value);
+  }
+  /** Full exports are explicit consumers (cross-program/VT/export/archive), never save/reopen/publication. */
+  async snapshotFile(snapshot:Artifact):Promise<string>{
+    if(snapshot.kind!=='native')return this.workspace.artifacts.verify(snapshot);
+    const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(snapshot),'utf8'))),root=join(saved.source==='checkout'?text(object(saved.checkout).root,4096):this.directory(),'explicit-exports',randomUUID());
+    await mkdir(root,{recursive:true,mode:0o700});const output=join(root,'program.gzf');
+    if(saved.source==='server'){
+      const binding=await this.server().ensure();
+      if(saved.origin!==binding.origin||saved.repository!==binding.repository)fail('binding','Explicit native export binding changed.');
+      const value=await this.server().nativeRead(binding,{...saved,operation:'export',output});if(value.state!=='verified')fail('binding','Exact native server export failed.');
+    }else if(saved.source==='checkout'){
+      const checkout=object(saved.checkout) as unknown as NativeCheckout,context=this.workspace.contextById(checkout.context);
+      if(context.nativeCheckout?.root!==checkout.root||context.nativeCheckout.state!=='active')fail('binding','Explicit export requires the original active native view.');
+      if(await this.closed(context)){
+        const value=await this.nativeOperation(context.nativeCheckout,'export',{fingerprint:saved.fingerprint,output});if(value.state!=='ready')fail('save','Saved native export failed.');
+      }else{
+        const record=await this.selected(context);await this.nativeView(record,{operation:'fingerprint',expected:saved.fingerprint});
+        const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:root,output_name:'program.gzf'}));
+        if(exported.success!==true)fail('save','Explicit native export was not acknowledged.');
+        await this.nativeView(record,{operation:'fingerprint',expected:saved.fingerprint});
+      }
+    }else fail('binding','Unknown native export source.');
+    return this.workspace.artifacts.verify(await this.workspace.captureSnapshot(output));
   }
   private async removePeer(record:Running,path:string) {
     // A cancelled invocation must still release its verified owned temporary program.
@@ -512,7 +754,7 @@ public class ${name} extends GhidraScript {
     if(reconcile)await this.reconcilePeers(record);
     const name='__insight_peer_'+randomUUID().replaceAll('-',''),path='/'+name,
       folder=join(record.binding.root,'cross-peer',name);await mkdir(folder,{recursive:true,mode:0o700});
-    const file=join(folder,'input.gzf');await link(await this.workspace.artifacts.verify(snapshot),file);
+    const file=join(folder,'input.gzf');await link(await this.snapshotFile(snapshot),file);
     await durable(join(folder,'receipt.json'),{path,target:record.binding.target,context:record.binding.context,state:'preparing'});
     try {
       const imported=object(await record.http.call('/import_program',{gzf_path:file,target_folder:'/',target_name:name,overwrite:false}));
@@ -719,23 +961,27 @@ public class ${name} extends GhidraScript {
     await this.verified(binding,this.workspace.target(scope.target));return false;
   }
   async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {
-    const target=this.workspace.target(targetId),server=this.server(),binding=await server.ensure();
-    const before=await server.programStatus(binding,programPath(targetId));
-    if(before.checkinActive!==false)fail('blocked','Shared model has an active check-in.');
-    const expected=version(before.version),record=await this.shared(target,binding);
-    try {
-      const opened=await server.programStatus(binding,programPath(targetId));
-      if(opened.version!==expected)fail('binding','Shared model changed while opening its saved view.');
-      const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
-      const exported=object(await record.http.call('/export_program',{program_name:record.binding.program,output_dir:output,output_name:'shared.gzf'}));
-      if(exported.success!==true)fail('save','Shared snapshot export was not acknowledged.');
-      const snapshot=await this.workspace.captureSnapshot(join(output,'shared.gzf'));
-      const after=await server.programStatus(binding,programPath(targetId));
-      if(after.version!==expected)fail('binding','Shared model changed before its snapshot was verified.');
-      return {revision:expected,snapshot};
-    } finally {await this.stopRecord(record);}
+    return this.serverView(targetId);
+  }
+  private async inspectNative(snapshot:Artifact,operation:'fields'|'inspect',parameters:Record<string,unknown>){
+    const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(snapshot),'utf8')));
+    if(saved.engine!==this.nativeEngine||saved.runtimeFingerprint!==this.inputs.fingerprint&&saved.source==='server')fail('binding','Native view uses a different engine/runtime.');
+    if(saved.source==='server'){
+      const binding=await this.server().ensure();if(saved.origin!==binding.origin||saved.repository!==binding.repository)fail('binding','Native shared view binding changed.');
+      const result=await this.server().nativeRead(binding,{...saved,operation,...parameters});
+      if(result.state!=='verified')fail('binding','Immutable native server view could not be verified.');return operation==='fields'?result.fields:result.value;
+    }
+    if(saved.source!=='checkout')fail('binding','Unknown native view source.');
+    const checkout=object(saved.checkout) as unknown as NativeCheckout,context=this.workspace.contextById(checkout.context);
+    if(context.nativeCheckout?.root!==checkout.root||context.nativeCheckout.state!=='active')fail('binding','The retained native view is no longer the active working copy.');
+    if(await this.closed(context)){
+      const result=await this.nativeOperation(context.nativeCheckout,operation,{fingerprint:saved.fingerprint,...parameters});
+      if(result.state!=='ready')fail('binding','Saved native project inspection failed.');return result.value;
+    }
+    return this.nativeView(await this.selected(context),{operation,expected:saved.fingerprint,...parameters});
   }
   async fields(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>> {
+    if(snapshot.kind==='native')return object(await this.inspectNative(snapshot,'fields',{selectors:changes})) as Record<string,{value:string|null;dependency:string;exists:boolean}>;
     const directory=join(this.directory(),'inspection',randomUUID());await mkdir(directory,{recursive:true,mode:0o700});
     const selectors=join(directory,'fields.json');await durable(selectors,changes.map(change=>({address:change.address,field:change.field})));
     const result=await this.server().fields(await this.workspace.artifacts.verify(snapshot),selectors),values=object(result.fields);
@@ -746,51 +992,17 @@ public class ${name} extends GhidraScript {
     }
     return values as Record<string,{value:string|null;dependency:string;exists:boolean}>;
   }
-  private async applyField(record:Running,change:ScalarChange) {
-    const result=object(await record.http.call(change.field==='function.name'?'/rename_function':'/set_comment',change.field==='function.name'?
-      {program:record.binding.program,old_name:change.address,new_name:change.local,strict_mode:'off'}:
-      {program:record.binding.program,address:change.address,type:change.field.slice(8),comment:change.local??''}));
-    if(result.status!=='success'&&result.success!==true)fail('partial','Candidate edit was not acknowledged.');
-    if(change.field==='function.name') {
-      const read=object(await record.http.call('/get_functions',{program:record.binding.program,functions:change.address,fields:'entry_point',include_call_context:false}));
-      if(object(object(read.functions)[change.address]).name!==change.local)fail('partial','Candidate name readback differs.');
-    } else {
-      const read=object(await record.http.call('/get_comment',{program:record.binding.program,address:change.address}));
-      if((read[change.field.slice(8)]||null)!==change.local)fail('partial','Candidate comment readback differs.');
-    }
-  }
-  async candidate(targetId:string,snapshot:Artifact,changes:ScalarChange[]):Promise<Artifact> {
-    const target=this.workspace.target(targetId),root=await this.prepareRoot('candidate',targetId);
-    await link(await this.workspace.artifacts.verify(snapshot),join(root,'saved.gzf'));
-    const record=await this.launch(root,target,'candidate','/program','headless');
-    try {
-      await record.http.call('/create_project',{parentDir:root,name:'view'});
-      await record.http.call('/import_program',{gzf_path:join(root,'saved.gzf'),target_folder:'/',target_name:'program',overwrite:false});
-      await record.http.call('/open_program',{path:record.binding.program});await this.verified(record.binding,target);
-      for(const change of changes)await this.applyField(record,change);
-      return await this.capture(record);
-    } finally {await this.stopRecord(record,false);}
-  }
-  async publish(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}> {
-    const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
-    const directory=join(this.directory(),'publications',publication.id);await mkdir(directory,{recursive:true,mode:0o700});
-    const result=await server.publish(binding,programPath(target.id),await this.workspace.artifacts.verify(publication.snapshot),
-      publication.expectedRevision,publication.id,join(directory,'native-intent.json'),target.binarySha256);
-    if(result.state==='conflict'&&result.applied===0)return {state:'conflict',applied:0};
-    if(result.state!=='published'||result.version!==publication.expectedRevision+1||result.snapshotBuffersVerified!==true||result.ownedCheckoutReleased!==true)
-      fail('unknown','Native publication did not establish its version and complete saved buffers.');
-    const verified=await this.recover(publication);
-    if(verified.state!=='verified')fail('unknown','Independent exact-version publication verification remains unresolved.');
-    return {state:'published',revision:verified.revision};
-  }
-  async recover(publication:Publication):Promise<{state:'verified';revision:number}|{state:'unknown'}> {
-    const server=this.server(),binding=await server.ensure(),target=this.workspace.target(publication.target);
-    const journal=join(this.directory(),'publications',publication.id,'native-intent.json');
-    const result=await server.recoverPublication(binding,programPath(target.id),await this.workspace.artifacts.verify(publication.snapshot),
-      publication.expectedRevision,publication.id,journal,target.binarySha256);
-    if(result.state==='verified'&&result.version===publication.expectedRevision+1&&result.snapshotBuffersVerified===true&&result.ownedCheckoutReleased===true)
-      return {state:'verified',revision:version(result.version)};
-    return {state:'unknown'};
+  async recover(publication:Publication):Promise<{state:'verified';revision:number;snapshot:Artifact}|{state:'unknown'}> {
+    if(publication.snapshot.kind!=='native')return {state:'unknown'};
+    const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(publication.snapshot),'utf8'))),checkout=object(saved.checkout) as unknown as NativeCheckout;
+    if(saved.engine!==this.nativeEngine||saved.source!=='checkout')return {state:'unknown'};
+    const {binding}=await this.nativeOwner(checkout),target=this.workspace.target(publication.target),revisionNumber=publication.expectedRevision+1;
+    const value=await this.server().nativeRead(binding,{operation:'verify',path:checkout.path,sourceSha:target.binarySha256,fileId:checkout.fileId,
+      version:revisionNumber,marker:'insight native '+publication.id,fingerprint:saved.fingerprint});
+    if(value.state!=='verified'||value.version!==revisionNumber)return {state:'unknown'};
+    const shared=await this.serverView(publication.target,revisionNumber);
+    if(object(shared.value).fingerprint!==saved.fingerprint)return {state:'unknown'};
+    return {state:'verified',revision:revisionNumber,snapshot:shared.snapshot};
   }
   async recoverModel(targetId:string):Promise<boolean> {
     if(this.workspace.activePublication(targetId))return false;

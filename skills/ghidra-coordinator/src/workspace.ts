@@ -26,6 +26,12 @@ export interface ScalarChange {
   conflict?: {shared: string | null};
 }
 export interface SyncPolicy {publish:'manual'|'after-edit'|'after-save';refresh:'manual'|'before-edit'}
+export interface NativeCheckout {
+  schema:1;context:string;root:string;fileId:string;checkoutId:number;baseVersion:number;
+  origin:string;repository:string;path:string;runtimeFingerprint:string;
+  state:'active'|'verified'|'dropped';
+  conflict?:{request:string;message:string};
+}
 export interface GhidraContext extends Scope {
   /** Internal storage key, never a caller's backend selector. */
   id: string; tool: 'ghidra'; state: 'opening' | 'ready' | 'stopped' | 'needs_recovery'; generation: number;
@@ -34,6 +40,7 @@ export interface GhidraContext extends Scope {
   scalars: ScalarChange[]; complexChanges: string[];
   debugger?:DebuggerState;
   syncPolicy?:SyncPolicy;
+  nativeCheckout?:NativeCheckout;
 }
 export interface SavedTrace {id:string;name:string;snapshot:Artifact;snap:string;modules:number;threads:number;connected:boolean;thread?:string}
 export interface DebuggerState {traces:SavedTrace[];active?:string;connected:boolean}
@@ -53,7 +60,7 @@ export interface OpenReservation {
   context: GhidraContext; request: ResearchRequest; replay: boolean;
 }
 type ContextPatch = Partial<Pick<GhidraContext,
-  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'viewEpoch' | 'scalars' | 'complexChanges' | 'debugger' | 'syncPolicy'>>;
+  'state' | 'baseRevision' | 'baseSnapshot' | 'workingSnapshot' | 'viewEpoch' | 'scalars' | 'complexChanges' | 'debugger' | 'syncPolicy' | 'nativeCheckout'>>;
 const now = () => new Date().toISOString();
 function loadSettings(value: GhidraLoadSettings): GhidraLoadSettings {
   if (typeof value.autoAnalyze !== 'boolean' || Object.keys(value).some(key =>
@@ -149,13 +156,14 @@ export class Workspace {
   }
   private knownSnapshot(artifact: Artifact) {
     this.artifacts.path(artifact);
-    if (artifact.kind !== 'snapshot' || this.db.prepare('SELECT data FROM artifacts WHERE id=?').get(artifact.id)?.data !== stable(artifact))
+    if (!['snapshot','native'].includes(artifact.kind) || this.db.prepare('SELECT data FROM artifacts WHERE id=?').get(artifact.id)?.data !== stable(artifact))
       fail('artifact', 'Context requires a captured immutable snapshot.');
   }
   async captureSnapshot(path: string): Promise<Artifact> {
     const artifact = await this.artifacts.capture(path, 'snapshot');
     this.rememberArtifact(artifact); return artifact;
   }
+  async captureNative(path:string):Promise<Artifact>{const artifact=await this.artifacts.capture(path,'native');this.rememberArtifact(artifact);return artifact;}
   async importTarget(path: string): Promise<ResearchTarget> {
     const name = text(basename(path), 512);
     const input = await this.artifacts.capture(path, 'input');
@@ -272,6 +280,15 @@ export class Workspace {
   scopedRequest(scope:Scope,identity:string):ResearchRequest|undefined {
     const row=this.db.prepare('SELECT data FROM requests WHERE context=? AND (id=? OR caller_id=?)').get(this.context(scope).id,id(identity),id(identity));
     return row?JSON.parse(String(row.data)):undefined;
+  }
+  recoverMigrationOpen(scope:Scope):number {
+    return this.transaction(()=>{
+      const context=this.context(scope),unresolved=this.unresolved(scope);
+      if(context.nativeCheckout||context.workingSnapshot||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||unresolved.some(q=>q.operation!=='ghidra.open'))fail('blocked','Only a proven no-work open can be recovered by migration.');
+      for(const request of unresolved)this.writeRequest(request.id,'failed',{...scope,state:'not_opened',reason:'explicit_native_migration_completed',previousResult:request.result??null});
+      if(unresolved.length)this.writeContext(scope,context.generation,{state:'stopped'});
+      return unresolved.length;
+    });
   }
   request(request: string): ResearchRequest {
     const row = this.db.prepare('SELECT data FROM requests WHERE id=?').get(id(request));
@@ -422,7 +439,7 @@ export class Workspace {
       return next;
     });
   }
-  finishPublication(publication:string,publishedRevision:number,result:unknown):Publication {
+  finishPublication(publication:string,publishedRevision:number,result:unknown,sharedSnapshot?:Artifact):Publication {
     version(publishedRevision);
     return this.transaction(()=>{
       const previous=this.publication(publication);
@@ -430,9 +447,12 @@ export class Workspace {
         fail('binding','Verified publication has an unexpected state or version.');
       const context=this.context(previous),model=this.model(previous.target);
       if(context.generation!==previous.generation)fail('binding','Private context changed during publication; preserve both saved versions.');
-      this.writeContext(previous,previous.generation,{state:'ready',baseRevision:publishedRevision,baseSnapshot:previous.snapshot,
-        workingSnapshot:previous.snapshot,viewEpoch:(context.viewEpoch??0)+1,scalars:[],complexChanges:[]});
-      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'ready',sharedRevision:publishedRevision,sharedSnapshot:previous.snapshot}),previous.target);
+      if(sharedSnapshot)this.knownSnapshot(sharedSnapshot);
+      const saved=sharedSnapshot??previous.snapshot;
+      this.writeContext(previous,previous.generation,{state:context.nativeCheckout?'stopped':'ready',baseRevision:publishedRevision,baseSnapshot:saved,
+        workingSnapshot:saved,viewEpoch:(context.viewEpoch??0)+1,scalars:[],complexChanges:[],
+        ...(context.nativeCheckout?{nativeCheckout:{...context.nativeCheckout,state:'verified',baseVersion:publishedRevision}}:{})});
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'ready',sharedRevision:publishedRevision,sharedSnapshot:saved}),previous.target);
       this.writeRequest(previous.request,'applied',result);
       const next={...previous,state:'verified' as const,publishedRevision};
       this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);return next;
@@ -481,13 +501,15 @@ export class Workspace {
   }
   private writeContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     if (!Number.isSafeInteger(expectedGeneration) || expectedGeneration < 0) fail('invalid', 'Invalid context generation.');
-    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'viewEpoch', 'scalars', 'complexChanges','debugger','syncPolicy'].includes(key)) ||
+    if (Object.keys(patch).some(key => !['state', 'baseRevision', 'baseSnapshot', 'workingSnapshot', 'viewEpoch', 'scalars', 'complexChanges','debugger','syncPolicy','nativeCheckout'].includes(key)) ||
         patch.state !== undefined && !['opening', 'ready', 'stopped', 'needs_recovery'].includes(patch.state))
       fail('invalid', 'Invalid context state update.');
     if (patch.baseRevision !== undefined) version(patch.baseRevision);
     if(patch.viewEpoch!==undefined&&(!Number.isSafeInteger(patch.viewEpoch)||patch.viewEpoch<0))fail('invalid','View epoch must be a nonnegative integer.');
     if (patch.baseSnapshot) this.knownSnapshot(patch.baseSnapshot);
     if (patch.workingSnapshot) this.knownSnapshot(patch.workingSnapshot);
+    if(patch.nativeCheckout){const n=patch.nativeCheckout;if(n.schema!==1||!['active','verified','dropped'].includes(n.state)||!Number.isSafeInteger(n.checkoutId)||n.checkoutId<0||!Number.isSafeInteger(n.baseVersion)||n.baseVersion<1||
+      !/^[a-f0-9]{64}$/.test(n.runtimeFingerprint)||n.context!==this.context(scope).id||!n.root||!n.fileId||!n.origin||!n.repository||n.path!=='/'+scope.target+'.bin')fail('binding','Native checkout receipt is malformed.');}
     if(patch.syncPolicy){const p=patch.syncPolicy;if(Object.keys(p).some(k=>!['publish','refresh'].includes(k))||!['manual','after-edit','after-save'].includes(p.publish)||!['manual','before-edit'].includes(p.refresh))fail('invalid','Invalid synchronization policy.');}
     if(patch.debugger){const state=patch.debugger;if(typeof state.connected!=='boolean'||!Array.isArray(state.traces)||state.traces.length>64)fail('invalid','Debugger trace state is malformed.');
       const ids=new Set<string>();for(const trace of state.traces){

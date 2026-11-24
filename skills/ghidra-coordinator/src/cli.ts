@@ -3,6 +3,7 @@ import {captureCommands} from './capture.js';
 import {binaryCommands} from './binary.js';
 import {skillCommand,toolboxCommands} from './toolbox.js';
 import {listProcesses} from './tool-runtime/supervisor.js';
+import {migrationProcessBlockers} from './legacy-migration.js';
 import {diagnosticsCommands} from './dotnet-diagnostics.js';
 import {fridaCommands} from './frida.js';
 import {mitmproxyCommands} from './mitmproxy.js';
@@ -72,6 +73,7 @@ class Owner {
   storage?:AnalysisStorage;
   private readonly profiles=new Map<string,ProfileOwner>();
   private readonly runtimeChanging=new Set<string>();
+  private openSequence=0;
   async runtime<T>(c:CommandContext,action:()=>Promise<T>,quiescent=true):Promise<T>{
     const directory=c.appArguments.AppDataDirectory;
     if(this.runtimeChanging.has(directory))fail('busy','Another runtime operation is in progress.');
@@ -112,6 +114,28 @@ class Owner {
       if(!(await store.getPermissions(c.profile.name))?.includes(Permission.Update))throw new CliError('Automatic synchronization requires the current Factory Update permission.',{code:'permission.denied',next:[['permissions','grant','Update']]});
     }),administration:new Administration(profile.workspace,backend,profile.tasks),lifecycle:new Lifecycle(profile.workspace,research,backend),projects:new Projects(profile.workspace,backend,research,profile.tasks),sdkFiles:new SdkFiles(profile.workspace,research,backend),tracking:new VersionTracking(profile.workspace,research,backend,profile.tasks),ui:new UserInterface(profile.workspace,research,backend),debugger:new Debugger(profile.workspace,research,backend),archive:new Archive(profile.workspace,research,backend,c),backend};
   }
+  async openCommand<T>(c:CommandContext,action:(selected:ReturnType<Owner['selected']>)=>Promise<T>):Promise<T>{
+    const selected=this.selected(c),tasks=this.profiles.get(c.appArguments.AppDataDirectory)!.tasks;
+    // Register before the first await, including import before a context/task exists.
+    const key='open-command:'+ ++this.openSequence,task=Promise.resolve().then(()=>action(selected));
+    tasks.set(key,task);
+    try{return await task;}finally{tasks.delete(key);}
+  }
+  async migrate(c:CommandContext,target:string|undefined,dryRun:boolean){
+    if(!dryRun){const store=this.options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
+      if(!(await store.getPermissions(c.profile.name))?.includes('Destructive'))throw new CliError('Explicit Ghidra migration requires Destructive permission.',{code:'permission.denied',next:[['permissions','grant','Destructive']]});}
+    const selected=this.selected(c),profile=this.profiles.get(c.appArguments.AppDataDirectory)!;
+    if(profile.tasks.size)fail('busy','Finish research operations before migration.');
+    this.runtimeChanging.add(c.appArguments.AppDataDirectory);
+    try{
+      // A missing private-worker receipt does not prove an interrupted native helper stopped.
+      const helpers=await migrationProcessBlockers(c.appArguments.AppDataDirectory);
+      const workers=(await runtimeProcesses(analysisDirectory(c))).filter(p=>p.kind!=='server');
+      if(helpers.length||workers.length)fail('busy','Stop or reconcile retained Ghidra workers and native helpers before migration; no takeover is performed.',{helpers,workers});
+      const backend=await selected.backend();if(!backend.migrate)fail('unsupported','The selected backend cannot migrate native Ghidra models.');return await backend.migrate(target,dryRun);
+    }
+    finally{this.runtimeChanging.delete(c.appArguments.AppDataDirectory);}
+  }
   async invalidateProfile(app: IAppArguments) {
     const directory=app.AppDataDirectory,profile=this.profiles.get(directory);
     if(this.storage?.busy(directory))fail('busy','Storage migration is in progress.');
@@ -143,7 +167,7 @@ const scoped=[
 ];
 const at={flags:'--address <address>',description:'Explicit hexadecimal address or space:address',required:true};
 const request={flags:'--request-id <id>',description:'Retrieve the same changing intent after a lost response'};
-const resolveOptions=[{flags:'--resolve-conflict',description:'Resolve the existing field against an explicitly observed shared value'},
+const resolveOptions=[{flags:'--resolve-conflict',description:'Legacy scalar resolution only; native conflicts require Ghidra decisions'},
   {flags:'--expect-shared <value>',description:'Shared value used for this resolution'},
   {flags:'--expect-shared-null',description:'Expect the shared comment to be absent'}];
 function resolution(options:Record<string,unknown>) {
@@ -292,6 +316,10 @@ export function createDefinition(options: Options = {}): CliDefinition {
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Inspect one target context'},...paged]}),
       ]),
       command('ghidra','Research through an isolated saved context',[
+        command('migrate','Explicitly migrate retained legacy models; repeat to resume',({options:o},c)=>{
+          if(Boolean(o.target)===Boolean(o.all))fail('invalid','Select exactly one --target or --all.');
+          return owner.migrate(c,o.target===undefined?undefined:id(o.target),Boolean(o.dryRun));
+        },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Migrate one immutable target'},{flags:'--all',description:'Inspect or migrate every Ghidra target in this profile'},{flags:'--dry-run',description:'Inspect without checkout, check-in or context changes'}]}),
         command('progress','Read initial-model import/publication progress without starting Ghidra',async({options:o},c)=>{
           const selected=owner.selected(c),who=scope(o);selected.workspace.context(who);
           return {...who,progress:await readInitialProgress(selected.workspace.directory,who.target)};
@@ -317,7 +345,8 @@ export function createDefinition(options: Options = {}): CliDefinition {
           {permission:Permission.Update,options:[...scoped,request]}),
         command('open [input]','Start independent work or continue a context',async({args,options:o},c)=>{
           if(Boolean(args.input)===Boolean(o.target))fail('invalid','Supply exactly one input path or --target.');
-          const selected=owner.selected(c),target=args.input?(await selected.workspace.importTarget(resolve(c.cwd,text(args.input,4096)))).id:id(o.target);
+          return owner.openCommand(c,async selected=>{
+          const target=args.input?(await selected.workspace.importTarget(resolve(c.cwd,text(args.input,4096)))).id:id(o.target);
           let previous;
           try{previous=selected.workspace.model(target).settings;}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
           const settings={...previous,autoAnalyze:typeof o.analysis==='boolean'?o.analysis:previous?.autoAnalyze??false,
@@ -325,6 +354,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
             ...(o.imageBase?{imageBase:text(o.imageBase)}:{}),...(o.loader?{loader:text(o.loader,512)}:{}),
             ...(o.loaderOptions!==undefined?{loaderOptions:object(parseDomainJson(text(o.loaderOptions,16000))) as Record<string,string|number|boolean>}:{})};
           return selected.research.open(target,text(o.session),settings,o.requestId===undefined?undefined:id(o.requestId),mode(o.mode));
+          });
         },{permission:Permission.Update,options:[{flags:'--session <id>',description:'Use new for independent work, or an existing session',required:true},
           {flags:'--target <id>',description:'Continue existing input instead of supplying a file'},request,
           {flags:'--mode <mode>',description:'Request headless or gui; continuation preserves current mode'},

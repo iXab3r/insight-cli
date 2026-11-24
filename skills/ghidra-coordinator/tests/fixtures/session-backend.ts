@@ -10,6 +10,8 @@ import {fieldKey} from '../../src/merge.js';
 interface View {names:Record<string,string>;comments:Record<string,Record<string,string|null>>;opaque:string}
 const empty=():View=>({names:{'1000':'first','1100':'second'},comments:{},opaque:'base'});
 export class SessionBackend implements ResearchBackend {
+  readonly nativeEngine='native-checkout-v1' as const;
+  nativeUpdates=0;disposals=0;
   views=new Map<string,{epoch:number;view:View}>();
   shared=new Map<string,{revision:number;snapshot:Artifact}>();markers=new Map<string,number>();
   publications=0;edits=0;losePublication=false;loseSetter=false;cannotVerify=false;
@@ -39,6 +41,32 @@ export class SessionBackend implements ResearchBackend {
     this.edits++;if(this.loseSetter)throw Error('Synthetic setter response loss');return {status:'success'};
   }
   async saved(scope:Scope){return this.encode(this.view(scope));}
+  async updateNative(scope:Scope,_request:string){
+    this.nativeUpdates++;
+    const context=this.workspace.context(scope),shared=this.shared.get(scope.target)!,original=await this.decode(context.baseSnapshot!),mine=this.view(scope),latest=await this.decode(shared.snapshot);
+    // JSON-only fake backend for orchestration tests. Actual Ghidra semantics are established by native acceptance.
+    const same=(a:unknown,b:unknown)=>JSON.stringify(a)===JSON.stringify(b);
+    function receive(base:unknown,local:unknown,remote:unknown):unknown{
+      if(same(local,base))return remote;if(same(remote,base)||same(local,remote))return local;
+      if([base,local,remote].every(v=>v!==null&&typeof v==='object'&&!Array.isArray(v))){
+        const b=base as Record<string,unknown>,l=local as Record<string,unknown>,r=remote as Record<string,unknown>,out:Record<string,unknown>={};
+        for(const key of new Set([...Object.keys(b),...Object.keys(l),...Object.keys(r)])){const value=receive(b[key],l[key],r[key]);if(value!==undefined)out[key]=value;}return out;
+      }
+      throw Error('Synthetic native resolver conflict');
+    }
+    let combined:View;try{combined=receive(original,mine,latest) as View;}catch{return {state:'conflict' as const,revision:context.baseRevision!,conflict:'Synthetic native resolver conflict'};}
+    const snapshot=await this.encode(combined),receivedChanges=Number(context.baseRevision!==shared.revision),viewEpoch=(context.viewEpoch??0)+1;
+    this.workspace.observeShared(scope.target,shared.revision,shared.snapshot);
+    this.workspace.saveContext(scope,context.generation,{baseRevision:shared.revision,baseSnapshot:shared.snapshot,workingSnapshot:snapshot,viewEpoch});
+    this.views.set(context.id,{epoch:viewEpoch,view:combined});
+    return {state:same(combined,latest)?'empty' as const:'ready' as const,revision:shared.revision,snapshot,sharedSnapshot:shared.snapshot,receivedChanges,nativeMergeInvocations:receivedChanges};
+  }
+  async publishNative(publication:Publication){return this.publish(publication);}
+  async dropNative(scope:Scope){this.disposals++;this.views.delete(this.workspace.context(scope).id);}
+  async finishEmptyNative(scope:Scope){const c=this.workspace.context(scope),shared=this.shared.get(scope.target)!;
+    this.workspace.saveContext(scope,c.generation,{workingSnapshot:shared.snapshot,baseSnapshot:shared.snapshot,baseRevision:shared.revision,scalars:[],complexChanges:[],viewEpoch:(c.viewEpoch??0)+1});
+    await this.dropNative(scope);
+  }
   async mode(_scope:Scope,_mode:ToolMode){}
   async close(scope:Scope){this.views.delete(this.workspace.context(scope).id);}
   async dispose(){this.views.clear();}

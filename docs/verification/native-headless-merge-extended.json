@@ -1,0 +1,299 @@
+{
+  "schema": 2,
+  "scope": "extended native headless multi-agent merge prototype",
+  "platform": "win32",
+  "ghidra": "12.1.2",
+  "agents": 3,
+  "normalIndependentCheckouts": true,
+  "functionsAndSignaturesCombined": true,
+  "structureChangesCombined": true,
+  "nativeDivergentMerges": 4,
+  "stockResolverSelection": true,
+  "sharedFunctionIndependentChangesCombined": true,
+  "conflictCases": [
+    {
+      "kind": "function",
+      "serverVersion": 9,
+      "localProjectionPreserved": true,
+      "checkoutPreserved": true
+    },
+    {
+      "kind": "bytes",
+      "serverVersion": 10,
+      "localProjectionPreserved": true,
+      "checkoutPreserved": true
+    },
+    {
+      "kind": "block-comment",
+      "serverVersion": 11,
+      "localProjectionPreserved": true,
+      "checkoutPreserved": true
+    },
+    {
+      "kind": "block-comment-clear",
+      "serverVersion": 12,
+      "localProjectionPreserved": true,
+      "checkoutPreserved": true
+    }
+  ],
+  "testedCategories": [
+    "function names",
+    "signatures and parameters",
+    "stack locals",
+    "namespaces and labels",
+    "function creation and deletion",
+    "instructions",
+    "defined data",
+    "memory bytes",
+    "memory block attributes",
+    "structures, type renames and deletions",
+    "enums",
+    "unions",
+    "typedefs",
+    "type-use dependencies",
+    "references",
+    "comments",
+    "bookmarks",
+    "equates",
+    "user properties",
+    "program options",
+    "program trees",
+    "function tags",
+    "register context",
+    "external functions and library paths"
+  ],
+  "returnConflictUsesTypesPresentBeforeConflictCheckouts": true,
+  "distinctCreatedTypeUniversalIdsVerified": true,
+  "knownUnfixedNativeCase": {
+    "case": "Concurrent first-time float/double returns on one function",
+    "observed": "checkin succeeds and retains latest float instead of reporting conflict",
+    "evidence": "native-merge-proof-A8uqWN/authoritative-readback.json",
+    "scope": "Not resolved or covered by the successful baseline-type conflict case"
+  },
+  "conflictRefused": true,
+  "conflictingLocalWorkRetained": true,
+  "unpublishedCopyDropRefused": true,
+  "independentServerReadback": true,
+  "guiWindows": 0,
+  "upstreamListingSha256": "3b6ce2e22fd414d6cc63ce2a3be6c533f13524b9513767b932f6da8f2d9326d6",
+  "patchedListingSha256": "27661df23e426a9b3d5394f78d98251046b2b58825a68e1de1fc10ac9312a09e",
+  "uiSeamPatches": 3,
+  "upstreamProjectFileSha256": "aafc9c66f42ce12c3f0e7847529d982545b4f760dd570db482133578e9d531e2",
+  "patchedProjectFileSha256": "0d31998e7ed4eb19f14f4688cff86fb6998c14e2faafc2e3977e82787595bc43",
+  "headlessGuardPatches": 2,
+  "copiesDropped": 6,
+  "upstreamProgramContextSha256": "f2a57f5100de73f980fab99a8ba1d79cf8ecee6257ba32686b78f3512e4c67bb",
+  "patchedProgramContextSha256": "0a373e43e0abe74d51fbc0a0df749ffe43fac314b7875cefa90e18f73746f4db",
+  "programContextUiPatches": 1,
+  "upstreamExternalMergerSha256": "76aa623434213057e936c8abef1539844c41c30361891b4398665d673574f519",
+  "patchedExternalMergerSha256": "4ba69a3036b5e8662ee2d8f16e61da6cb26691ce8e057f0bd8c99819d3ec8eee",
+  "externalUiPatches": 2,
+  "upstreamFunctionMergerSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+  "patchedFunctionMergerSha256": "84fd6ff165076e28ec111f11752116dd79c0bff861a4fcb7082a7c36e303559d",
+  "functionConflictUiPatches": 1,
+  "nativeCompatibilityFix": {
+    "class": "MemoryMergeManager",
+    "upstreamSha256": "28b1fd583e694a7b48d37dcdebdae6674990ee0c2b3dbf3d44a726da33dd1129",
+    "patchedSha256": "b745456b4611eecbee9686de9c870546c0375ca8360e6adb622de327ff27c298",
+    "reason": "Unchanged null comment wrongly clears latest; delete-vs-update conflict detection is asymmetric",
+    "unpatchedLossReproducedIn": "native-merge-proof-4VUDaO",
+    "checks": [
+      "unchanged null preserves incoming comment",
+      "intentional clear survives later merges",
+      "clear-vs-update conflict",
+      "update-vs-clear conflict"
+    ]
+  },
+  "sourceHashes": {
+    "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+    "NativeMergeFixture.java": "04ab7ce4010c32bc6a22a56b938db9b167050f6cc2718fbd5762530f7ca851b7",
+    "ExtendedMergeCases.java": "afa99082276a658a44154602a9d1240a4f102c81a610f5229b7e31a1cea2d204",
+    "proof-native-merge.mjs": "d1a6fcd8a3950f2e21d7261aa2c2ad05c6bcb35bb71ce54cecd95dfc28c162d8"
+  },
+  "startedAt": "2026-10-26T20:02:39.213Z",
+  "finishedAt": "2026-10-26T20:08:02.407Z",
+  "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+  "runtimeJarCount": 154,
+  "installedJarsUnchanged": true,
+  "limitations": [
+    "Synthetic native program; bounded observations are not full database equivalence",
+    "Stock resolver selection; headless adapter and one documented native memory-comment compatibility fix, not an unmodified-stock support claim",
+    "No conflict resolution or migration/GC implemented",
+    "No public CLI integration, crash recovery or separate-user publication authorization proof",
+    "Memory layout changes and arbitrary overlapping structural changes are not claimed"
+  ],
+  "ownedNativeProcessesExited": true,
+  "classification": "Historical extended research evidence for the retained mAPTlq sources; not acceptance of current repository files",
+  "sourceBaseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+  "proposalPath": "docs/NATIVE-MERGE-PROTOTYPE.md",
+  "evidence": {
+    "directoryName": "native-merge-proof-mAPTlq",
+    "receiptSha256": "1db375038ca56b5c1f33545ad818fbeca3cbaa41f886eda01972b92bcd331b52",
+    "resultsSha256": "ed13ba65e267321517768f7be96aa61a8dcc4b76e84a51f2120878056df828da",
+    "runtimeInventorySha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd",
+    "sourceInventorySha256": "031110db58e402613c5667105a19fcb8613e737121af0caa6ab65bc32e0036d5",
+    "sourceArchive": "sources"
+  },
+  "observations": {
+    "checkoutBaseVersions": [
+      1,
+      1,
+      1
+    ],
+    "nativeMergeInvocationsPerInitialCheckin": [
+      0,
+      1,
+      1
+    ],
+    "nativeMergeInvocationsPerJointCheckin": [
+      0,
+      1,
+      1
+    ],
+    "resolverPhases": [
+      "Memory Block Merger",
+      "Program Tree Merger",
+      "Data Type Merger",
+      "Program Context Registers Merger",
+      "Function Tag Merger",
+      "Listing Merger",
+      "External Program Merger",
+      "Property List Merger"
+    ],
+    "independentCombinedVersion": 4,
+    "independentJointVersion": 7,
+    "typeConflictVersion": 8,
+    "finalAcceptedVersion": 12,
+    "rejectedConflictKinds": [
+      "datatype component",
+      "function return type",
+      "memory byte",
+      "block comment clear versus update",
+      "block comment update versus clear"
+    ],
+    "successfulWorkingProjectsDropped": 6,
+    "typeUseBindingsVerified": true,
+    "unresolvedRecordedProjectionAndCheckoutPreserved": true
+  },
+  "retainedFailedExperiments": [
+    {
+      "case": "Unchanged private null clears incoming block comment",
+      "status": "Corrected by the separately recorded MemoryMergeManager compatibility patch; both conflict directions now pass",
+      "evidence": {
+        "directoryName": "native-merge-proof-4VUDaO",
+        "files": [
+          {
+            "path": "calls/read-reader0-e177be87-ca4c-4f12-820f-8a10bbd1429a/stdout.json",
+            "sha256": "9f89d09cfe32947e592266a4a77e6a9b7d8af0ab5ec6d45d5ac6e734c18cf821"
+          }
+        ]
+      }
+    },
+    {
+      "case": "First-time float/double return types",
+      "status": "Unresolved publication-loss case; current successful existing-type conflict does not clear it",
+      "observedServerVersions": 10,
+      "observedFinalReturnType": "float",
+      "evidence": {
+        "directoryName": "native-merge-proof-A8uqWN",
+        "files": [
+          {
+            "path": "authoritative-readback.json",
+            "sha256": "7cc06bef5ce97d24b9c0a6a386bc0d186de78b10834766cef519eaa401c284e6"
+          },
+          {
+            "path": "calls/conflictedit-fconflict0-13b2c105-5f80-41eb-a5f3-e76ab3142a60/stdout.json",
+            "sha256": "a6ad321474de0da630d2d95f21e4d0eb00ff3679276e0c06227fbad0699e8b56"
+          },
+          {
+            "path": "calls/conflictedit-fconflict1-d50a0bb5-51c8-452b-8f92-176e8e83a48f/stdout.json",
+            "sha256": "debe6d47e667eebf3523005d26ad60ff39cbaa812e5e744620d59b514838edea"
+          }
+        ]
+      }
+    },
+    {
+      "case": "Preseeding float/double into synthetic baseline",
+      "status": "Unexpected datatype conflict in positive scenario; cause unclassified",
+      "evidence": {
+        "directoryName": "native-merge-proof-EzD5CN",
+        "files": [
+          {
+            "path": "calls/checkin-agent1-f42cf81b-869e-4c5e-b5d5-457eacaabc56/stdout.json",
+            "sha256": "82ae1d9277cf3d986efb56d0cdef923be73a57df41e023c75fa8e4f9cc41e7ba"
+          },
+          {
+            "path": "calls/checkin-agent1-f42cf81b-869e-4c5e-b5d5-457eacaabc56/stderr.log",
+            "sha256": "abc3d18618df4a2a8948312b69838c8294501dab9302c366f06154c3df4c68c0"
+          }
+        ]
+      }
+    },
+    {
+      "case": "Function conflict swallowed by GUI setup error",
+      "status": "Headless seam corrected and independently reviewed; final candidate preserves conflicting return and checkout",
+      "observedServerVersions": 9,
+      "observedFinalReturnType": "Record0 *",
+      "secondCheckoutReleased": true,
+      "evidence": {
+        "directoryName": "native-merge-proof-gDIipX",
+        "files": [
+          {
+            "path": "authoritative-readback.json",
+            "sha256": "4bc28dbdf67eaac8579f4ec09c91a33f43f627c28887a3da6827b3f4a7d41fd1"
+          },
+          {
+            "path": "calls/checkin-fconflict1-73e6adb4-3703-4802-9470-3c19f1b26cb8/stdout.json",
+            "sha256": "dacca8733848468abf0d389221937e6a9ff0d68c462306cf40dea58addb4dd40"
+          },
+          {
+            "path": "calls/checkin-fconflict1-73e6adb4-3703-4802-9470-3c19f1b26cb8/stderr.log",
+            "sha256": "9bf47988bd22445142b5312f99df68c40d2ff10fb3540f1c3d5ac18dc13de5c4"
+          }
+        ]
+      }
+    }
+  ],
+  "reproduction": {
+    "command": "node scripts/proof-native-merge.mjs --ack-disposable --ghidra-home GHIDRA_12_1_2_HOME --java JDK21_JAVA --mcp-jar GHIDRA_MCP_JAR --output-base EXISTING_DISPOSABLE_BASE",
+    "notes": "Requires loopback access. Creates fresh server, repository and owned test projects. No product profile is opened. Software and output paths resolving into ec2-native are rejected. Native server stores versions/checkouts; native client resolvers run in the fixture worker."
+  },
+  "additionalValidation": {
+    "nodeSyntax": "passed",
+    "pinnedToolCatalog": "passed: 30 binary assets",
+    "untrackedSourceWhitespaceAndAuthorPathScan": "passed",
+    "apacheLicenseBytes": "match existing bundled GhidraMCP license",
+    "releaseTests": {
+      "passed": 21,
+      "failed": 5,
+      "skipped": 7,
+      "failure": "All five fail spawning host python3 with EACCES; no release-suite pass claimed",
+      "temporaryDirectory": "Explicit writable disposable directory; initial sandbox TEMP was absent"
+    }
+  },
+  "exclusions": [
+    "No ec2-native data accessed or modified by this prototype",
+    "No production CLI integration or migration/GC",
+    "No native refresh acceptance or conflict-resolution implementation",
+    "No separate-user authorization or crash/unknown-outcome acceptance",
+    "No full database equivalence, memory layout or arbitrary overlapping structural-change claim"
+  ],
+  "historicalSources": {
+    "directoryName": "native-merge-proof-mAPTlq/sources",
+    "note": "sourceHashes and sourcePathsAtTimeOfRun identify the archived candidate. The current runner has additional return-type regressions."
+  },
+  "sourcePathsAtTimeOfRun": {
+    "HeadlessProgramMergeManager.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/HeadlessProgramMergeManager.java",
+    "NativeMergeFixture.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/NativeMergeFixture.java",
+    "ExtendedMergeCases.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/ExtendedMergeCases.java",
+    "proof-native-merge.mjs": "scripts/proof-native-merge.mjs"
+  },
+  "supersededBy": "native-return-type-regression.json",
+  "followupResolution": {
+    "case": "Previously unresolved float/double return loss",
+    "cause": "Incomplete headless adapter: native conflict display dereferences a null listing panel and catches the error before reaching the rejection hook",
+    "status": "Native detection/remapping succeeds; the existing headless seam correction is covered by a minimal before/after regression and renewed server evidence",
+    "report": "native-return-type-regression.json",
+    "note": "knownUnfixedNativeCase and retainedFailedExperiments preserve the classification at the time of this historical run; they are not the current diagnosis."
+  }
+}

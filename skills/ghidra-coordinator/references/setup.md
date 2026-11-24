@@ -34,7 +34,17 @@ artifact provenance. Its pinned functionality catalog is from source
 `f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32`.
 `mcpJar` optionally selects another copy of those exact verified bytes. Runtime startup needs no
 bridge/Factory source checkout or Python MCP bridge. Packaged native helper sources compile
-against the installed Ghidra/JDK.
+against the installed Ghidra/JDK. Native merge additionally requires that installation's
+unaltered Ghidra 12.1.2 source archives. Six upstream sources are hash-pinned before compiling
+owned headless adapter classes; installed Ghidra JARs are not rewritten. License/provenance
+is retained in `references/native/NATIVE-MERGE-NOTICE.txt` and the generated helper cache.
+
+Fresh models use native checkouts/Update/check-in. Existing detached contexts and unmarked
+legacy models are rejected for explicit migration; opening them does not auto-convert or clean
+research. Do not mix an older snapshot writer with a native item. Use explicit `ghidra migrate --target <target> --dry-run`, then the same command
+without `--dry-run` with Destructive permission; `--all` selects the whole profile.
+Repeat execution to resume its journal. Detached private work without provable native
+ancestry is explicitly refused and retained. See [migration](recovery.md#explicit-legacy-migration).
 
 Omitting `server` enables owned local startup. The facade creates profile storage, a private
 repository and distinct read-only/publisher accounts with random credentials in Factory's secret
@@ -81,7 +91,7 @@ defaults to 120 (1–3600 seconds). Configure them with `ghidra budgets set
 This uses Factory ProfileStore without invalidating research or stopping native contexts.
 Active requests retain their original budget. Generic `profile set` remains guarded for
 profiles containing research; initial profile creation also accepts these fields. Both are execution policy, independent
-of immutable target/load identity. Save and packed snapshot export use the save budget;
+of immutable target/load identity. Native save, Update/check-in, exact-version verification and explicit packed export use the save budget;
 discovery and ordinary HTTP queries keep their 30-second budget. Each native request has
 its own budget, not a total command deadline. Cancellation remains independent.
 

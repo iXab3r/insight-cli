@@ -1,3 +1,5 @@
+package insight.nativecheckout;
+
 import com.google.gson.*;
 import db.DBHandle;
 import ghidra.GhidraApplicationLayout;
@@ -14,20 +16,11 @@ import java.security.MessageDigest;
 import java.util.*;
 
 /** Read scalar values and conservative dependencies from an immutable saved program. */
-class InsightSnapshotFields {
+public class InsightSnapshotFields {
   static final Map<String,Integer> kinds=Map.of("comment.eol",CodeUnit.EOL_COMMENT,"comment.pre",CodeUnit.PRE_COMMENT,
     "comment.post",CodeUnit.POST_COMMENT,"comment.plate",CodeUnit.PLATE_COMMENT,"comment.repeatable",CodeUnit.REPEATABLE_COMMENT);
-  public static void main(String[] args) {
-    var output=System.out;System.setOut(System.err);
-    try {
-      if(args.length!=2)throw new IllegalArgumentException();
-      String input=Files.readString(Path.of(args[1]));if(input.length()>1048576)throw new IllegalArgumentException();
-      JsonArray requests=JsonParser.parseString(input).getAsJsonArray();if(requests.size()>5000)throw new IllegalArgumentException();
-      Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
-      DBHandle db=PackedDatabase.getPackedDatabase(Path.of(args[0]).toFile(),true,TaskMonitor.DUMMY).open(TaskMonitor.DUMMY);
-      Object consumer=new Object();ProgramDB program=new ProgramDB(db,OpenMode.IMMUTABLE,TaskMonitor.DUMMY,consumer);
+  public static Map<String,Object> inspect(ProgramDB program,JsonArray requests) throws Exception {
       Map<String,Object> values=new LinkedHashMap<>();
-      try {
         for(JsonElement item:requests) {
           JsonObject request=item.getAsJsonObject();String address=request.get("address").getAsString(),field=request.get("field").getAsString();
           if(!field.equals("function.name")&&!kinds.containsKey(field))throw new IllegalArgumentException();
@@ -60,6 +53,19 @@ class InsightSnapshotFields {
           Map<String,Object> observed=new LinkedHashMap<>();observed.put("value",value);observed.put("exists",exists);observed.put("dependency",anchor);
           values.put(address+"@"+field,observed);
         }
+      return values;
+  }
+  public static void main(String[] args) {
+    var output=System.out;System.setOut(System.err);
+    try {
+      if(args.length!=2)throw new IllegalArgumentException();
+      String input=Files.readString(Path.of(args[1]));if(input.length()>1048576)throw new IllegalArgumentException();
+      JsonArray requests=JsonParser.parseString(input).getAsJsonArray();if(requests.size()>5000)throw new IllegalArgumentException();
+      Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
+      DBHandle db=PackedDatabase.getPackedDatabase(Path.of(args[0]).toFile(),true,TaskMonitor.DUMMY).open(TaskMonitor.DUMMY);
+      Object consumer=new Object();ProgramDB program=new ProgramDB(db,OpenMode.IMMUTABLE,TaskMonitor.DUMMY,consumer);
+      Map<String,Object> values;
+      try { values=inspect(program,requests);
       }finally{program.release(consumer);}
       output.println(new GsonBuilder().serializeNulls().create().toJson(Map.of("fields",values)));
       System.exit(0);

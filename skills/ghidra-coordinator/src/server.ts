@@ -1,6 +1,7 @@
 import {ghidraBudget} from './budgets.js';
 import {CliError} from '@eyeauras/cli-factory';
-import {launchProcess,terminateProcess} from './tool-runtime/supervisor.js';
+import {launchProcess,terminateProcess,processStatus} from './tool-runtime/supervisor.js';
+import {processIdentity} from './tool-runtime/identity.js';
 import {runTool} from './tool-runtime/run.js';
 import type { CommandContext } from '@eyeauras/cli-factory';
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
@@ -26,6 +27,17 @@ const live = (pid: number) => {
   try { process.kill(pid, 0); return true; }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ESRCH') return false; throw error; }
 };
+/** A proven different process birth retires only the saved receipt, never the PID. */
+export async function retireReusedServer(directory:string,control:string,local:LocalServer){
+  if(!local.pid||!local.toolProcessId)return false;
+  const row=await processStatus(control,local.toolProcessId);
+  if(row.phase!=='pid_identity_changed'||row.tool!=='ghidra'||row.role!=='server'||row.pid!==local.pid||!row.strongIdentity||typeof row.identity!=='string'||typeof row.metadata?.serverDirectory!=='string'||await realpath(row.metadata.serverDirectory)!==await realpath(directory))return false;
+  const observed=await processIdentity(local.pid);
+  if(!observed?.strong||observed.birth===row.identity)return false;
+  await durable(join(directory,'server','retired-local-'+randomUUID()+'.json'),{schema:1,reason:'Original server birth is no longer alive; reused PID was not signaled.',local:{...local},process:row,observedBirth:observed.birth});
+  local.phase='stopped';delete local.pid;delete local.toolProcessId;
+  await durable(join(directory,'server','local.json'),local);return true;
+}
 async function durable(path: string, value: unknown) {
   const temporary = path + '.new-' + randomUUID(), handle = await open(temporary, 'wx', 0o600);
   try { await handle.writeFile(stable(value)); await handle.sync(); } finally { await handle.close(); }
@@ -61,6 +73,7 @@ export class GhidraServer {
     const output=await runTool(this.c,{tool:'ghidra',role:label,installation:this.inputs.fingerprint,executable:this.inputs.java,arguments:['-Djava.awt.headless=true','-Dghidra.home='+this.inputs.ghidraHome,
       ...nativeJvmDirectories(root),...nativeExtensionArguments(this.inputs),'-cp',classes+delimiter+this.inputs.classpath,main,...args],cwd:root,environment, input,acceptedCodes,timeoutMs:timeoutMilliseconds,maxOutputBytes:1024*1024});
     let result;try{result=object(parseDomainJson(output.stdout));}catch{fail('malformed','Native server operation returned malformed content.');}
+    if(result.state==='unknown'&&typeof result.reason==='string')fail(result.code==='migration'?'migration':'unknown',result.reason,{diagnostic:result.diagnostic});
     if(result.error||result.state==='failed')fail('authorization','Native server operation did not establish its outcome.');return result;
   }
 
@@ -71,9 +84,24 @@ export class GhidraServer {
       GHIDRA_SERVER_PASSWORD:await this.c.secrets.require(role === 'reader' ? binding.readerSecret : binding.publisherSecret)};
   }
   async fields(snapshot:string,selectors:string) {
-    return this.run('snapshot-fields','InsightSnapshotFields',[snapshot,selectors]);
+    return this.run('snapshot-fields','insight.nativecheckout.InsightSnapshotFields',[snapshot,selectors]);
   }
-  async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','InsightSnapshotInspect',[snapshot,request]);}
+  async nativeCheckout(binding:ServerBinding,request:Record<string,unknown>){
+    const root=join(this.root(),'native-calls',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const input=join(root,'request.json');await durable(input,request);
+    return this.run('native-checkout','InsightNativeCheckout',[input],await this.credentials(binding,'publisher'),undefined,[0],ghidraBudget(this.c.profile.values,'save'));
+  }
+  async nativeMigration(binding:ServerBinding,request:Record<string,unknown>){
+    const root=join(this.root(),'migration-calls',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const input=join(root,'request.json');await durable(input,request);
+    return this.run('native-migration','InsightNativeMigration',[input],['snapshot','quiescence'].includes(String(request.operation))?{}:await this.credentials(binding,'publisher'),undefined,[0],ghidraBudget(this.c.profile.values,'save'));
+  }
+  async nativeRead(binding:ServerBinding,request:Record<string,unknown>){
+    const root=join(this.root(),'native-reads',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
+    const input=join(root,'request.json');await durable(input,{...request,repository:binding.repository});
+    return this.run('native-read','InsightNativeRead',[input],await this.credentials(binding,'reader'),undefined,[0],ghidraBudget(this.c.profile.values,'save'));
+  }
+  async inspect(snapshot:string,request:string) {return this.run('snapshot-inspect','insight.nativecheckout.InsightSnapshotInspect',[snapshot,request]);}
   async sdkFile(operation:string,p:Record<string,unknown>){
     const root=join(this.root(),'sdk-files',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
     const tracking=operation.startsWith('vt.');
@@ -151,15 +179,6 @@ export class GhidraServer {
     this.c.progress('Ghidra initial publication: '+operation);
     return this.run('initial-publication','db.InsightInitialPublication',[root,operation],await this.credentials(binding,operation.startsWith('verify')?'reader':'publisher'));
   }
-  async publish(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
-    return this.run('publish','db.InsightSnapshotPublisher',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],
-      await this.credentials(binding,'publisher'),undefined,[0,2]);
-  }
-  async recoverPublication(binding:ServerBinding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string) {
-    return this.run('recover-publication','db.InsightPublicationRecovery',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],
-      {...await this.credentials(binding,'reader'),INSIGHT_PUBLISHER_USER:binding.publisherUser,
-        INSIGHT_PUBLISHER_PASSWORD:await this.c.secrets.require(binding.publisherSecret)});
-  }
   private async authority(binding: ServerBinding) {
     for (const role of ['reader','publisher'] as const) {
       const result = await this.run('verify-' + role, 'InsightServerProbe', [binding.repository,role], await this.credentials(binding,role));
@@ -225,6 +244,7 @@ export class GhidraServer {
         await this.c.secrets.set(key,randomBytes(32).toString('hex'));
       }
     }
+    if (local.pid && live(local.pid))await retireReusedServer(this.directory,this.c.appArguments.AppDataDirectory,local);
     if (local.pid && live(local.pid)) {
       await this.identity(local); await this.authority(local); return local;
     }

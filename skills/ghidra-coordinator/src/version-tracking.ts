@@ -46,7 +46,9 @@ export class VersionTracking {
         if(receipt.request!==request.id||receipt.operation!=='create')fail('binding','VT creation receipt differs.');const result=this.response(owner,receipt.value);this.workspace.administrationState(request.id,'applied',result);return result;
       }
       const backend=await this.backend();await backend.open(selected);await backend.open(source);
-      const sourceSnapshot=await backend.saved(source),destinationSnapshot=await backend.saved(selected),root=join(this.workspace.directory,'version-tracking',tracking);
+      const sourceView=await backend.saved(source),destinationView=await backend.saved(selected);
+      const sourceSnapshot=backend.snapshotFile?await this.workspace.captureSnapshot(await backend.snapshotFile(sourceView)):sourceView,
+        destinationSnapshot=backend.snapshotFile?await this.workspace.captureSnapshot(await backend.snapshotFile(destinationView)):destinationView,root=join(this.workspace.directory,'version-tracking',tracking);
       await mkdir(root,{recursive:true,mode:0o700});if(await realpath(root)!==resolve(root))fail('binding','VT storage moved.');
       const owner:TrackingOwner={schema:1,tracking,profile:this.workspace.profile,source,destination:selected,sourceSnapshot,destinationSnapshot,
         sourceGeneration:this.workspace.context(source).generation,destinationGeneration:this.workspace.context(selected).generation};await persist(join(root,'owner.json'),owner);
