@@ -241,7 +241,7 @@ try{
  assert.deepEqual(await serverCheckouts(),[retained.nativeCheckout.checkoutId]);assert.ok(!(await readdir(unchanged.root)).includes('view.rep'));
  // A file below a subfolder exists only in this project and must keep it.
  await cli(['ghidra','open',...select(a)]);const nested=context(a).nativeCheckout;
- await script(a,'import ghidra.app.script.GhidraScript;import ghidra.program.database.ProgramDB; public class NestedFile extends GhidraScript {public void run()throws Exception {var root=currentProgram.getDomainFile().getParent().getProjectData().getRootFolder();var p=new ProgramDB("nested",currentProgram.getLanguage(),currentProgram.getCompilerSpec(),this);try{root.createFolder("owned").createFile("nested",p,monitor);}finally{p.release(this);}}}');
+ await script(a,'import ghidra.app.script.GhidraScript;import ghidra.program.database.ProgramDB; public class NestedFile extends GhidraScript {public void run()throws Exception {var root=currentProgram.getDomainFile().getParent().getProjectData().getRootFolder();var p=new ProgramDB("nested",currentProgram.getLanguage(),currentProgram.getLanguage().getDefaultCompilerSpec(),this);try{root.createFolder("owned").createFile("nested",p,monitor);}finally{p.release(this);}}}');
  assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'retained');assert.ok((await readdir(nested.root)).includes('view.rep'));
  const nestedClosed=await server.nativeCheckout(binding,{root:nested.root,owner:JSON.parse(await readFile(join(nested.root,'native-owner.json'))),operation:'status',fileId:nested.fileId,checkoutId:nested.checkoutId});
  assert.ok(nestedClosed.projectFiles.includes('owned/nested'));assert.ok(!nestedClosed.projectFiles.includes(other.target+'.bin'));
