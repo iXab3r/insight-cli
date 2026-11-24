@@ -150,6 +150,14 @@ test('a clean detached context of an already native target is matched to its exa
  const result=await migrateLegacy(f.workspace,f.port,f.target.id,false);assert.equal((result.items[0]!.contexts as {state:string}[])[0]!.state,'converted_unchanged');
  assert.deepEqual(asked,[undefined,1]);assert.equal(f.runs+f.adoptions+f.releases,0);assert.equal(f.conversions,1);
 });
+test('equal saved records convert a context whose buffers differ; missing or different records do not',async t=>{
+ for(const [content,server,identity,expected] of [['r','r','c',1],['r','x','c',0],[undefined,undefined,'c',0],['r','r','d',0]] as const){
+  const f=await fixture(t);f.engine='native-checkout-v1';f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
+  const latest=f.port.probe;f.port.probe=async(target,revision)=>({...await latest(target),version:revision??3,fingerprint:'e'.repeat(64),...(revision&&server?{content:server}:{})});
+  f.port.snapshots=async paths=>paths.map(()=>({state:'verified',fingerprint:'f'.repeat(64),...(content?{content}:{}),programIdentity:identity.repeat(64),sourceSha:f.target.binarySha256}));
+  const result=await migrateLegacy(f.workspace,f.port,f.target.id,false);assert.equal(f.conversions,expected);assert.equal(result.retainedContexts,1-expected);
+ }
+});
 test('an unproved older revision keeps the detached context',async t=>{
  const f=await fixture(t);f.engine='native-checkout-v1';f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
  const latest=f.port.probe;f.port.probe=async(target,revision)=>{if(revision)throw Error('unavailable');return {...await latest(target),version:3};};
