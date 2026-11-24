@@ -66,6 +66,16 @@ public final class InsightNativeMigration {
             if(text(q,"operation").equals("quiescence")){
                 quiescent(Path.of(text(q,"nativeRoot")));output.println("{\"state\":\"verified\"}");System.exit(0);
             }
+            if(text(q,"operation").equals("snapshots")){
+                Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
+                var items=new ArrayList<Map<String,Object>>();
+                for(JsonElement path:q.getAsJsonArray("snapshots")){
+                    var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(path.getAsString()).toFile(),true,MONITOR).open(MONITOR);
+                    var p=new ghidra.program.database.ProgramDB(db,ghidra.framework.data.OpenMode.IMMUTABLE,MONITOR,CONSUMER);
+                    try{items.add(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p)));}finally{p.release(CONSUMER);}
+                }
+                output.println(new Gson().toJson(Map.of("state","verified","items",items)));System.exit(0);
+            }
             if(text(q,"operation").equals("snapshot")){
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(text(q,"snapshot")).toFile(),true,MONITOR).open(MONITOR);

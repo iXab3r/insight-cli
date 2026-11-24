@@ -94,7 +94,7 @@ export class GhidraServer {
   async nativeMigration(binding:ServerBinding,request:Record<string,unknown>){
     const root=join(this.root(),'migration-calls',randomUUID());await mkdir(root,{recursive:true,mode:0o700});
     const input=join(root,'request.json');await durable(input,request);
-    return this.run('native-migration','InsightNativeMigration',[input],['snapshot','quiescence'].includes(String(request.operation))?{}:await this.credentials(binding,'publisher'),undefined,[0],ghidraBudget(this.c.profile.values,'save'));
+    return this.run('native-migration','InsightNativeMigration',[input],['snapshot','snapshots','quiescence'].includes(String(request.operation))?{}:await this.credentials(binding,'publisher'),undefined,[0],ghidraBudget(this.c.profile.values,'save'));
   }
   async nativeRead(binding:ServerBinding,request:Record<string,unknown>){
     const root=join(this.root(),'native-reads',randomUUID());await mkdir(root,{recursive:true,mode:0o700});

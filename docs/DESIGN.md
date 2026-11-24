@@ -21,7 +21,7 @@ execution, conflict transport, publication readback, recovery and disposal. Ghid
 stores shared revisions/checkouts; the service worker invokes the native client merger.
 Agents work on independent copies, publish through the shared repository, then release/drop
 verified copies. Continued work takes a fresh checkout. Conflicts and uncertain publication
-retain local work; future GC cannot delete them merely because they are old. Factory retains
+retain local work; [collection](GHIDRA-STORAGE-COLLECTION.md) cannot delete them merely because they are old. Factory retains
 host/IPC ownership. The [native prototype and integration plan](NATIVE-MERGE-PROTOTYPE.md)
 records implementation status and evidence; this accepted direction does not claim that the
 historical prototype alone establishes production integration. The

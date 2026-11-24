@@ -48,10 +48,16 @@ before intent resume the same owned project/checkout. A completed rerun creates 
 
 A packed detached program does not prove native checkout ancestry or native change sets.
 The migrator hashes and inspects every retained detached snapshot. A context with complete
-saved buffers equal to the verified pre-migration server version, no pending edits, traces
-or unresolved operations can become a fresh unchanged native checkout. Its original full
-context and snapshot reference remain in a dedicated migration journal. This is equality
-verification, not replay of diagnostic edits.
+saved buffers and program identity equal to the pre-migration, published or current server
+version, or to the exact older server version recorded as its base, and no pending edits,
+traces or unresolved operations is reset without creating a checkout. Its next open takes
+one native checkout at the current revision. Its original full context and snapshot identity
+remain in a dedicated migration journal. This is equality verification, not replay of
+diagnostic edits. Snapshots are inspected in bounded batches.
+
+Targets that are already native report `native_unchanged`; their detached contexts receive
+the same inspection, without a migration check-in or model adoption. After migration,
+[collection](GHIDRA-STORAGE-COLLECTION.md) reclaims the unreferenced packed copies.
 
 Other detached contexts are explicitly reported as `retained`, including their session,
 target, immutable snapshot, observed identity and reason. Arbitrary private changes are

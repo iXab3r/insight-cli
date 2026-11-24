@@ -121,18 +121,29 @@ class Owner {
     tasks.set(key,task);
     try{return await task;}finally{tasks.delete(key);}
   }
-  async migrate(c:CommandContext,target:string|undefined,dryRun:boolean){
+  migrate(c:CommandContext,target:string|undefined,dryRun:boolean){
+    return this.maintain(c,'migration',dryRun,async backend=>{
+      if(!backend.migrate)fail('unsupported','The selected backend cannot migrate native Ghidra models.');return backend.migrate(target,dryRun);
+    });
+  }
+  collect(c:CommandContext,dryRun:boolean){
+    return this.maintain(c,'garbage collection',dryRun,async backend=>{
+      if(!backend.collect)fail('unsupported','The selected backend cannot collect retained storage.');return backend.collect(dryRun);
+    });
+  }
+  /** Exclusive maintenance: no research task, native worker or uncertain helper may overlap it. */
+  private async maintain<T>(c:CommandContext,name:string,dryRun:boolean,action:(backend:ResearchBackend)=>Promise<T>):Promise<T>{
     if(!dryRun){const store=this.options.runtime?.profileStore??new ProfileStore({applicationId:c.appArguments.AppName,appArguments:c.appArguments});
-      if(!(await store.getPermissions(c.profile.name))?.includes('Destructive'))throw new CliError('Explicit Ghidra migration requires Destructive permission.',{code:'permission.denied',next:[['permissions','grant','Destructive']]});}
+      if(!(await store.getPermissions(c.profile.name))?.includes('Destructive'))throw new CliError('Explicit Ghidra '+name+' requires Destructive permission.',{code:'permission.denied',next:[['permissions','grant','Destructive']]});}
     const selected=this.selected(c),profile=this.profiles.get(c.appArguments.AppDataDirectory)!;
-    if(profile.tasks.size)fail('busy','Finish research operations before migration.');
+    if(profile.tasks.size)fail('busy','Finish research operations before '+name+'.');
     this.runtimeChanging.add(c.appArguments.AppDataDirectory);
     try{
       // A missing private-worker receipt does not prove an interrupted native helper stopped.
       const helpers=await migrationProcessBlockers(c.appArguments.AppDataDirectory);
       const workers=(await runtimeProcesses(analysisDirectory(c))).filter(p=>p.kind!=='server');
-      if(helpers.length||workers.length)fail('busy','Stop or reconcile retained Ghidra workers and native helpers before migration; no takeover is performed.',{helpers,workers});
-      const backend=await selected.backend();if(!backend.migrate)fail('unsupported','The selected backend cannot migrate native Ghidra models.');return await backend.migrate(target,dryRun);
+      if(helpers.length||workers.length)fail('busy','Stop or reconcile retained Ghidra workers and native helpers before '+name+'; no takeover is performed.',{helpers,workers});
+      return await action(await selected.backend());
     }
     finally{this.runtimeChanging.delete(c.appArguments.AppDataDirectory);}
   }
@@ -320,6 +331,8 @@ export function createDefinition(options: Options = {}): CliDefinition {
           if(Boolean(o.target)===Boolean(o.all))fail('invalid','Select exactly one --target or --all.');
           return owner.migrate(c,o.target===undefined?undefined:id(o.target),Boolean(o.dryRun));
         },{permission:Permission.ReadOnly,options:[{flags:'--target <id>',description:'Migrate one immutable target'},{flags:'--all',description:'Inspect or migrate every Ghidra target in this profile'},{flags:'--dry-run',description:'Inspect without checkout, check-in or context changes'}]}),
+        command('gc','Reclaim redundant copies: unreferenced snapshots, duplicate exports, stopped detached projects and unchanged checkouts',({options:o},c)=>owner.collect(c,Boolean(o.dryRun)),
+          {permission:Permission.ReadOnly,options:[{flags:'--dry-run',description:'Report reclaimable and retained storage without changing it'}]}),
         command('progress','Read initial-model import/publication progress without starting Ghidra',async({options:o},c)=>{
           const selected=owner.selected(c),who=scope(o);selected.workspace.context(who);
           return {...who,progress:await readInitialProgress(selected.workspace.directory,who.target)};

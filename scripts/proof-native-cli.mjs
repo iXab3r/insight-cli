@@ -222,6 +222,31 @@ try{
  const selectors=join(f.root,'export-fields.json');await writeFile(selectors,JSON.stringify([{address:'1000',field:'function.name'}]));
  const inspectedExport=await server.fields(explicitOutput,selectors);assert.equal(inspectedExport.fields['1000@function.name'].value,'second_conflict');
  assert.equal((await readdir(join(workspace,'artifacts'))).filter(n=>n.endsWith('.gzf')).length,2);
+ // Bounded detached inspection equals the single operation; exact older versions stay provable.
+ const single=await server.nativeMigration(binding,{operation:'snapshot',snapshot:explicitOutput}),batch=await server.nativeMigration(binding,{operation:'snapshots',snapshots:[explicitOutput,explicitOutput]});
+ assert.equal(batch.items.length,2);for(const item of batch.items)for(const key of ['state','fingerprint','programIdentity','sourceSha'])assert.equal(item[key],single[key],key);
+ assert.equal(single.sourceSha,sourceSha);assert.match(single.fingerprint,/^[a-f0-9]{64}$/);
+ const older=await server.nativeRead(binding,{operation:'migration-probe',path:'/'+a.target+'.bin',sourceSha,version:2}),newest=await server.nativeRead(binding,{operation:'migration-probe',path:'/'+a.target+'.bin',sourceSha});
+ assert.equal(older.version,2);assert.equal(newest.version,finalVersion);assert.notEqual(older.fingerprint,newest.fingerprint);
+ // An unchanged close releases its checkout; collection releases one left by an ended owner and keeps real work.
+ const serverCheckouts=async()=>(await server.nativeRead(binding,{operation:'latest',path:'/'+a.target+'.bin',sourceSha})).checkouts.map(c=>c.id);
+ await cli(['ghidra','open',...select(a)]);const unchanged=context(a).nativeCheckout;assert.equal(unchanged.baseVersion,finalVersion);
+ assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');assert.equal(context(a).nativeCheckout.state,'dropped');
+ assert.deepEqual(await serverCheckouts(),[retained.nativeCheckout.checkoutId]);assert.ok(!(await readdir(unchanged.root)).includes('view.rep'));
+ const closedWork=await cli(['ghidra','close',...select(d)]);assert.equal(closedWork.checkout,'retained');
+ await cli(['ghidra','open',...select(a)]);const abandoned=context(a).nativeCheckout;await app.dispose();app=createApplication();
+ const abandonedPid=JSON.parse(await readFile(join(abandoned.root,'process.json'))).pid;
+ for(let i=0;i<600;i++){try{process.kill(abandonedPid,0);}catch{break;}await new Promise(ok=>setTimeout(ok,100));}
+ const planned=await cli(['ghidra','gc','--dry-run']);assert.equal(planned.categories['native-checkouts'].items,1);assert.ok((await readdir(abandoned.root)).includes('view.rep'));
+ assert.deepEqual((await serverCheckouts()).sort(),[retained.nativeCheckout.checkoutId,abandoned.checkoutId].sort());
+ const collected=await cli(['ghidra','gc']);assert.equal(collected.categories['native-checkouts'].items,1);assert.equal(context(a).nativeCheckout.state,'dropped');
+ assert.deepEqual(await serverCheckouts(),[retained.nativeCheckout.checkoutId]);assert.ok(!(await readdir(abandoned.root)).includes('view.rep'));
+ assert.equal((await cli(['ghidra','gc'])).bytes,0);
+ await cli(['ghidra','open',...select(d)]);assert.equal((await cli(['ghidra','functions','get',...select(d),'--address','1000'])).name,'second_conflict');
+ assert.equal(context(d).nativeCheckout.checkoutId,retained.nativeCheckout.checkoutId);
+ await cli(['ghidra','open',...select(a)]);assert.equal((await cli(['ghidra','functions','get',...select(a),'--address','1000'])).name,'first_conflict');
+ assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');
+ const collection={planned,collected};
  for(const [path,expected]of Object.entries(sourceHashes))assert.equal(hash(await readFile(path.startsWith('../scripts/')?new URL('./'+path.slice('../scripts/'.length),import.meta.url):join(sourceRoot,path))),expected,'Source changed during acceptance');
  receipt={schema:1,scope:options['global-entry']?'Actual global CLI entrypoint with isolated environment/profile':'main Factory CLI with default production backend',installedIpc:options.installed===true,
   globallyInstalledCli:!!options['global-entry'],runtimeArgumentsInjected:options.installed===true&&!options['global-entry'],...(options['global-entry']?{globalVersion:JSON.parse(await readFile(join(installation,'package.json'))).version}:{}),
@@ -231,6 +256,7 @@ try{
   nativeConflictPreservesProjectCheckoutAndBase:true,conflictingPublicationRefused:true,repeatedPublicationCycles:true,...(lostReply?{lostReply}:{}),
   explicitNativeDiscardVerified:true,...(discardLostReply?{discardLostReply}:{}),afterSaveWithoutCliDiagnosticsVerified:true,closeAfterDisposalAllocatesNothing:true,remainingNativeProjects:remainingProjects,remainingServerCheckouts:final.checkouts,
   ordinaryRuntimeRoles:roles,legacyRuntimeRolesAbsentBeforeExplicitExport:true,explicitPackedExportVerified:true,workingViewRemainsNativeAfterExport:true,
+  unchangedCloseReleased:true,abandonedCheckoutCollected:true,collection,
   runtimeFingerprint:runtimeBefore.fingerprint,runtimeJarCount:runtimeBefore.jars.length,installedRuntimeUnchanged:true,
   nativeContextBeforeRestart:savedB.nativeCheckout,engine:'ghidra-native',limitations:['Disposable raw binary fixture; no arbitrary-native-change or hostile-same-user sandbox guarantee']};
 }catch(error){console.error('Main CLI fixture retained:',f.root);throw error;}

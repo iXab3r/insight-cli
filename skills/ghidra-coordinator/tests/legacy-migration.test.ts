@@ -131,3 +131,27 @@ test('a strongly proved reused server PID is never signaled and its binding is r
  assert.equal(retained.repository,local.repository);assert.equal(retained.origin,local.origin);assert.equal('pid' in retained,false);
  assert.equal(JSON.parse(await readFile(join(directory,'server/local.json'),'utf8')).phase,'stopped');
 });
+
+test('migration resets many unchanged contexts lazily from bounded inspection batches',async t=>{
+ const f=await fixture(t);f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
+ const contexts=[f.workspace.context(f.context)];
+ for(const r of f.workspace.unresolved(f.context))f.workspace.recordRequest(r.id,'failed',{state:'not_opened'});
+ for(let i=0;i<10;i++){const {context,request}=f.workspace.reserveOpen(f.target.id,'new',{autoAnalyze:false}),path=join(f.root,'s'+i);f.workspace.recordRequest(request.id,'failed',{state:'not_opened'});await writeFile(path,'snapshot '+i);const own=await f.workspace.captureSnapshot(path);
+  contexts.push(f.workspace.saveContext(context,context.generation,{workingSnapshot:own,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'}));}
+ const batches:number[]=[];f.port.snapshots=async paths=>{batches.push(paths.length);return paths.map(()=>({state:'verified',fingerprint:'a'.repeat(64),programIdentity:'c'.repeat(64),sourceSha:f.target.binarySha256}));};
+ f.port.convert=async c=>{f.workspace.resetMigratedContext(c);};
+ const result=await migrateLegacy(f.workspace,f.port,f.target.id,false);assert.deepEqual(batches,[8,3]);assert.equal(result.retainedContexts,0);
+ for(const c of contexts){const now=f.workspace.context(c);assert.equal(now.state,'stopped');assert.equal(now.workingSnapshot,undefined);assert.equal(now.baseSnapshot,undefined);assert.equal(now.nativeCheckout,undefined);}
+ await migrateLegacy(f.workspace,f.port,f.target.id,false);assert.deepEqual(batches,[8,3]);
+});
+test('a clean detached context of an already native target is matched to its exact older server version',async t=>{
+ const f=await fixture(t);f.engine='native-checkout-v1';f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
+ const latest=f.port.probe,asked:unknown[]=[];f.port.probe=async(target,revision)=>{asked.push(revision);return {...await latest(target),version:revision??3,...(revision?{fingerprint:'a'.repeat(64)}:{})};};
+ const result=await migrateLegacy(f.workspace,f.port,f.target.id,false);assert.equal((result.items[0]!.contexts as {state:string}[])[0]!.state,'converted_unchanged');
+ assert.deepEqual(asked,[undefined,1]);assert.equal(f.runs+f.adoptions+f.releases,0);assert.equal(f.conversions,1);
+});
+test('an unproved older revision keeps the detached context',async t=>{
+ const f=await fixture(t);f.engine='native-checkout-v1';f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:f.snapshot,baseSnapshot:f.snapshot,baseRevision:1,state:'stopped'});
+ const latest=f.port.probe;f.port.probe=async(target,revision)=>{if(revision)throw Error('unavailable');return {...await latest(target),version:3};};
+ assert.equal((await migrateLegacy(f.workspace,f.port,f.target.id,false)).retainedContexts,1);assert.equal(f.conversions,0);
+});

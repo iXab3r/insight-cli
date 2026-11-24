@@ -95,7 +95,9 @@ blocked on their original project; the old snapshot-based `abandon` rollback is
 unsupported for native contexts. Memory layout/language operations remain subject
 to Ghidra's exclusive-access rules.
 
-GC, existing-profile migration and `ec2-native` data are excluded. Empty diagnostic
+Closing an unchanged context releases its checkout, and [`ghidra gc`](GHIDRA-STORAGE-COLLECTION.md)
+collects redundant copies. Existing-profile migration and `ec2-native` data are excluded
+from this acceptance. Empty diagnostic
 containers, journals and server history remain; deleting the successful private native
 project does not delete the shared analysis.
 

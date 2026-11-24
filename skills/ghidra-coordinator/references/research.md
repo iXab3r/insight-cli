@@ -96,6 +96,8 @@ with unpublished program edits. A truncated result indicates that another page m
 `ghidra status` verifies the selected tool and reports saved pending work. `ghidra save` retains
 private changes without publishing. `ghidra close` saves and releases the owned process; continue
 with the same open selectors to retain local work. Save/close accept the optional request ID.
+Closing a verified unchanged checkout also releases it (`checkout: released`); the next open uses
+the current shared revision. Any pending or unproved work keeps its checkout (`retained`).
 
 The `ghidra ui` commands use the same explicit scope. `cursor --type all` reads address, function,
 selection and focused program; headless facets return null with an explicit reason. `tools` starts

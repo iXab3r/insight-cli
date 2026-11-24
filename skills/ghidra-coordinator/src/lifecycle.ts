@@ -39,9 +39,14 @@ export class Lifecycle {
       const alreadyEnded=closingExternal&&backend.closed?await backend.closed(selected):false;
       if(!closingExternal)await backend.open(selected);const before=this.workspace.context(selected);
       this.workspace.startRequest(request.id,{kind:operation,generation:before.generation,workingSnapshot:before.workingSnapshot});
-      let savedSnapshot:Artifact|undefined;
+      let savedSnapshot:Artifact|undefined,checkout:'released'|'retained'|undefined;
       try {
-        if(operation==='close'&&!alreadyEnded)await backend.close(selected);
+        if(operation==='close'&&!alreadyEnded){
+          await backend.close(selected);
+          // The close is already complete. An unproved release only keeps the saved checkout.
+          if(!unresolved.length&&backend.releaseUnchanged)
+            try{checkout=await backend.releaseUnchanged(selected)?'released':'retained';}catch{checkout='retained';}
+        }
         const current=this.workspace.context(selected),snapshot=operation==='save'?await backend.saved(selected):current.workingSnapshot;
         if(!snapshot)fail('partial','Lifecycle operation did not retain its private snapshot.');
         savedSnapshot=snapshot;
@@ -56,7 +61,7 @@ export class Lifecycle {
           this.workspace.recordRequest(intent.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:object(intent.execution??{}).operation});
         }
         const retained=this.workspace.context(selected);
-        const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:retained.scalars.length+retained.complexChanges.length};
+        const result={...selected,state:operation==='save'?'saved':'closed',...(checkout?{checkout}:{}),pendingChanges:retained.scalars.length+retained.complexChanges.length};
         this.workspace.completeSavedRequest(selected,request.id,retained.generation,{workingSnapshot:operation==='close'?retained.workingSnapshot??snapshot:snapshot,...(operation==='close'?{state:'stopped' as const,
           ...(retained.debugger?{debugger:{...retained.debugger,connected:false,traces:retained.debugger.traces.map(trace=>({...trace,connected:false}))}}:{})}:{} )},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;}

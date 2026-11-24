@@ -22,7 +22,7 @@ project, checkout ID/base and native changes. `refresh` runs Ghidra Update; `mer
 Update/check-in through the service and drops the project after independent verification.
 Private workers have no repository password. Ordinary save does not export another `.gzf`.
 Conflicts/unknown results retain the copy. Legacy detached contexts need explicit migration;
-GC is separate. See [research](references/research.md) and [recovery](references/recovery.md).
+Close unchanged work to release its checkout; `ghidra gc --dry-run` reports redundant copies. See [research](references/research.md) and [recovery](references/recovery.md).
 
 For research loops, use the packaged [persistent client](references/persistent.md) and keep
 one connection across queries. It uses the existing CLI transport and preserves typed errors;

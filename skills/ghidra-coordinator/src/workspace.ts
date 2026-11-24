@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { chmodSync, mkdirSync, realpathSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Artifacts, type Artifact } from './artifacts.js';
@@ -280,6 +280,40 @@ export class Workspace {
   scopedRequest(scope:Scope,identity:string):ResearchRequest|undefined {
     const row=this.db.prepare('SELECT data FROM requests WHERE context=? AND (id=? OR caller_id=?)').get(this.context(scope).id,id(identity),id(identity));
     return row?JSON.parse(String(row.data)):undefined;
+  }
+  allContexts():GhidraContext[] {return this.db.prepare('SELECT data FROM contexts ORDER BY rowid').all().map(row=>JSON.parse(String(row.data)));}
+  allArtifacts():Artifact[] {return this.db.prepare('SELECT data FROM artifacts ORDER BY rowid').all().map(row=>JSON.parse(String(row.data)));}
+  /** An abandoned or otherwise unknown terminal effect keeps all of its native evidence. */
+  uncertainOutcome(scope:Scope):boolean {
+    return this.db.prepare("SELECT data FROM requests WHERE context=? AND state='failed'").all(this.context(scope).id)
+      .some(row=>(JSON.parse(String(row.data)).result as {outcome?:unknown}|undefined)?.outcome==='unknown');
+  }
+  /** Receipt-only comparison; native state is verified separately before any release. */
+  unchangedNative(context:GhidraContext):boolean {
+    if(context.nativeCheckout?.state==='verified')return true;
+    if(context.workingSnapshot?.kind!=='native'||context.baseSnapshot?.kind!=='native')return false;
+    try{
+      const [local,base]=[context.workingSnapshot,context.baseSnapshot].map(value=>JSON.parse(readFileSync(this.artifacts.path(value),'utf8')));
+      return typeof local.fingerprint==='string'&&local.fingerprint===base.fingerprint;
+    }catch{return false;}
+  }
+  /** Applied requests keep their results; their superseded before-images are not recovery inputs. */
+  artifactRoots():Set<string> {
+    const roots=new Set<string>(),scan=(value:string)=>{for(const match of value.matchAll(/(?:input|snapshot|native):[a-f0-9]{64}/g))roots.add(match[0]);};
+    for(const table of ['targets','sessions','ghidra_models','contexts','administration_requests'])
+      for(const row of this.db.prepare('SELECT data FROM '+table).all())scan(String(row.data));
+    for(const row of this.db.prepare("SELECT data FROM publications WHERE state<>'verified'").all())scan(String(row.data));
+    for(const row of this.db.prepare('SELECT state,data FROM requests').all())
+      scan(row.state==='applied'?stable(JSON.parse(String(row.data)).result??null):String(row.data));
+    return roots;
+  }
+  forgetArtifact(artifact:string) {this.db.prepare('DELETE FROM artifacts WHERE id=?').run(artifact);}
+  /** A detached context proved equal to a server version continues from a lazy native checkout. */
+  resetMigratedContext(scope:Scope) {
+    const context=this.context(scope);
+    if(context.nativeCheckout||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||this.unresolved(scope).length)
+      fail('blocked','Only an unchanged detached context can be reset by migration.');
+    this.writeContext(scope,context.generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,viewEpoch:(context.viewEpoch??0)+1});
   }
   recoverMigrationOpen(scope:Scope):number {
     return this.transaction(()=>{

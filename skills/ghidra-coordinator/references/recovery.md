@@ -179,3 +179,12 @@ release. Existing native models are unchanged. Detached snapshots with unproved 
 ancestry/change sets are explicitly reported and retained, including private work.
 A verified no-work failed open can be recovered without abandoning an arbitrary effect;
 continue its original session/target with an ordinary new open request afterwards.
+
+## Reclaim redundant storage
+
+`ghidra gc --dry-run` reports reclaimable and retained copies by category. `ghidra gc`
+(Destructive permission) removes unreferenced snapshots, duplicate exports, stopped detached
+projects and caches, and releases checkouts Ghidra itself verifies as unchanged. Close workers
+first; it never stops one. Pending, conflicted, uncertain and unverified work is retained with
+a reason. Repeat the command after an interruption. Collection is not recovery: resolve an
+unknown operation first.
