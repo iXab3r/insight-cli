@@ -1,6 +1,6 @@
 {
   "name": "@eyeauras/insight-cli",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "Agent-facing durable sessions and isolated Ghidra research contexts",
   "main": "./dist/src/index.js",

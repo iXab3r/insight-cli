@@ -106,14 +106,15 @@ export async function migrateLegacy(workspace:Workspace,port:MigrationPort,selec
       const snapshot=original.workingSnapshot!,retained=await workspace.artifacts.verify(snapshot);
       const record:Record<string,unknown>={session:original.session,target:target.id,snapshot,state:'retained',reason:'Packed detached work has no provable native checkout ancestry/change sets; native conversion is refused. No scalar or script replay was performed.'};
       const observed=inspections.get(snapshot.id)??await port.write({operation:'snapshot',snapshot:retained});
-      const matches=(v:Record<string,unknown>|undefined)=>v!==undefined&&observed.fingerprint===v.fingerprint&&observed.programIdentity===v.programIdentity;
+      const matches=(v:Record<string,unknown>|undefined)=>v!==undefined&&observed.programIdentity===v.programIdentity&&
+        (observed.fingerprint===v.fingerprint||typeof observed.content==='string'&&observed.content===v.content);
       const clean=!original.scalars.length&&!original.complexChanges.length&&!original.debugger?.traces.length&&!original.debugger?.connected&&
         original.state!=='needs_recovery'&&!workspace.unresolved(original).length&&!workspace.uncertainOutcome(original);
       let equal=accepted.some(matches);
       if(!equal&&clean&&original.baseRevision&&original.baseRevision<Number(value.version))equal=matches(await exact(original.baseRevision));
       if(observed.sourceSha!==target.binarySha256){record.reason='Detached snapshot source SHA256 differs from its target; snapshot and context retained.';}
       else if(equal&&clean){
-        record.state=dryRun?'convertible_unchanged':'converted_unchanged';record.reason='Complete saved buffers equal a verified server version; the next open creates its native checkout.';
+        record.state=dryRun?'convertible_unchanged':'converted_unchanged';record.reason='Saved program content equals a verified server version; the next open creates its native checkout.';
         if(!dryRun){await mkdir(root,{recursive:true,mode:0o700});await migrationDurable(join(root,original.id+'-detached.json'),{schema:1,original,observed});await port.convert(original);}
       }else{record.observed=observed;record.baseRevision=original.baseRevision??null;}
       (item.contexts as unknown[]).push(record);

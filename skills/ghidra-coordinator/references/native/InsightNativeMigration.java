@@ -35,6 +35,14 @@ public final class InsightNativeMigration {
         require(p.getExecutableSHA256().equals(text(q,"sourceSha")),"Migration source SHA256 differs");
         require(programIdentity(p).equals(text(q,"programIdentity")),"Migration program bytes or load identity differ");
     }
+    /**
+     * A process born after its import/publication receipt is presumed to reuse that PID; a missing birth blocks.
+     * Those workers also hold their target lock until exit, checked above. process.json always uses the bare PID.
+     */
+    static boolean mayBeWorker(long pid,java.time.Instant receipt){
+        return ProcessHandle.of(pid).filter(ProcessHandle::isAlive).map(process->process.info().startInstant()
+            .map(birth->receipt.equals(java.time.Instant.MAX)||!birth.isAfter(receipt.plusSeconds(60))).orElse(true)).orElse(false);
+    }
     static void quiescent(Path root)throws Exception {
         if(!Files.exists(root))return;
         var channels=new ArrayList<FileChannel>();var locks=new ArrayList<FileLock>();
@@ -55,7 +63,7 @@ public final class InsightNativeMigration {
                     stopped=receipt.get("pid").equals(saved.get("pid"))&&receipt.get("tokenSecret").equals(saved.get("tokenSecret"));
                 }
                 long pid=receipt.get("pid").getAsLong();require(pid>0,"Invalid retained worker PID");
-                require(stopped||!ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false),"Retained native worker is live; no takeover");
+                require(stopped||!mayBeWorker(pid,name.equals("process.json")?java.time.Instant.MAX:Files.getLastModifiedTime(path).toInstant()),"Retained native worker is live; no takeover");
             }
         }finally{for(var lock:locks)lock.close();for(var channel:channels)channel.close();}
     }
@@ -72,7 +80,7 @@ public final class InsightNativeMigration {
                 for(JsonElement path:q.getAsJsonArray("snapshots")){
                     var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(path.getAsString()).toFile(),true,MONITOR).open(MONITOR);
                     var p=new ghidra.program.database.ProgramDB(db,ghidra.framework.data.OpenMode.IMMUTABLE,MONITOR,CONSUMER);
-                    try{items.add(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p)));}finally{p.release(CONSUMER);}
+                    try{items.add(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p)));}finally{p.release(CONSUMER);}
                 }
                 output.println(new Gson().toJson(Map.of("state","verified","items",items)));System.exit(0);
             }
@@ -80,7 +88,7 @@ public final class InsightNativeMigration {
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(text(q,"snapshot")).toFile(),true,MONITOR).open(MONITOR);
                 var p=new ghidra.program.database.ProgramDB(db,ghidra.framework.data.OpenMode.IMMUTABLE,MONITOR,CONSUMER);
-                try{output.println(new Gson().toJson(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p))));}finally{p.release(CONSUMER);}
+                try{output.println(new Gson().toJson(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p))));}finally{p.release(CONSUMER);}
                 System.exit(0);
             }
             Path root=Path.of(text(q,"root")).toRealPath(),ownerPath=root.resolve("migration-owner.json"),journal=root.resolve("native-migration.json");

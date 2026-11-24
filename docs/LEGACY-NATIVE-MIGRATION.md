@@ -3,6 +3,9 @@
 Migration refuses live, starting or unverified Ghidra helpers across the profile,
 including interrupted checkout creation without a private-worker receipt. Retained
 bootstrap/initial worker PIDs and initial-model locks are checked independently.
+For an initial import or publication receipt, a live PID whose process was born more than
+a minute after that receipt was last written is presumed reused and does not block, provided
+its target lock is free. An unknown birth, and any live bootstrap/context worker PID, blocks.
 It never stops or takes over a worker to satisfy this admission check.
 An admitted open holds migration admission from before input import until the
 whole command completes; migration cannot pass a still-importing open.
@@ -51,12 +54,15 @@ before intent resume the same owned project/checkout. A completed rerun creates 
 
 A packed detached program does not prove native checkout ancestry or native change sets.
 The migrator hashes and inspects every retained detached snapshot. A context with complete
-saved buffers and program identity equal to the pre-migration, published or current server
+saved buffers, or complete saved records, and program identity equal to the pre-migration, published or current server
 version, or to the exact older server version recorded as its base, and no pending edits,
 traces or unresolved operations is reset without creating a checkout. Its next open takes
 one native checkout at the current revision. Its original full context and snapshot identity
 remain in a dedicated migration journal. This is equality verification, not replay of
-diagnostic edits. Snapshots are inspected in bounded batches.
+diagnostic edits. Record equality ignores only what opening
+a program writes by itself: the derived `Metadata` table and the `Should Ask To Analyze` GUI flag.
+Every other table, schema and record must match; stored file bytes, original and modified, must
+match too, and program identity covers the memory bytes held outside tables. Snapshots are inspected in bounded batches.
 
 Targets that are already native report `native_unchanged`; their detached contexts receive
 the same inspection, without a migration check-in or model adoption. After migration,
