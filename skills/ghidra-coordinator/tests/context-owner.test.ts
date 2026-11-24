@@ -203,3 +203,28 @@ test('native process authentication accepts a profile projection and rejects for
  pid++;assert.equal(await verifyGhidraProcess(record,context),false);
  const foreign={...context,appArguments:{AppDataDirectory:other}};assert.equal(await verifyGhidraProcess(record,foreign),false);
 });
+
+test('a live legacy worker is refused before its project is saved or reopened',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),context={id:'c',generation:0,workingSnapshot:{fixture:true}};
+ const backend=new GhidraContexts({directory:f.root,context:()=>context,contextById:()=>context,target:()=>({id:'t'}),unresolved:()=>[]} as unknown as Workspace,{} as NativeInputs,{} as CommandContext);
+ await assert.rejects(backend.open({session:'s',target:'t'}),/legacy detached work/);
+ let calls=0;const record={binding:{kind:'context',context:'c',root:f.root,program:'/t'},http:{call:async()=>{calls++;return{success:true};}}};
+ await assert.rejects((backend as any).capture(record),/legacy detached work/);assert.equal(calls,0);
+});
+test('another runtime must prove a checkout readable before launching a worker',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),checkout={schema:1,context:'c',root:f.root,fileId:'f',checkoutId:2,baseVersion:1,origin:'o',repository:'r',path:'/t.bin',runtimeFingerprint:'a'.repeat(64),state:'active'};
+ const context={id:'c',target:'t',session:'s',generation:0,nativeCheckout:checkout};
+ const backend=new GhidraContexts({directory:f.root,context:()=>context,target:()=>({id:'t'}),model:()=>({})} as unknown as Workspace,{fingerprint:'b'.repeat(64)} as NativeInputs,{profile:{name:'default',values:{maxContexts:2}},appArguments:{AppDataDirectory:f.root}} as unknown as CommandContext);
+ let observed:Record<string,unknown>={state:'unknown'},launched=0;
+ Object.assign(backend,{nativeOwner:async()=>({}),nativeOperation:async()=>observed,launch:async()=>{launched++;throw Error('launched');}});
+ await assert.rejects((backend as any).privateCopy(context,{}),/without changing it/);assert.equal(launched,0);
+ observed={state:'ready',checkoutId:2};await assert.rejects((backend as any).privateCopy(context,{}),/launched/);assert.equal(launched,1);
+});
+test('an interrupted snapshot publication is established by readback only',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),snapshot={kind:'snapshot'};let value:Record<string,unknown>={state:'verified',version:3,snapshotBuffersVerified:true,ownedCheckoutReleased:false};const calls:unknown[][]=[];
+ const backend=new GhidraContexts({directory:f.root,target:()=>({id:'t',binarySha256:'d'.repeat(64)}),artifacts:{verify:async()=>'/owned.gzf'}} as unknown as Workspace,{} as NativeInputs,{} as CommandContext);
+ Object.assign(backend,{server:()=>({ensure:async()=>({}),recoverPublication:async(...a:unknown[])=>{calls.push(a);return value;}})});
+ const publication={id:'q_owned',target:'t',snapshot,expectedRevision:2} as never;
+ assert.deepEqual(await backend.recover(publication),{state:'unknown'});value={...value,ownedCheckoutReleased:true};
+ assert.deepEqual(await backend.recover(publication),{state:'verified',revision:3,snapshot});assert.equal(calls[0]![3],2);
+});

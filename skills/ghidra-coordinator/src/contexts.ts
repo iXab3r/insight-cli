@@ -404,6 +404,11 @@ export class GhidraContexts {
       const target=this.workspace.target(context.target),checkout=context.nativeCheckout;
       if(!checkout||checkout.state!=='active')fail('binding','An active native checkout is required.');
       await this.nativeOwner(checkout);const root=checkout.root;
+      // Another runtime first proves, without an upgrade, that it can read the saved database.
+      if(checkout.runtimeFingerprint!==this.inputs.fingerprint){
+        const observed=await this.nativeOperation(checkout,'status');
+        if(observed.state!=='ready'||observed.checkoutId!==checkout.checkoutId)fail('binding','This runtime cannot open the native checkout without changing it; the project is retained.');
+      }
       record=await this.launch(root,target,'context',checkout.path,'headless',context.id);
       const project=object(await record.http.call('/open_project',{path:join(root,'view.gpr')}));
       if(project.success===false)fail('launch','Native working project could not be reopened.');

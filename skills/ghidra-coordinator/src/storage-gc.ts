@@ -135,6 +135,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
         if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
         if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
+        for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
         if(nativeRoot){
           // The project itself belongs to its checkout lifecycle, including uncertain creations.

@@ -69,8 +69,14 @@ public final class InsightNativeCheckout {
         for(Path target:List.of(locator.getProjectDir().toPath(),locator.getMarkerFile().toPath())){
             if(!Files.exists(target,LinkOption.NOFOLLOW_LINKS))continue;
             require(!Files.isSymbolicLink(target)&&target.toRealPath().getParent().equals(root),"Native deletion escaped owned project");
-            List<Path> entries;try(var walk=Files.walk(target)){entries=walk.sorted(Comparator.reverseOrder()).toList();}
-            for(Path entry:entries){require(entry.toRealPath(LinkOption.NOFOLLOW_LINKS).startsWith(root)&&!Files.readAttributes(entry,java.nio.file.attribute.BasicFileAttributes.class,LinkOption.NOFOLLOW_LINKS).isOther(),"Native deletion met a link");Files.deleteIfExists(entry);}
+            // Validate the whole tree first: a Windows junction is a directory whose children live elsewhere.
+            List<Path> entries=new ArrayList<>();
+            Files.walkFileTree(target,new SimpleFileVisitor<Path>(){
+                FileVisitResult visit(Path path,java.nio.file.attribute.BasicFileAttributes at){require(!at.isSymbolicLink()&&!at.isOther(),"Native deletion met a link");entries.add(path);return FileVisitResult.CONTINUE;}
+                @Override public FileVisitResult preVisitDirectory(Path path,java.nio.file.attribute.BasicFileAttributes at)throws java.io.IOException{require(path.toRealPath().startsWith(root),"Native deletion escaped owned project");return visit(path,at);}
+                @Override public FileVisitResult visitFile(Path path,java.nio.file.attribute.BasicFileAttributes at){return visit(path,at);}
+            });
+            Collections.reverse(entries);for(Path entry:entries)Files.delete(entry);
         }
         require(!locator.getMarkerFile().exists()&&!locator.getProjectDir().exists(),"Native project remains");
     }

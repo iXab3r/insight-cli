@@ -137,17 +137,17 @@ test('linked owned subdirectories are never followed',async t=>{
  const f=await fixture(t),stage=await f.stage(f.context),outside=join(f.root,'outside');await mkdir(outside);await writeFile(join(outside,'shared.gzf'),'foreign');
  const root=join(f.workspace.directory,'ghidra-native','context',f.context.id,randomUUID());await mkdir(root);
  await writeFile(join(root,'process.json'),await readFile(join(stage,'process.json')));await writeFile(join(root,'stopped.json'),await readFile(join(stage,'stopped.json')));
- await symlink(outside,join(root,'exports'),'junction');await collectStorage(f.workspace,f.port,false);assert.equal(await readFile(join(outside,'shared.gzf'),'utf8'),'foreign');
+ await symlink(outside,join(root,'exports'),'junction');const result=await collectStorage(f.workspace,f.port,false);assert.ok(result.retained.some(r=>r.path===join(root,'exports')));assert.equal(await readFile(join(outside,'shared.gzf'),'utf8'),'foreign');
 });
 test('recent pending captures are left to their owner; stale ones are reclaimed',async t=>{
  const f=await fixture(t),at=join(f.workspace.directory,'artifacts'),fresh=join(at,'pending-'+randomUUID()),stale=join(at,'pending-'+randomUUID()),unrowed=join(at,'c'.repeat(64)+'.gzf');
  for(const path of [fresh,stale,unrowed])await writeFile(path,'capture');await utimes(stale,new Date(0),new Date(0));
  await collectStorage(f.workspace,f.port,false);assert.ok(await exists(fresh));assert.ok(await exists(unrowed));assert.equal(await exists(stale),false);
 });
-test('version-tracking owners and unfinished publications root their snapshots',async t=>{
- const f=await fixture(t),vt=await f.snapshot('vt'),published=await f.snapshot('published');
+test('version-tracking owners root their snapshots',async t=>{
+ const f=await fixture(t),vt=await f.snapshot('vt'),orphan=await f.snapshot('orphan');
  const at=join(f.workspace.directory,'version-tracking','v_owned');await mkdir(at,{recursive:true});await writeFile(join(at,'owner.json'),JSON.stringify({source:vt}));
- await collectStorage(f.workspace,f.port,false);await f.workspace.artifacts.verify(vt);assert.equal(await exists(f.workspace.artifacts.path(published)),false);
+ await collectStorage(f.workspace,f.port,false);await f.workspace.artifacts.verify(vt);assert.equal(await exists(f.workspace.artifacts.path(orphan)),false);
 });
 test('native release verifies Ghidra status, local files, recovery data and uncertainty before disposal',async t=>{
  const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),path=join(f.root,randomUUID());

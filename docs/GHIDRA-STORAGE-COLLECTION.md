@@ -59,3 +59,6 @@ Finish detached work with the release that created it: merge or discard pending 
 reconcile unknown operations and close workers before upgrading. The current engine never
 saves into a detached worker. An interrupted snapshot publication can still be reconciled by
 readback; other unresolved detached operations stay retained.
+
+Publishing a context disposes its checkout even when another context's unresolved transfer
+used it as a source; that transfer stays unresolved. Reconcile it before merging its source.
