@@ -1,3 +1,5 @@
+package insight.nativecheckout;
+
 import com.google.gson.*;
 import com.xebyte.core.ServiceUtils;
 import db.DBHandle;
@@ -13,7 +15,7 @@ import java.nio.file.*;
 import java.util.*;
 
 /** Inspect the committed private snapshot, rather than trusting a mutation acknowledgment. */
-class InsightSnapshotInspect {
+public class InsightSnapshotInspect {
   static String string(JsonObject request,String name) {return request.has(name)?request.get(name).getAsString():"";}
   static Map<String,Object> type(DataType value) {
     Map<String,Object> out=new LinkedHashMap<>();out.put("name",value.getName());out.put("path",value.getPathName());
@@ -37,7 +39,7 @@ class InsightSnapshotInspect {
     if(value instanceof TypeDef alias)out.put("typedefBase",alias.getBaseDataType().getName());
     return out;
   }
-  static Object inspect(ProgramDB program,JsonObject request) throws Exception {
+  public static Object inspect(ProgramDB program,JsonObject request) throws Exception {
     String kind=string(request,"kind"),name=string(request,"name"),address=string(request,"address");
     if(kind.equals("sdk"))return insight.InsightSdkTools.verify(program,string(request,"operation"),request.getAsJsonObject("parameters"),TaskMonitor.DUMMY);
     var at=address.isEmpty()?null:program.getAddressFactory().getAddress(address);

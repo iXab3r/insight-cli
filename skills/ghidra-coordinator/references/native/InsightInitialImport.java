@@ -28,7 +28,7 @@ class InsightInitialImport {
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 JsonObject settings=p.getAsJsonObject("settings"),request=new JsonObject();
                 request.addProperty("input",input.toString());request.addProperty("output",root.resolve(InsightInitialJournal.text(s,"snapshot")).toString());
-                request.add("auto_analyze",settings.get("autoAnalyze"));
+                request.add("auto_analyze",settings.get("autoAnalyze"));request.addProperty("native_model",true);
                 for(String key:List.of("language","loader"))if(settings.has(key))request.add(key,settings.get(key));
                 if(settings.has("compilerSpec"))request.add("compiler_spec",settings.get("compilerSpec"));
                 if(settings.has("imageBase"))request.add("image_base",settings.get("imageBase"));

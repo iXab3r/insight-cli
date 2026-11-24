@@ -1,0 +1,15 @@
+Native headless merge integration
+
+HeadlessProgramMergeManager.java adapts orchestration from Ghidra 12.1.2
+MergeManager.java, developed by the National Security Agency and distributed
+under the Apache License, Version 2.0 (APACHE-2.0.txt). It is modified for
+synchronous headless operation and refuses unresolved native decisions.
+ProgramMultiUserMergeManager creates/orders all stock resolvers.
+
+native-merge-patches.ts extracts six SHA-256-pinned upstream source files from
+the selected Ghidra installation into owned compilation storage. The generated
+sources retain their original license headers. Headless entry/display assumptions
+are adapted. A separate native MemoryMergeManager compatibility correction covers
+unchanged-null comments and symmetric deletion/update conflicts. The generated
+native-merge-provenance.json records upstream and compiled source hashes.
+Installed Ghidra JARs are not modified. No alternative object merger is provided.

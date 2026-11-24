@@ -12,6 +12,31 @@ import {randomUUID} from 'node:crypto';
 import {digest} from '../src/model.js';
 import {processIdentity} from '../src/tool-runtime/identity.js';
 
+test('native discard reconciliation requires a completed owned journal and the new checkout saved state',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),scope={session:'s',target:'t'},root=join(f.root,'owned');await mkdir(join(root,'operations'),{recursive:true});
+ const original={schema:1 as const,context:'c',root,fileId:'file',checkoutId:1,baseVersion:2,origin:'ghidra://127.0.0.1:1234',repository:'r',path:'/t.bin',runtimeFingerprint:'a'.repeat(64),state:'active' as const};
+ let current:any={id:'c',generation:0,nativeCheckout:original},writes=0,operations:string[]=[];
+ const workspace={directory:f.root,context:()=>current,saveContext:(_s:unknown,_g:unknown,patch:Record<string,unknown>)=>{writes++;current={...current,...patch};return current;}} as unknown as Workspace;
+ const backend=new GhidraContexts(workspace,{} as NativeInputs,{} as CommandContext),owner={context:'c',target:'t'},saved={fingerprint:'b'.repeat(64),fileId:'file',version:3};
+ let observed:any={state:'ready',checkedOut:true,checkoutId:2,baseVersion:3,fileId:'file',modified:false,saved,checkouts:[{id:2,version:3}],projectFiles:['t.bin','t.bin.keep']};
+ Object.assign(backend,{closed:async()=>true,nativeOwner:async()=>({owner}),nativeOperation:async(c:any,op:string)=>{assert.equal(c.checkoutId,2);operations.push(op);return observed;},
+  serverView:async()=>({revision:3,snapshot:{id:'shared'},value:{fingerprint:saved.fingerprint}}),nativeReceipt:async()=>({id:'working'}),observeNativeShared:()=>{}});
+ const request='q_'+randomUUID(),q={root,owner,operation:'discard',request,fileId:'file',checkoutId:1},result={state:'discarded',checkoutId:2,baseVersion:3,modified:false,saved,retainedKeepFile:'t.bin.keep'};
+ const journal=join(root,'operations',request+'-discard.json');
+ for(const value of [{request:q},{request:{...q,checkoutId:9},result},{request:q,result:{...result,modified:true}}]){
+  await writeFile(journal,JSON.stringify(value));assert.deepEqual(await backend.recoverDiscardNative(scope,request,original),{state:'unknown'});assert.equal(writes,0);
+ }
+ await writeFile(journal,JSON.stringify({request:q,result}));
+ const correct=observed;observed={...correct,saved:{fingerprint:'c'.repeat(64)}};
+ assert.deepEqual(await backend.recoverDiscardNative(scope,request,original),{state:'unknown'});assert.equal(writes,0);
+ observed={...correct,checkouts:[{id:1,version:2},{id:2,version:3}]};
+ assert.deepEqual(await backend.recoverDiscardNative(scope,request,original),{state:'unknown'});assert.equal(writes,0);
+ observed=correct;const applied:any[]=[];Object.assign(backend,{applyNativeDiscard:async(_s:unknown,value:unknown)=>{applied.push(value);current.nativeCheckout={...original,checkoutId:2,baseVersion:3};return {baseRevision:3,retainedKeepFile:'t.bin.keep'};}});
+ assert.deepEqual(await backend.recoverDiscardNative(scope,request,original),{state:'verified',baseRevision:3,retainedKeepFile:'t.bin.keep'});
+ assert.deepEqual(await backend.recoverDiscardNative(scope,request,original),{state:'verified',baseRevision:3,retainedKeepFile:'t.bin.keep'});
+ assert.equal(applied.length,2);assert.ok(operations.every(op=>op==='status'),'Recovery must never dispatch discard');
+});
+
 test('inventory ignores a proven reused worker PID before resolving a removed target, retaining its journal',async t=>{
  const identity=await processIdentity(process.pid);if(!identity?.strong){t.skip('Requires strong OS process birth identity');return;}
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
@@ -42,7 +67,7 @@ test('inventory ignores a proven reused worker PID before resolving a removed ta
  process.kill(process.pid,0);
 });
 
-test('a terminal supervised worker releases its credential after its PID is reused without stopping the new process',async t=>{
+test('a terminal supervised worker is recognized after PID reuse; detached legacy work is not copied',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
  const scope={session:'session',target:'target'},context={id:'context-id',generation:0,workingSnapshot:{fixture:true}};
  const root=join(directory,'ghidra-native','context',context.id,'stage');await mkdir(root,{recursive:true});
@@ -69,7 +94,7 @@ test('a terminal supervised worker releases its credential after its PID is reus
   assert.equal(await (backend as any).retiredWorker(binding),false);
  }
  await writeFile(recordPath,JSON.stringify(receipt));
- await backend.open(scope);assert.equal(copied,1);assert.equal(released,1);
+ await assert.rejects(backend.open(scope),/legacy detached work/);assert.equal(copied,0);assert.equal(released,0);
  process.kill(process.pid,0); // The unrelated current process was never terminated.
 });
 
@@ -93,7 +118,7 @@ test('stopped launch-failure workers release their own credentials before a curr
  }
 });
 
-test('a retired previous-runtime binding does not prevent restoring its saved context',async t=>{
+test('a retired legacy runtime binding requires explicit migration and preserves its saved data',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace');
  const scope={session:'session',target:'target'},context={id:'context-id',generation:0,workingSnapshot:{fixture:true}};
  const root=join(directory,'ghidra-native','context',context.id,'stage');await mkdir(root,{recursive:true});
@@ -108,7 +133,7 @@ test('a retired previous-runtime binding does not prevent restoring its saved co
  const backend=new GhidraContexts(workspace,{fingerprint:'new-runtime'} as NativeInputs,
   {secrets:{delete:async(name:string)=>{assert.equal(name,binding.tokenSecret);released++;}}} as unknown as CommandContext);
  (backend as any).privateCopy=async()=>{copied++;};
- await backend.open(scope);assert.equal(copied,1);assert.equal(released,1);
+ await assert.rejects(backend.open(scope),/legacy detached work/);assert.equal(copied,0);assert.equal(released,0);
 });
 
 test('a replacement context owner authenticates and releases an unread owned child during disposal',async t=>{
@@ -177,4 +202,29 @@ test('native process authentication accepts a profile projection and rejects for
  assert.equal(await verifyGhidraProcess(record,context),true);assert.equal(requests,1);
  pid++;assert.equal(await verifyGhidraProcess(record,context),false);
  const foreign={...context,appArguments:{AppDataDirectory:other}};assert.equal(await verifyGhidraProcess(record,foreign),false);
+});
+
+test('a live legacy worker is refused before its project is saved or reopened',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),context={id:'c',generation:0,workingSnapshot:{fixture:true}};
+ const backend=new GhidraContexts({directory:f.root,context:()=>context,contextById:()=>context,target:()=>({id:'t'}),unresolved:()=>[]} as unknown as Workspace,{} as NativeInputs,{} as CommandContext);
+ await assert.rejects(backend.open({session:'s',target:'t'}),/legacy detached work/);
+ let calls=0;const record={binding:{kind:'context',context:'c',root:f.root,program:'/t'},http:{call:async()=>{calls++;return{success:true};}}};
+ await assert.rejects((backend as any).capture(record),/legacy detached work/);assert.equal(calls,0);
+});
+test('another runtime must prove a checkout readable before launching a worker',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),checkout={schema:1,context:'c',root:f.root,fileId:'f',checkoutId:2,baseVersion:1,origin:'o',repository:'r',path:'/t.bin',runtimeFingerprint:'a'.repeat(64),state:'active'};
+ const context={id:'c',target:'t',session:'s',generation:0,nativeCheckout:checkout};
+ const backend=new GhidraContexts({directory:f.root,context:()=>context,target:()=>({id:'t'}),model:()=>({})} as unknown as Workspace,{fingerprint:'b'.repeat(64)} as NativeInputs,{profile:{name:'default',values:{maxContexts:2}},appArguments:{AppDataDirectory:f.root}} as unknown as CommandContext);
+ let observed:Record<string,unknown>={state:'unknown'},launched=0;
+ Object.assign(backend,{nativeOwner:async()=>({}),nativeOperation:async()=>observed,launch:async()=>{launched++;throw Error('launched');}});
+ await assert.rejects((backend as any).privateCopy(context,{}),/without changing it/);assert.equal(launched,0);
+ observed={state:'ready',checkoutId:2};await assert.rejects((backend as any).privateCopy(context,{}),/launched/);assert.equal(launched,1);
+});
+test('an interrupted snapshot publication is established by readback only',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),snapshot={kind:'snapshot'};let value:Record<string,unknown>={state:'verified',version:3,snapshotBuffersVerified:true,ownedCheckoutReleased:false};const calls:unknown[][]=[];
+ const backend=new GhidraContexts({directory:f.root,target:()=>({id:'t',binarySha256:'d'.repeat(64)}),artifacts:{verify:async()=>'/owned.gzf'}} as unknown as Workspace,{} as NativeInputs,{} as CommandContext);
+ Object.assign(backend,{server:()=>({ensure:async()=>({}),recoverPublication:async(...a:unknown[])=>{calls.push(a);return value;}})});
+ const publication={id:'q_owned',target:'t',snapshot,expectedRevision:2} as never;
+ assert.deepEqual(await backend.recover(publication),{state:'unknown'});value={...value,ownedCheckoutReleased:true};
+ assert.deepEqual(await backend.recover(publication),{state:'verified',revision:3,snapshot});assert.equal(calls[0]![3],2);
 });

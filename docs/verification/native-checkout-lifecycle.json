@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "classification": "Disposable native lifecycle acceptance; production CLI unchanged",
+  "sourceBaseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+  "protectedData": {
+    "productProfilesOpened": false,
+    "ec2NativeAccessed": false,
+    "installedRuntimeModified": false
+  },
+  "evidence": {
+    "directory": "native-merge-proof-N7xZyX",
+    "receiptSha256": "221125d7c26e060b7e37adaa602270c45608cf44dfad5bca458bd0f1e0e79c39",
+    "resultsSha256": "4b28f7742ec799c2aa248286143aad05ca7efd0b2061a194098db2d1f24bfa3c",
+    "sourceInventorySha256": "3e6c5350fee26946abfeb1e1e62332bdf5437698fc313265b85be068abdf6180",
+    "runtimeInventorySha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd",
+    "operations": 39,
+    "expectedRejections": [
+      {
+        "operation": "checkout",
+        "role": "reader",
+        "error": "ghidra.util.ReadOnlyException"
+      },
+      {
+        "operation": "checkin",
+        "role": "worker",
+        "error": "ghidra.framework.client.NotConnectedException"
+      },
+      {
+        "operation": "update",
+        "role": "publisher",
+        "error": "insight.prototype.HeadlessProgramMergeManager$UnresolvedNativeConflict"
+      },
+      {
+        "operation": "drop",
+        "role": "publisher",
+        "error": "java.lang.IllegalStateException"
+      }
+    ],
+    "sandboxAttempt": {
+      "directory": "native-merge-proof-jSDDN3",
+      "disposition": "Failed to connect to owned loopback server: getsockopt permission denied. No acceptance receipt. Rerun used a fresh server/root with loopback permission."
+    }
+  },
+  "documentationHashes": {
+    "docs/NATIVE-CHECKOUT-LIFECYCLE.md": "4b0e1ddfe6b2d244a55870a6b368db90883f2a5e7277f9e4cf9c0dc3f71b7b51",
+    "docs/NATIVE-MERGE-PROTOTYPE.md": "f7c0e19b027711fce055d31883a32a96c47e46d693191166d6dec7013d318cb0",
+    "docs/GHIDRA-SERVER-UTILIZATION-AUDIT.md": "5ca9995ccc5e486c75d8bfba658ec563243ee5f429285824cb89b08b4a174c5e"
+  },
+  "observations": {
+    "schema": 1,
+    "scope": "native checkout lifecycle and authority proof",
+    "ghidra": "12.1.2",
+    "serverAccounts": {
+      "publisher": "admin",
+      "reader": "read-only",
+      "worker": "no credentials; native authentication refused"
+    },
+    "sameNativeProjectsReopened": true,
+    "checkoutIdsPreserved": true,
+    "nativeChangeSetsPreservedAcrossRestart": true,
+    "offlineWorkerCheckinRefused": true,
+    "readerCheckoutRefused": true,
+    "dirtyNativeUpdate": {
+      "from": 1,
+      "to": 2,
+      "serverVersionUnchanged": true,
+      "keepFileObserved": true,
+      "nativeMergeInvocations": 1
+    },
+    "cleanNativeUpdate": {
+      "from": 3,
+      "to": 4,
+      "nativeMergeInvocations": 0
+    },
+    "editsAfterUpdatePublished": true,
+    "independentReadback": true,
+    "confirmedPublishedCopiesDropped": 3,
+    "cleanCheckoutReleasedAndDropped": true,
+    "evidenceProjectsDropped": 5,
+    "conflictingUpdate": {
+      "refused": true,
+      "localProjectionAndChangeSetsPreserved": true,
+      "checkoutAndBasePreserved": true,
+      "dropRefused": true
+    },
+    "plaintextRoleCredentialsAbsentFromRetainedProjects": true,
+    "projectFilesScanned": 10,
+    "guiWindows": 0,
+    "retained": [
+      "conflictb: unresolved private work, original checkout/base; server and call evidence retained"
+    ],
+    "limitations": [
+      "Disposable fixture only; no product CLI migration or GC",
+      "Cooperative worker process credential isolation, not an OS security boundary against hostile same-user code",
+      "Bounded function/type and extended object projections, not full database equivalence",
+      "No process kill, unknown check-in recovery or concurrent service writers tested",
+      "Pinned headless adapter and documented native memory-comment compatibility fix required"
+    ],
+    "sourceHashes": {
+      "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+      "NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+      "ExtendedMergeCases.java": "3c3c93d9b9f494886dd3ba7f010d60878c4638757da85eeb5c15b210fe9bac7c",
+      "NativeReturnTypeRepro.java": "85e15d63eb63f79ce418af7f2b7a92966ba041d825c01c784e1b2ed8238b73ca",
+      "NativeCheckoutLifecycle.java": "b777e97f4552c63dca6229ac9f733dc2c62dc8819bf743b334f6e5807e2aa618",
+      "NativeLifecycleServerInit.java": "90a5b6b79a74d9e05749ca4b01e77bb1be9e9d6521764784c2e9a2c9ea4ce940",
+      "proof-native-merge.mjs": "ac99315b6afb18a97a5693d11f02a02e9add54c472db24536e8df105d5b2d04c",
+      "checkout-lifecycle.mjs": "3eb17d121b798139c3183cbc9541e549fdcd13be4c1b05bcd2951aa85cb81068"
+    },
+    "startedAt": "2026-10-26T23:51:06.451Z",
+    "finishedAt": "2026-10-26T23:53:41.269Z",
+    "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+    "runtimeJarCount": 154,
+    "installedJarsUnchanged": true,
+    "ownedNativeProcessesExited": true,
+    "checkoutB": [
+      {
+        "operation": "checkout",
+        "checkoutId": 3,
+        "baseVersion": 1
+      },
+      {
+        "operation": "local",
+        "checkoutId": 3,
+        "baseVersion": 1
+      },
+      {
+        "operation": "update",
+        "checkoutId": 3,
+        "baseVersion": 2
+      }
+    ],
+    "finalHistory": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "projectDisposal": {
+      "deleted": [
+        "agenta",
+        "agentb",
+        "clean",
+        "conflicta",
+        "denied",
+        "readbefore",
+        "readfinal",
+        "readafterconflict",
+        "baseline"
+      ],
+      "remainingNativeProjects": [
+        "conflictb"
+      ]
+    }
+  },
+  "candidateRevision": {
+    "baseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+    "worktree": true,
+    "fingerprint": "98d8b5ffb5d4e158530f0e4ac6804aecfef396b388f5a8ba366f1341cfdd6006"
+  },
+  "independentReview": {
+    "reviewer": "/root/checkout_lifecycle_review",
+    "freshSession": true,
+    "verdict": "No material findings within the authorized prototype scope",
+    "candidateFingerprint": "98d8b5ffb5d4e158530f0e4ac6804aecfef396b388f5a8ba366f1341cfdd6006",
+    "checks": [
+      "8 executable source hashes: current files and retained snapshots",
+      "3 documentation hashes",
+      "receipt/results/source/runtime inventory hashes",
+      "39 raw response records against results.json",
+      "independent published R3/R4 projections and clean Update equality",
+      "retained project inventory",
+      "JavaScript syntax"
+    ],
+    "exclusions": [
+      "No real writer rerun by reviewer",
+      "No production CLI, crash/cancel recovery, concurrent publisher, migration or GC acceptance"
+    ]
+  },
+  "repositoryChecks": {
+    "javascriptSyntax": "passed",
+    "documentationLinksAndAnchors": {
+      "passed": true,
+      "localLinksChecked": 14
+    },
+    "metadataAndEvidenceHashes": "passed",
+    "toolCatalog": {
+      "passed": true,
+      "binaryAssets": 30
+    },
+    "trackedDiffWhitespace": "passed"
+  }
+}

@@ -1,9 +1,17 @@
 # Continue saved work
 
 Retain the session/target returned by initial open. Continue the tuple through
-`insight-cli ghidra open --session <id> --target <id> --json`. Saved private snapshots and
-pending scalar comparisons persist independently of a backend process. Reopening preserves
-private work; it does not silently receive a newer shared version.
+`insight-cli ghidra open --session <id> --target <id> --json`. The native working project, checkout ID/base
+and native change sets persist independently of the worker. Reopening uses that exact project
+without importing a snapshot or silently receiving a newer shared version. Private workers
+have no publisher credentials; service-only Update/check-in temporarily owns the stopped project.
+Legacy detached contexts require explicit migration and remain retained.
+
+If native `changes discard` loses its response, retry its original request ID or continue
+the same session/target. Recovery requires a completed native discard journal and matching
+new checkout identity/base and saved buffers, followed by independent server readback.
+It does not repeat discard. An incomplete journal or mismatched checkout stays unknown;
+preserve the project and any `.keep` file.
 
 First-import recovery uses the same scoped `ghidra open` or the original request ID/input.
 Import/analysis writes a private snapshot and completion receipt before any initial publication.
@@ -39,12 +47,12 @@ independent readback. The old project, intent and original session/target remain
 ## Unresponsive headless backend
 
 Continue the same session/target with ordinary `ghidra open` or a research read. When the
-backend fails its identity preflight, the facade verifies the acknowledged private snapshot
-and independently authenticates the exact worker before retiring it and restoring that snapshot.
+backend fails its identity preflight, the facade verifies the saved-view receipt
+and independently authenticates the exact worker before retiring it and reopening the same native project.
 This automatic retirement is limited to headless contexts without uncertain mutations, active
 publication or a connected debugger. A failed health preflight is never permission to repeat a
 script, save or publication. Journals, original projects and acknowledged pending edits remain.
-Lifecycle diagnostics record `backend_unresponsive` followed by snapshot restoration.
+Lifecycle diagnostics record `backend_unresponsive` followed by saved-project reopen.
 
 On macOS ARM64 the packaged read-only kernel helper checks the same-user process, executable,
 private root and digest of its unique context token without entering the JVM. It emits no token,
@@ -102,17 +110,17 @@ for adversarial same-JVM Java, and existing unknown script attempts are not recl
 their exception strings or an unchanged program snapshot. File/Python scripts retain their
 existing conservative recovery semantics.
 
-An unknown or partial effect retains its request intent, snapshots and native stage. Open the
+An unknown or partial effect retains its request intent, receipts and native project. Open the
 same tuple to reconcile supported outcomes. A committed merge is verified against its recorded
 server version and complete saved buffers through independent read authority; it is never
 checked in again merely because its response was lost. Until verification succeeds, publication
 for this shared target is blocked across sessions. Saved private work remains retained.
 
 Scalar reconciliation observes and saves an already present effect; it does not execute the
-setter again. Supported structural/function edits retain a candidate snapshot after an incomplete
-response; continuation can verify every requested effect in that immutable snapshot and adopt it
-without replay. If the complete result cannot be established, the candidate and previous saved
-private view remain retained. An unproved program/script/external outcome remains unresolved. Preserve the profile
+setter again. Supported structural/function edits can retain a saved-view receipt after an incomplete
+response. For native contexts inspection must still match that receipt on the original saved
+project; the receipt cannot recreate an older DB. Continuation adopts only fully verified effects
+without replay. Unproved native work stays blocked and retained. An unproved program/script/external outcome remains unresolved. Preserve the profile
 storage and credential store. Do not delete another session's project, stop a process by guessed
 PID/port, or blindly repeat a script/external action to turn uncertainty into success.
 
@@ -125,7 +133,17 @@ as disconnected and retains saved program work. It does not recreate the old cur
 a previous prompt policy. Other unproved live UI effects remain retained until their outcome is
 established or the original process is known to have ended.
 
-## Abandon an uncertain private program attempt
+## Native unknown attempts and legacy abandonment
+
+For native contexts the snapshot-based `ghidra abandon` rollback is unsupported: replacing the
+DB from a detached snapshot would lose native ancestry and could discard acknowledged private
+work. Preserve the original project/journal and reconcile provable effects. Do not use discard,
+GC, another request ID or a new server checkout as evidence that an unknown script did nothing.
+
+The historical snapshot-based abandonment contract below applies only to its retained legacy
+fixtures, not to native contexts admitted by the primary CLI.
+
+### Historical detached abandonment
 
 A post-mutation save timeout does not repeat the script or issue another save in the
 error handler. Status exposes the original request identity and retained phase/budget.
@@ -150,3 +168,23 @@ result. Earlier saved private edits remain pending. The original changing reques
 execute again. Abandoning never undoes external effects or establishes what an arbitrary
 script did; the acknowledgement explicitly accepts that uncertainty. Publication recovery,
 initial import, UI and debugger attempts use their own protocols and cannot use this command.
+
+## Explicit legacy migration
+
+Legacy models require `ghidra migrate --target <target> --dry-run`, then the same
+command without `--dry-run` (Destructive permission). Use `--all` for the profile.
+Close selected workers first. Repeating migration resumes its retained journal; it never
+retries an uncertain native check-in. Independent exact-version readback precedes checkout
+release. Existing native models are unchanged. Detached snapshots with unproved native
+ancestry/change sets are explicitly reported and retained, including private work.
+A verified no-work failed open can be recovered without abandoning an arbitrary effect;
+continue its original session/target with an ordinary new open request afterwards.
+
+## Reclaim redundant storage
+
+`ghidra gc --dry-run` reports reclaimable and retained copies by category. `ghidra gc`
+(Destructive permission) removes unreferenced snapshots, duplicate exports, stopped detached
+projects and caches, and releases checkouts Ghidra itself verifies as unchanged. Close workers
+first; it never stops one. Pending, conflicted, uncertain and unverified work is retained with
+a reason. Repeat the command after an interruption. Collection is not recovery: resolve an
+unknown operation first.

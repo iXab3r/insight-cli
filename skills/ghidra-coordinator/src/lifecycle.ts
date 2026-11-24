@@ -28,14 +28,25 @@ export class Lifecycle {
           next:[['sessions','status',selected.session,'--target',selected.target],
             ...(operation==='close'?[['tools','processes','--tool','ghidra','--session',selected.session,'--target',selected.target]]:[['ghidra','open','--session',selected.session,'--target',selected.target]])]});
       }
+      const settled=this.workspace.context(selected);
+      if(operation==='close'&&settled.nativeCheckout?.state==='dropped'&&!this.workspace.unresolved(selected).length){
+        const result={...selected,state:'closed',pendingChanges:0};
+        this.workspace.startRequest(request.id,{kind:'close',generation:settled.generation,workingSnapshot:settled.workingSnapshot});
+        this.workspace.completeSavedRequest(selected,request.id,settled.generation,{state:'stopped'},result);return result;
+      }
       backend??=await this.backend();const unresolved=this.workspace.unresolved(selected);
       const closingExternal=operation==='close'&&unresolved.length>0&&unresolved.every(intent=>['debugger','ui'].includes(String(object(intent.execution??{}).kind)));
       const alreadyEnded=closingExternal&&backend.closed?await backend.closed(selected):false;
       if(!closingExternal)await backend.open(selected);const before=this.workspace.context(selected);
       this.workspace.startRequest(request.id,{kind:operation,generation:before.generation,workingSnapshot:before.workingSnapshot});
-      let savedSnapshot:Artifact|undefined;
+      let savedSnapshot:Artifact|undefined,checkout:'released'|'retained'|undefined;
       try {
-        if(operation==='close'&&!alreadyEnded)await backend.close(selected);
+        if(operation==='close'&&!alreadyEnded){
+          await backend.close(selected);
+          // The close is already complete. An unproved release only keeps the saved checkout.
+          if(!unresolved.length&&backend.releaseUnchanged)
+            try{checkout=await backend.releaseUnchanged(selected)?'released':'retained';}catch{checkout='retained';}
+        }
         const current=this.workspace.context(selected),snapshot=operation==='save'?await backend.saved(selected):current.workingSnapshot;
         if(!snapshot)fail('partial','Lifecycle operation did not retain its private snapshot.');
         savedSnapshot=snapshot;
@@ -50,7 +61,7 @@ export class Lifecycle {
           this.workspace.recordRequest(intent.id,'failed',{...selected,state:'disconnected',outcome:'unknown',operation:object(intent.execution??{}).operation});
         }
         const retained=this.workspace.context(selected);
-        const result={...selected,state:operation==='save'?'saved':'closed',pendingChanges:retained.scalars.length+retained.complexChanges.length};
+        const result={...selected,state:operation==='save'?'saved':'closed',...(checkout?{checkout}:{}),pendingChanges:retained.scalars.length+retained.complexChanges.length};
         this.workspace.completeSavedRequest(selected,request.id,retained.generation,{workingSnapshot:operation==='close'?retained.workingSnapshot??snapshot:snapshot,...(operation==='close'?{state:'stopped' as const,
           ...(retained.debugger?{debugger:{...retained.debugger,connected:false,traces:retained.debugger.traces.map(trace=>({...trace,connected:false}))}}:{})}:{} )},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',...(savedSnapshot?{savedSnapshot}:{})});throw error;}
@@ -59,12 +70,25 @@ export class Lifecycle {
   async discard(selected:Scope,callerId?:string) {
     const reserved=this.workspace.reserveRequest(selected,'ghidra.changes.discard',{},callerId);
     return this.research.ordered(selected,async()=>{
-      const request=this.workspace.request(reserved.request.id);
+      let request=this.workspace.request(reserved.request.id),backend:ResearchBackend|undefined;
+      if(reserved.replay&&['running','unknown'].includes(request.state)){
+        backend=await this.backend();await this.research.reconcileRequests(selected,backend);request=this.workspace.request(request.id);
+      }
       if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;fail('unknown','Local discard outcome is retained; continue the context before retrieving it.',request.result);}
-      const backend=await this.backend();await backend.open(selected);
+      backend??=await this.backend();await backend.open(selected);
       if(this.workspace.context(selected).debugger?.connected)fail('busy','Close the live debugger context before discarding static program edits.');
       // Resource save/release precedes the local atomic switch, as with mode preparation.
       await backend.close(selected);const context=this.workspace.context(selected);
+      if(context.nativeCheckout){
+        if(!backend.discardNative)fail('configuration','Native discard is required; a detached snapshot switch is disabled.');
+        this.workspace.startRequest(request.id,{kind:'native-discard',generation:context.generation,checkout:context.nativeCheckout,discardedChanges:context.scalars.length+context.complexChanges.length});
+        try{
+          const discarded=await backend.discardNative(selected,request.id),current=this.workspace.context(selected);
+          const result={...selected,state:'discarded',discardedChanges:context.scalars.length+context.complexChanges.length,pendingChanges:0,
+            baseRevision:'R'+discarded.baseRevision,...(discarded.retainedKeepFile?{retainedKeepFile:discarded.retainedKeepFile}:{})};
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{},result);return result;
+        }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown'});throw error;}
+      }
       if(!context.baseSnapshot||!context.workingSnapshot)fail('binding','Discard requires retained base and private snapshots.');
       await this.workspace.artifacts.verify(context.baseSnapshot);
       const result={...selected,state:'discarded',discardedChanges:context.scalars.length+context.complexChanges.length,pendingChanges:0,
@@ -89,7 +113,7 @@ export class Lifecycle {
 }
 export function lifecycleCommands(service:(context:CommandContext)=>Lifecycle,runtimeStatus?:(context:CommandContext)=>Promise<unknown>):CommandDefinition[] {
   return [command('changes','Manage unpublished edits in the selected context',[
-    command('discard','Save a retained copy, then restore the opening base without publication',({options:o},c)=>service(c).discard(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
+    command('discard','Retain native keep data, discard private edits and check out the current server version',({options:o},c)=>service(c).discard(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:'Destructive',options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the same local discard result'}]})]),
     command('save-all','Save every Ghidra context in the explicit session; outcomes are per context',({options:o},c)=>service(c).saveAll(id(o.session),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:Permission.Update,options:[{flags:'--session <id>',description:'Explicit session whose contexts are saved',required:true},{flags:'--request-id <id>',description:'Retrieve the recorded session save outcomes'}]}),

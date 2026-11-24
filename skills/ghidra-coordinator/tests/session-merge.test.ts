@@ -17,7 +17,7 @@ async function setup(t:Parameters<typeof createCliFixture>[0]) {
   const get=async(who:Scope,at:string)=>(await f.json(app,['ghidra','comments','get',...selectors(who),'--address',at,'--kind','eol']) as {text:string|null}).text;
   return {f,app,a,b,set,get,backend:backend!};
 }
-test('A/B refresh receives disjoint changes, mixed conflict merges nothing, explicit nullable resolution publishes',async t=>{
+test('native Update receives disjoint changes; native conflict rejects the entire merge/refresh',async t=>{
   const {f,app,a,b,set,get,backend}=await setup(t);
   await set(a,'1000','A');await set(b,'1100','B');await f.json(app,['ghidra','merge',...selectors(a)]);
   assert.equal(await get(b,'1000'),null);
@@ -27,14 +27,13 @@ test('A/B refresh receives disjoint changes, mixed conflict merges nothing, expl
   await f.json(app,['ghidra','merge',...selectors(b)]);await f.json(app,['ghidra','refresh',...selectors(a)]);
   await set(a,'1000','A overlap');await set(b,'1000','B overlap');await set(b,'1100','B another');await f.json(app,['ghidra','merge',...selectors(a)]);
   const before=backend.publications,failed=await f.run(app,['ghidra','merge',...selectors(b),'--json']);assert.notEqual(failed.exitCode,0);assert.equal(backend.publications,before);
-  const mixed=await f.json(app,['ghidra','refresh',...selectors(b)]) as {state:string};assert.equal(mixed.state,'conflict');assert.equal(await get(b,'1000'),'B overlap');
+  const mixed=await f.run(app,['ghidra','refresh',...selectors(b),'--json']);assert.notEqual(mixed.exitCode,0);assert.equal(JSON.parse(mixed.stdout).state,'conflict');assert.equal(await get(b,'1000'),'B overlap');
   const afterRefreshCount=backend.publications;
   assert.notEqual((await f.run(app,['ghidra','merge',...selectors(b),'--json'])).exitCode,0);
   assert.equal(backend.publications,afterRefreshCount,'Refresh must not turn an unresolved overlap into an unchanged-base overwrite');
   const stale=await f.run(app,['ghidra','comments','set',...selectors(b),'--address','1000','--kind','eol','--text','resolution','--resolve-conflict','--expect-shared','stale','--json']);
   assert.notEqual(stale.exitCode,0);assert.equal(await get(b,'1000'),'B overlap');
-  await set(b,'1000','',['--resolve-conflict','--expect-shared','A overlap']);
-  await f.json(app,['ghidra','merge',...selectors(b)]);assert.equal(await get(b,'1000'),null);assert.equal(await get(b,'1100'),'B another');
+  assert.equal(await get(b,'1100'),'B another');assert.ok(backend.nativeUpdates>0);
 });
 test('committed response loss freezes every publisher, then open reconciles without another check-in',async t=>{
   const {f,app,a,b,set,backend}=await setup(t);await set(a,'1000','saved A');backend.losePublication=true;backend.cannotVerify=true;
@@ -69,11 +68,11 @@ test('one context orders a setter before merge and retains a setter queued after
   const shared=await backend.latest(a.target),fields=await backend.fields(shared.snapshot,[{address:'1000',field:'comment.eol'},{address:'1100',field:'comment.eol'}]);
   assert.equal(fields['1000@comment.eol']!.value,'before merge');assert.equal(fields['1100@comment.eol']!.value,null);
 });
-test('shared value changed again after explicit resolution prevents publication and preserves the decision',async t=>{
+test('further shared changes cannot turn an unresolved native conflict into publication',async t=>{
   const {f,app,a,b,set,get,backend}=await setup(t);
   await set(a,'1000','first shared');await set(b,'1000','private');await f.json(app,['ghidra','merge',...selectors(a)]);
-  await f.json(app,['ghidra','refresh',...selectors(b)]);
-  await set(b,'1000','decision',['--resolve-conflict','--expect-shared','first shared']);
+  assert.notEqual((await f.run(app,['ghidra','refresh',...selectors(b),'--json'])).exitCode,0);
+  await set(b,'1000','decision');
   await set(a,'1000','newer shared');await f.json(app,['ghidra','merge',...selectors(a)]);
   const count=backend.publications;
   assert.notEqual((await f.run(app,['ghidra','merge',...selectors(b),'--json'])).exitCode,0);

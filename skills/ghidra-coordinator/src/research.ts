@@ -4,11 +4,10 @@ import {inspectFunctions,type FunctionInspectionOptions} from './function-inspec
 import {entryRequest} from './function-entries.js';
 import {inspectAnchors,type AnchorRequest} from './string-anchors.js';
 import type { Artifact } from './artifacts.js';
-import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings } from './workspace.js';
+import type { GhidraContext, Scope, ScalarChange, Publication, ResearchRequest,DebuggerState,GhidraLoadSettings,NativeCheckout } from './workspace.js';
 import { Workspace } from './workspace.js';
-import { fail, id, object, text,digest } from './model.js';
+import { fail, id, object, text,digest,fieldKey } from './model.js';
 import type { ToolMode } from './contexts.js';
-import {fieldKey,scalarMerge,scalarRefresh} from './merge.js';
 import type {ScriptPage} from './scripts.js';
 import {verifyMutation} from './mutation-effects.js';
 import {transferResult} from './cross-results.js';
@@ -18,6 +17,19 @@ import {navigationResult} from './context-diagnostics.js';
 import {inspectCodeReferences,type ReferenceRequest} from './code-references.js';
 
 export interface ResearchBackend {
+  snapshotFile?(snapshot:Artifact):Promise<string>;
+  readonly nativeEngine?:'native-checkout-v1';
+  migrate?(target:string|undefined,dryRun:boolean):Promise<unknown>;
+  collect?(dryRun:boolean):Promise<unknown>;
+  releaseUnchanged?(scope:Scope):Promise<boolean>;
+  updateNative?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}>;
+  recoverUpdate?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}|{state:'unknown'}>;
+  publishNative?(publication:Publication):Promise<{state:'published';revision:number;snapshot?:Artifact}|{state:'conflict';applied:0;conflict?:string}>;
+  dropNative?(scope:Scope):Promise<void>;
+  finishEmptyNative?(scope:Scope):Promise<void>;
+  recoverEmptyNative?(scope:Scope,request:string):Promise<{state:'verified';revision:number}|{state:'unknown'}>;
+  discardNative?(scope:Scope,request:string):Promise<{baseRevision:number;retainedKeepFile:string}>;
+  recoverDiscardNative?(scope:Scope,request:string,original:NativeCheckout):Promise<{state:'verified';baseRevision:number;retainedKeepFile:string}|{state:'unknown'}>;
   inlineScript?(scope:Scope,parameters:Record<string,unknown>,requestId:string):Promise<{response:Record<string,unknown>;safe:boolean}>;
   observation?(scope:Scope):Promise<unknown>;
   inspectObservation?(scope:Scope):Promise<unknown>;
@@ -42,9 +54,7 @@ export interface ResearchBackend {
   dispose(): Promise<void>;
   latest?(target:string):Promise<{revision:number;snapshot:Artifact}>;
   fields?(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>>;
-  candidate?(target:string,snapshot:Artifact,changes:ScalarChange[]):Promise<Artifact>;
-  publish?(publication:Publication):Promise<{state:'published';revision:number}|{state:'conflict';applied:0}>;
-  recover?(publication:Publication):Promise<{state:'verified';revision:number}|{state:'unknown'}>;
+  recover?(publication:Publication):Promise<{state:'verified';revision:number;snapshot?:Artifact}|{state:'unknown'}>;
   recoverModel?(target:string):Promise<boolean>;
   scripts?(scope:Scope,filter:string,limit:number,offset:number):Promise<ScriptPage>;
   inspect?(snapshot:Artifact,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
@@ -113,16 +123,18 @@ export class Research {
     const external=this.workspace.unresolvedSessionAdministration(selected.session,selected.target);
     return {...selected,externalRequests:external.map(request=>({...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state})),externalRequestsTruncated:external.length===100,
       ghidra:{syncPolicy:context.syncPolicy??{publish:'manual',refresh:'manual'},state:unresolved.length?'needs_recovery':context.state,baseRevision:revision(context.baseRevision),
+      engine:context.nativeCheckout?'ghidra-native':'uninitialized-or-legacy',...(context.nativeCheckout?{checkout:{id:context.nativeCheckout.checkoutId,fileId:context.nativeCheckout.fileId,baseRevision:revision(context.nativeCheckout.baseVersion),state:context.nativeCheckout.state}}:{}),
       sharedRevision:revision(model.sharedRevision),pendingChanges:count(context),
       mergeState:model.state==='unknown'?'unknown':'idle',
-      conflicts:context.scalars.filter(change=>change.conflict).map(change=>({address:publicAddress(change.address),field:change.field,
-        original:change.original,local:change.local,shared:change.conflict!.shared})),
+      conflicts:[...(context.nativeCheckout?.conflict?[{engine:'ghidra-native',...context.nativeCheckout.conflict}]:[]),...context.scalars.filter(change=>change.conflict).map(change=>({address:publicAddress(change.address),field:change.field,
+        original:change.original,local:change.local,shared:change.conflict!.shared}))],
       unresolvedRequests:unresolved.map(request=>({id:request.id,...(request.result?{detail:request.result}:{}),...(request.callerId?{requestId:request.callerId}:{}),operation:request.operation,state:request.state}))}};
   }
   async abandon(selected:Scope,requestId:string,acknowledged:boolean) {
     return this.ordered(selected,async()=>{
       if(!acknowledged)fail('invalid','Explicit --acknowledge-unknown-effects is required.');
       const context=this.workspace.context(selected),requests=this.workspace.unresolved(selected);
+      if(context.nativeCheckout)fail('unsupported','A native unknown program outcome must be reconciled on its original project; detached snapshot rollback is disabled.');
       const request=this.workspace.scopedRequest(selected,requestId);
       if(request?.state==='failed'&&object(request.result??{}).state==='abandoned')return request.result;
       if(!request||!['running','unknown'].includes(request.state)||requests.length!==1||object(request.execution??{}).kind!=='program')fail('blocked','Abandon requires exactly one unresolved private program operation.');
@@ -144,7 +156,7 @@ export class Research {
     const retained=(state:string)=>({session:reserved.context.session,target,state,...(callerId?{requestId:callerId}:{})});
     const next=[['sessions','status',reserved.context.session,'--target',target],['ghidra','open','--session',reserved.context.session,'--target',target]];
     const openingFailure=(error:unknown,state:string)=>new CliError(error instanceof CliError?error.message:'Ghidra open did not complete; the context is retained for reconciliation.',{
-      code:error instanceof CliError?error.code:'coordinator.unknown',result:{...retained(state),...(error instanceof CliError&&error.result&&typeof error.result==='object'?{detail:error.result}:{})},next});
+      code:error instanceof CliError?error.code:'coordinator.unknown',result:{...retained(state),...(error instanceof CliError&&error.result&&typeof error.result==='object'?{detail:error.result}:{})},next:error instanceof CliError&&error.code==='coordinator.migration'?[['ghidra','migrate','--target',target,'--dry-run'],['ghidra','migrate','--target',target],...next]:next});
     return this.ordered(reserved.context,async()=>{
       if(this.workspace.request(reserved.request.id).state==='applied')return opened(this.workspace.request(reserved.request.id).result);
       let backend:ResearchBackend;
@@ -174,8 +186,9 @@ export class Research {
           sharedRevision:revision(this.workspace.model(target).sharedRevision),pendingChanges:count(context)};
         this.workspace.completeSavedRequest(context,request.id,context.generation,{},result);return result;
       } catch(error) {
-        const result=retained('unknown');this.workspace.recordRequest(request.id,'unknown',result);
-        throw openingFailure(error,'unknown');
+        const migration=error instanceof CliError&&error.code==='coordinator.migration';
+        const result={...retained(migration?'blocked':'unknown'),...(migration?{reason:'explicit_native_migration_required',detail:error.message}:{})};this.workspace.recordRequest(request.id,migration?'failed':'unknown',result);
+        throw openingFailure(error,migration?'blocked':'unknown');
       }
     });
   }
@@ -348,6 +361,7 @@ export class Research {
       // Restore before starting this mutation; other uncertain effects still block the context.
       await backend.open(selected);
       const before=this.workspace.context(selected);
+      if(resolution&&before.nativeCheckout)fail('unsupported','Native conflicts require Ghidra resolver decisions; the legacy scalar resolution option cannot choose a native winner.');
       const previous=before.scalars.find(change=>change.address===at&&change.field===field);
       let observed: string|null;
       if(field==='function.name') {
@@ -408,19 +422,33 @@ export class Research {
       else if(backend.recover) {
         const observed=await backend.recover(active);
         if(observed.state==='verified')this.workspace.finishPublication(active.id,observed.revision,{session:active.session,target:active.target,
-          state:'merged',sharedRevision:revision(observed.revision),applied:active.scalars.length+(active.complexChanges?.length??Number(active.complex)),pendingChanges:0});
+          state:'merged',sharedRevision:revision(observed.revision),applied:active.scalars.length+(active.complexChanges?.length??Number(active.complex)),pendingChanges:0},observed.snapshot);
+        if(observed.state==='verified'&&backend.dropNative)await backend.dropNative(active);
       }
     }
     for(const request of this.workspace.unresolved(selected)) {
       if(request.operation==='ghidra.merge') {
         let publication;
         try{publication=this.workspace.publication(request.id);}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
-        if(!publication)this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_published',applied:0});
+        if(!publication){
+          const empty=await backend.recoverEmptyNative?.(selected,request.id);
+          if(empty?.state==='verified'){
+            const current=this.workspace.context(selected);this.workspace.completeSavedRequest(selected,request.id,current.generation,{}, {...selected,state:'empty',applied:0,pendingChanges:0,sharedRevision:revision(empty.revision),engine:'ghidra-native'});continue;
+          }
+          if(backend.nativeEngine){const update=await backend.recoverUpdate?.(selected,request.id);if(!update||update.state==='unknown')continue;}
+          this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_published',applied:0});
+        }
         continue;
       }
       if(request.operation==='ghidra.refresh') {
-        // A refresh stages a detached candidate; context/result commit together, before install.
-        this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_updated',receivedChanges:0});continue;
+        // Native Update may have changed the saved checkout. An interrupted result cannot be declared not_updated.
+        if(backend.nativeEngine){
+          const update=await backend.recoverUpdate?.(selected,request.id);if(!update||update.state==='unknown')continue;
+          const context=this.workspace.context(selected);
+          if(update.state==='conflict')this.workspace.recordRequest(request.id,'failed',{...selected,state:'conflict',receivedChanges:0,preservedLocalChanges:count(context),conflicts:[{engine:'ghidra',message:update.conflict}]});
+          else this.workspace.completeSavedRequest(selected,request.id,context.generation,{}, {...selected,state:'updated',engine:'ghidra-native',sharedRevision:revision(update.revision),receivedChanges:update.receivedChanges,preservedLocalChanges:count(context),nativeMergeInvocations:update.nativeMergeInvocations,conflicts:[]});
+        }else this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_updated',receivedChanges:0});
+        continue;
       }
       if(request.operation==='ghidra.open') {
         if(backend.recoverModel&&!await backend.recoverModel(selected.target))continue;
@@ -434,6 +462,15 @@ export class Research {
         continue;
       }
       const execution=request.execution===undefined?undefined:object(request.execution);
+      if(execution?.kind==='native-discard'){
+        const discarded=await backend.recoverDiscardNative?.(selected,request.id,execution.checkout as NativeCheckout);
+        if(discarded?.state==='verified'){
+          const current=this.workspace.context(selected);
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{}, {...selected,state:'discarded',discardedChanges:Number(execution.discardedChanges),pendingChanges:0,
+            baseRevision:revision(discarded.baseRevision),...(discarded.retainedKeepFile?{retainedKeepFile:discarded.retainedKeepFile}:{})});
+        }
+        continue;
+      }
       if(execution?.kind==='discard'){
         try{const current=this.workspace.context(selected),base=execution.baseSnapshot as Artifact,discarded=execution.discardedSnapshot as Artifact;
           if(!backend.closed||!await backend.closed(selected)||current.generation!==execution.generation||current.baseSnapshot?.id!==base.id||current.workingSnapshot?.id!==discarded.id)continue;
@@ -475,7 +512,7 @@ export class Research {
         try{const snapshot=execution.snapshot as Artifact;await this.workspace.artifacts.verify(snapshot);
           const observed=await this.workspace.artifacts.capture(text(execution.output,4096),'snapshot'),current=this.workspace.context(selected);
           if(observed.id!==snapshot.id||current.generation!==execution.generation)continue;
-          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot},
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:(execution.workingSnapshot as Artifact|undefined)??snapshot},
             {...selected,state:'exported',output:execution.output,sha256:snapshot.sha256,size:snapshot.size});
         }catch{/* Partial or changed output cannot prove an export and is never overwritten. */}
         continue;
@@ -547,66 +584,49 @@ export class Research {
     const reserved=this.workspace.reserveRequest(selected,'ghidra.merge',{},callerId);
     return this.ordered(selected,()=>this.sharedOrder(selected.target,async()=>{
       let request=this.workspace.request(reserved.request.id),backend:ResearchBackend|undefined;
-      if(reserved.replay&&['running','unknown'].includes(request.state)) {
-        backend=await this.backend();await this.reconcile(selected,backend);request=this.workspace.request(request.id);
-      }
-      if(reserved.replay&&request.state!=='accepted') {
+      if(reserved.replay&&['running','unknown'].includes(request.state)){backend=await this.backend();await this.reconcile(selected,backend);request=this.workspace.request(request.id);}
+      if(reserved.replay&&request.state!=='accepted'){
         if(request.state==='applied')return request.result;
-        if(request.state==='failed')fail('conflict','This merge retained its original failed result.',request.result);
-        fail('unknown','This merge has an unresolved outcome; its intent must be reconciled.',request.result);
+        fail(request.state==='failed'?'conflict':'unknown','This merge retains its recorded outcome; it is never checked in blindly again.',request.result);
       }
-      if(this.workspace.activePublication(selected.target)||this.workspace.model(selected.target).state==='unknown')
-        fail('blocked','Shared model has an unresolved publication; preserve all private work until reconciliation.');
-      backend??=await this.backend();await backend.open(selected);
-      if(!backend.latest||!backend.fields||!backend.candidate||!backend.publish)fail('configuration','Selected backend lacks the verified publication contract.');
-      let context=this.workspace.context(selected);
-      if(context.complexChanges.length&&context.workingSnapshot){const scalars=await this.savedScalars(context,backend,context.workingSnapshot);if(digest(scalars)!==digest(context.scalars))context=this.workspace.saveContext(selected,context.generation,{scalars});}
-      if(!context.baseRevision||!context.baseSnapshot||!context.workingSnapshot)fail('binding','Private context has no saved comparison base.');
-      this.workspace.startRequest(request.id);
+      if(this.workspace.activePublication(selected.target)||this.workspace.model(selected.target).state==='unknown')fail('blocked','Shared publication is unresolved; retain every working copy.');
+      backend??=await this.backend();
+      if(backend.nativeEngine!=='native-checkout-v1'||!backend.updateNative||!backend.publishNative||!backend.dropNative||!backend.finishEmptyNative)
+        fail('configuration','The primary CLI requires native checkout/Update/check-in; scalar fallback is disabled.');
+      await backend.open(selected);
+      if(this.workspace.context(selected).debugger?.connected)fail('busy','Stop the live debugger before handing its native project to Update/check-in.');
+      this.workspace.startRequest(request.id,{kind:'native-merge'});
       let publication:Publication|undefined;
-      try {
-        if(!count(context)) {
-          const result={...selected,state:'empty',applied:0,pendingChanges:0};this.workspace.recordRequest(request.id,'applied',result);return result;
+      try{
+        const update=await backend.updateNative(selected,request.id),context=this.workspace.context(selected);
+        if(update.state==='conflict'){
+          const result={...selected,state:'conflict',applied:0,pendingChanges:count(context),conflicts:[{engine:'ghidra',message:update.conflict}]};
+          this.workspace.recordRequest(request.id,'failed',result);fail('conflict','Native conflict preserves the original working copy and checkout.',result);
         }
-        const shared=await backend.latest(selected.target);this.workspace.observeShared(selected.target,shared.revision,shared.snapshot);
-        const original=await backend.fields(context.baseSnapshot,context.scalars),current=await backend.fields(shared.snapshot,context.scalars);
-        const comparisons=Object.fromEntries(context.scalars.map(change=>{
-          const key=fieldKey(change),before=original[key],after=current[key];
-          if(!before||!after)fail('partial','Saved comparison omitted a pending field.');
-          return [key,{value:after.value,compatible:after.exists&&before.exists&&(change.dependency??before.dependency)===after.dependency}];
-        }));
-        const plan=scalarMerge(context.scalars,context.complexChanges.length>0,context.baseRevision,shared.revision,comparisons);
-        if(plan.state==='conflict') {
-          const conflicts=[...plan.conflicts.map(conflict=>({...conflict,address:publicAddress(conflict.address)})),
-            ...(context.complexChanges.length&&context.baseRevision!==shared.revision?[{field:'program',reason:'complex_divergence',
-              originalRevision:revision(context.baseRevision),sharedRevision:revision(shared.revision),local:'retained saved private state'}]:[])];
-          const scalars=context.scalars.map(change=>{const conflict=plan.conflicts.find(item=>fieldKey(item)===fieldKey(change));
-            return conflict?{...change,conflict:{shared:conflict.shared}}:change;});
-          this.workspace.saveContext(selected,context.generation,{scalars});
-          const result={...selected,state:'conflict',applied:0,sharedRevision:revision(shared.revision),pendingChanges:count(context),conflicts};
-          this.workspace.recordRequest(request.id,'failed',result);fail('conflict','Merge conflicts preserve all local work; nothing was published.',result);
+        if(update.state==='empty'){
+          await backend.finishEmptyNative(selected);const current=this.workspace.context(selected);
+          const result={...selected,state:count(context)?'merged':'empty',applied:0,pendingChanges:0,sharedRevision:revision(update.revision),engine:'ghidra-native'};
+          this.workspace.completeSavedRequest(selected,request.id,current.generation,{},result);return result;
         }
-        if(plan.state==='already_shared') {
-          const result={...selected,state:'merged',applied:0,sharedRevision:revision(shared.revision),pendingChanges:0};
-          this.workspace.completeSavedRequest(selected,request.id,context.generation,{baseRevision:shared.revision,baseSnapshot:shared.snapshot,
-            workingSnapshot:shared.snapshot,viewEpoch:(context.viewEpoch??0)+1,scalars:[],complexChanges:[]},result);return result;
-        }
-        const snapshot=plan.fullSnapshot?context.workingSnapshot:await backend.candidate(selected.target,shared.snapshot,plan.apply);
-        publication=this.workspace.beginPublication(selected,request.id,shared.revision,snapshot);
-        publication=this.workspace.publicationIntent(publication.id);
-        const published=await backend.publish(publication);
-        if(published.state==='conflict') {
+        if(update.revision<(this.workspace.model(selected.target).sharedRevision??1)){
           const result={...selected,state:'conflict',reason:'shared_changed',applied:0,pendingChanges:count(context)};
-          this.workspace.rejectPublication(publication.id,result);fail('conflict','Shared base changed before publication; all local work was retained.',result);
+          this.workspace.recordRequest(request.id,'failed',result);fail('conflict','Another context observed a newer server version; retain this checkout and perform a new native Update.',result);
         }
-        const result={...selected,state:'merged',sharedRevision:revision(published.revision),applied:count(context),pendingChanges:0};
-        this.workspace.finishPublication(publication.id,published.revision,result);return result;
-      } catch(error) {
+        publication=this.workspace.beginPublication(selected,request.id,update.revision,update.snapshot);
+        publication=this.workspace.publicationIntent(publication.id);
+        const published=await backend.publishNative(publication);
+        if(published.state==='conflict'){
+          const result={...selected,state:'conflict',reason:'shared_changed',applied:0,pendingChanges:count(context),conflicts:[{engine:'ghidra',message:published.conflict??'Shared head changed'}]};
+          this.workspace.rejectPublication(publication.id,result);fail('conflict','Native check-in was refused; local work remains retained.',result);
+        }
+        const result={...selected,state:'merged',sharedRevision:revision(published.revision),applied:count(context),pendingChanges:0,engine:'ghidra-native'};
+        this.workspace.finishPublication(publication.id,published.revision,result,published.snapshot);
+        await backend.dropNative(selected);return result;
+      }catch(error){
         const state=this.workspace.request(request.id).state;
-        if(state!=='applied'&&state!=='failed') {
-          if(publication&&['commit_intent','unknown'].includes(this.workspace.publication(publication.id).state))
-            this.workspace.unknownPublication(publication.id,{state:'unknown'});
-          this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown'});
+        if(state!=='applied'&&state!=='failed'){
+          if(publication&&['commit_intent','unknown'].includes(this.workspace.publication(publication.id).state))this.workspace.unknownPublication(publication.id,{state:'unknown',engine:'ghidra-native'});
+          this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',engine:'ghidra-native'});
         }
         throw error;
       }
@@ -616,59 +636,26 @@ export class Research {
     const reserved=this.workspace.reserveRequest(selected,'ghidra.refresh',{},callerId);
     return this.ordered(selected,()=>this.sharedOrder(selected.target,async()=>{
       const request=this.workspace.request(reserved.request.id);
-      if(reserved.replay&&request.state!=='accepted') {
+      if(reserved.replay&&request.state!=='accepted'){
         if(request.state==='applied')return request.result;
-        fail('unknown','Refresh retains an unresolved result; its saved state must be reconciled.',request.result);
+        fail(request.state==='failed'?'conflict':'unknown','Native Update retains its recorded outcome; its saved checkout is preserved.',request.result);
       }
-      if(this.workspace.activePublication(selected.target)||this.workspace.model(selected.target).state==='unknown')
-        fail('blocked','Shared publication outcome must be reconciled before receiving its version.');
-      const backend=await this.backend();await backend.open(selected);
-      if(!backend.latest||!backend.fields||!backend.candidate)fail('configuration','Selected backend lacks the verified refresh contract.');
-      const context=this.workspace.context(selected);
-      if(!context.baseSnapshot||!context.baseRevision||!context.workingSnapshot)fail('binding','Context lacks saved private and base state.');
-      this.workspace.startRequest(request.id);
-      try {
-        const shared=await backend.latest(selected.target);this.workspace.observeShared(selected.target,shared.revision,shared.snapshot);
-        const publications=this.workspace.publishedSince(selected.target,context.baseRevision);
-        const fields=new Map<string,ScalarChange>(context.scalars.map(change=>[fieldKey(change),change]));
-        for(const publication of publications)for(const change of publication.scalars)fields.set(fieldKey(change),change);
-        const selectors=[...fields.values()];
-        const original=await backend.fields(context.baseSnapshot,selectors),working=await backend.fields(context.workingSnapshot,selectors),current=await backend.fields(shared.snapshot,selectors);
-        const local=context.complexChanges.length?await this.savedScalars(context,backend,context.workingSnapshot):context.scalars.map(change=>({...change}));
-        // An opaque operation may have touched an incoming scalar too: retain that actual value.
-        if(context.complexChanges.length)for(const change of selectors) {
-          const key=fieldKey(change),before=original[key],privateValue=working[key];
-          if(before&&privateValue&&before.value!==privateValue.value&&!local.some(item=>fieldKey(item)===key))
-            local.push({address:change.address,field:change.field,original:before.value,local:privateValue.value,dependency:before.dependency,...(!privateValue.exists?{removed:true as const}:{})});
+      if(this.workspace.activePublication(selected.target)||this.workspace.model(selected.target).state==='unknown')fail('blocked','Shared publication requires reconciliation before Update.');
+      const backend=await this.backend();
+      if(backend.nativeEngine!=='native-checkout-v1'||!backend.updateNative)fail('configuration','Native Update is required; scalar refresh fallback is disabled.');
+      await backend.open(selected);
+      if(this.workspace.context(selected).debugger?.connected)fail('busy','Stop the live debugger before handing its native project to Update.');
+      this.workspace.startRequest(request.id,{kind:'native-update'});
+      try{
+        const update=await backend.updateNative(selected,request.id),context=this.workspace.context(selected);
+        if(update.state==='conflict'){
+          const result={...selected,state:'conflict',receivedChanges:0,preservedLocalChanges:count(context),conflicts:[{engine:'ghidra',message:update.conflict}]};
+          this.workspace.recordRequest(request.id,'failed',result);fail('conflict','Native Update requires a decision; saved private work and ancestry are preserved.',result);
         }
-        const incoming:ScalarChange[]=[],comparisons:Record<string,{value:string|null;compatible:boolean}>={};
-        for(const selector of selectors) {
-          const key=fieldKey(selector),before=original[key],privateValue=working[key],after=current[key];
-          if(!before||!privateValue||!after)fail('partial','Refresh comparison omitted an incoming or local field.');
-          comparisons[key]={value:after.value,compatible:before.exists&&privateValue.exists&&after.exists&&
-            before.dependency===after.dependency&&privateValue.dependency===after.dependency};
-          incoming.push({address:selector.address,field:selector.field,original:before.value,local:after.value});
-        }
-        const plan=scalarRefresh(local,incoming,comparisons);
-        const changed=plan.receive.filter(change=>working[fieldKey(change)]?.value!==change.local);
-        const dependencyConflict=local.some(change=>!comparisons[fieldKey(change)]?.compatible);
-        const preserveWhole=context.complexChanges.length>0||dependencyConflict;
-        let snapshot=context.workingSnapshot;
-        if(preserveWhole) {
-          if(changed.length)snapshot=await backend.candidate(selected.target,context.workingSnapshot,changed);
-        } else snapshot=plan.preserve.length?await backend.candidate(selected.target,shared.snapshot,plan.preserve):shared.snapshot;
-        const complexConflict=preserveWhole&&shared.revision!==context.baseRevision;
-        const conflicts=[...plan.conflicts.map(conflict=>({...conflict,address:publicAddress(conflict.address)})),
-          ...(complexConflict?[{field:'program',reason:'complex_divergence',originalRevision:revision(context.baseRevision),
-            sharedRevision:revision(shared.revision),local:'retained saved private state'}]:[])];
-        const receivedProgram=!preserveWhole&&shared.revision!==context.baseRevision&&
-          (publications.some(publication=>publication.complex)||publications.length!==shared.revision-context.baseRevision);
-        const result={...selected,state:conflicts.length?'conflict':'updated',sharedRevision:revision(shared.revision),
-          receivedChanges:changed.length+Number(receivedProgram),preservedLocalChanges:plan.preserve.length+context.complexChanges.length,conflicts};
-        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot,viewEpoch:(context.viewEpoch??0)+1,
-          scalars:plan.preserve,...(!preserveWhole?{baseRevision:shared.revision,baseSnapshot:shared.snapshot}:{})},result);
-        return result;
-      }catch(error){if(this.workspace.request(request.id).state!=='applied')this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown'});throw error;}
+        const result={...selected,state:'updated',engine:'ghidra-native',sharedRevision:revision(update.revision),receivedChanges:update.receivedChanges,
+          preservedLocalChanges:count(context),nativeMergeInvocations:update.nativeMergeInvocations,conflicts:[]};
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,{},result);return result;
+      }catch(error){if(!['applied','failed'].includes(this.workspace.request(request.id).state))this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',engine:'ghidra-native'});throw error;}
     }));
   }
   async mutate(selected:Scope,operation:string,parameters:Record<string,unknown>,

@@ -28,6 +28,14 @@ profile storage (the installation default for new profiles; AppData before confi
 runtime state. Updates are disabled by default. Agents edit isolated working contexts;
 the service coordinates shared publication. A local lock cannot enforce server authorization.
 
+Ghidra owns merge semantics. Native merge/refresh must use its multi-user engine and native
+checkout ancestry/change sets; do not extend the coordinator's legacy scalar merger into an
+object merger or invent winners for native conflicts. The coordinator owns orchestration,
+authorization, journals, recovery and working-copy lifecycle. See the accepted architecture
+boundary in [design](docs/DESIGN.md#native-merge-ownership) and the
+[native integration work](docs/NATIVE-MERGE-PROTOTYPE.md). Existing scalar code is legacy,
+not a pattern for new native merge behavior.
+
 Unknown check-in outcomes freeze the lane until history and independent readback establish the
 result. Preserve journals and local copies; never retry a check-in blindly or expire a live owner.
 Default tests are offline; real writes use only explicitly created disposable fixtures.

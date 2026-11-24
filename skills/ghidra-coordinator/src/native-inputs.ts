@@ -9,6 +9,7 @@ import { promisify } from 'node:util';
 import { fail, stable, text } from './model.js';
 import {managedExtensions,extensionJvmArguments} from './extensions.js';
 import {runtimeValues,runtimeSelection} from './runtime-selection.js';
+import {nativeMergeSources} from './native-merge-patches.js';
 
 export interface NativeInputs {
   java: string; ghidraHome: string; mcpJar: string; jars: string[]; classpath: string;
@@ -112,14 +113,18 @@ export async function nativeHelpers(directory: string, inputs: NativeInputs,c?:R
   if (!names.length) fail('configuration', 'Installed package omitted its native helper sources.');
   const hashes = [];
   for (const name of names) hashes.push(await sha(join(sources, name)));
-  const key = createHash('sha256').update(stable([inputs.fingerprint, names, hashes])).digest('hex');
+  const mergeSources=await nativeMergeSources(inputs.ghidraHome);
+  const key = createHash('sha256').update(stable([inputs.fingerprint, names, hashes,mergeSources.map(({name,sha256})=>({name,sha256}))])).digest('hex');
   const parent = join(directory, 'native-helpers'); await mkdir(parent, {recursive: true, mode: 0o700});
   const classes = join(parent, key);
   try { if (await readFile(join(classes, 'complete'), 'utf8') === key) return classes; }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   const temporary = join(parent, 'compiling-' + randomUUID()); await mkdir(temporary, {mode: 0o700});
   try {
-    const executable=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':'')),args=['-proc:none','-cp',inputs.classpath,'-d',temporary,...names.map(name=>join(sources,name))];
+    const patched:string[]=[];
+    for(const item of mergeSources){const path=join(temporary,'sources',item.name);await mkdir(dirname(path),{recursive:true});await writeFile(path,item.source,{flag:'wx'});patched.push(path);}
+    await writeFile(join(temporary,'native-merge-provenance.json'),stable(mergeSources.map(({source,...item})=>item)),{flag:'wx'});
+    const executable=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':'')),args=['-proc:none','-cp',inputs.classpath,'-d',temporary,...names.map(name=>join(sources,name)),...patched];
     if(c)await runTool(c,{tool:'ghidra',role:'compile-helpers',installation:inputs.fingerprint,executable,arguments:args,timeoutMs:60000,maxOutputBytes:262144});
     else await run(executable,await javaClasspathArguments(temporary,'ghidra',executable,args),{timeout:60000,maxBuffer:262144});
     const complete = await open(join(temporary, 'complete'), 'wx', 0o600);

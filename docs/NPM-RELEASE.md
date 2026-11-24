@@ -6,7 +6,7 @@ The workflow now increments patch by default and keeps the selected version acro
 minor, major and the exact source version are explicit choices. The 0.2.0 receipts below remain
 historical evidence of the initial CI publication.
 
-The current release is 0.2.0, including [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md).
+The recorded 0.2.0 release includes [managed runtime delivery](MANAGED-GHIDRA-RUNTIME.md).
 The historical 0.1.0 receipt and executable proof remain below. Run the historical
 `proof-global-package.mjs` only with its matching 0.1.0 executable/artifact; current releases use
 the manual CI build, publication and global-install gate.
@@ -94,6 +94,21 @@ The one-time npm Trusted Publisher targets `iXab3r/insight-cli`, `release-npm.ym
 `npm-release`. That environment permits main only, with no extra review gate; `NPM_RELEASE_READY`
 is true. No npm token is stored in GitHub. Use **Actions → Release npm → Run workflow**, main,
 publish checked. Build-only remains available by unchecking publish.
+
+## Local global native build 0.5.9
+
+On 2026-10-27 the owner requested a global-install update and a new disposable native proof.
+The local 0.5.9 build replaces the observed global 0.5.8 installation. Package and all shipped
+skill versions are synchronized; this is a local installation, not an npm registry publication
+or a claim about the registry's latest version. The canonical standalone bundle installs offline.
+
+The [global native delivery report](verification/native-global-cli-delivery.json) binds the exact
+archive, all installed payloads, global shim/entrypoint and native execution evidence. Its proof
+uses the actual global `dist/src/bin.js` with disposable `APPDATA`/`LOCALAPPDATA`, profile and
+server, without a backend or runtime-arguments wrapper. Existing product profiles/processes and
+`ec2-native` data are excluded. The [native architecture](NATIVE-CLI-INTEGRATION.md) records the
+working-copy, native Update/check-in, verification and disposal boundary; GC and migration remain
+separate work.
 
 Preflight found and corrected a clean-build executable-mode difference and a relative archive
 argument that npm interpreted as GitHub shorthand. The first full run failed before publication;

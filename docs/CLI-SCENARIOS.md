@@ -206,7 +206,7 @@ insight-cli ghidra refresh --session s_b --target t_client --json
 ```json
 {
   "session":"s_b","target":"t_client","state":"updated","sharedRevision":"R2",
-  "receivedChanges":2,"preservedLocalChanges":1,"conflicts":[]
+  "receivedChanges":1,"preservedLocalChanges":1,"conflicts":[]
 }
 ```
 
@@ -220,53 +220,18 @@ insight-cli ghidra merge --session s_b --target t_client --json
 {"session":"s_b","target":"t_client","state":"merged","sharedRevision":"R3","applied":1,"pendingChanges":0}
 ```
 
-## Conflict and explicit resolution
+## Native conflicts
 
-A refreshes client to R3. A and B now make different changes to the same existing comment:
+A refreshes client to R3. A and B change the same function/type differently; A publishes.
+B's native Update/check-in requires a decision. The command exits nonzero, publishes nothing
+and retains B's saved native project, checkout ID and original base. `sessions status` exposes
+`engine: ghidra-native`, checkout identity/base/state and a bounded Ghidra conflict description.
 
-```sh
-insight-cli ghidra refresh --session s_a --target t_client --json
-insight-cli ghidra comments set --session s_a --target t_client --address 0x140001000 --kind eol --text "Loads settings from a file" --json
-insight-cli ghidra comments set --session s_b --target t_client --address 0x140001000 --kind eol --text "Loads settings from embedded data" --json
-insight-cli ghidra merge --session s_a --target t_client --json
-insight-cli ghidra merge --session s_b --target t_client --json
-```
-
-A's merge produces R4. B's merge fails with nonzero exit status:
-
-```json
-{
-  "session":"s_b","target":"t_client","state":"conflict","applied":0,
-  "conflicts":[{
-    "address":"0x140001000","field":"comment.eol",
-    "original":"Reads settings from config.json",
-    "shared":"Loads settings from a file",
-    "local":"Loads settings from embedded data"
-  }]
-}
-```
-
-The common value remains A's; B's local value and conflict remain available. The caller chooses
-the meaning of the resolution. The service does not infer a winner from the text.
-
-B can keep either existing value or choose another through the same setter. For example, if
-further investigation supports a fallback path:
-
-```sh
-insight-cli ghidra comments set --session s_b --target t_client --address 0x140001000 --kind eol --text "Loads settings from a file; falls back to embedded defaults" --resolve-conflict --expect-shared "Loads settings from a file" --json
-```
-
-```json
-{"session":"s_b","target":"t_client","state":"applied","conflict":"resolved","sharedState":"pending"}
-```
-
-This records a local decision against the observed shared base. B then uses ordinary merge.
-If the shared value has already changed, resolution fails with `state: conflict` and
-`reason: shared_changed`, retaining the local work and returning expected/shared/local values.
-If it changes later, merge compares against that acknowledged base and checks for another conflict.
-The typed implementation defines null/absent values consistently. The owner selected no partial
-publication: any conflict prevents publication of the whole selected merge, preserving all work.
-Refresh still applies incoming changes proven safe to combine and retains local/shared conflicts.
+No partial scalar refresh or TypeScript winner is applied. The old scalar
+`--resolve-conflict --expect-shared` flags cannot resolve native decisions. The native decision/
+resume transport is not implemented. Adjust work privately and let native Update evaluate it
+again under a new request, or retain the old context and explicitly transfer intended work
+onto a fresh context. Do not replay an arbitrary script as a merge algorithm.
 
 ## Failure and continuation
 
@@ -305,7 +270,7 @@ If durable evidence establishes that publication completed:
 
 The publication is not repeated. If evidence cannot establish the result, it remains unknown;
 further publication affecting that shared model stays blocked rather than guessing or blindly
-checking in again. The precise unknown/error envelope is an implementation-planning decision.
+checking in again. Unknown check-in freezes the publication lane until history and independent exact-version readback establish the outcome.
 
 B reopens its own context and still reads its unresolved local value:
 
@@ -377,25 +342,12 @@ or required agent-visible job entity is introduced.
 
 ## Complex changes and a diverged base
 
-An agent can edit types, signatures, structures or analysis through the facade. If the shared
-model is unchanged, a verified saved private result can be published. If another session advances
-the model, changes outside verified merge categories remain explicit conflicts. Both versions
-remain available; the service does not force-replace the shared version or replay the agent's script.
-
-To transfer desired work onto the latest model, the agent can open the existing target in a new
-session while retaining its previous context:
-
-```sh
-insight-cli ghidra open --session new --target t_client --json
-```
-
-```json
-{"session":"s_b_current","target":"t_client","state":"ready"}
-```
-
-The agent reads its old work through `s_b`, applies the desired changes through `s_b_current`
-against that current base, then merges normally. This uses the existing session/target model;
-no automatic whole-version overwrite or new rebase entity is required.
+An agent can edit types, signatures, structures and other analysis through the facade.
+A divergent base uses native Ghidra Update with native ancestry/change sets; there is no
+coordinator category whitelist. Conflicts preserve the whole original native working copy.
+The [primary native integration](NATIVE-CLI-INTEGRATION.md) identifies tested scope and limits.
+An explicit new session remains available when the agent wants a separate current checkout;
+it is not an automatic replay or whole-version replacement.
 
 ## Opt-in publication in the A/B workflow
 

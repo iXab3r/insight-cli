@@ -38,6 +38,17 @@ test('automatic conflict preserves entire local work and stops incoming-conflict
  assert.equal((await get(b,'1000')).text,'B');assert.equal((await get(b,'1100')).text,'B second');
  await policy(b,'after-edit','before-edit');const edits=backend.edits;assert.notEqual((await f.run(app,['ghidra','comments','set',...selectors(b),'--address','1100','--kind','pre','--text','not dispatched','--json'])).exitCode,0);assert.equal(backend.edits,edits);
 });
+
+test('after-save publishes saved native edits even when CLI diagnostics contain no pending changes',async t=>{
+ const {f,app,a,backend,policy}=await setup(t);await policy(a,'after-save');
+ // A GUI/native edit has no CLI scalar or opaque acknowledgment record.
+ await backend.call(a,'/set_comment',{address:'1000',type:'eol',comment:'native edit outside CLI diagnostics'});
+ assert.equal(backend.workspace.context(a).scalars.length+backend.workspace.context(a).complexChanges.length,0);
+ const args=['ghidra','save',...selectors(a),'--request-id','native-save-no-diagnostics'];
+ const result=await f.json(app,args) as any;assert.equal(result.automatic.publication.state,'merged');assert.equal(backend.publications,1);
+ await f.json(app,args);assert.equal(backend.publications,1);
+ const clean=await f.json(app,['ghidra','save',...selectors(a)]) as any;assert.equal(clean.automatic.publication.state,'empty');assert.equal(backend.publications,1);
+});
 test('automatic lost publication response reconciles one actual publication; local setter and shared check-in never replay',async t=>{
  const {f,app,a,backend,policy,set}=await setup(t);await policy(a,'after-edit');backend.losePublication=true;backend.cannotVerify=true;
  const args=['ghidra','comments','set',...selectors(a),'--address','1000','--kind','eol','--text','retained','--request-id','lost-auto','--json'];

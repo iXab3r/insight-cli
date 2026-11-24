@@ -1,7 +1,7 @@
 import type {ScalarChange} from './workspace.js';
-import {fail} from './model.js';
+import {fail,fieldKey} from './model.js';
+export {fieldKey} from './model.js';
 
-export const fieldKey=(change:Pick<ScalarChange,'address'|'field'>)=>change.address+'@'+change.field;
 export interface SharedScalar {value:string|null;compatible:boolean}
 export interface FieldConflict {
   address:string;field:ScalarChange['field'];original:string|null;local:string|null;shared:string|null;

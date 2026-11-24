@@ -3,7 +3,7 @@
 The owner accepted these five branches and 25 scenarios on 2026-10-16. This document
 owns the scenario hierarchy and acceptance criteria. All 25 scenarios now have
 [individual Gherkin workflows and a frozen benchmark](BUSINESS-ACCEPTANCE.md). That
-execution report records **25/25 passed on real Ghidra**, including all six prepared-base
+execution report records the historical **25/25 passed on real Ghidra**, including all six prepared-base
 speedup pairs, separately from this agreed contract.
 Existing technical checks and historical receipts do not establish acceptance of this
 catalogue. [Automation setup](ACCEPTANCE-AUTOMATION.md) describes the current runner
@@ -12,6 +12,61 @@ and technical bridge; [CLI scenarios](CLI-SCENARIOS.md) describe the public cont
 The agent chooses the investigation, interprets evidence and resolves disagreements.
 insight-cli supplies target/session context, tool operations and shared publication.
 Acceptance concerns what the agent can accomplish through the installed public CLI.
+
+## Current native collaboration expectations
+
+The separately executable [Ghidra Server business follow-up](SERVER-BUSINESS-ACCEPTANCE.md)
+adds GS-01–GS-32 without reassigning the historical BS IDs. Its current run results
+must be read separately from the original 25-scenario acceptance.
+
+For the native follow-up, describe the agent's goal and expected observable result before
+implementation details. Keep BS-01–BS-25 stable. The historical 25/25 run is evidence for its
+recorded artifact, not acceptance of the local native 0.5.9 build. The
+[global native delivery](verification/native-global-cli-delivery.json) supplies supporting
+technical evidence. GS-01–GS-32 are new Windows public-CLI workflows for that installed
+artifact; the historical BS corpus and benchmark have not been rerun on it.
+
+| Business expectation | Current native acceptance boundary |
+| --- | --- |
+| Two agents investigate independently, then deliver both contributions (BS-10–BS-11). | GS-01–GS-06 and GS-21–GS-23 check private work and fresh readback of names, exact types, related data models, navigation and code corrections. |
+| An agent receives a colleague's findings and continues its own work (BS-12). | GS-07–GS-10 require stable private reads, explicit receive, retained local work and a subsequently delivered result. |
+| Agents settle contradictory findings and deliver their agreed result (BS-14). | GS-14 requires deliberate public transfer of a chosen name, fresh readback, both notes and continued work by both original agents. GS-15 requires the same for a type; its observed silent replacement is a failure. Native in-place decision/resume remains missing. |
+| A disagreement cannot silently lose findings or deliver only part of a selected result (BS-15). | GS-12–GS-13 and GS-18 check saved private/shared values and usable conflict details. GS-24–GS-26 and GS-31–GS-32 require preservation for byte, region-description and numeric-signature disagreements. An error code alone cannot pass them. |
+| An interrupted agent resumes and establishes whether its result was delivered (BS-18–BS-20). | GS-09/GS-19 check graceful owner/server restart and continuation; GS-16 checks a lost completed client reply and original-request retry. These do not establish abrupt worker/check-in crash recovery. |
+
+BS-14 must express the complete outcome, for example:
+
+```gherkin
+Scenario: Two agents settle contradictory findings and continue investigating
+  Given two agents have independent findings about the same program
+  And they disagree about a function name or a type definition
+  When the first agent delivers its findings
+  And the second agent requests incoming findings
+  Then the second agent can inspect the disagreement without losing private work
+  And no part of its conflicting finding set is delivered silently
+  When the second agent explicitly chooses the intended result and delivers it
+  Then a fresh agent reads the chosen name or type definition
+  And unrelated findings from both agents are retained
+  And both agents can continue their investigation from the accepted result
+```
+
+Use separate function-name and type-definition fixtures with explicit expected values.
+The agent makes the decision; Ghidra applies its native merge semantics. This contract
+does not select an automatic winner or authorize a coordinator merge algorithm. The example
+is the acceptance expectation; GS-14 and GS-15 implement its distinct name/type cases.
+The accepted BS-14 permits an intentional transfer through public operations. It does not
+require a particular resolution command or UI. The name-transfer workflow has passed in
+the follow-up; that result does not establish type settlement or native in-place
+decision/continuation. The follow-up report owns exact outcomes and artifact identity.
+
+For working-copy lifecycle, the observable expectations are that saved private findings
+survive a restart, ordinary commands do not accumulate complete program copies, successful
+delivery releases the verified private copy, and disagreements/uncertain delivery preserve
+work. GC and migration of existing data remain outside this follow-up.
+
+Delivery reports should lead with the scenario, expected result, observed result and any
+remaining gap. Command transcripts, checkout IDs, fingerprints and process evidence support
+that account; they do not replace the business outcome.
 
 ## Shared acceptance rules
 

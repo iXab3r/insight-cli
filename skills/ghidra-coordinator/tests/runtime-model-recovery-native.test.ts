@@ -30,6 +30,11 @@ test('disposable native repository: upgrade absence, concurrent preparation, R3 
   const argv=['-Djava.awt.headless=true','-Dghidra.home='+home!,...nativeJvmDirectories(call),'-cp',root+delimiter+cp,main,...args];
   return exec(java!,await javaClasspathArguments(call,'ghidra',java!,argv),{env:{...process.env,...await server.credentials(binding,role)},windowsHide:true,timeout:60000,maxBuffer:1024*1024});
  }
+ // Historical legacy-history fixture only: this raw publisher is deliberately absent from the primary CLI service.
+ async function legacyPublish(_binding:typeof binding,path:string,snapshot:string,expected:number,request:string,journal:string,sourceSha:string){
+  const result=await run('db.InsightSnapshotPublisher',[binding.repository,path,snapshot,String(expected),'insight merge '+request,journal,sourceSha],'publisher');
+  return JSON.parse(result.stdout) as Record<string,unknown>;
+ }
  const helper=join(root,'RecoveryFixture.java');await writeFile(helper,`package db;
  import java.nio.file.*;import ghidra.GhidraApplicationLayout;import ghidra.framework.*;import ghidra.framework.data.OpenMode;import ghidra.framework.store.db.PackedDatabase;import ghidra.program.database.ProgramDB;import ghidra.util.task.TaskMonitor;
  class RecoveryFixture{public static void main(String[] a)throws Exception{Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
@@ -55,14 +60,14 @@ test('disposable native repository: upgrade absence, concurrent preparation, R3 
  const imported=JSON.parse(await readFile(join(next,'import.json'),'utf8'));let snapshot=join(next,imported.snapshot);
  for(let revision=2;revision<=3;revision++){
   const changed=join(root,'R'+revision+'.gzf');await run('db.RecoveryFixture',['edit',snapshot,changed,'annotation R'+revision]);
-  const id='q_'+randomUUID(),journal=join(root,'publication-'+id+'.json');assert.equal((await server.publish(binding,'/'+target.id+'.bin',changed,revision-1,id,journal,target.binarySha256)).version,revision);snapshot=changed;
+  const id='q_'+randomUUID(),journal=join(root,'publication-'+id+'.json');assert.equal((await legacyPublish(binding,'/'+target.id+'.bin',changed,revision-1,id,journal,target.binarySha256)).version,revision);snapshot=changed;
  }
  const candidate=await server.initialRecovery(binding,at,fingerprint);assert.equal(candidate.state,'candidate');assert.equal(candidate.version,3);
  const held=await run('db.RecoveryFixture',['checkout',binding.repository,target.id+'.bin'],'publisher'),checkout=/CHECKOUT (\d+)/.exec(held.stdout)![1]!;
  assert.equal((await server.initialRecovery(binding,at,fingerprint,String(candidate.receipt))).state,'unknown','Live checkout blocks readback');
  await run('db.RecoveryFixture',['release',binding.repository,target.id+'.bin',checkout],'publisher');
  const changed=join(root,'R4.gzf');await run('db.RecoveryFixture',['edit',snapshot,changed,'annotation R4']);const id='q_'+randomUUID();
- await server.publish(binding,'/'+target.id+'.bin',changed,3,id,join(root,'publication-'+id+'.json'),target.binarySha256);
+ await legacyPublish(binding,'/'+target.id+'.bin',changed,3,id,join(root,'publication-'+id+'.json'),target.binarySha256);
  assert.equal((await server.initialRecovery(binding,at,fingerprint,String(candidate.receipt))).state,'unknown','Revision advance blocks stale candidate');
  const privateSnapshot=await workspace.captureSnapshot(snapshot);workspace.saveContext(b.context,0,{workingSnapshot:privateSnapshot,baseSnapshot:privateSnapshot,baseRevision:3,scalars:[{address:'10000',field:'comment.eol',original:'annotation R3',local:'private edit'}]});const pending=workspace.context(b.context);
  const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server);assert.deepEqual(await Promise.all([backend.recoverModel(target.id),backend.fork(c).recoverModel(target.id)]),[true,true]);

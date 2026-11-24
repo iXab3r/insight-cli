@@ -108,13 +108,14 @@ export class Projects {
         const observed=await this.workspace.artifacts.capture(output,'snapshot'),current=this.workspace.context(selected);
         if(observed.id!==snapshot.id||current.generation!==execution.generation)fail('unknown','Export output cannot establish the retained outcome.');
         const result={...selected,state:'exported',output,sha256:snapshot.sha256,size:snapshot.size};
-        this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:snapshot},result);return result;
+        this.workspace.completeSavedRequest(selected,request.id,current.generation,{workingSnapshot:(execution.workingSnapshot as Artifact|undefined)??snapshot},result);return result;
       }
       await this.newOutput(output);
-      const backend=await this.backend();await backend.open(selected);const snapshot=await backend.saved(selected),context=this.workspace.context(selected);
-      this.workspace.startRequest(request.id,{kind:'export',generation:context.generation,snapshot,output});
+      const backend=await this.backend();await backend.open(selected);const view=await backend.saved(selected),context=this.workspace.context(selected);
+      const snapshot=backend.snapshotFile?await this.workspace.captureSnapshot(await backend.snapshotFile(view)):view;
+      this.workspace.startRequest(request.id,{kind:'export',generation:context.generation,snapshot,workingSnapshot:view,output});
       try{await this.exportArtifact(snapshot,output);const result={...selected,state:'exported',output,sha256:snapshot.sha256,size:snapshot.size};
-        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:snapshot},result);return result;
+        this.workspace.completeSavedRequest(selected,request.id,context.generation,{workingSnapshot:view},result);return result;
       }catch(error){this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',savedSnapshot:snapshot});throw error;}
     });
   }

@@ -14,6 +14,7 @@ class InsightGuiMain {
     GhidraApplicationConfiguration configuration=new GhidraApplicationConfiguration();
     configuration.setShowSplashScreen(false);
     Application.initializeApplication(new GhidraApplicationLayout(),configuration);
+    insight.nativecheckout.InsightOfflineAuthenticator.install();
     SwingUtilities.invokeAndWait(()->{
       try {
         var manager=new OwnedProjectManager();

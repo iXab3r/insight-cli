@@ -17,6 +17,13 @@ session/cell ID, await that same execution with the host's wait/poll facility un
 status and read its stdout/stderr. An empty first chunk is not a lost CLI response. Do not
 start another open or repeat a CPU mutation while the original command is still running.
 
+Each session/target owns one saved native checkout. Reopen the same selectors to keep its
+project, checkout ID/base and native changes. `refresh` runs Ghidra Update; `merge` runs native
+Update/check-in through the service and drops the project after independent verification.
+Private workers have no repository password. Ordinary save does not export another `.gzf`.
+Conflicts/unknown results retain the copy. Legacy detached contexts need explicit migration;
+Close unchanged work to release its checkout; `ghidra gc --dry-run` reports redundant copies. See [research](references/research.md) and [recovery](references/recovery.md).
+
 For research loops, use the packaged [persistent client](references/persistent.md) and keep
 one connection across queries. It uses the existing CLI transport and preserves typed errors;
 lost mutation replies still require request/status recovery.

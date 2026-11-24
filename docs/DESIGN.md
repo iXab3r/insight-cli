@@ -7,6 +7,27 @@ is `insight-cli`; Ghidra functionality belongs under `insight-cli ghidra ...`. T
 surface is our CLI/API. The service owns underlying instances, routing, isolation, lifecycle,
 change capture and merge orchestration. Callers provide research intelligence and assignments.
 
+### Native merge ownership
+
+The owner reaffirmed this boundary on 2026-10-26: Ghidra owns the semantics of merging
+analysis. Native merge/refresh uses Ghidra's multi-user engine, real checkout ancestry and
+native change sets. insight-cli must not grow its legacy scalar merger into an alternative
+object merger, maintain a competing resolver/category list or choose winners for unresolved
+native conflicts. Native defects belong in narrowly scoped, version-pinned upstream fixes
+with native regression evidence, rather than replacement coordinator merge rules.
+
+The service owns isolated working copies, binding/authorization, durable intent, native
+execution, conflict transport, publication readback, recovery and disposal. Ghidra Server
+stores shared revisions/checkouts; the service worker invokes the native client merger.
+Agents work on independent copies, publish through the shared repository, then release/drop
+verified copies. Continued work takes a fresh checkout. Conflicts and uncertain publication
+retain local work; [collection](GHIDRA-STORAGE-COLLECTION.md) cannot delete them merely because they are old. Factory retains
+host/IPC ownership. The [native prototype and integration plan](NATIVE-MERGE-PROTOTYPE.md)
+records implementation status and evidence; this accepted direction does not claim that the
+historical prototype alone establishes production integration. The
+[primary native CLI integration](NATIVE-CLI-INTEGRATION.md) records current routing,
+checkout/save/Update/check-in lifecycle, migration admission and exact acceptance.
+
 ### RE workflow and saved materials
 
 The owner chose a simple RE-skill workflow above the tool applications. The packaged
@@ -363,8 +384,9 @@ specified for the supported operations. No agent-visible process ID or lock comm
 If A and B open a shared Ghidra model at R1, each context starts from R1 and accumulates its own
 changes. A publishing produces shared R2. B retains its working view and local work until its
 Ghidra context is updated. Updating `(s_b, t_client, ghidra)` does not update other targets or tools.
-For supported scopes the service compares the original, local and shared states, preserves local
-changes and retains incompatible values as explicit conflicts. Context refresh and publication
+Ghidra's native multi-user engine compares the original, local and shared states using the
+checkout ancestry/change sets. The service orchestrates that engine and retains unresolved
+native conflicts. Context refresh and publication
 are distinct operations; refresh does not itself approve replacing shared data with local values.
 
 The manual A/B walkthrough uses `ghidra refresh` to receive shared changes and `ghidra merge`
@@ -380,18 +402,18 @@ and incoming refresh before an edit; default behavior stays manual. See
 and preserves all local work. This is a publication gate, not a claim that separate backend calls
 are atomic: incomplete stages remain recoverable and never receive a successful publication result.
 
-Refresh applies incoming changes that can be safely combined and preserves conflicting local values
-alongside the shared version. Dependencies between edits must be checked; sharing an address or
-being an unchanged scalar value does not establish that applying it to a changed structure is safe.
-
-Complex local program changes can be published when the relevant shared model is unchanged and
-their saved result can be verified. Once that model diverges, only categories with defined and
-verified merge semantics are automatically combined. Other changes retain the local and shared
-versions as an explicit conflict. The caller transfers the desired work onto a current shared
-base before publication; whole-version force replacement is outside the selected contract.
-No universal native database merge or replay of arbitrary scripts is implied here.
+Native Update receives incoming changes through Ghidra's resolvers, including their object
+dependencies. An unresolved decision rejects the whole Update and preserves the original
+saved native copy, checkout ID and base. There is no partial scalar receive or coordinator
+category whitelist. Native conflict choice/resume transport remains separate work; whole-version
+force replacement and replaying arbitrary scripts are not merge implementations.
 
 ### Agreed scalar conflict resolution
+
+This subsection retains the historical scalar contract and examples for legacy regression
+fixtures. It is superseded in the primary CLI by [native merge ownership](#native-merge-ownership).
+The scalar resolution flags below cannot resolve native conflicts; do not extend this historical
+algorithm or use its examples as the native implementation contract.
 
 For supported scalar fields, conflict detection compares original, local and shared values.
 A change on only one side can be preserved; equal resulting values do not conflict. Different
@@ -444,10 +466,8 @@ insight-cli ghidra merge --session s_b --target t_client --json
 }
 ```
 
-These examples cover one non-null scalar comment. The typed implementation must define null/absent
-values and operation-specific conflicts consistently. The full-delivery choices above now settle
-multi-change publication and incoming refresh; they do not make non-scalar changes independently
-mergeable fields.
+These historical examples cover one non-null scalar comment. They do not define mergeable
+fields or a resolver list for the native engine.
 
 ### Request identity and lost responses
 
@@ -491,6 +511,9 @@ demonstrates a need. Optional caller request identity does not require a separat
 object in the ordinary research workflow.
 
 ## Current prototype implementation
+
+This section records the retained comment-publication regression fixture. Its exclusive
+checkout/scalar flow is historical, separate from the [primary native CLI](NATIVE-CLI-INTEGRATION.md).
 
 One public agent repository ships real TypeScript/Node CLIs and version-matched skills. Each
 executable helper has one canonical source under `skills/<product>` as an npm workspace.

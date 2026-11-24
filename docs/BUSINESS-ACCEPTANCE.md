@@ -5,10 +5,40 @@ different workload and result: repeatable acceleration was not confirmed. Its sl
 and disk-full merge attempt remain reported. The fixture results below retain their own
 identity and do not imply live-agent research acceleration.
 
-**All 25 business scenarios pass on real Ghidra through the installed public CLI.**
+**The recorded 2026-10-16 artifact passed all 25 business scenarios on real Ghidra through the installed public CLI.**
 Six prepared-base pairs demonstrate repeatable acceleration with three native workers.
 This document records the accepted results, limits and reproduction protocol.
 The [agreed catalogue](BUSINESS-SCENARIOS.md) owns BS-01–BS-25 and their business criteria.
+
+## Native follow-up: business acceptance remains open
+
+The local native 0.5.9 [global-install proof](verification/native-global-cli-delivery.json)
+is supporting technical evidence, not a new 25/25 business acceptance run. The separate
+[Ghidra Server business follow-up](SERVER-BUSINESS-ACCEPTANCE.md) adds 32 Windows
+public-CLI workflows, each with its own disposable server/profile state. It exercises
+the actual installed artifact, native Update/check-in, rich findings, disagreement
+preservation, continuation, authority and working-copy lifecycle. Its own report owns
+the outcomes and limitations; it does not renew the historical corpus or benchmark.
+
+BS-14 remains open for native delivery: the agent must inspect a disagreement, explicitly
+choose the intended finding, deliver it, obtain fresh independent readback and continue
+working with unrelated findings preserved. Refusing an Update safely establishes only
+the preservation part. GS-14 has demonstrated deliberate public transfer of a chosen
+name, both agents' notes and further work by both original agents. GS-15 requires the
+same outcome for a contradictory type definition, but receiving it silently replaces
+the private definition before settlement. GS-13 also exposes missing conflict details.
+Native in-place conflict decision/continuation remains unimplemented. The goal is the
+delivered, verified finding; passing public name transfer does not close these gaps.
+
+The historical BS driver still uses legacy scalar `--resolve-conflict` /
+`--expect-shared` flags and macOS fixture preparation. Those flags cannot resolve
+native conflicts. The new GS workflows use their own native/public operations and
+do not wrap that older driver in a passing step.
+
+Use the [current business expectations](BUSINESS-SCENARIOS.md#current-native-collaboration-expectations)
+to drive implementation and the Automation workflows. Retain the existing scenario IDs and
+historical receipts. Do not mark a business scenario passed by wrapping the technical proof
+in one step, accepting a nonzero exit as successful resolution, or reusing the run below.
 
 ## Accepted native run
 

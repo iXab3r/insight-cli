@@ -1,0 +1,289 @@
+{
+  "schema": 1,
+  "auditedOn": "2026-10-27",
+  "classification": "Source-only architecture/utilization audit; no new runtime acceptance",
+  "sourceBaseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+  "scope": {
+    "productionCodeChanged": false,
+    "productProfilesOpened": false,
+    "ec2NativeAccessed": false,
+    "auditDocument": "docs/GHIDRA-SERVER-UTILIZATION-AUDIT.md",
+    "newGhidraServersOrClientsStarted": false,
+    "inspectionTools": [
+      "Python standard-library ZIP/source reads",
+      "JDK javap declared-method inspection"
+    ]
+  },
+  "repositorySourceHashes": {
+    "skills/ghidra-coordinator/src/bin.ts": "76ce890e915a646022c10ca97287bba3febf310eb0027d4c793b20badac9b0b1",
+    "skills/ghidra-coordinator/src/cli.ts": "13d581018ae926335156d923b22c972d58d608269a5bf945be4f600d030d7dd2",
+    "skills/ghidra-coordinator/src/contexts.ts": "94ebc8156e143f12948115111c73e444f1677a6496ba9db7675b4fce84c913d4",
+    "skills/ghidra-coordinator/src/research.ts": "8eed0916c09feaef46ffb30d6e79b3fe664bf6f4ce6b9297e5634b8c43c47400",
+    "skills/ghidra-coordinator/src/merge.ts": "a203f6028d4cd4cfc08b535dcbb26f6a7c7579490d0bb71b1f7bfbde49fafe0b",
+    "skills/ghidra-coordinator/src/workspace.ts": "fe07a863a2e01e5453cd7ad4217fc8805cc06f3c3dceef9aa4328d87991aacbd",
+    "skills/ghidra-coordinator/src/server.ts": "2b86096ec4a5958626b278fea4caeae1f58a32d9e8c9f3d2cd95f83c4df5a9a4",
+    "skills/ghidra-coordinator/src/ghidra.ts": "f5c9b6a4982f47de664b64001316187dec0adbc9b93dc0e786c53e4e51f7ad08",
+    "skills/ghidra-coordinator/src/prototype-cli.ts": "82c4200f2972d9e3a961e773f41b3a6c4aa77f9a273aecbd606401086f579eff",
+    "skills/ghidra-coordinator/src/lifecycle.ts": "44e216a837c1c52611e276f88f8962a962da513f889087f1b3a99b76d67374a6",
+    "skills/ghidra-coordinator/src/sync-policy.ts": "219fcc9d799cc8bfe52e9c9229e368869dd71ef868830a6a015af6448cda3899",
+    "skills/ghidra-coordinator/src/artifacts.ts": "0b7aca45a260f434ca39b00e6a8cd594b309b899f07ae5638ac72a21cda30073",
+    "skills/ghidra-coordinator/src/native-inputs.ts": "2dfd69fd54dd1adb6b401dbe197e75a89a5544e156b3ed089e2aa3b1ef6200d9",
+    "skills/ghidra-coordinator/src/administration.ts": "73151c13c2299bd6465d862c0cea4e14074b1b0fa1bd85a8f94ff3e70d06e6fb",
+    "skills/ghidra-coordinator/src/projects.ts": "a8ac2e39ee1a99288d9a109443a34f1d1f0c290f6d44bc00ba856be96f1aa493",
+    "skills/ghidra-coordinator/references/native/InsightSnapshotPublisher.java": "0570b6c4babd661dba0a5e19779b852854d23256bf606d38f56587fdd405ef81",
+    "skills/ghidra-coordinator/references/native/InsightBlockTransfer.java": "9f96e5b811a720b53f9df85328a8ff863bece09a00f9274f7beba137b0f1dd79",
+    "skills/ghidra-coordinator/references/native/InsightPublicationRecovery.java": "f74bcae4a9750a6a29fd86f52f9827bdfc2b81e86ce128e16a5de4765a9fedd6",
+    "skills/ghidra-coordinator/references/native/InsightInitialPublication.java": "efd42303628389f20faad8d8610de0bb14b2bd471cf8127bd28b40293adc30da",
+    "skills/ghidra-coordinator/references/native/InsightServerInit.java": "c974bfc1f70e8c154b5001ca27a6948daa31e8451d064aa20eac24b94e5bf31d",
+    "skills/ghidra-coordinator/references/native/InsightServerProbe.java": "e59d8301b854cba97f5f6489a9a877fd27eb9b194dfc46cb8662e192983b11f0",
+    "skills/ghidra-coordinator/references/native/InsightServerAdministration.java": "14cd7df61a24c793ae5730a1d354dd8fde6cf0c7058230693c36cade05647fe1",
+    "scripts/proof-native-merge.mjs": "cce526ac8048811fd9f5aff91e57c4e5a3572107ded64256f352fa4d21bc3d6b",
+    "skills/ghidra-coordinator/tests/fixtures/native-merge/NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+    "skills/ghidra-coordinator/tests/fixtures/native-merge/HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506"
+  },
+  "documentationHashes": {
+    "docs/GHIDRA-SERVER-UTILIZATION-AUDIT.md": "89eb5a907ec60e0f86300d56e35d44fedd29d5504ffb8cdd0e3a17c33962cb88",
+    "docs/NATIVE-MERGE-PROTOTYPE.md": "5a53322c80cd8a455e541e9554679510e14a316a732da4dc51dde19f76b7d1df"
+  },
+  "upstreamVersion": "Ghidra 12.1.2; supplied local source/help inspected",
+  "upstream": [
+    {
+      "archive": "Ghidra/Framework/Project/lib/Project-src.zip",
+      "archiveSha256": "5e0461a66be8b01aa8b3fc1f1d98933c6914c257d217e02a681dcce9243e35f3",
+      "entries": [
+        {
+          "name": "ghidra/framework/model/DomainFile.java",
+          "sha256": "73fac31d2099e7c7772eee70023971aee0ddce1e7765585a907039ecea6aa826"
+        },
+        {
+          "name": "ghidra/framework/data/GhidraFileData.java",
+          "sha256": "aafc9c66f42ce12c3f0e7847529d982545b4f760dd570db482133578e9d531e2"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Framework/FileSystem/lib/FileSystem-src.zip",
+      "archiveSha256": "e75b8e159b9ae3665f85658295f80052c29d32f57ab0ceebc94c870c8248825e",
+      "entries": [
+        {
+          "name": "ghidra/framework/store/CheckoutType.java",
+          "sha256": "823355dc6d078663991e4303d63efe0abf22df0962ed7f2d66955556f68d8e6c"
+        },
+        {
+          "name": "ghidra/framework/client/RepositoryAdapter.java",
+          "sha256": "6373d527e1ecab553a0b7ad17d1c289a23f892c03c2e4e80c059200dd665f045"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Framework/SoftwareModeling/lib/SoftwareModeling-src.zip",
+      "archiveSha256": "eac17e5679d3cb7b1a0fea409f0a24f3a24d2b8e692b2a1807ceb78b5d1bc9d8",
+      "entries": [
+        {
+          "name": "ghidra/program/database/ProgramDBChangeSet.java",
+          "sha256": "9eae3e547f00fb84203441486b67f69711a7e70d3b365cede81d2d65ee502d24"
+        },
+        {
+          "name": "ghidra/program/model/listing/ProgramChangeSet.java",
+          "sha256": "735f61278179971e332511dd35bd52c8df3cceb3ccb47a695752edcb7ae7aa30"
+        },
+        {
+          "name": "ghidra/program/model/listing/DataTypeChangeSet.java",
+          "sha256": "17ee7c3f489eba1cfc966145fe5e7edda7d9a1fb17389c4566fad7f709170432"
+        },
+        {
+          "name": "ghidra/program/database/ProgramContentHandler.java",
+          "sha256": "3fe0b483e09cf3e50f0f40a4b9213990f17278478ed2296bd9b3c9ad4db4bfe6"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Framework/DB/lib/DB-src.zip",
+      "archiveSha256": "81f658a0dcecf139ff01b98c2c27bb49bd24f2fcd5e17b0f36bf4b9e7c23e05a",
+      "entries": [
+        {
+          "name": "db/buffers/VersionFile.java",
+          "sha256": "af5bea413701da82241d132972ba0e784ce854f09d59abe3cc04f5c5479a6fb4"
+        },
+        {
+          "name": "db/buffers/ManagedBufferFile.java",
+          "sha256": "ae47e8fe440af86862f7e46bddfc7efe296934a973eb4d94b5cb4997980a0ca4"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Features/GhidraServer/lib/GhidraServer-src.zip",
+      "archiveSha256": "60863d35918c5bb4c65be4309aec9b262d7cdd2e2627944400f2b79a4ee9ea30",
+      "entries": [
+        {
+          "name": "ghidra/server/Repository.java",
+          "sha256": "797b936615499dc80927eab4bf9e68a4afe93c57f79f4afa64f22eebb02e449e"
+        },
+        {
+          "name": "ghidra/server/store/RepositoryFile.java",
+          "sha256": "415d5b1a263baa7115fb5335b6fc60ce40e285d1f4b2417a6daea04a3b644305"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Features/Base/lib/Base-src.zip",
+      "archiveSha256": "544a9fa144afc9a1e9999835f99e39c175c32ecfa6e9f9af3dfc4bc4c3c99884",
+      "entries": [
+        {
+          "name": "ghidra/app/merge/ProgramMultiUserMergeManager.java",
+          "sha256": "5c6c35cad540b1c7c8fbfd489deae06bc087b67c6cf7c97a4234f9dd8ef1ce84"
+        },
+        {
+          "name": "ghidra/app/merge/listing/AbstractFunctionMerger.java",
+          "sha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5"
+        }
+      ]
+    },
+    {
+      "archive": "Ghidra/Features/Base/lib/Base.jar",
+      "archiveSha256": "1b3c47ef1dd15868429e20226ce1083a3a407e1f100b804c6502cd3f07bd3dee",
+      "entries": [
+        {
+          "name": "help/topics/VersionControl/project_repository.htm",
+          "sha256": "8e87f498649ad0d08d676e8bc1156e9ec872ecc75575c5914b36ef8b6a5550d1"
+        },
+        {
+          "name": "help/topics/Repository/Merge_Program_Files.htm",
+          "sha256": "ec9eae6394a84fc1762fe869ae26e45b86d6cdf02479b489b8a2bdaf2cc9c7b7"
+        }
+      ]
+    }
+  ],
+  "bridge": {
+    "path": "skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar",
+    "sha256": "f4a9272e911466ed774c8cf73bc1adf1daef6009d895fda57aa0b28522fcdf32",
+    "inspectedClasses": [
+      {
+        "name": "com/xebyte/core/VersionControlService.class",
+        "sha256": "1b18fc067f2ddb8a89ad9a7de7287c37b2d32c08faf8abaead212038c1b3b66b"
+      },
+      {
+        "name": "com/xebyte/core/ProjectVersionControl.class",
+        "sha256": "12806f70e64cedc90f24b4c200e85ccd5f6c35af766f2b24a9f97a726b6b7f67"
+      }
+    ],
+    "declaredVersionControlMethods": [
+      "checkout",
+      "checkinProgram/checkin",
+      "undoCheckout",
+      "addToVersionControl",
+      "versionHistory",
+      "checkouts",
+      "terminateCheckout",
+      "terminateAllCheckouts"
+    ],
+    "scope": "javap declared methods of these classes; native DomainFile.merge exists, but these service classes expose no Update wrapper"
+  },
+  "findings": [
+    {
+      "id": "A1",
+      "type": "observed product architecture",
+      "summary": "Active ResearchBackend persists snapshots/scalars rather than native context checkout identity; merge and refresh have coordinator semantic authority"
+    },
+    {
+      "id": "A2",
+      "type": "source-based migration risk; no new current-loss reproduction",
+      "summary": "Low-level publisher manufactures broad change data, which is not a proven native checkout delta; mixing legacy and native ancestry requires explicit migration"
+    },
+    {
+      "id": "A3",
+      "type": "observed lifecycle/data path; size unmeasured",
+      "summary": "Restore/capture/latest/candidate retain fresh projects and full exports; byte-level CAS does not deduplicate native working DBs"
+    },
+    {
+      "id": "A4",
+      "type": "implementation/evidence gap",
+      "summary": "Native Update and general conflict resolution/headless paths are not integrated or accepted"
+    },
+    {
+      "id": "A5",
+      "type": "production/prototype authority mismatch",
+      "summary": "Product separates reader/private workers/publisher, while proof gives every JVM the same writable account; credential-separated native checkout reuse remains unproved"
+    },
+    {
+      "id": "A6",
+      "type": "native constraints requiring lifecycle acceptance",
+      "summary": "Exclusive structural edits, open-handle checkout retention, dirty-Update keep files and durable normal checkouts must be honored"
+    },
+    {
+      "id": "A7",
+      "type": "scope limitation; existing profile isolation is intentional",
+      "summary": "Workspace namespaced target paths do not implicitly converge across independent profiles sharing one repository"
+    }
+  ],
+  "priorRuntimeEvidence": {
+    "report": "docs/verification/native-return-type-regression.json",
+    "sha256": "0d6e6969a1866a13d8cedb83f3df299daff62f4337da577fe9b2cfbf63ed7f7e",
+    "reuse": "Existing bounded native merge evidence only, not a new runtime pass",
+    "runtimeSourceHashesStillMatch": true,
+    "historicalDocumentation": {
+      "directoryName": "ghidra-server-audit-9r4r_3j0/regression-documents",
+      "hashes": {
+        "AGENTS.md": "5782361ffdb0fd1cc1206edc63de701245965c803b0d50ca73e532168813dbde",
+        "docs/DESIGN.md": "a3396dc8d9d29533affba5cc0f95af76859c3dba547f541c5e4cd7bdd1b87e63",
+        "docs/roles/coordinator-maintainer.md": "bf70541a705e21850f89274be3a0c599eea4afb2fa8c579831db8d5e3015ba4e",
+        "docs/NATIVE-MERGE-PROTOTYPE.md": "615f658454b64ef178e5438888eefbe328d78ca30f953d57eb6f21b579c7302b",
+        "docs/NATIVE-RETURN-TYPE-REGRESSION.md": "ea0b23841efeea11793f5b0fc85535bbfdba0135460a422bb0b2a69fb85fbd40"
+      },
+      "note": "Exact documents from prior regression were archived and hash-verified before adding this audit link. Native prototype document now evolves independently."
+    }
+  },
+  "nextGate": "Persistent service-owned normal checkout with credential-separated offline editing, saved reopen and native Update; then full facade migration acceptance",
+  "validation": {
+    "routingLinksAndMetadata": "passed",
+    "nativeRuntimeTests": "not run; source/documentation audit only"
+  },
+  "installedPackageInspection": {
+    "name": "@eyeauras/insight-cli",
+    "version": "0.5.8",
+    "scope": "Read-only selected JS files; no runtime/profile opened, no whole-package/source equivalence claim",
+    "files": [
+      {
+        "path": "dist/src/bin.js",
+        "sha256": "e5e168751ff1b54851cf9c7e0f9c55c9100dcfaa2313630020b4b37ec2995945",
+        "presentMarkers": {
+          "runHosted": true,
+          "createDefinition": true
+        }
+      },
+      {
+        "path": "dist/src/cli.js",
+        "sha256": "b2f3f7459b0bf12f2b79c5cb99ef40b054a45ec63a05a1b0d5f96fee10672873",
+        "presentMarkers": {
+          "new GhidraContexts": true,
+          "new Research": true
+        }
+      },
+      {
+        "path": "dist/src/research.js",
+        "sha256": "1c1db8aeee7d14141eed5e1a503165a43e8b7ba89f6d665001aa6517958e843f",
+        "presentMarkers": {
+          "scalarMerge(": true,
+          "scalarRefresh(": true
+        }
+      },
+      {
+        "path": "dist/src/contexts.js",
+        "sha256": "938e613d8b2cc1fd1f599e0e621383e1a2b48833c64c54d40d7a062fc4333e98",
+        "presentMarkers": {
+          "saved.gzf": true,
+          "/import_program": true,
+          "async privateCopy": true,
+          "async publish": true
+        }
+      },
+      {
+        "path": "dist/src/server.js",
+        "sha256": "1f2f7a88ee65710fd2e8ec8c14907daf8b3f79b16b77f7fca647a01b2ccb7c27",
+        "presentMarkers": {
+          "db.InsightSnapshotPublisher": true
+        }
+      }
+    ]
+  }
+}

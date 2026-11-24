@@ -7,6 +7,13 @@ process sentinel. Product bindings belong to this repository. Automation supplie
 process ownership, deadlines, logs and cleanup; insight-cli retains its existing CLI,
 Factory lifecycle and native acceptance assertions.
 
+Integration in the repository does not imply that the private submodule is initialized in
+every checkout; the bootstrap fails explicitly when its project is absent. For the current
+native follow-up, [business expectations](BUSINESS-SCENARIOS.md#current-native-collaboration-expectations)
+lead implementation and reporting. The historical business pass below does not establish
+acceptance of native 0.5.9; [the remaining gap](BUSINESS-ACCEPTANCE.md#native-follow-up-business-acceptance-remains-open)
+includes end-to-end conflict resolution.
+
 The [25 business scenarios and acceptance criteria](BUSINESS-SCENARIOS.md) now have
 five executable feature files and product-specific public-CLI bindings. Run them with
 `npm run test:business`; [business acceptance](BUSINESS-ACCEPTANCE.md) describes the
@@ -17,11 +24,16 @@ older technical bridge features remain a separate supporting layer.
 [Connection evidence](verification/automation-bootstrap.json) records two passing offline
 scenarios, the real installed multi-agent native scenario, four-scenario discovery and
 rejection of an empty selection on macOS ARM64. The full 33-group bridge was discovered
-but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. Current discovery
-finds 31 scenarios: 25 business workflows, four technical bridges, managed runtime delivery
+but not executed in this connection check. That connection check also passed the then-existing 128 offline tests. At that recorded checkpoint, discovery
+found 31 scenarios: 25 business workflows, four technical bridges, managed runtime delivery
 and the combined shared tool runtime scenario.
 
 ## Setup and commands
+
+The [native Server business follow-up](SERVER-BUSINESS-ACCEPTANCE.md) adds 32 separate
+`@server-business` outcomes, selectable with `npm run test:business:server`. It uses
+isolated control roots and the actual installed public CLI on Windows, and reports
+failures rather than treating expected product gaps as passing or skipped scenarios.
 
 Node 24+, .NET SDK 10 and authenticated read access to the private Automation repo
 are required for this development suite. Normal installation/use of insight-cli does

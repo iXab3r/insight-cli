@@ -13,7 +13,7 @@ export class PublicCli {
  constructor(manifest,directory,profile=manifest.profile){this.m=manifest;this.directory=directory;this.profile=profile;this.scopes=[];this.sequence=0;this.calls=[];}
  async call(args,{allowFailure=false,discardReply=false,timeout=600000,global=false}={}){
   await mkdir(this.directory,{recursive:true,mode:0o700});const n=++this.sequence,started=performance.now();let output,code=0;
-  try{output=await exec(process.execPath,[this.m.cli,...(global?[]:['--profile',this.profile]),...args,'--json'],{timeout,maxBuffer:8*1024*1024});}
+  try{output=await exec(process.execPath,[this.m.cli,...(global?[]:['--profile',this.profile]),...args,'--json'],{timeout,maxBuffer:8*1024*1024,windowsHide:true,...(this.m.environment?{env:{...process.env,...this.m.environment},cwd:this.m.directory}:{})});}
   catch(error){output=error;code=Number(error.code)||1;}
   await writeFile(join(this.directory,n+'.stdout'),output.stdout??'',{mode:0o600});await writeFile(join(this.directory,n+'.stderr'),output.stderr??'',{mode:0o600});
   const timing={n,args,code,started,ended:performance.now(),discardReply};this.calls.push(timing);await appendFile(join(this.directory,'commands.jsonl'),JSON.stringify(timing)+'\n',{mode:0o600});

@@ -46,7 +46,9 @@ try{
  // native payload. Keep a bounded deadline without treating disk latency as failure.
  await runNpm(['install','--global','--prefix',globalPrefix,'--cache',join(proof,'empty-npm-cache'),'--offline','--no-update-notifier','--ignore-scripts','--no-audit','--no-fund',join(artifacts,pack.filename)],{cwd:install,timeout:300000,maxBuffer:262144});
  await runNpm(['ls','--global','--prefix',globalPrefix,'--all','--json'],{cwd:install,timeout:30000,maxBuffer:1048576});
- const globalModules=(await runNpm(['root','--global','--prefix',globalPrefix],{cwd:install})).stdout.trim();
+ // npm can redact UUID-like segments in stdout. The explicitly owned prefix is
+ // authoritative; never turn redacted display output back into a filesystem path.
+ const globalModules=join(globalPrefix,...(process.platform==='win32'?[]:['lib']),'node_modules');
  const globalCli=join(globalModules,'@eyeauras/insight-cli');
  async function sameFiles(expected,actual){
   for(const entry of await readdir(expected,{withFileTypes:true})){

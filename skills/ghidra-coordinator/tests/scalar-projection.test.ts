@@ -20,8 +20,8 @@ test('opaque edits replace tracked scalar values before refresh, preserving the 
   };
   await new Research(backend!.workspace,async()=>backend!).mutate(a,'/fixture/complex',{},async(_backend,response)=>response);
   assert.equal(backend!.workspace.context(a).scalars[0]!.local,'actual complex value');
-  await edit(b,'shared value');await f.json(app,['ghidra','merge',...select(b)]);const refreshed=await f.json(app,['ghidra','refresh',...select(a)]) as {state:string;conflicts:{local:string}[]};
-  assert.equal(refreshed.state,'conflict');assert.ok(refreshed.conflicts.some(conflict=>conflict.local==='actual complex value'));
+  await edit(b,'shared value');await f.json(app,['ghidra','merge',...select(b)]);const refreshed=await f.run(app,['ghidra','refresh',...select(a),'--json']);
+  assert.notEqual(refreshed.exitCode,0);assert.equal(JSON.parse(refreshed.stdout).state,'conflict');assert.equal(backend!.workspace.context(a).scalars[0]!.local,'actual complex value');
   assert.equal((await f.json(app,['ghidra','comments','get',...select(a),'--address','1000','--kind','eol']) as {text:string}).text,'actual complex value');
 });
 

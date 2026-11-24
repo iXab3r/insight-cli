@@ -55,8 +55,10 @@ export class Synchronization {
       let local=progress.local===undefined?undefined:object(progress.local);
       if(!local){remember({phase:'local'});local=object(await run(requestId));if(!['applied','saved','preview'].includes(String(local.state)))fail('unknown','The local command has no verified saved acknowledgment.',local);remember({local,phase:'saved'});}
       const automatic:Record<string,unknown>={...(progress.incoming?{refresh:progress.incoming}:{})};
+      // Native buffers decide whether there is work to publish. GUI/native edits need not
+      // create scalar/opaque CLI diagnostics, and an unchanged checkout is safely empty.
       const publish=(policy.publish==='after-save'&&path==='ghidra save'||policy.publish==='after-edit')&&
-        (path==='ghidra save'||local.sharedState==='pending')&&Number(local.pendingChanges)>0;
+        local.state!=='preview'&&(path==='ghidra save'||local.sharedState==='pending'||this.workspace.context(selected).nativeCheckout?.state==='active');
       if(publish){remember({phase:'publish'});automatic.publication=await this.research.merge(selected,'auto-merge-'+request.id);}
       const current=this.workspace.context(selected),result={...local,pendingChanges:current.scalars.length+current.complexChanges.length,
         ...(local.sharedState!==undefined?{sharedState:current.scalars.length||current.complexChanges.length?'pending':'shared'}:{}),automatic};
@@ -69,7 +71,7 @@ export class Synchronization {
       // Retain the local acknowledgment alongside a failed/uncertain publication. Its caller
       // can distinguish successful editing from a publication that needs intervention.
       const result={...selected,state:code.endsWith('.conflict')?'conflict':knownRejection?'rejected':'unknown',failureCode:code,phase:progress.phase,
-        ...(progress.local?{localApplied:true,local:progress.local}:notStarted||rejected?{localApplied:false}:{localOutcome:progress.phase==='local'?'unknown':'not_started'}),automatic:{...(progress.incoming?{refresh:progress.incoming}:{}),...(detail?{outcome:detail}:{})}};
+        ...(progress.local?{localApplied:true,local:progress.local}:notStarted||rejected||progress.phase==='refresh'?{localApplied:false}:{localOutcome:progress.phase==='local'?'unknown':'not_started'}),automatic:{...(progress.incoming?{refresh:progress.incoming}:{}),...(detail?{outcome:detail}:{})}};
       if(code.endsWith('.conflict')||knownRejection)this.workspace.administrationState(request.id,'failed',result);
       else this.workspace.administrationState(request.id,'unknown',{...progress,outcome:result});
       fail(code.endsWith('.conflict')?'conflict':knownRejection?code.replace(/^coordinator\./,''):'unknown','Automatic synchronization did not complete; retained local effects are not replayed.',result);

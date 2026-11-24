@@ -1,0 +1,565 @@
+{
+  "schema": 1,
+  "classification": "Scoped native research regression; production CLI unchanged",
+  "sourceBaseCommit": "e1220618c796dd3c2444b4a68855c9ea9dce9e7c",
+  "sourceHashes": {
+    "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+    "NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+    "ExtendedMergeCases.java": "3c3c93d9b9f494886dd3ba7f010d60878c4638757da85eeb5c15b210fe9bac7c",
+    "NativeReturnTypeRepro.java": "85e15d63eb63f79ce418af7f2b7a92966ba041d825c01c784e1b2ed8238b73ca",
+    "proof-native-merge.mjs": "cce526ac8048811fd9f5aff91e57c4e5a3572107ded64256f352fa4d21bc3d6b"
+  },
+  "sourcePaths": {
+    "HeadlessProgramMergeManager.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/HeadlessProgramMergeManager.java",
+    "NativeMergeFixture.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/NativeMergeFixture.java",
+    "ExtendedMergeCases.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/ExtendedMergeCases.java",
+    "NativeReturnTypeRepro.java": "skills/ghidra-coordinator/tests/fixtures/native-merge/NativeReturnTypeRepro.java",
+    "proof-native-merge.mjs": "scripts/proof-native-merge.mjs"
+  },
+  "architectureDocumentation": {
+    "AGENTS.md": "5782361ffdb0fd1cc1206edc63de701245965c803b0d50ca73e532168813dbde",
+    "docs/DESIGN.md": "a3396dc8d9d29533affba5cc0f95af76859c3dba547f541c5e4cd7bdd1b87e63",
+    "docs/roles/coordinator-maintainer.md": "bf70541a705e21850f89274be3a0c599eea4afb2fa8c579831db8d5e3015ba4e",
+    "docs/NATIVE-MERGE-PROTOTYPE.md": "615f658454b64ef178e5438888eefbe328d78ca30f953d57eb6f21b579c7302b",
+    "docs/NATIVE-RETURN-TYPE-REGRESSION.md": "ea0b23841efeea11793f5b0fc85535bbfdba0135460a422bb0b2a69fb85fbd40"
+  },
+  "diagnosis": {
+    "owner": "Prototype headless integration; native type conflict detection/remapping is correct in the reproduced case",
+    "path": "Native function conflict reaches setupConflictPanel; null listing panel raises InvocationTargetException, caught by stock display code before adapter rejection hook; synchronous adapter then reports completion",
+    "correction": "Redirect an already-detected native function conflict to the headless rejection hook before GUI setup; unexpected hook return also throws",
+    "typeSemanticPatchAdded": false,
+    "fixStatus": "Existing function-conflict headless seam correction now proven as the float/double fix; previous separate unresolved classification is superseded",
+    "sourceClass": "ghidra/app/merge/listing/AbstractFunctionMerger.java",
+    "upstreamSourceSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+    "fixedSourceSha256": "84fd6ff165076e28ec111f11752116dd79c0bff861a4fcb7082a7c36e303559d"
+  },
+  "minimalReproduction": {
+    "oneFunction": true,
+    "serverOrProductCoordinatorUsed": false,
+    "baselineReturn": "int",
+    "floatAndDoubleAbsentFromBaseline": true,
+    "collidingLocalTypeIds": true,
+    "nativeMapPreservesPrivateDouble": true,
+    "unsafeControlCompletesWithFloat": true,
+    "fixedControlRejectsNativeConflict": true,
+    "latestAndPrivateReturnObservationsPreserved": true,
+    "guiWindows": 0
+  },
+  "serverCases": [
+    {
+      "order": "float then double",
+      "function": "function0",
+      "baselineReturn": "Record0 *",
+      "firstProposal": "float",
+      "secondProposal": "double",
+      "authoritativeReturn": "float",
+      "authoritativeVersion": 10,
+      "secondProjectionPreserved": true,
+      "originalCheckoutPreserved": true,
+      "unpublishedCopyDropRefused": true
+    },
+    {
+      "order": "double then float",
+      "function": "function1",
+      "baselineReturn": "uint",
+      "firstProposal": "double",
+      "secondProposal": "float",
+      "authoritativeReturn": "double",
+      "authoritativeVersion": 11,
+      "secondProjectionPreserved": true,
+      "originalCheckoutPreserved": true,
+      "unpublishedCopyDropRefused": true
+    }
+  ],
+  "serverObservations": {
+    "normalIndependentCheckouts": true,
+    "nativeDivergentMerges": 4,
+    "testedCategories": [
+      "function names",
+      "signatures and parameters",
+      "stack locals",
+      "namespaces and labels",
+      "function creation and deletion",
+      "instructions",
+      "defined data",
+      "memory bytes",
+      "memory block attributes",
+      "structures, type renames and deletions",
+      "enums",
+      "unions",
+      "typedefs",
+      "type-use dependencies",
+      "references",
+      "comments",
+      "bookmarks",
+      "equates",
+      "user properties",
+      "program options",
+      "program trees",
+      "function tags",
+      "register context",
+      "external functions and library paths"
+    ],
+    "successfulWorkingProjectsDropped": 6,
+    "rejectedConflictsIncludingDatatype": 7,
+    "finalAuthoritativeVersion": 14,
+    "reverseOrderScope": "Separate uint-return function baseline; float already exists in the shared datatype manager after forward case. This is not a second both-builtins-absent proof.",
+    "receiptFieldScope": {
+      "returnConflictUsesTypesPresentBeforeConflictCheckouts": "Legacy receipt field refers only to the Record0*/Record1* function conflict; builtin-return and builtin-return-reverse are separate cases with the recorded baselines above."
+    }
+  },
+  "tests": {
+    "minimalFixed": {
+      "receipt": {
+        "schema": 1,
+        "scope": "minimal native return-type regression",
+        "ghidra": "12.1.2",
+        "stockFunctionConflictUi": false,
+        "disposition": "native conflict refused",
+        "sourceHashes": {
+          "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+          "NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+          "ExtendedMergeCases.java": "3c3c93d9b9f494886dd3ba7f010d60878c4638757da85eeb5c15b210fe9bac7c",
+          "NativeReturnTypeRepro.java": "85e15d63eb63f79ce418af7f2b7a92966ba041d825c01c784e1b2ed8238b73ca",
+          "proof-native-merge.mjs": "cce526ac8048811fd9f5aff91e57c4e5a3572107ded64256f352fa4d21bc3d6b"
+        },
+        "result": {
+          "builtinsAbsentFromBaseline": true,
+          "original": {
+            "changedTypes": [],
+            "storage": "EAX:4",
+            "typeId": 100,
+            "addedTypes": [],
+            "returnType": "int"
+          },
+          "latest": {
+            "changedTypes": [],
+            "storage": "XMM0_Da:4",
+            "typeId": 101,
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "float"
+              }
+            ],
+            "returnType": "float"
+          },
+          "mine": {
+            "changedTypes": [],
+            "storage": "XMM0_Qa:8",
+            "typeId": 101,
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "double"
+              }
+            ],
+            "returnType": "double"
+          },
+          "conflict": "insight.prototype.HeadlessProgramMergeManager$UnresolvedNativeConflict: Native conflict requires a decision: listing",
+          "ResolvedMyDataTypes": {
+            "101": "double"
+          },
+          "ResolvedLatestDataTypes": {},
+          "result": {
+            "changedTypes": [],
+            "storage": "XMM0_Da:4",
+            "typeId": 101,
+            "addedTypes": [
+              {
+                "id": 102,
+                "name": "double"
+              }
+            ],
+            "returnType": "float"
+          },
+          "mineAfter": {
+            "changedTypes": [],
+            "storage": "XMM0_Qa:8",
+            "typeId": 101,
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "double"
+              }
+            ],
+            "returnType": "double"
+          },
+          "latestAfter": {
+            "changedTypes": [],
+            "storage": "XMM0_Da:4",
+            "typeId": 101,
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "float"
+              }
+            ],
+            "returnType": "float"
+          },
+          "guiWindows": 0
+        },
+        "upstreamFunctionMergerSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+        "compiledFunctionMergerSha256": "84fd6ff165076e28ec111f11752116dd79c0bff861a4fcb7082a7c36e303559d",
+        "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+        "runtimeJarCount": 154,
+        "installedJarsUnchanged": true,
+        "ownedNativeProcessesExited": true
+      },
+      "evidence": {
+        "directoryName": "native-merge-proof-PgTiR1",
+        "files": [
+          {
+            "path": "sanitized-receipt.json",
+            "sha256": "6047f2f97c3c313d43e66ec6e24715488227d7db0b2314a57f33837770bbbcd1"
+          },
+          {
+            "path": "source-inventory.json",
+            "sha256": "d463bd1a1d9ac24ae5fb9a8903cdd6391b6c47d062eedfc9c3c768a302e65207"
+          },
+          {
+            "path": "runtime-inventory.json",
+            "sha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd"
+          },
+          {
+            "path": "native-return-types.json",
+            "sha256": "7e43395f7731a1fc02daeef97e05050877839d072a53667fd602eb92ffca37b5"
+          },
+          {
+            "path": "native-return-types.log",
+            "sha256": "18875c16eccfa347b31bf090c84e7edfcf8ec2612ee2250ac186b4cb7c4abbad"
+          }
+        ]
+      }
+    },
+    "minimalUnsafeControl": {
+      "receipt": {
+        "schema": 1,
+        "scope": "minimal native return-type regression",
+        "ghidra": "12.1.2",
+        "stockFunctionConflictUi": true,
+        "disposition": "reproduced unsafe historical adapter behavior",
+        "sourceHashes": {
+          "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+          "NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+          "ExtendedMergeCases.java": "3c3c93d9b9f494886dd3ba7f010d60878c4638757da85eeb5c15b210fe9bac7c",
+          "NativeReturnTypeRepro.java": "85e15d63eb63f79ce418af7f2b7a92966ba041d825c01c784e1b2ed8238b73ca",
+          "proof-native-merge.mjs": "cce526ac8048811fd9f5aff91e57c4e5a3572107ded64256f352fa4d21bc3d6b"
+        },
+        "result": {
+          "builtinsAbsentFromBaseline": true,
+          "original": {
+            "returnType": "int",
+            "addedTypes": [],
+            "typeId": 100,
+            "storage": "EAX:4",
+            "changedTypes": []
+          },
+          "latest": {
+            "returnType": "float",
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "float"
+              }
+            ],
+            "typeId": 101,
+            "storage": "XMM0_Da:4",
+            "changedTypes": []
+          },
+          "mine": {
+            "returnType": "double",
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "double"
+              }
+            ],
+            "typeId": 101,
+            "storage": "XMM0_Qa:8",
+            "changedTypes": []
+          },
+          "completed": true,
+          "ResolvedMyDataTypes": {
+            "101": "double"
+          },
+          "ResolvedLatestDataTypes": {},
+          "result": {
+            "returnType": "float",
+            "addedTypes": [
+              {
+                "id": 102,
+                "name": "double"
+              }
+            ],
+            "typeId": 101,
+            "storage": "XMM0_Da:4",
+            "changedTypes": []
+          },
+          "mineAfter": {
+            "returnType": "double",
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "double"
+              }
+            ],
+            "typeId": 101,
+            "storage": "XMM0_Qa:8",
+            "changedTypes": []
+          },
+          "latestAfter": {
+            "returnType": "float",
+            "addedTypes": [
+              {
+                "id": 101,
+                "name": "float"
+              }
+            ],
+            "typeId": 101,
+            "storage": "XMM0_Da:4",
+            "changedTypes": []
+          },
+          "guiWindows": 0
+        },
+        "upstreamFunctionMergerSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+        "compiledFunctionMergerSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+        "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+        "runtimeJarCount": 154,
+        "installedJarsUnchanged": true,
+        "ownedNativeProcessesExited": true
+      },
+      "evidence": {
+        "directoryName": "native-merge-proof-RbUEJZ",
+        "files": [
+          {
+            "path": "sanitized-receipt.json",
+            "sha256": "555b3a579f28703092158127f116070e6677b814cc8f6dc6cecf11c8289fd733"
+          },
+          {
+            "path": "source-inventory.json",
+            "sha256": "d463bd1a1d9ac24ae5fb9a8903cdd6391b6c47d062eedfc9c3c768a302e65207"
+          },
+          {
+            "path": "runtime-inventory.json",
+            "sha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd"
+          },
+          {
+            "path": "native-return-types.json",
+            "sha256": "31b4357e6c4dbc769496ab7be211087b5b7e40ac3299fd1e0c8e79e933487f85"
+          },
+          {
+            "path": "native-return-types.log",
+            "sha256": "e0dd011b5a30cb12a5d05a9055a5ac455f8544cfac63fbfa4d815dca391748fb"
+          }
+        ]
+      }
+    },
+    "serverRegression": {
+      "receipt": {
+        "schema": 2,
+        "scope": "extended native headless multi-agent merge prototype",
+        "platform": "win32",
+        "ghidra": "12.1.2",
+        "agents": 3,
+        "normalIndependentCheckouts": true,
+        "functionsAndSignaturesCombined": true,
+        "structureChangesCombined": true,
+        "nativeDivergentMerges": 4,
+        "stockResolverSelection": true,
+        "sharedFunctionIndependentChangesCombined": true,
+        "conflictCases": [
+          {
+            "kind": "function",
+            "serverVersion": 9,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          },
+          {
+            "kind": "builtin-return",
+            "serverVersion": 10,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          },
+          {
+            "kind": "builtin-return-reverse",
+            "serverVersion": 11,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          },
+          {
+            "kind": "bytes",
+            "serverVersion": 12,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          },
+          {
+            "kind": "block-comment",
+            "serverVersion": 13,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          },
+          {
+            "kind": "block-comment-clear",
+            "serverVersion": 14,
+            "localProjectionPreserved": true,
+            "checkoutPreserved": true,
+            "unpublishedCopyDropRefused": true
+          }
+        ],
+        "testedCategories": [
+          "function names",
+          "signatures and parameters",
+          "stack locals",
+          "namespaces and labels",
+          "function creation and deletion",
+          "instructions",
+          "defined data",
+          "memory bytes",
+          "memory block attributes",
+          "structures, type renames and deletions",
+          "enums",
+          "unions",
+          "typedefs",
+          "type-use dependencies",
+          "references",
+          "comments",
+          "bookmarks",
+          "equates",
+          "user properties",
+          "program options",
+          "program trees",
+          "function tags",
+          "register context",
+          "external functions and library paths"
+        ],
+        "returnConflictUsesTypesPresentBeforeConflictCheckouts": true,
+        "distinctCreatedTypeUniversalIdsVerified": true,
+        "resolvedHeadlessAdapterCase": {
+          "case": "Concurrent first-time float/double returns on one function",
+          "cause": "Missing headless function-conflict seam: null GUI panel exception is swallowed before the rejection hook",
+          "previousEvidence": "native-merge-proof-A8uqWN/authoritative-readback.json",
+          "resolution": "Route the native conflict to the headless rejection hook before GUI setup; native type detection/remapping is unchanged"
+        },
+        "conflictRefused": true,
+        "conflictingLocalWorkRetained": true,
+        "unpublishedCopyDropRefused": true,
+        "independentServerReadback": true,
+        "guiWindows": 0,
+        "upstreamListingSha256": "3b6ce2e22fd414d6cc63ce2a3be6c533f13524b9513767b932f6da8f2d9326d6",
+        "patchedListingSha256": "27661df23e426a9b3d5394f78d98251046b2b58825a68e1de1fc10ac9312a09e",
+        "uiSeamPatches": 3,
+        "upstreamProjectFileSha256": "aafc9c66f42ce12c3f0e7847529d982545b4f760dd570db482133578e9d531e2",
+        "patchedProjectFileSha256": "0d31998e7ed4eb19f14f4688cff86fb6998c14e2faafc2e3977e82787595bc43",
+        "headlessGuardPatches": 2,
+        "copiesDropped": 6,
+        "upstreamProgramContextSha256": "f2a57f5100de73f980fab99a8ba1d79cf8ecee6257ba32686b78f3512e4c67bb",
+        "patchedProgramContextSha256": "0a373e43e0abe74d51fbc0a0df749ffe43fac314b7875cefa90e18f73746f4db",
+        "programContextUiPatches": 1,
+        "upstreamExternalMergerSha256": "76aa623434213057e936c8abef1539844c41c30361891b4398665d673574f519",
+        "patchedExternalMergerSha256": "4ba69a3036b5e8662ee2d8f16e61da6cb26691ce8e057f0bd8c99819d3ec8eee",
+        "externalUiPatches": 2,
+        "upstreamFunctionMergerSha256": "9e4ea08167344d8527701dac0ed1607fd68e0670849c8b453463fcf8fccb4fb5",
+        "patchedFunctionMergerSha256": "84fd6ff165076e28ec111f11752116dd79c0bff861a4fcb7082a7c36e303559d",
+        "functionConflictUiPatches": 1,
+        "nativeCompatibilityFix": {
+          "class": "MemoryMergeManager",
+          "upstreamSha256": "28b1fd583e694a7b48d37dcdebdae6674990ee0c2b3dbf3d44a726da33dd1129",
+          "patchedSha256": "b745456b4611eecbee9686de9c870546c0375ca8360e6adb622de327ff27c298",
+          "reason": "Unchanged null comment wrongly clears latest; delete-vs-update conflict detection is asymmetric",
+          "unpatchedLossReproducedIn": "native-merge-proof-4VUDaO",
+          "checks": [
+            "unchanged null preserves incoming comment",
+            "intentional clear survives later merges",
+            "clear-vs-update conflict",
+            "update-vs-clear conflict"
+          ]
+        },
+        "sourceHashes": {
+          "HeadlessProgramMergeManager.java": "4902c84c604bf7550c0ed1aa3cc4edec5304c8c599873bbf5c454d5a0c778506",
+          "NativeMergeFixture.java": "53322b9dcc5babe868c654af5198883ff6658b8963d3f3943b375f363bebfce9",
+          "ExtendedMergeCases.java": "3c3c93d9b9f494886dd3ba7f010d60878c4638757da85eeb5c15b210fe9bac7c",
+          "NativeReturnTypeRepro.java": "85e15d63eb63f79ce418af7f2b7a92966ba041d825c01c784e1b2ed8238b73ca",
+          "proof-native-merge.mjs": "cce526ac8048811fd9f5aff91e57c4e5a3572107ded64256f352fa4d21bc3d6b"
+        },
+        "startedAt": "2026-10-26T20:46:05.513Z",
+        "finishedAt": "2026-10-26T20:52:40.798Z",
+        "runtimeClasspathSha256": "2a7cac691c72d4369d2a8468041e63d962998799766d34345b2be4d29b8ee7b5",
+        "runtimeJarCount": 154,
+        "installedJarsUnchanged": true,
+        "limitations": [
+          "Synthetic native program; bounded observations are not full database equivalence",
+          "Stock resolver selection; headless adapter and one documented native memory-comment compatibility fix, not an unmodified-stock support claim",
+          "No conflict resolution or migration/GC implemented",
+          "No public CLI integration, crash recovery or separate-user publication authorization proof",
+          "Memory layout changes and arbitrary overlapping structural changes are not claimed"
+        ],
+        "ownedNativeProcessesExited": true
+      },
+      "evidence": {
+        "directoryName": "native-merge-proof-4RH3ez",
+        "files": [
+          {
+            "path": "sanitized-receipt.json",
+            "sha256": "a61f4ca862672a5ee13216e03d8223ac8585b40659c6ce3e012a52de63a97e79"
+          },
+          {
+            "path": "source-inventory.json",
+            "sha256": "d463bd1a1d9ac24ae5fb9a8903cdd6391b6c47d062eedfc9c3c768a302e65207"
+          },
+          {
+            "path": "runtime-inventory.json",
+            "sha256": "de81de1d80c78dd44b452df6bc77e2b3face42e3027982646f5f15ca6a893bfd"
+          },
+          {
+            "path": "results.json",
+            "sha256": "94b3ef80cef28386f21500a06db6f44af1e6f3333747e153a9f0a9ff9211e183"
+          }
+        ]
+      }
+    }
+  },
+  "historicalLossEvidence": {
+    "directoryName": "native-merge-proof-A8uqWN",
+    "files": [
+      {
+        "path": "authoritative-readback.json",
+        "sha256": "7cc06bef5ce97d24b9c0a6a386bc0d186de78b10834766cef519eaa401c284e6"
+      },
+      {
+        "path": "calls/checkin-fconflict1-4197f2eb-4e09-4fcd-9165-26d2e21b8be0/settings/ghidra/ghidra_12.1.2_PUBLIC/application.log",
+        "sha256": "6e4b5169c80d1b9c0055bf919b8d33b519df31b60b8dd7b3478cc72c2a47b7a1"
+      }
+    ]
+  },
+  "retainedTestDesignFailure": {
+    "directoryName": "native-merge-proof-fQZxZu",
+    "classification": "No full-pass receipt; invalid reverse-case baseline, not a new merge-engine failure",
+    "cause": "Reverse private proposal repeated the float already published on function0",
+    "correction": "Use function1 uint baseline and assert both proposals differ from the identical before projection"
+  },
+  "reproduction": {
+    "fixed": "node scripts/proof-native-merge.mjs --case return-types --ack-disposable --ghidra-home GHIDRA_HOME --java JAVA --mcp-jar MCP_JAR --output-base DISPOSABLE_BASE",
+    "unsafeControl": "Append --function-conflict-ui stock; allowed only for the offline minimal case",
+    "server": "Omit --case return-types for the broad disposable server regression"
+  },
+  "validation": {
+    "nativeMinimalControls": "passed with same current source hashes",
+    "nativeServerRegression": "passed",
+    "nodeSyntax": "passed",
+    "pinnedToolCatalog": "passed: 30 binary assets",
+    "documentationLinksWhitespaceAndMetadata": "passed"
+  },
+  "limits": [
+    "Synthetic native programs and bounded observations; no whole-database equivalence claim",
+    "Headless display seams remain version-pinned; separate memory-comment semantic compatibility patch is explicitly retained",
+    "No production CLI integration, native refresh/conflict-resolution, crash recovery or separate-user authorization acceptance",
+    "Earlier preseed datatype-conflict observation remains unclassified; this diagnosis does not resolve all native merge behaviors",
+    "No ec2-native data accessed or modified by this regression"
+  ]
+}
