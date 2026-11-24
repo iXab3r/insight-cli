@@ -21,7 +21,7 @@ if(options['global-entry']){assert.ok(options['global-package']);options.install
 assert.equal(options.ack,true);for(const key of ['ghidra-home','java','output-base'])assert.ok(options[key]);
 assert.ok(!options.faults||options.installed,'Owner-kill acceptance requires the installed IPC path');
 for(const key of ['ghidra-home','java','output-base']){options[key]=await realpath(resolve(options[key]));assert.ok(!options[key].toLowerCase().includes('ec2-native'));}
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 process.env.TEMP=process.env.TMP=process.env.TMPDIR=options['output-base'];
 const sourceRoot=resolve('skills/ghidra-coordinator'),hash=b=>createHash('sha256').update(b).digest('hex');
 const sourceHashes={};

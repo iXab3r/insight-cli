@@ -16,7 +16,7 @@ for(let i=2;i<process.argv.length;i++) {
   else if(arg.startsWith('--')&&process.argv[i+1])options[arg.slice(2)]=process.argv[++i];else throw Error('Invalid acceptance argument');
 }
 assert.equal(options.ack,true);
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 for(const key of ['java','ghidra-home','mcp-jar','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 const scratch=await realpath(await mkdtemp('/tmp/insight-facade-')),applicationId='insight-proof-'+randomUUID(),
   entry=join(scratch,'fixture-bin.mjs');

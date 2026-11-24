@@ -12,7 +12,7 @@ for(let i=0;i<argv.length;i++) {
   else throw Error('Invalid proof argument');
 }
 assert.equal(options.ack,true);
-assert.ok(!Object.keys(process.env).some(key=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
+assert.ok(!Object.keys(process.env).some(key=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
 for(const key of ['ghidra-home','java','mcp-jar']) assert.ok(options[key],`Missing --${key}`);
 const root=await realpath(await mkdtemp('/tmp/insight-server-proof-'));
 // This fixture adapter exercises the same scoped credential interface without using a real account.

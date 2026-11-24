@@ -70,15 +70,17 @@ test('sources containing destination storage and redirected storage are rejected
   assert.deepEqual(await readdir(other), []);
 });
 test('a changing source aborts the snapshot and removes partially copied bytes', async t => {
-  const root = await directory(t), appData = join(root, 'profile'), source = join(root, 'large-file');
-  const handle = await open(source, 'wx'); await handle.truncate(64 * 1024 * 1024); await handle.close();
+  const root = await directory(t), appData = join(root, 'profile'), source = join(root, 'source');
+  // The changed file is copied last, after enough files for the staging directory to be observed.
+  await mkdir(source); for (let i = 0; i < 800; i++) await writeFile(join(source, 'a' + i), 'file');
+  const last = join(source, 'z-last'); await writeFile(last, 'original');
   let stopped = false, changed = false;
   const mutate = (async () => {
     while (!stopped) {
       const storage = await readdir(join(appData, 'materials')).catch(() => []);
       if (storage.some(name => name.startsWith('.pending-'))) {
         // Once staging has begun, the pre-copy inventory has captured the original state.
-        const writer = await open(source, 'r+'); try { await writer.write(Buffer.from('changed'), 0, 7, 0); } finally { await writer.close(); }
+        const writer = await open(last, 'r+'); try { await writer.write(Buffer.from('changed'), 0, 7, 0); } finally { await writer.close(); }
         changed = true; return;
       }
       await new Promise(resolve => setTimeout(resolve, 1));

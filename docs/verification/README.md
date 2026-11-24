@@ -25,7 +25,7 @@ The same archive is now published as 0.2.0; registry and native proof are bound 
 ## Published npm package and actual global installation
 
 [`@eyeauras/insight-cli@0.2.0`](npm-release-0.2.0.json) is public on npm with `latest=0.2.0`.
-The recorded release passes
+The recorded release run 38960073085 passes
 build, publication and fresh Linux registry global installation. Its archive SHA-256 is
 `ac24a6fa06bacf0f48d6472ebe26b2f6efe68966b47990466494bc5f52c70dab`, identical to the native-tested
 candidate. Registry integrity matches; the decoded npm provenance identifies source
@@ -208,7 +208,7 @@ own resources; no existing user project or instance is selected.
 104 passing offline tests, all eight passing local native groups and an additional real SDK
 response-loss case (one actual mutation, independent saved readback, no replay). The 25 focused
 SDK/VT/FID/BSim/live-trace cases pass, as do P0/P1, existing mutations, debugger and installed IPC.
-Windows/Linux CI passes all three
+Windows/Linux CI run 38797117575 passes all three
 headless native groups on each OS, including 104 offline tests and isolated package installation.
 That run identifies commit `0c9b140d85d81fa828b1033b0f11cb2a1b914ec1`; its runtime source, schemas,
 individual OS runners and workflow are identical to the local candidate. The later candidate

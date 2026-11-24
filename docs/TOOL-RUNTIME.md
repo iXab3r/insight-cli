@@ -81,7 +81,7 @@ supported platform/component, including license/source companion assets. A tool 
 manifest describing this same inventory and upstream provenance. Installed CLI downloads must
 not trust a replacement manifest fetched from the same release to redefine their expected hashes.
 No `latest` resolution or automatic upstream fallback occurs during installation. Upstream URLs
-are acquisition provenance for the release workflow, not runtime dependencies.
+are acquisition provenance for the release procedure, not runtime dependencies.
 
 Microsoft-only exception: ProcMon and WinDbg prohibit our redistribution. Their exact vendor
 URLs, sizes, SHA256 values, terms and delivery reason are retained in
@@ -93,7 +93,7 @@ without another download opt-in. A local archive or explicit external executable
 The shared runtime verifies size/hash before cache selection and refuses a corrupt cached entry.
 These source-policy entries alone do not advertise an implemented/accepted ProcMon or WinDbg adapter.
 
-The release workflow performs this sequence:
+Publish from a clean, reviewed `main` checkout (`diec-3.21` on macOS). The sequence is:
 
 1. Read a reviewed, committed component recipe with exact upstream version, URLs and digests.
 2. Acquire bytes and verify independent pinned digests; record whether each asset is an original

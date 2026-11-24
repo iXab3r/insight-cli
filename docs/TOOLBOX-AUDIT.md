@@ -96,7 +96,7 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
 * **Managed diagnostics need more than a DLL.** Inventory RID-specific native libraries, SOS/DAC
   and runtime resolution; prove real collect/analyze, stack and trace tasks with the pinned private
   runtime. NuGet declaring major roll-forward is only a compatibility hypothesis.
-* **Windows proof environment is not presumed.** The repository has hosted Windows CI and no
+* **Windows proof environment is not presumed.** At this audit the repository had hosted Windows CI and no
   self-hosted runner. Confirm ProcMon's driver/admin capture and dnSpyEx's actual automation in
   that environment before counting them feasible. A successful download or visible GUI is
   insufficient. Windows run 39029921856

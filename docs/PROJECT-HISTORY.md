@@ -200,7 +200,7 @@ into root sessions or exposed as public worker/proposal commands. Existing RE en
 not adopted or modified by the facade.
 
 Managed Ghidra delivery: [runtime commands and ownership](../skills/ghidra-coordinator/references/managed-runtime.md).
-Version 0.4.0 was published with a fresh registry global installation.
+Version 0.4.0 was published with a fresh registry global installation (run 39523296992).
 
 New Ghidra targets import without full automatic analysis; opt in with `ghidra open --analysis`.
 Use scoped `ghidra analysis run` or `analysis reanalyze` later when needed.

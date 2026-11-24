@@ -17,7 +17,15 @@ for key in $(compgen -e); do
 done
 export CI=true GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$(pwd)"
 tools="$(mktemp -d)"
-trap 'rm -rf -- "$tools"' EXIT
+cleanup() {
+    if [[ "$mode" != --verify && -d output/release ]]; then
+        printf "##teamcity[publishArtifacts 'output/release/* => npm-release.zip']\n"
+    fi
+    rm -rf -- "$tools"
+}
+trap cleanup EXIT
+# No receipt from an earlier checkout may stand in for this run.
+rm -rf -- output/release
 export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/ NPM_CONFIG_USERCONFIG="$tools/npmrc" NPM_CONFIG_GLOBALCONFIG="$tools/global-npmrc"
 : > "$NPM_CONFIG_USERCONFIG"
 : > "$NPM_CONFIG_GLOBALCONFIG"

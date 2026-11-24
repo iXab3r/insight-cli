@@ -11,7 +11,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createHash} from 'node:crypto';
 const options={};for(let i=2;i<process.argv.length;i++){const a=process.argv[i];if(a==='--ack-disposable')options.ack=true;else if(a.startsWith('--')&&process.argv[i+1])options[a.slice(2)]=process.argv[++i];else throw Error('Invalid proof argument');}
-assert.equal(options.ack,true);assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.equal(options.ack,true);assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 for(const key of ['java','ghidra-home','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 const files=['src/cli.ts','src/contexts.ts','src/queries.ts','src/query-results.ts','src/query-policy.ts','src/native-queries.ts','src/memory-inputs.ts','src/mutation-effects.ts','src/research.ts','src/arguments.ts','references/queries.json','references/native/InsightResearchQueries.java','references/native/InsightEmulation.java','references/native/InsightSnapshotInspect.java'];
 const hashes=async()=>Object.fromEntries(await Promise.all(files.map(async name=>[name,createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/'+name,import.meta.url))).digest('hex')])));

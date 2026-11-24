@@ -20,9 +20,14 @@ export function requireNewer(version,latest){
 export async function stage({manifest,archive,npm,receipt,download}){
   const listed=JSON.parse(await npm(['stage','list',manifest.name,'--json'])||'[]');
   assert.ok(Array.isArray(listed)&&!listed.some(item=>item.version===manifest.version),'This version already has a stage; inspect its receipt before retrying.');
-  const staged=JSON.parse(await npm(['stage','publish',archive,'--json','--access','public','--tag','latest','--ignore-scripts']))[manifest.name];
-  await receipt('staged-unverified',staged?.stageId);
-  assert.ok(uuid.test(staged?.stageId)&&staged.name===manifest.name&&staged.version===manifest.version&&staged.integrity===manifest.integrity,'Stage metadata differs from the tested archive; inspect the saved stage ID.');
+  // A lost or malformed response leaves this receipt: the outcome is unknown, never retried here.
+  await receipt('stage-upload-unknown');
+  const response=await npm(['stage','publish',archive,'--json','--access','public','--tag','latest','--ignore-scripts']);
+  console.log(response);
+  const staged=JSON.parse(response)[manifest.name];
+  assert.ok(uuid.test(staged?.stageId),'npm returned no stage ID; the upload outcome is unknown.');
+  await receipt('staged-unverified',staged.stageId);
+  assert.ok(staged.name===manifest.name&&staged.version===manifest.version&&staged.integrity===manifest.integrity,'Stage metadata differs from the tested archive; inspect the saved stage ID.');
   assert.equal(integrity(await download(staged.stageId)),manifest.integrity,'Downloaded stage differs from the tested archive; inspect the saved stage ID.');
   await receipt('awaiting-2fa-approval',staged.stageId);return staged.stageId;
 }
@@ -37,16 +42,18 @@ async function main(mode){
   const token=process.env.NPM_TOKEN??'',revision=process.env.RELEASE_REVISION??'';
   const environment={...process.env,NPM_CONFIG_REGISTRY:registry};delete environment.NPM_TOKEN;
   const run=(command,args,extra={})=>execFileSync(command,args,{cwd:root,env:environment,stdio:'inherit',...extra});
-  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
+  const git=(...args)=>execFileSync('git',args,{cwd:root,env:environment,encoding:'utf8'}).trim();
+  await rm(output,{recursive:true,force:true});
   if(mode!=='verify'){
     assert.match(revision,/^[a-f0-9]{40}$/,'RELEASE_REVISION must be the full commit');
     assert.equal(git('rev-parse','HEAD'),revision,'RELEASE_REVISION differs from the checkout');
-    assert.equal(git('status','--porcelain','--untracked-files=no'),'','A release requires a clean tree');
+    assert.equal(git('status','--porcelain'),'','A release requires a clean tree');
   }
   run('npm',['ci','--ignore-scripts','--no-audit','--no-fund']);run('npm',['run','cache:factory']);run('npm',['test']);run('npm',['run','test:package']);
+  assert.equal(git('status','--porcelain'),'','The build changed the source tree');
   if(mode==='verify')return;
-  await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});run('npm',['run','pack:cli']);
-  assert.equal(git('status','--porcelain','--untracked-files=no'),'','The build changed tracked files');
+  await mkdir(output,{recursive:true});run('npm',['run','pack:cli']);
+  assert.equal(git('status','--porcelain'),'','Packing changed the source tree');
   const pkg=JSON.parse(await readFile('skills/ghidra-coordinator/package.json','utf8'));assert.equal(pkg.name,packageName);
   const file=`eyeauras-insight-cli-${pkg.version}.tgz`,archive=join(output,file);await copyFile(join(root,'artifacts',file),archive);
   const bytes=await readFile(archive),manifest={schema:1,name:pkg.name,version:pkg.version,commit:revision,file,bytes:bytes.length,

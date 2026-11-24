@@ -9,7 +9,7 @@ import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 const root=fileURLToPath(new URL('../',import.meta.url)),args=process.argv.slice(2),exec=promisify(execFile);
 assert.ok(args.includes('--ack-disposable'));
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 const directory=await mkdtemp(join(tmpdir(),'insight-p2-matrix-'));
 const runners=['proof-p2-sdk','proof-p2-tracking','proof-p2-databases','proof-p2-trace','proof-api-gaps','proof-mutations','proof-debugger','acceptance-facade'];
 async function inputs(){

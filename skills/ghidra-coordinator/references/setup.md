@@ -72,7 +72,7 @@ Changing those runtime inputs requires stopping the old owner before continuing 
 
 Native acceptance separates macOS GUI/LLDB workflows from selected headless Windows/Linux
 SDK, Version Tracking and FID/BSim workflows. Native Windows/Linux debugger/GUI acceptance
-remains deferred. The ordinary CI lane stays offline; disposable native CI is explicit.
+remains deferred. CI stays offline and refuses native proofs.
 
 On macOS 15+ ARM64, `ghidra install` delivers an owned LLDB/Python debugger backend;
 OS debugger authorization remains required. Other host profiles need their supported debugger. Its

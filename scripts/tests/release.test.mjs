@@ -11,7 +11,7 @@ function fixture(changes={}){
 }
 test('a stage is uploaded once, downloaded back and left for owner approval',async()=>{
   const f=fixture();assert.equal(await stage(f.input),id);
-  assert.deepEqual(f.calls.map(c=>c[1]),['list','publish']);assert.deepEqual(f.receipts,[['staged-unverified',id],['awaiting-2fa-approval',id]]);
+  assert.deepEqual(f.calls.map(c=>c[1]),['list','publish']);assert.deepEqual(f.receipts,[['stage-upload-unknown'],['staged-unverified',id],['awaiting-2fa-approval',id]]);
   assert.ok(!f.calls.flat().some(v=>v==='approve'));
 });
 test('an existing stage of this version prevents another upload',async()=>{
@@ -19,7 +19,13 @@ test('an existing stage of this version prevents another upload',async()=>{
 });
 for(const [name,changes] of Object.entries({integrity:{staged:{integrity:'sha512-other'}},version:{staged:{version:'0.6.1'}},bytes:{downloaded:Buffer.from('other')}}))
   test('a stage with different '+name+' keeps only its unverified identity',async()=>{
-    const f=fixture(changes);await assert.rejects(stage(f.input),/inspect the saved stage ID/);assert.deepEqual(f.receipts,[['staged-unverified',id]]);
+    const f=fixture(changes);await assert.rejects(stage(f.input),/inspect the saved stage ID/);assert.deepEqual(f.receipts,[['stage-upload-unknown'],['staged-unverified',id]]);
+  });
+for(const [name,publish] of Object.entries({failure:()=>{throw Error('timed out');},malformed:()=>'{',missing:()=>'{}',empty:()=>JSON.stringify({[packageName]:{name:packageName}})}))
+  test('a '+name+' upload response leaves an unknown receipt without another upload',async()=>{
+    const f=fixture();let uploads=0;
+    await assert.rejects(stage({...f.input,npm:async args=>{if(args[1]==='list')return '[]';uploads++;return publish();}}));
+    assert.equal(uploads,1);assert.deepEqual(f.receipts,[['stage-upload-unknown']]);
   });
 test('registry verification needs the exact version, bytes and latest tag',async()=>{
   const values={'0.6.0':{version:'0.6.0',dist:{integrity:manifest.integrity}},'dist-tags':{latest:'0.6.0'}},view=async key=>values[key];
