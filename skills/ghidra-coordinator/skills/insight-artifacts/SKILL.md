@@ -3,7 +3,7 @@ name: insight-artifacts
 description: Retain a completed reverse-engineering evidence file or directory as an ordinary checkpoint using insight-cli artifacts save. Use after Ghidra or any external tool; preserve existing project formats and source of truth.
 ---
 
-# Insight Artifacts 0.2.0
+# Insight Artifacts 0.6.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

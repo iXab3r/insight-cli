@@ -13,7 +13,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 const options={},argv=process.argv.slice(2);
 for(let i=0;i<argv.length;i++){if(argv[i]==='--ack-disposable')options.ack=true;else if(argv[i].startsWith('--')&&argv[i+1])options[argv[i].slice(2)]=argv[++i];else throw Error('Invalid proof argument');}
 assert.equal(options.ack,true);
-assert.ok(!Object.keys(process.env).some(key=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
+assert.ok(!Object.keys(process.env).some(key=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(key)&&process.env[key]),'Native proof is local only');
 for(const key of ['ghidra-home','java','mcp-jar','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 const root=await realpath(await mkdtemp('/tmp/insight-context-proof-')),exec=promisify(execFile);
 const workspace=new Workspace(join(root,'profile'),'default'),secrets=new Map();

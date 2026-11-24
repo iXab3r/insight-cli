@@ -3,7 +3,7 @@
 # Keep prior failed feasibility evidence; do not use this script as a toolbox acceptance gate.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$root = Join-Path $env:RUNNER_TEMP 'insight-toolbox-audit'
+$root = Join-Path ([System.IO.Path]::GetTempPath()) 'insight-toolbox-audit'
 New-Item -ItemType Directory -Force $root | Out-Null
 $result = [ordered]@{schema=1;scope='Windows host feasibility, not toolbox acceptance';tools=[ordered]@{} }
 $owned = [System.Collections.Generic.List[System.Diagnostics.Process]]::new()
@@ -115,7 +115,7 @@ if(args.Length>1) for(int i=0;i<600;i++) Thread.Sleep(100);
 } finally {
     foreach($process in $owned) { try { if(!$process.HasExited){$process.Kill($true);$process.WaitForExit()} } catch {} }
     # Only the sanitized receipt is retained; downloaded payloads and raw captures stay private.
-    $output=Join-Path $env:GITHUB_WORKSPACE 'toolbox-audit-windows.json'
+    $output=Join-Path (Get-Location).Path 'toolbox-audit-windows.json'
     $result | ConvertTo-Json -Depth 10 | Set-Content $output
     $result | ConvertTo-Json -Depth 10 | Write-Output
 }

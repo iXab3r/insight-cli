@@ -1,7 +1,7 @@
 # Native API feasibility; public adapter and independent model acceptance are separate gates.
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($env:INSIGHT_NATIVE_DISPOSABLE -ne '1'){throw 'Disposable native scope must be explicit'}
-$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path;$root=Join-Path $env:RUNNER_TEMP 'insight-dnspy-debug spaces-Ω';New-Item -ItemType Directory -Force $root|Out-Null
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path;$root=Join-Path ([System.IO.Path]::GetTempPath()) 'insight-dnspy-debug spaces-Ω';New-Item -ItemType Directory -Force $root|Out-Null
 $zip=Join-Path $root 'dnSpy.zip';Invoke-WebRequest 'https://github.com/dnSpyEx/dnSpy/releases/download/v6.6.0/dnSpy-net-win64.zip' -OutFile $zip
 if((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne '8ed48f165dc355e869f3a0037ad4f9216147f995a5ae0258b296eeef1f73aab0'){throw 'Pinned dnSpyEx distribution differs'}
 $tool=Join-Path $root 'tool';[IO.Compression.ZipFile]::ExtractToDirectory($zip,$tool);$extension=Join-Path $root 'extension';New-Item -ItemType Directory $extension|Out-Null

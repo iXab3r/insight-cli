@@ -8,7 +8,7 @@ import {nativeInputs,pinnedMcpJar} from '../skills/ghidra-coordinator/dist/src/n
 import {writeFile,mkdir} from 'node:fs/promises';import {join} from 'node:path';
 import {execFile} from 'node:child_process';import {promisify} from 'node:util';
 const options={};for(let i=2;i<process.argv.length;i++){const key=process.argv[i];if(key==='--ack-disposable')options.ack=true;else if(key.startsWith('--')&&process.argv[i+1])options[key.slice(2)]=process.argv[++i];else throw Error('Invalid proof option');}
-assert.equal(options.ack,true);assert.equal(process.platform,'darwin');assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));for(const key of ['java','ghidra-home'])assert.ok(options[key]);
+assert.equal(options.ack,true);assert.equal(process.platform,'darwin');assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));for(const key of ['java','ghidra-home'])assert.ok(options[key]);
 const values={java:options.java,ghidraHome:options['ghidra-home']},f=await createCliFixture({after(){}},{applicationId:'insight-cli',profiles:[{name:'default',values,permissions:['ReadOnly','Update','Destructive']}]});
 let native,context,receipt,opened,lose=false,lostCalls=0;const cases=[];
 const app=f.createApplication(runtime=>createInsightCli({runtime:{...runtime,fetch:async(...args)=>{

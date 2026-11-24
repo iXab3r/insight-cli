@@ -27,13 +27,13 @@ test('published immutable verification needs neither upstream acquisition nor up
  const input=join(root,'recipe.json');await writeFile(input,bytes);const bin=join(root,'bin');await mkdir(bin);
  const executable=join(bin,process.platform==='win32'?'gh.cmd':'gh');
  if(process.platform==='win32')return; // POSIX CLI seam; production portable acquisition tests run above.
- await writeFile(executable,'#!'+process.execPath+'\nif(process.argv[2]!=="api"||!process.argv[3].includes("/releases/tags/"))process.exit(11);console.log('+JSON.stringify(JSON.stringify(remote))+');\n');await chmod(executable,0o755);
+ await writeFile(executable,'#!'+process.execPath+'\nif(process.argv[2]!=="api")process.exit(11);if(process.argv[3].endsWith("/immutable-releases")){console.log(JSON.stringify({enabled:process.env.FIXTURE_IMMUTABLE==="true"}));process.exit();}if(!process.argv[3].includes("/releases/tags/"))process.exit(11);console.log('+JSON.stringify(JSON.stringify(remote))+');\n');await chmod(executable,0o755);
  const run=promisify(execFile),script=fileURLToPath(new URL('../tool-release.mjs',import.meta.url));
- const env={...process.env,PATH:bin+':'+process.env.PATH,GITHUB_ACTIONS:'true',TOOL_RELEASE_IMMUTABLE_READY:'true'};
+ const env={...process.env,PATH:bin+':'+process.env.PATH,FIXTURE_IMMUTABLE:'true'};
  const result=await run(process.execPath,[script,input,join(root,'out'),'--publish'],{env});
  assert.equal(JSON.parse(result.stdout).state,'published_verified');
  const {stat}=await import('node:fs/promises');await assert.rejects(stat(join(root,'out',a.name)));
- await assert.rejects(run(process.execPath,[script,input,join(root,'denied'),'--publish'],{env:{...env,TOOL_RELEASE_IMMUTABLE_READY:''}}),/setup is not confirmed/);
+ await assert.rejects(run(process.execPath,[script,input,join(root,'denied'),'--publish'],{env:{...env,FIXTURE_IMMUTABLE:'false'}}),/must be enabled/);
 });
 test('draft/readback reconciliation tolerates delayed visibility with bounded read-only polling',async()=>{
  const {waitFor}=await import('../tool-release.mjs');let reads=0;

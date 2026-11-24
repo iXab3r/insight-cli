@@ -81,7 +81,7 @@ supported platform/component, including license/source companion assets. A tool 
 manifest describing this same inventory and upstream provenance. Installed CLI downloads must
 not trust a replacement manifest fetched from the same release to redefine their expected hashes.
 No `latest` resolution or automatic upstream fallback occurs during installation. Upstream URLs
-are acquisition provenance for the release workflow, not runtime dependencies.
+are acquisition provenance for the release procedure, not runtime dependencies.
 
 Microsoft-only exception: ProcMon and WinDbg prohibit our redistribution. Their exact vendor
 URLs, sizes, SHA256 values, terms and delivery reason are retained in
@@ -93,7 +93,7 @@ without another download opt-in. A local archive or explicit external executable
 The shared runtime verifies size/hash before cache selection and refuses a corrupt cached entry.
 These source-policy entries alone do not advertise an implemented/accepted ProcMon or WinDbg adapter.
 
-The release workflow performs this sequence:
+Publish from a clean, reviewed `main` checkout (`diec-3.21` on macOS). The sequence is:
 
 1. Read a reviewed, committed component recipe with exact upstream version, URLs and digests.
 2. Acquire bytes and verify independent pinned digests; record whether each asset is an original
@@ -109,17 +109,14 @@ The release workflow performs this sequence:
 5. Publish with GitHub immutable releases enabled and verify the resulting release/asset identity.
    Update the installer catalog only after publication and independent download verification.
 
-One-time setup enables immutable releases through an administrator and sets the repository variable
-`TOOL_RELEASE_IMMUTABLE_READY=true`. GitHub Actions cannot read that administrative setting with
-its ordinary token. Publication checks the explicit setup flag and verifies the actual published
-release is immutable; it does not store or request an administrative token. Existing published
-releases are verified against the recipe without requiring upstream availability again.
+One-time setup enables immutable releases through an administrator. Publication runs manually
+with the maintainer's authenticated `gh`, reads that repository setting first and verifies that the
+actual published release is immutable. Existing published releases are verified against the recipe
+without requiring upstream availability again.
 
-The workflow is manually dispatched, serialized per distribution identity and uses repository
-permissions scoped to its release job. Pull-request validation cannot publish tool assets.
-It does not execute downloaded installer scripts, add binaries to Git/npm, grant new npm publishing
-rights, or alter the existing manual npm auto-version pipeline. Mirror releases use `--latest=false`
-so they do not become the application's latest release.
+Run one publication per distribution identity at a time. It does not execute downloaded installer
+scripts, add binaries to Git/npm, grant npm publishing rights or alter the npm release pipeline.
+Mirror releases use `--latest=false` so they do not become the application's latest release.
 
 GitHub currently requires each release asset to be below 2 GiB. Oversized distributions need an
 explicit supported packaging strategy before admission; silently splitting an archive is excluded.

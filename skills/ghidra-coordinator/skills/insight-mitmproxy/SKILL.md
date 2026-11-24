@@ -3,7 +3,7 @@ name: insight-mitmproxy
 description: Record, inspect and compare HTTP request/response evidence with insight-cli mitmproxy. Use when an owned client can explicitly use a loopback proxy; read native flow archives or HAR without replaying traffic. System interception and global certificate trust are outside this facade.
 ---
 
-# Insight mitmproxy 0.2.0
+# Insight mitmproxy 0.6.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

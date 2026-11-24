@@ -96,10 +96,10 @@ not grant administrative rights, accept arbitrary terms silently, or prove execu
 * **Managed diagnostics need more than a DLL.** Inventory RID-specific native libraries, SOS/DAC
   and runtime resolution; prove real collect/analyze, stack and trace tasks with the pinned private
   runtime. NuGet declaring major roll-forward is only a compatibility hypothesis.
-* **Windows proof environment is not presumed.** The repository has hosted Windows CI and no
+* **Windows proof environment is not presumed.** At this audit the repository had hosted Windows CI and no
   self-hosted runner. Confirm ProcMon's driver/admin capture and dnSpyEx's actual automation in
   that environment before counting them feasible. A successful download or visible GUI is
-  insufficient. [Windows run 39029921856](https://github.com/iXab3r/insight-cli/actions/runs/39029921856)
+  insufficient. Windows run 39029921856
   passed WinDbg console commands, ProcMon observation of a successful owned configuration
   ReadFile, and dnSpyEx GUI/extension-contract availability. ProcMon needed a normalized
   Windows path in the probe oracle. This proves host feasibility only; scoped capture and
@@ -633,9 +633,9 @@ suite passed 204 tests with two explicit opt-in skips; release/admission checks 
 The exact globally installed package SHA-256 is
 `d1969fd4382ea5d56957d377619dec97e5f95c9cdcd8e2c050362e409f689b61`;
 a clean source pack reproduced those bytes. Windows run
-[39070879670](https://github.com/iXab3r/insight-cli/actions/runs/39070879670), Linux run
-[39070879669](https://github.com/iXab3r/insight-cli/actions/runs/39070879669) and offline CI
-[39070879735](https://github.com/iXab3r/insight-cli/actions/runs/39070879735) passed.
+39070879670, Linux run
+39070879669 and offline CI
+39070879735 passed.
 
 The first combined macOS run `e63c150ff2f9411ab4cbe8d76481e1bf` failed: 11 passed,
 six failed and four OS-specific scenarios skipped. Five failures were empty-output native
@@ -755,7 +755,7 @@ Native CI verifies this adjustment; no raw system capture is published.
 
 
 The subsequent driver/CIM wait also failed in legacy native-feasibility run
-[39075613185](https://github.com/iXab3r/insight-cli/actions/runs/39075613185), while its scoped
+39075613185, while its scoped
 ProcMon registry/first-event/file workflows and dnSpy jobs passed. That legacy user-default,
 unfiltered startup path is superseded by the seven real native facade/lifetime jobs. The
 existing `native-feasibility` check is now an aggregate requiring success of all seven,
@@ -781,10 +781,10 @@ Speedscope export. Reports explicitly distinguish sampled thread time from CPU c
 and retain the weak macOS process-birth identity limitation. Every checkpoint file matched
 its ordinary project source bytes and the final handoff used the returned path.
 
-Windows run [39076493625](https://github.com/iXab3r/insight-cli/actions/runs/39076493625)
+Windows run 39076493625
 at `5f1f471` passed all seven actual native jobs and the required aggregate. Linux
-[39076493599](https://github.com/iXab3r/insight-cli/actions/runs/39076493599) and offline
-[39076493608](https://github.com/iXab3r/insight-cli/actions/runs/39076493608) passed too.
+39076493599 and offline
+39076493608 passed too.
 The aggregate itself performs no native observation; the seven prerequisite jobs do.
 This establishes native CI, not independent Windows/Linux model acceptance.
 
@@ -871,10 +871,10 @@ retains every prior failed/pass candidate separately. The later `75cca82` handof
 package has the same 382 executable/runtime/reference files, a clean byte-identical pack,
 its own package/release checks and fresh ILSpy/C06 model receipts.
 
-Windows [39077664218](https://github.com/iXab3r/insight-cli/actions/runs/39077664218) passed
+Windows 39077664218 passed
 all seven actual native jobs plus their aggregate on `75cca82`. Linux
-[39077664171](https://github.com/iXab3r/insight-cli/actions/runs/39077664171) and offline
-[39077664196](https://github.com/iXab3r/insight-cli/actions/runs/39077664196) also passed.
+39077664171 and offline
+39077664196 also passed.
 The separate prepared Ghidra GUI/debugger model investigation is still under review;
 neither static interop nor this native suite silently completes that agent-family gate.
 
@@ -1008,10 +1008,10 @@ ordinary caller/stack/register verification, two disconnected traces, private LL
 installation/doctor/drift/removal, the real standalone LLDB/Frida lifetime faults and the
 remaining toolbox workflows. A separate recursive preflight passed on that same package.
 
-Windows [39100877533](https://github.com/iXab3r/insight-cli/actions/runs/39100877533) passed all
+Windows 39100877533 passed all
 seven scoped native jobs and their aggregate. Linux
-[39100877444](https://github.com/iXab3r/insight-cli/actions/runs/39100877444) and offline
-[39100877450](https://github.com/iXab3r/insight-cli/actions/runs/39100877450) also passed on
+39100877444 and offline
+39100877450 also passed on
 `f3ea16f`. The [combined receipt](verification/toolbox-combined-native.json) identifies this
 revision as the latest native-tested implementation. The separately reviewed model units
 retain their original package identities; complete GUI/family/host model and whole-toolbox agent

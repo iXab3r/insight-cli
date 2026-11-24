@@ -9,14 +9,14 @@ import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 const root=fileURLToPath(new URL('../',import.meta.url)),args=process.argv.slice(2),exec=promisify(execFile);
 assert.ok(args.includes('--ack-disposable'));
-assert.ok(!Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
+assert.ok(!Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]));
 const directory=await mkdtemp(join(tmpdir(),'insight-p2-matrix-'));
 const runners=['proof-p2-sdk','proof-p2-tracking','proof-p2-databases','proof-p2-trace','proof-api-gaps','proof-mutations','proof-debugger','acceptance-facade'];
 async function inputs(){
  // Bind actual executable inputs. Markdown/package-only harness changes cannot change a
  // native operation; final package identity and offline tests have their own receipts.
  const files=['package.json','package-lock.json','vendor/provenance.json','vendor/factory-ipc-a2094fb.tgz',
-  '.github/workflows/native-p2.yml','scripts/proof-p2-matrix.mjs','scripts/native-proof-guard.mjs','scripts/npm-command.mjs','scripts/fixtures/facade-owner.mjs',...runners.map(name=>'scripts/'+name+'.mjs')];
+  'scripts/proof-p2-matrix.mjs','scripts/native-proof-guard.mjs','scripts/npm-command.mjs','scripts/fixtures/facade-owner.mjs',...runners.map(name=>'scripts/'+name+'.mjs')];
  async function walk(path,accept){for(const entry of await readdir(join(root,path),{withFileTypes:true})){const name=join(path,entry.name);if(entry.isDirectory())await walk(name,accept);else if(entry.isFile()&&accept(name))files.push(name);}}
  await walk('skills/ghidra-coordinator/src',name=>name.endsWith('.ts'));
  await walk('skills/ghidra-coordinator/dist/src',name=>name.endsWith('.js'));

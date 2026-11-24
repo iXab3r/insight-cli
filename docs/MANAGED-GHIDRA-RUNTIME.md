@@ -90,7 +90,7 @@ in private GUI storage. The default runtime requires no installed Homebrew, Grad
 external Ghidra or Python MCP bridge. Native acceptance here is macOS ARM64; Windows/Linux x64
 catalog entries and portable extraction do not imply native GUI/debugger acceptance there.
 
-Version 0.2.0 is now published on npm as `latest` through the manual GitHub Actions workflow.
+Version 0.2.0 was published on npm as `latest`.
 [Registry release verification](verification/npm-release-0.2.0.json) confirms the archive is
 byte-identical to this native-tested candidate, with matching provenance source, a clean Linux
 global-install smoke test and an actual macOS global registry installation.

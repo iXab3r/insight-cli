@@ -32,3 +32,4 @@ skills/ghidra-coordinator/references/native/InsightPeRanges.java text eol=lf
 scripts/native/InstallResearchView.java text eol=lf
 scripts/build-research-view-bridge.mjs text eol=lf
 skills/ghidra-coordinator/runtime/GhidraMCP-7.0.0.jar -text
+build/*.sh text eol=lf

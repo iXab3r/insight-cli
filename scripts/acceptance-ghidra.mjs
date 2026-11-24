@@ -10,7 +10,7 @@ import {fileURLToPath} from 'node:url';
 const source=fileURLToPath(new URL('../',import.meta.url));
 const args=process.argv.slice(2), options={};
 for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--ack-disposable')options.ack=true;else if(arg==='--faults')options.faults=true;else if(arg.startsWith('--')&&args[i+1]&&!args[i+1].startsWith('--'))options[arg.slice(2)]=args[++i];else throw Error('Unsupported acceptance argument');}
-if(Object.keys(process.env).some(k=>/^(CI|GITHUB_ACTIONS|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]))throw Error('Real writes are refused in CI');
+if(Object.keys(process.env).some(k=>/^(CI|TEAMCITY_VERSION|GITLAB_CI|TF_BUILD|BUILD_BUILDID)$/i.test(k)&&process.env[k]))throw Error('Real writes are refused in CI');
 assert.equal(options.ack,true,'Pass --ack-disposable');
 for(const key of ['ghidra-home','java','mcp-jar','python','bridge-directory','clang','lld'])assert.ok(options[key],`Missing --${key}`);
 const ghidraHome=resolve(options['ghidra-home']),java=resolve(options.java),jar=resolve(options['mcp-jar']);

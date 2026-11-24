@@ -3,7 +3,7 @@ name: insight-tshark
 description: Inspect an offline PCAP or PCAPNG with insight-cli tshark to identify protocols, HTTP/DNS/TLS fields, packet evidence and reconstructed TCP/UDP streams. Use for captured traffic questions; live acquisition and TLS decryption are separate tasks.
 ---
 
-# Insight TShark 0.2.0
+# Insight TShark 0.6.0
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

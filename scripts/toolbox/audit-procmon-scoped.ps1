@@ -2,7 +2,7 @@
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 if($env:INSIGHT_NATIVE_DISPOSABLE -ne '1'){throw 'Disposable native scope must be explicit'}
 if(Get-Process -Name 'Procmon*' -ErrorAction SilentlyContinue){throw 'Foreign Process Monitor already exists'}
-$root=Join-Path $env:RUNNER_TEMP 'insight-procmon-scoped';New-Item -ItemType Directory -Force $root | Out-Null
+$root=Join-Path ([System.IO.Path]::GetTempPath()) 'insight-procmon-scoped';New-Item -ItemType Directory -Force $root | Out-Null
 $zip=Join-Path $root 'ProcessMonitor.zip';Invoke-WebRequest 'https://download.sysinternals.com/files/ProcessMonitor.zip' -OutFile $zip
 if((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne '477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10'){throw 'Vendor archive differs'}
 [IO.Compression.ZipFile]::ExtractToDirectory($zip,(Join-Path $root 'tool'));$procmon=Join-Path $root 'tool/Procmon64.exe'
