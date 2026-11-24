@@ -61,8 +61,8 @@ one native checkout at the current revision. Its original full context and snaps
 remain in a dedicated migration journal. This is equality verification, not replay of
 diagnostic edits. Record equality ignores only what opening
 a program writes by itself: the derived `Metadata` table and the `Should Ask To Analyze` GUI flag.
-Every other table, schema and record must match; program identity covers the memory bytes held
-outside tables. Snapshots are inspected in bounded batches.
+Every other table, schema and record must match; stored file bytes, original and modified, must
+match too, and program identity covers the memory bytes held outside tables. Snapshots are inspected in bounded batches.
 
 Targets that are already native report `native_unchanged`; their detached contexts receive
 the same inspection, without a migration check-in or model adoption. After migration,

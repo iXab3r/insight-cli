@@ -32,7 +32,7 @@ export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/ NPM_CONFIG_USERCONFIG="$t
 npm install --global --prefix "$tools/npm" --no-audit --no-fund --ignore-scripts "$(node -p "require('./package.json').packageManager")"
 export PATH="$tools/npm/bin:$PATH"
 if [[ "$mode" == --stage ]]; then
-    NPM_TOKEN="$stage_token" node scripts/release.mjs stage
+    NPM_TOKEN="$stage_token" timeout -k 30 25m node scripts/release.mjs stage
 else
-    node scripts/release.mjs "${mode#--}"
+    timeout -k 30 25m node scripts/release.mjs "${mode#--}"
 fi

@@ -42,7 +42,7 @@ async function main(mode){
   const token=process.env.NPM_TOKEN??'',revision=process.env.RELEASE_REVISION??'';
   const environment={...process.env,NPM_CONFIG_REGISTRY:registry};delete environment.NPM_TOKEN;
   const run=(command,args,extra={})=>execFileSync(command,args,{cwd:root,env:environment,stdio:'inherit',...extra});
-  const git=(...args)=>execFileSync('git',args,{cwd:root,env:environment,encoding:'utf8'}).trim();
+  const git=(...args)=>execFileSync('git',args,{cwd:root,env:environment,encoding:'utf8',timeout:60000,killSignal:'SIGKILL'}).trim();
   await rm(output,{recursive:true,force:true});
   if(mode!=='verify'){
     assert.match(revision,/^[a-f0-9]{40}$/,'RELEASE_REVISION must be the full commit');
@@ -64,7 +64,7 @@ async function main(mode){
   try{
     const userconfig=join(temporary,'npmrc');await writeFile(userconfig,'',{mode:0o600});await writeFile(join(temporary,'global-npmrc'),'');
     const isolated={...environment,NPM_CONFIG_USERCONFIG:userconfig,NPM_CONFIG_GLOBALCONFIG:join(temporary,'global-npmrc')};
-    const npm=(args,cwd=root,secret)=>execFileSync('npm',['--registry',registry,...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','inherit'],timeout:300000,env:secret?{...isolated,NPM_TOKEN:secret}:isolated});
+    const npm=(args,cwd=root,secret)=>{console.log('npm '+args.slice(0,2).join(' '));return execFileSync('npm',['--registry',registry,...args],{cwd,encoding:'utf8',stdio:['ignore','pipe','inherit'],timeout:300000,killSignal:'SIGKILL',env:secret?{...isolated,NPM_TOKEN:secret}:isolated});};
     const view=async field=>{
       const response=await fetch(field==='dist-tags'?registry+'-/package/@eyeauras%2finsight-cli/dist-tags':registry+'@eyeauras%2finsight-cli/'+field,{signal:AbortSignal.timeout(30000)});
       if(response.status===404)return;assert.equal(response.status,200);return response.json();

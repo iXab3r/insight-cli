@@ -80,7 +80,7 @@ public final class InsightNativeMigration {
                 for(JsonElement path:q.getAsJsonArray("snapshots")){
                     var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(path.getAsString()).toFile(),true,MONITOR).open(MONITOR);
                     var p=new ghidra.program.database.ProgramDB(db,ghidra.framework.data.OpenMode.IMMUTABLE,MONITOR,CONSUMER);
-                    try{items.add(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(((ghidra.program.database.ProgramDB)p).getDBHandle()),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p)));}finally{p.release(CONSUMER);}
+                    try{items.add(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p)));}finally{p.release(CONSUMER);}
                 }
                 output.println(new Gson().toJson(Map.of("state","verified","items",items)));System.exit(0);
             }
@@ -88,7 +88,7 @@ public final class InsightNativeMigration {
                 Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
                 var db=ghidra.framework.store.db.PackedDatabase.getPackedDatabase(Path.of(text(q,"snapshot")).toFile(),true,MONITOR).open(MONITOR);
                 var p=new ghidra.program.database.ProgramDB(db,ghidra.framework.data.OpenMode.IMMUTABLE,MONITOR,CONSUMER);
-                try{output.println(new Gson().toJson(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(((ghidra.program.database.ProgramDB)p).getDBHandle()),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p))));}finally{p.release(CONSUMER);}
+                try{output.println(new Gson().toJson(Map.of("state","verified","fingerprint",InsightNativeFingerprint.of(p),"content",InsightNativeFingerprint.content(p),"sourceSha",p.getExecutableSHA256(),"programIdentity",programIdentity(p))));}finally{p.release(CONSUMER);}
                 System.exit(0);
             }
             Path root=Path.of(text(q,"root")).toRealPath(),ownerPath=root.resolve("migration-owner.json"),journal=root.resolve("native-migration.json");
