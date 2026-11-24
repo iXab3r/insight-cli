@@ -3,6 +3,8 @@
 Migration refuses live, starting or unverified Ghidra helpers across the profile,
 including interrupted checkout creation without a private-worker receipt. Retained
 bootstrap/initial worker PIDs and initial-model locks are checked independently.
+A live PID whose process was born more than a minute after its retained receipt was last
+written is a reused PID and does not block; an unknown birth still does.
 It never stops or takes over a worker to satisfy this admission check.
 An admitted open holds migration admission from before input import until the
 whole command completes; migration cannot pass a still-importing open.

@@ -3,7 +3,7 @@ name: insight-cli
 description: Choose and prepare reverse-engineering capabilities from the insight-cli toolbox for binary, managed-code and runtime investigations. Use to discover the appropriate tool or its packaged skill before installing native runtimes.
 ---
 
-# insight-cli 0.6.0
+# insight-cli 0.6.1
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

@@ -35,6 +35,11 @@ public final class InsightNativeMigration {
         require(p.getExecutableSHA256().equals(text(q,"sourceSha")),"Migration source SHA256 differs");
         require(programIdentity(p).equals(text(q,"programIdentity")),"Migration program bytes or load identity differ");
     }
+    /** A process born after its own receipt was written only reuses that PID; unknown births still block. */
+    static boolean mayBeWorker(long pid,java.time.Instant receipt){
+        return ProcessHandle.of(pid).filter(ProcessHandle::isAlive).map(process->process.info().startInstant()
+            .map(birth->!birth.isAfter(receipt.plusSeconds(60))).orElse(true)).orElse(false);
+    }
     static void quiescent(Path root)throws Exception {
         if(!Files.exists(root))return;
         var channels=new ArrayList<FileChannel>();var locks=new ArrayList<FileLock>();
@@ -55,7 +60,7 @@ public final class InsightNativeMigration {
                     stopped=receipt.get("pid").equals(saved.get("pid"))&&receipt.get("tokenSecret").equals(saved.get("tokenSecret"));
                 }
                 long pid=receipt.get("pid").getAsLong();require(pid>0,"Invalid retained worker PID");
-                require(stopped||!ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false),"Retained native worker is live; no takeover");
+                require(stopped||!mayBeWorker(pid,Files.getLastModifiedTime(path).toInstant()),"Retained native worker is live; no takeover");
             }
         }finally{for(var lock:locks)lock.close();for(var channel:channels)channel.close();}
     }
