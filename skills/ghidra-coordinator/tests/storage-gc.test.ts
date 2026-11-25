@@ -227,3 +227,27 @@ test('a checkout whose project disappeared is reported without a native release 
  for(const dry of [true,false]){const result=await collectStorage(f.workspace,f.port,dry);assert.ok(result.retained.some(r=>r.path===c.nativeCheckout!.root&&/project is missing/.test(r.reason)));assert.equal(result.categories['native-checkouts'],undefined);}
  assert.deepEqual(f.released,[]);
 });
+
+test('a checkout whose project is lost is given up with a journal and only its server checkout ends',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'b'.repeat(64),'a'.repeat(64)),backend=new GhidraContexts(f.workspace,{} as NativeInputs,{appArguments:{AppDataDirectory:f.root}} as CommandContext);
+ const {Lifecycle}=await import('../src/lifecycle.js');let ended=0,lose=true;
+ const port={missingCheckout:(s:never)=>backend.missingCheckout(s),abandonMissing:async()=>{ended++;if(lose)throw Error('lost response');}};
+ const life=new Lifecycle(f.workspace,{ordered:async(_:unknown,a:()=>Promise<unknown>)=>a()} as never,async()=>port as never);
+ const parent=join(f.workspace.directory,'ghidra-native','context',c.id),root=c.nativeCheckout!.root;
+ await assert.rejects(life.discardMissing(c,false),/acknowledge-lost-work/);await assert.rejects(life.discardMissing(f.context,true),/no retained native checkout/);
+ await assert.rejects(life.discardMissing(c,true,'lost'),/still exists/);
+ await rm(root,{recursive:true});await mkdir(join(parent,'w-other'));await assert.rejects(life.discardMissing(c,true,'lost'),/Other retained data/);
+ await rm(parent,{recursive:true});assert.equal(ended,0);
+ const live=f.open(),at=join(f.workspace.directory,'ghidra-native','context',live.id,'w-live');await mkdir(at,{recursive:true});
+ f.workspace.saveContext(c,f.workspace.context(c).generation,{complexChanges:['q_'+randomUUID()]});
+ const pending=f.workspace.reserveRequest(c,'/set_function_prototype',{name:'pending'}).request;
+ const other=f.workspace.checkoutReferenced.bind(f.workspace);f.workspace.checkoutReferenced=()=>true;await assert.rejects(life.discardMissing(c,true,'lost'),/another context/);f.workspace.checkoutReferenced=other;
+ await assert.rejects(life.discardMissing(c,true,'lost'),/lost response/);assert.equal(f.workspace.context(c).nativeCheckout!.state,'active');assert.equal(f.workspace.request(pending.id).state,'accepted');
+ lose=false;const result=await life.discardMissing(c,true,'lost') as Record<string,unknown>;assert.equal(result.state,'discarded');assert.equal(result.discardedChanges,1);assert.equal(result.checkoutId,3);
+ assert.deepEqual(await life.discardMissing(c,true,'lost'),result);assert.equal(ended,2);
+ const after=f.workspace.context(c);assert.equal(after.nativeCheckout!.state,'dropped');assert.equal(after.workingSnapshot,undefined);assert.deepEqual(after.complexChanges,[]);assert.equal(f.workspace.request(pending.id).state,'failed');
+ const journals=await readdir(join(f.workspace.directory,'native-discards',f.target.id));assert.equal(journals.length,1);
+ assert.equal(JSON.parse(await readFile(join(f.workspace.directory,'native-discards',f.target.id,journals[0]!),'utf8')).original.nativeCheckout.root,root);
+ const collected=await collectStorage(f.workspace,f.port,false);assert.ok(!collected.retained.some(r=>r.path.includes(c.id)));
+ await assert.rejects(life.discardMissing(c,true,'again'),/no retained native checkout/);
+});

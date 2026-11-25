@@ -1,4 +1,4 @@
-import {migrateLegacy} from './legacy-migration.js';
+import {migrateLegacy,migrationProcessBlockers} from './legacy-migration.js';
 import {collectStorage} from './storage-gc.js';
 import {ownedDirectory,projectPathWithin,sameDirectory} from './directory-identity.js';
 import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
@@ -12,7 +12,7 @@ import type { CommandContext } from '@eyeauras/cli-factory';
 import {runtimeProcesses} from './runtime-manager.js';
 import { type ChildProcess } from 'node:child_process';
 import { randomUUID, randomBytes } from 'node:crypto';
-import { mkdir,mkdtemp, open, readFile, readdir, rename, link, realpath,copyFile,chmod,writeFile,unlink } from 'node:fs/promises';
+import { mkdir,mkdtemp, open, readFile, readdir, lstat, rename, link, realpath,copyFile,chmod,writeFile,unlink } from 'node:fs/promises';
 import {constants} from 'node:fs';
 import { join, delimiter, sep, resolve, dirname, basename } from 'node:path';
 import { createServer } from 'node:net';
@@ -538,6 +538,28 @@ export class GhidraContexts {
     // A worker whose owner died before its current receipt is still found by its process receipt.
     if((await runtimeProcesses(dirname(this.workspace.directory))).some(p=>p.kind!=='server'&&(p.sessionContext??context.id)===context.id))return false;
     return this.neverStartedOrClosed(context);
+  }
+  /** Absence is proved by the owned storage that remains: nothing of the context may survive beside the lost root. */
+  async missingCheckout(scope:Scope):Promise<NativeCheckout>{
+    const context=this.workspace.context(scope),checkout=context.nativeCheckout,contexts=join(this.directory(),'context'),parent=join(contexts,context.id);
+    if(!checkout||checkout.state==='dropped')fail('unsupported','This context has no retained native checkout.');
+    if(resolve(checkout.root)!==resolve(join(parent,basename(checkout.root))))fail('binding','Native checkout receipt names a directory outside this context.');
+    if(await realpath(contexts)!==join(await realpath(this.workspace.directory),'ghidra-native','context'))fail('binding','Owned context storage moved.');
+    const absent=async(path:string)=>{try{await lstat(path);return false;}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return true;throw error;}};
+    if(!await absent(checkout.root))fail('blocked','The native checkout project still exists; use ghidra changes discard.');
+    // A surviving sibling root can be this project under another name, and a receipt can name a live worker.
+    if(!await absent(parent))fail('blocked','Other retained data of this context still exists; its checkout is not proved lost.');
+    const process=await runtimeProcesses(dirname(this.workspace.directory));
+    if(this.capacity.slots.has(context.id)||process.some(p=>p.kind!=='server')||(await migrationProcessBlockers(this.c.appArguments.AppDataDirectory)).length)
+      fail('busy','Stop or reconcile every Ghidra worker and native helper before giving up a missing checkout.');
+    return checkout;
+  }
+  async abandonMissing(scope:Scope):Promise<void>{
+    const checkout=await this.missingCheckout(scope),context=this.workspace.context(scope),server=this.server(),binding=await server.ensure();
+    if(checkout.origin!==binding.origin||checkout.repository!==binding.repository||checkout.path!==programPath(scope.target))fail('binding','Native checkout server binding changed.');
+    const value=await server.nativeCheckout(binding,{root:checkout.root,operation:'abandon',fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion,
+      owner:{protocol:this.nativeEngine,context:context.id,target:scope.target,path:checkout.path,repository:checkout.repository}});
+    if(value.state!=='abandoned')fail('unknown','The server checkout is not proved ended; repeat this command.');
   }
   async collect(dryRun:boolean){
     return collectStorage(this.workspace,{closed:c=>this.neverStartedOrClosed(c),release:c=>this.releaseUnchanged(c)},dryRun,message=>this.c.progress(message));

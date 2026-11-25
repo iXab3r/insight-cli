@@ -98,6 +98,7 @@ function page(limit: number, offset: number) {
 }
 
 /** Profile root state, deliberately separate from the earlier coordinator.sqlite journals. */
+export const missingDiscardOperation='ghidra.changes.discard-missing';
 export const legacyDiscardOperation='ghidra.changes.discard-legacy';
 export class Workspace {
   readonly directory: string;
@@ -298,15 +299,24 @@ export class Workspace {
    * a native checkout, and exactly those non-applied rows stop owning evidence. Their own outcomes stay readable.
    */
   discardLegacy(scope:Scope,request:string,generation:number,result:Record<string,unknown>) {
+    return this.giveUp(scope,request,generation,result,legacyDiscardOperation);
+  }
+  /** The same for a native checkout whose project is gone and whose server checkout was ended. */
+  discardMissing(scope:Scope,request:string,generation:number,result:Record<string,unknown>) {
+    return this.giveUp(scope,request,generation,result,missingDiscardOperation);
+  }
+  private giveUp(scope:Scope,request:string,generation:number,result:Record<string,unknown>,operation:string) {
     return this.transaction(()=>{
       const context=this.context(scope),intent=this.request(request),model=this.model(scope.target);
-      if(context.generation!==generation||context.nativeCheckout||this.activePublication(scope.target)||context.debugger?.connected||model.state!=='ready'||
-        intent.context!==context.id||intent.operation!==legacyDiscardOperation||intent.state!=='running')fail('blocked','Only an unchanged, stopped detached context can be discarded.');
-      for(const pending of this.unfinished(scope))if(pending.id!==request)this.writeRequest(pending.id,'failed',{...scope,state:'discarded',reason:'explicit_legacy_discard'});
+      const checkout=context.nativeCheckout,missing=operation===missingDiscardOperation;
+      if(context.generation!==generation||missing!==Boolean(checkout)||checkout?.state==='dropped'||this.activePublication(scope.target)||context.debugger?.connected||model.state!=='ready'||
+        intent.context!==context.id||intent.operation!==operation||intent.state!=='running')fail('blocked','Only an unchanged, stopped context can be discarded.');
+      for(const pending of this.unfinished(scope))if(pending.id!==request)this.writeRequest(pending.id,'failed',{...scope,state:'discarded',reason:missing?'explicit_missing_discard':'explicit_legacy_discard'});
       for(const row of this.db.prepare("SELECT id,data FROM requests WHERE context=? AND state='failed'").all(context.id))
         this.db.prepare('UPDATE requests SET data=? WHERE id=?').run(bounded({...JSON.parse(String(row.data)),dropped:true}),String(row.id));
       this.writeContext(scope,generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,debugger:undefined,
-        scalars:[],complexChanges:[],viewEpoch:(context.viewEpoch??0)+1});
+        scalars:[],complexChanges:[],viewEpoch:(context.viewEpoch??0)+1,
+        ...(checkout?{nativeCheckout:(({conflict,...rest})=>({...rest,state:'dropped' as const}))(checkout)}:{})});
       return this.writeRequest(request,'applied',result).result;
     });
   }
