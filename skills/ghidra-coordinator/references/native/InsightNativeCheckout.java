@@ -208,6 +208,7 @@ public final class InsightNativeCheckout {
                     Object local=saved(file,owner).get("fingerprint");
                     // Ghidra's own rewrite on open marks a checkout modified; only bytes the coordinator proved to hold no work may carry it.
                     boolean opened=q.has("opened")&&local.equals(text(q,"opened"));
+                    if(opened){var files=new TreeSet<String>();local(project.getProjectData().getRootFolder(),files);require(files.equals(Set.of(name)),"Unpublished native work must be retained");}
                     require(opened||!file.modifiedSinceCheckout(),"Unpublished native work must be retained");
                     require(opened||local.equals(text(q,"fingerprint")),"Verified native buffers changed");
                     release.put("state","release_intent");write(releaseFile,release);file.undoCheckout(false);

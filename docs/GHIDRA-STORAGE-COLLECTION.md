@@ -32,7 +32,9 @@ states, byte for byte. Only then may the native status report a modification. Th
 passes the observed fingerprint, and Ghidra's `undoCheckout(false)` is invoked only for
 exactly those bytes; any other modified checkout stays retained. Copies left by earlier
 releases become reclaimable once any context opens a pristine checkout of the same version
-with a release containing this rule. Until then `gc --dry-run` reports them as retained.
+with a release containing this rule. A reference binds the server origin, repository,
+version, file ID and base fingerprint. `gc --dry-run` judges saved receipts only; execution
+verifies the observed bytes and may still retain a copy the dry-run counted.
 Equal bytes are the proof; the rule does not depend on which records Ghidra rewrote.
 
 ## `ghidra gc [--dry-run]`

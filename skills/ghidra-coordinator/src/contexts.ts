@@ -394,7 +394,7 @@ export class GhidraContexts {
     }
     await task;return this.workspace.model(target.id);
   }
-  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running> {
+  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running&{generation?:number}> {
     if(!this.capacity.inventory)this.capacity.inventory=this.inventory();
     await this.capacity.inventory;
     const configured=this.c.profile.values.maxContexts,max=configured===undefined?4:Number(configured);
@@ -423,28 +423,28 @@ export class GhidraContexts {
       record.binding.viewEpoch=context.viewEpoch??0;
       await durable(join(root,'process.json'),record.binding);
       await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);
-      if(first)await this.recordOpened(context,checkout,record);
+      const generation=first?await this.recordOpened(context,checkout,record):undefined;
       if(context.workingSnapshot)await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'restore',reason:'saved_snapshot',pid:record.binding.pid});
-      return record;
+      return generation===undefined?record:{...record,generation};
     } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
   }
   /**
    * Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs. On a worker's first open of a
    * pristine checkout those bytes are captured as its new receipt and as a proved no-work state of that shared version.
    */
-  private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running){
+  private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running):Promise<number|undefined>{
     const context=this.workspace.context(scope);if(!context.workingSnapshot||!context.baseSnapshot)return;
     const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
     const [local,base]=[await read(context.workingSnapshot),await read(context.baseSnapshot)];
-    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint)return;
+    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint||base.origin!==checkout.origin||base.repository!==checkout.repository)return;
     const snapshot=await this.capture(record),saved=await read(snapshot),opened=text(saved.fingerprint);
     if(opened!==base.fingerprint){
       const root=join(this.directory(),'shared-views',context.target,'opened'),path=join(root,'v'+checkout.baseVersion+'-'+opened+'.json');
       await mkdir(root,{recursive:true,mode:0o700});
-      if(!await exists(path))await durable(path,{schema:1,target:context.target,version:checkout.baseVersion,fileId:checkout.fileId,base:base.fingerprint,opened,
+      if(!await exists(path))await durable(path,{schema:1,target:context.target,origin:checkout.origin,repository:checkout.repository,version:checkout.baseVersion,fileId:checkout.fileId,base:base.fingerprint,opened,
         runtimeFingerprint:this.inputs.fingerprint,context:context.id,at:new Date().toISOString()});
     }
-    this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot});
+    return this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot}).generation;
   }
   private async createNative(scope:Scope):Promise<GhidraContext>{
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target),server=this.server(),binding=await server.ensure();
@@ -700,9 +700,9 @@ export class GhidraContexts {
     let current=this.workspace.context(scope);
     if(current.nativeCheckout?.state==='verified'){await this.dropNative(scope);current=this.workspace.context(scope);}
     if(!current.nativeCheckout||current.nativeCheckout.state==='dropped')current=await this.createNative(scope);
-    await this.privateCopy(current,current.workingSnapshot!);
-    // A first open may have replaced the receipt; nothing else writes this context while its worker starts.
-    return this.workspace.saveContext(scope,this.workspace.context(scope).generation,{state:'ready'});
+    // A first open may replace the receipt; only that write advances the expected generation.
+    const started=await this.privateCopy(current,current.workingSnapshot!);
+    return this.workspace.saveContext(scope,started?.generation??current.generation,{state:'ready'});
   }
 
   private async retireUnresponsive(scope:Scope,binding:ProcessBinding,error:unknown):Promise<boolean>{

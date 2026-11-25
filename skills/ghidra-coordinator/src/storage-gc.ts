@@ -112,7 +112,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     const project=join(checkout.root,'view.rep');
     if(dryRun){
       if(workspace.unchangedNative(context))await remove(project,category);
-      else keep(checkout.root,'Saved view differs from its shared base and from every proved pristine open of that version.');
+      else keep(checkout.root,'Saved receipt differs from its shared base and from every recorded pristine open of that version; the checkout may hold private work.');
       continue;
     }
     const sizes=new Reclaimed();if(await present(project))await sizes.add(project,category);
