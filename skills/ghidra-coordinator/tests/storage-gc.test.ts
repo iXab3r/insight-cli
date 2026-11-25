@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,mkdir,link,access,readdir,symlink,utimes}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{randomUUID}from'node:crypto';
+import {mkdtemp,rm,writeFile,readFile,mkdir,link,access,readdir,symlink,utimes}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{randomUUID}from'node:crypto';
 import{Workspace,type GhidraContext}from'../src/workspace.js';import{collectStorage,type CollectionPort}from'../src/storage-gc.js';
 import{GhidraContexts}from'../src/contexts.js';import type{NativeInputs}from'../src/native-inputs.js';import type{CommandContext}from'@eyeauras/cli-factory';
 import{createCliFixture}from'@eyeauras/cli-factory/testing';import{createInsightCli}from'../src/cli.js';import{SessionBackend}from'./fixtures/session-backend.js';
@@ -220,4 +220,10 @@ test('a checkout whose worker never started is released natively instead of fail
  const contexts=Object.create(GhidraContexts.prototype) as GhidraContexts;Object.assign(contexts,{workspace:f.workspace,directory:()=>join(f.workspace.directory,'ghidra-native'),
   nativeOperation:async()=>({state:'ready',checkedOut:true,modified:true})});
  assert.equal(await contexts.releaseUnchanged(c),false);
+});
+
+test('a checkout whose project disappeared is reported without a native release or a false saving',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));await rm(c.nativeCheckout!.root,{recursive:true});
+ for(const dry of [true,false]){const result=await collectStorage(f.workspace,f.port,dry);assert.ok(result.retained.some(r=>r.path===c.nativeCheckout!.root&&/project is missing/.test(r.reason)));assert.equal(result.categories['native-checkouts'],undefined);}
+ assert.deepEqual(f.released,[]);
 });
