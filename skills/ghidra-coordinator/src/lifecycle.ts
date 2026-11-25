@@ -1,6 +1,6 @@
 import {command,Permission,CliError,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {Research,scope,type ResearchBackend} from './research.js';
-import {Workspace,legacyDiscardOperation,type Scope,type DebuggerState} from './workspace.js';
+import {Workspace,legacyDiscardOperation,missingDiscardOperation,type NativeCheckout,type Scope,type DebuggerState} from './workspace.js';
 import {id,fail,object,digest} from './model.js';
 import {selectedOptions} from './arguments.js';
 import type {Artifact} from './artifacts.js';
@@ -124,6 +124,39 @@ export class Lifecycle {
         discardedRequests:unresolved.map(pending=>pending.callerId??pending.id),...(current.workingSnapshot?{discardedSha256:current.workingSnapshot.sha256}:{}),pendingChanges:0});
     });
   }
+  /** Gives up a native checkout whose project no longer exists. Only its exact server checkout is ended. */
+  async discardMissing(selected:Scope,acknowledged:boolean,callerId?:string) {
+    if(!acknowledged)fail('invalid','Explicit --acknowledge-lost-work is required.');
+    const reserved=this.workspace.reserveRequest(selected,missingDiscardOperation,{},callerId);
+    return this.research.ordered(selected,async()=>{
+      const request=this.workspace.request(reserved.request.id);
+      if(request.state==='applied')return request.result;
+      // Ending the recorded checkout is idempotent, so an interrupted run is simply repeated.
+      if(!['accepted','running'].includes(request.state))fail('unknown','Missing checkout discard did not complete; repeat it with a new request.',request.result);
+      const current=this.workspace.context(selected),backend=await this.backend();
+      let checkout:NativeCheckout;
+      try {
+        if(this.workspace.activePublication(selected.target))fail('blocked','Publication must be reconciled before discarding a missing checkout.');
+        if(this.workspace.model(selected.target).state!=='ready')fail('blocked','Initial publication of this model must be reconciled before discarding a missing checkout.');
+        if(current.debugger?.connected)fail('busy','Close the live debugger context before discarding it.');
+        if(this.workspace.checkoutReferenced(current))fail('blocked','An unresolved operation in another context references this checkout.');
+        if(!backend.missingCheckout||!backend.abandonMissing)fail('unsupported','The selected backend cannot give up a missing native checkout.');
+        checkout=await backend.missingCheckout(selected);
+        if(request.state==='accepted')await backend.abandonMissing(selected,true);
+      } catch(error) {
+        // Nothing was changed, so a refused intent must not block a restored project.
+        if(request.state==='accepted')this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_discarded'});
+        throw error;
+      }
+      const unresolved=this.workspace.unfinished(selected).filter(pending=>pending.id!==request.id);
+      const root=join(this.workspace.directory,'native-discards',selected.target);await mkdir(root,{recursive:true,mode:0o700});
+      await migrationDurable(join(root,current.id+'-'+request.id+'.json'),{schema:1,request:request.id,original:current,unresolved});
+      if(request.state==='accepted')this.workspace.startRequest(request.id,{kind:'missing-discard',generation:current.generation,checkout});
+      await backend.abandonMissing!(selected,false);
+      return this.workspace.discardMissing(selected,request.id,current.generation,{...selected,state:'discarded',discardedChanges:current.scalars.length+current.complexChanges.length,
+        discardedRequests:unresolved.map(pending=>pending.callerId??pending.id),checkoutId:checkout.checkoutId,pendingChanges:0});
+    });
+  }
   async saveAll(session:string,callerId?:string) {
     this.workspace.session(session);const reserved=this.workspace.reserveAdministration('session.ghidra.save',{session},callerId),request=this.workspace.administration(reserved.request.id);
     if(reserved.replay&&request.state!=='accepted'){if(request.state==='applied')return request.result;fail('unknown','Session save outcomes are retained and are not repeated.',request.result);}
@@ -143,7 +176,9 @@ export function lifecycleCommands(service:(context:CommandContext)=>Lifecycle,ru
     command('discard','Retain native keep data, discard private edits and check out the current server version',({options:o},c)=>service(c).discard(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:'Destructive',options:[...selectedOptions,{flags:'--request-id <id>',description:'Retrieve the same local discard result'}]}),
     command('discard-legacy','Give up detached work of an older engine; gc then reclaims it and the next open starts a native checkout',({options:o},c)=>service(c).discardLegacy(scope(o),Boolean(o.acknowledgeLostWork),o.requestId===undefined?undefined:id(o.requestId)),
-      {permission:'Destructive',options:[...selectedOptions,{flags:'--acknowledge-lost-work',description:'Accept that unpublished edits and unknown outcomes of this context are dropped'},{flags:'--request-id <id>',description:'Retrieve the same discard result'}]})]),
+      {permission:'Destructive',options:[...selectedOptions,{flags:'--acknowledge-lost-work',description:'Accept that unpublished edits and unknown outcomes of this context are dropped'},{flags:'--request-id <id>',description:'Retrieve the same discard result'}]}),
+    command('discard-missing','Give up a native checkout whose project directory no longer exists and end its server checkout; the next open starts a new one',({options:o},c)=>service(c).discardMissing(scope(o),Boolean(o.acknowledgeLostWork),o.requestId===undefined?undefined:id(o.requestId)),
+      {permission:'Destructive',options:[...selectedOptions,{flags:'--acknowledge-lost-work',description:'Accept that unpublished edits and unknown outcomes of this context are lost'},{flags:'--request-id <id>',description:'Retrieve the same discard result'}]})]),
     command('save-all','Save every Ghidra context in the explicit session; outcomes are per context',({options:o},c)=>service(c).saveAll(id(o.session),o.requestId===undefined?undefined:id(o.requestId)),
       {permission:Permission.Update,options:[{flags:'--session <id>',description:'Explicit session whose contexts are saved',required:true},{flags:'--request-id <id>',description:'Retrieve the recorded session save outcomes'}]}),
     command('status','Inspect the installed runtime, or verify a selected context',({options:o},c)=>{

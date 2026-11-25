@@ -3,7 +3,7 @@ name: insight-strace
 description: Observe actual file reads, writes, process creation and network syscalls in an authorized owned native Linux launch using insight-cli strace. Use when static inference needs concrete operating-system interaction evidence.
 ---
 
-# Insight strace 0.6.3
+# Insight strace 0.6.4
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

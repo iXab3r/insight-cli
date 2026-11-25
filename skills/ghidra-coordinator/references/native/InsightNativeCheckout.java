@@ -86,13 +86,38 @@ public final class InsightNativeCheckout {
         out.put("checkouts",Arrays.stream(repository.getCheckouts("/",name)).map(c->Map.of("id",c.getCheckoutId(),"version",c.getCheckoutVersion(),"user",c.getUser())).toList());
         out.put("checkinActive",repository.isCheckinActive("/",name));
     }
+    /** Ends exactly one server checkout whose own project no longer exists; its private work cannot be recovered. */
+    static Map<String,Object> abandon(RepositoryAdapter repository,JsonObject q,JsonObject owner)throws Exception {
+        Path root=Path.of(text(q,"root"));String name=text(owner,"path").substring(1);long id=q.get("checkoutId").getAsLong();
+        require(root.isAbsolute()&&!Files.exists(root,LinkOption.NOFOLLOW_LINKS),"Native project still exists");
+        require(root.getParent().getFileName().toString().equals(text(owner,"context")),"Malformed native binding");
+        var item=repository.getItem("/",name);require(item!=null&&item.getFileID().equals(text(q,"fileId")),"Native file ID changed");
+        require(!repository.isCheckinActive("/",name),"A native check-in is active");
+        String owned="/"+text(owner,"context")+"/"+root.getFileName()+"/view";boolean present=false;
+        // Everything is proved before the only effect.
+        for(var checkout:repository.getCheckouts("/",name)){
+            boolean project=Objects.toString(checkout.getProjectPath(),"").replace('\\','/').endsWith(owned);
+            require(project==(checkout.getCheckoutId()==id),"Server checkout belongs to another project");
+            if(!project)continue;
+            require(checkout.getUser().equals(System.getenv("GHIDRA_SERVER_USER"))&&checkout.getCheckoutType()==ghidra.framework.store.CheckoutType.NORMAL&&
+                checkout.getCheckoutVersion()==q.get("baseVersion").getAsInt(),"Server checkout differs from its receipt");
+            present=true;
+        }
+        if(q.get("check").getAsBoolean())return Map.of("state","endable");
+        require(!Files.exists(root,LinkOption.NOFOLLOW_LINKS),"Native project still exists");
+        if(present)repository.terminateCheckout("/",name,id,false);
+        for(var checkout:repository.getCheckouts("/",name))require(checkout.getCheckoutId()!=id,"Owned checkout remains");
+        return Map.of("state","abandoned","terminated",present);
+    }
     public static void main(String[] args){
         var output=System.out;System.setOut(System.err);Project project=null;GhidraServerManager server=null;
         Map<String,Object> out=new LinkedHashMap<>();
         try {
             require(args.length==1,"Owned request required");
             JsonObject q=JsonParser.parseString(Files.readString(Path.of(args[0]))).getAsJsonObject();
-            Path root=Path.of(text(q,"root")).toRealPath();JsonObject owner=JsonParser.parseString(Files.readString(root.resolve("native-owner.json"))).getAsJsonObject();
+            boolean abandoning=text(q,"operation").equals("abandon");
+            Path root=abandoning?Path.of(text(q,"root")):Path.of(text(q,"root")).toRealPath();
+            JsonObject owner=abandoning?q.getAsJsonObject("owner"):JsonParser.parseString(Files.readString(root.resolve("native-owner.json"))).getAsJsonObject();
             require(owner.equals(q.getAsJsonObject("owner")),"Native owner receipt changed");
             require(text(owner,"protocol").equals("native-checkout-v1")&&text(owner,"path").equals("/"+text(owner,"target")+".bin"),"Malformed native binding");
             String operation=text(q,"operation"),path=text(owner,"path"),name=path.substring(1);
@@ -102,6 +127,9 @@ public final class InsightNativeCheckout {
             server=new GhidraServerManager();server.connect();require(server.isConnected(),"Native repository disconnected");
             RepositoryAdapter repository=server.server().getRepository(text(owner,"repository"));repository.connect();
             require(repository.getUser().hasWritePermission()&&repository.getUser().getName().equals(System.getenv("GHIDRA_SERVER_USER")),"Publisher authority required");
+            if(abandoning){
+                out.putAll(abandon(repository,q,owner));repository.disconnect();server.disconnect();output.println(GSON.toJson(out));System.exit(0);
+            }
             ProjectLocator locator=new ProjectLocator(root.toString(),"view");Projects manager=new Projects();
             // After a proved release the project is never reopened: an interrupted deletion can leave it unreadable.
             if((operation.equals("release")||operation.equals("drop"))&&released(root,q)){

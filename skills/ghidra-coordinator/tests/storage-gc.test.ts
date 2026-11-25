@@ -227,3 +227,46 @@ test('a checkout whose project disappeared is reported without a native release 
  for(const dry of [true,false]){const result=await collectStorage(f.workspace,f.port,dry);assert.ok(result.retained.some(r=>r.path===c.nativeCheckout!.root&&/project is missing/.test(r.reason)));assert.equal(result.categories['native-checkouts'],undefined);}
  assert.deepEqual(f.released,[]);
 });
+
+test('a checkout whose project is lost is given up with a journal and only its server checkout ends',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'b'.repeat(64),'a'.repeat(64)),backend=new GhidraContexts(f.workspace,{} as NativeInputs,{appArguments:{AppDataDirectory:f.root}} as CommandContext);
+ const {Lifecycle}=await import('../src/lifecycle.js');let ended=0,lose=true;
+ let refuse=true;const port={missingCheckout:(s:never)=>backend.missingCheckout(s),abandonMissing:async(_:never,check:boolean)=>{if(check){if(refuse)throw Error('server mismatch');return;}ended++;if(lose)throw Error('lost response');}};
+ const life=new Lifecycle(f.workspace,{ordered:async(_:unknown,a:()=>Promise<unknown>)=>a()} as never,async()=>port as never);
+ const parent=join(f.workspace.directory,'ghidra-native','context',c.id),root=c.nativeCheckout!.root;
+ await assert.rejects(life.discardMissing(c,false),/acknowledge-lost-work/);await assert.rejects(life.discardMissing(f.context,true),/no retained native checkout/);
+ await assert.rejects(life.discardMissing(c,true),/still exists/);
+ await rm(root,{recursive:true});await mkdir(join(parent,'w-other'));await assert.rejects(life.discardMissing(c,true),/Other retained data/);await rm(join(parent,'w-other'),{recursive:true});
+ await writeFile(join(parent,'checkout.json'),JSON.stringify({root:join(parent,'w-new')}));await assert.rejects(life.discardMissing(c,true),/another project/);await writeFile(join(parent,'checkout.json'),JSON.stringify({root}));
+ await writeFile(join(parent,'current.json'),JSON.stringify({root,pid:process.pid}));await assert.rejects(life.discardMissing(c,true),/not proved stopped/);await writeFile(join(parent,'current.json'),JSON.stringify({root,pid:999999}));
+ const moved=join(f.workspace.directory,'ghidra-native','context','renamed');await mkdir(join(moved,'w-owned'),{recursive:true});await writeFile(join(moved,'w-owned','native-owner.json'),JSON.stringify({context:c.id}));
+ await assert.rejects(life.discardMissing(c,true),/under another name/);await rm(moved,{recursive:true});
+ await assert.rejects(life.discardMissing(c,true,'refused'),/server mismatch/);refuse=false;assert.equal(f.workspace.unresolved(c).length,0);assert.equal(ended,0);
+ await assert.rejects(life.discardMissing(c,true,'refused'),/new request/);
+ const live=f.open(),at=join(f.workspace.directory,'ghidra-native','context',live.id,'w-live');await mkdir(at,{recursive:true});
+ f.workspace.saveContext(c,f.workspace.context(c).generation,{complexChanges:['q_'+randomUUID()],debugger:{connected:false,traces:[{id:'trace_'+randomUUID(),name:'t',snapshot:f.working,snap:'0',modules:0,threads:0,connected:false}]}} as never);
+ const pending=f.workspace.reserveRequest(c,'/set_function_prototype',{name:'pending'}).request;
+ const other=f.workspace.checkoutReferenced.bind(f.workspace);f.workspace.checkoutReferenced=()=>true;await assert.rejects(life.discardMissing(c,true),/another context/);f.workspace.checkoutReferenced=other;
+ await assert.rejects(life.discardMissing(c,true,'lost'),/lost response/);assert.equal(f.workspace.context(c).nativeCheckout!.state,'active');assert.equal(f.workspace.request(pending.id).state,'accepted');
+ lose=false;const result=await life.discardMissing(c,true,'lost') as Record<string,unknown>;assert.equal(result.state,'discarded');assert.equal(result.discardedChanges,1);assert.equal(result.checkoutId,3);
+ assert.deepEqual(await life.discardMissing(c,true,'lost'),result);assert.equal(ended,2);
+ const after=f.workspace.context(c);assert.equal(after.nativeCheckout!.state,'dropped');assert.equal(after.workingSnapshot,undefined);assert.equal(after.debugger!.traces.length,1);assert.deepEqual(after.complexChanges,[]);assert.equal(f.workspace.request(pending.id).state,'failed');
+ const journals=await readdir(join(f.workspace.directory,'native-discards',f.target.id));assert.equal(journals.length,1);
+ assert.equal(JSON.parse(await readFile(join(f.workspace.directory,'native-discards',f.target.id,journals[0]!),'utf8')).original.nativeCheckout.root,root);
+ const collected=await collectStorage(f.workspace,f.port,false);assert.ok(!collected.retained.some(r=>/project is missing/.test(r.reason)));
+ await assert.rejects(life.discardMissing(c,true,'again'),/no retained native checkout/);
+});
+
+test('ending a missing checkout archives its stale receipts after the server proof only',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'b'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root,parent=join(root,'..');
+ await rm(root,{recursive:true});await writeFile(join(parent,'current.json'),JSON.stringify({root,pid:999999}));
+ const backend=new GhidraContexts(f.workspace,{} as NativeInputs,{appArguments:{AppDataDirectory:f.root}} as CommandContext),calls:Record<string,unknown>[]=[];
+ let origin='ghidra://127.0.0.1:2',state='unknown';
+ (backend as unknown as {server:unknown}).server=()=>({ensure:async()=>({origin,repository:'owned'}),nativeCheckout:async(_:unknown,q:Record<string,unknown>)=>{calls.push(q);return {state:state==='ok'?q.check?'endable':'abandoned':state};}});
+ await assert.rejects(backend.abandonMissing(c,true),/server binding changed/);assert.equal(calls.length,0);origin='ghidra://127.0.0.1:1';
+ await assert.rejects(backend.abandonMissing(c,false),/not proved ended/);assert.ok(await exists(join(parent,'current.json')));
+ state='ok';await backend.abandonMissing(c,true);assert.ok(await exists(join(parent,'current.json')));
+ await backend.abandonMissing(c,false);await backend.abandonMissing(c,false);assert.equal(await exists(parent),false);
+ assert.equal((await readdir(join(f.workspace.directory,'native-discards',f.target.id))).length,1);
+ assert.deepEqual(calls.at(-1),{root,operation:'abandon',check:false,fileId:'file',checkoutId:3,baseVersion:1,owner:{protocol:'native-checkout-v1',context:c.id,target:f.target.id,path:'/'+f.target.id+'.bin',repository:'owned'}});
+});

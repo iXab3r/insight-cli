@@ -3,7 +3,7 @@ name: insight-dotnet-trace
 description: Collect and inspect bounded .NET EventPipe traces to identify sampled thread work, waits or runtime activity; distinguish wall-clock samples from CPU consumption.
 ---
 
-# Insight .NET Trace 0.6.3
+# Insight .NET Trace 0.6.4
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized
