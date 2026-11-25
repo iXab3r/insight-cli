@@ -543,23 +543,41 @@ export class GhidraContexts {
   async missingCheckout(scope:Scope):Promise<NativeCheckout>{
     const context=this.workspace.context(scope),checkout=context.nativeCheckout,contexts=join(this.directory(),'context'),parent=join(contexts,context.id);
     if(!checkout||checkout.state==='dropped')fail('unsupported','This context has no retained native checkout.');
-    if(resolve(checkout.root)!==resolve(join(parent,basename(checkout.root))))fail('binding','Native checkout receipt names a directory outside this context.');
+    const name=basename(checkout.root);
+    if(basename(dirname(checkout.root))!==context.id)fail('binding','Native checkout receipt names a directory outside this context.');
     if(await realpath(contexts)!==join(await realpath(this.workspace.directory),'ghidra-native','context'))fail('binding','Owned context storage moved.');
     const absent=async(path:string)=>{try{await lstat(path);return false;}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return true;throw error;}};
-    if(!await absent(checkout.root))fail('blocked','The native checkout project still exists; use ghidra changes discard.');
-    // A surviving sibling root can be this project under another name, and a receipt can name a live worker.
-    if(!await absent(parent))fail('blocked','Other retained data of this context still exists; its checkout is not proved lost.');
+    if(!await absent(checkout.root)||!await absent(join(parent,name)))fail('blocked','The native checkout project still exists; it is not lost.');
+    // Only receipts of the lost root may remain beside it, and its last worker must be gone.
+    if(!await absent(parent))for(const entry of await readdir(parent,{withFileTypes:true})){
+      if(!entry.isFile()||!['checkout.json','current.json'].includes(entry.name))fail('blocked','Other retained data of this context still exists; its checkout is not proved lost.');
+      const receipt=object(JSON.parse(await readFile(join(parent,entry.name),'utf8')));
+      if(typeof receipt.root!=='string'||basename(receipt.root)!==name||basename(dirname(receipt.root))!==context.id)fail('blocked','A retained receipt names another project of this context.');
+      if(entry.name==='current.json'&&(!Number.isSafeInteger(receipt.pid)||alive(Number(receipt.pid))))fail('busy','The last worker of this context is not proved stopped.');
+    }
+    // A project renamed inside owned storage keeps its owner receipt.
+    for(const owner of await readdir(contexts,{withFileTypes:true}))if(owner.isDirectory())
+      for(const root of await readdir(join(contexts,owner.name),{withFileTypes:true}))if(root.isDirectory()){
+        let value:unknown;try{value=JSON.parse(await readFile(join(contexts,owner.name,root.name,'native-owner.json'),'utf8'));}
+        catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
+        if(object(value).context===context.id)fail('blocked','A project of this context still exists under another name; restore its directory.');
+      }
     const process=await runtimeProcesses(dirname(this.workspace.directory));
     if(this.capacity.slots.has(context.id)||process.some(p=>p.kind!=='server')||(await migrationProcessBlockers(this.c.appArguments.AppDataDirectory)).length)
       fail('busy','Stop or reconcile every Ghidra worker and native helper before giving up a missing checkout.');
     return checkout;
   }
-  async abandonMissing(scope:Scope):Promise<void>{
+  async abandonMissing(scope:Scope,check:boolean):Promise<void>{
     const checkout=await this.missingCheckout(scope),context=this.workspace.context(scope),server=this.server(),binding=await server.ensure();
     if(checkout.origin!==binding.origin||checkout.repository!==binding.repository||checkout.path!==programPath(scope.target))fail('binding','Native checkout server binding changed.');
-    const value=await server.nativeCheckout(binding,{root:checkout.root,operation:'abandon',fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion,
+    const value=await server.nativeCheckout(binding,{root:checkout.root,operation:'abandon',check,fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion,
       owner:{protocol:this.nativeEngine,context:context.id,target:scope.target,path:checkout.path,repository:checkout.repository}});
-    if(value.state!=='abandoned')fail('unknown','The server checkout is not proved ended; repeat this command.');
+    if(value.state!==(check?'endable':'abandoned'))fail('unknown','The server checkout is not proved ended; repeat this command.');
+    if(check)return;
+    // Receipts of the lost root would otherwise be read as an unproved worker; they stay as evidence.
+    const kept=join(this.workspace.directory,'native-discards',scope.target);await mkdir(kept,{recursive:true,mode:0o700});
+    try{await rename(join(this.directory(),'context',context.id),join(kept,context.id+'-receipts-'+randomUUID()));}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
   }
   async collect(dryRun:boolean){
     return collectStorage(this.workspace,{closed:c=>this.neverStartedOrClosed(c),release:c=>this.releaseUnchanged(c)},dryRun,message=>this.c.progress(message));

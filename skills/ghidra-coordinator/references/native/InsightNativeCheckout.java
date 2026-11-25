@@ -93,17 +93,21 @@ public final class InsightNativeCheckout {
         require(root.getParent().getFileName().toString().equals(text(owner,"context")),"Malformed native binding");
         var item=repository.getItem("/",name);require(item!=null&&item.getFileID().equals(text(q,"fileId")),"Native file ID changed");
         require(!repository.isCheckinActive("/",name),"A native check-in is active");
-        String owned="/"+text(owner,"context")+"/"+root.getFileName()+"/view";boolean terminated=false;
+        String owned="/"+text(owner,"context")+"/"+root.getFileName()+"/view";boolean present=false;
+        // Everything is proved before the only effect.
         for(var checkout:repository.getCheckouts("/",name)){
             boolean project=Objects.toString(checkout.getProjectPath(),"").replace('\\','/').endsWith(owned);
             require(project==(checkout.getCheckoutId()==id),"Server checkout belongs to another project");
             if(!project)continue;
             require(checkout.getUser().equals(System.getenv("GHIDRA_SERVER_USER"))&&checkout.getCheckoutType()==ghidra.framework.store.CheckoutType.NORMAL&&
                 checkout.getCheckoutVersion()==q.get("baseVersion").getAsInt(),"Server checkout differs from its receipt");
-            repository.terminateCheckout("/",name,id,false);terminated=true;
+            present=true;
         }
+        if(q.get("check").getAsBoolean())return Map.of("state","endable");
+        require(!Files.exists(root,LinkOption.NOFOLLOW_LINKS),"Native project still exists");
+        if(present)repository.terminateCheckout("/",name,id,false);
         for(var checkout:repository.getCheckouts("/",name))require(checkout.getCheckoutId()!=id,"Owned checkout remains");
-        return Map.of("state","abandoned","terminated",terminated);
+        return Map.of("state","abandoned","terminated",present);
     }
     public static void main(String[] args){
         var output=System.out;System.setOut(System.err);Project project=null;GhidraServerManager server=null;

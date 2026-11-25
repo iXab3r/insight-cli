@@ -75,15 +75,19 @@ are refused.
 
 `ghidra changes discard-missing --session <id> --target <id> --acknowledge-lost-work`
 (Destructive) ends a native checkout whose project directory no longer exists. Unpublished
-edits of that context are already lost and cannot be merged. It is refused while any data of
-the context remains on disk, while any Ghidra worker or native helper of the profile runs or
+edits of that context are already lost and cannot be merged. It is refused while the project or
+any data beyond its own receipts remains in the context directory, while a project of the
+context exists under another name in owned context storage, while any Ghidra worker or native helper of the profile runs or
 is unverified, with an unresolved publication, or when another context's unresolved operation
 names the checkout. A journal `native-discards/<target>/<context>-<request>.json` first keeps the
 original context and its unresolved requests. Then only the recorded server checkout ends,
 after its file ID, checkout ID, owner, base version and project path match; a mismatch
 changes nothing. Server versions and history are never changed. Requests of the
-context become terminal as above, and the next open makes a new checkout. Repeat the command
-with the same request ID after an interruption.
+context become terminal as above, and the next open makes a new checkout. Remaining receipts move beside the
+journal. Saved debugger
+traces stay. A refusal is terminal for its request ID and changes nothing; after an
+interruption repeat the command with the same ID. A copy moved outside owned storage cannot
+be detected: restore it first, because it loses its checkout.
 
 ## Upgrading with detached work
 

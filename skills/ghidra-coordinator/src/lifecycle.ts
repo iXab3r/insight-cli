@@ -1,6 +1,6 @@
 import {command,Permission,CliError,type CommandContext,type CommandDefinition} from '@eyeauras/cli-factory';
 import {Research,scope,type ResearchBackend} from './research.js';
-import {Workspace,legacyDiscardOperation,missingDiscardOperation,type Scope,type DebuggerState} from './workspace.js';
+import {Workspace,legacyDiscardOperation,missingDiscardOperation,type NativeCheckout,type Scope,type DebuggerState} from './workspace.js';
 import {id,fail,object,digest} from './model.js';
 import {selectedOptions} from './arguments.js';
 import type {Artifact} from './artifacts.js';
@@ -133,19 +133,26 @@ export class Lifecycle {
       if(request.state==='applied')return request.result;
       // Ending the recorded checkout is idempotent, so an interrupted run is simply repeated.
       if(!['accepted','running'].includes(request.state))fail('unknown','Missing checkout discard did not complete; repeat it with a new request.',request.result);
-      const current=this.workspace.context(selected);
-      if(this.workspace.activePublication(selected.target))fail('blocked','Publication must be reconciled before discarding a missing checkout.');
-      if(this.workspace.model(selected.target).state!=='ready')fail('blocked','Initial publication of this model must be reconciled before discarding a missing checkout.');
-      if(current.debugger?.connected)fail('busy','Close the live debugger context before discarding it.');
-      if(this.workspace.checkoutReferenced(current))fail('blocked','An unresolved operation in another context references this checkout.');
-      const backend=await this.backend();
-      if(!backend.missingCheckout||!backend.abandonMissing)fail('unsupported','The selected backend cannot give up a missing native checkout.');
-      const checkout=await backend.missingCheckout(selected);
+      const current=this.workspace.context(selected),backend=await this.backend();
+      let checkout:NativeCheckout;
+      try {
+        if(this.workspace.activePublication(selected.target))fail('blocked','Publication must be reconciled before discarding a missing checkout.');
+        if(this.workspace.model(selected.target).state!=='ready')fail('blocked','Initial publication of this model must be reconciled before discarding a missing checkout.');
+        if(current.debugger?.connected)fail('busy','Close the live debugger context before discarding it.');
+        if(this.workspace.checkoutReferenced(current))fail('blocked','An unresolved operation in another context references this checkout.');
+        if(!backend.missingCheckout||!backend.abandonMissing)fail('unsupported','The selected backend cannot give up a missing native checkout.');
+        checkout=await backend.missingCheckout(selected);
+        if(request.state==='accepted')await backend.abandonMissing(selected,true);
+      } catch(error) {
+        // Nothing was changed, so a refused intent must not block a restored project.
+        if(request.state==='accepted')this.workspace.recordRequest(request.id,'failed',{...selected,state:'not_discarded'});
+        throw error;
+      }
       const unresolved=this.workspace.unfinished(selected).filter(pending=>pending.id!==request.id);
       const root=join(this.workspace.directory,'native-discards',selected.target);await mkdir(root,{recursive:true,mode:0o700});
       await migrationDurable(join(root,current.id+'-'+request.id+'.json'),{schema:1,request:request.id,original:current,unresolved});
       if(request.state==='accepted')this.workspace.startRequest(request.id,{kind:'missing-discard',generation:current.generation,checkout});
-      await backend.abandonMissing(selected);
+      await backend.abandonMissing!(selected,false);
       return this.workspace.discardMissing(selected,request.id,current.generation,{...selected,state:'discarded',discardedChanges:current.scalars.length+current.complexChanges.length,
         discardedRequests:unresolved.map(pending=>pending.callerId??pending.id),checkoutId:checkout.checkoutId,pendingChanges:0});
     });

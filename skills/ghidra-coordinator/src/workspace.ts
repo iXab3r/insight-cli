@@ -314,7 +314,9 @@ export class Workspace {
       for(const pending of this.unfinished(scope))if(pending.id!==request)this.writeRequest(pending.id,'failed',{...scope,state:'discarded',reason:missing?'explicit_missing_discard':'explicit_legacy_discard'});
       for(const row of this.db.prepare("SELECT id,data FROM requests WHERE context=? AND state='failed'").all(context.id))
         this.db.prepare('UPDATE requests SET data=? WHERE id=?').run(bounded({...JSON.parse(String(row.data)),dropped:true}),String(row.id));
-      this.writeContext(scope,generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,debugger:undefined,
+      this.writeContext(scope,generation,{state:'stopped',workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined,
+        // Saved traces of a native context live outside its project.
+        ...(missing?{}:{debugger:undefined}),
         scalars:[],complexChanges:[],viewEpoch:(context.viewEpoch??0)+1,
         ...(checkout?{nativeCheckout:(({conflict,...rest})=>({...rest,state:'dropped' as const}))(checkout)}:{})});
       return this.writeRequest(request,'applied',result).result;
