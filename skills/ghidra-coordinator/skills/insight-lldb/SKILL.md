@@ -3,7 +3,7 @@ name: insight-lldb
 description: Observe native runtime arguments, return values, registers, stacks and bounded memory at a selected breakpoint using an owned LLDB launch. Use insight-cli lldb on macOS ARM64 when static findings need a concrete execution check.
 ---
 
-# Insight LLDB 0.6.4
+# Insight LLDB 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

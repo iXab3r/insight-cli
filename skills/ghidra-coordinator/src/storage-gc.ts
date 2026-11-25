@@ -110,7 +110,11 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     if(workspace.checkoutReferenced(context)){keep(checkout.root,'An unresolved operation in another context references this checkout.');continue;}
     if(checkout.state==='active'&&!await present(checkout.root)){keep(checkout.root,'Native checkout project is missing; its server checkout is retained.');continue;}
     const project=join(checkout.root,'view.rep');
-    if(dryRun){if(workspace.unchangedNative(context))await remove(project,category);continue;}
+    if(dryRun){
+      if(workspace.unchangedNative(context))await remove(project,category);
+      else keep(checkout.root,'Saved view differs from its shared base and from every proved pristine open of that version.');
+      continue;
+    }
     const sizes=new Reclaimed();if(await present(project))await sizes.add(project,category);
     try{
       progress('Verifying native checkout '+context.session+' / '+context.target);

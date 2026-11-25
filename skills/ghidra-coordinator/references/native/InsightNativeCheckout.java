@@ -204,8 +204,12 @@ public final class InsightNativeCheckout {
                 Path releaseFile=root.resolve("released.json");
                 Map<String,Object> release=new LinkedHashMap<>(Map.of("checkoutId",q.get("checkoutId").getAsLong(),"version",q.get("verifiedVersion").getAsInt(),"fingerprint",text(q,"fingerprint")));
                 if(file.isCheckedOut()){
-                    require(!file.modifiedSinceCheckout()&&file.getCheckoutStatus().getCheckoutVersion()==q.get("verifiedVersion").getAsInt(),"Unpublished native work must be retained");
-                    require(saved(file,owner).get("fingerprint").equals(text(q,"fingerprint")),"Verified native buffers changed");
+                    require(file.getCheckoutStatus().getCheckoutVersion()==q.get("verifiedVersion").getAsInt()&&!file.canRecover(),"Unpublished native work must be retained");
+                    Object local=saved(file,owner).get("fingerprint");
+                    // Ghidra's own rewrite on open marks a checkout modified; only bytes the coordinator proved to hold no work may carry it.
+                    boolean opened=q.has("opened")&&local.equals(text(q,"opened"));
+                    require(opened||!file.modifiedSinceCheckout(),"Unpublished native work must be retained");
+                    require(opened||local.equals(text(q,"fingerprint")),"Verified native buffers changed");
                     release.put("state","release_intent");write(releaseFile,release);file.undoCheckout(false);
                 }else{
                     var prior=JsonParser.parseString(Files.readString(releaseFile)).getAsJsonObject();

@@ -3,7 +3,7 @@ name: insight-ilspy
 description: Recover C#, inspect IL/types/metadata, extract resources or export projects from managed .NET assemblies through insight-cli ILSpy. Choose native analysis for NativeAOT or ordinary PE machine code.
 ---
 
-# Insight ILSpy 0.6.4
+# Insight ILSpy 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

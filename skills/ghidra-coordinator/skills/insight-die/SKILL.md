@@ -3,7 +3,7 @@ name: insight-die
 description: Classify unknown executable or container inputs by format, architecture and compiler/runtime/packer signatures with Detect It Easy before choosing managed or native analysis. Use insight-cli die for static triage and preserve scan uncertainty.
 ---
 
-# Insight Detect It Easy 0.6.4
+# Insight Detect It Easy 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

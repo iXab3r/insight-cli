@@ -3,7 +3,7 @@ name: insight-dnspy
 description: Debug a managed Windows EXE at an IL breakpoint and read primitive arguments, or change one expected IL Int32 constant in a new assembly copy through insight-cli dnspy. Use when C# decompilation needs observed execution or a controlled binary edit.
 ---
 
-# Insight dnSpyEx 0.6.4
+# Insight dnSpyEx 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

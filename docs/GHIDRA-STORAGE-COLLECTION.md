@@ -17,6 +17,24 @@ project dropped. The result reports `checkout: released` or `checkout: retained`
 or unavailable verification only retains the checkout. The next open of the same selectors
 checks out the **current** shared revision. Changed contexts keep their original checkout.
 
+### Ghidra's own rewrite on open
+
+Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs (the
+headless bridge saves inside `open_program`). Such a checkout reports itself modified and
+its bytes no longer equal the server base, although it holds no work. On a worker's first
+open of a pristine checkout, the coordinator therefore saves and captures the opened
+buffers as that context's receipt. When they differ from the base, it records them under
+`ghidra-native/shared-views/<target>/opened/v<version>-<fingerprint>.json` as a proved
+no-work state of that version and file ID. Later edits are compared with that receipt.
+
+Close and `gc` accept saved buffers that equal either the base or one of these recorded
+states, byte for byte. Only then may the native status report a modification. The release
+passes the observed fingerprint, and Ghidra's `undoCheckout(false)` is invoked only for
+exactly those bytes; any other modified checkout stays retained. Copies left by earlier
+releases become reclaimable once any context opens a pristine checkout of the same version
+with a release containing this rule. Until then `gc --dry-run` reports them as retained.
+Equal bytes are the proof; the rule does not depend on which records Ghidra rewrote.
+
 ## `ghidra gc [--dry-run]`
 
 Collection covers the selected profile. Dry-run needs ReadOnly and changes nothing;
