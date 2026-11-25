@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { chmodSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Artifacts, type Artifact } from './artifacts.js';
@@ -31,6 +31,8 @@ export interface NativeCheckout {
   origin:string;repository:string;path:string;runtimeFingerprint:string;
   state:'active'|'verified'|'dropped';
   conflict?:{request:string;message:string};
+  /** Saved buffers proved to hold no private work although Ghidra rewrote them on open; the release accepts only these. */
+  opened?:string;
 }
 export interface GhidraContext extends Scope {
   /** Internal storage key, never a caller's backend selector. */
@@ -333,8 +335,30 @@ export class Workspace {
     if(context.workingSnapshot?.kind!=='native'||context.baseSnapshot?.kind!=='native')return false;
     try{
       const [local,base]=[context.workingSnapshot,context.baseSnapshot].map(value=>JSON.parse(readFileSync(this.artifacts.path(value),'utf8')));
-      return typeof local.fingerprint==='string'&&local.fingerprint===base.fingerprint;
+      return this.unchangedBuffers(context.target,base,local.fingerprint);
     }catch{return false;}
+  }
+  /**
+   * Saved buffers hold no private work when they equal the shared base, or equal what Ghidra itself wrote when a
+   * worker opened a pristine checkout of that base. Equal bytes are the proof; what Ghidra rewrote is irrelevant.
+   */
+  unchangedBuffers(target:string,base:Record<string,unknown>,fingerprint:unknown):boolean {
+    if(typeof fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(fingerprint)||base.source!=='server'||typeof base.fingerprint!=='string')return false;
+    return fingerprint===base.fingerprint||this.openedReferences(target,base).has(fingerprint);
+  }
+  /** Saved buffers of pristine checkouts of one shared version, as each was left by its worker's own open. */
+  openedReferences(target:string,base:Record<string,unknown>):Set<string> {
+    const revision=Number(base.version);
+    const found=new Set<string>(),root=join(this.directory,'ghidra-native','shared-views',id(target),'opened');let names:string[];
+    try{names=readdirSync(root);}catch{return found;}
+    for(const name of names){
+      const match=/^v(\d+)-([a-f0-9]{64})\.json$/.exec(name);if(!match||Number(match[1])!==revision)continue;
+      try{
+        const row=JSON.parse(readFileSync(join(root,name),'utf8'));
+        if(row.schema===1&&row.target===target&&row.version===revision&&row.fileId===base.fileId&&row.base===base.fingerprint&&row.origin===base.origin&&row.repository===base.repository&&row.opened===match[2])found.add(match[2]!);
+      }catch{}
+    }
+    return found;
   }
   /** Another context's unresolved operation may still need this checkout's private view. */
   checkoutReferenced(context:GhidraContext):boolean {

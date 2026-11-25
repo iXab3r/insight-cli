@@ -222,6 +222,31 @@ test('a checkout whose worker never started is released natively instead of fail
  assert.equal(await contexts.releaseUnchanged(c),false);
 });
 
+test('a checkout Ghidra rewrote on open is released only as the exact bytes a pristine open produced',async t=>{
+ const f=await fixture(t),base='a'.repeat(64),opened='c'.repeat(64),other='e'.repeat(64);
+ const receipt=async(v:unknown)=>{const p=join(f.root,randomUUID());await writeFile(p,JSON.stringify(v));return f.workspace.captureNative(p);};
+ const make=async(local:string)=>{const c=await nativeContext(f,local,base);return f.workspace.saveContext(c,c.generation,{baseSnapshot:await receipt({source:'server',version:1,fileId:'file',fingerprint:base,origin:'ghidra://127.0.0.1:1',repository:'owned'})});};
+ const references=join(f.workspace.directory,'ghidra-native','shared-views',f.target.id,'opened');
+ const reference=async(fileId:string,from=base,repository='owned')=>{await mkdir(references,{recursive:true});await writeFile(join(references,'v1-'+opened+'.json'),JSON.stringify({schema:1,target:f.target.id,origin:'ghidra://127.0.0.1:1',repository,version:1,fileId,base:from,opened}));};
+ const calls:Record<string,unknown>[]=[];let seen=opened;
+ const backend=(c:{nativeCheckout?:{path:string}})=>{const contexts=Object.create(GhidraContexts.prototype) as GhidraContexts;Object.assign(contexts,{workspace:f.workspace,directory:()=>join(f.workspace.directory,'ghidra-native'),
+  nativeOperation:async(_:unknown,operation:string,parameters:Record<string,unknown>={})=>{calls.push({operation,...parameters});
+   if(operation==='status')return {state:'ready',checkedOut:true,modified:true,recoverable:false,fileId:'file',checkoutId:3,baseVersion:1,saved:{fingerprint:seen,version:1,fileId:'file'},projectFiles:[c.nativeCheckout!.path.slice(1)]};
+   return {state:operation==='release'?'released':'dropped'};}});return contexts;};
+ const rewritten=await make(opened),stale=await make(base);
+ // No proved pristine open: a rewritten checkout is private work.
+ assert.equal(f.workspace.unchangedNative(rewritten),false);assert.equal(await backend(rewritten).releaseUnchanged(rewritten),false);
+ for(const [fileId,from,repository] of [['another-file',base,'owned'],['file',other,'owned'],['file',base,'another-repository']]){await reference(fileId!,from,repository);assert.equal(f.workspace.unchangedNative(rewritten),false);}
+ await reference('file');assert.equal(f.workspace.unchangedNative(rewritten),true);
+ assert.equal((await collectStorage(f.workspace,f.port,true)).categories['native-checkouts']!.items,2);
+ // Observed bytes decide, not the receipt.
+ seen=other;assert.equal(await backend(stale).releaseUnchanged(stale),false);assert.equal(calls.some(c=>c.operation==='release'),false);
+ seen=opened;assert.equal(await backend(stale).releaseUnchanged(stale),true);
+ const released=calls.filter(c=>c.operation==='release');assert.equal(released.length,1);assert.equal(released[0]!.fingerprint,base);assert.equal(released[0]!.opened,opened);
+ assert.equal(f.workspace.context(stale).nativeCheckout!.state,'dropped');assert.equal(f.workspace.context(stale).nativeCheckout!.opened,opened);
+ assert.equal(await backend(rewritten).releaseUnchanged(rewritten),true);assert.equal(f.workspace.context(rewritten).nativeCheckout!.state,'dropped');
+});
+
 test('a checkout whose project disappeared is reported without a native release or a false saving',async t=>{
  const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));await rm(c.nativeCheckout!.root,{recursive:true});
  for(const dry of [true,false]){const result=await collectStorage(f.workspace,f.port,dry);assert.ok(result.retained.some(r=>r.path===c.nativeCheckout!.root&&/project is missing/.test(r.reason)));assert.equal(result.categories['native-checkouts'],undefined);}

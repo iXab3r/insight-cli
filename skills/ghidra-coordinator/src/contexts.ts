@@ -56,6 +56,9 @@ async function durable(path: string, value: unknown) {
   try {await handle.writeFile(stable(value));await handle.sync();}finally{await handle.close();}
   await rename(temporary,path);
 }
+async function exists(path:string){
+  try{await lstat(path);return true;}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return false;throw error;}
+}
 async function port() {
   const listener=createServer();await new Promise<void>((ok,bad)=>{listener.once('error',bad);listener.listen(0,'127.0.0.1',ok);});
   const address=listener.address();if(!address||typeof address==='string')fail('launch','Owned context port allocation failed.');
@@ -391,7 +394,7 @@ export class GhidraContexts {
     }
     await task;return this.workspace.model(target.id);
   }
-  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running> {
+  private async privateCopy(context: GhidraContext, snapshot: Artifact): Promise<Running&{generation?:number}> {
     if(!this.capacity.inventory)this.capacity.inventory=this.inventory();
     await this.capacity.inventory;
     const configured=this.c.profile.values.maxContexts,max=configured===undefined?4:Number(configured);
@@ -409,6 +412,7 @@ export class GhidraContexts {
         const observed=await this.nativeOperation(checkout,'status');
         if(observed.state!=='ready'||observed.checkoutId!==checkout.checkoutId)fail('binding','This runtime cannot open the native checkout without changing it; the project is retained.');
       }
+      const first=!await exists(join(root,'process.json'));
       record=await this.launch(root,target,'context',checkout.path,'headless',context.id);
       const project=object(await record.http.call('/open_project',{path:join(root,'view.gpr')}));
       if(project.success===false)fail('launch','Native working project could not be reopened.');
@@ -419,9 +423,28 @@ export class GhidraContexts {
       record.binding.viewEpoch=context.viewEpoch??0;
       await durable(join(root,'process.json'),record.binding);
       await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);
+      const generation=first?await this.recordOpened(context,checkout,record):undefined;
       if(context.workingSnapshot)await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'restore',reason:'saved_snapshot',pid:record.binding.pid});
-      return record;
+      return generation===undefined?record:{...record,generation};
     } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
+  }
+  /**
+   * Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs. On a worker's first open of a
+   * pristine checkout those bytes are captured as its new receipt and as a proved no-work state of that shared version.
+   */
+  private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running):Promise<number|undefined>{
+    const context=this.workspace.context(scope);if(!context.workingSnapshot||!context.baseSnapshot)return;
+    const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
+    const [local,base]=[await read(context.workingSnapshot),await read(context.baseSnapshot)];
+    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint||base.origin!==checkout.origin||base.repository!==checkout.repository)return;
+    const snapshot=await this.capture(record),saved=await read(snapshot),opened=text(saved.fingerprint);
+    if(opened!==base.fingerprint){
+      const root=join(this.directory(),'shared-views',context.target,'opened'),path=join(root,'v'+checkout.baseVersion+'-'+opened+'.json');
+      await mkdir(root,{recursive:true,mode:0o700});
+      if(!await exists(path))await durable(path,{schema:1,target:context.target,origin:checkout.origin,repository:checkout.repository,version:checkout.baseVersion,fileId:checkout.fileId,base:base.fingerprint,opened,
+        runtimeFingerprint:this.inputs.fingerprint,context:context.id,at:new Date().toISOString()});
+    }
+    return this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot}).generation;
   }
   private async createNative(scope:Scope):Promise<GhidraContext>{
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target),server=this.server(),binding=await server.ensure();
@@ -496,7 +519,7 @@ export class GhidraContexts {
     if(checkout.state!=='verified')fail('blocked','Only a verified native publication can dispose its project.');
     const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
     if(shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId)fail('binding','Verified native disposal reference changed.');
-    const parameters={verifiedVersion:checkout.baseVersion,fingerprint:text(shared.fingerprint)};
+    const parameters={verifiedVersion:checkout.baseVersion,fingerprint:text(shared.fingerprint),...(checkout.opened?{opened:checkout.opened}:{})};
     const released=await this.nativeOperation(checkout,'release',parameters);
     if(released.state!=='released')fail('unknown','Publication is verified but checkout release remains unproved; its project is retained.');
     const dropped=await this.nativeOperation(checkout,'drop',parameters);
@@ -508,8 +531,9 @@ export class GhidraContexts {
     if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope);return;}
     // No new server version; the independent base view must equal all saved local buffers.
     const local=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.workingSnapshot!),'utf8'))),base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
-    if(local.fingerprint!==base.fingerprint)fail('binding','An unchanged native checkout differs from its shared base.');
-    this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...context.nativeCheckout,state:'verified'},workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
+    if(!this.workspace.unchangedBuffers(context.target,base,local.fingerprint))fail('binding','An unchanged native checkout differs from its shared base.');
+    const opened=local.fingerprint===base.fingerprint?{}:{opened:text(local.fingerprint)};
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...context.nativeCheckout,...opened,state:'verified'},workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
     await this.dropNative(scope);
   }
   /** Close and GC drop a working copy only when Ghidra itself reports no private change. */
@@ -519,9 +543,17 @@ export class GhidraContexts {
       this.workspace.activePublication(scope.target)?.session===scope.session||!this.workspace.unchangedNative(context)||this.workspace.uncertainOutcome(scope)||this.workspace.checkoutReferenced(context)||!await this.neverStartedOrClosed(context))return false;
     if(checkout.state==='verified'){await this.dropNative(scope);return true;}
     const base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8'))),observed=await this.nativeOperation(checkout,'status');
-    if(base.source!=='server'||base.version!==checkout.baseVersion||observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.recoverable!==false||observed.fileId!==checkout.fileId||
-      observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion||object(observed.saved).fingerprint!==base.fingerprint||
+    const fingerprint=observed.saved&&typeof observed.saved==='object'?(observed.saved as Record<string,unknown>).fingerprint:undefined;
+    // Ghidra reports its own open rewrite as a modification; only exact no-work bytes may carry it.
+    if(base.source!=='server'||base.version!==checkout.baseVersion||observed.state!=='ready'||observed.checkedOut!==true||observed.recoverable!==false||observed.fileId!==checkout.fileId||
+      observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion||!this.workspace.unchangedBuffers(context.target,base,fingerprint)||
+      (observed.modified!==false&&fingerprint===base.fingerprint)||typeof observed.modified!=='boolean'||
       !Array.isArray(observed.projectFiles)||observed.projectFiles.some(name=>name!==basename(checkout.path)))return false;
+    // The release accepts exactly the observed bytes, never the older receipt.
+    if(fingerprint!==object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.workingSnapshot!),'utf8'))).fingerprint){
+      const snapshot=await this.nativeReceipt(checkout,object(observed.saved));
+      this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot});
+    }
     await this.finishEmptyNative(scope);return true;
   }
   /** A missing current receipt means no worker was ever started; any other missing receipt is unproved. */
@@ -668,8 +700,9 @@ export class GhidraContexts {
     let current=this.workspace.context(scope);
     if(current.nativeCheckout?.state==='verified'){await this.dropNative(scope);current=this.workspace.context(scope);}
     if(!current.nativeCheckout||current.nativeCheckout.state==='dropped')current=await this.createNative(scope);
-    await this.privateCopy(current,current.workingSnapshot!);
-    return this.workspace.saveContext(scope,current.generation,{state:'ready'});
+    // A first open may replace the receipt; only that write advances the expected generation.
+    const started=await this.privateCopy(current,current.workingSnapshot!);
+    return this.workspace.saveContext(scope,started?.generation??current.generation,{state:'ready'});
   }
 
   private async retireUnresponsive(scope:Scope,binding:ProcessBinding,error:unknown):Promise<boolean>{

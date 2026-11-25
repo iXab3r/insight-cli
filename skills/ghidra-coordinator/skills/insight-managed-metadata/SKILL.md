@@ -3,7 +3,7 @@ name: insight-managed-metadata
 description: Query managed assembly metadata, MethodDef tokens, P/Invoke declarations and bounded IL, or compare two C#/.NET assemblies through insight-cli ilspy query/compare. Use for structured static evidence and changed-method research without executing the target.
 ---
 
-# Insight Managed Metadata 0.6.4
+# Insight Managed Metadata 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

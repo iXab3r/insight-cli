@@ -3,7 +3,7 @@ name: insight-sevenzip
 description: Inventory, integrity-check and recover files from archives and supported containers with insight-cli 7-Zip, then hand recovered binaries or configuration to the appropriate research tool.
 ---
 
-# Insight 7-Zip 0.6.4
+# Insight 7-Zip 0.6.5
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized
