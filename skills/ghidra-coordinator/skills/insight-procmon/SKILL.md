@@ -3,7 +3,7 @@ name: insight-procmon
 description: Observe actual file and registry access by an authorized running Windows process through insight-cli procmon. Use when static paths or configuration guesses need runtime evidence; inspect retained captures without collecting again.
 ---
 
-# Insight ProcMon 0.6.2
+# Insight ProcMon 0.6.3
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

@@ -3,7 +3,7 @@ name: insight-dotnet-stack
 description: Inspect live managed thread stacks to identify active or waiting work in an explicitly selected .NET process without taking a dump.
 ---
 
-# Insight .NET Stack 0.6.2
+# Insight .NET Stack 0.6.3
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

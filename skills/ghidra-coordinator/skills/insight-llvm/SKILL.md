@@ -3,7 +3,7 @@ name: insight-llvm
 description: Inspect PE, ELF and Mach-O headers, dependencies, exports and symbols; query PDB debug information or a small instruction window with insight-cli LLVM utilities before opening a full analysis project.
 ---
 
-# Insight LLVM 0.6.2
+# Insight LLVM 0.6.3
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

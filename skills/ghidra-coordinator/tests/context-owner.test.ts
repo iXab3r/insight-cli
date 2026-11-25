@@ -228,3 +228,33 @@ test('an interrupted snapshot publication is established by readback only',async
  assert.deepEqual(await backend.recover(publication),{state:'unknown'});value={...value,ownedCheckoutReleased:true};
  assert.deepEqual(await backend.recover(publication),{state:'verified',revision:3,snapshot});assert.equal(calls[0]![3],2);
 });
+
+test('a worker that failed to finish starting does not block its context; live, foreign or ambiguous receipts still do',async t=>{
+ const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace'),scope={session:'session',target:'target'};
+ const root=join(directory,'ghidra-native','context','context-id','stage');await mkdir(root,{recursive:true});
+ const context={id:'context-id',generation:0,workingSnapshot:{fixture:true},nativeCheckout:{state:'active',root}};
+ const base={root,kind:'context',context:context.id,target:scope.target,session:scope.session,mode:'headless',program:'/target.bin',runtimeFingerprint:'runtime'};
+ const old={...base,pid:123456789,tokenSecret:'context-'+randomUUID(),endpoint:'http://127.0.0.1:1',baseRevision:2,viewEpoch:0};
+ const started={...base,pid:123456788,tokenSecret:'context-'+randomUUID(),endpoint:'http://127.0.0.1:2'};
+ let copied=0;const deleted:string[]=[];
+ const workspace={directory,context:()=>context,target:()=>({id:'target'}),unresolved:()=>[],model:()=>({sharedRevision:2}),saveContext:()=>context} as unknown as Workspace;
+ const backend=new GhidraContexts(workspace,{fingerprint:'runtime'} as NativeInputs,
+  {appArguments:{AppDataDirectory:f.root},secrets:{delete:async(name:string)=>{deleted.push(name);}}} as unknown as CommandContext);
+ Object.assign(backend,{privateCopy:async()=>{copied++;}});
+ const write=async(current:unknown,process:unknown,stopped?:unknown)=>{await writeFile(join(root,'..','current.json'),JSON.stringify(current));
+  await writeFile(join(root,'process.json'),JSON.stringify(process));await writeFile(join(root,'stopped.json'),JSON.stringify(stopped??{pid:1,tokenSecret:'none'}));};
+ const bytes=JSON.stringify(old);
+ await write(old,started,{pid:started.pid,tokenSecret:started.tokenSecret,reason:'startup_failed'});
+ assert.equal(await backend.closed(scope),true);await (backend as any).inventory();
+ await backend.open(scope);assert.equal(copied,1);assert.deepEqual(deleted,[started.tokenSecret]);
+ assert.equal(await readFile(join(root,'..','current.json'),'utf8'),bytes);
+ await write(old,started);assert.equal(await backend.closed(scope),true,'owner died before the stop receipt');
+ const live={...started,pid:process.pid};await write(old,live);
+ assert.equal(await backend.closed(scope),false);await assert.rejects(backend.open(scope),/not finished starting/);await (backend as any).inventory();
+ assert.equal((backend as any).capacity.slots.has(context.id),true);
+ for(const changed of [{target:'foreign'},{context:'foreign'},{session:'foreign'},{program:'/other.bin'},{kind:'shared'},{root:directory},{tokenSecret:old.tokenSecret}]){
+  await write(old,{...started,...changed},{pid:started.pid,tokenSecret:started.tokenSecret});await assert.rejects(backend.closed(scope),/receipt changed/,JSON.stringify(changed));
+ }
+ await write({...old,pid:process.pid},started,{pid:started.pid,tokenSecret:started.tokenSecret});await assert.rejects(backend.closed(scope),/receipt changed/,'the older worker may be alive');
+ assert.equal(copied,1);
+});

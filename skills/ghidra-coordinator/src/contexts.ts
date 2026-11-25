@@ -597,8 +597,8 @@ export class GhidraContexts {
     const context=this.workspace.context(scope),target=this.workspace.target(scope.target);
     if(this.workspace.unresolved(scope).some(intent=>intent.id!==request&&intent.operation!=='ghidra.open'))
       fail('blocked','This context retains an unresolved operation; reconcile its recorded outcome before continuing.');
-    let binding: ProcessBinding|undefined;
-    try {binding=JSON.parse(await readFile(join(this.directory(),'context',context.id,'current.json'),'utf8'));}
+    let binding: ProcessBinding|undefined,unfinished=false;
+    try {({binding,unfinished}=await this.lastWorker(context.id));}
     catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     let stopped=false;
     if(binding) {
@@ -608,11 +608,12 @@ export class GhidraContexts {
       } catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     }
     if(context.workingSnapshot&&!context.nativeCheckout)fail('migration','This context contains legacy detached work; run ghidra migrate --target '+scope.target+' --dry-run, then ghidra migrate --target '+scope.target+'. Its data is retained.');
-    if(binding&&!stopped&&alive(binding.pid)&&((binding.viewEpoch??0)!==(context.viewEpoch??0)||
+    if(binding&&unfinished&&!stopped&&alive(binding.pid)&&!await this.retiredWorker(binding))fail('busy','A worker of this context has not finished starting; it is retained.');
+    if(binding&&!unfinished&&!stopped&&alive(binding.pid)&&((binding.viewEpoch??0)!==(context.viewEpoch??0)||
         binding.baseRevision!==context.baseRevision&&context.baseRevision!==undefined)) {
       await this.stopRecord(await this.verified(binding,target),true,false,'view_replaced');stopped=true;
     }
-    if(binding&&!stopped&&alive(binding.pid)) {
+    if(binding&&!unfinished&&!stopped&&alive(binding.pid)) {
       if(binding.context!==context.id)fail('binding','Native process belongs to a different working context.');
       try{await this.verified(binding,target);return context;}
       catch(error){if(!await this.retireUnresponsive(scope,binding,error))throw error;stopped=true;}
@@ -620,7 +621,7 @@ export class GhidraContexts {
     if(binding?.mode==='gui')await this.debuggerReleased(binding);
     if(!context.nativeCheckout)await this.model(target);
     if(binding&&!stopped&&!alive(binding.pid))await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'stop',reason:'unknown',pid:binding.pid});
-    if(binding&&(stopped||!alive(binding.pid))){
+    if(binding&&(stopped||unfinished||!alive(binding.pid))){
       if(binding.context!==context.id||binding.target!==scope.target)fail('binding','Retired native credential belongs to another context.');
       await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive,()=>this.retiredWorker(binding));
     }
@@ -989,9 +990,25 @@ public class ${name} extends GhidraScript {
     const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
     this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record,true,true,'explicit_close');
   }
+  /**
+   * The worker that last used a context root. A start records process.json first and current.json only once its
+   * program is open, so a failed start leaves an older current receipt. It is superseded only by a receipt of the
+   * same context and root, and only after the older worker is proved gone.
+   */
+  private async lastWorker(context:string):Promise<{binding:ProcessBinding;unfinished:boolean}>{
+    const binding=JSON.parse(await readFile(join(this.directory(),'context',context,'current.json'),'utf8')) as ProcessBinding;
+    let started:ProcessBinding;
+    try{started=JSON.parse(await readFile(join(binding.root,'process.json'),'utf8'));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {binding,unfinished:false};throw error;}
+    const identity=(b:ProcessBinding)=>stable({context:b.context??null,target:b.target,session:b.session??null,kind:b.kind,root:b.root,program:b.program});
+    if(stable(started)===stable(binding)||binding.context!==context||identity(started)!==identity(binding)||
+      !Number.isSafeInteger(started.pid)||started.pid<1||!started.tokenSecret||started.tokenSecret===binding.tokenSecret||
+      alive(binding.pid)&&!await this.retiredWorker(binding))return {binding,unfinished:false};
+    return {binding:started,unfinished:true};
+  }
   async closed(scope:Scope) {
-    const context=this.workspace.context(scope),path=join(this.directory(),'context',context.id,'current.json');
-    const binding=JSON.parse(await readFile(path,'utf8')) as ProcessBinding,root=await realpath(binding.root);
+    const context=this.workspace.context(scope);
+    const {binding,unfinished}=await this.lastWorker(context.id),root=await realpath(binding.root);
     if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
@@ -1000,7 +1017,8 @@ public class ${name} extends GhidraScript {
       // evidence about this process; verify the current PID/binding independently below.
     }
     catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-    if(!alive(binding.pid))return true;
+    if(!alive(binding.pid)||unfinished&&await this.retiredWorker(binding))return true;
+    if(unfinished)return false;
     await this.verified(binding,this.workspace.target(scope.target));return false;
   }
   async latest(targetId:string):Promise<{revision:number;snapshot:Artifact}> {
@@ -1102,8 +1120,8 @@ public class ${name} extends GhidraScript {
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
     for(const entry of entries) {
       if(!entry.isDirectory())continue;
-      let binding: ProcessBinding;
-      try {binding=JSON.parse(await readFile(join(directory,entry.name,'current.json'),'utf8'));}
+      let binding: ProcessBinding,unfinished=false;
+      try {({binding,unfinished}=await this.lastWorker(entry.name));}
       catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
       if(binding.context!==entry.name||binding.kind!=='context')fail('binding','Persisted context inventory has an inconsistent receipt.');
       let stopped=false;
@@ -1112,6 +1130,8 @@ public class ${name} extends GhidraScript {
         stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
       if(!stopped&&alive(binding.pid)) {
+        // An unfinished start is never adopted; its own context reports it, others keep working.
+        if(unfinished){if(!await this.retiredWorker(binding))this.capacity.slots.add(entry.name);continue;}
         if(binding.mode==='headless'&&await this.retiredInventoryWorker(binding))continue;
         // A replacement owner must also release contexts it has not read yet.
         // PID existence alone grants no authority: authenticate the complete receipt.

@@ -3,7 +3,7 @@ name: insight-managed-heap
 description: Query structured .NET heap objects, primitive fields and managed stacks from a retained CoreCLR dump through insight-cli dotnet-dump query. Use for bounded offline dump investigation with an explicit matching DAC, preserving uncertainty and immutable input identity.
 ---
 
-# Insight Managed Heap 0.6.2
+# Insight Managed Heap 0.6.3
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

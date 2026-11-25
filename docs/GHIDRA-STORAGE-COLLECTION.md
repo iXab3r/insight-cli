@@ -40,7 +40,7 @@ The following are always retained and reported: contexts that are opening, need 
 hold unresolved or abandoned-unknown effects, debugger traces, an unverified private
 snapshot or an unfinished publication; live or unproved workers; changed ownership
 receipts; modified or conflicted checkouts; projects with additional files; links and
-unrecognized files; unrecorded captures less than a day old. Binary inputs, server repositories and their history, migration and
+unrecognized files; checkouts whose project directory is missing; unrecorded captures less than a day old. Binary inputs, server repositories and their history, migration and
 initial-import journals, receipts and logs are never collected.
 
 `bytes` counts a hard-linked file only when its last name is removed. Packed programs of
