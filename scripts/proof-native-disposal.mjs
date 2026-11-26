@@ -146,7 +146,11 @@ try{
  // Repeat the public dirty discard on one project. Ghidra preserves earlier copies and picks the next free name.
  {
   const scope=await cli(['ghidra','open','--target',a.target,'--session','new']),copies=new Map(),journals=[];
-  const original=context(scope).nativeCheckout,versions=(await native(original,'status')).versions;
+  // The CLI worker owns the project lock until discard stops it; history needs only the repository.
+  const original=context(scope).nativeCheckout,history=await server.programStatus(binding,original.path);
+  assert.equal(history.repository,binding.repository);assert.equal(history.path,original.path);assert.equal(history.checkinActive,false);
+  assert.ok(Array.isArray(history.versions)&&history.versions.length>0);const versions=history.versions;
+  events.push({repositoryHistory:history,purpose:'repeated-discard-baseline'});
   const actual=GhidraServer.prototype.nativeCheckout;let calls=0,loseReply=false,lost;
   GhidraServer.prototype.nativeCheckout=async function(...args){
    if(args[1].operation!=='discard')return Reflect.apply(actual,this,args);
