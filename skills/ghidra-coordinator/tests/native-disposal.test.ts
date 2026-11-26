@@ -198,13 +198,22 @@ for(const invalid of ['missing proof','wrong source','wrong checkout','inactive 
  await assert.rejects(research.merge(f.context,'unproved-empty'));assert.equal(updates,1);
 });
 
-for(const ownership of ['proved','unknown'] as const)test('interrupted pre-upgrade empty disposal reconciles a '+ownership+' refusal without Update/check-in replay',async t=>{
+for(const refusal of [null,undefined,'unstructured refusal'])test('an unstructured disposal failure preserves unknown safety: '+String(refusal),async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend);let updates=0;
+ f.backend.updateNative=async()=>{updates++;const c=f.workspace.context(f.context);return {state:'empty',revision:1,snapshot:c.workingSnapshot!,sharedSnapshot:c.baseSnapshot!,receivedChanges:0,nativeMergeInvocations:0};};
+ f.backend.finishEmptyNative=async()=>{throw refusal;};
+ await assert.rejects(research.merge(f.context,'unstructured-refusal'),error=>error===refusal);
+ assert.equal(f.workspace.scopedRequest(f.context,'unstructured-refusal')!.state,'unknown');
+ await assert.rejects(research.merge(f.context,'unstructured-refusal'));assert.equal(updates,1);
+});
+
+for(const savedFingerprint of [base,opened])for(const ownership of ['proved','unknown'] as const)test('interrupted pre-upgrade empty disposal reconciles a '+ownership+' refusal from '+(savedFingerprint===base?'base':'legacy opened')+' buffers without Update/check-in replay',async t=>{
  const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'legacy-empty').request;
  f.workspace.startRequest(request.id,{kind:'native-merge'});f.workspace.recordRequest(request.id,'unknown',{state:'unknown'});
- const c=f.workspace.context(f.context);f.patch({nativeCheckout:{...f.checkout,state:'verified'},workingSnapshot:c.baseSnapshot});
+ const c=f.workspace.context(f.context);f.patch({nativeCheckout:{...f.checkout,state:'verified',...(savedFingerprint===opened?{opened}:{})},workingSnapshot:c.baseSnapshot});
  const operations=join(f.checkout.root,'operations');await mkdir(operations);
- await writeFile(join(operations,request.id+'-update.json'),JSON.stringify({request:{request:request.id,root:f.checkout.root,checkoutId:f.checkout.checkoutId,owner:{}},
-  result:{state:'updated',modified:false,baseVersion:1,saved:{fingerprint:base}}}));
+ await writeFile(join(operations,request.id+'-update.json'),JSON.stringify({request:{request:request.id,root:f.checkout.root,fileId:f.checkout.fileId,checkoutId:f.checkout.checkoutId,owner:{}},
+  result:{state:'updated',modified:savedFingerprint!==base,checkoutId:f.checkout.checkoutId,baseVersion:1,saved:{fileId:f.checkout.fileId,version:1,fingerprint:savedFingerprint}}}));
  f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';if(ownership==='unknown')f.state.status={checkedOut:false};
  await assert.rejects(research.merge(f.context,'legacy-empty'));
  assert.equal(f.workspace.request(request.id).state,ownership==='proved'?'failed':'unknown');
@@ -213,4 +222,20 @@ for(const ownership of ['proved','unknown'] as const)test('interrupted pre-upgra
   await research.open(c.target,c.session,{autoAnalyze:false},'legacy-inspect');assert.equal(await f.fingerprint(),privateWork);
  }
  assert.ok(!f.calls.some(c=>['update','checkin','drop'].includes(c.operation)));
+});
+
+test('an already released legacy opened checkout completes its old empty-merge request without trusting an active opened proof',async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'legacy-released').request;
+ f.workspace.startRequest(request.id,{kind:'native-merge'});f.workspace.recordRequest(request.id,'unknown',{state:'unknown'});
+ const c=f.workspace.context(f.context);f.patch({nativeCheckout:{...f.checkout,state:'verified',opened},workingSnapshot:c.baseSnapshot});
+ const operations=join(f.checkout.root,'operations');await mkdir(operations);
+ await writeFile(join(operations,request.id+'-update.json'),JSON.stringify({request:{request:request.id,root:f.checkout.root,fileId:f.checkout.fileId,checkoutId:f.checkout.checkoutId,owner:{}},
+  result:{state:'updated',modified:true,checkoutId:f.checkout.checkoutId,baseVersion:1,saved:{fileId:f.checkout.fileId,version:1,fingerprint:opened}}}));
+ // The native boundary represents an independently established completed release receipt.
+ f.state.status={checkedOut:false};
+ const result=await research.merge(f.context,'legacy-released');assert.equal((result as {state:string}).state,'empty');
+ assert.equal(f.workspace.request(request.id).state,'applied');assert.equal(f.workspace.context(c).nativeCheckout!.state,'dropped');
+ const release=f.calls.find(call=>call.operation==='release')!;assert.equal(release.parameters.openedVerified,false);
+ assert.deepEqual(await research.merge(f.context,'legacy-released'),result);
+ assert.ok(!f.calls.some(call=>['update','checkin'].includes(call.operation)));
 });

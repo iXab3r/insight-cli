@@ -665,10 +665,13 @@ export class GhidraContexts {
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
     const q=object(journal.request),result=object(journal.result??{}),saved=object(result.saved??{}),{owner}=await this.nativeOwner(checkout);
     const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
+    // An older opened proof cannot undo a live checkout. The native release guard can still reconcile an
+    // already completed release, or independently establish that the original checkout survived refusal.
+    const pendingOpened=typeof checkout.opened==='string'&&/^[a-f0-9]{64}$/.test(checkout.opened)&&checkout.opened===saved.fingerprint;
     if(q.request!==request||q.root!==checkout.root||q.fileId!==checkout.fileId||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||typeof result.modified!=='boolean'||
       result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||
       shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId||shared.origin!==checkout.origin||shared.repository!==checkout.repository||
-      !this.workspace.unchangedBuffers(context.target,shared,saved.fingerprint))return {state:'unknown' as const};
+      !this.workspace.unchangedBuffers(context.target,shared,saved.fingerprint)&&!pendingOpened)return {state:'unknown' as const};
     await this.dropNative(scope);return {state:'verified' as const,revision:checkout.baseVersion};
   }
   async discardNative(scope:Scope,request:string){

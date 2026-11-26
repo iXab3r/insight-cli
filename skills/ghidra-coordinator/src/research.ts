@@ -114,6 +114,7 @@ export class Research {
   constructor(readonly workspace: Workspace, private readonly backend: ()=>Promise<ResearchBackend>,
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
   private retainedDisposal(selected:Scope,error:unknown){
+    if(!error||typeof error!=='object')return;
     const failure=error as {code?:string;result?:{state?:string;retention?:{schema?:number;source?:string;checkout?:unknown}}},proof=failure.result?.retention,current=this.workspace.context(selected);
     if(failure.code==='coordinator.conflict'&&failure.result?.state==='retained'&&proof?.schema===1&&proof.source==='native-release-status'&&
       proof.checkout&&current.nativeCheckout?.state==='active'&&digest(proof.checkout)===digest(current.nativeCheckout))return failure.result;

@@ -20,7 +20,7 @@ const applyUpdate=(GhidraContexts.prototype as unknown as {
 async function fixture(t:test.TestContext){
  const f=await createCliFixture(t,{applicationId:'insight-cli',profiles:[{name:'default',permissions:['ReadOnly','Update']}]});
  let workspace!:Workspace,backend!:GhidraContexts,checkoutId=0;
- const state={fingerprint:opened,modified:true,revision:1,updateState:'updated',updates:0,publications:0,saves:0,opens:0,releases:0,drops:0,failCleanup:''};
+ const state={fingerprint:opened,modified:true,checkedOut:true,revision:1,updateState:'updated',updates:0,publications:0,saves:0,opens:0,releases:0,drops:0,failCleanup:''};
  const bases=new Map([[1,base]]),beforePublication:NativeCheckout[]=[],releaseParameters:Record<string,unknown>[]=[];
  const receipt=async(value:unknown)=>{const path=join(f.root,randomUUID()+'.json');await writeFile(path,JSON.stringify(value));return workspace.captureNative(path);};
  const owner=(checkout:NativeCheckout)=>({context:checkout.context,origin,repository,path:checkout.path});
@@ -28,7 +28,8 @@ async function fixture(t:test.TestContext){
  const reference=async(target:string,version=1,fingerprint=opened,patch:Record<string,unknown>={})=>{
   const root=join(workspace.directory,'ghidra-native','shared-views',target,'opened');await mkdir(root,{recursive:true});
   const path=join(root,'v'+version+'-'+fingerprint+'.json');
-  await writeFile(path,JSON.stringify({schema:1,target,origin,repository,version,fileId,base:bases.get(version),opened:fingerprint,...patch}));return path;
+  await writeFile(path,JSON.stringify({schema:2,target,origin,repository,version,fileId,base:bases.get(version),opened:fingerprint,
+   preOpen:{fingerprint:bases.get(version),fileId,checkoutId,baseVersion:version},...patch}));return path;
  };
  const serverView=async(target:string,version=state.revision)=>{
   assert.ok(bases.has(version),'The exact native server version must exist');
@@ -42,7 +43,7 @@ async function fixture(t:test.TestContext){
    open:async(scope:Scope,request?:string)=>{
     if(workspace.unresolved(scope).some(q=>q.id!==request))throw Error('Unresolved native fixture intent');
     let c=workspace.context(scope);if(c.nativeCheckout?.state==='active')return c;
-    state.opens++;
+    state.opens++;state.checkedOut=true;
     const checkout:NativeCheckout={schema:1,context:c.id,root:join(workspace.directory,'ghidra-native','context',c.id,'owned-'+(++checkoutId)),fileId,checkoutId,
      baseVersion:state.revision,origin,repository,path:'/'+scope.target+'.bin',runtimeFingerprint:'e'.repeat(64),state:'active'};
     await mkdir(checkout.root,{recursive:true});const shared=await serverView(scope.target);
@@ -62,10 +63,10 @@ async function fixture(t:test.TestContext){
     return applyUpdate.call(backend,scope,request,result,checkout.baseVersion);
    },
    nativeOperation:async(checkout:NativeCheckout,operation:string,parameters:Record<string,unknown>)=>{
-    if(operation==='status')return {state:'ready',checkedOut:true,modified:state.modified,recoverable:false,fileId,checkoutId:checkout.checkoutId,baseVersion:state.revision,
+    if(operation==='status')return {state:'ready',checkedOut:state.checkedOut,modified:state.modified,recoverable:false,fileId,checkoutId:checkout.checkoutId,baseVersion:state.revision,
      saved:{...saved(checkout),version:state.revision},projectFiles:[checkout.path.slice(1)]};
     assert.ok(['release','drop'].includes(operation),'No native check-in may bypass the publication boundary');
-    if(operation==='release'){state.releases++;releaseParameters.push(parameters);}else state.drops++;
+    if(operation==='release'){state.releases++;releaseParameters.push(parameters);state.checkedOut=false;}else state.drops++;
     if(state.failCleanup===operation){state.failCleanup='';throw Error('Lost native '+operation+' acknowledgment');}
     return {state:operation==='release'?'released':'dropped'};
    },
