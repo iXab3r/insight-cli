@@ -7,6 +7,12 @@ without importing a snapshot or silently receiving a newer shared version. Priva
 have no publisher credentials; service-only Update/check-in temporarily owns the stopped project.
 Legacy detached contexts require explicit migration and remain retained.
 
+If final checkout release refuses, saved private work remains retained. When the service
+independently proves that the same checkout survived, reopen the same selectors to inspect
+it. An empty merge can finish as failed/retained; an already published request keeps its
+verified result. An unproved release or check-in outcome stays blocked for journal-based
+recovery. Preserve its project and receipts rather than repeating a mutation with a new ID.
+
 If native `changes discard` loses its response, retry its original request ID or continue
 the same session/target. Recovery requires a completed native discard journal and matching
 new checkout identity/base and saved buffers, followed by independent server readback.

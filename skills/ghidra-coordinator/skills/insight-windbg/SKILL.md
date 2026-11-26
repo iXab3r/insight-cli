@@ -3,7 +3,7 @@ name: insight-windbg
 description: Investigate Windows native user-mode minidumps using bounded stacks, threads, registers, modules, memory and disassembly through insight-cli windbg. Use on Windows x64 when a captured runtime state needs native debugger evidence.
 ---
 
-# Insight WinDbg 0.6.5
+# Insight WinDbg 0.6.6
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized
