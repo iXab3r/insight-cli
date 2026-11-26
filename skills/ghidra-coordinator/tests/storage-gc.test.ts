@@ -52,6 +52,40 @@ test('hard links are counted only when their last name is removed',async t=>{
  const f=await fixture(t);await f.stage(f.context);const planned=await collectStorage(f.workspace,f.port,true);
  assert.equal(planned.categories['duplicate-exports']!.bytes,'duplicate'.length);
 });
+
+test('a missing recorded native root does not block an independent legacy project or closed peer input',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),other=f.open(),gone=join(f.workspace.directory,'ghidra-native','context',other.id,'gone');
+ f.workspace.saveContext(other,other.generation,{nativeCheckout:{schema:1,context:other.id,root:gone,fileId:'file',checkoutId:1,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+f.target.id+'.bin',runtimeFingerprint:'a'.repeat(64),state:'dropped'}});
+ const name='__insight_peer_'+randomUUID().replaceAll('-',''),peer=join(root,'cross-peer',name);await mkdir(peer,{recursive:true});
+ await link(await f.workspace.artifacts.verify(f.working),join(peer,'input.gzf'));
+ await writeFile(join(peer,'receipt.json'),JSON.stringify({context:f.context.id,target:f.target.id,path:'/'+name,state:'closed'}));
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(peer,'input.gzf')));
+ await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(peer,'input.gzf')),false);assert.equal(await exists(join(root,'view.rep')),false);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);assert.deepEqual(f.released,[]);
+});
+
+for(const file of ['view.rep','view.gpr'])test('failed '+file+' removal retains the capture proof until a successful retry',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),project=join(root,file),saved=join(root,'saved.gzf'),fs=(await import('node:fs/promises')).default;
+ const {syncBuiltinESMExports}=await import('node:module'),original=fs.rm,originalUnlink=fs.unlink;
+ const mocked=t.mock.method(fs,'rm',async(...args:Parameters<typeof fs.rm>)=>{if(args[0]===project)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(original,fs,args);});
+ const mockedUnlink=t.mock.method(fs,'unlink',async(...args:Parameters<typeof fs.unlink>)=>{if(args[0]===project)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(originalUnlink,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();});
+ const first=await collectStorage(f.workspace,f.port,false);assert.ok(first.retained.some(r=>r.path===project&&r.reason.includes('EBUSY')));
+ assert.ok(await exists(project));assert.equal(await readFile(saved,'utf8'),'working');await f.workspace.artifacts.verify(f.working);
+ mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(saved));
+ const retried=await collectStorage(f.workspace,f.port,false);assert.deepEqual(retried.categories,planned.categories);assert.equal(retried.bytes,planned.bytes);
+ assert.equal(await exists(project),false);assert.equal(await exists(saved),false);assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+});
+
+test('completed explicit legacy discard authorizes its proved stopped project without saved.gzf',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context);await rm(join(root,'saved.gzf'));
+ const r=f.workspace.reserveRequest(f.context,'ghidra.changes.discard-legacy',{}).request;f.workspace.startRequest(r.id);
+ f.workspace.discardLegacy(f.context,r.id,f.workspace.context(f.context).generation,{state:'discarded'});
+ assert.equal(f.workspace.legacyDiscarded(f.workspace.context(f.context)),true);
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(root,'view.rep')));
+ await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(root,'view.rep')),false);assert.deepEqual(f.released,[]);
+});
 const uncertain:Record<string,(f:Awaited<ReturnType<typeof fixture>>)=>Promise<void>>={
  'unresolved operation':async f=>{await request(f,'unknown',f.working,{state:'unknown'});},
  'abandoned unknown effect':async f=>{await request(f,'failed',f.working,{outcome:'unknown'});},

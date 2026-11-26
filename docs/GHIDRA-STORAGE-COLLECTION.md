@@ -53,7 +53,7 @@ continues safely because every decision is recomputed from retained state.
 | Snapshot and native receipt artifacts | No live row, unfinished/failed request, reported result, unverified publication, retained native project or version-tracking owner needs them; unverifiable native metadata stays retained |
 | `saved.gzf`, `exports/saved-*`, `shared`, `recovered`, captured explicit-export stages | Owned stopped root; the captured artifact is the durable copy. Candidate roots also require every context of their target to be settled |
 | Completed `cross-peer/*/input.gzf` comparison inputs | Owned stopped root, matching closed stage receipt and recognized inventory, with no unresolved operation owning the input or referencing that checkout. Ownership receipts and journals stay retained |
-| Detached `view.rep`/`view.gpr` projects | Positively identified legacy worker bound to that root, matching stop receipt (a GUI root only after an explicit close), one imported program and `saved.gzf` matching a verified full snapshot; migration uses its original full snapshot |
+| Detached `view.rep`/`view.gpr` projects | Positively identified legacy worker bound to that root, matching stop receipt (a GUI root only after an explicit close), one imported program and `saved.gzf` matching a verified full snapshot; migration uses its original full snapshot. A completed explicit legacy discard authorizes cleanup without that capture |
 | Ghidra `*.cache` files | Owned stopped root or completed server helper |
 
 An applied request keeps its inputs and results; its superseded before-image is not a

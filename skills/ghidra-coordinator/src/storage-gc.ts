@@ -191,8 +191,13 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
           const creation=kind==='context'?await json(creationPath):undefined;
           const creationPresent=kind==='context'&&Boolean(await present(creationPath));
           const creationRoot=creation?.root;
-          const recordedNative=!ownerPresent&&(nativeRoots.has(root)||[...nativeRoots].some(named=>sameDirectory(named,root))||typeof creationRoot==='string'&&(creationRoot===root||sameDirectory(creationRoot,root)));
-          if(!ownerPresent&&(recordedNative||(creationPresent&&typeof creationRoot!=='string')||unverifiedNativeReceipt)){
+          let locatorUnverified=false;
+          const locators=[...nativeRoots,...(typeof creationRoot==='string'?[creationRoot]:[])];
+          const recordedNative=!ownerPresent&&locators.some(named=>{
+            if(named===root)return true;
+            try{return sameDirectory(named,root);}catch(error){if(!missing(error))locatorUnverified=true;return false;}
+          });
+          if(!ownerPresent&&(recordedNative||locatorUnverified||(creationPresent&&typeof creationRoot!=='string')||unverifiedNativeReceipt)){
             projectOwnershipReason='Native checkout or creation ownership is missing or unverifiable; detached cleanup is not authorized.';
           }
           worker=await json(join(root,'process.json'));nativeRoot=ownerPresent;
@@ -222,9 +227,9 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         // Closed peer exports have their own complete ownership proof, independent of project disposal.
         if(projectOwnershipReason){keep(root,projectOwnershipReason);continue;}
         const given=kind==='context'&&discarded.has(owner);
-        const candidates=given?artifacts.filter(a=>a.kind==='snapshot'):kind==='context'?captured.get(owner)??[]:[...(targetCaptures.get(owner)??[])];
+        const candidates=kind==='context'?captured.get(owner)??[]:[...(targetCaptures.get(owner)??[])];
         if(kind!=='context')try{const shared=workspace.model(owner).sharedSnapshot;if(shared?.kind==='snapshot')candidates.push(shared);}catch{/* Unknown model roots cannot supply capture proof. */}
-        if(!nativeRoot&&(worker?.program!=='program'||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!await detachedCapture(workspace,root,candidates))){
+        if(!nativeRoot&&(worker?.program!=='program'||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!given&&!await detachedCapture(workspace,root,candidates))){
           keep(root,'Project has no verified full detached program capture; native JSON receipts do not contain program bytes.');continue;
         }
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
@@ -234,12 +239,14 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
           continue;
         }
         for(const file of await files(join(root,'exports')))if(exportName.test(file))await remove(join(root,'exports',file),'duplicate-exports');
-        await remove(join(root,'saved.gzf'),'duplicate-exports');
         // Facade edits are captured as they complete; a GUI save is captured only by an explicit close.
         const stop=worker&&await stopReceipt(root,worker);
         if(!given&&(!stop||worker?.mode!=='headless'&&stop.reason!=='explicit_close')){keep(join(root,'view.rep'),'Project has no clean stop receipt that proves capture.');continue;}
         if(!await soleProgram(root)){keep(join(root,'view.rep'),'Project holds additional files.');continue;}
-        for(const file of ['view.rep','view.gpr','view.lock','view.lock~'])await remove(join(root,file),'detached-projects');
+        const projectFiles=['view.rep','view.gpr','view.lock','view.lock~'];
+        for(const file of projectFiles)await remove(join(root,file),'detached-projects');
+        // Keep the capture proof until every project removal succeeds, so a sharing violation is retryable.
+        if(dryRun||!(await Promise.all(projectFiles.map(file=>present(join(root,file))))).some(Boolean))await remove(join(root,'saved.gzf'),'duplicate-exports');
       }
     }
   }
