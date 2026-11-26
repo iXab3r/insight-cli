@@ -104,6 +104,30 @@ try{
  await cli(['ghidra','open',...select(a)]);assert.equal((await cli(['ghidra','comments','get',...select(a),'--address','1000','--kind','eol'])).text,null);
  assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');checks.discardEmptyMergeAndReopen=true;
  await app.dispose();app=f.createApplication(runtime=>createInsightCli({runtime}));binding=await server.ensure();workspace=new Workspace(ws,'default');
+ // Missing native ownership is not permission to delete a saved private project as detached.
+ const gcScope=await cli(['ghidra','open','--target',a.target,'--session','new']);
+ await cli(['ghidra','comments','set',...select(gcScope),'--address','1002','--kind','eol','--text','PRIVATE_GC_OWNER_LOSS']);
+ assert.equal((await cli(['ghidra','close',...select(gcScope)])).checkout,'retained');
+ const gcCheckout=context(gcScope).nativeCheckout,gcBefore=await native(gcCheckout,'status');
+ const ownerPath=join(gcCheckout.root,'native-owner.json'),heldOwner=ownerPath+'.fixture-held',ownerBytes=await readFile(ownerPath);
+ const actualCheckout=GhidraServer.prototype.nativeCheckout;let gcReleases=0;
+ GhidraServer.prototype.nativeCheckout=async function(...args){if(['release','drop'].includes(args[1].operation))gcReleases++;return Reflect.apply(actualCheckout,this,args);};
+ await rename(await owned(ownerPath),heldOwner);
+ try{
+  for(const dry of [true,false,false]){
+   const result=await cli(['ghidra','gc',...(dry?['--dry-run']:[])]);
+   assert.ok((await readdir(gcCheckout.root)).includes('view.rep'));
+   assert.equal(context(gcScope).nativeCheckout.checkoutId,gcCheckout.checkoutId);
+   assert.equal(context(gcScope).nativeCheckout.state,'active');
+   assert.ok(result.retained.some(row=>row.path===gcCheckout.root&&/native.*(?:owner|ownership)/i.test(row.reason)));
+   assert.equal(result.categories['detached-projects'],undefined);assert.equal(gcReleases,0);
+   assert.deepEqual(await readFile(heldOwner),ownerBytes);
+  }
+ }finally{GhidraServer.prototype.nativeCheckout=actualCheckout;await rename(heldOwner,ownerPath);}
+ assert.equal((await native(gcCheckout,'status')).saved.fingerprint,gcBefore.saved.fingerprint);
+ await cli(['ghidra','open',...select(gcScope)]);
+ assert.equal((await cli(['ghidra','comments','get',...select(gcScope),'--address','1002','--kind','eol'])).text,'PRIVATE_GC_OWNER_LOSS');
+ assert.equal((await cli(['ghidra','close',...select(gcScope)])).checkout,'retained');checks.missingNativeOwnerGcRetained=true;
  classes=await nativeHelpers(ws,inputs,c);compileRoot=join(f.root,'fixture-classes');await mkdir(compileRoot);
  const source=fileURLToPath(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url));
  const javac=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':''));
