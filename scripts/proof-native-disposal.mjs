@@ -39,14 +39,14 @@ async function native(checkout,operation,parameters={}){
  events.push({native:operation,root:checkout.root,parameters,result});return result;
 }
 let classes,compileRoot;
-async function mutate(checkout,operation){
+async function mutate(checkout,operation,parameters={}){
  const call=join(f.root,'mutation-'+randomUUID());await mkdir(call);await owned(checkout.root);
- const q=join(call,'request.json');await writeFile(q,JSON.stringify({root:checkout.root,owner:JSON.parse(await readFile(join(checkout.root,'native-owner.json')))}));
+ const q=join(call,'request.json');await writeFile(q,JSON.stringify({root:checkout.root,owner:JSON.parse(await readFile(join(checkout.root,'native-owner.json'))),fileId:checkout.fileId,checkoutId:checkout.checkoutId,...parameters}));
  const args=['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,...nativeJvmDirectories(call),'-cp',compileRoot+delimiter+classes+delimiter+inputs.classpath,'NativeDisposalFixture',operation,q];
  await exec(inputs.java,await javaClasspathArguments(call,'ghidra',inputs.java,args),{env:{...process.env,...await server.credentials(binding,'publisher')},windowsHide:true,timeout:60000,maxBuffer:1024*1024});
 }
 async function directCheckout(target){
- const reservation=workspace.reserveOpen(target,'new',{autoAnalyze:false});workspace.recordRequest(reservation.request.id,'failed',{state:'fixture_control'});
+ const reservation=workspace.reserveOpen(target,'new',workspace.model(target).settings);workspace.recordRequest(reservation.request.id,'failed',{state:'fixture_control'});
  return (await new GhidraContexts(workspace,inputs,c,undefined,undefined,server).createNative(reservation.context)).nativeCheckout;
 }
 try{
@@ -113,6 +113,24 @@ try{
  const kept={...keepCheckout,checkoutId:discard.checkoutId,baseVersion:discard.baseVersion};await mutate(kept,'edit-backup');
  assert.equal((await native(kept,'release',{verifiedVersion:kept.baseVersion,fingerprint:discard.saved.fingerprint})).state,'unknown');
  assert.equal((await native(kept,'status')).checkedOut,true);checks.changedNativeBackupRetained=true;
+ // Stop at the real server-termination/local-deletion boundary, retaining the native file as hijacked.
+ for(const fault of ['none','edit','nested','legacy-intent']){
+  const checkout=await directCheckout(a.target),before=await native(checkout,'status'),proof={verifiedVersion:checkout.baseVersion,fingerprint:before.saved.fingerprint};
+  await mutate(checkout,'interrupt-release',proof);
+  const interrupted=await native(checkout,'status');assert.equal(interrupted.checkedOut,false);assert.ok(interrupted.projectFiles.includes(checkout.path.slice(1)));
+  assert.equal(interrupted.saved.fingerprint,before.saved.fingerprint);assert.equal(interrupted.fileId,checkout.fileId);
+  if(fault==='legacy-intent'){
+   const path=join(checkout.root,'released.json'),intent=JSON.parse(await readFile(path));delete intent.fileId;delete intent.savedFingerprint;await writeFile(path,JSON.stringify(intent));
+  }else if(fault!=='none')await mutate(checkout,fault);
+  const result=await native(checkout,'release',proof);
+  if(fault==='none'){
+   assert.equal(result.state,'released');assert.equal((await native(checkout,'drop',proof)).state,'dropped');assert.ok(!(await readdir(checkout.root)).includes('view.rep'));
+  }else{
+   assert.equal(result.state,'unknown');assert.ok((await readdir(checkout.root)).includes('view.rep'));
+   assert.equal(JSON.parse(await readFile(join(checkout.root,'released.json'))).state,'release_intent');
+  }
+  checks['interruptedUndo-'+fault]=true;
+ }
  // Both completed legacy release and interrupted legacy intent recover without undoing an unrelated checkout.
  for(const legacy of ['released','release_intent']){
   const checkout=await directCheckout(a.target),status=await native(checkout,'status'),proof={verifiedVersion:checkout.baseVersion,fingerprint:status.saved.fingerprint};

@@ -23,6 +23,19 @@ public final class NativeDisposalFixture {
         JsonObject base=q.deepCopy();base.remove("opened");InsightNativeCheckout.require(!InsightNativeCheckout.sameRelease(current,base),"Opened proof fell back to base");
         current.addProperty("savedFingerprint","base");InsightNativeCheckout.require(InsightNativeCheckout.sameRelease(current,base),"Base proof rejected");
         current.remove("fileId");InsightNativeCheckout.require(!InsightNativeCheckout.sameRelease(current,base),"Incomplete new receipt accepted as legacy");
+        JsonObject intent=legacy.deepCopy();intent.addProperty("state","release_intent");intent.addProperty("fileId","file");intent.addProperty("savedFingerprint","opened");
+        var surviving=Map.<String,Object>of("fileId","file","fingerprint","opened");
+        InsightNativeCheckout.require(InsightNativeCheckout.survivingRelease(intent,q,surviving),"Exact interrupted-undo file rejected");
+        for(String key:List.of("fileId","fingerprint")){
+            var changed=new HashMap<>(surviving);changed.put(key,"other");
+            InsightNativeCheckout.require(!InsightNativeCheckout.survivingRelease(intent,q,changed),"Surviving file accepted changed "+key);
+        }
+        for(String key:List.of("fileId","savedFingerprint")){
+            JsonObject incomplete=intent.deepCopy();incomplete.remove(key);
+            InsightNativeCheckout.require(!InsightNativeCheckout.survivingRelease(incomplete,q,surviving),"Legacy intent authorized surviving bytes");
+        }
+        JsonObject completed=intent.deepCopy();completed.addProperty("state","released");
+        InsightNativeCheckout.require(!InsightNativeCheckout.survivingRelease(completed,q,surviving),"A non-intent authorized surviving bytes");
         JsonObject backup=JsonParser.parseString("{before:{fingerprint:'original'},backupAbsent:true,backupExpected:true,result:{disposableBackups:{'program.keep':{schema:1,fileId:'created',fingerprint:'saveAs-bytes'}}}}").getAsJsonObject();
         var actual=Map.<String,Object>of("fileId","created","fingerprint","saveAs-bytes");
         InsightNativeCheckout.require(InsightNativeCheckout.backupMatches(backup,"program.keep",actual),"Dirty Update saveAs backup rejected");
@@ -48,6 +61,23 @@ public final class NativeDisposalFixture {
         var server=new GhidraServerManager();server.connect();var repository=server.server().getRepository(owner.get("repository").getAsString());repository.connect();
         var project=new InsightNativeCheckout.Projects().openProject(new ProjectLocator(root.toString(),"view"),false,false);
         String path=owner.get("path").getAsString();DomainFile file=project.getProjectData().getFile(args[0].equals("edit-backup")?path+".keep":path);
+        if(args[0].equals("interrupt-release")){
+            try{
+                var checkout=file.getCheckoutStatus();
+                InsightNativeCheckout.require(file.isCheckedOut()&&file.getFileID().equals(q.get("fileId").getAsString())&&checkout.getCheckoutId()==q.get("checkoutId").getAsLong()&&
+                    checkout.getCheckoutVersion()==q.get("verifiedVersion").getAsInt()&&!file.canRecover(),"Fixture release identity changed");
+                InsightNativeCheckout.require(InsightNativeCheckout.saved(file,owner).get("fingerprint").equals(InsightNativeCheckout.authorized(q)),"Fixture release bytes changed");
+                var release=new LinkedHashMap<String,Object>();release.put("state","release_intent");release.put("checkoutId",checkout.getCheckoutId());
+                release.put("version",checkout.getCheckoutVersion());release.put("fileId",file.getFileID());release.put("fingerprint",q.get("fingerprint").getAsString());
+                release.put("savedFingerprint",InsightNativeCheckout.authorized(q));
+                release.put("disposableBackups",InsightNativeCheckout.releaseFiles(project,root.resolve("operations"),q,owner,true));
+                InsightNativeCheckout.write(root.resolve("released.json"),release);
+                // The same server-only effect as undoCheckout, deliberately omitting its following local deletion.
+                file.terminateCheckout(checkout.getCheckoutId());
+                InsightNativeCheckout.require(Arrays.stream(repository.getCheckouts("/",file.getName())).noneMatch(item->item.getCheckoutId()==checkout.getCheckoutId()),"Fixture checkout remains");
+            }finally{project.close();repository.disconnect();server.disconnect();}
+            System.out.println("DISPOSABLE_RELEASE_INTERRUPTED");System.exit(0);return;
+        }
         ProgramDB program=(ProgramDB)file.getDomainObject(InsightNativeCheckout.CONSUMER,false,false,InsightNativeCheckout.MONITOR);
         try{
             if(args[0].equals("edit")||args[0].equals("edit-backup")){

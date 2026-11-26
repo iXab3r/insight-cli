@@ -67,6 +67,11 @@ public final class InsightNativeCheckout {
         if(!receipt.has("savedFingerprint")&&!receipt.has("fileId"))return true;
         return Objects.equals(receipt.get("fileId"),q.get("fileId"))&&Objects.equals(receipt.get("savedFingerprint"),new JsonPrimitive(authorized(q)));
     }
+    /** A new intent can prove the local file left between server termination and native undo's local deletion. */
+    static boolean survivingRelease(JsonObject receipt,JsonObject q,Map<String,Object> saved){
+        return receipt.has("fileId")&&receipt.has("savedFingerprint")&&Objects.equals(receipt.get("state"),new JsonPrimitive("release_intent"))&&sameRelease(receipt,q)&&
+            Objects.equals(saved.get("fileId"),text(receipt,"fileId"))&&Objects.equals(saved.get("fingerprint"),text(receipt,"savedFingerprint"));
+    }
     static boolean backupMatches(JsonObject journal,String name,Map<String,Object> saved){
         JsonObject files=journal.getAsJsonObject("result").getAsJsonObject("disposableBackups");
         if(files==null||!files.has(name))return false;
@@ -101,10 +106,10 @@ public final class InsightNativeCheckout {
         }
         return proved;
     }
-    static Map<String,String> releaseFiles(Project project,Path operations,JsonObject q,JsonObject owner,boolean checkedOut)throws Exception {
+    static Map<String,String> releaseFiles(Project project,Path operations,JsonObject q,JsonObject owner,boolean localProgram)throws Exception {
         var files=new TreeSet<String>();local(project.getProjectData().getRootFolder(),files);
         Map<String,String> backups=backups(project,operations,q,owner);var allowed=new TreeSet<>(backups.keySet());
-        if(checkedOut)allowed.add(text(owner,"path").substring(1));
+        if(localProgram)allowed.add(text(owner,"path").substring(1));
         require(files.equals(allowed),"Unpublished native project files must be retained");return backups;
     }
     static boolean released(Path root,JsonObject q)throws Exception {
@@ -274,8 +279,10 @@ public final class InsightNativeCheckout {
                     release.put("state","release_intent");write(releaseFile,release);file.undoCheckout(false);
                 }else{
                     var prior=JsonParser.parseString(Files.readString(releaseFile)).getAsJsonObject();
-                    require(sameRelease(prior,q),"Release intent changed");
-                    release.put("disposableBackups",releaseFiles(project,operations,q,owner,false));
+                    require(text(prior,"state").equals("release_intent")&&sameRelease(prior,q),"Release intent changed");
+                    boolean surviving=file.isHijacked();
+                    if(surviving)require(!file.canRecover()&&survivingRelease(prior,q,saved(file,owner)),"Unproved surviving native file must be retained");
+                    release.put("disposableBackups",releaseFiles(project,operations,q,owner,surviving));
                 }
                 require(Arrays.stream(repository.getCheckouts("/",name)).noneMatch(c->c.getCheckoutId()==q.get("checkoutId").getAsLong()),"Owned checkout remains");
                 release.put("state","released");write(releaseFile,release);out.put("state","released");
