@@ -139,9 +139,10 @@ Unsupported platforms fail explicitly and may use compatible external profile pa
 acceptance for this delivery is macOS ARM64; catalog availability is not Windows/Linux native proof.
 
 The host provides Node/npm, OS frameworks, display/keychain access and debugger authorization.
-macOS LLDB and its embedded Python come from Apple's developer tools; they are OS prerequisites,
-not downloaded third-party Python dependencies. `doctor` reports a missing host debugger as a partial
-failure even when static analysis/server pass. No root installation, developer-tools installer,
+On macOS 15+ ARM64 the managed debugger below supplies private LLDB/Python; Apple developer
+tools are not prerequisites for that backend. Other macOS system-debugger routes use LLDB and
+its Python from Apple's developer tools. `doctor` probes the selected backend and can report
+partial debugger failure while static analysis/server pass. No root installation, developer-tools installer,
 Gatekeeper disabling, shell-profile edit or global Java/Python selection is performed. Ghidra GUI
 agents receive private copies of the Ghidra SDK's pinned debugger Python wheels.
 

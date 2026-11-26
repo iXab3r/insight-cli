@@ -37,9 +37,14 @@ Codex is the first concrete supported-host gate.
 
 ## Execution access
 
-A skill link does not grant filesystem or IPC permissions. Allow the assigned profile's AppData
-and the CLI's `.runtime` directory, plus its exact local IPC endpoint. On macOS the application
-root is `~/Library/Application Support/insight-cli`; its Unix socket is `.runtime/host.sock`.
+A skill link does not grant filesystem or IPC permissions. Run
+`insight-cli --profile <name> storage show --json` through the selected executable to inspect
+the assigned profile. Allow its Factory
+`appData` control location and its effective analysis `directory`, which may be elsewhere after
+storage configuration, migration or installation-default selection. Follow the
+[storage workflow](storage.md) for retained compatibility paths. Also allow the CLI's `.runtime`
+directory and exact local IPC endpoint. On macOS the application root is
+`~/Library/Application Support/insight-cli`; its Unix socket is `.runtime/host.sock`.
 Keep unrelated profiles outside the write scope and pass the assigned `--profile` explicitly.
 Do not grant broad external network access merely to reach a local socket.
 

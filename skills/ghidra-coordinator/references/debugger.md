@@ -29,7 +29,7 @@ packed-database readback before acknowledgment. Reopening after process replacem
 saved trace data as disconnected. It does not restart the debuggee or reconstruct CPU execution.
 Ordinary static program edits remain private and retain the usual merge/refresh behavior.
 Static breakpoint bookmarks created by debugger actions also count as pending program changes.
-They follow explicit merge/refresh and complex-change conflict rules; CPU execution does not
+They follow native merge/refresh and its conflict handling; CPU execution does not
 wait for publication, and publishing a program never resumes another session's process.
 
 On macOS, launch enforces the selected working directory, including paths with spaces and
@@ -37,9 +37,11 @@ quotes. A GUI backend crash ends the owned live debuggee through its debugger co
 Verified trace data retained before a lost action response is adopted on disconnected continuation,
 unless a later observation already saved a newer view. The CPU action itself remains uncertain.
 
-On macOS, use an installed local LLDB and an executable supported by that host. GUI startup
+On macOS 15+ ARM64, GUI uses the private LLDB/Python dependency described in
+[managed runtime](managed-runtime.md#managed-debugger-dependency). Other macOS routes use a
+compatible local LLDB and Python; select an executable supported by that host. GUI startup
 prepares the Python wheels already supplied with Ghidra in owned storage; it does not install
-packages into system Python. A launcher's optional Python executable and Windows debugger
+packages into system Python. System-backend Python overrides and the Windows debugger
 directory are Factory profile settings. Native Windows/Linux acceptance remains deferred.
 
 Use generated help for exact flags. A retained static breakpoint bookmark may remain after its live trace placement is
