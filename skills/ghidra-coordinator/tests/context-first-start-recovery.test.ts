@@ -79,3 +79,22 @@ test('a ready pointer delegates to full closed validation; nested missing eviden
   await assert.rejects((backend as any).neverStartedOrClosed(f.workspace.context(f.scope)),{code:'ENOENT'});
   assert.deepEqual(f.deleted,[]);assert.equal(f.calls.length,0);
 });
+
+for(const change of [
+  {name:'foreign program',patch:{program:'/foreign.bin'}},
+  {name:'legacy program in a native checkout',patch:{program:'/program'}},
+  {name:'remote endpoint',patch:{endpoint:'http://remote.invalid:19091'}},
+  {name:'missing mode',patch:{mode:undefined}},
+  {name:'missing runtime',patch:{runtimeFingerprint:undefined}},
+])test('an ended ready worker with '+change.name+' cannot authorize continuation',async t=>{
+  const f=await recoveryFixture(t),binding={...f.processBinding(await endedPid()),...change.patch},backend=f.backend();
+  const path=join(f.checkout.root,'process.json'),ready=join(f.checkout.root,'..','current.json'),bytes=JSON.stringify(binding);
+  await writeFile(path,bytes);await writeFile(ready,bytes);
+  await writeFile(join(f.checkout.root,'stopped.json'),JSON.stringify({pid:binding.pid,tokenSecret:binding.tokenSecret}));
+  let launches=0;Object.assign(backend,{privateCopy:async()=>{launches++;throw Error('Unproved replacement reached');}});
+  await assert.rejects(backend.open(f.scope),/receipt changed/);await assert.rejects(backend.closed(f.scope),/receipt changed/);
+  await assert.rejects((backend as any).neverStartedOrClosed(f.workspace.context(f.scope)),/receipt changed/);
+  await assert.rejects((backend as any).inventory(),/receipt changed/);
+  assert.equal(launches,0);assert.deepEqual(f.deleted,[]);assert.deepEqual(f.calls,[]);
+  assert.equal(await readFile(path,'utf8'),bytes);assert.equal(await readFile(ready,'utf8'),bytes);
+});

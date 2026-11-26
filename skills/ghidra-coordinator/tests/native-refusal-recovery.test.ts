@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {Research} from '../src/research.js';
+import {fail} from '../src/model.js';
 import {recoveryFixture} from './scoped-recovery-fixture.js';
 
 async function refusalFixture(t:test.TestContext){
@@ -33,6 +34,41 @@ test('lost pre-call refusal settles request/publication/model after restart and 
   // A different intentional request is admitted to Update; this boundary creates no native work.
   Object.assign(backend,{updateNative:async()=>({state:'conflict',revision:1,conflict:'Fresh Update admitted'})});
   await assert.rejects(research.merge(f.scope,'fresh-intent'),/Native conflict/);assert.equal(w.scopedRequest(f.scope,'fresh-intent')!.state,'failed');
+});
+
+test('lost refusal recovers when the native reader throws its missing-marker error',async t=>{
+  const f=await refusalFixture(t),before=f.workspace.context(f.scope),journal=await readFile(f.path,'utf8');
+  const read=f.server.nativeRead.bind(f.server);
+  f.server.nativeRead=async(binding,request)=>{
+    const value=await read(binding,request);
+    // InsightNativeRead emits unknown + reason; GhidraServer.run transports it as this CliError.
+    if(request.operation==='verify')fail('unknown','Native history marker is unresolved',{diagnostic:'IllegalStateException'});
+    return value;
+  };
+  const backend=f.backend();await new Research(f.workspace,async()=>backend).reconcileRequests(f.scope,backend);
+  assert.equal(f.workspace.request(f.q.id).state,'failed');assert.equal(f.workspace.publication(f.q.id).state,'conflict');
+  assert.equal(f.workspace.model(f.scope.target).state,'ready');assert.deepEqual(f.workspace.context(f.scope),before);
+  assert.equal(await readFile(f.path,'utf8'),journal);assert.ok(f.calls.every(q=>!['checkin','discard','release','drop'].includes(String(q.operation))));
+});
+
+for(const control of [
+  {name:'unrelated unknown reason',code:'unknown',message:'Native item is absent or busy',diagnostic:'IllegalStateException'},
+  {name:'different native diagnostic',code:'unknown',message:'Native history marker is unresolved',diagnostic:'SecurityException'},
+  {name:'missing native diagnostic',code:'unknown',message:'Native history marker is unresolved',diagnostic:undefined},
+  {name:'transport failure',code:'transport',message:'Native history marker is unresolved',diagnostic:'IllegalStateException'},
+  {name:'migration requirement',code:'migration',message:'Native history marker is unresolved',diagnostic:'IllegalStateException'},
+])test('refusal recovery preserves '+control.name+' as unknown',async t=>{
+  const f=await refusalFixture(t),before=f.workspace.context(f.scope),read=f.server.nativeRead.bind(f.server);
+  f.server.nativeRead=async(binding,request)=>{
+    const value=await read(binding,request);
+    if(request.operation==='verify')fail(control.code,control.message,{diagnostic:control.diagnostic});
+    return value;
+  };
+  const backend=f.backend();await assert.rejects(new Research(f.workspace,async()=>backend).reconcileRequests(f.scope,backend),
+    (error:any)=>error.code==='coordinator.'+control.code&&error.message===control.message);
+  assert.equal(f.workspace.request(f.q.id).state,'unknown');assert.equal(f.workspace.publication(f.q.id).state,'unknown');
+  assert.equal(f.workspace.model(f.scope.target).state,'unknown');assert.deepEqual(f.workspace.context(f.scope),before);
+  assert.deepEqual(f.calls.map(q=>q.operation),['verify']);
 });
 
 const journalControls:Record<string,(j:any)=>void>={

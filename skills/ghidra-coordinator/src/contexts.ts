@@ -727,7 +727,7 @@ export class GhidraContexts {
       fail('blocked','This context retains an unresolved operation; reconcile its recorded outcome before continuing.');
     let binding: ProcessBinding|undefined,unfinished=false;
     ({binding,unfinished}=await this.lastWorker(context.id,{...context,...scope}));
-    if(binding)await this.workerReceipt(binding,context.id,scope);
+    if(binding)await this.workerReceipt(binding,context.id,{...context,...scope});
     let stopped=false;
     if(binding) {
       try {
@@ -1152,10 +1152,23 @@ public class ${name} extends GhidraScript {
     const directory=join(binding.root,'worker-history');await mkdir(directory,{recursive:true,mode:0o700});
     await durable(join(directory,digest(binding)+'.json'),{schema:1,process:processReceipt,...(stopped?{stopped}:{})});
   }
-  private async workerReceipt(binding:ProcessBinding,context:string,scope?:Scope){
+  private workerShape(binding:ProcessBinding,context:string,scope?:Scope){
+    let endpoint:URL;try{endpoint=new URL(binding.endpoint);}catch{fail('binding','Context process receipt changed.');}
+    let checkout=(scope as Partial<GhidraContext>|undefined)?.nativeCheckout;
+    if(!scope)try{checkout=this.workspace.contextById?.(context)?.nativeCheckout;}
+    catch(error){if((error as {code?:string}).code!=='coordinator.notFound')throw error;}
+    const program=checkout?binding.program===checkout.path:
+      binding.program==='program'||binding.program==='/program'||binding.program===programPath(binding.target);
     if(!Number.isSafeInteger(binding.pid)||binding.pid<1||binding.kind!=='context'||binding.context!==context||
-      typeof binding.root!=='string'||!binding.tokenSecret||scope&&(binding.target!==scope.target||binding.session!==undefined&&binding.session!==scope.session))
+      typeof binding.root!=='string'||typeof binding.target!=='string'||!binding.target||!program||
+      !['headless','gui'].includes(binding.mode)||typeof binding.runtimeFingerprint!=='string'||!binding.runtimeFingerprint||
+      !/^context-[a-f0-9-]{36}$/.test(binding.tokenSecret)||endpoint.protocol!=='http:'||endpoint.hostname!=='127.0.0.1'||!endpoint.port||
+      endpoint.username||endpoint.password||endpoint.pathname!=='/'||endpoint.search||endpoint.hash||
+      scope&&(binding.target!==scope.target||binding.session!==undefined&&binding.session!==scope.session))
       fail('binding','Context process receipt changed.');
+  }
+  private async workerReceipt(binding:ProcessBinding,context:string,scope?:Scope){
+    this.workerShape(binding,context,scope);
     const root=await realpath(binding.root);
     if(!ownedDirectory(root,this.directory(),['context',context,basename(root)])||(await lstat(join(root,'process.json'))).isSymbolicLink()||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Context process receipt changed.');
@@ -1167,8 +1180,7 @@ public class ${name} extends GhidraScript {
     let binding:ProcessBinding|undefined;
     try{binding=object(JSON.parse(await readFile(join(parent,'current.json'),'utf8'))) as unknown as ProcessBinding;}
     catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-    if(binding&&(typeof binding.root!=='string'||binding.kind!=='context'||binding.context!==context||
-      !Number.isSafeInteger(binding.pid)||binding.pid<1||!binding.tokenSecret))fail('binding','Context process receipt changed.');
+    if(binding)this.workerShape(binding,context,scope);
     let entries;
     try{entries=await readdir(parent,{withFileTypes:true});}
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT'&&!binding)return {unfinished:false};throw error;}
@@ -1183,10 +1195,6 @@ public class ${name} extends GhidraScript {
       // Validate even ended historical roots. A foreign or unreadable receipt proves no absence.
       if(typeof started.root!=='string'||!sameDirectory(started.root,root))fail('binding','Context process receipt changed.');
       await this.workerReceipt(started,context,scope);
-      let endpoint:URL;try{endpoint=new URL(started.endpoint);}catch{fail('binding','Context process receipt changed.');}
-      if(!['headless','gui'].includes(started.mode)||typeof started.runtimeFingerprint!=='string'||!started.runtimeFingerprint||
-        !/^context-[a-f0-9-]{36}$/.test(started.tokenSecret)||endpoint.protocol!=='http:'||endpoint.hostname!=='127.0.0.1'||!endpoint.port||
-        endpoint.username||endpoint.password||endpoint.pathname!=='/'||endpoint.search||endpoint.hash)fail('binding','Context process receipt changed.');
       candidates.push(started);
     }
     if(candidates.length){
@@ -1218,7 +1226,7 @@ public class ${name} extends GhidraScript {
     const context=this.workspace.context(scope);
     const {binding,unfinished}=await this.lastWorker(context.id,{...context,...scope});
     if(!binding)return true;
-    await this.workerReceipt(binding,context.id,scope);const root=await realpath(binding.root);
+    await this.workerReceipt(binding,context.id,{...context,...scope});const root=await realpath(binding.root);
     if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
@@ -1278,8 +1286,16 @@ public class ${name} extends GhidraScript {
     const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(publication.snapshot),'utf8'))),checkout=object(saved.checkout) as unknown as NativeCheckout;
     if(saved.engine!==this.nativeEngine||saved.source!=='checkout')return {state:'unknown'};
     const {binding}=await this.nativeOwner(checkout),target=this.workspace.target(publication.target),revisionNumber=publication.expectedRevision+1;
-    const value=await this.server().nativeRead(binding,{operation:'verify',path:checkout.path,sourceSha:target.binarySha256,fileId:checkout.fileId,
-      version:revisionNumber,marker:'insight native '+publication.id,fingerprint:saved.fingerprint});
+    let value:Record<string,unknown>;
+    try{value=await this.server().nativeRead(binding,{operation:'verify',path:checkout.path,sourceSha:target.binarySha256,fileId:checkout.fileId,
+      version:revisionNumber,marker:'insight native '+publication.id,fingerprint:saved.fingerprint});}
+    catch(error){
+      const failure=error as {code?:string;message?:string;result?:{diagnostic?:string}};
+      // The native reader transports a missing success marker as an error. Its negative
+      // completion still needs every independent refusal proof below; other failures propagate.
+      if(failure.code!=='coordinator.unknown'||failure.message!=='Native history marker is unresolved'||failure.result?.diagnostic!=='IllegalStateException')throw error;
+      return this.recoverNativeRefusal(publication,checkout,saved);
+    }
     if(value.state!=='verified'||value.version!==revisionNumber)return this.recoverNativeRefusal(publication,checkout,saved);
     const shared=await this.serverView(publication.target,revisionNumber);
     if(object(shared.value).fingerprint!==saved.fingerprint)return {state:'unknown'};

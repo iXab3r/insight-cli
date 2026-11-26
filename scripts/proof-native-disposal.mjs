@@ -380,18 +380,32 @@ try{
  assert.ok((await readdir(checkout.root)).includes('view.rep'));assert.equal((await native(checkout,'drop',proof)).state,'dropped');checks.changedReleaseProofRefused=true;
 }catch(error){primaryFailure=error;throw error;}finally{
  const teardown=[],failures=[];
- async function attempt(stage,action){try{await action();teardown.push({stage,state:'completed'});}catch(error){failures.push(error);teardown.push({stage,state:'failed',reason:String(error.message??error)});}}
+ async function attempt(stage,action){try{await action();teardown.push({stage,state:'completed'});return true;}catch(error){failures.push(error);teardown.push({stage,state:'failed',reason:String(error.message??error)});return false;}}
  if(workspace)await attempt('workspace-close',()=>workspace.close());else teardown.push({stage:'workspace-close',state:'not-created'});
  await attempt('application-dispose',()=>app.dispose());await attempt('server-stop',()=>server.stop());
- const receipt={schema:1,scope:'focused disposable native first-open, repeated discard identity/recovery, release and Update backup safety',root:f.root,checks,events,teardown,
+ const fingerprints={};
+ for(const [key,url] of [
+  ['sourceSha256',new URL('../skills/ghidra-coordinator/references/native/InsightNativeCheckout.java',import.meta.url)],
+  ['fixtureSha256',new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url)],
+  ['proofSha256',new URL('./proof-native-disposal.mjs',import.meta.url)]
+ ])await attempt('hash-'+key,async()=>{fingerprints[key]=createHash('sha256').update(await readFile(url)).digest('hex');});
+ const fixtureResults=join(f.root,'native-disposal-results.json'),outputResults=join(options['output-base'],'native-disposal-results.json');
+ const receipt={schema:1,terminal:true,scope:'focused disposable native first-open, repeated discard identity/recovery, release and Update backup safety',root:f.root,checks,events,teardown,
   state:primaryFailure||failures.length?'failed':'passed',
+  ...(primaryFailure?{failure:{code:primaryFailure.code??null,message:String(primaryFailure.message??primaryFailure)}}:{}),
   runtimeFingerprint:inputs.fingerprint,ghidraVersion:inputs.ghidraVersion,
-  sourceSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/references/native/InsightNativeCheckout.java',import.meta.url))).digest('hex'),
-  fixtureSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url))).digest('hex'),
-  proofSha256:createHash('sha256').update(await readFile(new URL('./proof-native-disposal.mjs',import.meta.url))).digest('hex'),
+  ...fingerprints,
   limits:['Default backend CLI first-open/discard recovery, direct native Update/backup and final-release faults; no concurrent race scheduling or installed-package proof']};
- await attempt('write-fixture-receipt',()=>writeFile(join(f.root,'native-disposal-results.json'),JSON.stringify(receipt,null,2)));
- await attempt('write-output-receipt',()=>writeFile(join(options['output-base'],'native-disposal-results.json'),JSON.stringify(receipt,null,2)));
- console.log(JSON.stringify({root:f.root,state:receipt.state,checks,teardown,results:join(f.root,'native-disposal-results.json')}));
+ // Publish a nonterminal snapshot first, then the authoritative fixture receipt last.
+ // A failed final write can leave only pending/failed evidence, never a passed receipt.
+ await attempt('write-output-receipt',()=>writeFile(outputResults,JSON.stringify({...receipt,terminal:false,
+  state:receipt.state==='failed'?'failed':'pending',finalResults:fixtureResults},null,2)));
+ receipt.state=primaryFailure||failures.length?'failed':'passed';
+ const written=await attempt('write-fixture-receipt',()=>writeFile(fixtureResults,JSON.stringify(receipt,null,2)));
+ if(!written){
+  receipt.state='failed';
+  await attempt('write-output-failure',()=>writeFile(outputResults,JSON.stringify({...receipt,terminal:false,finalResults:fixtureResults},null,2)));
+ }
+ console.log(JSON.stringify({root:f.root,state:receipt.state,checks,teardown,results:fixtureResults}));
  if(failures.length&&!primaryFailure)throw new AggregateError(failures,'Disposable proof teardown or receipt persistence failed');
 }
