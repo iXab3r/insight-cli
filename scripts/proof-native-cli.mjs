@@ -103,6 +103,7 @@ const cleanupContext={appArguments:f.appArguments,profile:{name:'default',values
  secrets:new ProfileSecrets(installedSecrets??f.secretStore,'insight-cli','default'),progress(){}};
 try{
  const input=join(f.root,'fixture.bin');await writeFile(input,Buffer.alloc(0x400,0xc3));
+ const inputSha256=hash(await readFile(input));
  const a=await cli(['ghidra','open',input,'--session','new','--loader','ghidra.app.util.opinion.BinaryLoader','--language','x86:LE:64:default','--image-base','1000','--loader-options','{"Base Address":"0"}']);
  await script(a,baseCode);assert.equal((await cli(['ghidra','merge',...select(a)])).sharedRevision,'R2');
  await cli(['ghidra','open',...select(a)]);
@@ -131,6 +132,7 @@ try{
  assert.equal(publishedDouble.name,'actor_1');assert.equal(publishedDouble.signature,'double actor_1(void)');
  const server=new GhidraServer(workspace,await nativeInputs(values),cleanupContext),binding=await server.ensure();
  const sourceSha=JSON.parse(await readFile(join(beforeA.root,'native-owner.json'))).sourceSha;
+ assert.equal(sourceSha,inputSha256);
  const authoritative=await server.nativeRead(binding,{operation:'latest',path:'/'+a.target+'.bin',sourceSha});
  assert.equal(authoritative.state,'verified');assert.equal(authoritative.version,4);
  for(let i=0;i<2;i++)for(const [name,exists]of [['Created'+i,true],['Obsolete'+i,false],['Record'+i,true]]){
@@ -232,6 +234,7 @@ try{
  const serverCheckouts=async()=>(await server.nativeRead(binding,{operation:'latest',path:'/'+a.target+'.bin',sourceSha})).checkouts.map(c=>c.id);
  // A shared repository lists every target; another target's server item is not local work.
  const otherInput=join(f.root,'other.bin');await writeFile(otherInput,Buffer.alloc(0x200,0x90));
+ const otherInputSha256=hash(await readFile(otherInput));
  const other=await cli(['ghidra','open',otherInput,'--session','new','--loader','ghidra.app.util.opinion.BinaryLoader','--language','x86:LE:64:default','--image-base','1000','--loader-options','{"Base Address":"0"}']);
  // First import prepares the shared base; the default open requests no private analysis.
  assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'released');await cli(['ghidra','open',...select(other)]);await cli(['ghidra','merge',...select(other)]);
@@ -260,6 +263,7 @@ try{
  await cli(['ghidra','open',...select(g)]);assert.equal((await cli(['ghidra','functions','get',...select(g),'--address','1000'])).name,'first_conflict');
  assert.equal((await cli(['ghidra','close',...select(g)])).checkout,'released');
  const collection={planned,collected};
+ assert.equal(hash(await readFile(input)),inputSha256);assert.equal(hash(await readFile(otherInput)),otherInputSha256);
  for(const [path,expected]of Object.entries(sourceHashes))assert.equal(hash(await readFile(path.startsWith('../scripts/')?new URL('./'+path.slice('../scripts/'.length),import.meta.url):join(sourceRoot,path))),expected,'Source changed during acceptance');
  receipt={schema:1,scope:options['global-entry']?'Actual global CLI entrypoint with isolated environment/profile':'main Factory CLI with default production backend',installedIpc:options.installed===true,
   globallyInstalledCli:!!options['global-entry'],runtimeArgumentsInjected:options.installed===true&&!options['global-entry'],...(options['global-entry']?{globalVersion:JSON.parse(await readFile(join(installation,'package.json'))).version}:{}),
@@ -269,7 +273,7 @@ try{
   nativeConflictPreservesProjectCheckoutAndBase:true,conflictingPublicationRefused:true,repeatedPublicationCycles:true,...(lostReply?{lostReply}:{}),
   explicitNativeDiscardVerified:true,...(discardLostReply?{discardLostReply}:{}),afterSaveWithoutCliDiagnosticsVerified:true,closeAfterDisposalAllocatesNothing:true,remainingNativeProjects:remainingProjects,remainingServerCheckouts:final.checkouts,
   ordinaryRuntimeRoles:roles,legacyRuntimeRolesAbsentBeforeExplicitExport:true,explicitPackedExportVerified:true,workingViewRemainsNativeAfterExport:true,
-  pristineFirstImportReleased:true,unchangedCloseReleased:true,abandonedCheckoutCollected:true,collection,
+  pristineFirstImportReleased:true,unchangedCloseReleased:true,abandonedCheckoutCollected:true,collection,sourceInputsPreserved:true,sourceInputSha256:inputSha256,
   runtimeFingerprint:runtimeBefore.fingerprint,runtimeJarCount:runtimeBefore.jars.length,installedRuntimeUnchanged:true,
   nativeContextBeforeRestart:savedB.nativeCheckout,engine:'ghidra-native',limitations:['Disposable raw binary fixture; no arbitrary-native-change or hostile-same-user sandbox guarantee']};
 }catch(error){console.error('Main CLI fixture retained:',f.root);throw error;}
