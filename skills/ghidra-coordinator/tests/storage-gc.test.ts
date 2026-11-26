@@ -161,6 +161,42 @@ test('historical native receipts survive GC and prevent later detached deletion 
  assert.deepEqual(f.released,[]);
 });
 
+for(const outcome of ['released','retained','unreadable'] as const)test('native receipt liveness follows completed project disposal: '+outcome,async t=>{
+ const f=await fixture(t),c=f.open(),root=join(f.workspace.directory,'ghidra-native','context',c.id,'w-owned');
+ await mkdir(join(root,'view.rep'),{recursive:true});await writeFile(join(root,'view.rep','db.gbf'),'owned native bytes');
+ await writeFile(join(root,'view.gpr'),'project');await writeFile(join(root,'native-owner.json'),'{}');
+ const checkout={schema:1 as const,context:c.id,root,fileId:'file',checkoutId:3,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+c.target+'.bin',runtimeFingerprint:'a'.repeat(64),state:'active' as const};
+ const receipt=async(value:unknown)=>{const path=join(f.root,randomUUID());await writeFile(path,JSON.stringify(value));return f.workspace.captureNative(path);};
+ const base=await receipt({source:'server',version:1,fingerprint:'a'.repeat(64)});
+ const saved=await receipt({source:'checkout',checkout,fingerprint:'a'.repeat(64)}),historical=await receipt({source:'checkout',checkout,fingerprint:'b'.repeat(64)});
+ f.workspace.saveContext(c,c.generation,{baseSnapshot:base,workingSnapshot:saved,nativeCheckout:checkout});
+ let disposed=false,releases=0;
+ const fs=(await import('node:fs/promises')).default,{syncBuiltinESMExports}=await import('node:module'),original=fs.lstat;
+ const mocked=t.mock.method(fs,'lstat',(...args:Parameters<typeof fs.lstat>)=>{
+  if(outcome==='unreadable'&&disposed&&args[0]===join(root,'view.rep'))throw Object.assign(Error('fixture inventory unavailable'),{code:'EACCES'});
+  return Reflect.apply(original,fs,args);
+ });syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();syncBuiltinESMExports();});
+ f.port.release=async current=>{
+  releases++;if(outcome==='retained')return false;
+  await rm(join(root,'view.rep'),{recursive:true});await rm(join(root,'view.gpr'));
+  const fresh=f.workspace.context(current);f.workspace.saveContext(fresh,fresh.generation,{nativeCheckout:{...checkout,state:'dropped'},workingSnapshot:undefined});disposed=true;return true;
+ };
+ await collectStorage(f.workspace,f.port,true);assert.equal(releases,0);await f.workspace.artifacts.verify(saved);await f.workspace.artifacts.verify(historical);
+ const first=await collectStorage(f.workspace,f.port,false);
+ if(outcome==='released'){
+  for(const artifact of [saved,historical])assert.equal(await exists(f.workspace.artifacts.path(artifact)),false);
+  assert.equal(first.categories['unreferenced-snapshots']!.bytes,saved.size+historical.size);
+ }else{
+  await f.workspace.artifacts.verify(saved);await f.workspace.artifacts.verify(historical);
+  if(outcome==='unreadable')assert.ok(first.retained.some(r=>r.path===root&&r.reason.includes('inventory could not be verified')));
+ }
+ mocked.mock.restore();syncBuiltinESMExports();
+ const again=await collectStorage(f.workspace,f.port,false);
+ assert.equal(again.bytes,outcome==='unreadable'?saved.size+historical.size:0);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+ await f.workspace.artifacts.verify(base);await f.workspace.artifacts.verify(f.target.input);
+});
+
 for(const invalid of ['malformed','directory'])test('unverifiable native ownership is retained before native release: '+invalid,async t=>{
  const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root,path=join(root,'native-owner.json');
  await rm(path);if(invalid==='directory')await mkdir(path);else await writeFile(path,'{invalid');

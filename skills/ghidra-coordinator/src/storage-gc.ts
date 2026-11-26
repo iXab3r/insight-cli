@@ -108,7 +108,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
 
   // A context participates only when nothing about its private state is uncertain.
   const contexts=workspace.allContexts(),safe=new Set<string>(),blockedTargets=new Set<string>(),unsettled=new Set<string>();
-  const nativeRoots=new Set(contexts.flatMap(c=>c.nativeCheckout?[c.nativeCheckout.root]:[])),artifacts=workspace.allArtifacts(),nativeEvidence=new Set<string>();
+  const nativeRoots=new Set(contexts.flatMap(c=>c.nativeCheckout?[c.nativeCheckout.root]:[])),artifacts=workspace.allArtifacts(),nativeEvidence=new Set<string>(),nativeProjects=new Map<string,string>();
   let unverifiedNativeReceipt=false;
   for(const artifact of artifacts)if(artifact.kind==='native')try{
     const view=await json(await workspace.artifacts.verify(artifact));
@@ -116,8 +116,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     else if(view.source==='checkout'){
       const checkout=view.checkout as {root?:unknown}|undefined;
       if(typeof checkout?.root==='string'){
-        nativeRoots.add(checkout.root);
-        if(await present(join(checkout.root,'view.rep'))||await present(join(checkout.root,'view.gpr')))nativeEvidence.add(artifact.id);
+        nativeRoots.add(checkout.root);nativeProjects.set(artifact.id,checkout.root);
       }else{unverifiedNativeReceipt=true;nativeEvidence.add(artifact.id);}
     }
   }catch{unverifiedNativeReceipt=true;nativeEvidence.add(artifact.id);}
@@ -259,6 +258,12 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
 
   // Roots are live rows, unfinished or failed intents, every user-visible result and VT owners.
   const roots=workspace.artifactRoots();for(const id of nativeEvidence)roots.add(id);
+  // Native release above can remove a project and its live context reference in this same pass.
+  for(const [id,root] of nativeProjects)try{
+    if(await present(join(root,'view.rep'))||await present(join(root,'view.gpr')))roots.add(id);
+  }catch{
+    roots.add(id);keep(root,'Native project inventory could not be verified; its receipt is retained.');
+  }
   // Migration journals keep identity, not artifact liveness. A retained saved.gzf still needs its
   // canonical verification copy for the next collection attempt, even after the context migrated.
   for(const kind of ['context','shared','candidate'] as const)for(const owner of await directories(join(native,kind))){
