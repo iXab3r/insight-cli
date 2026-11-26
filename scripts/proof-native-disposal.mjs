@@ -76,9 +76,10 @@ try{
  classes=await nativeHelpers(ws,inputs,c);compileRoot=join(f.root,'fixture-classes');await mkdir(compileRoot);
  const source=fileURLToPath(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url));
  const javac=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':''));
- await exec(javac,await javaClasspathArguments(compileRoot,'ghidra',javac,['-proc:none','-cp',classes+delimiter+inputs.classpath,'-d',compileRoot,source]),{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+ const compileCall=join(f.root,'fixture-compile'),receiptCall=join(f.root,'fixture-receipts');await mkdir(compileCall);await mkdir(receiptCall);
+ await exec(javac,await javaClasspathArguments(compileCall,'ghidra',javac,['-proc:none','-cp',classes+delimiter+inputs.classpath,'-d',compileRoot,source]),{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
  const receiptArgs=['-cp',compileRoot+delimiter+classes+delimiter+inputs.classpath,'NativeDisposalFixture','receipts'];
- assert.match((await exec(inputs.java,await javaClasspathArguments(compileRoot,'ghidra',inputs.java,receiptArgs),{windowsHide:true})).stdout,/RELEASE_RECEIPTS_VERIFIED/);
+ assert.match((await exec(inputs.java,await javaClasspathArguments(receiptCall,'ghidra',inputs.java,receiptArgs),{windowsHide:true})).stdout,/RELEASE_RECEIPTS_VERIFIED/);
  checks.exactAndLegacyReleaseReceipts=true;
  for(const mutation of ['base-fallback','edit','nested','backup']){
   const checkout=await directCheckout(a.target),status=await native(checkout,'status');assert.equal(status.modified,false);
