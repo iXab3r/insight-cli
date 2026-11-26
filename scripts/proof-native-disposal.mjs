@@ -69,7 +69,12 @@ async function incoming(target,address,text){
 async function dirtyBackup(target,kind){
  const original=await directCheckout(target);await mutate(original,'edit',{address:'1004',text:'BACKUP_'+kind});
  const request='q_'+randomUUID(),discard=await native(original,'discard',{request});assert.equal(discard.state,'discarded');
- const checkout={...original,checkoutId:discard.checkoutId,baseVersion:discard.baseVersion};
+ assert.notEqual(discard.checkoutId,original.checkoutId);
+ const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server),scope=workspace.contextById(original.context);
+ await backend.applyNativeDiscard(scope,discard);
+ const checkout=workspace.context(scope).nativeCheckout;
+ assert.equal(checkout.root,original.root);assert.equal(checkout.fileId,original.fileId);
+ assert.equal(checkout.checkoutId,discard.checkoutId);assert.equal(checkout.baseVersion,discard.baseVersion);
  const path=join(checkout.root,'operations',request+'-discard.json'),journal=JSON.parse(await readFile(path)),backup=await inspectBackup(checkout);
  assert.equal(backup.comments['1004'],'BACKUP_'+kind);assert.equal(backup.memory,'90'.repeat(512));
  assert.equal(backup.fileId,journal.result.disposableBackups[target+'.bin.keep'].fileId);
