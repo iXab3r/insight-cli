@@ -95,14 +95,15 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
   const id=randomUUID(),receipt=join(workspace.directory,'gc',id+'.json'),startedAt=new Date().toISOString();
   if(!dryRun){await mkdir(join(workspace.directory,'gc'),{recursive:true,mode:0o700});await durable(receipt,{schema:1,id,state:'started',startedAt});}
   const keep=(path:string,reason:string)=>{retained.push({path,reason});};
-  async function remove(path:string,category:string):Promise<void>{
-    const st=await present(path);if(!st)return;
-    if(st.isSymbolicLink()||!st.isFile()&&!st.isDirectory())return keep(path,'Links and special entries are never removed.');
+  async function remove(path:string,category:string):Promise<boolean>{
+    const st=await present(path);if(!st)return true;
+    if(st.isSymbolicLink()||!st.isFile()&&!st.isDirectory()){keep(path,'Links and special entries are never removed.');return false;}
     const sizes=new Reclaimed();await sizes.add(path,category);
     if(!dryRun)try{if(st.isDirectory())await rm(path,{recursive:true,maxRetries:3});else await unlink(path);}
-      catch(error){return keep(path,'Removal failed: '+String((error as NodeJS.ErrnoException).code));}
+      catch(error){keep(path,'Removal failed: '+String((error as NodeJS.ErrnoException).code));return false;}
     reclaimed.include(sizes);
     (categories[category]??={items:0,bytes:0}).items++;
+    return true;
   }
 
   // A context participates only when nothing about its private state is uncertain.
@@ -232,24 +233,22 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         if(!nativeRoot&&(worker?.program!=='program'||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!given&&!await detachedCapture(workspace,root,candidates))){
           keep(root,'Project has no verified full detached program capture; native JSON receipts do not contain program bytes.');continue;
         }
-        for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
+        let cleanupComplete=true;
+        for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))cleanupComplete=await remove(join(root,'ghidra',file),'temporary-caches')&&cleanupComplete;
         if(nativeRoot){
           // The project itself belongs to its checkout lifecycle, including uncertain creations.
           for(const run of await directories(join(root,'explicit-exports')))await remove(join(root,'explicit-exports',run,'program.gzf'),'duplicate-exports');
           continue;
         }
-        for(const file of await files(join(root,'exports')))if(exportName.test(file))await remove(join(root,'exports',file),'duplicate-exports');
+        for(const file of await files(join(root,'exports')))if(exportName.test(file))cleanupComplete=await remove(join(root,'exports',file),'duplicate-exports')&&cleanupComplete;
         // Facade edits are captured as they complete; a GUI save is captured only by an explicit close.
         const stop=worker&&await stopReceipt(root,worker);
         if(!given&&(!stop||worker?.mode!=='headless'&&stop.reason!=='explicit_close')){keep(join(root,'view.rep'),'Project has no clean stop receipt that proves capture.');continue;}
         if(!await soleProgram(root)){keep(join(root,'view.rep'),'Project holds additional files.');continue;}
         const projectFiles=['view.rep','view.gpr','view.lock','view.lock~'];
-        for(const file of projectFiles)await remove(join(root,file),'detached-projects');
-        // Keep the capture proof until every project removal succeeds, so a sharing violation is retryable.
-        if(dryRun||!(await Promise.all(projectFiles.map(file=>present(join(root,file))))).some(Boolean)){
-          await remove(join(root,'saved.gzf'),'duplicate-exports');
-          if(dryRun||!await present(join(root,'saved.gzf')))disposedDetachedRoots.add(root);
-        }
+        for(const file of projectFiles)cleanupComplete=await remove(join(root,file),'detached-projects')&&cleanupComplete;
+        // Every recognized removal must succeed before its full capture proof can be forgotten.
+        if(cleanupComplete&&await remove(join(root,'saved.gzf'),'duplicate-exports'))disposedDetachedRoots.add(root);
       }
     }
   }

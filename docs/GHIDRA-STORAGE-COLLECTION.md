@@ -65,7 +65,8 @@ lifecycle. Missing or unverifiable ownership retains the project with a reason. 
 receipt describes saved buffers but cannot replace them. Closed comparison inputs retain their
 separate stage-ownership checks; project retention does not authorize deleting their evidence.
 An interrupted detached-project cleanup keeps its full capture and canonical snapshot verification
-until both the project and duplicate capture have been removed, including after migration.
+until the project, recognized duplicate exports and temporary caches have been removed,
+including after migration.
 
 The following are always retained and reported: contexts that are opening, need recovery,
 hold unresolved or abandoned-unknown effects, debugger traces, an unverified private

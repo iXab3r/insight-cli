@@ -87,8 +87,9 @@ test('completed explicit legacy discard authorizes its proved stopped project wi
  await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(root,'view.rep')),false);assert.deepEqual(f.released,[]);
 });
 
-for(const failure of ['view.rep','saved.gzf'])test('migration capture verification survives failed '+failure+' cleanup until retry completes',async t=>{
- const f=await fixture(t),root=await f.stage(f.context),failed=join(root,failure),saved=join(root,'saved.gzf'),path=join(f.root,randomUUID());
+for(const failure of ['view.rep','saved.gzf','secondary-export','temporary-cache'])test('migration capture verification survives failed '+failure+' cleanup until retry completes',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),relative=failure==='secondary-export'?join('exports',(await readdir(join(root,'exports'))).find(n=>n.endsWith('.gzf'))!):failure==='temporary-cache'?join('ghidra','ghidra1.cache'):failure;
+ const failed=join(root,relative),saved=join(root,'saved.gzf'),path=join(f.root,randomUUID());
  await writeFile(path,JSON.stringify({source:'server',fingerprint:'a'.repeat(64)}));const shared=await f.workspace.captureNative(path);f.workspace.observeShared(f.target.id,1,shared);
  const folder=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(folder,{recursive:true});
  await writeFile(join(folder,f.context.id+'-detached.json'),JSON.stringify({schema:1,original:f.context}));f.workspace.resetMigratedContext(f.context);
@@ -102,7 +103,7 @@ for(const failure of ['view.rep','saved.gzf'])test('migration capture verificati
  mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();
  const planned=await collectStorage(f.workspace,f.port,true);await f.workspace.artifacts.verify(f.working);
  const retry=await collectStorage(f.workspace,f.port,false);assert.equal(retry.bytes,planned.bytes);assert.deepEqual(retry.categories,planned.categories);
- assert.equal(await exists(join(root,'view.rep')),false);assert.equal(await exists(saved),false);assert.equal(await exists(f.workspace.artifacts.path(f.working)),false);
+ assert.equal(await exists(join(root,'view.rep')),false);assert.equal(await exists(failed),false);assert.equal(await exists(saved),false);assert.equal(await exists(f.workspace.artifacts.path(f.working)),false);
  assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);await f.workspace.artifacts.verify(shared);await f.workspace.artifacts.verify(f.target.input);
 });
 const uncertain:Record<string,(f:Awaited<ReturnType<typeof fixture>>)=>Promise<void>>={
