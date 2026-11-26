@@ -375,3 +375,28 @@ test('gc retains and reports an unreadable native-owner receipt in dry-run and e
   }finally{mock.mock.restore();syncBuiltinESMExports();}
   assert.equal(await readFile(owner,'utf8'),before);await collectStorage(f.workspace,f.port,false);assert.equal(await exists(s.input),false);
 });
+
+for(const proof of ['missing process','unreadable process','unreadable stop'] as const)test('gc retains a historical peer input with '+proof+' proof despite a stopped replacement checkout',async t=>{
+  const f=await fixture(t,false),packed=await f.snapshot('last historical source bytes'),s=await f.stage(packed);
+  const replacement=join(f.root,'..','w-replacement');await mkdir(replacement);
+  for(const name of ['process.json','stopped.json','native-owner.json'])await writeFile(join(replacement,name),await readFile(join(f.root,name)));
+  f.workspace.saveContext(f.context,f.context.generation,{nativeCheckout:{...f.context.nativeCheckout!,root:replacement}});
+  f.workspace.forgetArtifact(packed.id);await unlink(f.workspace.artifacts.path(packed));assert.equal((await lstat(s.input)).nlink,1);
+  const process=join(f.root,'process.json'),stop=join(f.root,'stopped.json');
+  if(proof==='missing process')await unlink(process);
+  const original=fs.promises.readFile,mock=proof==='missing process'?undefined:t.mock.method(fs.promises,'readFile',((path:Parameters<typeof readFile>[0],...options:unknown[])=>{
+    if(String(path)===(proof==='unreadable process'?process:stop))return Promise.reject(Object.assign(Error('injected historical worker proof read failure'),{code:'EACCES'}));
+    return Reflect.apply(original,fs.promises,[path,...options]);
+  }) as typeof readFile);syncBuiltinESMExports();
+  try{
+    for(const dry of [true,false]){
+      const result=await collectStorage(f.workspace,f.port,dry);assert.equal(result.state,dry?'planned':'complete');assert.equal(result.bytes,0);
+      const reason=proof==='missing process'?/no worker receipt that proves it stopped/:/worker proof could not be verified: EACCES/;
+      assert.ok(result.retained.some(row=>[f.root,s.folder].includes(row.path)&&reason.test(row.reason)));
+      assert.equal(await readFile(s.input,'utf8'),'last historical source bytes');
+      if(!dry){const receipt=JSON.parse(await readFile(join(f.workspace.directory,'gc',result.id!+'.json'),'utf8'));assert.deepEqual(receipt.retained,result.retained);}
+    }
+  }finally{mock?.mock.restore();syncBuiltinESMExports();}
+  if(proof==='missing process')await writeFile(process,await readFile(join(replacement,'process.json')));
+  await collectStorage(f.workspace,f.port,false);assert.equal(await exists(s.input),false);
+});

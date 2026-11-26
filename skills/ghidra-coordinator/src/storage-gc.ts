@@ -143,10 +143,13 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
       for(const name of await directories(join(parent,owner))){
         const root=join(parent,owner,name);
         if(await realpath(root)!==join(await realpath(parent),owner,name)){keep(root,'Working root moved outside owned storage.');continue;}
-        const worker=await json(join(root,'process.json')),nativeRoot=Boolean(await present(join(root,'native-owner.json')));
-        if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
-        if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
-        if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
+        let worker:Record<string,unknown>|undefined,nativeRoot=false;
+        try{
+          worker=await json(join(root,'process.json'));nativeRoot=Boolean(await present(join(root,'native-owner.json')));
+          if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
+          if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
+          if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
+        }catch(error){keep(root,'Working root worker proof could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable'));continue;}
         for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
         if(kind==='context'){
@@ -154,7 +157,8 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
           if(stages.length)try{
             const linkedOwner=await linked(join(root,'process.json'))||await linked(join(root,'native-owner.json'));
             const nativeOwner=nativeRoot&&!linkedOwner&&(await lstat(join(root,'native-owner.json'))).isFile()?await json(join(root,'native-owner.json')):undefined;
-            if(linkedOwner)ownershipReason='Cross-target working root ownership receipt is a link.';
+            if(!worker)ownershipReason='Cross-target working root has no worker receipt that proves it stopped.';
+            else if(linkedOwner)ownershipReason='Cross-target working root ownership receipt is a link.';
             else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))ownershipReason='Cross-target working root receipt belongs to a different owner.';
           }catch(error){ownershipReason='Cross-target working root ownership receipt could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable');}
           for(const stage of stages){
