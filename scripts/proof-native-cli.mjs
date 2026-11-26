@@ -233,8 +233,8 @@ try{
  // A shared repository lists every target; another target's server item is not local work.
  const otherInput=join(f.root,'other.bin');await writeFile(otherInput,Buffer.alloc(0x200,0x90));
  const other=await cli(['ghidra','open',otherInput,'--session','new','--loader','ghidra.app.util.opinion.BinaryLoader','--language','x86:LE:64:default','--image-base','1000','--loader-options','{"Base Address":"0"}']);
- // Its first analysis is private work until published.
- assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'retained');await cli(['ghidra','open',...select(other)]);await cli(['ghidra','merge',...select(other)]);
+ // First import prepares the shared base; the default open requests no private analysis.
+ assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'released');await cli(['ghidra','open',...select(other)]);await cli(['ghidra','merge',...select(other)]);
  await cli(['ghidra','open',...select(other)]);assert.equal((await cli(['ghidra','close',...select(other)])).checkout,'released');
  await cli(['ghidra','open',...select(a)]);const unchanged=context(a).nativeCheckout;assert.equal(unchanged.baseVersion,finalVersion);
  assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');assert.equal(context(a).nativeCheckout.state,'dropped');
@@ -269,7 +269,7 @@ try{
   nativeConflictPreservesProjectCheckoutAndBase:true,conflictingPublicationRefused:true,repeatedPublicationCycles:true,...(lostReply?{lostReply}:{}),
   explicitNativeDiscardVerified:true,...(discardLostReply?{discardLostReply}:{}),afterSaveWithoutCliDiagnosticsVerified:true,closeAfterDisposalAllocatesNothing:true,remainingNativeProjects:remainingProjects,remainingServerCheckouts:final.checkouts,
   ordinaryRuntimeRoles:roles,legacyRuntimeRolesAbsentBeforeExplicitExport:true,explicitPackedExportVerified:true,workingViewRemainsNativeAfterExport:true,
-  unchangedCloseReleased:true,abandonedCheckoutCollected:true,collection,
+  pristineFirstImportReleased:true,unchangedCloseReleased:true,abandonedCheckoutCollected:true,collection,
   runtimeFingerprint:runtimeBefore.fingerprint,runtimeJarCount:runtimeBefore.jars.length,installedRuntimeUnchanged:true,
   nativeContextBeforeRestart:savedB.nativeCheckout,engine:'ghidra-native',limitations:['Disposable raw binary fixture; no arbitrary-native-change or hostile-same-user sandbox guarantee']};
 }catch(error){console.error('Main CLI fixture retained:',f.root);throw error;}
