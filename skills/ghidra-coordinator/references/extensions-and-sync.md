@@ -88,7 +88,7 @@ insight-cli ghidra sync-policy set --session s_a --target t_exe \
 | `--publish after-edit` | After a supported program edit has a verified saved acknowledgment, merge all pending work in that context. Also publishes pending work on explicit `ghidra save`. |
 | `--publish after-save` | Ordinary edits stay private; explicit scoped `ghidra save` merges all pending work after saving. |
 | `--refresh manual` | No automatic incoming update. |
-| `--refresh before-edit` | Refresh before a program-edit command; any returned conflict stops that edit before dispatch. Safe incoming changes from the refresh remain retained. |
+| `--refresh before-edit` | Refresh before a program-edit command. A native conflict receives no incoming changes, retains the original checkout and base, and stops the edit before dispatch. A successful refresh remains saved if the later edit fails. |
 
 Supported program-edit commands include ordinary names/comments, types, bytes/assembly,
 analysis and scripts. Policy excludes control commands (`open`, `close`, `merge`, `refresh`,
