@@ -249,10 +249,12 @@ export class Research {
         if(request.state==='applied')return request.result;
         fail('unknown','This documentation transfer retains an unproved outcome and is not repeated.',request.result);
       }
-      const backend=await this.backend();await backend.open(source);const sourceSnapshot=await backend.saved(source);
+      const backend=await this.backend();await backend.open(source);const sourceView=await backend.saved(source);
+      if(sourceView.kind==='native'&&!backend.snapshotFile)fail('configuration','Selected backend cannot retain an immutable documentation source.');
+      const sourceSnapshot=sourceView.kind==='native'?await this.workspace.captureSnapshot(await backend.snapshotFile!(sourceView)):sourceView;
       await backend.open(selected);if(!backend.transfer||!backend.transferCheck)fail('configuration','Selected backend cannot verify documentation transfer.');
       const context=this.workspace.context(selected);
-      this.workspace.startRequest(request.id,{kind:'transfer',generation:context.generation,workingSnapshot:context.workingSnapshot,source,sourceSnapshot,dryRun});
+      this.workspace.startRequest(request.id,{kind:'transfer',generation:context.generation,workingSnapshot:context.workingSnapshot,source,sourceView,sourceSnapshot,dryRun});
       try {
         const value=transferResult(await backend.transfer(selected,sourceSnapshot,dryRun),dryRun);
         const snapshot=await backend.saved(selected);

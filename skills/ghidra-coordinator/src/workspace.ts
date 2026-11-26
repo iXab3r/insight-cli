@@ -363,13 +363,19 @@ export class Workspace {
     return found;
   }
   /** Another context's unresolved operation may still need this checkout's private view. */
-  checkoutReferenced(context:GhidraContext):boolean {
-    const root=context.nativeCheckout?.root,seen=new Set<string>();if(!root)return false;
-    for(const row of this.db.prepare("SELECT data FROM requests WHERE context<>? AND state IN ('running','unknown')").all(context.id))
+  checkoutReferenced(context:GhidraContext,root=context.nativeCheckout?.root):boolean {
+    const seen=new Set<string>();if(!root)return false;
+    for(const row of this.db.prepare("SELECT data FROM requests WHERE context<>? AND state IN ('running','unknown','failed')").all(context.id)){
+      const request=JSON.parse(String(row.data)) as ResearchRequest;
+      if(request.dropped||request.state==='failed'&&(request.result as {outcome?:unknown}|undefined)?.outcome!=='unknown')continue;
       for(const match of String(row.data).matchAll(/native:([a-f0-9]{64})/g))seen.add(match[1]!);
+    }
     for(const sha of seen)try{
       const value=JSON.parse(readFileSync(join(this.directory,'artifacts',sha+'.json'),'utf8'));
-      if(value.source==='checkout'&&value.checkout?.root===root)return true;
+      if(value.source==='checkout'){
+        const referenced=value.checkout?.root;
+        if(typeof referenced!=='string'||referenced===root||realpathSync(referenced)===realpathSync(root))return true;
+      }
     }catch{return true;}
     return false;
   }

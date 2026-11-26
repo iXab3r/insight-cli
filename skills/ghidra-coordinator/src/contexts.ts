@@ -913,6 +913,8 @@ public class ${name} extends GhidraScript {
     const stage=await peerStage(record.binding.root,name,record.binding);
     if('reason' in stage)fail('binding',stage.reason);
     if(stage.receipt.state!=='closed')await durable(join(stage.folder,'receipt.json'),{...stage.receipt,state:'closed'});
+    const context=this.workspace.contextById(record.binding.context!);
+    if(this.workspace.unresolved(context).length||this.workspace.uncertainOutcome(context)||this.workspace.checkoutReferenced(context,record.binding.root))return;
     if(stage.input)await unlink(stage.input);
   }
   private async withPeer<T>(record:Running,snapshot:Artifact,action:(path:string)=>Promise<T>,reconcile=true):Promise<T> {

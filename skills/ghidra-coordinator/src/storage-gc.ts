@@ -150,14 +150,18 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
         if(kind==='context'){
-          const context=workspace.contextById(owner),linkedOwner=await linked(join(root,'process.json'))||await linked(join(root,'native-owner.json'));
-          const nativeOwner=nativeRoot&&!linkedOwner&&(await lstat(join(root,'native-owner.json'))).isFile()?await json(join(root,'native-owner.json')):undefined;
-          for(const stage of await peerStages(root,{context:owner,target:context.target})){
-            if(linkedOwner)keep(stage.folder,'Cross-target working root ownership receipt is a link.');
-            else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))keep(stage.folder,'Cross-target working root receipt belongs to a different owner.');
+          const context=workspace.contextById(owner),stages=await peerStages(root,{context:owner,target:context.target});let ownershipReason:string|undefined;
+          if(stages.length)try{
+            const linkedOwner=await linked(join(root,'process.json'))||await linked(join(root,'native-owner.json'));
+            const nativeOwner=nativeRoot&&!linkedOwner&&(await lstat(join(root,'native-owner.json'))).isFile()?await json(join(root,'native-owner.json')):undefined;
+            if(linkedOwner)ownershipReason='Cross-target working root ownership receipt is a link.';
+            else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))ownershipReason='Cross-target working root receipt belongs to a different owner.';
+          }catch(error){ownershipReason='Cross-target working root ownership receipt could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable');}
+          for(const stage of stages){
+            if(ownershipReason)keep(stage.folder,ownershipReason);
             else if('reason' in stage)keep(stage.folder,stage.reason);
             else if(stage.receipt.state!=='closed')keep(stage.folder,'Cross-target cleanup is incomplete; its temporary program removal is unverified.');
-            else if(workspace.checkoutReferenced(context))keep(stage.folder,'An unresolved operation in another context references this checkout.');
+            else if(workspace.checkoutReferenced(context,root))keep(stage.folder,'An unresolved operation in another context references this checkout.');
             else if(stage.input)await remove(stage.input,'duplicate-exports');
           }
         }
