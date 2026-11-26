@@ -81,6 +81,23 @@ try{
  const receiptArgs=['-cp',compileRoot+delimiter+classes+delimiter+inputs.classpath,'NativeDisposalFixture','receipts'];
  assert.match((await exec(inputs.java,await javaClasspathArguments(receiptCall,'ghidra',inputs.java,receiptArgs),{windowsHide:true})).stdout,/RELEASE_RECEIPTS_VERIFIED/);
  checks.exactAndLegacyReleaseReceipts=true;
+ // Dirty Update creates its .keep through saveAs, so its actual buffers have a new DB ID, not the original fingerprint.
+ const left=await cli(['ghidra','open','--target',a.target,'--session','new']),right=await cli(['ghidra','open','--target',a.target,'--session','new']);
+ await cli(['ghidra','comments','set',...select(left),'--address','1000','--kind','eol','--text','SHARED_DIRTY_UPDATE']);
+ await cli(['ghidra','comments','set',...select(right),'--address','1001','--kind','eol','--text','PRIVATE_DIRTY_UPDATE']);
+ const beforeUpdate=context(right).nativeCheckout;await cli(['ghidra','merge',...select(left)]);
+ const refreshed=await cli(['ghidra','refresh',...select(right),'--request-id','dirty-backup-update']);assert.equal(refreshed.nativeMergeInvocations,1);
+ assert.equal(context(right).nativeCheckout.checkoutId,beforeUpdate.checkoutId);
+ const read=new DatabaseSync(join(ws,'workspace.sqlite'),{readOnly:true});let updateRequest;
+ try{updateRequest=read.prepare('SELECT id FROM requests WHERE caller_id=?').get('dirty-backup-update').id;}finally{read.close();}
+ const update=JSON.parse(await readFile(join(beforeUpdate.root,'operations',updateRequest+'-update.json'))),keepName=right.target+'.bin.keep',backup=update.result.disposableBackups[keepName];
+ assert.equal(update.backupAbsent,true);assert.equal(update.backupExpected,true);assert.equal(backup.schema,1);assert.equal(typeof backup.fileId,'string');
+ assert.match(backup.fingerprint,/^[a-f0-9]{64}$/);assert.notEqual(backup.fingerprint,update.before.fingerprint,'Pinned saveAs must generate distinct DB-ID buffers');
+ assert.equal((await cli(['ghidra','comments','get',...select(right),'--address','1000','--kind','eol'])).text,'SHARED_DIRTY_UPDATE');
+ assert.equal((await cli(['ghidra','comments','get',...select(right),'--address','1001','--kind','eol'])).text,'PRIVATE_DIRTY_UPDATE');
+ await cli(['ghidra','merge',...select(right)]);assert.equal(context(right).nativeCheckout.state,'dropped');assert.ok(!(await readdir(beforeUpdate.root)).includes('view.rep'));
+ await cli(['ghidra','open',...select(right)]);assert.equal((await cli(['ghidra','comments','get',...select(right),'--address','1001','--kind','eol'])).text,'PRIVATE_DIRTY_UPDATE');
+ assert.equal((await cli(['ghidra','close',...select(right)])).checkout,'released');checks.dirtyUpdateBackupPublishedReleasedAndReopened=true;
  for(const mutation of ['base-fallback','edit','nested','backup']){
   const checkout=await directCheckout(a.target),status=await native(checkout,'status');assert.equal(status.modified,false);
   const baseView=JSON.parse(await readFile(await workspace.artifacts.verify(workspace.contextById(checkout.context).baseSnapshot)));assert.equal(status.saved.fingerprint,baseView.fingerprint);
@@ -90,7 +107,7 @@ try{
   const after=await native(checkout,'status');assert.equal(after.checkedOut,true);assert.equal(after.checkoutId,checkout.checkoutId);
   assert.ok((await readdir(checkout.root)).includes('view.rep'));checks[mutation]=true;
  }
- // A valid native-created .keep remains disposable only while its bytes still equal that operation's before-image.
+ // A valid native-created .keep remains disposable only while its actual saved bytes match that operation's receipt.
  const keepCheckout=await directCheckout(a.target);await mutate(keepCheckout,'edit');
  const discard=await native(keepCheckout,'discard',{request:'q_'+randomUUID()});assert.equal(discard.state,'discarded');assert.ok(discard.disposableBackups);
  const kept={...keepCheckout,checkoutId:discard.checkoutId,baseVersion:discard.baseVersion};await mutate(kept,'edit-backup');

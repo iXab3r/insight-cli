@@ -59,7 +59,7 @@ async function fixture(t:test.TestContext){
     const result={state:state.updateState,checkoutId:checkout.checkoutId,baseVersion:state.revision,modified:state.modified,
      saved:{...saved(checkout),version:state.revision},nativeMergeInvocations:Number(state.revision!==checkout.baseVersion),conflict:'Native decision required'};
     const operations=join(checkout.root,'operations');await mkdir(operations,{recursive:true});
-    await writeFile(join(operations,request+'-update.json'),JSON.stringify({request:{request,root:checkout.root,fileId,checkoutId:checkout.checkoutId,owner:owner(checkout)},result}));
+    await writeFile(join(operations,request+'-update.json'),JSON.stringify({request:{operation:'update',request,root:checkout.root,fileId,checkoutId:checkout.checkoutId,owner:owner(checkout)},result}));
     return applyUpdate.call(backend,scope,request,result,checkout.baseVersion);
    },
    nativeOperation:async(checkout:NativeCheckout,operation:string,parameters:Record<string,unknown>)=>{

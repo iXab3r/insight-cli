@@ -534,7 +534,7 @@ export class GhidraContexts {
     if(verified.state!=='verified')fail('unknown','Native history and independent exact-buffer readback do not yet establish publication.');
     return {state:'published' as const,revision:verified.revision,snapshot:verified.snapshot};
   }
-  async dropNative(scope:Scope){
+  async dropNative(scope:Scope,request?:string){
     const context=this.workspace.context(scope),checkout=context.nativeCheckout;
     if(!checkout||checkout.state==='dropped')return;
     if(checkout.state!=='verified')fail('blocked','Only a verified native publication can dispose its project.');
@@ -544,9 +544,9 @@ export class GhidraContexts {
       openedVerified:this.workspace.unchangedBuffers(context.target,shared,checkout.opened)}:{})};
     let released:Record<string,unknown>;
     try{released=await this.nativeOperation(checkout,'release',parameters);}
-    catch(error){await this.retainNative(scope,checkout);throw error;}
+    catch(error){await this.retainNative(scope,checkout,request);throw error;}
     if(released.state!=='released'){
-      await this.retainNative(scope,checkout);
+      await this.retainNative(scope,checkout,request);
       fail('unknown','Checkout release remains unproved; its project and saved work are retained.');
     }
     const dropped=await this.nativeOperation(checkout,'drop',parameters);
@@ -554,22 +554,20 @@ export class GhidraContexts {
     this.workspace.saveContext(scope,context.generation,{nativeCheckout:{...checkout,state:'dropped'},state:'stopped',workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
   }
   /** A lost release reply can mean undoCheckout succeeded. Only independent ownership readback permits reopening. */
-  private async retainNative(scope:Scope,checkout:NativeCheckout){
-    let retained:NativeCheckout|undefined;
+  private async retainNative(scope:Scope,checkout:NativeCheckout,request?:string){
+    let result:ReturnType<Workspace['retainNativeDisposal']>|undefined;
     try{
       const observed=await this.nativeOperation(checkout,'status');
       if(observed.state!=='ready'||observed.checkedOut!==true||observed.fileId!==checkout.fileId||observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion)return;
       const {opened,...binding}=checkout,active={...binding,state:'active' as const};
       const snapshot=await this.nativeReceipt(active,object(observed.saved)),context=this.workspace.context(scope);
-      this.workspace.saveContext(scope,context.generation,{nativeCheckout:active,workingSnapshot:snapshot,state:'stopped'});
-      retained=active;
+      result=this.workspace.retainNativeDisposal(scope,context.generation,checkout,snapshot,request);
     }catch{/* Unproved release/ownership stays verified for journal-based recovery, never a new private launch. */}
-    if(retained)fail('conflict','Final native release was refused; saved private work is retained.',{session:scope.session,target:scope.target,state:'retained',engine:'ghidra-native',checkout:'retained',
-      retention:{schema:1,source:'native-release-status',checkout:retained}});
+    if(result)fail('conflict','Final native release was refused; saved private work is retained.',result);
   }
-  async finishEmptyNative(scope:Scope){
+  async finishEmptyNative(scope:Scope,request?:string){
     const context=this.workspace.context(scope);if(!context.nativeCheckout)fail('binding','Native checkout is absent.');
-    if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope);return;}
+    if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope,request);return;}
     // No new server version; the independent base view must equal all saved local buffers.
     const local=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.workingSnapshot!),'utf8'))),base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
     if(!this.workspace.unchangedBuffers(context.target,base,local.fingerprint))fail('binding','An unchanged native checkout differs from its shared base.');
@@ -577,7 +575,7 @@ export class GhidraContexts {
     const {opened:previousOpened,...checkout}=context.nativeCheckout;
     // Keep the original saved view and diagnostics until release succeeds. A refused release is still private work.
     this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...checkout,...opened,state:'verified'}});
-    await this.dropNative(scope);
+    await this.dropNative(scope,request);
   }
   /** Close and GC drop a working copy only when Ghidra itself reports no private change. */
   async releaseUnchanged(scope:Scope):Promise<boolean>{
@@ -672,7 +670,7 @@ export class GhidraContexts {
       result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||
       shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId||shared.origin!==checkout.origin||shared.repository!==checkout.repository||
       !this.workspace.unchangedBuffers(context.target,shared,saved.fingerprint)&&!pendingOpened)return {state:'unknown' as const};
-    await this.dropNative(scope);return {state:'verified' as const,revision:checkout.baseVersion};
+    await this.dropNative(scope,request);return {state:'verified' as const,revision:checkout.baseVersion};
   }
   async discardNative(scope:Scope,request:string){
     const context=this.workspace.context(scope),checkout=context.nativeCheckout;

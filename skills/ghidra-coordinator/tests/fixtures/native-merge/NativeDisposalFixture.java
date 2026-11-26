@@ -23,6 +23,20 @@ public final class NativeDisposalFixture {
         JsonObject base=q.deepCopy();base.remove("opened");InsightNativeCheckout.require(!InsightNativeCheckout.sameRelease(current,base),"Opened proof fell back to base");
         current.addProperty("savedFingerprint","base");InsightNativeCheckout.require(InsightNativeCheckout.sameRelease(current,base),"Base proof rejected");
         current.remove("fileId");InsightNativeCheckout.require(!InsightNativeCheckout.sameRelease(current,base),"Incomplete new receipt accepted as legacy");
+        JsonObject backup=JsonParser.parseString("{before:{fingerprint:'original'},backupAbsent:true,backupExpected:true,result:{disposableBackups:{'program.keep':{schema:1,fileId:'created',fingerprint:'saveAs-bytes'}}}}").getAsJsonObject();
+        var actual=Map.<String,Object>of("fileId","created","fingerprint","saveAs-bytes");
+        InsightNativeCheckout.require(InsightNativeCheckout.backupMatches(backup,"program.keep",actual),"Dirty Update saveAs backup rejected");
+        InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(backup,"program.keep",Map.of("fileId","replacement","fingerprint","saveAs-bytes")),"Replaced backup accepted");
+        InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(backup,"program.keep",Map.of("fileId","created","fingerprint","changed")),"Changed backup accepted");
+        for(String key:List.of("backupAbsent","backupExpected")){
+            JsonObject changed=backup.deepCopy();changed.addProperty(key,false);InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(changed,"program.keep",actual),"Unproved native backup creation accepted");
+        }
+        JsonObject replaced=backup.deepCopy();replaced.addProperty("backupAbsent",false);replaced.addProperty("backupBeforeFileId","prior-native-copy");
+        InsightNativeCheckout.require(InsightNativeCheckout.backupMatches(replaced,"program.keep",actual),"A newly created replacement native backup was rejected");
+        replaced.addProperty("backupBeforeFileId","created");InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(replaced,"program.keep",actual),"An unchanged preexisting backup was accepted as native creation");
+        JsonObject legacyBackup=JsonParser.parseString("{before:{fingerprint:'original'},result:{disposableBackups:{'program.keep':'original'}}}").getAsJsonObject();
+        InsightNativeCheckout.require(InsightNativeCheckout.backupMatches(legacyBackup,"program.keep",Map.of("fileId","legacy","fingerprint","original")),"Legacy backup proof rejected");
+        InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(legacyBackup,"program.keep",actual),"Legacy proof blessed unrelated saveAs bytes");
         System.out.println("RELEASE_RECEIPTS_VERIFIED");
     }
     public static void main(String[] args)throws Exception {

@@ -588,6 +588,39 @@ export class Workspace {
   saveContext(scope: Scope, expectedGeneration: number, patch: ContextPatch): GhidraContext {
     return this.transaction(() => this.writeContext(scope, expectedGeneration, patch));
   }
+  /** Independent release readback and its no-publication request outcome become visible together. */
+  retainNativeDisposal(scope:Scope,generation:number,checkout:NativeCheckout,snapshot:Artifact,request?:string){
+    return this.transaction(()=>{
+      const context=this.context(scope);
+      if(checkout.state!=='verified'||stable(context.nativeCheckout)!==stable(checkout))fail('binding','Native disposal ownership changed before retention.');
+      const {opened,...binding}=checkout,active={...binding,state:'active' as const};
+      this.knownSnapshot(snapshot);
+      const saved=object(JSON.parse(readFileSync(this.artifacts.path(snapshot),'utf8')));
+      if(snapshot.kind!=='native'||saved.engine!=='native-checkout-v1'||saved.source!=='checkout'||stable(saved.checkout)!==stable(active)||
+        saved.fileId!==active.fileId||saved.version!==active.baseVersion||typeof saved.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(saved.fingerprint))
+        fail('binding','Retained native receipt differs from independently observed checkout ownership.');
+      if(request){
+        const pending=this.request(request);
+        if(pending.context!==context.id||pending.operation!=='ghidra.merge'||!['running','unknown'].includes(pending.state)||object(pending.execution??{}).kind!=='native-merge')
+          fail('binding','Retained disposal does not match an unfinished native merge request.');
+        if(this.db.prepare('SELECT id FROM publications WHERE id=? OR json_extract(data,\'$.request\')=?').get(request,request)||this.activePublication(scope.target)||this.model(scope.target).state!=='ready')
+          fail('blocked','A publication outcome cannot be replaced by retained empty disposal.');
+        const journal=object(JSON.parse(readFileSync(join(checkout.root,'operations',request+'-update.json'),'utf8'))),q=object(journal.request),updated=object(journal.result),view=object(updated.saved);
+        const owner=JSON.parse(readFileSync(join(checkout.root,'native-owner.json'),'utf8'));
+        if(q.operation!=='update'||q.request!==request||q.root!==checkout.root||q.fileId!==checkout.fileId||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||
+          updated.state!=='updated'||updated.checkoutId!==checkout.checkoutId||updated.baseVersion!==checkout.baseVersion||view.fileId!==checkout.fileId||view.version!==checkout.baseVersion||
+          typeof view.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(view.fingerprint))fail('binding','Retained disposal lacks its completed owned native Update.');
+        try{readFileSync(join(checkout.root,'operations',request+'-checkin.json'));fail('blocked','A native check-in intent cannot become retained empty disposal.');}
+        catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+      }else if(this.unresolved(scope).some(pending=>pending.operation==='ghidra.merge'))
+        fail('blocked','Retained native disposal requires its unfinished merge request identity.');
+      const result={session:scope.session,target:scope.target,state:'retained' as const,engine:'ghidra-native' as const,checkout:'retained' as const,
+        retention:{schema:1 as const,source:'native-release-status' as const,checkout:active,snapshot,...(request?{request}:{})}};
+      this.writeContext(scope,generation,{nativeCheckout:active,workingSnapshot:snapshot,state:'stopped'});
+      if(request)this.writeRequest(request,'failed',result);
+      return result;
+    });
+  }
   /** Terminal abandonment retains the previous outcome and saved view atomically. */
   abandonProgramRequest(scope:Scope,request:string,generation:number) {
     return this.transaction(()=>{

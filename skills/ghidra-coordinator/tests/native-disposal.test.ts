@@ -4,6 +4,8 @@ import {mkdtemp,mkdir,writeFile,readFile,rm,readdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import type {CommandContext} from '@eyeauras/cli-factory';
 import {Workspace,type GhidraContext,type NativeCheckout} from '../src/workspace.js';
 import {GhidraContexts} from '../src/contexts.js';
@@ -20,6 +22,7 @@ async function fixture(t:test.TestContext){
  const reservation=workspace.reserveOpen(target.id,'new',{autoAnalyze:false});workspace.recordRequest(reservation.request.id,'failed',{});
  const c=reservation.context,root=join(workspace.directory,'ghidra-native','context',c.id,'w-owned');await mkdir(join(root,'view.rep'),{recursive:true});
  await writeFile(join(root,'view.rep','database'),'saved private database');
+ await writeFile(join(root,'native-owner.json'),'{}');
  const checkout:NativeCheckout={schema:1,context:c.id,root,fileId:'file',checkoutId:3,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+target.id+'.bin',runtimeFingerprint:'d'.repeat(64),state:'active'};
  const receipt=async(value:unknown)=>{const path=join(directory,randomUUID()+'.json');await writeFile(path,JSON.stringify(value));return workspace.captureNative(path);};
  const shared=await receipt({schema:1,engine:'native-checkout-v1',source:'server',version:1,fileId:'file',fingerprint:base,origin:checkout.origin,repository:checkout.repository});
@@ -61,7 +64,12 @@ async function fixture(t:test.TestContext){
  const refs=()=>readdir(references).catch(error=>{if(error.code==='ENOENT')return [];throw error;});
  const fingerprint=async()=>JSON.parse(await readFile(await workspace.artifacts.verify(workspace.context(c).workingSnapshot!),'utf8')).fingerprint;
  const patch=(value:Partial<GhidraContext>)=>workspace.saveContext(c,workspace.context(c).generation,value);
- return {directory,workspace,context,checkout,backend,receipt,patch,calls,events,state,refs,references,fingerprint,saved};
+ const updateJournal=async(request:string,fingerprint=state.fingerprint)=>{
+  const operations=join(root,'operations');await mkdir(operations,{recursive:true});
+  await writeFile(join(operations,request+'-update.json'),JSON.stringify({request:{operation:'update',request,root,fileId:checkout.fileId,checkoutId:checkout.checkoutId,owner:{}},baseVersion:1,
+   result:{state:'updated',modified:fingerprint!==base,checkoutId:checkout.checkoutId,baseVersion:1,saved:{fileId:checkout.fileId,version:1,fingerprint}}}));
+ };
+ return {directory,workspace,context,checkout,backend,receipt,patch,calls,events,state,refs,references,fingerprint,saved,nativeReceipt,updateJournal};
 }
 
 test('first open records only the rewrite of independently proved base buffers, and normal reopen creates no new proof',async t=>{
@@ -160,8 +168,9 @@ test('pre-upgrade verified disposal with a replaced base receipt becomes usable 
 for(const ownership of ['proved','unknown'] as const)test('empty merge refusal after saved bytes change is '+ownership+' and its original request never replays',async t=>{
  const f=await fixture(t);await f.backend.open(f.context);let updates=0;
  const research=new Research(f.workspace,async()=>f.backend);
- f.backend.updateNative=async()=>{
+ f.backend.updateNative=async(_scope,request)=>{
   updates++;await f.backend.close(f.context);const c=f.workspace.context(f.context);
+  await f.updateJournal(request,await f.fingerprint());
   // The native Update completed. The later final-release inspection encounters a changed saved project.
   f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';if(ownership==='unknown')f.state.status={checkedOut:false};
   return {state:'empty',revision:1,snapshot:c.workingSnapshot!,sharedSnapshot:c.baseSnapshot!,receivedChanges:0,nativeMergeInvocations:0};
@@ -170,8 +179,10 @@ for(const ownership of ['proved','unknown'] as const)test('empty merge refusal a
  const request=f.workspace.scopedRequest(f.context,'refused-empty')!;
  assert.equal(request.state,ownership==='proved'?'failed':'unknown');assert.equal((request.result as {state:string}).state,ownership==='proved'?'retained':'unknown');
  await assert.rejects(research.merge(f.context,'refused-empty'),(error:unknown)=>{
-  assert.deepEqual((error as {result:unknown}).result,request.result);return true;
- });assert.equal(updates,1);
+  if(ownership==='proved')assert.deepEqual((error as {result:unknown}).result,request.result);
+  else assert.equal((error as {code:string}).code,'coordinator.unknown');
+  return true;
+ });assert.equal(updates,1);assert.deepEqual(f.workspace.request(request.id),request);
  if(ownership==='proved'){
   const c=f.workspace.context(f.context);assert.equal(c.nativeCheckout!.state,'active');assert.equal(await f.fingerprint(),privateWork);
   assert.equal((await research.open(c.target,c.session,{autoAnalyze:false},'inspect-retained') as {state:string}).state,'ready');
@@ -211,9 +222,7 @@ for(const savedFingerprint of [base,opened])for(const ownership of ['proved','un
  const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'legacy-empty').request;
  f.workspace.startRequest(request.id,{kind:'native-merge'});f.workspace.recordRequest(request.id,'unknown',{state:'unknown'});
  const c=f.workspace.context(f.context);f.patch({nativeCheckout:{...f.checkout,state:'verified',...(savedFingerprint===opened?{opened}:{})},workingSnapshot:c.baseSnapshot});
- const operations=join(f.checkout.root,'operations');await mkdir(operations);
- await writeFile(join(operations,request.id+'-update.json'),JSON.stringify({request:{request:request.id,root:f.checkout.root,fileId:f.checkout.fileId,checkoutId:f.checkout.checkoutId,owner:{}},
-  result:{state:'updated',modified:savedFingerprint!==base,checkoutId:f.checkout.checkoutId,baseVersion:1,saved:{fileId:f.checkout.fileId,version:1,fingerprint:savedFingerprint}}}));
+ await f.updateJournal(request.id,savedFingerprint);
  f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';if(ownership==='unknown')f.state.status={checkedOut:false};
  await assert.rejects(research.merge(f.context,'legacy-empty'));
  assert.equal(f.workspace.request(request.id).state,ownership==='proved'?'failed':'unknown');
@@ -228,9 +237,7 @@ test('an already released legacy opened checkout completes its old empty-merge r
  const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'legacy-released').request;
  f.workspace.startRequest(request.id,{kind:'native-merge'});f.workspace.recordRequest(request.id,'unknown',{state:'unknown'});
  const c=f.workspace.context(f.context);f.patch({nativeCheckout:{...f.checkout,state:'verified',opened},workingSnapshot:c.baseSnapshot});
- const operations=join(f.checkout.root,'operations');await mkdir(operations);
- await writeFile(join(operations,request.id+'-update.json'),JSON.stringify({request:{request:request.id,root:f.checkout.root,fileId:f.checkout.fileId,checkoutId:f.checkout.checkoutId,owner:{}},
-  result:{state:'updated',modified:true,checkoutId:f.checkout.checkoutId,baseVersion:1,saved:{fileId:f.checkout.fileId,version:1,fingerprint:opened}}}));
+ await f.updateJournal(request.id,opened);
  // The native boundary represents an independently established completed release receipt.
  f.state.status={checkedOut:false};
  const result=await research.merge(f.context,'legacy-released');assert.equal((result as {state:string}).state,'empty');
@@ -238,4 +245,80 @@ test('an already released legacy opened checkout completes its old empty-merge r
  const release=f.calls.find(call=>call.operation==='release')!;assert.equal(release.parameters.openedVerified,false);
  assert.deepEqual(await research.merge(f.context,'legacy-released'),result);
  assert.ok(!f.calls.some(call=>['update','checkin'].includes(call.operation)));
+});
+
+for(const phase of ['before','after'] as const)test('process exit '+phase+' retained-disposal commit never exposes active private work with an unfinished request',async t=>{
+ const f=await fixture(t),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'interrupted-retention').request;
+ f.workspace.startRequest(request.id,{kind:'native-merge'});await f.updateJournal(request.id,base);
+ f.patch({nativeCheckout:{...f.checkout,state:'verified'},complexChanges:['q_'+randomUUID()]});const prior=f.workspace.context(f.context);
+ f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';
+ const privateSnapshot=await f.nativeReceipt({...f.checkout,state:'active'},f.saved());
+ const child=fileURLToPath(new URL('./native-retention-child.js',import.meta.url));
+ const exit=spawnSync(process.execPath,[child,f.workspace.directory,request.id,JSON.stringify(privateSnapshot),phase],{windowsHide:true,encoding:'utf8'});
+ assert.equal(exit.status,phase==='before'?81:82,exit.stderr);
+ const restarted=new Workspace(f.workspace.directory,'default');
+ try{
+  const context=restarted.context(f.context),pending=restarted.request(request.id);
+  assert.equal(context.nativeCheckout!.state,phase==='before'?'verified':'active');assert.equal(pending.state,phase==='before'?'running':'failed');
+  assert.equal(context.workingSnapshot!.id,phase==='before'?prior.workingSnapshot!.id:privateSnapshot.id);
+  assert.equal(context.generation,prior.generation+Number(phase==='after'));assert.deepEqual(context.complexChanges,prior.complexChanges);
+  if(phase==='after'){
+   const result=pending.result as {state:string;retention:{request:string;snapshot:Artifact}};
+   assert.equal(result.state,'retained');assert.equal(result.retention.request,request.id);assert.equal(result.retention.snapshot.id,privateSnapshot.id);
+  }
+ }finally{restarted.close();}
+ const research=new Research(f.workspace,async()=>f.backend);
+ if(phase==='before'){
+  // The old verified context plus its completed owned Update is enough to retry only release readback, never Update/check-in.
+  await research.open(f.context.target,f.context.session,{autoAnalyze:false},'resume-retention');
+ }else await research.open(f.context.target,f.context.session,{autoAnalyze:false},'inspect-retention');
+ assert.equal(f.workspace.request(request.id).state,'failed');assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'active');assert.equal(await f.fingerprint(),privateWork);
+ const outcome=f.workspace.request(request.id).result;
+ await assert.rejects(research.merge(f.context,'interrupted-retention'),error=>{assert.deepEqual((error as {result:unknown}).result,outcome);return true;});
+ assert.equal((await f.backend.fields(f.workspace.context(f.context).workingSnapshot!,[{address:'1000',field:'comment.eol'}]))['1000@comment.eol']!.value,'private comment');
+ assert.ok(!f.calls.some(c=>['update','checkin','drop'].includes(c.operation)));
+});
+
+test('requestless retention cannot create the old active-context/unfinished-merge crash window',async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'unbound-retention').request;
+ f.workspace.startRequest(request.id,{kind:'native-merge'});await f.updateJournal(request.id,base);
+ f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';
+ await assert.rejects(f.backend.finishEmptyNative(f.context),/release remains unproved/);
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'verified');assert.equal(f.workspace.request(request.id).state,'running');
+ await assert.rejects(research.merge(f.context,'unbound-retention'));
+ assert.equal(f.workspace.request(request.id).state,'failed');assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'active');assert.equal(await f.fingerprint(),privateWork);
+ await research.open(f.context.target,f.context.session,{autoAnalyze:false},'unbound-inspection');
+});
+
+test('retaining private bytes after verified publication never changes its applied request or verified history',async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.merge',{},'published-retention').request;
+ f.workspace.startRequest(request.id,{kind:'native-merge'});
+ const publication=f.workspace.beginPublication(f.context,request.id,1,f.workspace.context(f.context).workingSnapshot!);f.workspace.publicationIntent(publication.id);
+ const shared=await f.receipt({schema:1,engine:'native-checkout-v1',source:'server',version:2,fileId:'file',fingerprint:'e'.repeat(64),origin:f.checkout.origin,repository:f.checkout.repository});
+ const published={session:f.context.session,target:f.context.target,state:'merged',sharedRevision:'R2',applied:0,pendingChanges:0};
+ f.workspace.finishPublication(publication.id,2,published,shared);
+ f.state.fingerprint=privateWork;f.state.modified=true;f.state.release='unknown';f.state.status={baseVersion:2,saved:{fileId:'file',version:2,fingerprint:privateWork}};
+ await assert.rejects(f.backend.dropNative(f.context),/private work is retained/);
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'active');assert.equal(await f.fingerprint(),privateWork);
+ assert.equal(f.workspace.request(request.id).state,'applied');assert.deepEqual(f.workspace.request(request.id).result,published);assert.equal(f.workspace.publication(publication.id).state,'verified');
+ assert.deepEqual(await research.merge(f.context,'published-retention'),published);assert.ok(!f.calls.some(c=>['update','checkin','drop'].includes(c.operation)));
+});
+
+for(const invalid of ['wrong request context','wrong operation','missing Update','wrong Update identity','check-in journal','publication exists'] as const)test('atomic retention refuses '+invalid+' before changing context or request',async t=>{
+ const f=await fixture(t),request=f.workspace.reserveRequest(f.context,invalid==='wrong operation'?'ghidra.refresh':'ghidra.merge',{},'bound-retention').request;
+ f.workspace.startRequest(request.id,{kind:'native-merge'});await f.updateJournal(request.id,base);
+ f.patch({nativeCheckout:{...f.checkout,state:'verified'}});
+ const snapshot=await f.nativeReceipt({...f.checkout,state:'active'},{fileId:f.checkout.fileId,version:1,fingerprint:privateWork});
+ let selected=f.context;
+ if(invalid==='wrong request context'){
+  const other=f.workspace.reserveOpen(f.context.target,'new',{autoAnalyze:false});f.workspace.recordRequest(other.request.id,'failed',{});
+  selected=other.context;
+ }else if(invalid==='missing Update')await rm(join(f.checkout.root,'operations',request.id+'-update.json'));
+ else if(invalid==='wrong Update identity'){
+  const path=join(f.checkout.root,'operations',request.id+'-update.json'),journal=JSON.parse(await readFile(path,'utf8'));journal.request.checkoutId=9;await writeFile(path,JSON.stringify(journal));
+ }else if(invalid==='check-in journal')await writeFile(join(f.checkout.root,'operations',request.id+'-checkin.json'),'{}');
+ else if(invalid==='publication exists')f.workspace.beginPublication(f.context,request.id,1,f.workspace.context(f.context).workingSnapshot!);
+ const before=f.workspace.context(f.context),pending=f.workspace.request(request.id);
+ assert.throws(()=>f.workspace.retainNativeDisposal(selected,f.workspace.context(selected).generation,before.nativeCheckout!,snapshot,request.id));
+ assert.deepEqual(f.workspace.context(f.context),before);assert.deepEqual(f.workspace.request(request.id),pending);
 });

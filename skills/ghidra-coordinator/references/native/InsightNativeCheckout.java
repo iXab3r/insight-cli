@@ -67,21 +67,36 @@ public final class InsightNativeCheckout {
         if(!receipt.has("savedFingerprint")&&!receipt.has("fileId"))return true;
         return Objects.equals(receipt.get("fileId"),q.get("fileId"))&&Objects.equals(receipt.get("savedFingerprint"),new JsonPrimitive(authorized(q)));
     }
-    /** Only a backup created by a completed owned native operation, still equal to its before-image, is disposable. */
+    static boolean backupMatches(JsonObject journal,String name,Map<String,Object> saved){
+        JsonObject files=journal.getAsJsonObject("result").getAsJsonObject("disposableBackups");
+        if(files==null||!files.has(name))return false;
+        JsonElement proof=files.get(name);
+        if(proof.isJsonPrimitive()){
+            // Older proofs were recorded only for a before-image-equal backup (not saveAs-created Update copies).
+            return proof.equals(journal.getAsJsonObject("before").get("fingerprint"))&&saved.get("fingerprint").equals(proof.getAsString());
+        }
+        if(!proof.isJsonObject())return false;
+        JsonObject created=proof.getAsJsonObject();
+        boolean newFile=journal.has("backupAbsent")&&(journal.get("backupAbsent").getAsBoolean()||journal.has("backupBeforeFileId")&&!journal.get("backupBeforeFileId").isJsonNull()&&
+            !journal.get("backupBeforeFileId").equals(created.get("fileId")));
+        return newFile&&journal.has("backupExpected")&&journal.get("backupExpected").getAsBoolean()&&
+            created.has("schema")&&created.get("schema").getAsInt()==1&&saved.get("fileId").equals(text(created,"fileId"))&&saved.get("fingerprint").equals(text(created,"fingerprint"));
+    }
+    /** Only an expected backup newly created by a completed owned native operation, still at its recorded bytes, is disposable. */
     static Map<String,String> backups(Project project,Path operations,JsonObject q,JsonObject owner)throws Exception {
         String name=text(owner,"path").substring(1),keep=name+".keep";Map<String,String> proved=new TreeMap<>();
         DomainFile backup=project.getProjectData().getFile("/"+keep);
-        if(backup==null||backup.canRecover()||backup.isCheckedOut()||backup.isHijacked())return proved;
+        if(backup==null||backup.isVersioned()||backup.canRecover()||backup.isCheckedOut()||backup.isHijacked())return proved;
         try(var paths=Files.list(operations)){
             for(Path path:paths.filter(p->p.getFileName().toString().matches("q_[a-f0-9-]{36}-(update|discard)\\.json")).sorted().toList()){
                 JsonObject journal=JsonParser.parseString(Files.readString(path)).getAsJsonObject(),request=journal.getAsJsonObject("request"),result=journal.getAsJsonObject("result");
                 if(request==null||result==null||!request.getAsJsonObject("owner").equals(owner)||!Objects.equals(request.get("root"),q.get("root"))||
                     !Objects.equals(request.get("fileId"),q.get("fileId"))||!Objects.equals(result.get("checkoutId"),q.get("checkoutId"))||
                     !path.getFileName().toString().equals(text(request,"request")+"-"+text(request,"operation")+".json")||
-                    !(text(result,"state").equals("updated")||text(result,"state").equals("discarded"))||result.get("baseVersion").getAsInt()>q.get("verifiedVersion").getAsInt())continue;
-                JsonObject files=result.getAsJsonObject("disposableBackups");
-                if(files!=null&&files.has(keep)&&files.get(keep).equals(journal.getAsJsonObject("before").get("fingerprint"))&&
-                    saved(backup,owner).get("fingerprint").equals(text(files,keep)))proved.put(keep,text(files,keep));
+                    !(text(request,"operation").equals("update")&&text(result,"state").equals("updated")||text(request,"operation").equals("discard")&&text(result,"state").equals("discarded"))||
+                    result.get("baseVersion").getAsInt()>q.get("verifiedVersion").getAsInt())continue;
+                Map<String,Object> current=saved(backup,owner);
+                if(backupMatches(journal,keep,current))proved.put(keep,current.get("fingerprint").toString());
             }
         }
         return proved;
@@ -196,7 +211,10 @@ public final class InsightNativeCheckout {
                     require(file.isCheckedOut(),"Native checkout missing");
                     var before=saved(file,owner);long checkout=file.getCheckoutStatus().getCheckoutId();int base=file.getCheckoutStatus().getCheckoutVersion(),head=file.getLatestVersion();
                     Map<String,Object> intent=new LinkedHashMap<>();intent.put("request",q);intent.put("before",before);intent.put("checkoutId",checkout);intent.put("baseVersion",base);intent.put("headVersion",head);
-                    boolean keepAbsent=project.getProjectData().getFile(path+".keep")==null;
+                    DomainFile priorKeep=project.getProjectData().getFile(path+".keep");boolean keepAbsent=priorKeep==null;
+                    String priorKeepId=keepAbsent?null:priorKeep.getFileID();
+                    boolean backupExpected=file.modifiedSinceCheckout()&&(operation.equals("discard")||operation.equals("update")&&head>base);
+                    intent.put("backupAbsent",keepAbsent);intent.put("backupBeforeFileId",priorKeepId);intent.put("backupExpected",backupExpected);
                     if(operation.equals("discard")){
                         write(journal,intent);
                         boolean dirty=file.modifiedSinceCheckout();file.undoCheckout(dirty);
@@ -231,9 +249,12 @@ public final class InsightNativeCheckout {
                     }
                     out.put("saved",saved(file,owner));out.put("checkoutId",file.getCheckoutStatus().getCheckoutId());out.put("baseVersion",file.getCheckoutStatus().getCheckoutVersion());
                     out.put("modified",file.modifiedSinceCheckout());out.put("nativeMergeInvocations",HeadlessProgramMergeManager.invocations);out.put("nativePhases",HeadlessProgramMergeManager.phases);
-                    if(keepAbsent&&(operation.equals("discard")||operation.equals("update"))){
+                    if(backupExpected&&(out.get("state").equals("discarded")||out.get("state").equals("updated"))){
                         DomainFile keep=project.getProjectData().getFile(path+".keep");
-                        if(keep!=null)try{Object fingerprint=saved(keep,owner).get("fingerprint");if(before.get("fingerprint").equals(fingerprint))out.put("disposableBackups",Map.of(name+".keep",fingerprint));}
+                        // Ghidra's dirty Update uses createFile/saveAs, assigning the copy a new DB ID inside the fingerprinted bytes.
+                        if(keep!=null&&(keepAbsent||priorKeepId!=null&&!priorKeepId.equals(keep.getFileID()))&&!keep.isVersioned()&&!keep.canRecover()&&!keep.isCheckedOut()&&!keep.isHijacked())try{
+                            var actual=saved(keep,owner);out.put("disposableBackups",Map.of(name+".keep",Map.of("schema",1,"fileId",actual.get("fileId"),"fingerprint",actual.get("fingerprint"))));
+                        }
                         catch(Exception unproved){/* An unreadable backup remains private; it cannot invalidate native completion. */}
                     }
                     intent.put("result",out);write(journal,intent);
