@@ -91,8 +91,9 @@ ordinary saved copy and its receipt. Neither operation requires a Ghidra install
 4. Rename functions or set/clear comments through ordinary commands. An `applied` result means
    verified saved private work. Other sessions keep their own views; local edits remain unpublished in the default manual mode.
 5. By default, publish explicitly with `ghidra merge`; receive safe shared changes with `ghidra refresh`.
-   Resolve overlapping names/comments against an explicitly observed shared value. A conflict
-   prevents the whole selected merge and retains local work.
+   Ghidra resolves local and incoming analysis using native checkout ancestry and change sets.
+   A native conflict prevents publication and retains the original checkout and base. Inspect
+   scoped status and the [recovery guidance](references/recovery.md) before choosing a resolution.
 6. Continue with `ghidra open --session <id> --target <id>`. For uncertain outcomes inspect
    `sessions status <id> --target <id>` and [recovery](references/recovery.md). Supplying a stable
    optional `--request-id` lets a repeated changing intent retrieve its outcome without rerunning.

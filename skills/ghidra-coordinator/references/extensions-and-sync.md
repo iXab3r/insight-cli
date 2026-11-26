@@ -107,11 +107,12 @@ Nothing from that merge is published. An incoming conflict reports `phase: refre
 `localApplied: false`; the requested edit was not started. Lost local replies may report
 `localOutcome: unknown`; they do not falsely assert that the local effect failed.
 
-Automatic merge uses exactly the manual contract: any conflict prevents the whole publication;
-only verified scalar categories combine after divergence; complex divergence retains both
-versions. Use explicit refresh, inspect/resolve scalar conflicts, or transfer complex changes
-onto a current base. A failed automatic workflow does not silently retry after resolution;
-use a new request or explicit merge for the new intention.
+Automatic merge follows the manual native workflow. Ghidra Update combines local and incoming
+analysis using checkout ancestry and native change sets, including structural edits. A native
+conflict prevents publication and retains the original checkout and base. Inspect scoped status
+and the native conflict details before choosing a deliberate resolution. A failed automatic
+workflow does not silently retry after resolution; use a new request or explicit merge for the
+new intention.
 
 Policy survives owner replacement. Optional request IDs (up to 128 characters) bind the local edit, incoming refresh and publication workflow. Repeating the same ID/input
 retrieves its result or reconciles the original publication; it never replays a check-in or

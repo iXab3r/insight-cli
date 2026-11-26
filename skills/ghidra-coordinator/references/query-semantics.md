@@ -104,5 +104,6 @@ the entire initialized-content digest before acknowledgment. `functions set-func
 also accepts `--calling-convention`; saved signature types and convention are verified.
 
 These remain complex private edits. Request IDs retrieve retained outcomes; lost responses are
-reconciled from saved effects, never blindly re-created. Publish with explicit merge on the
-unchanged shared base; structural divergence still retains a conflict.
+reconciled from saved effects, never blindly re-created. Publish with explicit `ghidra merge`,
+which runs native Update/check-in. Ghidra combines local and incoming analysis using checkout
+ancestry and native change sets. A native conflict retains the original working copy and base.
