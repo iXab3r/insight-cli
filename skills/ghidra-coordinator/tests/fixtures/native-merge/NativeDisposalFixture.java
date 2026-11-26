@@ -86,7 +86,7 @@ public final class NativeDisposalFixture {
                 program.save("Disposable release-race fixture",InsightNativeCheckout.MONITOR);
             }else{
                 var data=project.getProjectData().getRootFolder();
-                var extra=new ProgramDB("private",program.getLanguage(),program.getCompilerSpec(),InsightNativeCheckout.CONSUMER);
+                var extra=new ProgramDB("private",program.getLanguage(),program.getLanguage().getDefaultCompilerSpec(),InsightNativeCheckout.CONSUMER);
                 try{
                     if(args[0].equals("nested"))data.createFolder("private").createFile("nested",extra,InsightNativeCheckout.MONITOR);
                     else if(args[0].equals("backup"))data.createFile(file.getName()+".keep",extra,InsightNativeCheckout.MONITOR);
