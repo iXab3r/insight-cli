@@ -160,7 +160,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     }catch(error){keep(checkout.root,'Native release was refused: '+String((error as Error).message).slice(0,300));}
   }
 
-  const known=new Set(contexts.map(c=>c.id)),captured=new Map<string,Artifact[]>(),targetCaptures=new Map<string,Artifact[]>(),discarded=new Set<string>();
+  const known=new Set(contexts.map(c=>c.id)),captured=new Map<string,Artifact[]>(),targetCaptures=new Map<string,Artifact[]>(),discarded=new Set<string>(),disposedDetachedRoots=new Set<string>();
   for(const context of contexts){
     const snapshots:Artifact[]=[];
     if(context.workingSnapshot?.kind==='snapshot')snapshots.push(context.workingSnapshot);
@@ -246,7 +246,10 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         const projectFiles=['view.rep','view.gpr','view.lock','view.lock~'];
         for(const file of projectFiles)await remove(join(root,file),'detached-projects');
         // Keep the capture proof until every project removal succeeds, so a sharing violation is retryable.
-        if(dryRun||!(await Promise.all(projectFiles.map(file=>present(join(root,file))))).some(Boolean))await remove(join(root,'saved.gzf'),'duplicate-exports');
+        if(dryRun||!(await Promise.all(projectFiles.map(file=>present(join(root,file))))).some(Boolean)){
+          await remove(join(root,'saved.gzf'),'duplicate-exports');
+          if(dryRun||!await present(join(root,'saved.gzf')))disposedDetachedRoots.add(root);
+        }
       }
     }
   }
@@ -257,6 +260,18 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
 
   // Roots are live rows, unfinished or failed intents, every user-visible result and VT owners.
   const roots=workspace.artifactRoots();for(const id of nativeEvidence)roots.add(id);
+  // Migration journals keep identity, not artifact liveness. A retained saved.gzf still needs its
+  // canonical verification copy for the next collection attempt, even after the context migrated.
+  for(const kind of ['context','shared','candidate'] as const)for(const owner of await directories(join(native,kind))){
+    const proofs=kind==='context'?(discarded.has(owner)?[]:captured.get(owner)??[]):targetCaptures.get(owner)??[];
+    if(!proofs.length)continue;
+    for(const name of await directories(join(native,kind,owner))){
+      const root=join(native,kind,owner,name);if(disposedDetachedRoots.has(root))continue;
+      try{if(!await present(join(root,'saved.gzf')))continue;}
+      catch{keep(root,'Retained capture metadata could not be verified; its snapshot proof is preserved.');}
+      for(const artifact of proofs)roots.add(artifact.id);
+    }
+  }
   for(const tracking of await directories(join(workspace.directory,'version-tracking'))){
     let owner='';try{owner=await readFile(join(workspace.directory,'version-tracking',tracking,'owner.json'),'utf8');}catch(error){if(!missing(error))throw error;}
     for(const match of owner.matchAll(/(?:snapshot|native):[a-f0-9]{64}/g))roots.add(match[0]);

@@ -86,6 +86,25 @@ test('completed explicit legacy discard authorizes its proved stopped project wi
  const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(root,'view.rep')));
  await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(root,'view.rep')),false);assert.deepEqual(f.released,[]);
 });
+
+for(const failure of ['view.rep','saved.gzf'])test('migration capture verification survives failed '+failure+' cleanup until retry completes',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),failed=join(root,failure),saved=join(root,'saved.gzf'),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'server',fingerprint:'a'.repeat(64)}));const shared=await f.workspace.captureNative(path);f.workspace.observeShared(f.target.id,1,shared);
+ const folder=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(folder,{recursive:true});
+ await writeFile(join(folder,f.context.id+'-detached.json'),JSON.stringify({schema:1,original:f.context}));f.workspace.resetMigratedContext(f.context);
+ assert.equal(f.workspace.artifactRoots().has(f.working.id),false);
+ const fs=(await import('node:fs/promises')).default,{syncBuiltinESMExports}=await import('node:module'),original=fs.rm,originalUnlink=fs.unlink;
+ const mocked=t.mock.method(fs,'rm',async(...args:Parameters<typeof fs.rm>)=>{if(args[0]===failed)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(original,fs,args);});
+ const mockedUnlink=t.mock.method(fs,'unlink',async(...args:Parameters<typeof fs.unlink>)=>{if(args[0]===failed)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(originalUnlink,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();});
+ const first=await collectStorage(f.workspace,f.port,false);assert.ok(first.retained.some(r=>r.path===failed&&r.reason.includes('EBUSY')));
+ assert.equal(await readFile(saved,'utf8'),'working');await f.workspace.artifacts.verify(f.working);assert.ok(f.workspace.allArtifacts().some(a=>a.id===f.working.id));
+ mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();
+ const planned=await collectStorage(f.workspace,f.port,true);await f.workspace.artifacts.verify(f.working);
+ const retry=await collectStorage(f.workspace,f.port,false);assert.equal(retry.bytes,planned.bytes);assert.deepEqual(retry.categories,planned.categories);
+ assert.equal(await exists(join(root,'view.rep')),false);assert.equal(await exists(saved),false);assert.equal(await exists(f.workspace.artifacts.path(f.working)),false);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);await f.workspace.artifacts.verify(shared);await f.workspace.artifacts.verify(f.target.input);
+});
 const uncertain:Record<string,(f:Awaited<ReturnType<typeof fixture>>)=>Promise<void>>={
  'unresolved operation':async f=>{await request(f,'unknown',f.working,{state:'unknown'});},
  'abandoned unknown effect':async f=>{await request(f,'failed',f.working,{outcome:'unknown'});},
