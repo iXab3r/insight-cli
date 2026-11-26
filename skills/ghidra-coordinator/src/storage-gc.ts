@@ -3,6 +3,8 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {Workspace,type GhidraContext} from './workspace.js';
 import {stable} from './model.js';
+import {peerStages} from './cross-peer.js';
+import {sameDirectory} from './directory-identity.js';
 
 /** Deletes only bytes reproducible from retained state. Anything unproved is reported and kept. */
 export interface CollectionPort {
@@ -45,6 +47,9 @@ class Reclaimed {
     // A real run removes names as it goes, so keep the first observed link count.
     if(row)row.names++;else this.seen.set(key,{links:Number(st.nlink),names:1,size:Number(st.size),category});
   }
+  include(other:Reclaimed){
+    for(const [key,value] of other.seen){const row=this.seen.get(key);if(row)row.names+=value.names;else this.seen.set(key,value);}
+  }
   bytes(){const out:Record<string,number>={};for(const f of this.seen.values())if(f.names>=f.links)out[f.category]=(out[f.category]??0)+f.size;return out;}
 }
 async function stopReceipt(root:string,worker:Record<string,unknown>){
@@ -79,9 +84,10 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
   async function remove(path:string,category:string):Promise<void>{
     const st=await present(path);if(!st)return;
     if(st.isSymbolicLink()||!st.isFile()&&!st.isDirectory())return keep(path,'Links and special entries are never removed.');
-    await reclaimed.add(path,category);
+    const sizes=new Reclaimed();await sizes.add(path,category);
     if(!dryRun)try{if(st.isDirectory())await rm(path,{recursive:true,maxRetries:3});else await unlink(path);}
       catch(error){return keep(path,'Removal failed: '+String((error as NodeJS.ErrnoException).code));}
+    reclaimed.include(sizes);
     (categories[category]??={items:0,bytes:0}).items++;
   }
 
@@ -138,12 +144,33 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
       for(const name of await directories(join(parent,owner))){
         const root=join(parent,owner,name);
         if(await realpath(root)!==join(await realpath(parent),owner,name)){keep(root,'Working root moved outside owned storage.');continue;}
-        const worker=await json(join(root,'process.json')),nativeRoot=Boolean(await present(join(root,'native-owner.json')));
-        if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
-        if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
-        if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
+        let worker:Record<string,unknown>|undefined,nativeRoot=false;
+        try{
+          worker=await json(join(root,'process.json'));nativeRoot=Boolean(await present(join(root,'native-owner.json')));
+          if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
+          if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
+          if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
+        }catch(error){keep(root,'Working root worker proof could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable'));continue;}
         for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
+        if(kind==='context'){
+          const context=workspace.contextById(owner),stages=await peerStages(root,{context:owner,target:context.target});let ownershipReason:string|undefined;
+          if(stages.length)try{
+            const linkedOwner=await linked(join(root,'process.json'))||await linked(join(root,'native-owner.json'));
+            const nativeOwner=nativeRoot&&!linkedOwner&&(await lstat(join(root,'native-owner.json'))).isFile()?await json(join(root,'native-owner.json')):undefined;
+            if(!worker)ownershipReason='Cross-target working root has no worker receipt that proves it stopped.';
+            else if(linkedOwner)ownershipReason='Cross-target working root ownership receipt is a link.';
+            else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))ownershipReason='Cross-target working root receipt belongs to a different owner.';
+            else if(typeof worker.root!=='string'||!sameDirectory(worker.root,root))ownershipReason='Cross-target worker receipt does not identify this working root.';
+          }catch(error){ownershipReason='Cross-target working root ownership receipt could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable');}
+          for(const stage of stages){
+            if(ownershipReason)keep(stage.folder,ownershipReason);
+            else if('reason' in stage)keep(stage.folder,stage.reason);
+            else if(stage.receipt.state!=='closed')keep(stage.folder,'Cross-target cleanup is incomplete; its temporary program removal is unverified.');
+            else if(workspace.checkoutReferenced(context,root))keep(stage.folder,'An unresolved operation in another context references this checkout.');
+            else if(stage.input)await remove(stage.input,'duplicate-exports');
+          }
+        }
         if(nativeRoot){
           // The project itself belongs to its checkout lifecycle, including uncertain creations.
           for(const run of await directories(join(root,'explicit-exports')))await remove(join(root,'explicit-exports',run,'program.gzf'),'duplicate-exports');

@@ -30,8 +30,8 @@ export interface ResearchBackend {
   updateNative?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}>;
   recoverUpdate?(scope:Scope,request:string):Promise<{state:'ready'|'empty';revision:number;snapshot:Artifact;sharedSnapshot:Artifact;receivedChanges:number;nativeMergeInvocations:number}|{state:'conflict';revision:number;conflict:string}|{state:'unknown'}>;
   publishNative?(publication:Publication):Promise<{state:'published';revision:number;snapshot?:Artifact}|{state:'conflict';applied:0;conflict?:string}>;
-  dropNative?(scope:Scope):Promise<void>;
-  finishEmptyNative?(scope:Scope):Promise<void>;
+  dropNative?(scope:Scope,request?:string):Promise<void>;
+  finishEmptyNative?(scope:Scope,request?:string):Promise<void>;
   recoverEmptyNative?(scope:Scope,request:string):Promise<{state:'verified';revision:number}|{state:'unknown'}>;
   discardNative?(scope:Scope,request:string):Promise<{baseRevision:number;retainedKeepFile:string}>;
   recoverDiscardNative?(scope:Scope,request:string,original:NativeCheckout):Promise<{state:'verified';baseRevision:number;retainedKeepFile:string}|{state:'unknown'}>;
@@ -113,6 +113,13 @@ function pageResult(value: unknown, key: string, limit: number, offset: number) 
 export class Research {
   constructor(readonly workspace: Workspace, private readonly backend: ()=>Promise<ResearchBackend>,
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
+  private retainedDisposal(selected:Scope,request:string,error:unknown){
+    if(!error||typeof error!=='object')return;
+    const failure=error as {code?:string;result?:{state?:string;retention?:{schema?:number;source?:string;checkout?:unknown;request?:string;snapshot?:Artifact}}},proof=failure.result?.retention,current=this.workspace.context(selected),outcome=this.workspace.request(request);
+    if(failure.code==='coordinator.conflict'&&failure.result?.state==='retained'&&proof?.schema===1&&proof.source==='native-release-status'&&
+      proof.request===request&&proof.snapshot?.id===current.workingSnapshot?.id&&outcome.context===current.id&&outcome.state==='failed'&&digest(outcome.result)===digest(failure.result)&&
+      proof.checkout&&current.nativeCheckout?.state==='active'&&digest(proof.checkout)===digest(current.nativeCheckout))return failure.result;
+  }
   async ordered<T>(selected: Scope, action: ()=>Promise<T>): Promise<T> {
     const key=this.workspace.context(selected).id,previous=this.tasks.get(key);
     const task=timed('facade.queue','research',async()=>{await previous?.catch(()=>{});}).then(action);
@@ -242,10 +249,12 @@ export class Research {
         if(request.state==='applied')return request.result;
         fail('unknown','This documentation transfer retains an unproved outcome and is not repeated.',request.result);
       }
-      const backend=await this.backend();await backend.open(source);const sourceSnapshot=await backend.saved(source);
+      const backend=await this.backend();await backend.open(source);const sourceView=await backend.saved(source);
+      if(sourceView.kind==='native'&&!backend.snapshotFile)fail('configuration','Selected backend cannot retain an immutable documentation source.');
+      const sourceSnapshot=sourceView.kind==='native'?await this.workspace.captureSnapshot(await backend.snapshotFile!(sourceView)):sourceView;
       await backend.open(selected);if(!backend.transfer||!backend.transferCheck)fail('configuration','Selected backend cannot verify documentation transfer.');
       const context=this.workspace.context(selected);
-      this.workspace.startRequest(request.id,{kind:'transfer',generation:context.generation,workingSnapshot:context.workingSnapshot,source,sourceSnapshot,dryRun});
+      this.workspace.startRequest(request.id,{kind:'transfer',generation:context.generation,workingSnapshot:context.workingSnapshot,source,sourceView,sourceSnapshot,dryRun});
       try {
         const value=transferResult(await backend.transfer(selected,sourceSnapshot,dryRun),dryRun);
         const snapshot=await backend.saved(selected);
@@ -436,7 +445,13 @@ export class Research {
         let publication;
         try{publication=this.workspace.publication(request.id);}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
         if(!publication){
-          const empty=await backend.recoverEmptyNative?.(selected,request.id);
+          let empty;
+          try{empty=await backend.recoverEmptyNative?.(selected,request.id);}
+          catch(error){
+            const retained=this.retainedDisposal(selected,request.id,error);
+            if(!retained)throw error;
+            continue;
+          }
           if(empty?.state==='verified'){
             const current=this.workspace.context(selected);this.workspace.completeSavedRequest(selected,request.id,current.generation,{}, {...selected,state:'empty',applied:0,pendingChanges:0,sharedRevision:revision(empty.revision),engine:'ghidra-native'});continue;
           }
@@ -609,7 +624,7 @@ export class Research {
           this.workspace.recordRequest(request.id,'failed',result);fail('conflict','Native conflict preserves the original working copy and checkout.',result);
         }
         if(update.state==='empty'){
-          await backend.finishEmptyNative(selected);const current=this.workspace.context(selected);
+          await backend.finishEmptyNative(selected,request.id);const current=this.workspace.context(selected);
           const result={...selected,state:count(context)?'merged':'empty',applied:0,pendingChanges:0,sharedRevision:revision(update.revision),engine:'ghidra-native'};
           this.workspace.completeSavedRequest(selected,request.id,current.generation,{},result);return result;
         }
@@ -630,6 +645,8 @@ export class Research {
       }catch(error){
         const state=this.workspace.request(request.id).state;
         if(state!=='applied'&&state!=='failed'){
+          // Proved empty-disposal retention already committed its terminal request atomically above.
+          // An uncertain release or any publication still follows the unknown-outcome path below.
           if(publication&&['commit_intent','unknown'].includes(this.workspace.publication(publication.id).state))this.workspace.unknownPublication(publication.id,{state:'unknown',engine:'ghidra-native'});
           this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',engine:'ghidra-native'});
         }

@@ -21,9 +21,10 @@ checks out the **current** shared revision. Changed contexts keep their original
 
 Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs (the
 headless bridge saves inside `open_program`). Such a checkout reports itself modified and
-its bytes no longer equal the server base, although it holds no work. On a worker's first
-open of a pristine checkout, the coordinator therefore saves and captures the opened
-buffers as that context's receipt. When they differ from the base, it records them under
+its bytes no longer equal the server base, although it holds no work. Before a worker's
+first launch, independent native status must prove the saved base bytes and checkout identity,
+with no recovery data or additional local files. Only after that proof may the coordinator
+capture the opened buffers as a no-work receipt. When they differ from the base, it records them under
 `ghidra-native/shared-views/<target>/opened/v<version>-<fingerprint>.json` as a proved
 no-work state of that version and file ID. Later edits are compared with that receipt.
 
@@ -33,7 +34,8 @@ passes the observed fingerprint, and Ghidra's `undoCheckout(false)` is invoked o
 exactly those bytes; any other modified checkout stays retained. Copies left by earlier
 releases become reclaimable once any context opens a pristine checkout of the same version
 with a release containing this rule. A reference binds the server origin, repository,
-version, file ID and base fingerprint. `gc --dry-run` judges saved receipts only; execution
+version, file ID, base fingerprint and independently observed pre-open checkout. Older references
+without this provenance cannot authorize disposal of an active checkout. `gc --dry-run` judges saved receipts only; execution
 verifies the observed bytes and may still retain a copy the dry-run counted.
 Equal bytes are the proof; the rule does not depend on which records Ghidra rewrote.
 
@@ -50,6 +52,7 @@ continues safely because every decision is recomputed from retained state.
 | Unchanged native checkouts | Released only through the close verification above |
 | Snapshot and native receipt artifacts | No live row, unfinished/failed request, reported result, unverified publication or version-tracking owner names them |
 | `saved.gzf`, `exports/saved-*`, `shared`, `recovered`, captured explicit-export stages | Owned stopped root; the captured artifact is the durable copy. Candidate roots also require every context of their target to be settled |
+| Completed `cross-peer/*/input.gzf` comparison inputs | Owned stopped root, matching closed stage receipt and recognized inventory, with no unresolved operation owning the input or referencing that checkout. Ownership receipts and journals stay retained |
 | Detached `view.rep`/`view.gpr` projects | Non-native root with a matching stop receipt (a GUI root only after an explicit close), holding only its one imported program, with a verified saved snapshot or migration journal |
 | Ghidra `*.cache` files | Owned stopped root or completed server helper |
 

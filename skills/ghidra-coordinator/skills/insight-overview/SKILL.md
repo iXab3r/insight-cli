@@ -3,7 +3,7 @@ name: insight-overview
 description: Choose bounded tool overviews and focused drilldown through insight-cli without flooding agent context with whole-program code, traces or dumps. Use for tool discovery, scoped evidence paging and keeping native partial coverage separate from complete results.
 ---
 
-# Insight Overview 0.6.5
+# Insight Overview 0.6.6
 
 If local help/status reports AppData or IPC access denied, retry that **read-only probe**
 with the agent host's normal permission escalation, then use that route for later authorized

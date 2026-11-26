@@ -1,5 +1,6 @@
 import {migrateLegacy,migrationProcessBlockers} from './legacy-migration.js';
 import {collectStorage} from './storage-gc.js';
+import {peerStage,peerStages} from './cross-peer.js';
 import {ownedDirectory,projectPathWithin,sameDirectory} from './directory-identity.js';
 import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
@@ -413,6 +414,8 @@ export class GhidraContexts {
         if(observed.state!=='ready'||observed.checkoutId!==checkout.checkoutId)fail('binding','This runtime cannot open the native checkout without changing it; the project is retained.');
       }
       const first=!await exists(join(root,'process.json'));
+      // Missing process/control receipts are not evidence about the saved project. Prove its bytes before launch.
+      const pristine=first?await this.pristineNative(context,checkout):undefined;
       record=await this.launch(root,target,'context',checkout.path,'headless',context.id);
       const project=object(await record.http.call('/open_project',{path:join(root,'view.gpr')}));
       if(project.success===false)fail('launch','Native working project could not be reopened.');
@@ -423,25 +426,41 @@ export class GhidraContexts {
       record.binding.viewEpoch=context.viewEpoch??0;
       await durable(join(root,'process.json'),record.binding);
       await durable(join(this.directory(),'context',context.id,'current.json'),record.binding);
-      const generation=first?await this.recordOpened(context,checkout,record):undefined;
+      const generation=pristine?await this.recordOpened(context,checkout,record,pristine):undefined;
       if(context.workingSnapshot)await recordLifecycle(this.workspace,context.id,{at:new Date().toISOString(),event:'restore',reason:'saved_snapshot',pid:record.binding.pid});
       return generation===undefined?record:{...record,generation};
     } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
+  }
+  private async pristineNative(context:GhidraContext,checkout:NativeCheckout):Promise<Record<string,unknown>|undefined>{
+    if(!context.workingSnapshot||!context.baseSnapshot||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||
+      this.workspace.uncertainOutcome(context)||this.workspace.activePublication(context.target))return;
+    const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
+    const [local,base]=[await read(context.workingSnapshot),await read(context.baseSnapshot)];
+    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint||
+      base.origin!==checkout.origin||base.repository!==checkout.repository)return;
+    const observed=await this.nativeOperation(checkout,'status');
+    if(observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.recoverable!==false||observed.fileId!==checkout.fileId||
+      observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion||!Array.isArray(observed.projectFiles)||
+      observed.projectFiles.length!==1||observed.projectFiles[0]!==basename(checkout.path))return;
+    const saved=object(observed.saved);
+    if(saved.fingerprint!==base.fingerprint||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion)return;
+    return {fingerprint:saved.fingerprint,fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion};
   }
   /**
    * Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs. On a worker's first open of a
    * pristine checkout those bytes are captured as its new receipt and as a proved no-work state of that shared version.
    */
-  private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running):Promise<number|undefined>{
+  private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running,preOpen:Record<string,unknown>):Promise<number|undefined>{
     const context=this.workspace.context(scope);if(!context.workingSnapshot||!context.baseSnapshot)return;
     const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
     const [local,base]=[await read(context.workingSnapshot),await read(context.baseSnapshot)];
-    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint||base.origin!==checkout.origin||base.repository!==checkout.repository)return;
+    if(base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||local.fingerprint!==base.fingerprint||base.origin!==checkout.origin||base.repository!==checkout.repository||
+      preOpen.fingerprint!==base.fingerprint||preOpen.fileId!==checkout.fileId||preOpen.checkoutId!==checkout.checkoutId||preOpen.baseVersion!==checkout.baseVersion)return;
     const snapshot=await this.capture(record),saved=await read(snapshot),opened=text(saved.fingerprint);
     if(opened!==base.fingerprint){
       const root=join(this.directory(),'shared-views',context.target,'opened'),path=join(root,'v'+checkout.baseVersion+'-'+opened+'.json');
       await mkdir(root,{recursive:true,mode:0o700});
-      if(!await exists(path))await durable(path,{schema:1,target:context.target,origin:checkout.origin,repository:checkout.repository,version:checkout.baseVersion,fileId:checkout.fileId,base:base.fingerprint,opened,
+      await durable(path,{schema:2,target:context.target,origin:checkout.origin,repository:checkout.repository,version:checkout.baseVersion,fileId:checkout.fileId,base:base.fingerprint,opened,preOpen,
         runtimeFingerprint:this.inputs.fingerprint,context:context.id,at:new Date().toISOString()});
     }
     return this.workspace.saveContext(scope,context.generation,{workingSnapshot:snapshot}).generation;
@@ -486,7 +505,10 @@ export class GhidraContexts {
     const snapshot=await this.nativeReceipt(next,object(value.saved));
     const shared=await this.serverView(scope.target,next.baseVersion);this.observeNativeShared(scope.target,shared);
     context=this.workspace.saveContext(scope,context.generation,{nativeCheckout:next,state:'stopped',workingSnapshot:snapshot,baseSnapshot:shared.snapshot,baseRevision:next.baseVersion,viewEpoch:(context.viewEpoch??0)+1});
-    return {state:value.modified===true?'ready' as const:'empty' as const,revision:next.baseVersion,snapshot,sharedSnapshot:shared.snapshot,
+    // A pristine open can mark Ghidra's checkout modified without caller work. Compare the saved buffers with the
+    // independently read post-Update base and its proved opened states; diagnostic edit counts are not a work test.
+    const empty=this.workspace.unchangedNative(context);
+    return {state:value.modified===true&&!empty?'ready' as const:'empty' as const,revision:next.baseVersion,snapshot,sharedSnapshot:shared.snapshot,
       receivedChanges:Number(next.baseVersion!==previousBase),nativeMergeInvocations:Number(value.nativeMergeInvocations??0)};
   }
   async recoverUpdate(scope:Scope,request:string){
@@ -513,28 +535,48 @@ export class GhidraContexts {
     if(verified.state!=='verified')fail('unknown','Native history and independent exact-buffer readback do not yet establish publication.');
     return {state:'published' as const,revision:verified.revision,snapshot:verified.snapshot};
   }
-  async dropNative(scope:Scope){
+  async dropNative(scope:Scope,request?:string){
     const context=this.workspace.context(scope),checkout=context.nativeCheckout;
     if(!checkout||checkout.state==='dropped')return;
     if(checkout.state!=='verified')fail('blocked','Only a verified native publication can dispose its project.');
     const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
     if(shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId)fail('binding','Verified native disposal reference changed.');
-    const parameters={verifiedVersion:checkout.baseVersion,fingerprint:text(shared.fingerprint),...(checkout.opened?{opened:checkout.opened}:{})};
-    const released=await this.nativeOperation(checkout,'release',parameters);
-    if(released.state!=='released')fail('unknown','Publication is verified but checkout release remains unproved; its project is retained.');
+    const parameters={verifiedVersion:checkout.baseVersion,fingerprint:text(shared.fingerprint),...(checkout.opened?{opened:checkout.opened,
+      openedVerified:this.workspace.unchangedBuffers(context.target,shared,checkout.opened)}:{})};
+    let released:Record<string,unknown>;
+    try{released=await this.nativeOperation(checkout,'release',parameters);}
+    catch(error){await this.retainNative(scope,checkout,request);throw error;}
+    if(released.state!=='released'){
+      await this.retainNative(scope,checkout,request);
+      fail('unknown','Checkout release remains unproved; its project and saved work are retained.');
+    }
     const dropped=await this.nativeOperation(checkout,'drop',parameters);
     if(dropped.state!=='dropped')fail('unknown','Publication is verified but project deletion remains unproved.');
-    this.workspace.saveContext(scope,context.generation,{nativeCheckout:{...checkout,state:'dropped'},state:'stopped'});
+    this.workspace.saveContext(scope,context.generation,{nativeCheckout:{...checkout,state:'dropped'},state:'stopped',workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
   }
-  async finishEmptyNative(scope:Scope){
+  /** A lost release reply can mean undoCheckout succeeded. Only independent ownership readback permits reopening. */
+  private async retainNative(scope:Scope,checkout:NativeCheckout,request?:string){
+    let result:ReturnType<Workspace['retainNativeDisposal']>|undefined;
+    try{
+      const observed=await this.nativeOperation(checkout,'status');
+      if(observed.state!=='ready'||observed.checkedOut!==true||observed.fileId!==checkout.fileId||observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion)return;
+      const {opened,...binding}=checkout,active={...binding,state:'active' as const};
+      const snapshot=await this.nativeReceipt(active,object(observed.saved)),context=this.workspace.context(scope);
+      result=this.workspace.retainNativeDisposal(scope,context.generation,checkout,snapshot,request);
+    }catch{/* Unproved release/ownership stays verified for journal-based recovery, never a new private launch. */}
+    if(result)fail('conflict','Final native release was refused; saved private work is retained.',result);
+  }
+  async finishEmptyNative(scope:Scope,request?:string){
     const context=this.workspace.context(scope);if(!context.nativeCheckout)fail('binding','Native checkout is absent.');
-    if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope);return;}
+    if(context.nativeCheckout.state==='verified'||context.nativeCheckout.state==='dropped'){await this.dropNative(scope,request);return;}
     // No new server version; the independent base view must equal all saved local buffers.
     const local=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.workingSnapshot!),'utf8'))),base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
     if(!this.workspace.unchangedBuffers(context.target,base,local.fingerprint))fail('binding','An unchanged native checkout differs from its shared base.');
     const opened=local.fingerprint===base.fingerprint?{}:{opened:text(local.fingerprint)};
-    this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...context.nativeCheckout,...opened,state:'verified'},workingSnapshot:context.baseSnapshot,scalars:[],complexChanges:[]});
-    await this.dropNative(scope);
+    const {opened:previousOpened,...checkout}=context.nativeCheckout;
+    // Keep the original saved view and diagnostics until release succeeds. A refused release is still private work.
+    this.workspace.saveContext(scope,context.generation,{state:'stopped',nativeCheckout:{...checkout,...opened,state:'verified'}});
+    await this.dropNative(scope,request);
   }
   /** Close and GC drop a working copy only when Ghidra itself reports no private change. */
   async releaseUnchanged(scope:Scope):Promise<boolean>{
@@ -620,11 +662,16 @@ export class GhidraContexts {
     let journal:Record<string,unknown>;
     try{journal=object(JSON.parse(await readFile(join(checkout.root,'operations',request+'-update.json'),'utf8')));}
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
-    const q=object(journal.request),result=object(journal.result??{}),{owner}=await this.nativeOwner(checkout);
+    const q=object(journal.request),result=object(journal.result??{}),saved=object(result.saved??{}),{owner}=await this.nativeOwner(checkout);
     const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
-    if(q.request!==request||q.root!==checkout.root||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||result.modified!==false||
-      result.baseVersion!==checkout.baseVersion||shared.source!=='server'||shared.fileId!==checkout.fileId||shared.fingerprint!==object(result.saved).fingerprint)return {state:'unknown' as const};
-    await this.dropNative(scope);return {state:'verified' as const,revision:checkout.baseVersion};
+    // An older opened proof cannot undo a live checkout. The native release guard can still reconcile an
+    // already completed release, or independently establish that the original checkout survived refusal.
+    const pendingOpened=typeof checkout.opened==='string'&&/^[a-f0-9]{64}$/.test(checkout.opened)&&checkout.opened===saved.fingerprint;
+    if(q.request!==request||q.root!==checkout.root||q.fileId!==checkout.fileId||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||typeof result.modified!=='boolean'||
+      result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||
+      shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId||shared.origin!==checkout.origin||shared.repository!==checkout.repository||
+      !this.workspace.unchangedBuffers(context.target,shared,saved.fingerprint)&&!pendingOpened)return {state:'unknown' as const};
+    await this.dropNative(scope,request);return {state:'verified' as const,revision:checkout.baseVersion};
   }
   async discardNative(scope:Scope,request:string){
     const context=this.workspace.context(scope),checkout=context.nativeCheckout;
@@ -856,16 +903,19 @@ public class ${name} extends GhidraScript {
     if(removed.success!==true)fail('binding','Owned cross-target snapshot could not be removed.');
   }
   private async reconcilePeers(record:Running) {
-    const parent=join(record.binding.root,'cross-peer');let entries;
-    try{entries=await readdir(parent,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
-    for(const entry of entries) {
-      if(!entry.isDirectory()||!/^__insight_peer_[a-f0-9]{32}$/.test(entry.name))fail('binding','Owned cross-target stage inventory changed.');
-      const folder=join(parent,entry.name);if(await realpath(folder)!==folder)fail('binding','Cross-target stage left its owned directory.');
-      const receipt=object(JSON.parse(await readFile(join(folder,'receipt.json'),'utf8'))),path='/'+entry.name;
-      if(receipt.path!==path||receipt.target!==record.binding.target||receipt.context!==record.binding.context)fail('binding','Cross-target cleanup receipt belongs to another context.');
-      if(receipt.state==='closed')continue;if(receipt.state!=='preparing')fail('binding','Unknown cross-target cleanup stage.');
-      await this.removePeer(record,path);await durable(join(folder,'receipt.json'),{...receipt,state:'closed'});
+    for(const stage of await peerStages(record.binding.root,record.binding)) {
+      if('reason' in stage)fail('binding',stage.reason);
+      if(stage.receipt.state==='preparing')await this.removePeer(record,stage.receipt.path);
+      await this.completePeer(record,stage.receipt.path.slice(1));
     }
+  }
+  private async completePeer(record:Running,name:string){
+    const stage=await peerStage(record.binding.root,name,record.binding);
+    if('reason' in stage)fail('binding',stage.reason);
+    if(stage.receipt.state!=='closed')await durable(join(stage.folder,'receipt.json'),{...stage.receipt,state:'closed'});
+    const context=this.workspace.contextById(record.binding.context!);
+    if(this.workspace.unresolved(context).length||this.workspace.uncertainOutcome(context)||this.workspace.checkoutReferenced(context,record.binding.root))return;
+    if(stage.input)await unlink(stage.input);
   }
   private async withPeer<T>(record:Running,snapshot:Artifact,action:(path:string)=>Promise<T>,reconcile=true):Promise<T> {
     if(reconcile)await this.reconcilePeers(record);
@@ -880,7 +930,7 @@ public class ${name} extends GhidraScript {
       return await action(path);
     }finally {
       await this.removePeer(record,path);
-      await durable(join(folder,'receipt.json'),{path,target:record.binding.target,context:record.binding.context,state:'closed'});
+      await this.completePeer(record,name);
     }
   }
   async pair(selected:Scope,other:Scope,snapshot:Artifact,operation:string,parameters:Record<string,unknown>) {

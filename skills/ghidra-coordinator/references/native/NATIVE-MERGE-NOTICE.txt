@@ -10,6 +10,10 @@ native-merge-patches.ts extracts six SHA-256-pinned upstream source files from
 the selected Ghidra installation into owned compilation storage. The generated
 sources retain their original license headers. Headless entry/display assumptions
 are adapted. A separate native MemoryMergeManager compatibility correction covers
-unchanged-null comments and symmetric deletion/update conflicts. The generated
+unchanged-null comments and symmetric deletion/update conflicts. The native Update
+adapter also saves an unchanged merge result through Ghidra's DB save API so its
+cumulative change files exist, then records that result as clean at the exact
+merged version without replacing the checkout or inventing native edits.
+The generated
 native-merge-provenance.json records upstream and compiled source hashes.
 Installed Ghidra JARs are not modified. No alternative object merger is provided.

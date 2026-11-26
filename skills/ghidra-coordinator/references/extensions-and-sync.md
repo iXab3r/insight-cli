@@ -88,7 +88,7 @@ insight-cli ghidra sync-policy set --session s_a --target t_exe \
 | `--publish after-edit` | After a supported program edit has a verified saved acknowledgment, merge all pending work in that context. Also publishes pending work on explicit `ghidra save`. |
 | `--publish after-save` | Ordinary edits stay private; explicit scoped `ghidra save` merges all pending work after saving. |
 | `--refresh manual` | No automatic incoming update. |
-| `--refresh before-edit` | Refresh before a program-edit command; any returned conflict stops that edit before dispatch. Safe incoming changes from the refresh remain retained. |
+| `--refresh before-edit` | Refresh before a program-edit command. A native conflict receives no incoming changes, retains the original checkout and base, and stops the edit before dispatch. A successful refresh remains saved if the later edit fails. |
 
 Supported program-edit commands include ordinary names/comments, types, bytes/assembly,
 analysis and scripts. Policy excludes control commands (`open`, `close`, `merge`, `refresh`,
@@ -107,11 +107,12 @@ Nothing from that merge is published. An incoming conflict reports `phase: refre
 `localApplied: false`; the requested edit was not started. Lost local replies may report
 `localOutcome: unknown`; they do not falsely assert that the local effect failed.
 
-Automatic merge uses exactly the manual contract: any conflict prevents the whole publication;
-only verified scalar categories combine after divergence; complex divergence retains both
-versions. Use explicit refresh, inspect/resolve scalar conflicts, or transfer complex changes
-onto a current base. A failed automatic workflow does not silently retry after resolution;
-use a new request or explicit merge for the new intention.
+Automatic merge follows the manual native workflow. Ghidra Update combines local and incoming
+analysis using checkout ancestry and native change sets, including structural edits. A native
+conflict prevents publication and retains the original checkout and base. Inspect scoped status
+and the native conflict details before choosing a deliberate resolution. A failed automatic
+workflow does not silently retry after resolution; use a new request or explicit merge for the
+new intention.
 
 Policy survives owner replacement. Optional request IDs (up to 128 characters) bind the local edit, incoming refresh and publication workflow. Repeating the same ID/input
 retrieves its result or reconciles the original publication; it never replays a check-in or
