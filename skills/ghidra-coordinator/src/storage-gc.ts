@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {Workspace,type GhidraContext} from './workspace.js';
 import {stable} from './model.js';
 import {peerStages} from './cross-peer.js';
+import {sameDirectory} from './directory-identity.js';
 
 /** Deletes only bytes reproducible from retained state. Anything unproved is reported and kept. */
 export interface CollectionPort {
@@ -160,6 +161,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
             if(!worker)ownershipReason='Cross-target working root has no worker receipt that proves it stopped.';
             else if(linkedOwner)ownershipReason='Cross-target working root ownership receipt is a link.';
             else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))ownershipReason='Cross-target working root receipt belongs to a different owner.';
+            else if(typeof worker.root!=='string'||!sameDirectory(worker.root,root))ownershipReason='Cross-target worker receipt does not identify this working root.';
           }catch(error){ownershipReason='Cross-target working root ownership receipt could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable');}
           for(const stage of stages){
             if(ownershipReason)keep(stage.folder,ownershipReason);

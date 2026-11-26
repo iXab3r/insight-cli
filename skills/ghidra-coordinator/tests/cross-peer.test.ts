@@ -400,3 +400,27 @@ for(const proof of ['missing process','unreadable process','unreadable stop'] as
   if(proof==='missing process')await writeFile(process,await readFile(join(replacement,'process.json')));
   await collectStorage(f.workspace,f.port,false);assert.equal(await exists(s.input),false);
 });
+
+for(const binding of ['missing','replacement','alias'] as const)test('historical peer worker root binding is '+binding,async t=>{
+  const f=await fixture(t,false),packed=await f.snapshot('historical input binding'),s=await f.stage(packed);
+  f.workspace.forgetArtifact(packed.id);await unlink(f.workspace.artifacts.path(packed));assert.equal((await lstat(s.input)).nlink,1);
+  const replacement=join(f.root,'..','w-replacement'),processReceipt=join(f.root,'process.json'),worker=JSON.parse(await readFile(processReceipt,'utf8'));
+  await mkdir(replacement);await writeFile(join(replacement,'process.json'),JSON.stringify({...worker,root:replacement}));
+  for(const name of ['stopped.json','native-owner.json'])await writeFile(join(replacement,name),await readFile(join(f.root,name)));
+  f.workspace.saveContext(f.context,f.context.generation,{nativeCheckout:{...f.context.nativeCheckout!,root:replacement}});
+  const historical={...worker};
+  if(binding==='missing')delete historical.root;
+  else if(binding==='replacement')historical.root=replacement;
+  else{historical.root=join(f.directory,'historical-alias');await symlink(f.root,historical.root,'junction');}
+  await writeFile(processReceipt,JSON.stringify(historical));
+  for(const dry of [true,false]){
+    const result=await collectStorage(f.workspace,f.port,dry);
+    if(binding==='alias'){
+      assert.equal(result.categories['duplicate-exports']!.bytes,packed.size);assert.equal(await exists(s.input),dry);
+    }else{
+      assert.equal(result.bytes,0);assert.ok(await exists(s.input));
+      assert.ok(result.retained.some(row=>row.path===s.folder&&/does not identify this working root/.test(row.reason)));
+    }
+  }
+  if(binding!=='alias'){await writeFile(processReceipt,JSON.stringify(worker));await collectStorage(f.workspace,f.port,false);assert.equal(await exists(s.input),false);}
+});
