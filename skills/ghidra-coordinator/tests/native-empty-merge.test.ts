@@ -181,3 +181,21 @@ for(const outcome of ['conflict','unknown'])test('native '+outcome+' never becom
  assert.equal(after.workingSnapshot!.id,before.workingSnapshot!.id);assert.equal(after.nativeCheckout!.checkoutId,before.nativeCheckout!.checkoutId);
  assert.equal(after.nativeCheckout!.baseVersion,1);assert.equal(state.publications,0);assert.equal(state.releases,0);assert.equal(state.drops,0);assert.equal(state.updates,1);
 });
+
+test('an incomplete incoming Update intent stays unknown even with the no-op failure diagnostic',async t=>{
+ const {f,app,workspace,selected,scope,state,bases}=await fixture(t);
+ bases.set(2,incoming);state.revision=2;state.updateState='unknown';
+ const args=['ghidra','merge',...scope,'--request-id','incomplete-incoming','--json'];
+ assert.notEqual((await f.run(app,args)).exitCode,0);
+ const request=workspace.scopedRequest(selected,'incomplete-incoming')!,before=workspace.context(selected),checkout=before.nativeCheckout!;
+ const path=join(checkout.root,'operations',request.id+'-update.json'),journal=JSON.parse(await readFile(path,'utf8'));
+ delete journal.result;
+ Object.assign(journal,{baseVersion:1,headVersion:2,before:{...journal.before,fingerprint:state.fingerprint},diagnostic:'Concurrent database modification error (4)'});
+ await writeFile(path,JSON.stringify(journal));
+ for(let i=0;i<2;i++)assert.notEqual((await f.run(app,args)).exitCode,0);
+ assert.equal(workspace.request(request.id).state,'unknown');
+ assert.deepEqual(workspace.context(selected).nativeCheckout,checkout);
+ assert.equal(workspace.context(selected).workingSnapshot!.id,before.workingSnapshot!.id);
+ assert.equal(state.updates,1);assert.equal(state.publications,0);assert.equal(state.releases,0);assert.equal(state.drops,0);
+ assert.equal(JSON.parse(await readFile(path,'utf8')).result,undefined);
+});

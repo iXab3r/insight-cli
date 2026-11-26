@@ -3,7 +3,7 @@ import {join} from 'node:path';
 import * as zip from 'yauzl';
 import {fail} from './model.js';
 
-/** Version-pinned upstream display/entry adapters plus the separately proven comment fix.
+/** Version-pinned upstream display/entry adapters and native compatibility fixes.
  * Ghidra still creates/orders every resolver. No coordinator object merge lives here. */
 const pins=[
  ['Features/Base','ghidra/app/merge/listing/ListingMergeManager.java','3b6ce2e22fd414d6cc63ce2a3be6c533f13524b9513767b932f6da8f2d9326d6'],
@@ -39,7 +39,29 @@ export async function nativeMergeSources(home:string){
   if(name.endsWith('/ListingMergeManager.java')){
    source=replace(source,'mergePanel.setTopComponent(conflictInfoPanel);','if (mergePanel != null) mergePanel.setTopComponent(conflictInfoPanel);');
    for(const method of ['setListingViewsToEntireProgram','emptyListingViewForPrograms'])source=replace(source,'private void '+method+'() {','private void '+method+'() {\n\t\tif (mergePanel == null) return;');
-  }else if(name.endsWith('/GhidraFileData.java'))source=replace(source,'if (SystemUtilities.isInHeadlessMode()) {','if (false /* Insight native headless merge adapter installed */) {',2);
+  }else if(name.endsWith('/GhidraFileData.java')){
+   source=replace(source,'if (SystemUtilities.isInHeadlessMode()) {','if (false /* Insight native headless merge adapter installed */) {',2);
+   source=replace(source,'DomainObject latestObj = null; // TODO: Is there some way to leverage the buffer file we already copied into tmpItem? Missing required change set',
+    'boolean mergeChanged = true;\n\t\t\t\tDomainObject latestObj = null; // TODO: Is there some way to leverage the buffer file we already copied into tmpItem? Missing required change set');
+   source=replace(source,'mergeObj.save("Merge with version " + mergeVer, monitor);',
+    `// A native merge can leave the latest-version result unchanged, even when
+					// the source checkout has local saves (e.g. Ghidra's open-time rewrite).
+					// save() otherwise skips it, leaving no cumulative change files for
+					// updateCheckoutFrom. Let the native save create those files, without
+					// adding an edit or synthesizing a change set.
+					mergeChanged = ((DomainObjectAdapterDB) mergeObj).getDBHandle().isChanged();
+					((DomainObjectAdapterDB) mergeObj).setChanged(true);
+					mergeObj.save("Merge with version " + mergeVer, monitor);`);
+   source=replace(source,'tmpItem = null; // update removes temporary file if successful',
+    `tmpItem = null; // update removes temporary file if successful
+				if (!mergeChanged) {
+					// The native result had no buffer changes relative to mergeVer.
+					// Record its new local version as clean, keeping the same checkout
+					// and the exact version merged, even if the server advances again.
+					folderItem.setCheckout(checkoutId, folderItem.isCheckedOutExclusive(), mergeVer,
+						folderItem.getCurrentVersion());
+				}`);
+  }
   else if(name.endsWith('/ProgramContextMergeManager.java'))source=replace(source,'mergePanel.setTopComponent(conflictInfoPanel);','if (mergePanel != null) mergePanel.setTopComponent(conflictInfoPanel);');
   else if(name.endsWith('/ExternalFunctionMerger.java'))for(const panel of ['conflictInfoPanel','listingConflictInfoPanel'])source=replace(source,'listingMergePanel.setTopComponent('+panel+');','if (listingMergePanel != null) listingMergePanel.setTopComponent('+panel+');');
   else if(name.endsWith('/AbstractFunctionMerger.java'))source=replace(source,'final Address entryPt, final TaskMonitor monitor) {\n\n\t\tif (conflictPanel == null) {',
