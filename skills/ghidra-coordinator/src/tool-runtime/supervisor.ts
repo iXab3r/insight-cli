@@ -52,36 +52,54 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
   const stdio=Array.isArray(options.stdio)?[...options.stdio]:Array(3).fill(options.stdio??'pipe'),fd=stdio.length,nonce=randomUUID();if(gated)stdio.push('pipe');
   let child:TrackedChild;try{args=await javaClasspathArguments(root,spec.tool,executable,args);control.signal?.throwIfAborted();child=spawn(gated?process.execPath:executable,gated?['--no-warnings',fileURLToPath(new URL('./launch-worker.js',import.meta.url)),directory,id,String(fd)]:args,
    {cwd:root,...options,stdio,windowsHide:true,env:gated?{PATH:environment.PATH,HOME:root,TMPDIR:root}:environment}) as TrackedChild;}catch(error){Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);throw error;}
-  const closed=new Promise<void>((ok,bad)=>{child.on('error',error=>{if(!child.pid)bad(error);});child.once('close',ok);});void closed.catch(()=>{});
+  // Node can emit errors on the pipes as well as on the child (including a failed
+  // Windows spawn with no PID). Observe them before any adapter/identity await.
+  let childError:Error|undefined,streamError:Error|undefined,didSpawn=false,didClose=false;
+  const failure=()=>childError??streamError;
+  const spawned=new Promise<void>((ok,bad)=>{
+   child.once('spawn',()=>{didSpawn=true;ok();});
+   child.on('error',error=>{childError??=error;if(!didSpawn)bad(error);});
+  });
+  for(const stream of child.stdio)stream?.on('error',error=>{
+   // A tool may close its input without consuming it; retain the existing EPIPE policy.
+   if(stream!==child.stdin||(error as NodeJS.ErrnoException).code!=='EPIPE')streamError??=error;
+  });
+  const closed=new Promise<void>((ok,bad)=>{child.once('close',()=>{didClose=true;const error=failure();if(error)bad(error);else ok();});});void closed.catch(()=>{});
+  let finishLaunch!:()=>void;const launchFinished=new Promise<void>(ok=>finishLaunch=ok);
   const handle:Owned={child,closed,record};owned.set(ownedKey(directory,id),handle);
-  const finalized=control.finalize===false?closed:closed.then(async()=>{
+  const finalized=control.finalize===false?closed:closed.catch(()=>{}).then(async()=>{
+   // A fast exit must not finalize a reservation while startup is still writing it.
+   await launchFinished;
    const current=await readJson<ProcessRecord>(path)??record;
-   if(current.state!=='failed'&&current.state!=='unverified')Object.assign(current,{state:'exited',exitCode:child.exitCode,signal:child.signalCode,endedAt:new Date().toISOString(),outcome:current.requestedStop==='kill'?'killed':current.requestedStop==='stop'?'stopped':'completed'});
+   if(current.state!=='failed'&&current.state!=='unverified')Object.assign(current,{state:failure()?'failed':'exited',exitCode:child.exitCode,signal:child.signalCode,endedAt:new Date().toISOString(),outcome:failure()?'launch_failed':current.requestedStop==='kill'?'killed':current.requestedStop==='stop'?'stopped':'completed',...(failure()?{phase:'launch_failed',launchError:(failure() as NodeJS.ErrnoException).code??'stdio'}:{})});
    await atomicWrite(path,current);
-  },async()=>{Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);});
+  });
   handle.closed=finalized.finally(()=>{owned.delete(ownedKey(directory,id));});void handle.closed.catch(()=>{});
   Object.assign(child,{toolProcessId:id,toolClosed:handle.closed});
   try{
-   await control.onSpawn?.(child);if(!child.pid)throw Error('Owned tool spawn did not obtain a PID');
+   await spawned;if(failure())throw failure();
+   await control.onSpawn?.(child);if(failure())throw failure();if(!child.pid)throw Error('Owned tool spawn did not obtain a PID');
    if(gated){
     const channel=child.stdio[fd] as Writable;channel.on('error',()=>{});channel.end(JSON.stringify({executable,arguments:args,environment:Object.fromEntries(Object.entries(environment).filter(([,v])=>v!==undefined)),nonce}));
     let armed=false;
     for(let i=0;i<400;i++){
-     control.signal?.throwIfAborted();const ready=await readJson<{pid:number;nonce:string}>(join(root,'armed.json'));
+     control.signal?.throwIfAborted();if(failure())throw failure();const ready=await readJson<{pid:number;nonce:string}>(join(root,'armed.json'));
      if(ready&&ready.pid===child.pid&&ready.nonce===nonce){armed=true;break;}
      if(child.exitCode!==null||child.signalCode!==null)break;await delay(25);
     }
     if(!armed)throw Error('Owned launch did not become armed');
-    Object.assign(record,await readJson(path),{state:'running',phase:'exec_authorized'});await atomicWrite(path,record);await atomicWrite(join(root,'go.json'),{nonce});
+    if(failure())throw failure();Object.assign(record,await readJson(path),{state:'running',phase:'exec_authorized'});await atomicWrite(path,record);if(failure())throw failure();await atomicWrite(join(root,'go.json'),{nonce});
    }else{
     if(!child.pid)throw Error('No child process');const identity=await processIdentity(child.pid);Object.assign(record,{pid:child.pid,identity:identity?.birth,strongIdentity:identity?.strong,processGroup:identity?.group,state:'running',phase:'direct_child_only'});await atomicWrite(path,record);
    }
+   if(failure())throw failure();
    return child;
   }catch(error){
-   if(child.exitCode===null&&child.signalCode===null)try{child.kill('SIGKILL');}catch{}
-   await Promise.race([handle.closed.catch(()=>{}),delay(2000)]);
-   Object.assign(record,{state:child.exitCode!==null||child.signalCode!==null?'failed':'unverified',phase:'launch_failed'});await atomicWrite(path,record);throw error;
-  }
+   if(child.pid&&child.exitCode===null&&child.signalCode===null)try{child.kill('SIGKILL');}catch{}
+   await Promise.race([closed.catch(()=>{}),delay(2000)]);
+   const ended=didClose||child.exitCode!==null||child.signalCode!==null||!child.pid&&Boolean(childError);
+   Object.assign(record,await readJson(path),{state:ended?'failed':'unverified',phase:'launch_failed',launchError:((failure()??error) as NodeJS.ErrnoException).code??'launch',...(ended?{endedAt:new Date().toISOString(),exitCode:child.exitCode,signal:child.signalCode,outcome:'launch_failed'}:{})});await atomicWrite(path,record);throw failure()??error;
+  }finally{finishLaunch();}
  },control.signal);
 }
 export async function processStatus(directory:string,id:string,verify?:OwnershipVerifier):Promise<ProcessRecord>{
