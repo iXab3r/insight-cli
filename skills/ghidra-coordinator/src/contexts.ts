@@ -29,7 +29,7 @@ import {logicalPrograms} from './cross-results.js';
 import {uiResult} from './ui-results.js';
 import {fileURLToPath} from 'node:url';
 import {readCallerGoal,awaitCaller} from './debugger-caller.js';
-import {debuggerProgramMetadata} from './debugger-results.js';
+import {debuggerProgramMetadata,debuggerMetadataFingerprint} from './debugger-results.js';
 import {nativeQueries} from './query-policy.js';
 import {nativeQuery} from './native-queries.js';
 import {runInline} from './inline-script.js';
@@ -274,7 +274,11 @@ export class GhidraContexts {
     if(result.success!==true)fail('save','Private program save was not acknowledged.');
     if(context?.nativeCheckout){
       const saved=object(await this.nativeView(record,{operation:'fingerprint'}));
-      return this.nativeReceipt(context.nativeCheckout,saved);
+      // A native receipt names mutable project bytes. Retain this small metadata witness while
+      // those exact bytes are present; an older receipt cannot be inspected after the next save.
+      const debuggerMetadata=debuggerMetadataFingerprint(await this.nativeView(record,
+        {operation:'inspect',expected:saved.fingerprint,parameters:{kind:'debugger_bookmarks'}}));
+      return this.nativeReceipt(context.nativeCheckout,{...saved,debuggerMetadata});
     }
     const output=join(record.binding.root,'exports');await mkdir(output,{recursive:true,mode:0o700});
     const name='saved-'+randomUUID()+'.gzf';
@@ -598,9 +602,10 @@ export class GhidraContexts {
     }
     await this.finishEmptyNative(scope);return true;
   }
-  /** A missing current receipt means no worker was ever started; any other missing receipt is unproved. */
+  /** Absence of the ready receipt alone says nothing about an interrupted first start. */
   private async neverStartedOrClosed(c:GhidraContext){
-    try{await readFile(join(this.directory(),'context',c.id,'current.json'));}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return true;throw e;}
+    if(await exists(join(this.directory(),'context',c.id,'current.json')))return this.closed(c);
+    if(!(await this.lastWorker(c.id,c)).binding)return true;
     return this.closed(c);
   }
   /** A pending checkout intent may own a server checkout, so it is never treated as detached work. */
@@ -699,8 +704,12 @@ export class GhidraContexts {
     if(observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.fileId!==next.fileId||observed.checkoutId!==next.checkoutId||observed.baseVersion!==next.baseVersion||
       object(observed.saved).fingerprint!==object(value.saved).fingerprint||!Array.isArray(checkouts)||
       checkouts.some(c=>object(c).id===original.checkoutId)||!checkouts.some(c=>object(c).id===next.checkoutId&&object(c).version===next.baseVersion)||
-      typeof value.retainedKeepFile!=='string'||value.retainedKeepFile!==''&&(value.retainedKeepFile!==basename(next.path)+'.keep'||!Array.isArray(observed.projectFiles)||!observed.projectFiles.includes(value.retainedKeepFile)))return {state:'unknown' as const};
+      typeof value.retainedKeepFile!=='string'||value.retainedKeepFile!==''&&(!this.nativeKeepName(next,value.retainedKeepFile)||!Array.isArray(observed.projectFiles)||!observed.projectFiles.includes(value.retainedKeepFile)))return {state:'unknown' as const};
     return {state:'verified' as const,...await this.applyNativeDiscard(scope,value)};
+  }
+  private nativeKeepName(checkout:NativeCheckout,name:string){
+    const keep=basename(checkout.path)+'.keep';
+    return name===keep||name.startsWith(keep+'.')&&/^[1-9][0-9]*$/.test(name.slice(keep.length+1));
   }
   private async applyNativeDiscard(scope:Scope,value:Record<string,unknown>){
     const context=this.workspace.context(scope),checkout=context.nativeCheckout!;
@@ -717,13 +726,13 @@ export class GhidraContexts {
     if(this.workspace.unresolved(scope).some(intent=>intent.id!==request&&intent.operation!=='ghidra.open'))
       fail('blocked','This context retains an unresolved operation; reconcile its recorded outcome before continuing.');
     let binding: ProcessBinding|undefined,unfinished=false;
-    try {({binding,unfinished}=await this.lastWorker(context.id));}
-    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    ({binding,unfinished}=await this.lastWorker(context.id,{...context,...scope}));
+    if(binding)await this.workerReceipt(binding,context.id,scope);
     let stopped=false;
     if(binding) {
       try {
         const receipt=object(JSON.parse(await readFile(join(binding.root,'stopped.json'),'utf8')));
-        stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
+        stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret&&await this.workerEnded(binding);
       } catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
     }
     if(context.workingSnapshot&&!context.nativeCheckout)fail('migration','This context contains legacy detached work; run ghidra migrate --target '+scope.target+' --dry-run, then ghidra migrate --target '+scope.target+'. Its data is retained.');
@@ -743,6 +752,7 @@ export class GhidraContexts {
     if(binding&&(stopped||unfinished||!alive(binding.pid))){
       if(binding.context!==context.id||binding.target!==scope.target)fail('binding','Retired native credential belongs to another context.');
       await releaseStoppedContextCredential(this.directory(),binding,this.c.secrets,alive,()=>this.retiredWorker(binding));
+      if(unfinished)await this.retainStartedWorker(binding);
     }
     let current=this.workspace.context(scope);
     if(current.nativeCheckout?.state==='verified'){await this.dropNative(scope);current=this.workspace.context(scope);}
@@ -1103,6 +1113,25 @@ public class ${name} extends GhidraScript {
       ...(this.c.profile.values.windbgDir?{windbg_dir:text(this.c.profile.values.windbgDir,4096)}:{})});
   }
   async projectOutcome(requestId:string,expected:Record<string,unknown>) {return this.server().projectOutcome(requestId,expected);}
+  async debuggerMetadata(snapshot:Artifact):Promise<string>{
+    const inspect={inspect:(artifact:Artifact,parameters:Record<string,unknown>)=>this.inspect(artifact,parameters)};
+    if(snapshot.kind!=='native')return (await debuggerProgramMetadata(inspect,snapshot))!;
+    const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(snapshot),'utf8')));
+    if(saved.engine!==this.nativeEngine||!['checkout','server'].includes(String(saved.source)))fail('binding','Saved debugger metadata view uses a different engine or source.');
+    if(saved.debuggerMetadata!==undefined){
+      if(typeof saved.debuggerMetadata!=='string'||!/^[a-f0-9]{64}$/.test(saved.debuggerMetadata))fail('binding','Saved debugger metadata witness is malformed.');
+      return saved.debuggerMetadata;
+    }
+    if(saved.source==='server')return (await debuggerProgramMetadata(inspect,snapshot))!;
+    // Older receipts did not retain this witness. Compare actual metadata against their immutable
+    // server base once, rather than interpreting mutable checkout bytes as a historical copy.
+    const checkout=object(saved.checkout),context=this.workspace.contextById(text(checkout.context));
+    if(context.nativeCheckout?.root!==checkout.root||context.baseSnapshot?.kind!=='native')fail('binding','Previous debugger metadata has no immutable witness.');
+    const base=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot),'utf8')));
+    if(base.source!=='server'||base.fileId!==saved.fileId||base.version!==saved.version||base.origin!==checkout.origin||base.repository!==checkout.repository)
+      fail('binding','Previous debugger metadata base changed.');
+    return (await debuggerProgramMetadata(inspect,context.baseSnapshot))!;
+  }
   private async debuggerMetadataChanges(context:GhidraContext,snapshot:Artifact){
     if(!context.debugger?.traces.length||!context.workingSnapshot)return context.complexChanges;
     return await debuggerProgramMetadata(this,context.workingSnapshot)!==await debuggerProgramMetadata(this,snapshot)?[...context.complexChanges,'debugger-metadata-'+randomUUID()]:context.complexChanges;
@@ -1113,13 +1142,69 @@ public class ${name} extends GhidraScript {
     const complexChanges=await this.debuggerMetadataChanges(context,snapshot);
     this.workspace.saveContext(scope,context.generation,{state:'stopped',workingSnapshot:snapshot,complexChanges,...(debuggerState?{debugger:{...debuggerState,connected:false,traces:debuggerState.traces.map(trace=>({...trace,connected:false}))}}:{})});await this.stopRecord(record,true,true,'explicit_close');
   }
-  /**
-   * The worker that last used a context root. A start records process.json first and current.json only once its
-   * program is open, so a failed start leaves an older current receipt. It is superseded only by a receipt of the
-   * same context and root, and only after the older worker is proved gone.
-   */
-  private async lastWorker(context:string):Promise<{binding:ProcessBinding;unfinished:boolean}>{
-    const binding=JSON.parse(await readFile(join(this.directory(),'context',context,'current.json'),'utf8')) as ProcessBinding;
+  private async workerEnded(binding:ProcessBinding){return !alive(binding.pid)||await this.retiredWorker(binding);}
+  private async retainStartedWorker(binding:ProcessBinding){
+    if(!await this.workerEnded(binding))fail('busy','The interrupted start is not proved stopped; its receipt is retained.');
+    const processReceipt=await readFile(join(binding.root,'process.json'),'utf8');
+    if(stable(JSON.parse(processReceipt))!==stable(binding))fail('binding','Interrupted start receipt changed.');
+    let stopped:string|undefined;
+    try{stopped=await readFile(join(binding.root,'stopped.json'),'utf8');}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    const directory=join(binding.root,'worker-history');await mkdir(directory,{recursive:true,mode:0o700});
+    await durable(join(directory,digest(binding)+'.json'),{schema:1,process:processReceipt,...(stopped?{stopped}:{})});
+  }
+  private async workerReceipt(binding:ProcessBinding,context:string,scope?:Scope){
+    if(!Number.isSafeInteger(binding.pid)||binding.pid<1||binding.kind!=='context'||binding.context!==context||
+      typeof binding.root!=='string'||!binding.tokenSecret||scope&&(binding.target!==scope.target||binding.session!==undefined&&binding.session!==scope.session))
+      fail('binding','Context process receipt changed.');
+    const root=await realpath(binding.root);
+    if(!ownedDirectory(root,this.directory(),['context',context,basename(root)])||(await lstat(join(root,'process.json'))).isSymbolicLink()||
+      stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Context process receipt changed.');
+  }
+  /** Discover interrupted starts independently of the ready pointer. Every other retained root must
+   * be verifiably ended; no live or ambiguous start is adopted or overwritten by a replacement. */
+  private async lastWorker(context:string,scope?:Scope):Promise<{binding?:ProcessBinding;unfinished:boolean}>{
+    const parent=join(this.directory(),'context',context);
+    let binding:ProcessBinding|undefined;
+    try{binding=object(JSON.parse(await readFile(join(parent,'current.json'),'utf8'))) as unknown as ProcessBinding;}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    if(binding&&(typeof binding.root!=='string'||binding.kind!=='context'||binding.context!==context||
+      !Number.isSafeInteger(binding.pid)||binding.pid<1||!binding.tokenSecret))fail('binding','Context process receipt changed.');
+    let entries;
+    try{entries=await readdir(parent,{withFileTypes:true});}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT'&&!binding)return {unfinished:false};throw error;}
+    const candidates:ProcessBinding[]=[];
+    for(const entry of entries){
+      if(entry.isSymbolicLink())fail('binding','Context worker root moved; its evidence is retained.');
+      if(!entry.isDirectory())continue;
+      const root=join(parent,entry.name);if(binding?.root&&sameDirectory(binding.root,root))continue;
+      let started:ProcessBinding;
+      try{started=JSON.parse(await readFile(join(root,'process.json'),'utf8'));}
+      catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
+      // Validate even ended historical roots. A foreign or unreadable receipt proves no absence.
+      if(typeof started.root!=='string'||!sameDirectory(started.root,root))fail('binding','Context process receipt changed.');
+      await this.workerReceipt(started,context,scope);
+      let endpoint:URL;try{endpoint=new URL(started.endpoint);}catch{fail('binding','Context process receipt changed.');}
+      if(!['headless','gui'].includes(started.mode)||typeof started.runtimeFingerprint!=='string'||!started.runtimeFingerprint||
+        !/^context-[a-f0-9-]{36}$/.test(started.tokenSecret)||endpoint.protocol!=='http:'||endpoint.hostname!=='127.0.0.1'||!endpoint.port||
+        endpoint.username||endpoint.password||endpoint.pathname!=='/'||endpoint.search||endpoint.hash)fail('binding','Context process receipt changed.');
+      candidates.push(started);
+    }
+    if(candidates.length){
+      const selected=this.workspace.contextById(context),checkout=selected.nativeCheckout;
+      for(const candidate of candidates){
+        if(candidate.target!==selected.target||candidate.session!==undefined&&candidate.session!==selected.session||
+          checkout&&candidate.program!==checkout.path)fail('binding','Context process receipt changed.');
+        if(checkout&&sameDirectory(candidate.root,checkout.root))continue;
+        if(!await this.workerEnded(candidate))fail('busy','Another retained root of this context has a worker that is not proved stopped.');
+      }
+      const active=checkout?candidates.find(b=>sameDirectory(b.root,checkout.root)):candidates.length===1?candidates[0]:undefined;
+      if(active){
+        if(binding){await this.workerReceipt(binding,context,scope);if(!await this.workerEnded(binding))fail('busy','The previous context worker is not proved stopped.');}
+        return {binding:active,unfinished:true};
+      }
+      if(!binding&&!checkout)fail('binding','Competing historical context roots have no authoritative current worker.');
+    }
+    if(!binding)return {unfinished:false};
     let started:ProcessBinding;
     try{started=JSON.parse(await readFile(join(binding.root,'process.json'),'utf8'));}
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {binding,unfinished:false};throw error;}
@@ -1131,11 +1216,13 @@ public class ${name} extends GhidraScript {
   }
   async closed(scope:Scope) {
     const context=this.workspace.context(scope);
-    const {binding,unfinished}=await this.lastWorker(context.id),root=await realpath(binding.root);
+    const {binding,unfinished}=await this.lastWorker(context.id,{...context,...scope});
+    if(!binding)return true;
+    await this.workerReceipt(binding,context.id,scope);const root=await realpath(binding.root);
     if(!ownedDirectory(root,this.directory(),[binding.kind,binding.context??binding.target,basename(root)])||binding.context!==context.id||binding.target!==scope.target||
       stable(JSON.parse(await readFile(join(root,'process.json'),'utf8')))!==stable(binding))fail('binding','Closed context receipt changed.');
     try{const stopped=object(JSON.parse(await readFile(join(root,'stopped.json'),'utf8')));
-      if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret)return true;
+      if(stopped.pid===binding.pid&&stopped.tokenSecret===binding.tokenSecret&&await this.workerEnded(binding))return true;
       // A GUI transition reuses the saved project root. Its earlier headless stop is not
       // evidence about this process; verify the current PID/binding independently below.
     }
@@ -1186,17 +1273,60 @@ public class ${name} extends GhidraScript {
       return {state:'verified',revision:version(result.version),snapshot:publication.snapshot};
     return {state:'unknown'};
   }
-  async recover(publication:Publication):Promise<{state:'verified';revision:number;snapshot:Artifact}|{state:'unknown'}> {
+  async recover(publication:Publication):Promise<{state:'verified';revision:number;snapshot:Artifact}|{state:'refused';revision:number;snapshot:Artifact;conflict:string}|{state:'unknown'}> {
     if(publication.snapshot.kind!=='native')return this.recoverLegacy(publication);
     const saved=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(publication.snapshot),'utf8'))),checkout=object(saved.checkout) as unknown as NativeCheckout;
     if(saved.engine!==this.nativeEngine||saved.source!=='checkout')return {state:'unknown'};
     const {binding}=await this.nativeOwner(checkout),target=this.workspace.target(publication.target),revisionNumber=publication.expectedRevision+1;
     const value=await this.server().nativeRead(binding,{operation:'verify',path:checkout.path,sourceSha:target.binarySha256,fileId:checkout.fileId,
       version:revisionNumber,marker:'insight native '+publication.id,fingerprint:saved.fingerprint});
-    if(value.state!=='verified'||value.version!==revisionNumber)return {state:'unknown'};
+    if(value.state!=='verified'||value.version!==revisionNumber)return this.recoverNativeRefusal(publication,checkout,saved);
     const shared=await this.serverView(publication.target,revisionNumber);
     if(object(shared.value).fingerprint!==saved.fingerprint)return {state:'unknown'};
     return {state:'verified',revision:revisionNumber,snapshot:shared.snapshot};
+  }
+  /** Only the completed head-race branch before checkin() has this journal shape. */
+  private async recoverNativeRefusal(publication:Publication,checkout:NativeCheckout,saved:Record<string,unknown>){
+    const unknown={state:'unknown' as const},context=this.workspace.context(publication);
+    if(context.generation!==publication.generation||context.workingSnapshot?.id!==publication.snapshot.id||
+      checkout.state!=='active'||stable(context.nativeCheckout)!==stable(checkout)||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||
+      checkout.baseVersion!==publication.expectedRevision||typeof saved.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(saved.fingerprint)||
+      !await this.neverStartedOrClosed(context))return unknown;
+    const {owner,binding}=await this.nativeOwner(checkout),path=join(checkout.root,'operations',publication.id+'-checkin.json');
+    let journal:Record<string,unknown>;
+    try{if(await realpath(path)!==resolve(path))return unknown;journal=object(JSON.parse(await readFile(path,'utf8')));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return unknown;throw error;}
+    const q={root:checkout.root,owner,operation:'checkin',fileId:checkout.fileId,checkoutId:checkout.checkoutId,
+      request:publication.id,fingerprint:saved.fingerprint,expectedVersion:publication.expectedRevision};
+    const result=object(journal.result??{}),before=object(journal.before??{});
+    if(stable(journal.request)!==stable(q)||journal.marker!==undefined||journal.checkoutId!==checkout.checkoutId||journal.baseVersion!==checkout.baseVersion||
+      !Number.isSafeInteger(journal.headVersion)||Number(journal.headVersion)<=publication.expectedRevision||result.state!=='conflict'||
+      result.conflict!=='Shared head changed before native check-in'||result.nativeMergeInvocations!==0||!Array.isArray(result.nativePhases)||result.nativePhases.length!==0||
+      result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||typeof result.modified!=='boolean'||
+      before.fingerprint!==saved.fingerprint||before.fileId!==checkout.fileId||before.version!==checkout.baseVersion||stable(result.saved)!==stable(before))return unknown;
+    const observed=await this.nativeOperation(checkout,'status');
+    if(observed.state!=='ready'||observed.checkedOut!==true||observed.recoverable!==false||observed.checkinActive!==false||
+      observed.fileId!==checkout.fileId||observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion||
+      observed.modified!==result.modified||stable(observed.saved)!==stable(before))return unknown;
+    const server=this.server(),marker='insight native '+publication.id;
+    const history=(value:Record<string,unknown>)=>{
+      if(value.repository!==checkout.repository||value.path!==checkout.path||value.checkinActive!==false||!Number.isSafeInteger(value.version)||
+        Number(value.version)<Number(journal.headVersion)||!Array.isArray(value.versions)||!value.versions.length||
+        !Array.isArray(value.checkouts)||!value.checkouts.includes(checkout.checkoutId))return false;
+      const rows=value.versions.map(object),versions=rows.map(v=>v.version);
+      return rows.every(v=>Number.isSafeInteger(v.version)&&Number(v.version)>0&&typeof v.comment==='string'&&v.comment!==marker)&&
+        new Set(versions).size===versions.length&&versions.includes(checkout.baseVersion)&&versions.includes(journal.headVersion)&&
+        Math.max(...versions as number[])===value.version;
+    };
+    const prior=await server.programStatus(binding,checkout.path);if(!history(prior))return unknown;
+    // A fresh reader opens the exact observed server version and checks source/file identity and all buffers.
+    const shared=await this.serverView(publication.target,Number(prior.version));
+    if(shared.revision!==prior.version||shared.value.fileId!==checkout.fileId||typeof shared.value.fingerprint!=='string')return unknown;
+    const after=await server.programStatus(binding,checkout.path);
+    if(!history(after)||after.version!==prior.version||stable(after.versions)!==stable(prior.versions)||
+      !await this.neverStartedOrClosed(context)||stable((await this.nativeOperation(checkout,'status')))!==stable(observed)||
+      stable(JSON.parse(await readFile(path,'utf8')))!==stable(journal))return unknown;
+    return {state:'refused' as const,revision:shared.revision,snapshot:shared.snapshot,conflict:String(result.conflict)};
   }
   async recoverModel(targetId:string):Promise<boolean> {
     if(this.workspace.activePublication(targetId))return false;
@@ -1243,14 +1373,14 @@ public class ${name} extends GhidraScript {
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
     for(const entry of entries) {
       if(!entry.isDirectory())continue;
-      let binding: ProcessBinding,unfinished=false;
-      try {({binding,unfinished}=await this.lastWorker(entry.name));}
-      catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')continue;throw error;}
+      let binding: ProcessBinding|undefined,unfinished=false;
+      ({binding,unfinished}=await this.lastWorker(entry.name));
+      if(!binding)continue;
       if(binding.context!==entry.name||binding.kind!=='context')fail('binding','Persisted context inventory has an inconsistent receipt.');
       let stopped=false;
       try {
         const receipt=object(JSON.parse(await readFile(join(binding.root,'stopped.json'),'utf8')));
-        stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret;
+        stopped=receipt.pid===binding.pid&&receipt.tokenSecret===binding.tokenSecret&&await this.workerEnded(binding);
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
       if(!stopped&&alive(binding.pid)) {
         // An unfinished start is never adopted; its own context reports it, others keep working.

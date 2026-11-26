@@ -33,8 +33,9 @@ export class Debugger {
     const backend=await this.prepared(selected,trace,true);
     let value:unknown;
     if(operation!=='traces')value=debuggerResult(operation,p,await backend.debuggerCall(selected,operation,Object.fromEntries(Object.entries(p).filter(([key])=>!['limit','offset'].includes(key)))));
-    const saved=await backend.debuggerSaved(selected),current=this.workspace.context(selected),snapshot=await backend.saved(selected);
-    const changed=current.workingSnapshot&&await metadata(backend,current.workingSnapshot)!==await metadata(backend,snapshot);
+    const current=this.workspace.context(selected),beforeMetadata=current.workingSnapshot?await metadata(backend,current.workingSnapshot):undefined;
+    const saved=await backend.debuggerSaved(selected),snapshot=await backend.saved(selected);
+    const changed=beforeMetadata!==undefined&&beforeMetadata!==await metadata(backend,snapshot);
     const complexChanges=changed?[...current.complexChanges,'debugger-metadata-'+randomUUID()]:current.complexChanges;
     this.workspace.saveContext(selected,current.generation,{debugger:saved,workingSnapshot:snapshot,complexChanges});
     if(operation==='traces')value=saved.traces.map(row=>({trace:row.id,name:this.workspace.target(selected.target).name,current:row.id===saved.active,snap:row.snap,module_count:row.modules,thread_count:row.threads,connected:row.connected}));

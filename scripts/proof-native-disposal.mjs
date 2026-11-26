@@ -59,7 +59,7 @@ async function directCheckout(target){
  const reservation=workspace.reserveOpen(target,'new',workspace.model(target).settings);workspace.recordRequest(reservation.request.id,'failed',{state:'fixture_control'});
  return (await new GhidraContexts(workspace,inputs,c,undefined,undefined,server).createNative(reservation.context)).nativeCheckout;
 }
-const inspectBackup=checkout=>mutate(checkout,'inspect-backup');
+const inspectBackup=(checkout,backupName)=>mutate(checkout,'inspect-backup',backupName?{backupName}:{});
 const inspectProgram=checkout=>mutate(checkout,'inspect');
 async function incoming(target,address,text){
  const scope=await cli(['ghidra','open','--target',target,'--session','new']);
@@ -85,6 +85,7 @@ async function dirtyBackup(target,kind){
  }
  return {checkout,discard,backup};
 }
+let primaryFailure;
 try{
  const file=join(f.root,'fixture.bin');await writeFile(file,Buffer.alloc(512,0x90));
  const a=await cli(['ghidra','open',file,'--session','new','--loader','ghidra.app.util.opinion.BinaryLoader','--language','x86:LE:64:default','--image-base','1000','--loader-options','{"Base Address":"0"}']);
@@ -139,8 +140,90 @@ try{
  const compileCall=join(f.root,'fixture-compile'),receiptCall=join(f.root,'fixture-receipts');await mkdir(compileCall);await mkdir(receiptCall);
  await exec(javac,await javaClasspathArguments(compileCall,'ghidra',javac,['-proc:none','-cp',classes+delimiter+inputs.classpath,'-d',compileRoot,source]),{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
  const receiptArgs=['-cp',compileRoot+delimiter+classes+delimiter+inputs.classpath,'NativeDisposalFixture','receipts'];
- assert.match((await exec(inputs.java,await javaClasspathArguments(receiptCall,'ghidra',inputs.java,receiptArgs),{windowsHide:true})).stdout,/RELEASE_RECEIPTS_VERIFIED/);
+ const receiptOutput=(await exec(inputs.java,await javaClasspathArguments(receiptCall,'ghidra',inputs.java,receiptArgs),{windowsHide:true})).stdout;
+ assert.match(receiptOutput,/RELEASE_RECEIPTS_VERIFIED/);assert.match(receiptOutput,/BACKUP_RECEIPTS_VERIFIED controls=\d+/);
  checks.exactAndLegacyReleaseReceipts=true;
+ // Repeat the public dirty discard on one project. Ghidra preserves earlier copies and picks the next free name.
+ {
+  const scope=await cli(['ghidra','open','--target',a.target,'--session','new']),copies=new Map(),journals=[];
+  const original=context(scope).nativeCheckout,versions=(await native(original,'status')).versions;
+  const actual=GhidraServer.prototype.nativeCheckout;let calls=0,loseReply=false,lost;
+  GhidraServer.prototype.nativeCheckout=async function(...args){
+   if(args[1].operation!=='discard')return Reflect.apply(actual,this,args);
+   calls++;const result=await Reflect.apply(actual,this,args);
+   if(loseReply){loseReply=false;lost={request:args[1].request,result};throw Error('Disposable fixture lost completed discard reply');}
+   return result;
+  };
+  try{
+   for(let attempt=0;attempt<3;attempt++){
+    const address=(0x1008+attempt).toString(16),text='REPEATED_DISCARD_'+attempt,caller='repeated-discard-'+attempt;
+    await cli(['ghidra','comments','set',...select(scope),'--address',address,'--kind','eol','--text',text]);
+    const before=context(scope).nativeCheckout;assert.equal(before.root,original.root);
+    let result;
+    if(attempt===2){
+     loseReply=true;const response=await f.run(app,['ghidra','changes','discard',...select(scope),'--request-id',caller,'--json']);
+     events.push({lostDiscardReply:response});assert.notEqual(response.exitCode,0);assert.ok(lost);
+     const request=workspace.scopedRequest(scope,caller);assert.equal(request.state,'unknown');assert.equal(request.id,lost.request);
+     const journalPath=join(before.root,'operations',request.id+'-discard.json'),bytes=await readFile(journalPath,'utf8');
+     const next={...before,checkoutId:lost.result.checkoutId,baseVersion:lost.result.baseVersion};
+     const status=await native(next,'status');assert.equal(status.saved.fingerprint,lost.result.saved.fingerprint);
+     const callCount=calls;result=await cli(['ghidra','changes','discard',...select(scope),'--request-id',caller]);
+     assert.equal(calls,callCount,'Lost-reply recovery must never dispatch another discard');
+     assert.equal(await readFile(journalPath,'utf8'),bytes);assert.deepEqual(await native(next,'status'),status);
+     assert.deepEqual(await cli(['ghidra','changes','discard',...select(scope),'--request-id',caller]),result);assert.equal(calls,callCount);
+    }else result=await cli(['ghidra','changes','discard',...select(scope),'--request-id',caller]);
+    const checkout=context(scope).nativeCheckout,name=scope.target+'.bin.keep'+(attempt?'.'+attempt:'');
+    assert.equal(result.retainedKeepFile,name);assert.notEqual(checkout.checkoutId,before.checkoutId);assert.equal(checkout.root,original.root);
+    const request=workspace.scopedRequest(scope,caller),path=join(checkout.root,'operations',request.id+'-discard.json'),journal=JSON.parse(await readFile(path,'utf8'));
+    const backup=await inspectBackup(checkout,name),proof=journal.result.disposableBackups[name];
+    assert.deepEqual(proof,{schema:2,fileId:backup.fileId,fingerprint:backup.fingerprint});assert.equal(backup.fingerprint,journal.before.fingerprint);
+    assert.equal(journal.result.retainedKeepFile,name);assert.equal(journal.backupFilesBefore[name],undefined);assert.equal(journal.backupFilesAfter[name],backup.fileId);
+    assert.equal(backup.comments[address],text);assert.equal(backup.memory,'90'.repeat(512));
+    for(const [previous,contents] of copies){assert.equal(journal.backupFilesBefore[previous],contents.fileId);assert.deepEqual(await inspectBackup(checkout,previous),contents);}
+    copies.set(name,backup);journals.push({request:request.id,name,fileId:backup.fileId,fingerprint:backup.fingerprint});
+    const status=await native(checkout,'status');assert.deepEqual(status.versions,versions);assert.equal(status.checkedOut,true);assert.equal(status.modified,false);
+    assert.equal(status.checkouts.some(item=>item.id===before.checkoutId),false);assert.equal(status.checkouts.some(item=>item.id===checkout.checkoutId),true);
+    const readback=await inspectProgram(checkout);assert.equal(readback.fingerprint,status.saved.fingerprint);assert.equal(readback.memory,'90'.repeat(512));
+    for(let prior=0;prior<=attempt;prior++)assert.equal(readback.comments[(0x1008+prior).toString(16)],'');
+   }
+   assert.equal(calls,3);
+  }finally{GhidraServer.prototype.nativeCheckout=actual;}
+  const checkout=context(scope).nativeCheckout,backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server);
+  // Exact complete proofs for all three native copies, connected by completed checkout transitions, authorize final owned disposal.
+  await backend.finishEmptyNative(scope);assert.equal(context(scope).nativeCheckout.state,'dropped');
+  const released=JSON.parse(await readFile(join(checkout.root,'released.json')));
+  assert.deepEqual(released.disposableBackups,Object.fromEntries([...copies].map(([name,value])=>[name,value.fingerprint])));
+  assert.ok(!(await readdir(checkout.root)).includes('view.rep'));assert.ok(!(await readdir(checkout.root)).includes('view.gpr'));
+  await cli(['ghidra','open',...select(scope)]);assert.notEqual(context(scope).nativeCheckout.root,checkout.root);
+  for(let attempt=0;attempt<3;attempt++)assert.equal((await cli(['ghidra','comments','get',...select(scope),'--address',(0x1008+attempt).toString(16),'--kind','eol'])).text,null);
+  assert.equal((await cli(['ghidra','close',...select(scope)])).checkout,'released');
+  checks.repeatedDirtyDiscard={journals,discards:3,numberedBackups:true,independentReadback:true,lostReplyWithoutReplay:true,ownedCleanup:true,reopened:true};
+ }
+ // Foreign unnumbered/numbered copies remain byte-for-byte private even when undoCheckout must skip both names.
+ {
+  const checkout=await directCheckout(a.target),names=[a.target+'.bin.keep',a.target+'.bin.keep.1'],copies=new Map();
+  for(const name of names){await mutate(checkout,'backup',{backupName:name});await mutate(checkout,'edit-backup',{backupName:name,address:'100b',text:'FOREIGN_'+name});copies.set(name,await inspectBackup(checkout,name));}
+  await mutate(checkout,'edit',{address:'100c',text:'DISCARD_WITH_FOREIGN_COPIES'});const before=await inspectProgram(checkout);
+  const request='q_'+randomUUID(),result=await native(checkout,'discard',{request}),next={...checkout,checkoutId:result.checkoutId,baseVersion:result.baseVersion},name=a.target+'.bin.keep.2';
+  assert.equal(result.retainedKeepFile,name);assert.deepEqual(Object.keys(result.disposableBackups),[name]);
+  const copy=await inspectBackup(next,name);assert.equal(copy.fingerprint,before.fingerprint);assert.equal(copy.comments['100c'],'DISCARD_WITH_FOREIGN_COPIES');assert.equal(copy.memory,before.memory);
+  for(const [name,contents] of copies)assert.deepEqual(await inspectBackup(next,name),contents);
+  await refused(next,'release',{verifiedVersion:next.baseVersion,fingerprint:result.saved.fingerprint},/Unpublished native project files must be retained/);
+  const after=await native(next,'status');assert.equal(after.checkedOut,true);assert.equal(after.saved.fingerprint,result.saved.fingerprint);
+  for(const [name,contents] of copies)assert.deepEqual(await inspectBackup(next,name),contents);
+  checks.foreignNumberedBackupsPreserved={retainedKeepFile:name,foreignNames:names,releaseRefused:true};
+ }
+ // A valid numbered native copy loses disposal authority if its saved bytes change.
+ {
+  const {checkout}=await dirtyBackup(a.target,'numbered-change');await mutate(checkout,'edit',{address:'100c',text:'SECOND_NATIVE_BACKUP'});
+  const result=await native(checkout,'discard',{request:'q_'+randomUUID()}),next={...checkout,checkoutId:result.checkoutId,baseVersion:result.baseVersion},name=a.target+'.bin.keep.1';
+  assert.equal(result.retainedKeepFile,name);const first=await inspectBackup(next),second=await inspectBackup(next,name);
+  await mutate(next,'edit-backup',{backupName:name,address:'100d',text:'CHANGED_NUMBERED_PRIVATE_BACKUP'});const changed=await inspectBackup(next,name);
+  assert.equal(changed.fileId,second.fileId);assert.notEqual(changed.fingerprint,second.fingerprint);assert.equal(changed.comments['100d'],'CHANGED_NUMBERED_PRIVATE_BACKUP');
+  await refused(next,'release',{verifiedVersion:next.baseVersion,fingerprint:result.saved.fingerprint},/Unpublished native project files must be retained/);
+  assert.deepEqual(await inspectBackup(next),first);assert.deepEqual(await inspectBackup(next,name),changed);assert.equal((await native(next,'status')).checkedOut,true);
+  checks.changedNumberedNativeBackupRetained=true;
+ }
  // Dirty Update creates its .keep through saveAs, so its actual buffers have a new DB ID, not the original fingerprint.
  const left=await cli(['ghidra','open','--target',a.target,'--session','new']),right=await cli(['ghidra','open','--target',a.target,'--session','new']);
  await cli(['ghidra','comments','set',...select(left),'--address','1000','--kind','eol','--text','SHARED_DIRTY_UPDATE']);
@@ -295,15 +378,20 @@ try{
  assert.equal((await native(checkout,'release',proof)).state,'released');
  await refused(checkout,'drop',{...proof,opened:reference.opened===proof.fingerprint?reference.base:reference.opened,openedVerified:true},/Verified release receipt differs/);
  assert.ok((await readdir(checkout.root)).includes('view.rep'));assert.equal((await native(checkout,'drop',proof)).state,'dropped');checks.changedReleaseProofRefused=true;
-}finally{
- workspace?.close();await app.dispose();await server.stop();
- const receipt={schema:1,scope:'focused disposable native first-open, release and Update backup safety',root:f.root,checks,events,
+}catch(error){primaryFailure=error;throw error;}finally{
+ const teardown=[],failures=[];
+ async function attempt(stage,action){try{await action();teardown.push({stage,state:'completed'});}catch(error){failures.push(error);teardown.push({stage,state:'failed',reason:String(error.message??error)});}}
+ if(workspace)await attempt('workspace-close',()=>workspace.close());else teardown.push({stage:'workspace-close',state:'not-created'});
+ await attempt('application-dispose',()=>app.dispose());await attempt('server-stop',()=>server.stop());
+ const receipt={schema:1,scope:'focused disposable native first-open, repeated discard identity/recovery, release and Update backup safety',root:f.root,checks,events,teardown,
+  state:primaryFailure||failures.length?'failed':'passed',
   runtimeFingerprint:inputs.fingerprint,ghidraVersion:inputs.ghidraVersion,
   sourceSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/references/native/InsightNativeCheckout.java',import.meta.url))).digest('hex'),
   fixtureSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url))).digest('hex'),
   proofSha256:createHash('sha256').update(await readFile(new URL('./proof-native-disposal.mjs',import.meta.url))).digest('hex'),
-  limits:['Default backend CLI first-open/recovery, direct native Update/backup and final-release faults; no concurrent race scheduling or installed-package proof']};
- await writeFile(join(f.root,'native-disposal-results.json'),JSON.stringify(receipt,null,2));
- await writeFile(join(options['output-base'],'native-disposal-results.json'),JSON.stringify(receipt,null,2));
- console.log(JSON.stringify({root:f.root,checks,results:join(f.root,'native-disposal-results.json')}));
+  limits:['Default backend CLI first-open/discard recovery, direct native Update/backup and final-release faults; no concurrent race scheduling or installed-package proof']};
+ await attempt('write-fixture-receipt',()=>writeFile(join(f.root,'native-disposal-results.json'),JSON.stringify(receipt,null,2)));
+ await attempt('write-output-receipt',()=>writeFile(join(options['output-base'],'native-disposal-results.json'),JSON.stringify(receipt,null,2)));
+ console.log(JSON.stringify({root:f.root,state:receipt.state,checks,teardown,results:join(f.root,'native-disposal-results.json')}));
+ if(failures.length&&!primaryFailure)throw new AggregateError(failures,'Disposable proof teardown or receipt persistence failed');
 }

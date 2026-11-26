@@ -11,6 +11,83 @@ import java.util.*;
 
 /** Controlled mutations of disposable projects, between native status and final release. */
 public final class NativeDisposalFixture {
+    static int backupControls;
+    static void check(boolean value,String reason){backupControls++;InsightNativeCheckout.require(value,reason);}
+    static JsonObject discardJournal(int previous,int next,int number){
+        String name="program.keep"+(number==0?"":"."+number),fingerprint=String.valueOf((char)('a'+number)).repeat(64);
+        JsonObject journal=JsonParser.parseString("{request:{operation:'discard',request:'q_00000000-0000-0000-0000-00000000000"+number+"',root:'owned',fileId:'file',checkoutId:"+previous+",owner:{path:'/program',context:'owner'}},checkoutId:"+previous+",baseVersion:1,backupExpected:true,before:{fileId:'file',fingerprint:'"+fingerprint+"'},result:{state:'discarded',checkoutId:"+next+",baseVersion:1,modified:false,saved:{fileId:'file',version:1}}}").getAsJsonObject();
+        JsonObject before=new JsonObject();for(int i=0;i<number;i++)before.addProperty("program.keep"+(i==0?"":"."+i),"created-"+i);
+        JsonObject after=before.deepCopy();after.addProperty(name,"created-"+number);journal.add("backupFilesBefore",before);journal.add("backupFilesAfter",after);
+        JsonObject result=journal.getAsJsonObject("result");result.addProperty("retainedKeepFile",name);
+        result.getAsJsonObject("saved").addProperty("fingerprint","f".repeat(64));
+        result.add("disposableBackups",JsonParser.parseString("{'"+name+"':{schema:2,fileId:'created-"+number+"',fingerprint:'"+fingerprint+"'}}"));return journal;
+    }
+    static void backupReceiptTests(){
+        var journals=new ArrayList<JsonObject>();
+        JsonObject q=JsonParser.parseString("{root:'owned',fileId:'file',checkoutId:6,verifiedVersion:1}").getAsJsonObject();
+        JsonObject owner=JsonParser.parseString("{path:'/program',context:'owner'}").getAsJsonObject();
+        for(int i=0;i<3;i++){
+            JsonObject journal=discardJournal(3+i,4+i,i);journals.add(journal);
+            String name="program.keep"+(i==0?"":"."+i),fingerprint=text(journal.getAsJsonObject("before"),"fingerprint");
+            var actual=Map.<String,Object>of("fileId","created-"+i,"fingerprint",fingerprint);
+            check(InsightNativeCheckout.createdBackup("program",journal.getAsJsonObject("backupFilesBefore"),journal.getAsJsonObject("backupFilesAfter")).equals(name),"Wrong repeated backup name");
+            check(InsightNativeCheckout.backupMatches(journal,name,actual),"Exact repeated backup rejected");
+            check(InsightNativeCheckout.ownedBackupJournal(text(journal.getAsJsonObject("request"),"request")+"-discard.json",journal,q,owner),"Owned completed discard rejected");
+            check(!InsightNativeCheckout.backupMatches(journal,name,Map.of("fileId","foreign","fingerprint",fingerprint)),"Foreign backup with equal bytes accepted");
+            check(!InsightNativeCheckout.backupMatches(journal,name,Map.of("fileId","created-"+i,"fingerprint","changed")),"Changed numbered backup accepted");
+            for(String key:List.of("backupExpected","before","backupFilesBefore","backupFilesAfter","result")){
+                JsonObject incomplete=journal.deepCopy();incomplete.remove(key);check(!InsightNativeCheckout.backupMatches(incomplete,name,actual),"Incomplete proof accepted: "+key);
+            }
+            for(String key:List.of("schema","fileId","fingerprint")){
+                JsonObject incomplete=journal.deepCopy();incomplete.getAsJsonObject("result").getAsJsonObject("disposableBackups").getAsJsonObject(name).remove(key);
+                check(!InsightNativeCheckout.backupMatches(incomplete,name,actual),"Incomplete creation identity accepted: "+key);
+            }
+            JsonObject preexisting=journal.deepCopy();preexisting.getAsJsonObject("backupFilesBefore").addProperty(name,"created-"+i);
+            check(!InsightNativeCheckout.backupMatches(preexisting,name,actual),"Pre-existing name authorized as new creation");
+            JsonObject extra=journal.deepCopy();extra.getAsJsonObject("backupFilesAfter").addProperty("program.keep.99","extra");
+            check(!InsightNativeCheckout.backupMatches(extra,name,actual),"Ambiguous new backups accepted");
+            JsonObject wrong=journal.deepCopy();wrong.getAsJsonObject("result").addProperty("retainedKeepFile","program.keep.99");
+            check(!InsightNativeCheckout.backupMatches(wrong,name,actual),"Incorrect retainedKeepFile accepted");
+            wrong=journal.deepCopy();wrong.getAsJsonObject("before").addProperty("fingerprint","unrelated");
+            check(!InsightNativeCheckout.backupMatches(wrong,name,actual),"Unrelated saved buffers accepted as discard backup");
+            if(i>0){
+                for(String change:List.of("removed","replaced")){
+                    wrong=journal.deepCopy();JsonObject after=wrong.getAsJsonObject("backupFilesAfter");
+                    if(change.equals("removed"))after.remove("program.keep");else after.addProperty("program.keep","replacement");
+                    check(!InsightNativeCheckout.backupMatches(wrong,name,actual),"Pre-existing backup "+change+" without refusal");
+                }
+                wrong=journal.deepCopy();wrong.getAsJsonObject("result").getAsJsonObject("disposableBackups").getAsJsonObject(name).addProperty("schema",1);
+                check(!InsightNativeCheckout.backupMatches(wrong,name,actual),"Old unnumbered creation proof authorized a numbered name");
+                wrong.getAsJsonObject("result").getAsJsonObject("disposableBackups").addProperty(name,fingerprint);
+                check(!InsightNativeCheckout.backupMatches(wrong,name,actual),"Legacy unnumbered proof authorized a numbered name");
+            }
+        }
+        var ids=InsightNativeCheckout.backupCheckouts(journals,q);
+        for(long id=3;id<=6;id++)check(ids.contains(id),"Repeated discard lost owned checkout ancestry");
+        JsonObject incomplete=journals.get(1).deepCopy();incomplete.remove("result");
+        check(!InsightNativeCheckout.ownedBackupJournal(text(incomplete.getAsJsonObject("request"),"request")+"-discard.json",incomplete,q,owner),"Incomplete intent accepted");
+        check(!InsightNativeCheckout.backupCheckouts(List.of(journals.get(0),incomplete,journals.get(2)),q).contains(4L),"Incomplete intent connected an earlier backup");
+        for(String field:List.of("owner","root","fileId","operation","request")){
+            JsonObject foreign=journals.get(2).deepCopy();foreign.getAsJsonObject("request").addProperty(field,"foreign");
+            check(!InsightNativeCheckout.ownedBackupJournal(text(journals.get(2).getAsJsonObject("request"),"request")+"-discard.json",foreign,q,owner),"Foreign "+field+" accepted");
+        }
+        JsonObject future=journals.get(2).deepCopy();future.getAsJsonObject("result").addProperty("baseVersion",2);
+        check(!InsightNativeCheckout.ownedBackupJournal(text(future.getAsJsonObject("request"),"request")+"-discard.json",future,q,owner),"Future base accepted");
+        for(String field:List.of("checkoutId","baseVersion","modified","saved")){
+            JsonObject broken=journals.get(1).deepCopy();broken.getAsJsonObject("result").remove(field);
+            check(!InsightNativeCheckout.backupCheckouts(List.of(journals.get(0),broken,journals.get(2)),q).contains(4L),"Incomplete transition connected earlier backup: "+field);
+        }
+        for(String field:List.of("fileId","version","fingerprint")){
+            JsonObject broken=journals.get(1).deepCopy();broken.getAsJsonObject("result").getAsJsonObject("saved").remove(field);
+            check(!InsightNativeCheckout.backupCheckouts(List.of(journals.get(0),broken,journals.get(2)),q).contains(4L),"Incomplete saved transition connected earlier backup: "+field);
+        }
+        for(String name:List.of("program.keep","program.keep.1","program.keep.23"))check(InsightNativeCheckout.backupName("program",name),"Canonical backup rejected");
+        for(String name:List.of("program.keep.0","program.keep.01","program.keep.-1","program.keep.1x","program.keep.1/extra","nested/program.keep","other.keep","programXkeep.1"))check(!InsightNativeCheckout.backupName("program",name),"Arbitrary extra file admitted: "+name);
+        JsonObject holes=JsonParser.parseString("{'program.keep':'first','program.keep.2':'third'}").getAsJsonObject(),after=holes.deepCopy();after.addProperty("program.keep.1","new");
+        check(InsightNativeCheckout.createdBackup("program",holes,after).equals("program.keep.1"),"Observed gap filling was guessed incorrectly");
+        System.out.println("BACKUP_RECEIPTS_VERIFIED controls="+backupControls);
+    }
+    static String text(JsonObject object,String key){return object.get(key).getAsString();}
     static void receiptTests(){
         JsonObject q=JsonParser.parseString("{checkoutId:3,verifiedVersion:1,fileId:'file',fingerprint:'base',opened:'opened'}").getAsJsonObject();
         JsonObject legacy=JsonParser.parseString("{checkoutId:3,version:1,fingerprint:'base'}").getAsJsonObject();
@@ -52,6 +129,7 @@ public final class NativeDisposalFixture {
         InsightNativeCheckout.require(InsightNativeCheckout.backupMatches(legacyBackup,"program.keep",Map.of("fileId","legacy","fingerprint","original")),"Legacy backup proof rejected");
         InsightNativeCheckout.require(!InsightNativeCheckout.backupMatches(legacyBackup,"program.keep",actual),"Legacy proof blessed unrelated saveAs bytes");
         System.out.println("RELEASE_RECEIPTS_VERIFIED");
+        backupReceiptTests();
     }
     public static void main(String[] args)throws Exception {
         if(args[0].equals("receipts")){receiptTests();return;}
@@ -62,7 +140,9 @@ public final class NativeDisposalFixture {
         Application.initializeApplication(new GhidraApplicationLayout(),new HeadlessGhidraApplicationConfiguration());
         var server=new GhidraServerManager();server.connect();var repository=server.server().getRepository(owner.get("repository").getAsString());repository.connect();
         var project=new InsightNativeCheckout.Projects().openProject(new ProjectLocator(root.toString(),"view"),false,false);
-        String path=owner.get("path").getAsString();DomainFile file=project.getProjectData().getFile(args[0].endsWith("-backup")?path+".keep":path);
+        String path=owner.get("path").getAsString(),backup=q.has("backupName")?text(q,"backupName"):path.substring(1)+".keep";
+        InsightNativeCheckout.require(InsightNativeCheckout.backupName(path.substring(1),backup),"Fixture backup name escaped its program");
+        DomainFile file=project.getProjectData().getFile(args[0].endsWith("-backup")?"/"+backup:path);
         if(args[0].equals("interrupt-release")){
             try{
                 var checkout=file.getCheckoutStatus();
@@ -98,7 +178,7 @@ public final class NativeDisposalFixture {
                 program.save("Disposable release-race fixture",InsightNativeCheckout.MONITOR);
             }else{
                 var data=project.getProjectData().getRootFolder();
-                if(args[0].equals("backup"))data.createFile(file.getName()+".keep",program,InsightNativeCheckout.MONITOR);
+                if(args[0].equals("backup"))data.createFile(backup,program,InsightNativeCheckout.MONITOR);
                 else{var extra=new ProgramDB("private",program.getLanguage(),program.getLanguage().getDefaultCompilerSpec(),InsightNativeCheckout.CONSUMER);
                 try{
                     if(args[0].equals("nested"))data.createFolder("private").createFile("nested",extra,InsightNativeCheckout.MONITOR);

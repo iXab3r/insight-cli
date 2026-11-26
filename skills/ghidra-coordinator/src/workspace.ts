@@ -586,6 +586,21 @@ export class Workspace {
       this.writeRequest(previous.request,'failed',result);return next;
     });
   }
+  /** Exactly proved native pre-call refusal: settle all journals together, retaining the private view. */
+  finishRefusedPublication(publication:string,observedRevision:number,sharedSnapshot:Artifact,result:unknown):Publication {
+    version(observedRevision);this.knownSnapshot(sharedSnapshot);
+    return this.transaction(()=>{
+      const previous=this.publication(publication),context=this.context(previous),request=this.request(previous.request),model=this.model(previous.target);
+      if(!['commit_intent','unknown'].includes(previous.state)||observedRevision<=previous.expectedRevision||
+        observedRevision<(model.sharedRevision??1)||context.generation!==previous.generation||context.workingSnapshot?.id!==previous.snapshot.id||
+        context.nativeCheckout?.state!=='active'||request.context!==context.id||request.operation!=='ghidra.merge'||
+        !['running','unknown'].includes(request.state))fail('binding','Refused native publication no longer matches its retained intent.');
+      const next={...previous,state:'conflict' as const,detail:result};
+      this.db.prepare('UPDATE ghidra_models SET data=? WHERE target=?').run(stable({...model,state:'ready',sharedRevision:observedRevision,sharedSnapshot}),previous.target);
+      this.db.prepare('UPDATE publications SET state=?,data=? WHERE id=?').run(next.state,bounded(next),next.id);
+      this.writeRequest(previous.request,'failed',result);return next;
+    });
+  }
   publishedSince(target:string,revision:number):Publication[] {
     this.target(target);version(revision);
     return this.db.prepare("SELECT data FROM publications WHERE target=? AND state='verified' ORDER BY rowid").all(target)

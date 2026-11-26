@@ -2,19 +2,66 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,readdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname,delimiter} from 'node:path';
 import {randomUUID} from 'node:crypto';
-import {spawnSync} from 'node:child_process';
+import {spawnSync,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import type {CommandContext} from '@eyeauras/cli-factory';
 import {Workspace,type GhidraContext,type NativeCheckout} from '../src/workspace.js';
 import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
+import {nativeHelpers,moduleJars,packagedMcpJar,nativeJvmDirectories} from '../src/native-inputs.js';
+import {javaClasspathArguments} from '../src/tool-runtime/java-arguments.js';
 import type {Artifact} from '../src/artifacts.js';
 import {Research} from '../src/research.js';
 import {fail} from '../src/model.js';
 
 const base='a'.repeat(64),opened='b'.repeat(64),privateWork='c'.repeat(64);
+const receiptHome=process.env.INSIGHT_TEST_RECEIPTS_GHIDRA_HOME,receiptJava=process.env.INSIGHT_TEST_RECEIPTS_JAVA;
+test('pure native release/backup receipt controls compile against the SDK without starting Ghidra',{
+ skip:!receiptHome||!receiptJava?'Optional SDK-only receipt controls: INSIGHT_TEST_RECEIPTS_GHIDRA_HOME and INSIGHT_TEST_RECEIPTS_JAVA':false,timeout:120000
+},async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'insight receipt controls '));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const jars=[packagedMcpJar,...await moduleJars(receiptHome!)],run=promisify(execFile);
+ const inputs:NativeInputs={java:receiptJava!,ghidraHome:receiptHome!,mcpJar:packagedMcpJar,jars,classpath:jars.join(delimiter),ghidraVersion:'12.1.2',fingerprint:'pure-disposal-receipts',debuggerWheels:[]};
+ const classes=await nativeHelpers(directory,inputs),cp=classes+delimiter+inputs.classpath;
+ const javac=join(dirname(receiptJava!),'javac'+(process.platform==='win32'?'.exe':''));
+ const source=fileURLToPath(new URL('../../tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url));
+ const compileCall=join(directory,'compile'),receiptCall=join(directory,'receipts');await mkdir(compileCall);await mkdir(receiptCall);
+ await run(javac,await javaClasspathArguments(compileCall,'ghidra',javac,['-proc:none','-cp',cp,'-d',directory,source]),{windowsHide:true,timeout:60000});
+ // The receipts branch returns before Application.initializeApplication, server connection or project access.
+ const result=await run(receiptJava!,await javaClasspathArguments(receiptCall,'ghidra',receiptJava!,[
+  '-Djava.awt.headless=true',...nativeJvmDirectories(directory),'-cp',directory+delimiter+cp,'NativeDisposalFixture','receipts'
+ ]),{windowsHide:true,timeout:30000});
+ assert.match(result.stdout,/RELEASE_RECEIPTS_VERIFIED/);assert.match(result.stdout,/BACKUP_RECEIPTS_VERIFIED controls=\d+/);t.diagnostic(result.stdout.trim());
+});
+
+for(const fault of ['none','missing journal','missing result','intent marker only','wrong root','wrong owner','wrong file','wrong prior checkout','missing inventory','changed saved bytes'] as const)
+test('completed discard recovery '+fault+' uses proof/readback without dispatching discard',async t=>{
+ const f=await fixture(t),original=f.checkout,request='q_'+randomUUID(),keep=f.context.target+'.bin.keep';
+ const result={state:'discarded',checkoutId:4,baseVersion:1,modified:false,saved:{fileId:'file',version:1,fingerprint:base},retainedKeepFile:keep};
+ const journal:any={request:{operation:'discard',request,root:original.root,fileId:original.fileId,checkoutId:original.checkoutId,owner:{}},checkoutId:3,baseVersion:1,result};
+ if(fault==='missing result')delete journal.result;
+ if(fault==='intent marker only'){delete journal.result;journal.retainedKeepFile=keep;}
+ if(fault==='wrong root')journal.request.root=join(f.directory,'foreign');
+ if(fault==='wrong owner')journal.request.owner={context:'foreign'};
+ if(fault==='wrong file')journal.request.fileId='foreign';
+ if(fault==='wrong prior checkout')journal.request.checkoutId=9;
+ const operations=join(original.root,'operations'),path=join(operations,request+'-discard.json');await mkdir(operations);
+ if(fault!=='missing journal')await writeFile(path,JSON.stringify(journal));
+ const bytes=fault==='missing journal'?undefined:await readFile(path,'utf8');
+ f.state.files.push(keep);f.state.status={checkoutId:4,checkouts:[{id:4,version:1}],...(fault==='missing inventory'?{projectFiles:undefined}:{}),
+  ...(fault==='changed saved bytes'?{saved:{...result.saved,fingerprint:privateWork}}:{})};
+ let readbacks=0;
+ Object.assign(f.backend,{serverView:async()=>{readbacks++;return {revision:1,snapshot:f.workspace.context(f.context).baseSnapshot!,value:result.saved};}});
+ const recovered=await f.backend.recoverDiscardNative(f.context,request,original);
+ assert.equal(recovered.state,fault==='none'?'verified':'unknown');
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,fault==='none'?4:3);
+ assert.equal(readbacks,Number(fault==='none'));assert.ok(f.calls.every(call=>call.operation==='status'));
+ if(bytes!==undefined)assert.equal(await readFile(path,'utf8'),bytes);
+ assert.equal(await readFile(join(original.root,'view.rep','database'),'utf8'),'saved private database');
+});
 async function fixture(t:test.TestContext){
  const directory=await mkdtemp(join(tmpdir(),'native-disposal-')),workspace=new Workspace(join(directory,'workspace'),'default');
  t.after(async()=>{workspace.close();await rm(directory,{recursive:true,force:true});});
@@ -37,7 +84,7 @@ async function fixture(t:test.TestContext){
  const nativeReceipt=(b:NativeCheckout,v:Record<string,unknown>)=>(backend as unknown as {nativeReceipt(b:NativeCheckout,v:Record<string,unknown>):Promise<Artifact>}).nativeReceipt(b,v);
  let record:unknown;
  Object.assign(backend,{
-  nativeOwner:async()=>({owner:{}}),inventory:async()=>{},lastWorker:async()=>{throw Object.assign(Error('No current worker'),{code:'ENOENT'});},
+  nativeOwner:async()=>({owner:{}}),inventory:async()=>{},lastWorker:async()=>({unfinished:false}),
   closed:async()=>true,neverStartedOrClosed:async()=>true,verified:async()=>record,stopRecord:async()=>{},selected:async()=>record,
   nativeOperation:async(_checkout:NativeCheckout,operation:string,parameters:Record<string,unknown>={})=>{
    calls.push({operation,parameters});events.push(operation);

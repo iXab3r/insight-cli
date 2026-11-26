@@ -10,9 +10,13 @@ export function debuggerExecutionSettled(operation:string,before:Record<string,u
   if(operation==='resume')return after.execution_state==='RUNNING'||after.execution_state==='STOPPED'&&advanced;
   return after.execution_state==='STOPPED'&&(operation!=='step'||advanced);
 }
-export async function debuggerProgramMetadata(backend:Pick<ResearchBackend,'inspect'>,snapshot:Artifact){
-  if(!backend.inspect)return undefined;const value=object(await backend.inspect(snapshot,{kind:'debugger_bookmarks'}));
+export function debuggerMetadataFingerprint(raw:unknown){
+  const value=object(raw);
   if(typeof value.fingerprint!=='string'||! /^[a-f0-9]{64}$/.test(value.fingerprint))fail('partial','Debugger program metadata inspection is incomplete.');count(value.count);return value.fingerprint;
+}
+export async function debuggerProgramMetadata(backend:Pick<ResearchBackend,'inspect'|'debuggerMetadata'>,snapshot:Artifact){
+  if(backend.debuggerMetadata)return backend.debuggerMetadata(snapshot);
+  if(!backend.inspect)return undefined;return debuggerMetadataFingerprint(await backend.inspect(snapshot,{kind:'debugger_bookmarks'}));
 }
 export function debuggerResult(operation:string,p:Record<string,unknown>,raw:unknown){
   if(['launch_offers','traces','modules','list_breakpoints','stack_trace'].includes(operation)){

@@ -72,36 +72,89 @@ public final class InsightNativeCheckout {
         return receipt.has("fileId")&&receipt.has("savedFingerprint")&&Objects.equals(receipt.get("state"),new JsonPrimitive("release_intent"))&&sameRelease(receipt,q)&&
             Objects.equals(saved.get("fileId"),text(receipt,"fileId"))&&Objects.equals(saved.get("fingerprint"),text(receipt,"savedFingerprint"));
     }
-    static boolean backupMatches(JsonObject journal,String name,Map<String,Object> saved){
+    static boolean backupName(String program,String name){
+        String keep=program+".keep";
+        return name.equals(keep)||name.startsWith(keep+".")&&name.substring(keep.length()+1).matches("[1-9][0-9]*");
+    }
+    /** Include occupied server names too: undoCheckout chooses a name absent from both filesystems. */
+    static Map<String,String> backupInventory(Project project,String program){
+        Map<String,String> files=new TreeMap<>();
+        for(DomainFile file:project.getProjectData().getRootFolder().getFiles())if(backupName(program,file.getName()))files.put(file.getName(),file.getFileID());
+        return files;
+    }
+    static String createdBackup(String program,JsonObject before,JsonObject after){
+        require(before!=null&&after!=null,"Native backup creation inventory is missing");
+        for(var entry:before.entrySet())require(backupName(program,entry.getKey())&&entry.getValue().equals(after.get(entry.getKey())),"Pre-existing native backup identity changed");
+        var added=new TreeSet<>(after.keySet());added.removeAll(before.keySet());
+        require(added.size()==1&&backupName(program,added.first()),"Native backup creation is ambiguous");
+        JsonElement id=after.get(added.first());require(id!=null&&id.isJsonPrimitive()&&id.getAsJsonPrimitive().isString()&&!id.getAsString().isEmpty(),"Native backup identity is missing");
+        return added.first();
+    }
+    static boolean backupMatches(JsonObject journal,String name,Map<String,Object> saved){try{
         JsonObject files=journal.getAsJsonObject("result").getAsJsonObject("disposableBackups");
         if(files==null||!files.has(name))return false;
         JsonElement proof=files.get(name);
         if(proof.isJsonPrimitive()){
             // Older proofs were recorded only for a before-image-equal backup (not saveAs-created Update copies).
-            return proof.equals(journal.getAsJsonObject("before").get("fingerprint"))&&saved.get("fingerprint").equals(proof.getAsString());
+            return name.endsWith(".keep")&&proof.equals(journal.getAsJsonObject("before").get("fingerprint"))&&saved.get("fingerprint").equals(proof.getAsString());
         }
         if(!proof.isJsonObject())return false;
         JsonObject created=proof.getAsJsonObject();
+        if(!saved.get("fileId").equals(text(created,"fileId"))||!saved.get("fingerprint").equals(text(created,"fingerprint"))||
+            !journal.get("backupExpected").getAsBoolean())return false;
+        if(created.get("schema").getAsInt()==2){
+            String program=text(journal.getAsJsonObject("request").getAsJsonObject("owner"),"path").substring(1);
+            return text(journal.getAsJsonObject("request"),"operation").equals("discard")&&
+                name.equals(createdBackup(program,journal.getAsJsonObject("backupFilesBefore"),journal.getAsJsonObject("backupFilesAfter")))&&
+                journal.getAsJsonObject("backupFilesAfter").get(name).equals(created.get("fileId"))&&
+                name.equals(text(journal.getAsJsonObject("result"),"retainedKeepFile"))&&
+                created.get("fingerprint").equals(journal.getAsJsonObject("before").get("fingerprint"));
+        }
         boolean newFile=journal.has("backupAbsent")&&(journal.get("backupAbsent").getAsBoolean()||journal.has("backupBeforeFileId")&&!journal.get("backupBeforeFileId").isJsonNull()&&
             !journal.get("backupBeforeFileId").equals(created.get("fileId")));
-        return newFile&&journal.has("backupExpected")&&journal.get("backupExpected").getAsBoolean()&&
-            created.has("schema")&&created.get("schema").getAsInt()==1&&saved.get("fileId").equals(text(created,"fileId"))&&saved.get("fingerprint").equals(text(created,"fingerprint"));
+        return name.endsWith(".keep")&&newFile&&created.get("schema").getAsInt()==1;
+    }catch(RuntimeException unproved){return false;}}
+    static boolean ownedBackupJournal(String filename,JsonObject journal,JsonObject q,JsonObject owner){try{
+        JsonObject request=journal.getAsJsonObject("request"),result=journal.getAsJsonObject("result");
+        return request!=null&&result!=null&&owner.equals(request.getAsJsonObject("owner"))&&Objects.equals(request.get("root"),q.get("root"))&&
+            Objects.equals(request.get("fileId"),q.get("fileId"))&&text(request,"request").matches("q_[a-f0-9-]{36}")&&
+            filename.equals(text(request,"request")+"-"+text(request,"operation")+".json")&&
+            (text(request,"operation").equals("update")&&text(result,"state").equals("updated")||text(request,"operation").equals("discard")&&text(result,"state").equals("discarded"))&&
+            result.get("baseVersion").getAsInt()<=q.get("verifiedVersion").getAsInt();
+    }catch(RuntimeException unproved){return false;}}
+    /** A completed discard replaces one checkout in this same project. Incomplete intents never extend the chain. */
+    static Set<Long> backupCheckouts(List<JsonObject> journals,JsonObject q){
+        Set<Long> ids=new HashSet<>();ids.add(q.get("checkoutId").getAsLong());boolean changed;
+        do{changed=false;for(JsonObject journal:journals)try{
+            JsonObject request=journal.getAsJsonObject("request"),result=journal.getAsJsonObject("result"),saved=result.getAsJsonObject("saved");
+            if(text(request,"operation").equals("discard")&&text(result,"state").equals("discarded")&&ids.contains(result.get("checkoutId").getAsLong())&&
+                result.get("modified").getAsBoolean()==false&&Objects.equals(request.get("checkoutId"),journal.get("checkoutId"))&&
+                !Objects.equals(request.get("checkoutId"),result.get("checkoutId"))&&request.get("checkoutId").getAsLong()>=0&&
+                Objects.equals(saved.get("fileId"),q.get("fileId"))&&Objects.equals(saved.get("version"),result.get("baseVersion"))&&
+                text(saved,"fingerprint").matches("[a-f0-9]{64}")&&
+                result.get("baseVersion").getAsInt()>=journal.get("baseVersion").getAsInt())changed|=ids.add(request.get("checkoutId").getAsLong());
+        }catch(RuntimeException unproved){/* A partial receipt cannot connect checkouts. */}}while(changed);
+        return ids;
     }
     /** Only an expected backup newly created by a completed owned native operation, still at its recorded bytes, is disposable. */
     static Map<String,String> backups(Project project,Path operations,JsonObject q,JsonObject owner)throws Exception {
-        String name=text(owner,"path").substring(1),keep=name+".keep";Map<String,String> proved=new TreeMap<>();
-        DomainFile backup=project.getProjectData().getFile("/"+keep);
-        if(backup==null||backup.isVersioned()||backup.canRecover()||backup.isCheckedOut()||backup.isHijacked())return proved;
+        String name=text(owner,"path").substring(1);Map<String,String> proved=new TreeMap<>();List<JsonObject> journals=new ArrayList<>();
         try(var paths=Files.list(operations)){
             for(Path path:paths.filter(p->p.getFileName().toString().matches("q_[a-f0-9-]{36}-(update|discard)\\.json")).sorted().toList()){
-                JsonObject journal=JsonParser.parseString(Files.readString(path)).getAsJsonObject(),request=journal.getAsJsonObject("request"),result=journal.getAsJsonObject("result");
-                if(request==null||result==null||!request.getAsJsonObject("owner").equals(owner)||!Objects.equals(request.get("root"),q.get("root"))||
-                    !Objects.equals(request.get("fileId"),q.get("fileId"))||!Objects.equals(result.get("checkoutId"),q.get("checkoutId"))||
-                    !path.getFileName().toString().equals(text(request,"request")+"-"+text(request,"operation")+".json")||
-                    !(text(request,"operation").equals("update")&&text(result,"state").equals("updated")||text(request,"operation").equals("discard")&&text(result,"state").equals("discarded"))||
-                    result.get("baseVersion").getAsInt()>q.get("verifiedVersion").getAsInt())continue;
-                Map<String,Object> current=saved(backup,owner);
-                if(backupMatches(journal,keep,current))proved.put(keep,current.get("fingerprint").toString());
+                JsonObject journal=JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+                if(ownedBackupJournal(path.getFileName().toString(),journal,q,owner))journals.add(journal);
+            }
+        }
+        Set<Long> checkouts=backupCheckouts(journals,q);
+        for(JsonObject journal:journals){
+            JsonObject result=journal.getAsJsonObject("result"),files=result.getAsJsonObject("disposableBackups");
+            if(files==null||!checkouts.contains(result.get("checkoutId").getAsLong()))continue;
+            for(String keep:files.keySet()){
+                if(!backupName(name,keep))continue;
+                DomainFile backup=project.getProjectData().getFile("/"+keep);
+                if(backup==null||backup.isVersioned()||backup.canRecover()||backup.isCheckedOut()||backup.isHijacked())continue;
+                try{Map<String,Object> current=saved(backup,owner);if(backupMatches(journal,keep,current))proved.put(keep,current.get("fingerprint").toString());}
+                catch(Exception unproved){/* Unreadable or foreign bytes remain private. */}
             }
         }
         return proved;
@@ -234,10 +287,20 @@ public final class InsightNativeCheckout {
                     boolean backupExpected=file.modifiedSinceCheckout()&&(operation.equals("discard")||operation.equals("update")&&head>base);
                     intent.put("backupAbsent",keepAbsent);intent.put("backupBeforeFileId",priorKeepId);intent.put("backupExpected",backupExpected);
                     if(operation.equals("discard")){
+                        var backupsBefore=backupInventory(project,name);intent.put("backupFilesBefore",backupsBefore);
                         write(journal,intent);
-                        boolean dirty=file.modifiedSinceCheckout();file.undoCheckout(dirty);
+                        file.undoCheckout(backupExpected);
+                        out.put("state","discarded");out.put("retainedKeepFile","");
+                        if(backupExpected){
+                            var backupsAfter=backupInventory(project,name);intent.put("backupFilesAfter",backupsAfter);
+                            String keep=createdBackup(name,GSON.toJsonTree(backupsBefore).getAsJsonObject(),GSON.toJsonTree(backupsAfter).getAsJsonObject());
+                            DomainFile created=project.getProjectData().getFile("/"+keep);
+                            require(created!=null&&!created.isVersioned()&&!created.canRecover()&&!created.isCheckedOut()&&!created.isHijacked(),"Native discard backup is not private");
+                            var actual=saved(created,owner);
+                            require(Objects.equals(actual.get("fileId"),backupsAfter.get(keep))&&Objects.equals(actual.get("fingerprint"),before.get("fingerprint")),"Native discard backup differs from saved private buffers");
+                            out.put("retainedKeepFile",keep);out.put("disposableBackups",Map.of(keep,Map.of("schema",2,"fileId",actual.get("fileId"),"fingerprint",actual.get("fingerprint"))));
+                        }
                         file=project.getProjectData().getFile(path);require(file.checkout(false,MONITOR),"Native checkout after discard was refused");
-                        out.put("state","discarded");out.put("retainedKeepFile",dirty?name+".keep":"");
                     }else if(operation.equals("update")){
                         write(journal,intent);
                         // Only dirty incoming Update can replace .keep. A refusal is a completed pre-call outcome,
@@ -277,7 +340,7 @@ public final class InsightNativeCheckout {
                     }
                     out.put("saved",saved(file,owner));out.put("checkoutId",file.getCheckoutStatus().getCheckoutId());out.put("baseVersion",file.getCheckoutStatus().getCheckoutVersion());
                     out.put("modified",file.modifiedSinceCheckout());out.put("nativeMergeInvocations",HeadlessProgramMergeManager.invocations);out.put("nativePhases",HeadlessProgramMergeManager.phases);
-                    if(backupExpected&&(out.get("state").equals("discarded")||out.get("state").equals("updated"))){
+                    if(backupExpected&&out.get("state").equals("updated")){
                         DomainFile keep=project.getProjectData().getFile(path+".keep");
                         // Ghidra's dirty Update uses createFile/saveAs, assigning the copy a new DB ID inside the fingerprinted bytes.
                         if(keep!=null&&(keepAbsent||priorKeepId!=null&&!priorKeepId.equals(keep.getFileID()))&&!keep.isVersioned()&&!keep.canRecover()&&!keep.isCheckedOut()&&!keep.isHijacked())try{
