@@ -35,8 +35,15 @@ async function cli(args){const result=await f.run(app,[...args,'--json']);events
 const references=async target=>{try{return await readdir(join(ws,'ghidra-native','shared-views',target,'opened'));}catch(error){if(error.code==='ENOENT')return [];throw error;}};
 async function native(checkout,operation,parameters={}){
  await owned(checkout.root);const owner=JSON.parse(await readFile(join(checkout.root,'native-owner.json')));
- const result=await server.nativeCheckout(binding,{root:checkout.root,owner,fileId:checkout.fileId,checkoutId:checkout.checkoutId,operation,...parameters});
- events.push({native:operation,root:checkout.root,parameters,result});return result;
+ try{
+  const result=await server.nativeCheckout(binding,{root:checkout.root,owner,fileId:checkout.fileId,checkoutId:checkout.checkoutId,operation,...parameters});
+  events.push({native:operation,root:checkout.root,parameters,result});return result;
+ }catch(error){events.push({native:operation,root:checkout.root,parameters,refusal:{code:error.code,reason:error.message,diagnostic:error.result?.diagnostic}});throw error;}
+}
+async function refused(checkout,operation,parameters,reason){
+ await assert.rejects(native(checkout,operation,parameters),error=>{
+  assert.equal(error.code,'coordinator.unknown');assert.match(error.message,reason);return true;
+ });
 }
 let classes,compileRoot;
 async function mutate(checkout,operation,parameters={}){
@@ -103,7 +110,7 @@ try{
   const baseView=JSON.parse(await readFile(await workspace.artifacts.verify(workspace.contextById(checkout.context).baseSnapshot)));assert.equal(status.saved.fingerprint,baseView.fingerprint);
   const proof={verifiedVersion:checkout.baseVersion,fingerprint:status.saved.fingerprint};
   if(mutation==='base-fallback')Object.assign(proof,{opened:reference.opened===proof.fingerprint?reference.base:reference.opened,openedVerified:true});else await mutate(checkout,mutation);
-  const refusal=await native(checkout,'release',proof);assert.equal(refusal.state,'unknown',mutation);
+  await refused(checkout,'release',proof,mutation==='base-fallback'||mutation==='edit'?/Verified native buffers changed/:/Unpublished native project files must be retained/);
   const after=await native(checkout,'status');assert.equal(after.checkedOut,true);assert.equal(after.checkoutId,checkout.checkoutId);
   assert.ok((await readdir(checkout.root)).includes('view.rep'));checks[mutation]=true;
  }
@@ -111,7 +118,7 @@ try{
  const keepCheckout=await directCheckout(a.target);await mutate(keepCheckout,'edit');
  const discard=await native(keepCheckout,'discard',{request:'q_'+randomUUID()});assert.equal(discard.state,'discarded');assert.ok(discard.disposableBackups);
  const kept={...keepCheckout,checkoutId:discard.checkoutId,baseVersion:discard.baseVersion};await mutate(kept,'edit-backup');
- assert.equal((await native(kept,'release',{verifiedVersion:kept.baseVersion,fingerprint:discard.saved.fingerprint})).state,'unknown');
+ await refused(kept,'release',{verifiedVersion:kept.baseVersion,fingerprint:discard.saved.fingerprint},/Unpublished native project files must be retained/);
  assert.equal((await native(kept,'status')).checkedOut,true);checks.changedNativeBackupRetained=true;
  // Stop at the real server-termination/local-deletion boundary, retaining the native file as hijacked.
  for(const fault of ['none','edit','nested','legacy-intent']){
@@ -122,11 +129,11 @@ try{
   if(fault==='legacy-intent'){
    const path=join(checkout.root,'released.json'),intent=JSON.parse(await readFile(path));delete intent.fileId;delete intent.savedFingerprint;await writeFile(path,JSON.stringify(intent));
   }else if(fault!=='none')await mutate(checkout,fault);
-  const result=await native(checkout,'release',proof);
   if(fault==='none'){
-   assert.equal(result.state,'released');assert.equal((await native(checkout,'drop',proof)).state,'dropped');assert.ok(!(await readdir(checkout.root)).includes('view.rep'));
+   assert.equal((await native(checkout,'release',proof)).state,'released');assert.equal((await native(checkout,'drop',proof)).state,'dropped');assert.ok(!(await readdir(checkout.root)).includes('view.rep'));
   }else{
-   assert.equal(result.state,'unknown');assert.ok((await readdir(checkout.root)).includes('view.rep'));
+   await refused(checkout,'release',proof,fault==='nested'?/Unpublished native project files must be retained/:/Unproved surviving native file must be retained/);
+   assert.ok((await readdir(checkout.root)).includes('view.rep'));
    assert.equal(JSON.parse(await readFile(join(checkout.root,'released.json'))).state,'release_intent');
   }
   checks['interruptedUndo-'+fault]=true;
@@ -143,7 +150,7 @@ try{
  checks.legacyInterruptedDisposalRecovered=true;
  const checkout=await directCheckout(a.target),status=await native(checkout,'status'),proof={verifiedVersion:checkout.baseVersion,fingerprint:status.saved.fingerprint};
  assert.equal((await native(checkout,'release',proof)).state,'released');
- assert.equal((await native(checkout,'drop',{...proof,opened:reference.opened===proof.fingerprint?reference.base:reference.opened,openedVerified:true})).state,'unknown');
+ await refused(checkout,'drop',{...proof,opened:reference.opened===proof.fingerprint?reference.base:reference.opened,openedVerified:true},/Verified release receipt differs/);
  assert.ok((await readdir(checkout.root)).includes('view.rep'));assert.equal((await native(checkout,'drop',proof)).state,'dropped');checks.changedReleaseProofRefused=true;
 }finally{
  workspace?.close();await app.dispose();await server.stop();
