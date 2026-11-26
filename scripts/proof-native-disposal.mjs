@@ -401,7 +401,11 @@ try{
  await attempt('write-output-receipt',()=>writeFile(outputResults,JSON.stringify({...receipt,terminal:false,
   state:receipt.state==='failed'?'failed':'pending',finalResults:fixtureResults},null,2)));
  receipt.state=primaryFailure||failures.length?'failed':'passed';
- const written=await attempt('write-fixture-receipt',()=>writeFile(fixtureResults,JSON.stringify(receipt,null,2)));
+ const written=await attempt('write-fixture-receipt',async()=>{
+  const temporary=fixtureResults+'.new-'+randomUUID();
+  await writeFile(temporary,JSON.stringify(receipt,null,2),{flag:'wx',mode:0o600,flush:true});
+  await rename(temporary,fixtureResults);
+ });
  if(!written){
   receipt.state='failed';
   await attempt('write-output-failure',()=>writeFile(outputResults,JSON.stringify({...receipt,terminal:false,finalResults:fixtureResults},null,2)));

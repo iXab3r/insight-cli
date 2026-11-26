@@ -98,3 +98,22 @@ for(const change of [
   assert.equal(launches,0);assert.deepEqual(f.deleted,[]);assert.deepEqual(f.calls,[]);
   assert.equal(await readFile(path,'utf8'),bytes);assert.equal(await readFile(ready,'utf8'),bytes);
 });
+
+for(const ready of [false,true])for(const changed of ['target','session'] as const)
+test(`inventory rejects a foreign context ${changed} before credential access (ready: ${ready})`,async t=>{
+  const f=await recoveryFixture(t),binding=f.processBinding(process.pid),backend=f.backend();
+  if(changed==='target'){
+    const input=join(f.root,'other.bin');await writeFile(input,'another immutable input');
+    binding.target=(await f.workspace.importTarget(input)).id;
+  }else binding.session='s_foreign';
+  const bytes=JSON.stringify(binding),path=join(f.checkout.root,'process.json');await writeFile(path,bytes);
+  if(ready)await writeFile(join(f.checkout.root,'..','current.json'),bytes);
+  let credentials=0,bridge=0;
+  (backend as any).c.secrets.require=async()=>{credentials++;return 'synthetic-private-token';};
+  (backend as any).c.fetch=async()=>{bridge++;return Response.json({pid:binding.pid,tcp_port:19091,project_path:join(binding.root,'view')});};
+  await assert.rejects((backend as any).inventory(),{code:'coordinator.binding'});
+  assert.equal(credentials,0);assert.equal(bridge,0);assert.equal((backend as any).running.size,0);
+  assert.equal((backend as any).capacity.slots.has(f.scope.id),false);
+  assert.deepEqual(f.deleted,[]);assert.deepEqual(f.calls,[]);assert.equal(await readFile(path,'utf8'),bytes);
+  assert.equal(await readFile(f.bytes,'utf8'),'synthetic saved local program bytes');process.kill(process.pid,0);
+});

@@ -1154,9 +1154,10 @@ public class ${name} extends GhidraScript {
   }
   private workerShape(binding:ProcessBinding,context:string,scope?:Scope){
     let endpoint:URL;try{endpoint=new URL(binding.endpoint);}catch{fail('binding','Context process receipt changed.');}
-    let checkout=(scope as Partial<GhidraContext>|undefined)?.nativeCheckout;
-    if(!scope)try{checkout=this.workspace.contextById?.(context)?.nativeCheckout;}
+    let selected=scope as Partial<GhidraContext>|undefined;
+    if(!selected)try{selected=this.workspace.contextById?.(context);}
     catch(error){if((error as {code?:string}).code!=='coordinator.notFound')throw error;}
+    const checkout=selected?.nativeCheckout;
     const program=checkout?binding.program===checkout.path:
       binding.program==='program'||binding.program==='/program'||binding.program===programPath(binding.target);
     if(!Number.isSafeInteger(binding.pid)||binding.pid<1||binding.kind!=='context'||binding.context!==context||
@@ -1164,7 +1165,7 @@ public class ${name} extends GhidraScript {
       !['headless','gui'].includes(binding.mode)||typeof binding.runtimeFingerprint!=='string'||!binding.runtimeFingerprint||
       !/^context-[a-f0-9-]{36}$/.test(binding.tokenSecret)||endpoint.protocol!=='http:'||endpoint.hostname!=='127.0.0.1'||!endpoint.port||
       endpoint.username||endpoint.password||endpoint.pathname!=='/'||endpoint.search||endpoint.hash||
-      scope&&(binding.target!==scope.target||binding.session!==undefined&&binding.session!==scope.session))
+      selected&&(binding.target!==selected.target||binding.session!==undefined&&binding.session!==selected.session))
       fail('binding','Context process receipt changed.');
   }
   private async workerReceipt(binding:ProcessBinding,context:string,scope?:Scope){
