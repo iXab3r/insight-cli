@@ -50,11 +50,40 @@ async function mutate(checkout,operation,parameters={}){
  const call=join(f.root,'mutation-'+randomUUID());await mkdir(call);await owned(checkout.root);
  const q=join(call,'request.json');await writeFile(q,JSON.stringify({root:checkout.root,owner:JSON.parse(await readFile(join(checkout.root,'native-owner.json'))),fileId:checkout.fileId,checkoutId:checkout.checkoutId,...parameters}));
  const args=['-Djava.awt.headless=true','-Dghidra.home='+inputs.ghidraHome,...nativeJvmDirectories(call),'-cp',compileRoot+delimiter+classes+delimiter+inputs.classpath,'NativeDisposalFixture',operation,q];
- await exec(inputs.java,await javaClasspathArguments(call,'ghidra',inputs.java,args),{env:{...process.env,...await server.credentials(binding,'publisher')},windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+ const result=await exec(inputs.java,await javaClasspathArguments(call,'ghidra',inputs.java,args),{env:{...process.env,...await server.credentials(binding,'publisher')},windowsHide:true,timeout:60000,maxBuffer:1024*1024});
+ if(operation.startsWith('inspect')){
+  const value=JSON.parse(result.stdout.trim());events.push({inspection:operation,root:checkout.root,result:value});return value;
+ }
 }
 async function directCheckout(target){
  const reservation=workspace.reserveOpen(target,'new',workspace.model(target).settings);workspace.recordRequest(reservation.request.id,'failed',{state:'fixture_control'});
  return (await new GhidraContexts(workspace,inputs,c,undefined,undefined,server).createNative(reservation.context)).nativeCheckout;
+}
+const inspectBackup=checkout=>mutate(checkout,'inspect-backup');
+const inspectProgram=checkout=>mutate(checkout,'inspect');
+async function incoming(target,address,text){
+ const scope=await cli(['ghidra','open','--target',target,'--session','new']);
+ await cli(['ghidra','comments','set',...select(scope),'--address',address,'--kind','eol','--text',text]);
+ assert.equal((await cli(['ghidra','merge',...select(scope)])).state,'merged');return scope;
+}
+async function dirtyBackup(target,kind){
+ const original=await directCheckout(target);await mutate(original,'edit',{address:'1004',text:'BACKUP_'+kind});
+ const request='q_'+randomUUID(),discard=await native(original,'discard',{request});assert.equal(discard.state,'discarded');
+ assert.notEqual(discard.checkoutId,original.checkoutId);
+ const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server),scope=workspace.contextById(original.context);
+ await backend.applyNativeDiscard(scope,discard);
+ const checkout=workspace.context(scope).nativeCheckout;
+ assert.equal(checkout.root,original.root);assert.equal(checkout.fileId,original.fileId);
+ assert.equal(checkout.checkoutId,discard.checkoutId);assert.equal(checkout.baseVersion,discard.baseVersion);
+ const path=join(checkout.root,'operations',request+'-discard.json'),journal=JSON.parse(await readFile(path)),backup=await inspectBackup(checkout);
+ assert.equal(backup.comments['1004'],'BACKUP_'+kind);assert.equal(backup.memory,'90'.repeat(512));
+ assert.equal(backup.fileId,journal.result.disposableBackups[target+'.bin.keep'].fileId);
+ assert.equal(backup.fingerprint,journal.result.disposableBackups[target+'.bin.keep'].fingerprint);
+ if(kind==='legacy'){
+  assert.equal(backup.fingerprint,journal.before.fingerprint);
+  journal.result.disposableBackups[target+'.bin.keep']=journal.before.fingerprint;await writeFile(path,JSON.stringify(journal));
+ }
+ return {checkout,discard,backup};
 }
 try{
  const file=join(f.root,'fixture.bin');await writeFile(file,Buffer.alloc(512,0x90));
@@ -80,6 +109,30 @@ try{
  await cli(['ghidra','open',...select(a)]);assert.equal((await cli(['ghidra','comments','get',...select(a),'--address','1000','--kind','eol'])).text,null);
  assert.equal((await cli(['ghidra','close',...select(a)])).checkout,'released');checks.discardEmptyMergeAndReopen=true;
  await app.dispose();app=f.createApplication(runtime=>createInsightCli({runtime}));binding=await server.ensure();workspace=new Workspace(ws,'default');
+ // Missing native ownership is not permission to delete a saved private project as detached.
+ const gcScope=await cli(['ghidra','open','--target',a.target,'--session','new']);
+ await cli(['ghidra','comments','set',...select(gcScope),'--address','1002','--kind','eol','--text','PRIVATE_GC_OWNER_LOSS']);
+ assert.equal((await cli(['ghidra','close',...select(gcScope)])).checkout,'retained');
+ const gcCheckout=context(gcScope).nativeCheckout,gcBefore=await native(gcCheckout,'status');
+ const ownerPath=join(gcCheckout.root,'native-owner.json'),heldOwner=ownerPath+'.fixture-held',ownerBytes=await readFile(ownerPath);
+ const actualCheckout=GhidraServer.prototype.nativeCheckout;let gcReleases=0;
+ GhidraServer.prototype.nativeCheckout=async function(...args){if(['release','drop'].includes(args[1].operation))gcReleases++;return Reflect.apply(actualCheckout,this,args);};
+ await rename(await owned(ownerPath),heldOwner);
+ try{
+  for(const dry of [true,false,false]){
+   const result=await cli(['ghidra','gc',...(dry?['--dry-run']:[])]);
+   assert.ok((await readdir(gcCheckout.root)).includes('view.rep'));
+   assert.equal(context(gcScope).nativeCheckout.checkoutId,gcCheckout.checkoutId);
+   assert.equal(context(gcScope).nativeCheckout.state,'active');
+   assert.ok(result.retained.some(row=>row.path===gcCheckout.root&&/native.*(?:owner|ownership)/i.test(row.reason)));
+   assert.equal(result.categories['detached-projects'],undefined);assert.equal(gcReleases,0);
+   assert.deepEqual(await readFile(heldOwner),ownerBytes);
+  }
+ }finally{GhidraServer.prototype.nativeCheckout=actualCheckout;await rename(heldOwner,ownerPath);}
+ assert.equal((await native(gcCheckout,'status')).saved.fingerprint,gcBefore.saved.fingerprint);
+ await cli(['ghidra','open',...select(gcScope)]);
+ assert.equal((await cli(['ghidra','comments','get',...select(gcScope),'--address','1002','--kind','eol'])).text,'PRIVATE_GC_OWNER_LOSS');
+ assert.equal((await cli(['ghidra','close',...select(gcScope)])).checkout,'retained');checks.missingNativeOwnerGcRetained=true;
  classes=await nativeHelpers(ws,inputs,c);compileRoot=join(f.root,'fixture-classes');await mkdir(compileRoot);
  const source=fileURLToPath(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url));
  const javac=join(dirname(inputs.java),'javac'+(process.platform==='win32'?'.exe':''));
@@ -120,6 +173,96 @@ try{
  const kept={...keepCheckout,checkoutId:discard.checkoutId,baseVersion:discard.baseVersion};await mutate(kept,'edit-backup');
  await refused(kept,'release',{verifiedVersion:kept.baseVersion,fingerprint:discard.saved.fingerprint},/Unpublished native project files must be retained/);
  assert.equal((await native(kept,'status')).checkedOut,true);checks.changedNativeBackupRetained=true;
+ // A protected .keep survives harmless branches, then a dirty incoming Update and its retries/recovery.
+ for(const kind of ['changed','unproved']){
+  let checkout,backup;
+  if(kind==='changed'){
+   ({checkout}=await dirtyBackup(a.target,kind));await mutate(checkout,'edit-backup',{address:'1004',text:'PRIVATE_BACKUP_AFTER_REFUSAL'});
+  }else{
+   checkout=await directCheckout(a.target);await mutate(checkout,'backup');await mutate(checkout,'edit-backup',{address:'1004',text:'UNPROVED_PRIVATE_BACKUP'});
+  }
+  backup=await inspectBackup(checkout);const initial=await native(checkout,'status');
+  assert.equal(backup.comments['1004'],kind==='changed'?'PRIVATE_BACKUP_AFTER_REFUSAL':'UNPROVED_PRIVATE_BACKUP');
+  await refused(checkout,'release',{verifiedVersion:checkout.baseVersion,fingerprint:initial.saved.fingerprint},/Unpublished native project files must be retained/);
+  assert.deepEqual(await inspectBackup(checkout),backup);
+  const noIncoming=await native(checkout,'update',{request:'q_'+randomUUID()});assert.equal(noIncoming.state,'updated');assert.equal(noIncoming.nativeMergeInvocations,0);
+  assert.equal(noIncoming.baseVersion,initial.baseVersion);assert.deepEqual(await inspectBackup(checkout),backup);
+  await incoming(a.target,'1007','CLEAN_INCOMING_'+kind);
+  const cleanRequest='q_'+randomUUID(),clean=await native(checkout,'update',{request:cleanRequest});assert.equal(clean.state,'updated');assert.equal(clean.nativeMergeInvocations,0);
+  assert.ok(clean.baseVersion>checkout.baseVersion);
+  const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server),scopeBeforeWorker=workspace.contextById(checkout.context);
+  // Adopt the real completed native result, then produce the worker/stop receipts recovery requires.
+  // Normal Update always opens and stops this worker before native dispatch; direct fixture calls do not.
+  await backend.applyNativeUpdate(scopeBeforeWorker,cleanRequest,clean,checkout.baseVersion);
+  checkout={...checkout,baseVersion:clean.baseVersion};
+  assert.deepEqual(await inspectBackup(checkout),backup);assert.equal((await inspectProgram(checkout)).comments['1007'],'CLEAN_INCOMING_'+kind);
+  const beforeWorker=await inspectProgram(checkout);
+  await cli(['ghidra','open',...select(scopeBeforeWorker)]);
+  assert.equal((await cli(['ghidra','close',...select(scopeBeforeWorker)])).checkout,'retained');
+  const stopped=context(scopeBeforeWorker),afterWorker=await inspectProgram(checkout);
+  assert.equal(stopped.nativeCheckout.root,checkout.root);assert.equal(stopped.nativeCheckout.checkoutId,checkout.checkoutId);
+  assert.equal(stopped.nativeCheckout.baseVersion,checkout.baseVersion);assert.equal(await backend.closed(scopeBeforeWorker),true);
+  assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(afterWorker.comments,beforeWorker.comments);assert.equal(afterWorker.memory,beforeWorker.memory);
+  await mutate(checkout,'edit',{address:'1006',text:'LOCAL_RETAINED_'+kind});
+  const dirtyNoIncoming=await native(checkout,'update',{request:'q_'+randomUUID()});assert.equal(dirtyNoIncoming.state,'updated');assert.equal(dirtyNoIncoming.nativeMergeInvocations,0);
+  assert.deepEqual(await inspectBackup(checkout),backup);
+  await incoming(a.target,'1007','DIRTY_INCOMING_'+kind);
+  const before=await native(checkout,'status'),contents=await inspectProgram(checkout),request='q_'+randomUUID();
+  const refusedUpdate=await native(checkout,'update',{request});assert.equal(refusedUpdate.state,'conflict');assert.equal(refusedUpdate.nativeMergeInvocations,0);
+  assert.deepEqual(refusedUpdate.preCallRefusal,{schema:1,operation:'update',invoked:false,reason:'protected_existing_backup',fileId:backup.fileId});
+  assert.equal(refusedUpdate.checkoutId,checkout.checkoutId);assert.equal(refusedUpdate.baseVersion,checkout.baseVersion);assert.deepEqual(refusedUpdate.saved,before.saved);
+  assert.equal(refusedUpdate.disposableBackups,undefined);assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(await inspectProgram(checkout),contents);
+  const journalPath=join(checkout.root,'operations',request+'-update.json'),journalBytes=await readFile(journalPath,'utf8'),journal=JSON.parse(journalBytes);
+  assert.equal(journal.backupBeforeFileId,backup.fileId);assert.equal(journal.backupReplacementProof,undefined);
+  assert.equal((await native(checkout,'update',{request})).state,'conflict');assert.equal(await readFile(journalPath,'utf8'),journalBytes);
+  // Model a lost response with the real completed journal. Existing recovery only reads back status.
+  const scope=workspace.contextById(checkout.context),receipt=join(checkout.root,'fixture-current-view.json');
+  await writeFile(receipt,JSON.stringify({schema:1,engine:'native-checkout-v1',source:'checkout',checkout,...before.saved}));
+  workspace.saveContext(scope,scope.generation,{nativeCheckout:checkout,baseRevision:checkout.baseVersion,workingSnapshot:await workspace.captureNative(receipt)});
+  const recovered=await backend.recoverUpdate(scope,request);
+  assert.equal(recovered.state,'conflict');assert.equal(recovered.revision,checkout.baseVersion);assert.equal(await readFile(journalPath,'utf8'),journalBytes);
+  assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(await inspectProgram(checkout),contents);
+  // No completion proof: even familiar refusal text or a pre-call marker cannot classify/replay an old attempt.
+  for(const legacy of ['exception-text','pre-call-marker']){
+   const uncertain='q_'+randomUUID(),path=join(checkout.root,'operations',uncertain+'-update.json'),pending={...journal,request:{...journal.request,request:uncertain}};
+   delete pending.result;pending.reason=refusedUpdate.conflict;
+   if(legacy==='pre-call-marker')pending.preCallRefusal=refusedUpdate.preCallRefusal;
+   await writeFile(path,JSON.stringify(pending));const bytes=await readFile(path,'utf8');
+   await refused(checkout,'update',{request:uncertain},/Native outcome is unknown; do not retry/);
+   assert.equal((await backend.recoverUpdate(scope,uncertain)).state,'unknown');assert.equal(await readFile(path,'utf8'),bytes);
+   assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(await inspectProgram(checkout),contents);
+  }
+  checks['protectedBackup-'+kind]={backup,before:contents,refusedUpdate,recovered,noIncoming:true,cleanIncoming:true,dirtyNoIncoming:true,noReplay:true};
+ }
+ // Proved native and legacy backup disposal remains compatible, including consecutive saveAs-created Update backups.
+ for(const kind of ['owned','legacy','saveAs']){
+  let {checkout,backup}=await dirtyBackup(a.target,kind);
+  for(let attempt=0;attempt<(kind==='saveAs'?2:1);attempt++){
+   await mutate(checkout,'edit',{address:'1006',text:'LOCAL_VALID_'+kind+'_'+attempt});
+   await incoming(a.target,'1007','INCOMING_VALID_'+kind+'_'+attempt);
+   const request='q_'+randomUUID(),result=await native(checkout,'update',{request});
+   assert.equal(result.state,'updated');assert.equal(result.nativeMergeInvocations,1);assert.equal(result.checkoutId,checkout.checkoutId);assert.ok(result.baseVersion>checkout.baseVersion);
+   const journal=JSON.parse(await readFile(join(checkout.root,'operations',request+'-update.json')));
+   assert.deepEqual(journal.backupReplacementProof,{name:a.target+'.bin.keep',fileId:backup.fileId,fingerprint:backup.fingerprint});
+   checkout={...checkout,baseVersion:result.baseVersion};const replacement=await inspectBackup(checkout),program=await inspectProgram(checkout);
+   assert.notEqual(replacement.fileId,backup.fileId);assert.equal(replacement.fileId,result.disposableBackups[a.target+'.bin.keep'].fileId);
+   assert.equal(replacement.fingerprint,result.disposableBackups[a.target+'.bin.keep'].fingerprint);
+   assert.equal(replacement.comments['1006'],'LOCAL_VALID_'+kind+'_'+attempt);assert.equal(program.comments['1006'],'LOCAL_VALID_'+kind+'_'+attempt);
+   assert.equal(program.comments['1007'],'INCOMING_VALID_'+kind+'_'+attempt);assert.equal(replacement.memory,'90'.repeat(512));backup=replacement;
+  }
+  checks['compatibleBackup-'+kind]=true;
+ }
+ // Native conflicts still belong to Ghidra; a proved backup and all private work survive the failed merge.
+ {
+  const {checkout,backup}=await dirtyBackup(a.target,'conflict');await mutate(checkout,'edit',{address:'1006',text:'LOCAL_NATIVE_CONFLICT'});
+  await incoming(a.target,'1006','SHARED_NATIVE_CONFLICT');const before=await native(checkout,'status'),contents=await inspectProgram(checkout),request='q_'+randomUUID();
+  const conflict=await native(checkout,'update',{request});assert.equal(conflict.state,'conflict');assert.equal(conflict.preCallRefusal,undefined);
+  assert.equal(conflict.nativeMergeInvocations,1);assert.equal(conflict.checkoutId,checkout.checkoutId);assert.equal(conflict.baseVersion,checkout.baseVersion);assert.deepEqual(conflict.saved,before.saved);
+  assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(await inspectProgram(checkout),contents);
+  const path=join(checkout.root,'operations',request+'-update.json'),bytes=await readFile(path,'utf8');
+  assert.equal((await native(checkout,'update',{request})).state,'conflict');assert.equal(await readFile(path,'utf8'),bytes);
+  assert.deepEqual(await inspectBackup(checkout),backup);checks.nativeConflictRetainsExactBackupAndWork=true;
+ }
  // Stop at the real server-termination/local-deletion boundary, retaining the native file as hijacked.
  for(const fault of ['none','edit','nested','legacy-intent']){
   const checkout=await directCheckout(a.target),before=await native(checkout,'status'),proof={verifiedVersion:checkout.baseVersion,fingerprint:before.saved.fingerprint};
@@ -154,9 +297,12 @@ try{
  assert.ok((await readdir(checkout.root)).includes('view.rep'));assert.equal((await native(checkout,'drop',proof)).state,'dropped');checks.changedReleaseProofRefused=true;
 }finally{
  workspace?.close();await app.dispose();await server.stop();
- const receipt={schema:1,scope:'focused disposable native first-open and release safety',root:f.root,checks,events,
+ const receipt={schema:1,scope:'focused disposable native first-open, release and Update backup safety',root:f.root,checks,events,
+  runtimeFingerprint:inputs.fingerprint,ghidraVersion:inputs.ghidraVersion,
   sourceSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/references/native/InsightNativeCheckout.java',import.meta.url))).digest('hex'),
-  limits:['Default backend CLI first-open/recovery and direct native final-release faults; no concurrent race scheduling or installed-package proof']};
+  fixtureSha256:createHash('sha256').update(await readFile(new URL('../skills/ghidra-coordinator/tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url))).digest('hex'),
+  proofSha256:createHash('sha256').update(await readFile(new URL('./proof-native-disposal.mjs',import.meta.url))).digest('hex'),
+  limits:['Default backend CLI first-open/recovery, direct native Update/backup and final-release faults; no concurrent race scheduling or installed-package proof']};
  await writeFile(join(f.root,'native-disposal-results.json'),JSON.stringify(receipt,null,2));
  await writeFile(join(options['output-base'],'native-disposal-results.json'),JSON.stringify(receipt,null,2));
  console.log(JSON.stringify({root:f.root,checks,results:join(f.root,'native-disposal-results.json')}));

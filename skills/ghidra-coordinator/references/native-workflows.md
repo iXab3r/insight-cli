@@ -2,9 +2,11 @@
 
 These commands extend the pinned MCP catalog. All program calls select both `--session` and
 `--target`; API callers use the same Factory command paths. Use generated help for flags.
-Programs remain private until explicit `ghidra merge`. Every new program edit is a complex
-change: saved-state verification is required, and a diverged shared base retains a conflict.
-`refresh` does not silently overwrite either complex version. Program edits require Destructive
+By default, programs remain private until explicit `ghidra merge`; configured automatic policies
+are described in [synchronization](extensions-and-sync.md). Saved-state verification is required.
+Ghidra's native Update receives incoming changes for `merge` and `refresh`, including compatible
+structural changes. Unresolved native conflicts receive no incoming changes and retain the
+original private checkout, saved buffers and base. Program edits in these SDK workflows require Destructive
 permission. File/database creation and VT decisions require Update; reads require ReadOnly.
 
 ## Compare and edit a private program

@@ -322,3 +322,59 @@ for(const invalid of ['wrong request context','wrong operation','missing Update'
  assert.throws(()=>f.workspace.retainNativeDisposal(selected,f.workspace.context(selected).generation,before.nativeCheckout!,snapshot,request.id));
  assert.deepEqual(f.workspace.context(f.context),before);assert.deepEqual(f.workspace.request(request.id),pending);
 });
+
+for(const operation of ['refresh','merge'] as const)for(const lostReply of [false,true])test(operation+' retains a proved pre-call backup refusal'+(lostReply?' after a lost reply':'')+' without replay',async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend);
+ f.state.fingerprint=privateWork;f.state.modified=true;f.state.files.push(f.context.target+'.bin.keep');
+ const diagnostic='q_'+randomUUID();f.patch({complexChanges:[diagnostic],workingSnapshot:await f.nativeReceipt(f.checkout,f.saved())});
+ const original=(f.backend as any).nativeOperation.bind(f.backend);
+ let updates=0;
+ (f.backend as any).nativeOperation=async(checkout:NativeCheckout,kind:string,parameters:Record<string,unknown>={})=>{
+  if(kind!=='update')return original(checkout,kind,parameters);
+  updates++;f.calls.push({operation:kind,parameters});
+  const request=String(parameters.request);await f.updateJournal(request,privateWork);
+  const path=join(f.checkout.root,'operations',request+'-update.json'),journal=JSON.parse(await readFile(path,'utf8'));
+  journal.result={state:'conflict',conflict:'Existing native backup is not proved disposable; retain and inspect this project before Update',
+   preCallRefusal:{schema:1,operation:'update',invoked:false,reason:'protected_existing_backup',fileId:'private-backup'},
+   saved:f.saved(),checkoutId:f.checkout.checkoutId,baseVersion:1,modified:true,nativeMergeInvocations:0};
+  await writeFile(path,JSON.stringify(journal));
+  if(lostReply)throw Error('Lost completed pre-call refusal reply');
+  return journal.result;
+ };
+ await assert.rejects(research[operation](f.context,'protected-backup'));
+ const request=f.workspace.unresolved(f.context)[0]??f.workspace.request(f.calls.find(c=>c.operation==='update')!.parameters.request as string);
+ assert.equal(request.state,lostReply?'unknown':'failed');
+ if(lostReply)await research.open(f.context.target,f.context.session,{autoAnalyze:false},'recover-backup-refusal');
+ assert.equal(f.workspace.request(request.id).state,'failed');
+ const result=f.workspace.request(request.id).result;
+ await assert.rejects(research[operation](f.context,'protected-backup'),error=>{assert.deepEqual((error as {result:unknown}).result,result);return true;});
+ await research.open(f.context.target,f.context.session,{autoAnalyze:false},'inspect-backup-refusal');
+ assert.equal(updates,1);assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,3);
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.baseVersion,1);assert.equal(await f.fingerprint(),privateWork);
+ assert.deepEqual(f.workspace.context(f.context).complexChanges,[diagnostic]);
+ assert.equal((await f.backend.fields(f.workspace.context(f.context).workingSnapshot!,[{address:'1000',field:'comment.eol'}]))['1000@comment.eol']!.value,'private comment');
+ assert.ok(!f.calls.some(c=>['checkin','discard','release','drop'].includes(c.operation)));
+ const journal=JSON.parse(await readFile(join(f.checkout.root,'operations',request.id+'-update.json'),'utf8'));
+ assert.equal(journal.result.preCallRefusal.invoked,false);assert.equal(journal.result.nativeMergeInvocations,0);
+});
+
+for(const legacy of ['missing result','exception text','incomplete pre-call marker','changed readback'] as const)test('backup protection recovery keeps '+legacy+' unknown without replay',async t=>{
+ const f=await fixture(t),research=new Research(f.workspace,async()=>f.backend),request=f.workspace.reserveRequest(f.context,'ghidra.refresh',{},'uncertain-backup').request;
+ f.state.fingerprint=privateWork;f.state.modified=true;f.patch({complexChanges:['q_'+randomUUID()]});
+ f.workspace.startRequest(request.id,{kind:'native-update'});f.workspace.recordRequest(request.id,'unknown',{state:'unknown'});
+ await f.updateJournal(request.id,privateWork);
+ const path=join(f.checkout.root,'operations',request.id+'-update.json'),journal=JSON.parse(await readFile(path,'utf8'));
+ if(legacy==='changed readback')journal.result={...journal.result,state:'conflict',saved:{...f.saved(),fingerprint:base},preCallRefusal:{schema:1,operation:'update',invoked:false}};
+ else{
+  delete journal.result;
+  if(legacy==='exception text')journal.reason='Existing native backup is not proved disposable; retain and inspect this project before Update';
+  if(legacy==='incomplete pre-call marker')journal.preCallRefusal={schema:1,operation:'update',invoked:false};
+ }
+ await writeFile(path,JSON.stringify(journal));const original=await readFile(path,'utf8');
+ assert.deepEqual(await f.backend.recoverUpdate(f.context,request.id),{state:'unknown'});
+ await assert.rejects(research.refresh(f.context,'uncertain-backup'));
+ assert.equal(f.workspace.request(request.id).state,'unknown');assert.equal(await readFile(path,'utf8'),original);
+ assert.equal(await readFile(join(f.checkout.root,'view.rep','database'),'utf8'),'saved private database');
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,3);
+ assert.ok(!f.calls.some(c=>['update','checkin','discard','release','drop'].includes(c.operation)));
+});

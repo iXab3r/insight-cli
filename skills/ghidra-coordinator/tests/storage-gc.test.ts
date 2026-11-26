@@ -16,7 +16,7 @@ async function fixture(t:test.TestContext){
  const stage=async(owner:GhidraContext,options:{stopped?:boolean;pid?:number;programs?:number;native?:boolean;mode?:string;reason?:string;kind?:string}={})=>{
   const at=join(workspace.directory,'ghidra-native',options.kind??'context',options.kind?owner.target:owner.id,randomUUID()),pid=options.pid??999999;
   await mkdir(join(at,'view.rep','idata','00'),{recursive:true});await mkdir(join(at,'exports'));await mkdir(join(at,'ghidra'));
-  await writeFile(join(at,'process.json'),JSON.stringify({pid,tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
+  await writeFile(join(at,'process.json'),JSON.stringify({pid,root:at,program:'/program',tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
   if(options.stopped!==false)await writeFile(join(at,'stopped.json'),JSON.stringify({pid,tokenSecret:'owned',reason:options.reason??'explicit_close'}));
   if(options.native)await writeFile(join(at,'native-owner.json'),'{}');
   for(let i=0;i<(options.programs??1);i++)await writeFile(join(at,'view.rep','idata','00','0000000'+i+'.prp'),'program');
@@ -52,6 +52,70 @@ test('hard links are counted only when their last name is removed',async t=>{
  const f=await fixture(t);await f.stage(f.context);const planned=await collectStorage(f.workspace,f.port,true);
  assert.equal(planned.categories['duplicate-exports']!.bytes,'duplicate'.length);
 });
+
+for(const kind of ['context','candidate'] as const)for(const program of ['program','/program'])test('detached '+kind+' cleanup accepts the exact legacy program binding '+program,async t=>{
+ const f=await fixture(t),root=await f.stage(f.context,kind==='context'?{}:{kind}),path=join(root,'process.json');
+ const worker=JSON.parse(await readFile(path,'utf8'));await writeFile(path,JSON.stringify({...worker,program}));
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(root,'saved.gzf')));
+ const actual=await collectStorage(f.workspace,f.port,false);assert.deepEqual(actual.categories,planned.categories);
+ for(const removed of ['view.rep','view.gpr','saved.gzf','ghidra/ghidra1.cache'])assert.equal(await exists(join(root,removed)),false,removed);
+ assert.deepEqual(await readdir(join(root,'exports')),['user-notes.txt']);assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+ await f.workspace.artifacts.verify(f.target.input);await f.workspace.artifacts.verify(f.working);
+});
+
+test('a missing recorded native root does not block an independent legacy project or closed peer input',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),other=f.open(),gone=join(f.workspace.directory,'ghidra-native','context',other.id,'gone');
+ f.workspace.saveContext(other,other.generation,{nativeCheckout:{schema:1,context:other.id,root:gone,fileId:'file',checkoutId:1,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+f.target.id+'.bin',runtimeFingerprint:'a'.repeat(64),state:'dropped'}});
+ const name='__insight_peer_'+randomUUID().replaceAll('-',''),peer=join(root,'cross-peer',name);await mkdir(peer,{recursive:true});
+ await link(await f.workspace.artifacts.verify(f.working),join(peer,'input.gzf'));
+ await writeFile(join(peer,'receipt.json'),JSON.stringify({context:f.context.id,target:f.target.id,path:'/'+name,state:'closed'}));
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(peer,'input.gzf')));
+ await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(peer,'input.gzf')),false);assert.equal(await exists(join(root,'view.rep')),false);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);assert.deepEqual(f.released,[]);
+});
+
+for(const file of ['view.rep','view.gpr'])test('failed '+file+' removal retains the capture proof until a successful retry',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),project=join(root,file),saved=join(root,'saved.gzf'),fs=(await import('node:fs/promises')).default;
+ const {syncBuiltinESMExports}=await import('node:module'),original=fs.rm,originalUnlink=fs.unlink;
+ const mocked=t.mock.method(fs,'rm',async(...args:Parameters<typeof fs.rm>)=>{if(args[0]===project)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(original,fs,args);});
+ const mockedUnlink=t.mock.method(fs,'unlink',async(...args:Parameters<typeof fs.unlink>)=>{if(args[0]===project)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(originalUnlink,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();});
+ const first=await collectStorage(f.workspace,f.port,false);assert.ok(first.retained.some(r=>r.path===project&&r.reason.includes('EBUSY')));
+ assert.ok(await exists(project));assert.equal(await readFile(saved,'utf8'),'working');await f.workspace.artifacts.verify(f.working);
+ mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(saved));
+ const retried=await collectStorage(f.workspace,f.port,false);assert.deepEqual(retried.categories,planned.categories);assert.equal(retried.bytes,planned.bytes);
+ assert.equal(await exists(project),false);assert.equal(await exists(saved),false);assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+});
+
+test('completed explicit legacy discard authorizes its proved stopped project without saved.gzf',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context);await rm(join(root,'saved.gzf'));
+ const r=f.workspace.reserveRequest(f.context,'ghidra.changes.discard-legacy',{}).request;f.workspace.startRequest(r.id);
+ f.workspace.discardLegacy(f.context,r.id,f.workspace.context(f.context).generation,{state:'discarded'});
+ assert.equal(f.workspace.legacyDiscarded(f.workspace.context(f.context)),true);
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(root,'view.rep')));
+ await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(root,'view.rep')),false);assert.deepEqual(f.released,[]);
+});
+
+for(const failure of ['view.rep','saved.gzf','secondary-export','temporary-cache'])test('migration capture verification survives failed '+failure+' cleanup until retry completes',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),relative=failure==='secondary-export'?join('exports',(await readdir(join(root,'exports'))).find(n=>n.endsWith('.gzf'))!):failure==='temporary-cache'?join('ghidra','ghidra1.cache'):failure;
+ const failed=join(root,relative),saved=join(root,'saved.gzf'),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'server',fingerprint:'a'.repeat(64)}));const shared=await f.workspace.captureNative(path);f.workspace.observeShared(f.target.id,1,shared);
+ const folder=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(folder,{recursive:true});
+ await writeFile(join(folder,f.context.id+'-detached.json'),JSON.stringify({schema:1,original:f.context}));f.workspace.resetMigratedContext(f.context);
+ assert.equal(f.workspace.artifactRoots().has(f.working.id),false);
+ const fs=(await import('node:fs/promises')).default,{syncBuiltinESMExports}=await import('node:module'),original=fs.rm,originalUnlink=fs.unlink;
+ const mocked=t.mock.method(fs,'rm',async(...args:Parameters<typeof fs.rm>)=>{if(args[0]===failed)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(original,fs,args);});
+ const mockedUnlink=t.mock.method(fs,'unlink',async(...args:Parameters<typeof fs.unlink>)=>{if(args[0]===failed)throw Object.assign(Error('fixture sharing violation'),{code:'EBUSY'});return Reflect.apply(originalUnlink,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();});
+ const first=await collectStorage(f.workspace,f.port,false);assert.ok(first.retained.some(r=>r.path===failed&&r.reason.includes('EBUSY')));
+ assert.equal(await readFile(saved,'utf8'),'working');await f.workspace.artifacts.verify(f.working);assert.ok(f.workspace.allArtifacts().some(a=>a.id===f.working.id));
+ mocked.mock.restore();mockedUnlink.mock.restore();syncBuiltinESMExports();
+ const planned=await collectStorage(f.workspace,f.port,true);await f.workspace.artifacts.verify(f.working);
+ const retry=await collectStorage(f.workspace,f.port,false);assert.equal(retry.bytes,planned.bytes);assert.deepEqual(retry.categories,planned.categories);
+ assert.equal(await exists(join(root,'view.rep')),false);assert.equal(await exists(failed),false);assert.equal(await exists(saved),false);assert.equal(await exists(f.workspace.artifacts.path(f.working)),false);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);await f.workspace.artifacts.verify(shared);await f.workspace.artifacts.verify(f.target.input);
+});
 const uncertain:Record<string,(f:Awaited<ReturnType<typeof fixture>>)=>Promise<void>>={
  'unresolved operation':async f=>{await request(f,'unknown',f.working,{state:'unknown'});},
  'abandoned unknown effect':async f=>{await request(f,'failed',f.working,{outcome:'unknown'});},
@@ -83,6 +147,119 @@ async function nativeContext(f:Awaited<ReturnType<typeof fixture>>,local:string,
  return f.workspace.saveContext(c,c.generation,{baseSnapshot:await receipt({source:'server',fingerprint:baseFingerprint}),workingSnapshot:await receipt({source:'checkout',fingerprint:local}),
   nativeCheckout:{schema:1,context:c.id,root,fileId:'file',checkoutId:3,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+f.target.id+'.bin',runtimeFingerprint:'d'.repeat(64),state:'active'}});
 }
+for(const phase of ['active-dirty','active-clean','verified','dropped'] as const)test('missing native owner retains '+phase+' project without detached deletion',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root;
+ const state=phase==='active-dirty'||phase==='active-clean'?'active':phase;
+ const current=f.workspace.saveContext(c,c.generation,{nativeCheckout:{...c.nativeCheckout!,state},...(phase==='active-dirty'?{complexChanges:['q_'+randomUUID()]}:{})});
+ const worker={pid:999999,tokenSecret:'owned',kind:'context',context:c.id,target:c.target,root,mode:'headless',program:c.target+'.bin'};
+ await writeFile(join(root,'process.json'),JSON.stringify(worker));await writeFile(join(root,'stopped.json'),JSON.stringify({...worker,reason:'explicit_close'}));
+ await rm(join(root,'native-owner.json'));const privateFile=join(root,'view.rep','db.gbf');await writeFile(privateFile,'ONLY SAVED PRIVATE PROGRAM BYTES');
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(privateFile,'utf8'),'ONLY SAVED PRIVATE PROGRAM BYTES');
+  assert.equal(result.categories['detached-projects'],undefined);assert.ok(result.retained.some(r=>r.path===root&&/native.*(?:owner|ownership)/i.test(r.reason)));
+ }
+ assert.deepEqual(f.released,[]);assert.equal(f.workspace.context(current).nativeCheckout!.state,state);await f.workspace.artifacts.verify(current.workingSnapshot!);
+});
+
+test('historical native receipts survive GC and prevent later detached deletion after owner loss',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'checkout',checkout:{root,context:f.context.id}}));const history=await f.workspace.captureNative(path);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(join(root,'view.rep','idata','00','db.1.gbf'),'utf8'),'database');
+  assert.ok(result.retained.some(r=>r.path===root&&/native.*ownership/i.test(r.reason)));await f.workspace.artifacts.verify(history);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+for(const outcome of ['released','retained','unreadable'] as const)test('native receipt liveness follows completed project disposal: '+outcome,async t=>{
+ const f=await fixture(t),c=f.open(),root=join(f.workspace.directory,'ghidra-native','context',c.id,'w-owned');
+ await mkdir(join(root,'view.rep'),{recursive:true});await writeFile(join(root,'view.rep','db.gbf'),'owned native bytes');
+ await writeFile(join(root,'view.gpr'),'project');await writeFile(join(root,'native-owner.json'),'{}');
+ const checkout={schema:1 as const,context:c.id,root,fileId:'file',checkoutId:3,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+c.target+'.bin',runtimeFingerprint:'a'.repeat(64),state:'active' as const};
+ const receipt=async(value:unknown)=>{const path=join(f.root,randomUUID());await writeFile(path,JSON.stringify(value));return f.workspace.captureNative(path);};
+ const base=await receipt({source:'server',version:1,fingerprint:'a'.repeat(64)});
+ const saved=await receipt({source:'checkout',checkout,fingerprint:'a'.repeat(64)}),historical=await receipt({source:'checkout',checkout,fingerprint:'b'.repeat(64)});
+ f.workspace.saveContext(c,c.generation,{baseSnapshot:base,workingSnapshot:saved,nativeCheckout:checkout});
+ let disposed=false,releases=0;
+ const fs=(await import('node:fs/promises')).default,{syncBuiltinESMExports}=await import('node:module'),original=fs.lstat;
+ const mocked=t.mock.method(fs,'lstat',(...args:Parameters<typeof fs.lstat>)=>{
+  if(outcome==='unreadable'&&disposed&&args[0]===join(root,'view.rep'))throw Object.assign(Error('fixture inventory unavailable'),{code:'EACCES'});
+  return Reflect.apply(original,fs,args);
+ });syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();syncBuiltinESMExports();});
+ f.port.release=async current=>{
+  releases++;if(outcome==='retained')return false;
+  await rm(join(root,'view.rep'),{recursive:true});await rm(join(root,'view.gpr'));
+  const fresh=f.workspace.context(current);f.workspace.saveContext(fresh,fresh.generation,{nativeCheckout:{...checkout,state:'dropped'},workingSnapshot:undefined});disposed=true;return true;
+ };
+ await collectStorage(f.workspace,f.port,true);assert.equal(releases,0);await f.workspace.artifacts.verify(saved);await f.workspace.artifacts.verify(historical);
+ const first=await collectStorage(f.workspace,f.port,false);
+ if(outcome==='released'){
+  for(const artifact of [saved,historical])assert.equal(await exists(f.workspace.artifacts.path(artifact)),false);
+  assert.equal(first.categories['unreferenced-snapshots']!.bytes,saved.size+historical.size);
+ }else{
+  await f.workspace.artifacts.verify(saved);await f.workspace.artifacts.verify(historical);
+  if(outcome==='unreadable')assert.ok(first.retained.some(r=>r.path===root&&r.reason.includes('inventory could not be verified')));
+ }
+ mocked.mock.restore();syncBuiltinESMExports();
+ const again=await collectStorage(f.workspace,f.port,false);
+ assert.equal(again.bytes,outcome==='unreadable'?saved.size+historical.size:0);
+ assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+ await f.workspace.artifacts.verify(base);await f.workspace.artifacts.verify(f.target.input);
+});
+
+for(const invalid of ['malformed','directory'])test('unverifiable native ownership is retained before native release: '+invalid,async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root,path=join(root,'native-owner.json');
+ await rm(path);if(invalid==='directory')await mkdir(path);else await writeFile(path,'{invalid');
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(join(root,'view.rep','db.gbf'),'utf8'),'native database');
+  assert.ok(result.retained.some(r=>r.path===root&&/ownership receipt.*(?:unverifiable|could not be verified)/i.test(r.reason)));
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+test('interrupted native creation without owner metadata cannot inherit an older detached capture',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),path=join(f.workspace.directory,'ghidra-native','context',f.context.id,'checkout.json');
+ const intent=JSON.stringify({root,owner:{schema:1,protocol:'native-checkout-v1',context:f.context.id,target:f.target.id}});await writeFile(path,intent);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/native.*ownership/i.test(r.reason)));assert.equal(await readFile(path,'utf8'),intent);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+test('a native JSON working receipt is not a full detached program capture',async t=>{
+ const f=await fixture(t),path=join(f.root,randomUUID());await writeFile(path,JSON.stringify({source:'server',fingerprint:'a'.repeat(64)}));
+ const receipt=await f.workspace.captureNative(path),c=f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:receipt}),root=await f.stage(c);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));await f.workspace.artifacts.verify(receipt);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+for(const control of ['missing-export','changed-export','native-program','foreign-worker-root'])test('detached project needs positive root and full-capture proof: '+control,async t=>{
+ const f=await fixture(t),root=await f.stage(f.context);
+ if(control==='missing-export')await rm(join(root,'saved.gzf'));
+ else if(control==='changed-export'){await rm(join(root,'saved.gzf'));await writeFile(join(root,'saved.gzf'),'uncaptured different bytes');}
+ else{const path=join(root,'process.json'),worker=JSON.parse(await readFile(path,'utf8'));if(control==='native-program')worker.program=f.target.id+'.bin';else worker.root=f.root;await writeFile(path,JSON.stringify(worker));}
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));
+ }
+ await f.workspace.artifacts.verify(f.working);
+});
+
+test('unreadable detached capture retains the program and reports instead of aborting GC',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),saved=join(root,'saved.gzf'),fs=(await import('node:fs')).default;
+ const {syncBuiltinESMExports}=await import('node:module'),original=fs.createReadStream;
+ const mocked=t.mock.method(fs,'createReadStream',(...args:unknown[])=>{if(String(args[0])===saved)throw Object.assign(Error('fixture capture unreadable'),{code:'EACCES'});return Reflect.apply(original,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();syncBuiltinESMExports();});
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));
+ }
+});
+
 test('clean native checkouts are only released through native verification; dirty or refused ones stay',async t=>{
  const f=await fixture(t),clean=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),refused=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));
  const dirty=await nativeContext(f,'b'.repeat(64),'a'.repeat(64));f.workspace.saveContext(dirty,dirty.generation,{complexChanges:['q_'+randomUUID()]});
@@ -116,7 +293,9 @@ test('a project without proof that its last save was captured is retained',async
 test('a context without a saved or migrated view keeps its project',async t=>{
  const f=await fixture(t),stage=await f.stage(f.context);f.workspace.saveContext(f.context,f.workspace.context(f.context).generation,{workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined});
  await collectStorage(f.workspace,f.port,false);assert.ok(await exists(join(stage,'view.rep')));
- const journal=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(journal,{recursive:true});await writeFile(join(journal,f.context.id+'-detached.json'),'{}');
+ const journal=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(journal,{recursive:true});
+ const recaptured=await f.workspace.captureSnapshot(join(stage,'saved.gzf'));
+ await writeFile(join(journal,f.context.id+'-detached.json'),JSON.stringify({schema:1,original:{...f.context,workingSnapshot:recaptured}}));
  await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(stage,'view.rep')),false);
 });
 test('candidates of a target with an unsettled context keep their merge evidence',async t=>{
