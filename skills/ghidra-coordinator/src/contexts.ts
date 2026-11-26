@@ -419,7 +419,7 @@ export class GhidraContexts {
       }
       const first=!await exists(join(root,'process.json'));
       // Missing process/control receipts are not evidence about the saved project. Prove its bytes before launch.
-      const pristine=first?await this.pristineNative(context,checkout):undefined;
+      const pristine=(first?await this.pristineNative(context,checkout):undefined)??await this.discardedPristine(context,checkout);
       record=await this.launch(root,target,'context',checkout.path,'headless',context.id);
       const project=object(await record.http.call('/open_project',{path:join(root,'view.gpr')}));
       if(project.success===false)fail('launch','Native working project could not be reopened.');
@@ -435,7 +435,7 @@ export class GhidraContexts {
       return generation===undefined?record:{...record,generation};
     } catch(error){if(record)await this.stopRecord(record,false,true,'startup_failed');else this.capacity.slots.delete(context.id);throw error;}
   }
-  private async pristineNative(context:GhidraContext,checkout:NativeCheckout):Promise<Record<string,unknown>|undefined>{
+  private async pristineNative(context:GhidraContext,checkout:NativeCheckout,discard?:{request:string;files:string[]}):Promise<Record<string,unknown>|undefined>{
     if(!context.workingSnapshot||!context.baseSnapshot||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||
       this.workspace.uncertainOutcome(context)||this.workspace.activePublication(context.target))return;
     const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
@@ -445,14 +445,44 @@ export class GhidraContexts {
     const observed=await this.nativeOperation(checkout,'status');
     if(observed.state!=='ready'||observed.checkedOut!==true||observed.modified!==false||observed.recoverable!==false||observed.fileId!==checkout.fileId||
       observed.checkoutId!==checkout.checkoutId||observed.baseVersion!==checkout.baseVersion||!Array.isArray(observed.projectFiles)||
-      observed.projectFiles.length!==1||observed.projectFiles[0]!==basename(checkout.path))return;
+      stable([...observed.projectFiles].sort())!==stable([basename(checkout.path),...(discard?.files??[])].sort()))return;
     const saved=object(observed.saved);
     if(saved.fingerprint!==base.fingerprint||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion)return;
-    return {fingerprint:saved.fingerprint,fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion};
+    return {fingerprint:saved.fingerprint,fileId:checkout.fileId,checkoutId:checkout.checkoutId,baseVersion:checkout.baseVersion,
+      ...(discard?{discardRequest:discard.request,projectFiles:observed.projectFiles}:{})};
+  }
+  /** A completed discard replaces its checkout inside the same root, retaining its process and backup receipts. */
+  private async discardedPristine(context:GhidraContext,checkout:NativeCheckout):Promise<Record<string,unknown>|undefined>{
+    if(!context.workingSnapshot||!context.baseSnapshot||context.scalars.length||context.complexChanges.length||context.debugger?.traces.length||
+      this.workspace.unresolved(context).some(request=>request.operation!=='ghidra.open')||this.workspace.uncertainOutcome(context)||this.workspace.activePublication(context.target))return;
+    const read=async(artifact:Artifact)=>object(JSON.parse(await readFile(await this.workspace.artifacts.verify(artifact),'utf8')));
+    const [local,base]=await Promise.all([read(context.workingSnapshot),read(context.baseSnapshot)]);
+    if(local.source!=='checkout'||stable(local.checkout)!==stable(checkout)||local.fileId!==checkout.fileId||local.version!==checkout.baseVersion||
+      local.fingerprint!==base.fingerprint||base.source!=='server'||base.version!==checkout.baseVersion||base.fileId!==checkout.fileId||
+      base.origin!==checkout.origin||base.repository!==checkout.repository)return;
+    const directory=join(checkout.root,'operations');let names:string[];
+    try{names=await readdir(directory);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
+    const {owner}=await this.nativeOwner(checkout),proofs:{request:string;files:string[]}[]=[];
+    for(const name of names.filter(name=>/^q_[a-f0-9-]{36}-discard\.json$/.test(name))){
+      const journal=object(JSON.parse(await readFile(join(directory,name),'utf8'))),q=object(journal.request??{}),result=object(journal.result??{}),saved=object(result.saved??{}),before=object(journal.before??{});
+      if(q.operation!=='discard'||q.request+'-discard.json'!==name||q.root!==checkout.root||q.fileId!==checkout.fileId||stable(q.owner)!==stable(owner)||
+        !Number.isSafeInteger(q.checkoutId)||Number(q.checkoutId)<0||q.checkoutId===checkout.checkoutId||journal.checkoutId!==q.checkoutId||
+        !Number.isSafeInteger(journal.baseVersion)||Number(journal.baseVersion)<1||Number(journal.baseVersion)>checkout.baseVersion||
+        before.fileId!==checkout.fileId||before.version!==journal.baseVersion||typeof before.fingerprint!=='string'||!/^[a-f0-9]{64}$/.test(before.fingerprint)||
+        result.state!=='discarded'||result.modified!==false||result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||
+        saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||saved.fingerprint!==base.fingerprint||typeof result.retainedKeepFile!=='string')continue;
+      // This inventory permits recapturing only the main program's open-time rewrite. It never grants backup disposal.
+      const inventory=journal.backupFilesAfter??journal.backupFilesBefore;
+      const files=Object.keys(object(inventory??result.disposableBackups??{}));
+      if(files.some(file=>!this.nativeKeepName(checkout,file))||inventory!==undefined&&Object.values(object(inventory)).some(value=>typeof value!=='string'||!value)||
+        result.retainedKeepFile!==''&&!files.includes(result.retainedKeepFile))continue;
+      proofs.push({request:String(q.request),files});
+    }
+    if(proofs.length===1)return this.pristineNative(context,checkout,proofs[0]);
   }
   /**
-   * Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs. On a worker's first open of a
-   * pristine checkout those bytes are captured as its new receipt and as a proved no-work state of that shared version.
+   * Opening a checkout lets Ghidra rewrite its saved buffers before any caller runs. A proved pristine initial or
+   * replacement checkout captures those bytes as its new receipt and a no-work state of that shared version.
    */
   private async recordOpened(scope:Scope,checkout:NativeCheckout,record:Running,preOpen:Record<string,unknown>):Promise<number|undefined>{
     const context=this.workspace.context(scope);if(!context.workingSnapshot||!context.baseSnapshot)return;

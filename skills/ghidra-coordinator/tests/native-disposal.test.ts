@@ -131,6 +131,91 @@ test('first open records only the rewrite of independently proved base buffers, 
  assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'dropped');
 });
 
+async function discardedFixture(t:test.TestContext){
+ const f=await fixture(t);await f.backend.open(f.context);
+ const next={...f.checkout,checkoutId:4},request='q_'+randomUUID(),keep=f.context.target+'.bin.keep';
+ f.state.fingerprint=base;f.state.modified=false;f.state.files.push(keep);f.state.status={checkoutId:4};
+ f.patch({state:'stopped',nativeCheckout:next,viewEpoch:1,workingSnapshot:await f.nativeReceipt(next,f.saved())});
+ const directory=join(next.root,'operations');await mkdir(directory);
+ const journal:any={request:{operation:'discard',request,root:next.root,fileId:next.fileId,checkoutId:3,owner:{}},checkoutId:3,baseVersion:1,
+  before:{fileId:next.fileId,version:1,fingerprint:privateWork},backupFilesBefore:{},backupFilesAfter:{[keep]:'backup-file'},
+  result:{state:'discarded',checkoutId:4,baseVersion:1,modified:false,saved:f.saved(),retainedKeepFile:keep,
+   disposableBackups:{[keep]:{schema:2,fileId:'backup-file',fingerprint:privateWork}}}};
+ const path=join(directory,request+'-discard.json'),backup=join(next.root,'view.rep','retained-backup');
+ await writeFile(backup,'discarded private bytes');
+ const save=()=>writeFile(path,JSON.stringify(journal));await save();f.events.length=0;f.calls.length=0;
+ return {...f,next,request,keep,journal,path,backup,save};
+}
+
+test('a completed discard recaptures its proved replacement checkout before the next guarded dependency read',async t=>{
+ const f=await discardedFixture(t),before=f.workspace.context(f.context),old=before.workingSnapshot!,journalBytes=await readFile(f.path,'utf8');
+ await f.backend.open(f.context);const current=f.workspace.context(f.context);
+ assert.ok(f.events.indexOf('status')<f.events.indexOf('launch'));assert.equal(await f.fingerprint(),opened);
+ assert.equal(current.nativeCheckout!.checkoutId,4);assert.equal(current.nativeCheckout!.root,f.checkout.root);
+ assert.equal(current.generation,before.generation+2);assert.equal(current.baseSnapshot!.id,before.baseSnapshot!.id);
+ const proof=JSON.parse(await readFile(join(f.references,(await f.refs())[0]!),'utf8'));
+ assert.equal(proof.preOpen.checkoutId,4);assert.equal(proof.preOpen.discardRequest,f.request);
+ assert.deepEqual(proof.preOpen.projectFiles,[f.context.target+'.bin',f.keep]);
+ Object.assign(f.backend,{closed:async()=>false,nativeView:async(_record:unknown,p:Record<string,unknown>)=>{
+  assert.equal(p.expected,f.state.fingerprint,'Exact saved-view guard remains required');return {'1000@comment.eol':{exists:true,value:null,dependency:'unchanged'}};
+ }});
+ assert.equal((await f.backend.fields(current.workingSnapshot!,[{address:'1000',field:'comment.eol'}]))['1000@comment.eol']!.dependency,'unchanged');
+ await assert.rejects(f.backend.fields(old,[{address:'1000',field:'comment.eol'}]),/Exact saved-view guard/);
+ assert.equal(await readFile(f.path,'utf8'),journalBytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(f.calls.every(call=>call.operation==='status'));
+});
+
+for(const fault of ['incomplete','missing before','owner','request','root','file','prior checkout','replacement checkout','version','saved bytes','inventory identity','missing inventory','unrecorded file','nested file','recovery','modified','observed identity','ambiguous completion','unknown operation'] as const)
+test('post-discard open cannot bless '+fault+' as a pristine replacement',async t=>{
+ const f=await discardedFixture(t),reference=await readFile(join(f.references,(await f.refs())[0]!),'utf8');
+ if(fault==='incomplete')delete f.journal.result;
+ if(fault==='missing before')delete f.journal.before;
+ if(fault==='owner')f.journal.request.owner={context:'foreign'};
+ if(fault==='request')f.journal.request.request='q_'+randomUUID();
+ if(fault==='root')f.journal.request.root=join(f.directory,'foreign');
+ if(fault==='file')f.journal.request.fileId='foreign';
+ if(fault==='prior checkout')f.journal.request.checkoutId=4;
+ if(fault==='replacement checkout')f.journal.result.checkoutId=9;
+ if(fault==='version')f.journal.result.baseVersion=2;
+ if(fault==='saved bytes')f.journal.result.saved.fingerprint=privateWork;
+ if(fault==='inventory identity')f.journal.backupFilesAfter[f.keep]='';
+ if(fault==='missing inventory'){delete f.journal.backupFilesBefore;delete f.journal.backupFilesAfter;delete f.journal.result.disposableBackups;}
+ if(fault==='unrecorded file')f.state.files.push(f.keep+'.1');
+ if(fault==='nested file')f.state.files.push('private/nested');
+ if(fault==='recovery')f.state.recoverable=true;
+ if(fault==='modified')f.state.modified=true;
+ if(fault==='observed identity')f.state.status.checkoutId=9;
+ if(fault==='ambiguous completion'){
+  const other=structuredClone(f.journal);other.request.request='q_'+randomUUID();await writeFile(join(dirname(f.path),other.request.request+'-discard.json'),JSON.stringify(other));
+ }
+ if(fault==='unknown operation'){
+  const reserved=f.workspace.reserveRequest(f.context,'ghidra.changes.discard',{},'unresolved-discard');f.workspace.startRequest(reserved.request.id);
+ }
+ await f.save();const bytes=await readFile(f.path,'utf8');
+ if(fault==='unknown operation')await assert.rejects(f.backend.open(f.context),/unresolved/);else await f.backend.open(f.context);
+ assert.ok(!f.events.includes('capture'));assert.equal(await readFile(join(f.references,(await f.refs())[0]!),'utf8'),reference);
+ assert.equal(await readFile(f.path,'utf8'),bytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(f.calls.every(call=>call.operation==='status'));
+});
+
+for(const form of ['legacy backup receipt','no new backup','numbered backup'] as const)
+test('post-discard open retains '+form+' while recapturing only independently proved main bytes',async t=>{
+ const f=await discardedFixture(t);
+ if(form==='legacy backup receipt'){
+  delete f.journal.backupFilesBefore;delete f.journal.backupFilesAfter;f.journal.result.disposableBackups[f.keep]=privateWork;
+ }else if(form==='no new backup'){
+  delete f.journal.backupFilesAfter;delete f.journal.result.disposableBackups;f.journal.result.retainedKeepFile='';f.state.files.splice(1);
+ }else{
+  const numbered=f.keep+'.1';f.journal.backupFilesBefore[f.keep]='earlier-file';f.journal.backupFilesAfter[f.keep]='earlier-file';f.journal.backupFilesAfter[numbered]='backup-file';
+  f.journal.result.disposableBackups[numbered]=f.journal.result.disposableBackups[f.keep];delete f.journal.result.disposableBackups[f.keep];
+  f.journal.result.retainedKeepFile=numbered;f.state.files.push(numbered);
+ }
+ await f.save();const bytes=await readFile(f.path,'utf8');await f.backend.open(f.context);
+ assert.equal(await f.fingerprint(),opened);assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,4);
+ assert.equal(await readFile(f.path,'utf8'),bytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(!f.calls.some(call=>call.operation==='release'||call.operation==='drop'||call.operation==='discard'));
+});
+
 test('restored base-only control records cannot bless saved private work when process/current receipts are missing',async t=>{
  const f=await fixture(t);f.state.fingerprint=privateWork;f.state.modified=true;
  await f.backend.open(f.context);assert.deepEqual(await f.refs(),[]);assert.equal(f.events.includes('capture'),false);
