@@ -39,8 +39,11 @@ Codex is the first concrete supported-host gate.
 
 A skill link does not grant filesystem or IPC permissions. Run
 `insight-cli --profile <name> storage show --json` through the selected executable to inspect
-the assigned profile. Allow its Factory
-`appData` control location and its effective analysis `directory`, which may be elsewhere after
+the assigned profile. Its `appData` is the profile directory, not the whole application control root.
+Allow that directory and the shared metadata in its parent: `profiles.json` for profile discovery
+and `.analysis-storage-default.json` for installation defaults. Permit parent traversal and the
+metadata's owned lock/temporary entries when configuration writes need them; keep unrelated
+profile directories outside the grant. Also allow the effective analysis `directory`, which may be elsewhere after
 storage configuration, migration or installation-default selection. Follow the
 [storage workflow](storage.md) for retained compatibility paths. Also allow the CLI's `.runtime`
 directory and exact local IPC endpoint. On macOS the application root is

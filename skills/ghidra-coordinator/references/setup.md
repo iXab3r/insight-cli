@@ -62,9 +62,12 @@ skill discovery and help require no authentication or native process startup.
 Deletion and replacement commands also require `permissions grant Destructive`.
 
 Inspect `insight-cli --profile <name> storage show --json`: research bytes, snapshots, journals,
-projects, managed runtimes and materials use its effective analysis `directory`. Factory control
-state uses `appData`, and credentials remain in its platform secret store. Grant the host access
-to both required locations. They may differ after configuration, migration or installation-default
+projects, managed runtimes and materials use its effective analysis `directory`. Factory's `appData`
+is the profile directory. Its parent also holds shared control metadata: `profiles.json` and
+`.analysis-storage-default.json`. Grant access to the profile, effective analysis directory and
+those parent metadata files, including parent traversal and owned lock/temporary entries needed
+for configuration writes, while keeping unrelated profile directories outside the grant.
+Credentials remain in the platform secret store. These locations may differ after configuration, migration or installation-default
 selection; use the supported
 [storage workflow](storage.md). Stop the owner through `ipc-server stop` before changing its code/runtime
 configuration. Restoring a saved context preserves its private view. Server settings and initial
