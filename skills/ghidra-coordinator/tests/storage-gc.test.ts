@@ -227,7 +227,8 @@ test('a checkout Ghidra rewrote on open is released only as the exact bytes a pr
  const receipt=async(v:unknown)=>{const p=join(f.root,randomUUID());await writeFile(p,JSON.stringify(v));return f.workspace.captureNative(p);};
  const make=async(local:string)=>{const c=await nativeContext(f,local,base);return f.workspace.saveContext(c,c.generation,{baseSnapshot:await receipt({source:'server',version:1,fileId:'file',fingerprint:base,origin:'ghidra://127.0.0.1:1',repository:'owned'})});};
  const references=join(f.workspace.directory,'ghidra-native','shared-views',f.target.id,'opened');
- const reference=async(fileId:string,from=base,repository='owned')=>{await mkdir(references,{recursive:true});await writeFile(join(references,'v1-'+opened+'.json'),JSON.stringify({schema:1,target:f.target.id,origin:'ghidra://127.0.0.1:1',repository,version:1,fileId,base:from,opened}));};
+ const reference=async(fileId:string,from=base,repository='owned',schema=2)=>{await mkdir(references,{recursive:true});await writeFile(join(references,'v1-'+opened+'.json'),JSON.stringify({schema,target:f.target.id,origin:'ghidra://127.0.0.1:1',repository,version:1,fileId,base:from,opened,
+  preOpen:{fingerprint:from,fileId,baseVersion:1,checkoutId:3}}));};
  const calls:Record<string,unknown>[]=[];let seen=opened;
  const backend=(c:{nativeCheckout?:{path:string}})=>{const contexts=Object.create(GhidraContexts.prototype) as GhidraContexts;Object.assign(contexts,{workspace:f.workspace,directory:()=>join(f.workspace.directory,'ghidra-native'),
   nativeOperation:async(_:unknown,operation:string,parameters:Record<string,unknown>={})=>{calls.push({operation,...parameters});
@@ -236,6 +237,7 @@ test('a checkout Ghidra rewrote on open is released only as the exact bytes a pr
  const rewritten=await make(opened),stale=await make(base);
  // No proved pristine open: a rewritten checkout is private work.
  assert.equal(f.workspace.unchangedNative(rewritten),false);assert.equal(await backend(rewritten).releaseUnchanged(rewritten),false);
+ await reference('file',base,'owned',1);assert.equal(f.workspace.unchangedNative(rewritten),false);
  for(const [fileId,from,repository] of [['another-file',base,'owned'],['file',other,'owned'],['file',base,'another-repository']]){await reference(fileId!,from,repository);assert.equal(f.workspace.unchangedNative(rewritten),false);}
  await reference('file');assert.equal(f.workspace.unchangedNative(rewritten),true);
  assert.equal((await collectStorage(f.workspace,f.port,true)).categories['native-checkouts']!.items,2);

@@ -113,6 +113,11 @@ function pageResult(value: unknown, key: string, limit: number, offset: number) 
 export class Research {
   constructor(readonly workspace: Workspace, private readonly backend: ()=>Promise<ResearchBackend>,
     private readonly tasks=new Map<string,Promise<unknown>>()) {}
+  private retainedDisposal(selected:Scope,error:unknown){
+    const failure=error as {code?:string;result?:{state?:string;retention?:{schema?:number;source?:string;checkout?:unknown}}},proof=failure.result?.retention,current=this.workspace.context(selected);
+    if(failure.code==='coordinator.conflict'&&failure.result?.state==='retained'&&proof?.schema===1&&proof.source==='native-release-status'&&
+      proof.checkout&&current.nativeCheckout?.state==='active'&&digest(proof.checkout)===digest(current.nativeCheckout))return failure.result;
+  }
   async ordered<T>(selected: Scope, action: ()=>Promise<T>): Promise<T> {
     const key=this.workspace.context(selected).id,previous=this.tasks.get(key);
     const task=timed('facade.queue','research',async()=>{await previous?.catch(()=>{});}).then(action);
@@ -436,7 +441,13 @@ export class Research {
         let publication;
         try{publication=this.workspace.publication(request.id);}catch(error){if(!String((error as {code?:string}).code).endsWith('.notFound'))throw error;}
         if(!publication){
-          const empty=await backend.recoverEmptyNative?.(selected,request.id);
+          let empty;
+          try{empty=await backend.recoverEmptyNative?.(selected,request.id);}
+          catch(error){
+            const retained=this.retainedDisposal(selected,error);
+            if(!retained)throw error;
+            this.workspace.recordRequest(request.id,'failed',retained);continue;
+          }
           if(empty?.state==='verified'){
             const current=this.workspace.context(selected);this.workspace.completeSavedRequest(selected,request.id,current.generation,{}, {...selected,state:'empty',applied:0,pendingChanges:0,sharedRevision:revision(empty.revision),engine:'ghidra-native'});continue;
           }
@@ -630,6 +641,10 @@ export class Research {
       }catch(error){
         const state=this.workspace.request(request.id).state;
         if(state!=='applied'&&state!=='failed'){
+          // A final empty-disposal refusal is terminal only after independent native ownership readback.
+          // An uncertain release or any publication still follows the unknown-outcome path below.
+          const retained=!publication?this.retainedDisposal(selected,error):undefined;
+          if(retained){this.workspace.recordRequest(request.id,'failed',retained);throw error;}
           if(publication&&['commit_intent','unknown'].includes(this.workspace.publication(publication.id).state))this.workspace.unknownPublication(publication.id,{state:'unknown',engine:'ghidra-native'});
           this.workspace.recordRequest(request.id,'unknown',{...selected,state:'unknown',engine:'ghidra-native'});
         }

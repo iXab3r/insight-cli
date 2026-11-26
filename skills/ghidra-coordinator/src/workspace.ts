@@ -355,7 +355,9 @@ export class Workspace {
       const match=/^v(\d+)-([a-f0-9]{64})\.json$/.exec(name);if(!match||Number(match[1])!==revision)continue;
       try{
         const row=JSON.parse(readFileSync(join(root,name),'utf8'));
-        if(row.schema===1&&row.target===target&&row.version===revision&&row.fileId===base.fileId&&row.base===base.fingerprint&&row.origin===base.origin&&row.repository===base.repository&&row.opened===match[2])found.add(match[2]!);
+        // Earlier receipts inferred pristine state from control metadata alone; they cannot authorize deletion.
+        if(row.schema===2&&row.preOpen?.fingerprint===base.fingerprint&&row.preOpen.fileId===base.fileId&&row.preOpen.baseVersion===revision&&
+          Number.isSafeInteger(row.preOpen.checkoutId)&&row.preOpen.checkoutId>=0&&row.target===target&&row.version===revision&&row.fileId===base.fileId&&row.base===base.fingerprint&&row.origin===base.origin&&row.repository===base.repository&&row.opened===match[2])found.add(match[2]!);
       }catch{}
     }
     return found;

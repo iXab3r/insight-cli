@@ -57,13 +57,45 @@ public final class InsightNativeCheckout {
     /** Every file with local bytes, at any depth; unmodified server items have none. */
     static void local(DomainFolder folder,Set<String> names){
         for(DomainFile f:folder.getFiles())if(!f.isVersioned()||f.isCheckedOut()||f.isHijacked()||f.canRecover())names.add(f.getPathname().substring(1));
-        for(DomainFolder child:folder.getFolders())if(!child.isLinked())local(child,names);
+        for(DomainFolder child:folder.getFolders())if(child.isLinked())names.add(child.getPathname().substring(1)+"/");else local(child,names);
+    }
+    static String authorized(JsonObject q){return text(q,q.has("opened")?"opened":"fingerprint");}
+    static boolean sameRelease(JsonObject receipt,JsonObject q){
+        if(!Objects.equals(receipt.get("checkoutId"),q.get("checkoutId"))||!Objects.equals(receipt.get("fingerprint"),q.get("fingerprint"))||
+            !Objects.equals(receipt.get("version"),q.get("verifiedVersion")))return false;
+        // Completed older receipts already ended the checkout. Preserve their deletion-only recovery.
+        if(!receipt.has("savedFingerprint")&&!receipt.has("fileId"))return true;
+        return Objects.equals(receipt.get("fileId"),q.get("fileId"))&&Objects.equals(receipt.get("savedFingerprint"),new JsonPrimitive(authorized(q)));
+    }
+    /** Only a backup created by a completed owned native operation, still equal to its before-image, is disposable. */
+    static Map<String,String> backups(Project project,Path operations,JsonObject q,JsonObject owner)throws Exception {
+        String name=text(owner,"path").substring(1),keep=name+".keep";Map<String,String> proved=new TreeMap<>();
+        DomainFile backup=project.getProjectData().getFile("/"+keep);
+        if(backup==null||backup.canRecover()||backup.isCheckedOut()||backup.isHijacked())return proved;
+        try(var paths=Files.list(operations)){
+            for(Path path:paths.filter(p->p.getFileName().toString().matches("q_[a-f0-9-]{36}-(update|discard)\\.json")).sorted().toList()){
+                JsonObject journal=JsonParser.parseString(Files.readString(path)).getAsJsonObject(),request=journal.getAsJsonObject("request"),result=journal.getAsJsonObject("result");
+                if(request==null||result==null||!request.getAsJsonObject("owner").equals(owner)||!Objects.equals(request.get("root"),q.get("root"))||
+                    !Objects.equals(request.get("fileId"),q.get("fileId"))||!Objects.equals(result.get("checkoutId"),q.get("checkoutId"))||
+                    !path.getFileName().toString().equals(text(request,"request")+"-"+text(request,"operation")+".json")||
+                    !(text(result,"state").equals("updated")||text(result,"state").equals("discarded"))||result.get("baseVersion").getAsInt()>q.get("verifiedVersion").getAsInt())continue;
+                JsonObject files=result.getAsJsonObject("disposableBackups");
+                if(files!=null&&files.has(keep)&&files.get(keep).equals(journal.getAsJsonObject("before").get("fingerprint"))&&
+                    saved(backup,owner).get("fingerprint").equals(text(files,keep)))proved.put(keep,text(files,keep));
+            }
+        }
+        return proved;
+    }
+    static Map<String,String> releaseFiles(Project project,Path operations,JsonObject q,JsonObject owner,boolean checkedOut)throws Exception {
+        var files=new TreeSet<String>();local(project.getProjectData().getRootFolder(),files);
+        Map<String,String> backups=backups(project,operations,q,owner);var allowed=new TreeSet<>(backups.keySet());
+        if(checkedOut)allowed.add(text(owner,"path").substring(1));
+        require(files.equals(allowed),"Unpublished native project files must be retained");return backups;
     }
     static boolean released(Path root,JsonObject q)throws Exception {
         Path path=root.resolve("released.json");if(!Files.exists(path))return false;
         var released=JsonParser.parseString(Files.readString(path)).getAsJsonObject();
-        return text(released,"state").equals("released")&&released.get("checkoutId").equals(q.get("checkoutId"))&&
-            released.get("fingerprint").equals(q.get("fingerprint"))&&released.get("version").equals(q.get("verifiedVersion"));
+        return text(released,"state").equals("released")&&sameRelease(released,q);
     }
     static void deleteReleased(Path root,ProjectLocator locator)throws Exception {
         for(Path target:List.of(locator.getProjectDir().toPath(),locator.getMarkerFile().toPath())){
@@ -164,6 +196,7 @@ public final class InsightNativeCheckout {
                     require(file.isCheckedOut(),"Native checkout missing");
                     var before=saved(file,owner);long checkout=file.getCheckoutStatus().getCheckoutId();int base=file.getCheckoutStatus().getCheckoutVersion(),head=file.getLatestVersion();
                     Map<String,Object> intent=new LinkedHashMap<>();intent.put("request",q);intent.put("before",before);intent.put("checkoutId",checkout);intent.put("baseVersion",base);intent.put("headVersion",head);
+                    boolean keepAbsent=project.getProjectData().getFile(path+".keep")==null;
                     if(operation.equals("discard")){
                         write(journal,intent);
                         boolean dirty=file.modifiedSinceCheckout();file.undoCheckout(dirty);
@@ -198,23 +231,30 @@ public final class InsightNativeCheckout {
                     }
                     out.put("saved",saved(file,owner));out.put("checkoutId",file.getCheckoutStatus().getCheckoutId());out.put("baseVersion",file.getCheckoutStatus().getCheckoutVersion());
                     out.put("modified",file.modifiedSinceCheckout());out.put("nativeMergeInvocations",HeadlessProgramMergeManager.invocations);out.put("nativePhases",HeadlessProgramMergeManager.phases);
+                    if(keepAbsent&&(operation.equals("discard")||operation.equals("update"))){
+                        DomainFile keep=project.getProjectData().getFile(path+".keep");
+                        if(keep!=null)try{Object fingerprint=saved(keep,owner).get("fingerprint");if(before.get("fingerprint").equals(fingerprint))out.put("disposableBackups",Map.of(name+".keep",fingerprint));}
+                        catch(Exception unproved){/* An unreadable backup remains private; it cannot invalidate native completion. */}
+                    }
                     intent.put("result",out);write(journal,intent);
                 }
             }else if(operation.equals("release")){
                 Path releaseFile=root.resolve("released.json");
-                Map<String,Object> release=new LinkedHashMap<>(Map.of("checkoutId",q.get("checkoutId").getAsLong(),"version",q.get("verifiedVersion").getAsInt(),"fingerprint",text(q,"fingerprint")));
+                Map<String,Object> release=new LinkedHashMap<>(Map.of("checkoutId",q.get("checkoutId").getAsLong(),"version",q.get("verifiedVersion").getAsInt(),"fingerprint",text(q,"fingerprint"),
+                    "fileId",text(q,"fileId"),"savedFingerprint",authorized(q)));
                 if(file.isCheckedOut()){
+                    require(!q.has("opened")||q.has("openedVerified")&&q.get("openedVerified").getAsBoolean(),"Pristine-open proof is unverified; private work must be retained");
                     require(file.getCheckoutStatus().getCheckoutVersion()==q.get("verifiedVersion").getAsInt()&&!file.canRecover(),"Unpublished native work must be retained");
                     Object local=saved(file,owner).get("fingerprint");
                     // Ghidra's own rewrite on open marks a checkout modified; only bytes the coordinator proved to hold no work may carry it.
-                    boolean opened=q.has("opened")&&local.equals(text(q,"opened"));
-                    if(opened){var files=new TreeSet<String>();local(project.getProjectData().getRootFolder(),files);require(files.equals(Set.of(name)),"Unpublished native work must be retained");}
-                    require(opened||!file.modifiedSinceCheckout(),"Unpublished native work must be retained");
-                    require(opened||local.equals(text(q,"fingerprint")),"Verified native buffers changed");
+                    require(local.equals(authorized(q)),"Verified native buffers changed");
+                    require(q.has("opened")||!file.modifiedSinceCheckout(),"Unpublished native work must be retained");
+                    release.put("disposableBackups",releaseFiles(project,operations,q,owner,true));
                     release.put("state","release_intent");write(releaseFile,release);file.undoCheckout(false);
                 }else{
                     var prior=JsonParser.parseString(Files.readString(releaseFile)).getAsJsonObject();
-                    require(prior.get("checkoutId").equals(q.get("checkoutId"))&&prior.get("version").equals(q.get("verifiedVersion"))&&prior.get("fingerprint").equals(q.get("fingerprint")),"Release intent changed");
+                    require(sameRelease(prior,q),"Release intent changed");
+                    release.put("disposableBackups",releaseFiles(project,operations,q,owner,false));
                 }
                 require(Arrays.stream(repository.getCheckouts("/",name)).noneMatch(c->c.getCheckoutId()==q.get("checkoutId").getAsLong()),"Owned checkout remains");
                 release.put("state","released");write(releaseFile,release);out.put("state","released");
