@@ -229,7 +229,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         const given=kind==='context'&&discarded.has(owner);
         const candidates=kind==='context'?captured.get(owner)??[]:[...(targetCaptures.get(owner)??[])];
         if(kind!=='context')try{const shared=workspace.model(owner).sharedSnapshot;if(shared?.kind==='snapshot')candidates.push(shared);}catch{/* Unknown model roots cannot supply capture proof. */}
-        if(!nativeRoot&&(worker?.program!=='program'||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!given&&!await detachedCapture(workspace,root,candidates))){
+        if(!nativeRoot&&((worker?.program!=='program'&&worker?.program!=='/program')||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!given&&!await detachedCapture(workspace,root,candidates))){
           keep(root,'Project has no verified full detached program capture; native JSON receipts do not contain program bytes.');continue;
         }
         let cleanupComplete=true;

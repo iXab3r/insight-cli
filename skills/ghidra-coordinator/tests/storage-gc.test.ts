@@ -16,7 +16,7 @@ async function fixture(t:test.TestContext){
  const stage=async(owner:GhidraContext,options:{stopped?:boolean;pid?:number;programs?:number;native?:boolean;mode?:string;reason?:string;kind?:string}={})=>{
   const at=join(workspace.directory,'ghidra-native',options.kind??'context',options.kind?owner.target:owner.id,randomUUID()),pid=options.pid??999999;
   await mkdir(join(at,'view.rep','idata','00'),{recursive:true});await mkdir(join(at,'exports'));await mkdir(join(at,'ghidra'));
-  await writeFile(join(at,'process.json'),JSON.stringify({pid,root:at,program:'program',tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
+  await writeFile(join(at,'process.json'),JSON.stringify({pid,root:at,program:'/program',tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
   if(options.stopped!==false)await writeFile(join(at,'stopped.json'),JSON.stringify({pid,tokenSecret:'owned',reason:options.reason??'explicit_close'}));
   if(options.native)await writeFile(join(at,'native-owner.json'),'{}');
   for(let i=0;i<(options.programs??1);i++)await writeFile(join(at,'view.rep','idata','00','0000000'+i+'.prp'),'program');
@@ -51,6 +51,16 @@ test('superseded before-images, duplicate exports and stopped detached projects 
 test('hard links are counted only when their last name is removed',async t=>{
  const f=await fixture(t);await f.stage(f.context);const planned=await collectStorage(f.workspace,f.port,true);
  assert.equal(planned.categories['duplicate-exports']!.bytes,'duplicate'.length);
+});
+
+for(const kind of ['context','candidate'] as const)for(const program of ['program','/program'])test('detached '+kind+' cleanup accepts the exact legacy program binding '+program,async t=>{
+ const f=await fixture(t),root=await f.stage(f.context,kind==='context'?{}:{kind}),path=join(root,'process.json');
+ const worker=JSON.parse(await readFile(path,'utf8'));await writeFile(path,JSON.stringify({...worker,program}));
+ const planned=await collectStorage(f.workspace,f.port,true);assert.ok(planned.categories['detached-projects']);assert.ok(await exists(join(root,'saved.gzf')));
+ const actual=await collectStorage(f.workspace,f.port,false);assert.deepEqual(actual.categories,planned.categories);
+ for(const removed of ['view.rep','view.gpr','saved.gzf','ghidra/ghidra1.cache'])assert.equal(await exists(join(root,removed)),false,removed);
+ assert.deepEqual(await readdir(join(root,'exports')),['user-notes.txt']);assert.equal((await collectStorage(f.workspace,f.port,false)).bytes,0);
+ await f.workspace.artifacts.verify(f.target.input);await f.workspace.artifacts.verify(f.working);
 });
 
 test('a missing recorded native root does not block an independent legacy project or closed peer input',async t=>{
