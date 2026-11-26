@@ -486,7 +486,10 @@ export class GhidraContexts {
     const snapshot=await this.nativeReceipt(next,object(value.saved));
     const shared=await this.serverView(scope.target,next.baseVersion);this.observeNativeShared(scope.target,shared);
     context=this.workspace.saveContext(scope,context.generation,{nativeCheckout:next,state:'stopped',workingSnapshot:snapshot,baseSnapshot:shared.snapshot,baseRevision:next.baseVersion,viewEpoch:(context.viewEpoch??0)+1});
-    return {state:value.modified===true?'ready' as const:'empty' as const,revision:next.baseVersion,snapshot,sharedSnapshot:shared.snapshot,
+    // A pristine open can mark Ghidra's checkout modified without caller work. Compare the saved buffers with the
+    // independently read post-Update base and its proved opened states; diagnostic edit counts are not a work test.
+    const empty=this.workspace.unchangedNative(context);
+    return {state:value.modified===true&&!empty?'ready' as const:'empty' as const,revision:next.baseVersion,snapshot,sharedSnapshot:shared.snapshot,
       receivedChanges:Number(next.baseVersion!==previousBase),nativeMergeInvocations:Number(value.nativeMergeInvocations??0)};
   }
   async recoverUpdate(scope:Scope,request:string){
@@ -620,10 +623,12 @@ export class GhidraContexts {
     let journal:Record<string,unknown>;
     try{journal=object(JSON.parse(await readFile(join(checkout.root,'operations',request+'-update.json'),'utf8')));}
     catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {state:'unknown' as const};throw error;}
-    const q=object(journal.request),result=object(journal.result??{}),{owner}=await this.nativeOwner(checkout);
+    const q=object(journal.request),result=object(journal.result??{}),saved=object(result.saved??{}),{owner}=await this.nativeOwner(checkout);
     const shared=object(JSON.parse(await readFile(await this.workspace.artifacts.verify(context.baseSnapshot!),'utf8')));
-    if(q.request!==request||q.root!==checkout.root||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||result.modified!==false||
-      result.baseVersion!==checkout.baseVersion||shared.source!=='server'||shared.fileId!==checkout.fileId||shared.fingerprint!==object(result.saved).fingerprint)return {state:'unknown' as const};
+    if(q.request!==request||q.root!==checkout.root||q.fileId!==checkout.fileId||q.checkoutId!==checkout.checkoutId||stable(q.owner)!==stable(owner)||result.state!=='updated'||typeof result.modified!=='boolean'||
+      result.checkoutId!==checkout.checkoutId||result.baseVersion!==checkout.baseVersion||saved.fileId!==checkout.fileId||saved.version!==checkout.baseVersion||
+      shared.source!=='server'||shared.version!==checkout.baseVersion||shared.fileId!==checkout.fileId||shared.origin!==checkout.origin||shared.repository!==checkout.repository||
+      !this.workspace.unchangedBuffers(context.target,shared,saved.fingerprint))return {state:'unknown' as const};
     await this.dropNative(scope);return {state:'verified' as const,revision:checkout.baseVersion};
   }
   async discardNative(scope:Scope,request:string){
