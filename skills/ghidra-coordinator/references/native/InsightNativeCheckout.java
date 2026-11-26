@@ -106,6 +106,19 @@ public final class InsightNativeCheckout {
         }
         return proved;
     }
+    /** Update's createKeepFile deletes an existing .keep. Prove that exact file disposable before entering native merge. */
+    static boolean replaceableBackup(Project project,Path operations,JsonObject q,JsonObject owner,int base,Map<String,Object> intent){
+        JsonObject proof=q.deepCopy();proof.addProperty("verifiedVersion",base);
+        try{
+            String keep=text(owner,"path").substring(1)+".keep";
+            DomainFile backup=project.getProjectData().getFile("/"+keep);
+            if(backup==null||!Objects.equals(backup.getFileID(),intent.get("backupBeforeFileId")))return false;
+            String fingerprint=backups(project,operations,proof,owner).get(keep);
+            if(fingerprint==null)return false;
+            intent.put("backupReplacementProof",Map.of("name",keep,"fileId",intent.get("backupBeforeFileId"),"fingerprint",fingerprint));
+            return true;
+        }catch(Exception unproved){return false;}
+    }
     static Map<String,String> releaseFiles(Project project,Path operations,JsonObject q,JsonObject owner,boolean localProgram)throws Exception {
         var files=new TreeSet<String>();local(project.getProjectData().getRootFolder(),files);
         Map<String,String> backups=backups(project,operations,q,owner);var allowed=new TreeSet<>(backups.keySet());
@@ -227,12 +240,22 @@ public final class InsightNativeCheckout {
                         out.put("state","discarded");out.put("retainedKeepFile",dirty?name+".keep":"");
                     }else if(operation.equals("update")){
                         write(journal,intent);
-                        try{if(head>base)file.merge(false,MONITOR);
-                            require(file.getCheckoutStatus().getCheckoutId()==checkout&&file.getCheckoutStatus().getCheckoutVersion()>=head,"Native Update did not establish the requested ancestry");
-                            out.put("state","updated");}
-                        catch(HeadlessProgramMergeManager.UnresolvedNativeConflict conflict){
-                            require(before.equals(saved(file,owner))&&file.getCheckoutStatus().getCheckoutId()==checkout&&file.getCheckoutStatus().getCheckoutVersion()==base,"Native conflict did not preserve local state");
-                            out.put("state","conflict");out.put("conflict",conflict.getMessage());
+                        // Only dirty incoming Update can replace .keep. A refusal is a completed pre-call outcome,
+                        // carried by the existing conflict/recovery path; incomplete/legacy intents remain unknown.
+                        if(backupExpected&&!keepAbsent&&!replaceableBackup(project,operations,q,owner,base,intent)){
+                            require(before.equals(saved(file,owner))&&file.getCheckoutStatus().getCheckoutId()==checkout&&file.getCheckoutStatus().getCheckoutVersion()==base,"Backup refusal did not preserve local state");
+                            out.put("state","conflict");out.put("conflict","Existing native backup is not proved disposable; retain and inspect this project before Update");
+                            var refusal=new LinkedHashMap<String,Object>(Map.of("schema",1,"operation","update","invoked",false,"reason","protected_existing_backup"));
+                            refusal.put("fileId",priorKeepId);out.put("preCallRefusal",refusal);
+                        }else{
+                            if(intent.containsKey("backupReplacementProof"))write(journal,intent);
+                            try{if(head>base)file.merge(false,MONITOR);
+                                require(file.getCheckoutStatus().getCheckoutId()==checkout&&file.getCheckoutStatus().getCheckoutVersion()>=head,"Native Update did not establish the requested ancestry");
+                                out.put("state","updated");}
+                            catch(HeadlessProgramMergeManager.UnresolvedNativeConflict conflict){
+                                require(before.equals(saved(file,owner))&&file.getCheckoutStatus().getCheckoutId()==checkout&&file.getCheckoutStatus().getCheckoutVersion()==base,"Native conflict did not preserve local state");
+                                out.put("state","conflict");out.put("conflict",conflict.getMessage());
+                            }
                         }
                     }else{
                         require(before.get("fingerprint").equals(text(q,"fingerprint")),"Prepared native publication changed");
