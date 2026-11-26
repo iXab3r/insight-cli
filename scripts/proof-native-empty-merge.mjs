@@ -147,14 +147,22 @@ try{
  assert.equal((await nativeInputs(values)).fingerprint,inputs.fingerprint);checks.runtimeUnchanged=true;success=true;
 }catch(error){failure={code:error.code??error.name,message:error.message};throw error;}
 finally{
- workspace?.close();
- try{await app.dispose();await new GhidraServer(ws,inputs,c).stop();checks.cleanupCallsCompleted=true;}
- finally{
-  const result={schema:1,success,scope:'Installed package API native no-op/dirty/conflicting incoming Update, native ancestry, request retries and independent readback',
-   root:f.root,output,version:manifest.version,sourceRevisionArgument:o['source-revision'],archiveSha256:hash(await readFile(o.archive)),
-   packageBuild:JSON.parse(await readFile(join(pkg,'.cli-package-build.json'),'utf8')),harnessSha256:hash(await readFile(new URL(import.meta.url))),
-   runtimeFingerprint:inputs.fingerprint,checks,...(failure?{failure}:{}),limits:['Disposable raw x86 fixture','No global executable IPC coverage',
-    'Conflicted private work is intentionally retained','Does not reconcile or retry previously unknown operations']};
-  await writeFile(join(output,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+ const hadFailure=failure!==undefined,cleanupErrors=[];
+ for(const [stage,cleanup] of [
+  ['workspace.close',()=>workspace?.close()],
+  ['app.dispose',()=>app.dispose()],
+  ['server.stop',()=>new GhidraServer(ws,inputs,c).stop()],
+ ]){
+  try{await cleanup();}
+  catch(error){cleanupErrors.push({stage,code:error?.code??error?.name??'Error',message:String(error?.message??error)});}
  }
+ checks.cleanupCallsCompleted=cleanupErrors.length===0;
+ if(cleanupErrors.length){success=false;failure={...(failure??{code:'proof.cleanup',message:'Native proof cleanup failed'}),cleanupErrors};}
+ const result={schema:1,success,scope:'Installed package API native no-op/dirty/conflicting incoming Update, native ancestry, request retries and independent readback',
+  root:f.root,output,version:manifest.version,sourceRevisionArgument:o['source-revision'],archiveSha256:hash(await readFile(o.archive)),
+  packageBuild:JSON.parse(await readFile(join(pkg,'.cli-package-build.json'),'utf8')),harnessSha256:hash(await readFile(new URL(import.meta.url))),
+  runtimeFingerprint:inputs.fingerprint,checks,...(failure?{failure}:{}),limits:['Disposable raw x86 fixture','No global executable IPC coverage',
+   'Conflicted private work is intentionally retained','Does not reconcile or retry previously unknown operations']};
+ await writeFile(join(output,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+ if(cleanupErrors.length&&!hadFailure)throw new AggregateError(cleanupErrors,'Native proof cleanup failed');
 }
