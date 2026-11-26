@@ -183,9 +183,21 @@ try{
   const noIncoming=await native(checkout,'update',{request:'q_'+randomUUID()});assert.equal(noIncoming.state,'updated');assert.equal(noIncoming.nativeMergeInvocations,0);
   assert.equal(noIncoming.baseVersion,initial.baseVersion);assert.deepEqual(await inspectBackup(checkout),backup);
   await incoming(a.target,'1007','CLEAN_INCOMING_'+kind);
-  const clean=await native(checkout,'update',{request:'q_'+randomUUID()});assert.equal(clean.state,'updated');assert.equal(clean.nativeMergeInvocations,0);
-  assert.ok(clean.baseVersion>checkout.baseVersion);checkout={...checkout,baseVersion:clean.baseVersion};
+  const cleanRequest='q_'+randomUUID(),clean=await native(checkout,'update',{request:cleanRequest});assert.equal(clean.state,'updated');assert.equal(clean.nativeMergeInvocations,0);
+  assert.ok(clean.baseVersion>checkout.baseVersion);
+  const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server),scopeBeforeWorker=workspace.contextById(checkout.context);
+  // Adopt the real completed native result, then produce the worker/stop receipts recovery requires.
+  // Normal Update always opens and stops this worker before native dispatch; direct fixture calls do not.
+  await backend.applyNativeUpdate(scopeBeforeWorker,cleanRequest,clean,checkout.baseVersion);
+  checkout={...checkout,baseVersion:clean.baseVersion};
   assert.deepEqual(await inspectBackup(checkout),backup);assert.equal((await inspectProgram(checkout)).comments['1007'],'CLEAN_INCOMING_'+kind);
+  const beforeWorker=await inspectProgram(checkout);
+  await cli(['ghidra','open',...select(scopeBeforeWorker)]);
+  assert.equal((await cli(['ghidra','close',...select(scopeBeforeWorker)])).checkout,'retained');
+  const stopped=context(scopeBeforeWorker),afterWorker=await inspectProgram(checkout);
+  assert.equal(stopped.nativeCheckout.root,checkout.root);assert.equal(stopped.nativeCheckout.checkoutId,checkout.checkoutId);
+  assert.equal(stopped.nativeCheckout.baseVersion,checkout.baseVersion);assert.equal(await backend.closed(scopeBeforeWorker),true);
+  assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(afterWorker.comments,beforeWorker.comments);assert.equal(afterWorker.memory,beforeWorker.memory);
   await mutate(checkout,'edit',{address:'1006',text:'LOCAL_RETAINED_'+kind});
   const dirtyNoIncoming=await native(checkout,'update',{request:'q_'+randomUUID()});assert.equal(dirtyNoIncoming.state,'updated');assert.equal(dirtyNoIncoming.nativeMergeInvocations,0);
   assert.deepEqual(await inspectBackup(checkout),backup);
@@ -202,7 +214,7 @@ try{
   const scope=workspace.contextById(checkout.context),receipt=join(checkout.root,'fixture-current-view.json');
   await writeFile(receipt,JSON.stringify({schema:1,engine:'native-checkout-v1',source:'checkout',checkout,...before.saved}));
   workspace.saveContext(scope,scope.generation,{nativeCheckout:checkout,baseRevision:checkout.baseVersion,workingSnapshot:await workspace.captureNative(receipt)});
-  const backend=new GhidraContexts(workspace,inputs,c,undefined,undefined,server),recovered=await backend.recoverUpdate(scope,request);
+  const recovered=await backend.recoverUpdate(scope,request);
   assert.equal(recovered.state,'conflict');assert.equal(recovered.revision,checkout.baseVersion);assert.equal(await readFile(journalPath,'utf8'),journalBytes);
   assert.deepEqual(await inspectBackup(checkout),backup);assert.deepEqual(await inspectProgram(checkout),contents);
   // No completion proof: even familiar refusal text or a pre-call marker cannot classify/replay an old attempt.
