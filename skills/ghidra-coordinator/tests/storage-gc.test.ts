@@ -16,7 +16,7 @@ async function fixture(t:test.TestContext){
  const stage=async(owner:GhidraContext,options:{stopped?:boolean;pid?:number;programs?:number;native?:boolean;mode?:string;reason?:string;kind?:string}={})=>{
   const at=join(workspace.directory,'ghidra-native',options.kind??'context',options.kind?owner.target:owner.id,randomUUID()),pid=options.pid??999999;
   await mkdir(join(at,'view.rep','idata','00'),{recursive:true});await mkdir(join(at,'exports'));await mkdir(join(at,'ghidra'));
-  await writeFile(join(at,'process.json'),JSON.stringify({pid,tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
+  await writeFile(join(at,'process.json'),JSON.stringify({pid,root:at,program:'program',tokenSecret:'owned',mode:options.mode??'headless',kind:options.kind??'context',...(options.kind?{}:{context:owner.id}),target:owner.target}));
   if(options.stopped!==false)await writeFile(join(at,'stopped.json'),JSON.stringify({pid,tokenSecret:'owned',reason:options.reason??'explicit_close'}));
   if(options.native)await writeFile(join(at,'native-owner.json'),'{}');
   for(let i=0;i<(options.programs??1);i++)await writeFile(join(at,'view.rep','idata','00','0000000'+i+'.prp'),'program');
@@ -83,6 +83,83 @@ async function nativeContext(f:Awaited<ReturnType<typeof fixture>>,local:string,
  return f.workspace.saveContext(c,c.generation,{baseSnapshot:await receipt({source:'server',fingerprint:baseFingerprint}),workingSnapshot:await receipt({source:'checkout',fingerprint:local}),
   nativeCheckout:{schema:1,context:c.id,root,fileId:'file',checkoutId:3,baseVersion:1,origin:'ghidra://127.0.0.1:1',repository:'owned',path:'/'+f.target.id+'.bin',runtimeFingerprint:'d'.repeat(64),state:'active'}});
 }
+for(const phase of ['active-dirty','active-clean','verified','dropped'] as const)test('missing native owner retains '+phase+' project without detached deletion',async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root;
+ const state=phase==='active-dirty'||phase==='active-clean'?'active':phase;
+ const current=f.workspace.saveContext(c,c.generation,{nativeCheckout:{...c.nativeCheckout!,state},...(phase==='active-dirty'?{complexChanges:['q_'+randomUUID()]}:{})});
+ const worker={pid:999999,tokenSecret:'owned',kind:'context',context:c.id,target:c.target,root,mode:'headless',program:c.target+'.bin'};
+ await writeFile(join(root,'process.json'),JSON.stringify(worker));await writeFile(join(root,'stopped.json'),JSON.stringify({...worker,reason:'explicit_close'}));
+ await rm(join(root,'native-owner.json'));const privateFile=join(root,'view.rep','db.gbf');await writeFile(privateFile,'ONLY SAVED PRIVATE PROGRAM BYTES');
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(privateFile,'utf8'),'ONLY SAVED PRIVATE PROGRAM BYTES');
+  assert.equal(result.categories['detached-projects'],undefined);assert.ok(result.retained.some(r=>r.path===root&&/native.*(?:owner|ownership)/i.test(r.reason)));
+ }
+ assert.deepEqual(f.released,[]);assert.equal(f.workspace.context(current).nativeCheckout!.state,state);await f.workspace.artifacts.verify(current.workingSnapshot!);
+});
+
+test('historical native receipts survive GC and prevent later detached deletion after owner loss',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),path=join(f.root,randomUUID());
+ await writeFile(path,JSON.stringify({source:'checkout',checkout:{root,context:f.context.id}}));const history=await f.workspace.captureNative(path);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(join(root,'view.rep','idata','00','db.1.gbf'),'utf8'),'database');
+  assert.ok(result.retained.some(r=>r.path===root&&/native.*ownership/i.test(r.reason)));await f.workspace.artifacts.verify(history);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+for(const invalid of ['malformed','directory'])test('unverifiable native ownership is retained before native release: '+invalid,async t=>{
+ const f=await fixture(t),c=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),root=c.nativeCheckout!.root,path=join(root,'native-owner.json');
+ await rm(path);if(invalid==='directory')await mkdir(path);else await writeFile(path,'{invalid');
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.equal(await readFile(join(root,'view.rep','db.gbf'),'utf8'),'native database');
+  assert.ok(result.retained.some(r=>r.path===root&&/ownership receipt.*(?:unverifiable|could not be verified)/i.test(r.reason)));
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+test('interrupted native creation without owner metadata cannot inherit an older detached capture',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),path=join(f.workspace.directory,'ghidra-native','context',f.context.id,'checkout.json');
+ const intent=JSON.stringify({root,owner:{schema:1,protocol:'native-checkout-v1',context:f.context.id,target:f.target.id}});await writeFile(path,intent);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/native.*ownership/i.test(r.reason)));assert.equal(await readFile(path,'utf8'),intent);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+test('a native JSON working receipt is not a full detached program capture',async t=>{
+ const f=await fixture(t),path=join(f.root,randomUUID());await writeFile(path,JSON.stringify({source:'server',fingerprint:'a'.repeat(64)}));
+ const receipt=await f.workspace.captureNative(path),c=f.workspace.saveContext(f.context,f.context.generation,{workingSnapshot:receipt}),root=await f.stage(c);
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));await f.workspace.artifacts.verify(receipt);
+ }
+ assert.deepEqual(f.released,[]);
+});
+
+for(const control of ['missing-export','changed-export','native-program','foreign-worker-root'])test('detached project needs positive root and full-capture proof: '+control,async t=>{
+ const f=await fixture(t),root=await f.stage(f.context);
+ if(control==='missing-export')await rm(join(root,'saved.gzf'));
+ else if(control==='changed-export'){await rm(join(root,'saved.gzf'));await writeFile(join(root,'saved.gzf'),'uncaptured different bytes');}
+ else{const path=join(root,'process.json'),worker=JSON.parse(await readFile(path,'utf8'));if(control==='native-program')worker.program=f.target.id+'.bin';else worker.root=f.root;await writeFile(path,JSON.stringify(worker));}
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));
+ }
+ await f.workspace.artifacts.verify(f.working);
+});
+
+test('unreadable detached capture retains the program and reports instead of aborting GC',async t=>{
+ const f=await fixture(t),root=await f.stage(f.context),saved=join(root,'saved.gzf'),fs=(await import('node:fs')).default;
+ const {syncBuiltinESMExports}=await import('node:module'),original=fs.createReadStream;
+ const mocked=t.mock.method(fs,'createReadStream',(...args:unknown[])=>{if(String(args[0])===saved)throw Object.assign(Error('fixture capture unreadable'),{code:'EACCES'});return Reflect.apply(original,fs,args);});
+ syncBuiltinESMExports();t.after(()=>{mocked.mock.restore();syncBuiltinESMExports();});
+ for(const dry of [true,false,false]){
+  const result=await collectStorage(f.workspace,f.port,dry);assert.ok(await exists(join(root,'view.rep','idata','00','db.1.gbf')));
+  assert.ok(result.retained.some(r=>r.path===root&&/full detached program capture/.test(r.reason)));
+ }
+});
+
 test('clean native checkouts are only released through native verification; dirty or refused ones stay',async t=>{
  const f=await fixture(t),clean=await nativeContext(f,'a'.repeat(64),'a'.repeat(64)),refused=await nativeContext(f,'a'.repeat(64),'a'.repeat(64));
  const dirty=await nativeContext(f,'b'.repeat(64),'a'.repeat(64));f.workspace.saveContext(dirty,dirty.generation,{complexChanges:['q_'+randomUUID()]});
@@ -116,7 +193,9 @@ test('a project without proof that its last save was captured is retained',async
 test('a context without a saved or migrated view keeps its project',async t=>{
  const f=await fixture(t),stage=await f.stage(f.context);f.workspace.saveContext(f.context,f.workspace.context(f.context).generation,{workingSnapshot:undefined,baseSnapshot:undefined,baseRevision:undefined});
  await collectStorage(f.workspace,f.port,false);assert.ok(await exists(join(stage,'view.rep')));
- const journal=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(journal,{recursive:true});await writeFile(join(journal,f.context.id+'-detached.json'),'{}');
+ const journal=join(f.workspace.directory,'legacy-migrations',f.target.id);await mkdir(journal,{recursive:true});
+ const recaptured=await f.workspace.captureSnapshot(join(stage,'saved.gzf'));
+ await writeFile(join(journal,f.context.id+'-detached.json'),JSON.stringify({schema:1,original:{...f.context,workingSnapshot:recaptured}}));
  await collectStorage(f.workspace,f.port,false);assert.equal(await exists(join(stage,'view.rep')),false);
 });
 test('candidates of a target with an unsettled context keep their merge evidence',async t=>{

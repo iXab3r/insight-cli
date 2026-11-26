@@ -1,7 +1,9 @@
-import {access,lstat,mkdir,open,readdir,readFile,realpath,rename,rm,unlink} from 'node:fs/promises';
+import {lstat,mkdir,open,readdir,readFile,realpath,rename,rm,unlink} from 'node:fs/promises';
 import {join} from 'node:path';
-import {randomUUID} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
+import {createReadStream} from 'node:fs';
 import {Workspace,type GhidraContext} from './workspace.js';
+import type {Artifact} from './artifacts.js';
 import {stable} from './model.js';
 import {peerStages} from './cross-peer.js';
 import {sameDirectory} from './directory-identity.js';
@@ -70,6 +72,18 @@ async function soleProgram(root:string):Promise<boolean>{
   for(const tree of ['idata','versioned','user'])await walk(join(root,'view.rep',tree));
   return count<=1;
 }
+/** A native receipt describes bytes elsewhere; only a verified full packed program proves detached capture. */
+async function detachedCapture(workspace:Workspace,root:string,candidates:Artifact[]):Promise<boolean>{
+  try{
+    const path=join(root,'saved.gzf'),st=await present(path);
+    if(!st?.isFile()||st.isSymbolicLink())return false;
+    const possible=candidates.filter(a=>a.kind==='snapshot'&&a.size===st.size);if(!possible.length)return false;
+    const hash=createHash('sha256');for await(const chunk of createReadStream(path))hash.update(chunk);
+    const sha=hash.digest('hex');
+    for(const artifact of possible)if(artifact.sha256===sha)try{await workspace.artifacts.verify(artifact);return true;}catch{/* Try another retained full copy. */}
+  }catch{/* Unreadable or changing capture bytes never authorize project removal. */}
+  return false;
+}
 async function durable(path:string,value:unknown){
   const temporary=path+'.new-'+randomUUID(),file=await open(temporary,'wx',0o600);
   try{await file.writeFile(stable(value));await file.sync();}finally{await file.close();}
@@ -93,6 +107,19 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
 
   // A context participates only when nothing about its private state is uncertain.
   const contexts=workspace.allContexts(),safe=new Set<string>(),blockedTargets=new Set<string>(),unsettled=new Set<string>();
+  const nativeRoots=new Set(contexts.flatMap(c=>c.nativeCheckout?[c.nativeCheckout.root]:[])),artifacts=workspace.allArtifacts(),nativeEvidence=new Set<string>();
+  let unverifiedNativeReceipt=false;
+  for(const artifact of artifacts)if(artifact.kind==='native')try{
+    const view=await json(await workspace.artifacts.verify(artifact));
+    if(!view){unverifiedNativeReceipt=true;nativeEvidence.add(artifact.id);}
+    else if(view.source==='checkout'){
+      const checkout=view.checkout as {root?:unknown}|undefined;
+      if(typeof checkout?.root==='string'){
+        nativeRoots.add(checkout.root);
+        if(await present(join(checkout.root,'view.rep'))||await present(join(checkout.root,'view.gpr')))nativeEvidence.add(artifact.id);
+      }else{unverifiedNativeReceipt=true;nativeEvidence.add(artifact.id);}
+    }
+  }catch{unverifiedNativeReceipt=true;nativeEvidence.add(artifact.id);}
   for(const context of contexts){
     const active=workspace.activePublication(context.target);let reason:string|undefined;
     if(active)blockedTargets.add(context.target);
@@ -113,8 +140,12 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
   for(const context of contexts){
     const checkout=context.nativeCheckout,category='native-checkouts';
     if(!checkout||checkout.state==='dropped'||!safe.has(context.id)||checkout.conflict||context.scalars.length||context.complexChanges.length)continue;
-    if(workspace.checkoutReferenced(context)){keep(checkout.root,'An unresolved operation in another context references this checkout.');continue;}
     if(checkout.state==='active'&&!await present(checkout.root)){keep(checkout.root,'Native checkout project is missing; its server checkout is retained.');continue;}
+    try{
+      const owner=join(checkout.root,'native-owner.json');
+      if(await linked(owner)||!await json(owner)){keep(checkout.root,'Native ownership receipt is missing or unverifiable; its checkout is retained.');continue;}
+    }catch{keep(checkout.root,'Native ownership receipt could not be verified; its checkout is retained.');continue;}
+    if(workspace.checkoutReferenced(context)){keep(checkout.root,'An unresolved operation in another context references this checkout.');continue;}
     const project=join(checkout.root,'view.rep');
     if(dryRun){
       if(workspace.unchangedNative(context))await remove(project,category);
@@ -129,9 +160,17 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     }catch(error){keep(checkout.root,'Native release was refused: '+String((error as Error).message).slice(0,300));}
   }
 
-  const known=new Set(contexts.map(c=>c.id)),captured=new Set<string>(),discarded=new Set<string>();
-  for(const context of contexts)if(context.workingSnapshot)captured.add(context.id);
-    else try{await access(join(workspace.directory,'legacy-migrations',context.target,context.id+'-detached.json'));captured.add(context.id);}catch(error){if(!missing(error))throw error;}
+  const known=new Set(contexts.map(c=>c.id)),captured=new Map<string,Artifact[]>(),targetCaptures=new Map<string,Artifact[]>(),discarded=new Set<string>();
+  for(const context of contexts){
+    const snapshots:Artifact[]=[];
+    if(context.workingSnapshot?.kind==='snapshot')snapshots.push(context.workingSnapshot);
+    try{
+      const migration=await json(join(workspace.directory,'legacy-migrations',context.target,context.id+'-detached.json'));
+      const original=migration?.original as GhidraContext|undefined;
+      if(migration?.schema===1&&original?.id===context.id&&original.target===context.target&&!original.nativeCheckout&&original.workingSnapshot?.kind==='snapshot')snapshots.push(original.workingSnapshot);
+    }catch{/* A damaged migration receipt does not prove a detached capture. */}
+    captured.set(context.id,snapshots);targetCaptures.set(context.target,[...(targetCaptures.get(context.target)??[]),...snapshots]);
+  }
   // Only detached roots are reached by the project rule, and a discarded context holds no others.
   for(const context of contexts)if(workspace.legacyDiscarded(context))discarded.add(context.id);
   for(const kind of ['context','shared','candidate'] as const){
@@ -144,15 +183,24 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
       for(const name of await directories(join(parent,owner))){
         const root=join(parent,owner,name);
         if(await realpath(root)!==join(await realpath(parent),owner,name)){keep(root,'Working root moved outside owned storage.');continue;}
-        let worker:Record<string,unknown>|undefined,nativeRoot=false;
+        let worker:Record<string,unknown>|undefined,nativeRoot=false,projectOwnershipReason:string|undefined;
         try{
-          worker=await json(join(root,'process.json'));nativeRoot=Boolean(await present(join(root,'native-owner.json')));
+          const ownerPresent=Boolean(await present(join(root,'native-owner.json')));
+          const creationPath=join(parent,owner,'checkout.json');
+          if(kind==='context'&&await linked(creationPath)){keep(root,'Native creation receipt is linked; project ownership is unproved.');continue;}
+          const creation=kind==='context'?await json(creationPath):undefined;
+          const creationPresent=kind==='context'&&Boolean(await present(creationPath));
+          const creationRoot=creation?.root;
+          const recordedNative=!ownerPresent&&(nativeRoots.has(root)||[...nativeRoots].some(named=>sameDirectory(named,root))||typeof creationRoot==='string'&&(creationRoot===root||sameDirectory(creationRoot,root)));
+          if(!ownerPresent&&(recordedNative||(creationPresent&&typeof creationRoot!=='string')||unverifiedNativeReceipt)){
+            projectOwnershipReason='Native checkout or creation ownership is missing or unverifiable; detached cleanup is not authorized.';
+          }
+          worker=await json(join(root,'process.json'));nativeRoot=ownerPresent;
           if(!worker&&!nativeRoot){keep(root,'Working root has no worker receipt.');continue;}
           if(worker&&(worker.kind!==kind||(kind==='context'?worker.context:worker.target)!==owner)){keep(root,'Worker receipt belongs to a different owner.');continue;}
           if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
         }catch(error){keep(root,'Working root worker proof could not be verified: '+String((error as NodeJS.ErrnoException).code??'unavailable'));continue;}
         for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
-        for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
         if(kind==='context'){
           const context=workspace.contextById(owner),stages=await peerStages(root,{context:owner,target:context.target});let ownershipReason:string|undefined;
           if(stages.length)try{
@@ -171,6 +219,15 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
             else if(stage.input)await remove(stage.input,'duplicate-exports');
           }
         }
+        // Closed peer exports have their own complete ownership proof, independent of project disposal.
+        if(projectOwnershipReason){keep(root,projectOwnershipReason);continue;}
+        const given=kind==='context'&&discarded.has(owner);
+        const candidates=given?artifacts.filter(a=>a.kind==='snapshot'):kind==='context'?captured.get(owner)??[]:[...(targetCaptures.get(owner)??[])];
+        if(kind!=='context')try{const shared=workspace.model(owner).sharedSnapshot;if(shared?.kind==='snapshot')candidates.push(shared);}catch{/* Unknown model roots cannot supply capture proof. */}
+        if(!nativeRoot&&(worker?.program!=='program'||typeof worker.root!=='string'||!sameDirectory(worker.root,root)||!await detachedCapture(workspace,root,candidates))){
+          keep(root,'Project has no verified full detached program capture; native JSON receipts do not contain program bytes.');continue;
+        }
+        for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
         if(nativeRoot){
           // The project itself belongs to its checkout lifecycle, including uncertain creations.
           for(const run of await directories(join(root,'explicit-exports')))await remove(join(root,'explicit-exports',run,'program.gzf'),'duplicate-exports');
@@ -180,9 +237,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         await remove(join(root,'saved.gzf'),'duplicate-exports');
         // Facade edits are captured as they complete; a GUI save is captured only by an explicit close.
         const stop=worker&&await stopReceipt(root,worker);
-        const given=kind==='context'&&discarded.has(owner);
         if(!given&&(!stop||worker?.mode!=='headless'&&stop.reason!=='explicit_close')){keep(join(root,'view.rep'),'Project has no clean stop receipt that proves capture.');continue;}
-        if(kind==='context'&&!given&&!captured.has(owner)){keep(join(root,'view.rep'),'Project has no verified saved or migrated view.');continue;}
         if(!await soleProgram(root)){keep(join(root,'view.rep'),'Project holds additional files.');continue;}
         for(const file of ['view.rep','view.gpr','view.lock','view.lock~'])await remove(join(root,file),'detached-projects');
       }
@@ -194,7 +249,7 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
     if(file.endsWith('.cache'))await remove(join(calls,call,'ghidra',file),'temporary-caches');
 
   // Roots are live rows, unfinished or failed intents, every user-visible result and VT owners.
-  const roots=workspace.artifactRoots();
+  const roots=workspace.artifactRoots();for(const id of nativeEvidence)roots.add(id);
   for(const tracking of await directories(join(workspace.directory,'version-tracking'))){
     let owner='';try{owner=await readFile(join(workspace.directory,'version-tracking',tracking,'owner.json'),'utf8');}catch(error){if(!missing(error))throw error;}
     for(const match of owner.matchAll(/(?:snapshot|native):[a-f0-9]{64}/g))roots.add(match[0]);

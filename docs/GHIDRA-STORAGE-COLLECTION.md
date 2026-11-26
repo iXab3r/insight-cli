@@ -50,14 +50,20 @@ continues safely because every decision is recomputed from retained state.
 | Removed | Condition |
 | --- | --- |
 | Unchanged native checkouts | Released only through the close verification above |
-| Snapshot and native receipt artifacts | No live row, unfinished/failed request, reported result, unverified publication or version-tracking owner names them |
+| Snapshot and native receipt artifacts | No live row, unfinished/failed request, reported result, unverified publication, retained native project or version-tracking owner needs them; unverifiable native metadata stays retained |
 | `saved.gzf`, `exports/saved-*`, `shared`, `recovered`, captured explicit-export stages | Owned stopped root; the captured artifact is the durable copy. Candidate roots also require every context of their target to be settled |
 | Completed `cross-peer/*/input.gzf` comparison inputs | Owned stopped root, matching closed stage receipt and recognized inventory, with no unresolved operation owning the input or referencing that checkout. Ownership receipts and journals stay retained |
-| Detached `view.rep`/`view.gpr` projects | Non-native root with a matching stop receipt (a GUI root only after an explicit close), holding only its one imported program, with a verified saved snapshot or migration journal |
+| Detached `view.rep`/`view.gpr` projects | Positively identified legacy worker bound to that root, matching stop receipt (a GUI root only after an explicit close), one imported program and `saved.gzf` matching a verified full snapshot; migration uses its original full snapshot |
 | Ghidra `*.cache` files | Owned stopped root or completed server helper |
 
 An applied request keeps its inputs and results; its superseded before-image is not a
 recovery input. Failed or unknown requests keep every artifact they name.
+
+A missing native ownership file does not make a project detached. Current checkout rows,
+historical checkout receipts and creation intents keep their native roots under the checkout
+lifecycle. Missing or unverifiable ownership retains the project with a reason. A native JSON
+receipt describes saved buffers but cannot replace them. Closed comparison inputs retain their
+separate stage-ownership checks; project retention does not authorize deleting their evidence.
 
 The following are always retained and reported: contexts that are opening, need recovery,
 hold unresolved or abandoned-unknown effects, debugger traces, an unverified private
