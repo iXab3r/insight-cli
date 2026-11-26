@@ -1,5 +1,6 @@
 import {migrateLegacy,migrationProcessBlockers} from './legacy-migration.js';
 import {collectStorage} from './storage-gc.js';
+import {peerStage,peerStages} from './cross-peer.js';
 import {ownedDirectory,projectPathWithin,sameDirectory} from './directory-identity.js';
 import {releaseStoppedContextCredential,launchContextCredential} from './context-credential.js';
 import {recordLifecycle,type StopReason} from './context-diagnostics.js';
@@ -902,16 +903,17 @@ public class ${name} extends GhidraScript {
     if(removed.success!==true)fail('binding','Owned cross-target snapshot could not be removed.');
   }
   private async reconcilePeers(record:Running) {
-    const parent=join(record.binding.root,'cross-peer');let entries;
-    try{entries=await readdir(parent,{withFileTypes:true});}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return;throw error;}
-    for(const entry of entries) {
-      if(!entry.isDirectory()||!/^__insight_peer_[a-f0-9]{32}$/.test(entry.name))fail('binding','Owned cross-target stage inventory changed.');
-      const folder=join(parent,entry.name);if(await realpath(folder)!==folder)fail('binding','Cross-target stage left its owned directory.');
-      const receipt=object(JSON.parse(await readFile(join(folder,'receipt.json'),'utf8'))),path='/'+entry.name;
-      if(receipt.path!==path||receipt.target!==record.binding.target||receipt.context!==record.binding.context)fail('binding','Cross-target cleanup receipt belongs to another context.');
-      if(receipt.state==='closed')continue;if(receipt.state!=='preparing')fail('binding','Unknown cross-target cleanup stage.');
-      await this.removePeer(record,path);await durable(join(folder,'receipt.json'),{...receipt,state:'closed'});
+    for(const stage of await peerStages(record.binding.root,record.binding)) {
+      if('reason' in stage)fail('binding',stage.reason);
+      if(stage.receipt.state==='preparing')await this.removePeer(record,stage.receipt.path);
+      await this.completePeer(record,stage.receipt.path.slice(1));
     }
+  }
+  private async completePeer(record:Running,name:string){
+    const stage=await peerStage(record.binding.root,name,record.binding);
+    if('reason' in stage)fail('binding',stage.reason);
+    if(stage.receipt.state!=='closed')await durable(join(stage.folder,'receipt.json'),{...stage.receipt,state:'closed'});
+    if(stage.input)await unlink(stage.input);
   }
   private async withPeer<T>(record:Running,snapshot:Artifact,action:(path:string)=>Promise<T>,reconcile=true):Promise<T> {
     if(reconcile)await this.reconcilePeers(record);
@@ -926,7 +928,7 @@ public class ${name} extends GhidraScript {
       return await action(path);
     }finally {
       await this.removePeer(record,path);
-      await durable(join(folder,'receipt.json'),{path,target:record.binding.target,context:record.binding.context,state:'closed'});
+      await this.completePeer(record,name);
     }
   }
   async pair(selected:Scope,other:Scope,snapshot:Artifact,operation:string,parameters:Record<string,unknown>) {

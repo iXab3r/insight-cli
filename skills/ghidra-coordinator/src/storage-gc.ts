@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {Workspace,type GhidraContext} from './workspace.js';
 import {stable} from './model.js';
+import {peerStages} from './cross-peer.js';
 
 /** Deletes only bytes reproducible from retained state. Anything unproved is reported and kept. */
 export interface CollectionPort {
@@ -45,6 +46,9 @@ class Reclaimed {
     // A real run removes names as it goes, so keep the first observed link count.
     if(row)row.names++;else this.seen.set(key,{links:Number(st.nlink),names:1,size:Number(st.size),category});
   }
+  include(other:Reclaimed){
+    for(const [key,value] of other.seen){const row=this.seen.get(key);if(row)row.names+=value.names;else this.seen.set(key,value);}
+  }
   bytes(){const out:Record<string,number>={};for(const f of this.seen.values())if(f.names>=f.links)out[f.category]=(out[f.category]??0)+f.size;return out;}
 }
 async function stopReceipt(root:string,worker:Record<string,unknown>){
@@ -79,9 +83,10 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
   async function remove(path:string,category:string):Promise<void>{
     const st=await present(path);if(!st)return;
     if(st.isSymbolicLink()||!st.isFile()&&!st.isDirectory())return keep(path,'Links and special entries are never removed.');
-    await reclaimed.add(path,category);
+    const sizes=new Reclaimed();await sizes.add(path,category);
     if(!dryRun)try{if(st.isDirectory())await rm(path,{recursive:true,maxRetries:3});else await unlink(path);}
       catch(error){return keep(path,'Removal failed: '+String((error as NodeJS.ErrnoException).code));}
+    reclaimed.include(sizes);
     (categories[category]??={items:0,bytes:0}).items++;
   }
 
@@ -144,6 +149,18 @@ export async function collectStorage(workspace:Workspace,port:CollectionPort,dry
         if(worker&&!await stopped(root,worker)){keep(root,'Worker is not proved stopped.');continue;}
         for(const name of ['ghidra','exports','explicit-exports'])if(await linked(join(root,name)))keep(join(root,name),'Links and special entries are never removed.');
         for(const file of await files(join(root,'ghidra')))if(file.endsWith('.cache'))await remove(join(root,'ghidra',file),'temporary-caches');
+        if(kind==='context'){
+          const context=workspace.contextById(owner),linkedOwner=await linked(join(root,'process.json'))||await linked(join(root,'native-owner.json'));
+          const nativeOwner=nativeRoot&&!linkedOwner&&(await lstat(join(root,'native-owner.json'))).isFile()?await json(join(root,'native-owner.json')):undefined;
+          for(const stage of await peerStages(root,{context:owner,target:context.target})){
+            if(linkedOwner)keep(stage.folder,'Cross-target working root ownership receipt is a link.');
+            else if(worker&&worker.target!==context.target||nativeRoot&&(!nativeOwner||nativeOwner.context!==owner||nativeOwner.target!==context.target))keep(stage.folder,'Cross-target working root receipt belongs to a different owner.');
+            else if('reason' in stage)keep(stage.folder,stage.reason);
+            else if(stage.receipt.state!=='closed')keep(stage.folder,'Cross-target cleanup is incomplete; its temporary program removal is unverified.');
+            else if(workspace.checkoutReferenced(context))keep(stage.folder,'An unresolved operation in another context references this checkout.');
+            else if(stage.input)await remove(stage.input,'duplicate-exports');
+          }
+        }
         if(nativeRoot){
           // The project itself belongs to its checkout lifecycle, including uncertain creations.
           for(const run of await directories(join(root,'explicit-exports')))await remove(join(root,'explicit-exports',run,'program.gzf'),'duplicate-exports');
