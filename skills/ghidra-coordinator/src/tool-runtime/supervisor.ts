@@ -54,7 +54,7 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
    {cwd:root,...options,stdio,windowsHide:true,env:gated?{PATH:environment.PATH,HOME:root,TMPDIR:root}:environment}) as TrackedChild;}catch(error){Object.assign(record,{state:'failed',phase:'spawn_failed'});await atomicWrite(path,record);throw error;}
   // Node can emit errors on the pipes as well as on the child (including a failed
   // Windows spawn with no PID). Observe them before any adapter/identity await.
-  let childError:Error|undefined,streamError:Error|undefined,didSpawn=false,didClose=false;
+  let childError:Error|undefined,streamError:Error|undefined,didSpawn=false,didClose=false,startupSucceeded=false,startupError:unknown;
   const failure=()=>childError??streamError;
   const spawned=new Promise<void>((ok,bad)=>{
    child.once('spawn',()=>{didSpawn=true;ok();});
@@ -71,7 +71,8 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
    // A fast exit must not finalize a reservation while startup is still writing it.
    await launchFinished;
    const current=await readJson<ProcessRecord>(path)??record;
-   if(current.state!=='failed'&&current.state!=='unverified')Object.assign(current,{state:failure()?'failed':'exited',exitCode:child.exitCode,signal:child.signalCode,endedAt:new Date().toISOString(),outcome:failure()?'launch_failed':current.requestedStop==='kill'?'killed':current.requestedStop==='stop'?'stopped':'completed',...(failure()?{phase:'launch_failed',launchError:(failure() as NodeJS.ErrnoException).code??'stdio'}:{})});
+   const failed=!startupSucceeded||Boolean(failure()),error=failure()??startupError;
+   if(current.state!=='failed'&&current.state!=='unverified')Object.assign(current,{state:failed?'failed':'exited',exitCode:child.exitCode,signal:child.signalCode,endedAt:new Date().toISOString(),outcome:failed?'launch_failed':current.requestedStop==='kill'?'killed':current.requestedStop==='stop'?'stopped':'completed',...(failed?{phase:'launch_failed',launchError:(error as NodeJS.ErrnoException|undefined)?.code??(failure()?'stdio':'launch')}:{})});
    await atomicWrite(path,current);
   });
   handle.closed=finalized.finally(()=>{owned.delete(ownedKey(directory,id));});void handle.closed.catch(()=>{});
@@ -93,12 +94,15 @@ export async function launchProcess(directory:string,spec:ProcessSpec,executable
     if(!child.pid)throw Error('No child process');const identity=await processIdentity(child.pid);Object.assign(record,{pid:child.pid,identity:identity?.birth,strongIdentity:identity?.strong,processGroup:identity?.group,state:'running',phase:'direct_child_only'});await atomicWrite(path,record);
    }
    if(failure())throw failure();
+   startupSucceeded=true;
    return child;
   }catch(error){
+   // Keep rejection independent of the failure receipt: its atomic write may fail.
+   startupError=error;
    if(child.pid&&child.exitCode===null&&child.signalCode===null)try{child.kill('SIGKILL');}catch{}
    await Promise.race([closed.catch(()=>{}),delay(2000)]);
    const ended=didClose||child.exitCode!==null||child.signalCode!==null||!child.pid&&Boolean(childError);
-   Object.assign(record,await readJson(path),{state:ended?'failed':'unverified',phase:'launch_failed',launchError:((failure()??error) as NodeJS.ErrnoException).code??'launch',...(ended?{endedAt:new Date().toISOString(),exitCode:child.exitCode,signal:child.signalCode,outcome:'launch_failed'}:{})});await atomicWrite(path,record);throw failure()??error;
+   Object.assign(record,await readJson(path),{state:ended?'failed':'unverified',phase:'launch_failed',launchError:((failure()??error) as NodeJS.ErrnoException|undefined)?.code??'launch',...(ended?{endedAt:new Date().toISOString(),exitCode:child.exitCode,signal:child.signalCode,outcome:'launch_failed'}:{})});await atomicWrite(path,record);throw failure()??error;
   }finally{finishLaunch();}
  },control.signal);
 }

@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn,type ChildProcess} from 'node:child_process';
 import {createRequire,syncBuiltinESMExports} from 'node:module';
+import fs from 'node:fs/promises';
 import {mkdir,mkdtemp,readFile,readdir,rm} from 'node:fs/promises';
-import {join} from 'node:path';
+import {dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -52,6 +53,25 @@ async function exercise(mode:string,root:string){
   assert.equal(await readFile(join(record.root,'stdout.log'),'utf8'),'');
   const next=await followup(c);assert.notEqual(next,record.id);
   return {mode,pid:process.pid,failure:failure!.code,record,next,cwdLength:cwd.length};
+ }
+ if(mode==='callback-write-fault'||mode==='empty-callback-write-fault'){
+  const originalRename=fs.rename;let injected=false,held:ChildProcess|undefined,closed:Promise<void>|undefined;
+  const adapter=mode==='callback-write-fault'?Object.assign(new Error('Disposable adapter rejected startup'),{code:'EADAPTER'}):undefined;
+  fs.rename=async(from,to)=>{
+   if(!injected&&typeof to==='string'&&dirname(to)===join(root,'runtime/processes')){
+    const receipt=JSON.parse(await readFile(from,'utf8'));
+    if(receipt.phase==='launch_failed'){injected=true;throw Object.assign(new Error('Disposable failure-receipt write refused once'),{code:'EIO'});}
+   }
+   return originalRename(from,to);
+  };syncBuiltinESMExports();
+  try{
+   await assert.rejects(launchProcess(root,spec,process.execPath,['-e','setTimeout(()=>{},15000)'],{stdio:'pipe'},{onSpawn:async child=>{
+    held=child;closed=child.toolClosed;await delay(25);throw adapter;
+   }}),error=>(error as NodeJS.ErrnoException).code==='EIO');
+   assert.ok(injected);assert.ok(closed);await closed;
+   const record=(await records(root))[0]!;assert.equal(record.state,'failed');assert.equal(record.phase,'launch_failed');assert.equal(record.outcome,'launch_failed');assert.equal(record.launchError,adapter?.code??'launch');assert.ok(record.endedAt);
+   await assertUnused(root,'fixture');const next=await followup(c);return {mode,pid:process.pid,injected,record,next};
+  }finally{fs.rename=originalRename;syncBuiltinESMExports();if(held&&held.exitCode===null&&held.signalCode===null)held.kill('SIGKILL');await closed;}
  }
  if(mode==='adapter-gap'){
   let child:ChildProcess|undefined;const observed:{stream:number;code?:string}[]=[];
@@ -120,6 +140,8 @@ if(process.argv[2]==='--startup-owner'){
   ['missing-cwd','a failed spawn is a structured terminal failure and the same owner can run again'],
   ['long-cwd','Windows early ENOTCONN from an existing long cwd cannot crash the owner'],
   ['adapter-gap','the supervisor contains pipe errors during an asynchronous adapter binding'],
+  ['callback-write-fault','rejected startup stays failed after its first failure-receipt write is refused'],
+  ['empty-callback-write-fault','an empty callback rejection cannot become completed after a receipt-write failure'],
   ['output-fault','a real child output error retains bounded bytes and allows a successful follow-up'],
   ['unverified','a failed launch cannot claim completion or removal authority for a child still alive'],
   ['unverified-output','one-shot cleanup cannot terminalize a live child after an output failure'],
