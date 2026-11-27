@@ -43,6 +43,13 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
  const environment={PATH:c.environment.PATH??process.env.PATH,HOME:root,TMPDIR:root,...(process.platform==='win32'?{SystemRoot:process.env.SystemRoot,WINDIR:process.env.WINDIR,ComSpec:process.env.ComSpec,TEMP:root,TMP:root,USERPROFILE:root,LOCALAPPDATA:root,APPDATA:root}:{}),...spec.environment};
  const secrets=Object.entries(environment).filter(([key,value])=>/TOKEN|PASSWORD|SECRET|KEY/i.test(key)&&value&&value.length>=4).map(([,v])=>v!);
  const redact=(value:string)=>secrets.reduce((text,secret)=>text.split(secret).join('[redacted]'),value);
+ let retained:RunResult|undefined;
+ const retainOutput=async(exitCode=child?.exitCode??null)=>{
+  if(retained)return retained;
+  const result:RunResult={process:id,stdout:redact(Buffer.concat(stdout).toString('utf8')),stderr:redact(Buffer.concat(stderr).toString('utf8')),exitCode,signal:child?.signalCode??null,elapsedMs:Math.round(performance.now()-started),truncated,diagnostics:root};
+  if(spec.retainRawOutput){result.rawStdout=join(root,'stdout.bin');result.rawStderr=join(root,'stderr.bin');await writeFile(result.rawStdout,Buffer.concat(stdout),{mode:0o600});await writeFile(result.rawStderr,Buffer.concat(stderr),{mode:0o600});}
+  await writeFile(join(root,'stdout.log'),result.stdout,{mode:0o600});await writeFile(join(root,'stderr.log'),result.stderr,{mode:0o600});retained=result;return result;
+ };
  let timer:NodeJS.Timeout|undefined,force:NodeJS.Timeout|undefined,drain:NodeJS.Timeout|undefined,hard:NodeJS.Timeout|undefined,settled=false,abandon:((error:Error)=>void)|undefined;
  const signal=(name:NodeJS.Signals)=>{
   if(!child?.pid||settled)return;
@@ -57,9 +64,11 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
    {cwd:spec.cwd??root,env:environment,windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']},
    {id,finalize:false,signal:c.signal,onSpawn:launched=>{
     child=launched;child.once('close',()=>{settled=true;});
+    child.on('error',()=>stop('launch_failed'));
     child.once('exit',()=>{drain=setTimeout(()=>stop('background_output'),300);drain.unref();});
     const capture=(chunks:Buffer[],b:Buffer)=>{const available=Math.max(0,limit-bytes);if(available)chunks.push(Buffer.from(b.subarray(0,available)));bytes+=b.length;if(bytes>limit){truncated=true;stop('output_limit');}};
-    child.stdout!.on('data',b=>capture(stdout,b));child.stderr!.on('data',b=>capture(stderr,b));child.stdin!.on('error',()=>{});child.stdin!.end(spec.input);
+    child.stdout!.on('error',()=>stop('launch_failed'));child.stderr!.on('error',()=>stop('launch_failed'));
+    child.stdout!.on('data',b=>capture(stdout,b));child.stderr!.on('data',b=>capture(stderr,b));child.stdin!.end(spec.input);
     c.signal.addEventListener('abort',aborted,{once:true});if(c.signal.aborted)aborted();
     timer=setTimeout(()=>stop('timeout'),spec.timeoutMs??120000);timer.unref();
    }});
@@ -71,20 +80,20 @@ export async function runTool(c:RunContext,spec:RunSpec):Promise<RunResult>{
   }
   if(!outcome&&spec.nativeDeadline&&child.signalCode==='SIGALRM')outcome='timeout';
   if(!outcome&&(exitCode===null||!(spec.acceptedCodes??[0]).includes(exitCode)))outcome='exit_code';
-  const result:RunResult={process:id,stdout:redact(Buffer.concat(stdout).toString('utf8')),stderr:redact(Buffer.concat(stderr).toString('utf8')),exitCode,signal:child.signalCode,elapsedMs:Math.round(performance.now()-started),truncated,diagnostics:root};
-  if(spec.retainRawOutput){result.rawStdout=join(root,'stdout.bin');result.rawStderr=join(root,'stderr.bin');await writeFile(result.rawStdout,Buffer.concat(stdout),{mode:0o600});await writeFile(result.rawStderr,Buffer.concat(stderr),{mode:0o600});}
-  await writeFile(join(root,'stdout.log'),result.stdout,{mode:0o600});await writeFile(join(root,'stderr.log'),result.stderr,{mode:0o600});
+  const result=await retainOutput(exitCode);
   Object.assign(record,{state:outcome?'failed':'exited',outcome:outcome??'completed',exitCode:result.exitCode,signal:result.signal,elapsedMs:result.elapsedMs,endedAt:new Date().toISOString()});await atomicWrite(path,record);
   if(outcome)throw new CliError('Tool execution did not complete successfully: '+outcome+'.',{code:'tool.'+outcome.replaceAll('_','.'),result});
   if(spec.outputFile)try{await writeFile(spec.outputFile,Buffer.concat(stdout),{flag:'wx',mode:0o600});}
   catch(error){throw new CliError('Tool completed, but its binary output could not be written to a new file.',{code:'tool.output',cause:error,result:{process:id,diagnostics:root}});}
   return result;
  }catch(error){
-  const failure=error as Error&{code?:string;cause?:Error};await atomicWrite(join(root,'error.json'),{name:failure.name,code:failure.code,message:redact(failure.message??String(error)),...(failure.cause?{cause:{name:failure.cause.name,message:redact(failure.cause.message)}}:{})});
+  const failure=error as Error&{code?:string;cause?:Error};
   if(child&&!settled&&record.state!=='unverified'){stop('failed');await new Promise<void>(ok=>{if(settled){ok();return;}child!.once('close',()=>ok());setTimeout(()=>{signal('SIGKILL');ok();},1500).unref();});}
   Object.assign(record,await readJson(path));if(c.signal.aborted&&!outcome)outcome='cancelled';
+  if(child?.pid&&!settled&&child.exitCode===null&&child.signalCode===null)record.state='unverified';
   if(record.state==='starting'||record.state==='running'||record.state==='failed'){Object.assign(record,{state:'failed',outcome:outcome??'launch_failed',endedAt:new Date().toISOString(),elapsedMs:Math.round(performance.now()-started)});await atomicWrite(path,record);}
   if(record.state==='unverified')await atomicWrite(path,record);
+  await atomicWrite(join(root,'error.json'),{name:failure.name,code:failure.code,message:redact(failure.message??String(error)),...(failure.cause?{cause:{name:failure.cause.name,message:redact(failure.cause.message)}}:{})});await retainOutput();
   if(error instanceof CliError)throw error;
   if(record.state==='unverified')throw new CliError('Tool termination could not be verified; its process record blocks removal.',{code:'tool.termination.unverified',result:{process:id,diagnostics:root}});
   throw new CliError('Tool execution failed; inspect its retained process record.',{code:outcome?'tool.'+outcome.replaceAll('_','.'): 'tool.launch',cause:error,result:{process:id,diagnostics:root}});

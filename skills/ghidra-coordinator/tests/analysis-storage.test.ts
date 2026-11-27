@@ -229,7 +229,8 @@ test('managed runtime authority and a closed native receipt reopen after paths m
   const {f,c,storage,source,base,destination}=await setup(t),w=new Workspace(join(source,'workspace'),'default');
   const input=join(f.root,'native.exe');await writeFile(input,'generic native fixture');const target=await w.importTarget(input),opened=w.reserveOpen(target.id,'new',{autoAnalyze:false});
   const root=join(w.directory,'ghidra-native/context',opened.context.id,'retained-worker');await mkdir(root,{recursive:true});
-  const binding={root,target:target.id,context:opened.context.id,kind:'context',mode:'headless',pid:2147483646,tokenSecret:'synthetic-fixture-secret-name',runtimeFingerprint:'a'.repeat(64)};
+  const binding={root,target:target.id,context:opened.context.id,session:opened.context.session,kind:'context',mode:'headless',pid:2147483646,
+    endpoint:'http://127.0.0.1:19091',program:'/'+target.id+'.bin',tokenSecret:'context-11111111-1111-4111-8111-111111111111',runtimeFingerprint:'a'.repeat(64)};
   await atomicWrite(join(root,'process.json'),binding);await atomicWrite(join(root,'stopped.json'),{pid:binding.pid,tokenSecret:binding.tokenSecret});await atomicWrite(join(root,'../current.json'),binding);
   const id='b'.repeat(64),home=join(source,'runtime/installations',id,'ghidra');await mkdir(home,{recursive:true});
   const selection={schema:1,mode:'managed',id,ghidraHome:home,java:'/synthetic/java',fingerprint:'a'.repeat(64),selectedAt:'fixture'};await atomicWrite(join(source,'runtime/selection.json'),selection);w.close();

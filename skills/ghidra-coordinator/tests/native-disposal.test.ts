@@ -2,19 +2,66 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,readdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname,delimiter} from 'node:path';
 import {randomUUID} from 'node:crypto';
-import {spawnSync} from 'node:child_process';
+import {spawnSync,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import type {CommandContext} from '@eyeauras/cli-factory';
 import {Workspace,type GhidraContext,type NativeCheckout} from '../src/workspace.js';
 import {GhidraContexts} from '../src/contexts.js';
 import type {NativeInputs} from '../src/native-inputs.js';
+import {nativeHelpers,moduleJars,packagedMcpJar,nativeJvmDirectories} from '../src/native-inputs.js';
+import {javaClasspathArguments} from '../src/tool-runtime/java-arguments.js';
 import type {Artifact} from '../src/artifacts.js';
 import {Research} from '../src/research.js';
 import {fail} from '../src/model.js';
 
 const base='a'.repeat(64),opened='b'.repeat(64),privateWork='c'.repeat(64);
+const receiptHome=process.env.INSIGHT_TEST_RECEIPTS_GHIDRA_HOME,receiptJava=process.env.INSIGHT_TEST_RECEIPTS_JAVA;
+test('pure native release/backup receipt controls compile against the SDK without starting Ghidra',{
+ skip:!receiptHome||!receiptJava?'Optional SDK-only receipt controls: INSIGHT_TEST_RECEIPTS_GHIDRA_HOME and INSIGHT_TEST_RECEIPTS_JAVA':false,timeout:120000
+},async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'insight receipt controls '));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const jars=[packagedMcpJar,...await moduleJars(receiptHome!)],run=promisify(execFile);
+ const inputs:NativeInputs={java:receiptJava!,ghidraHome:receiptHome!,mcpJar:packagedMcpJar,jars,classpath:jars.join(delimiter),ghidraVersion:'12.1.2',fingerprint:'pure-disposal-receipts',debuggerWheels:[]};
+ const classes=await nativeHelpers(directory,inputs),cp=classes+delimiter+inputs.classpath;
+ const javac=join(dirname(receiptJava!),'javac'+(process.platform==='win32'?'.exe':''));
+ const source=fileURLToPath(new URL('../../tests/fixtures/native-merge/NativeDisposalFixture.java',import.meta.url));
+ const compileCall=join(directory,'compile'),receiptCall=join(directory,'receipts');await mkdir(compileCall);await mkdir(receiptCall);
+ await run(javac,await javaClasspathArguments(compileCall,'ghidra',javac,['-proc:none','-cp',cp,'-d',directory,source]),{windowsHide:true,timeout:60000});
+ // The receipts branch returns before Application.initializeApplication, server connection or project access.
+ const result=await run(receiptJava!,await javaClasspathArguments(receiptCall,'ghidra',receiptJava!,[
+  '-Djava.awt.headless=true',...nativeJvmDirectories(directory),'-cp',directory+delimiter+cp,'NativeDisposalFixture','receipts'
+ ]),{windowsHide:true,timeout:30000});
+ assert.match(result.stdout,/RELEASE_RECEIPTS_VERIFIED/);assert.match(result.stdout,/BACKUP_RECEIPTS_VERIFIED controls=\d+/);t.diagnostic(result.stdout.trim());
+});
+
+for(const fault of ['none','missing journal','missing result','intent marker only','wrong root','wrong owner','wrong file','wrong prior checkout','missing inventory','changed saved bytes'] as const)
+test('completed discard recovery '+fault+' uses proof/readback without dispatching discard',async t=>{
+ const f=await fixture(t),original=f.checkout,request='q_'+randomUUID(),keep=f.context.target+'.bin.keep';
+ const result={state:'discarded',checkoutId:4,baseVersion:1,modified:false,saved:{fileId:'file',version:1,fingerprint:base},retainedKeepFile:keep};
+ const journal:any={request:{operation:'discard',request,root:original.root,fileId:original.fileId,checkoutId:original.checkoutId,owner:{}},checkoutId:3,baseVersion:1,result};
+ if(fault==='missing result')delete journal.result;
+ if(fault==='intent marker only'){delete journal.result;journal.retainedKeepFile=keep;}
+ if(fault==='wrong root')journal.request.root=join(f.directory,'foreign');
+ if(fault==='wrong owner')journal.request.owner={context:'foreign'};
+ if(fault==='wrong file')journal.request.fileId='foreign';
+ if(fault==='wrong prior checkout')journal.request.checkoutId=9;
+ const operations=join(original.root,'operations'),path=join(operations,request+'-discard.json');await mkdir(operations);
+ if(fault!=='missing journal')await writeFile(path,JSON.stringify(journal));
+ const bytes=fault==='missing journal'?undefined:await readFile(path,'utf8');
+ f.state.files.push(keep);f.state.status={checkoutId:4,checkouts:[{id:4,version:1}],...(fault==='missing inventory'?{projectFiles:undefined}:{}),
+  ...(fault==='changed saved bytes'?{saved:{...result.saved,fingerprint:privateWork}}:{})};
+ let readbacks=0;
+ Object.assign(f.backend,{serverView:async()=>{readbacks++;return {revision:1,snapshot:f.workspace.context(f.context).baseSnapshot!,value:result.saved};}});
+ const recovered=await f.backend.recoverDiscardNative(f.context,request,original);
+ assert.equal(recovered.state,fault==='none'?'verified':'unknown');
+ assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,fault==='none'?4:3);
+ assert.equal(readbacks,Number(fault==='none'));assert.ok(f.calls.every(call=>call.operation==='status'));
+ if(bytes!==undefined)assert.equal(await readFile(path,'utf8'),bytes);
+ assert.equal(await readFile(join(original.root,'view.rep','database'),'utf8'),'saved private database');
+});
 async function fixture(t:test.TestContext){
  const directory=await mkdtemp(join(tmpdir(),'native-disposal-')),workspace=new Workspace(join(directory,'workspace'),'default');
  t.after(async()=>{workspace.close();await rm(directory,{recursive:true,force:true});});
@@ -37,7 +84,7 @@ async function fixture(t:test.TestContext){
  const nativeReceipt=(b:NativeCheckout,v:Record<string,unknown>)=>(backend as unknown as {nativeReceipt(b:NativeCheckout,v:Record<string,unknown>):Promise<Artifact>}).nativeReceipt(b,v);
  let record:unknown;
  Object.assign(backend,{
-  nativeOwner:async()=>({owner:{}}),inventory:async()=>{},lastWorker:async()=>{throw Object.assign(Error('No current worker'),{code:'ENOENT'});},
+  nativeOwner:async()=>({owner:{}}),inventory:async()=>{},lastWorker:async()=>({unfinished:false}),
   closed:async()=>true,neverStartedOrClosed:async()=>true,verified:async()=>record,stopRecord:async()=>{},selected:async()=>record,
   nativeOperation:async(_checkout:NativeCheckout,operation:string,parameters:Record<string,unknown>={})=>{
    calls.push({operation,parameters});events.push(operation);
@@ -82,6 +129,91 @@ test('first open records only the rewrite of independently proved base buffers, 
  f.events.length=0;await f.backend.open(f.context);assert.ok(!f.events.includes('status'));assert.ok(!f.events.includes('capture'));assert.deepEqual(await f.refs(),names);
  await f.backend.close(f.context);assert.equal(await f.backend.releaseUnchanged(f.context),true);
  assert.equal(f.workspace.context(f.context).nativeCheckout!.state,'dropped');
+});
+
+async function discardedFixture(t:test.TestContext){
+ const f=await fixture(t);await f.backend.open(f.context);
+ const next={...f.checkout,checkoutId:4},request='q_'+randomUUID(),keep=f.context.target+'.bin.keep';
+ f.state.fingerprint=base;f.state.modified=false;f.state.files.push(keep);f.state.status={checkoutId:4};
+ f.patch({state:'stopped',nativeCheckout:next,viewEpoch:1,workingSnapshot:await f.nativeReceipt(next,f.saved())});
+ const directory=join(next.root,'operations');await mkdir(directory);
+ const journal:any={request:{operation:'discard',request,root:next.root,fileId:next.fileId,checkoutId:3,owner:{}},checkoutId:3,baseVersion:1,
+  before:{fileId:next.fileId,version:1,fingerprint:privateWork},backupFilesBefore:{},backupFilesAfter:{[keep]:'backup-file'},
+  result:{state:'discarded',checkoutId:4,baseVersion:1,modified:false,saved:f.saved(),retainedKeepFile:keep,
+   disposableBackups:{[keep]:{schema:2,fileId:'backup-file',fingerprint:privateWork}}}};
+ const path=join(directory,request+'-discard.json'),backup=join(next.root,'view.rep','retained-backup');
+ await writeFile(backup,'discarded private bytes');
+ const save=()=>writeFile(path,JSON.stringify(journal));await save();f.events.length=0;f.calls.length=0;
+ return {...f,next,request,keep,journal,path,backup,save};
+}
+
+test('a completed discard recaptures its proved replacement checkout before the next guarded dependency read',async t=>{
+ const f=await discardedFixture(t),before=f.workspace.context(f.context),old=before.workingSnapshot!,journalBytes=await readFile(f.path,'utf8');
+ await f.backend.open(f.context);const current=f.workspace.context(f.context);
+ assert.ok(f.events.indexOf('status')<f.events.indexOf('launch'));assert.equal(await f.fingerprint(),opened);
+ assert.equal(current.nativeCheckout!.checkoutId,4);assert.equal(current.nativeCheckout!.root,f.checkout.root);
+ assert.equal(current.generation,before.generation+2);assert.equal(current.baseSnapshot!.id,before.baseSnapshot!.id);
+ const proof=JSON.parse(await readFile(join(f.references,(await f.refs())[0]!),'utf8'));
+ assert.equal(proof.preOpen.checkoutId,4);assert.equal(proof.preOpen.discardRequest,f.request);
+ assert.deepEqual(proof.preOpen.projectFiles,[f.context.target+'.bin',f.keep]);
+ Object.assign(f.backend,{closed:async()=>false,nativeView:async(_record:unknown,p:Record<string,unknown>)=>{
+  assert.equal(p.expected,f.state.fingerprint,'Exact saved-view guard remains required');return {'1000@comment.eol':{exists:true,value:null,dependency:'unchanged'}};
+ }});
+ assert.equal((await f.backend.fields(current.workingSnapshot!,[{address:'1000',field:'comment.eol'}]))['1000@comment.eol']!.dependency,'unchanged');
+ await assert.rejects(f.backend.fields(old,[{address:'1000',field:'comment.eol'}]),/Exact saved-view guard/);
+ assert.equal(await readFile(f.path,'utf8'),journalBytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(f.calls.every(call=>call.operation==='status'));
+});
+
+for(const fault of ['incomplete','missing before','owner','request','root','file','prior checkout','replacement checkout','version','saved bytes','inventory identity','missing inventory','unrecorded file','nested file','recovery','modified','observed identity','ambiguous completion','unknown operation'] as const)
+test('post-discard open cannot bless '+fault+' as a pristine replacement',async t=>{
+ const f=await discardedFixture(t),reference=await readFile(join(f.references,(await f.refs())[0]!),'utf8');
+ if(fault==='incomplete')delete f.journal.result;
+ if(fault==='missing before')delete f.journal.before;
+ if(fault==='owner')f.journal.request.owner={context:'foreign'};
+ if(fault==='request')f.journal.request.request='q_'+randomUUID();
+ if(fault==='root')f.journal.request.root=join(f.directory,'foreign');
+ if(fault==='file')f.journal.request.fileId='foreign';
+ if(fault==='prior checkout')f.journal.request.checkoutId=4;
+ if(fault==='replacement checkout')f.journal.result.checkoutId=9;
+ if(fault==='version')f.journal.result.baseVersion=2;
+ if(fault==='saved bytes')f.journal.result.saved.fingerprint=privateWork;
+ if(fault==='inventory identity')f.journal.backupFilesAfter[f.keep]='';
+ if(fault==='missing inventory'){delete f.journal.backupFilesBefore;delete f.journal.backupFilesAfter;delete f.journal.result.disposableBackups;}
+ if(fault==='unrecorded file')f.state.files.push(f.keep+'.1');
+ if(fault==='nested file')f.state.files.push('private/nested');
+ if(fault==='recovery')f.state.recoverable=true;
+ if(fault==='modified')f.state.modified=true;
+ if(fault==='observed identity')f.state.status.checkoutId=9;
+ if(fault==='ambiguous completion'){
+  const other=structuredClone(f.journal);other.request.request='q_'+randomUUID();await writeFile(join(dirname(f.path),other.request.request+'-discard.json'),JSON.stringify(other));
+ }
+ if(fault==='unknown operation'){
+  const reserved=f.workspace.reserveRequest(f.context,'ghidra.changes.discard',{},'unresolved-discard');f.workspace.startRequest(reserved.request.id);
+ }
+ await f.save();const bytes=await readFile(f.path,'utf8');
+ if(fault==='unknown operation')await assert.rejects(f.backend.open(f.context),/unresolved/);else await f.backend.open(f.context);
+ assert.ok(!f.events.includes('capture'));assert.equal(await readFile(join(f.references,(await f.refs())[0]!),'utf8'),reference);
+ assert.equal(await readFile(f.path,'utf8'),bytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(f.calls.every(call=>call.operation==='status'));
+});
+
+for(const form of ['legacy backup receipt','no new backup','numbered backup'] as const)
+test('post-discard open retains '+form+' while recapturing only independently proved main bytes',async t=>{
+ const f=await discardedFixture(t);
+ if(form==='legacy backup receipt'){
+  delete f.journal.backupFilesBefore;delete f.journal.backupFilesAfter;f.journal.result.disposableBackups[f.keep]=privateWork;
+ }else if(form==='no new backup'){
+  delete f.journal.backupFilesAfter;delete f.journal.result.disposableBackups;f.journal.result.retainedKeepFile='';f.state.files.splice(1);
+ }else{
+  const numbered=f.keep+'.1';f.journal.backupFilesBefore[f.keep]='earlier-file';f.journal.backupFilesAfter[f.keep]='earlier-file';f.journal.backupFilesAfter[numbered]='backup-file';
+  f.journal.result.disposableBackups[numbered]=f.journal.result.disposableBackups[f.keep];delete f.journal.result.disposableBackups[f.keep];
+  f.journal.result.retainedKeepFile=numbered;f.state.files.push(numbered);
+ }
+ await f.save();const bytes=await readFile(f.path,'utf8');await f.backend.open(f.context);
+ assert.equal(await f.fingerprint(),opened);assert.equal(f.workspace.context(f.context).nativeCheckout!.checkoutId,4);
+ assert.equal(await readFile(f.path,'utf8'),bytes);assert.equal(await readFile(f.backup,'utf8'),'discarded private bytes');
+ assert.ok(!f.calls.some(call=>call.operation==='release'||call.operation==='drop'||call.operation==='discard'));
 });
 
 test('restored base-only control records cannot bless saved private work when process/current receipts are missing',async t=>{

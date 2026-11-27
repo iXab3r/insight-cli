@@ -43,7 +43,8 @@ test('inventory ignores a proven reused worker PID before resolving a removed ta
  const root=join(f.root,'previous-installation','missing-stage'),context='old-context',id=randomUUID();
  const receiptDirectory=join(directory,'ghidra-native/context',context);await mkdir(receiptDirectory,{recursive:true});
  const binding={root,context,kind:'context',mode:'headless',target:'removed-target',session:'old-session',pid:process.pid,
-  toolProcessId:id,runtimeFingerprint:'old-runtime',tokenSecret:'old-token-reference'};
+  toolProcessId:id,runtimeFingerprint:'old-runtime',tokenSecret:'context-'+randomUUID(),
+  endpoint:'http://127.0.0.1:19091',program:'/removed-target.bin'};
  const path=join(receiptDirectory,'current.json'),bytes=JSON.stringify(binding);await writeFile(path,bytes);
  await mkdir(join(f.root,'runtime/processes'),{recursive:true});
  const processRoot=join(f.root,'runtime/runs',id);await mkdir(processRoot,{recursive:true});
@@ -74,7 +75,8 @@ test('a terminal supervised worker is recognized after PID reuse; detached legac
  const id=randomUUID(),processRoot=join(f.root,'runtime','runs',id);await mkdir(processRoot,{recursive:true});
  await mkdir(join(f.root,'runtime','processes'),{recursive:true});
  const binding={root,kind:'context',context:context.id,target:scope.target,session:scope.session,pid:process.pid,mode:'headless',
-  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime',toolProcessId:id};
+  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime',toolProcessId:id,
+  endpoint:'http://127.0.0.1:19091',program:'/program'};
  await writeFile(join(root,'process.json'),JSON.stringify(binding));
  await writeFile(join(root,'stopped.json'),JSON.stringify({pid:binding.pid,tokenSecret:binding.tokenSecret}));
  await writeFile(join(root,'..','current.json'),JSON.stringify(binding));
@@ -123,7 +125,7 @@ test('a retired legacy runtime binding requires explicit migration and preserves
  const scope={session:'session',target:'target'},context={id:'context-id',generation:0,workingSnapshot:{fixture:true}};
  const root=join(directory,'ghidra-native','context',context.id,'stage');await mkdir(root,{recursive:true});
  const binding={root,kind:'context',context:context.id,target:scope.target,pid:123456789,mode:'headless',
-  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime'};
+  tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'previous-runtime',endpoint:'http://127.0.0.1:19091',program:'/program'};
  await writeFile(join(root,'process.json'),JSON.stringify(binding));
  await writeFile(join(root,'stopped.json'),JSON.stringify({pid:binding.pid,tokenSecret:binding.tokenSecret}));
  await writeFile(join(root,'..','current.json'),JSON.stringify(binding));
@@ -171,7 +173,7 @@ test('a GUI replacement ignores an earlier stop as proof and independently verif
   const root=join(directory,'ghidra-native/context',scope.id,'owned');await mkdir(root,{recursive:true});
   const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});assert.ok(child.pid);
   t.after(()=>{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');});
-  const binding={pid:child.pid,endpoint:'http://127.0.0.1:19092',root,target:target.id,context:scope.id,mode:'gui',program:'/program',kind:'context',tokenSecret:'current-fixture-token',runtimeFingerprint:'b'.repeat(64)};
+  const binding={pid:child.pid,endpoint:'http://127.0.0.1:19092',root,target:target.id,context:scope.id,mode:'gui',program:'/program',kind:'context',tokenSecret:'context-'+randomUUID(),runtimeFingerprint:'b'.repeat(64)};
   await writeFile(join(root,'process.json'),JSON.stringify(binding));await writeFile(join(directory,'ghidra-native/context',scope.id,'current.json'),JSON.stringify(binding));
   await writeFile(join(root,'stopped.json'),JSON.stringify({pid:child.pid+1,tokenSecret:'previous-headless-token'}));
   let wrong=false,authentications=0;
@@ -232,7 +234,7 @@ test('an interrupted snapshot publication is established by readback only',async
 test('a worker that failed to finish starting does not block its context; live, foreign or ambiguous receipts still do',async t=>{
  const f=await createCliFixture(t,{applicationId:'insight-cli'}),directory=join(f.root,'workspace'),scope={session:'session',target:'target'};
  const root=join(directory,'ghidra-native','context','context-id','stage');await mkdir(root,{recursive:true});
- const context={id:'context-id',generation:0,workingSnapshot:{fixture:true},nativeCheckout:{state:'active',root}};
+ const context={id:'context-id',generation:0,workingSnapshot:{fixture:true},nativeCheckout:{state:'active',root,path:'/target.bin'}};
  const base={root,kind:'context',context:context.id,target:scope.target,session:scope.session,mode:'headless',program:'/target.bin',runtimeFingerprint:'runtime'};
  const old={...base,pid:123456789,tokenSecret:'context-'+randomUUID(),endpoint:'http://127.0.0.1:1',baseRevision:2,viewEpoch:0};
  const started={...base,pid:123456788,tokenSecret:'context-'+randomUUID(),endpoint:'http://127.0.0.1:2'};

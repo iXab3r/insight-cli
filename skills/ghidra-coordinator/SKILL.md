@@ -23,10 +23,12 @@ in the agent's long-lived runtime. Reuse it across calls to avoid repeated front
    runtime is not needed to discover what a tool does.
 2. Use `insight-cli tools show <tool> --json` for tasks, supported inputs/platforms,
    dependencies and its skill path. Read that skill before preparing or using the tool.
-3. Select a profile for execution. Run the selected application's `status` and generated
-   `--help`. `install` prepares its private runtime; archives/offline and external paths
-   are tool-specific and described in its skill. Update permission is required for tool
-   preparation/execution and saved changes: `insight-cli permissions grant Update`.
+3. Select a profile for execution and read the selected capability's generated `--help`.
+   If `tools show` reports `runtime.statusCommand`, run that advertised readiness probe.
+   Follow its skill for any `install`, archives/offline or external-path setup. Capabilities
+   with `runtime.required: false` follow their own skill without separate runtime preparation.
+   Update permission is required for tool preparation/execution and saved changes:
+   `insight-cli permissions grant Update`.
 4. Answer the question with focused queries and ordinary project files. Follow results to
    useful detail; a large raw dump is not an interpretation. External tools remain welcome.
 5. Preserve completed files with `insight-cli artifacts save <path> --json` when a retained
@@ -48,6 +50,6 @@ Reuse existing session/target selectors before opening another copy. Read [setup
 for explicit later analysis and passive first-open progress (`ghidra progress`).
 
 Use generated help as the syntax authority. Catalog metadata describes shipped capabilities;
-profile runtime readiness comes from the selected tool's `status`. Unavailable profile/IPC
-access means execution readiness is unknown. Preserve work and diagnose access before trying
+profile runtime readiness comes from its advertised `runtime.statusCommand`, when present.
+Unavailable profile/IPC access means execution readiness is unknown. Preserve work and diagnose access before trying
 again; stopping a shared owner does not grant a denied agent access to it.

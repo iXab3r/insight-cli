@@ -350,7 +350,7 @@ export function createDefinition(options: Options = {}): CliDefinition {
           },{permission:Permission.Update,options:[{flags:'--initial-import-seconds <seconds>',description:'Initial import/analysis: 1–86400 seconds'},
             {flags:'--save-seconds <seconds>',description:'Native save/export: 1–3600 seconds'}]})
         ]),
-        command('abandon','Retain an uncertain program attempt and resume its previous saved view',({options:o},c)=>owner.selected(c).research.abandon(scope(o),id(o.requestId),Boolean(o.acknowledgeUnknownEffects)),
+        command('abandon','Retain an uncertain legacy detached program attempt and resume its previous saved view',({options:o},c)=>owner.selected(c).research.abandon(scope(o),id(o.requestId),Boolean(o.acknowledgeUnknownEffects)),
           {permission:'Destructive',options:[...scoped,{flags:'--request-id <id>',description:'Original unresolved request ID from sessions status',required:true},{flags:'--acknowledge-unknown-effects',description:'Acknowledge that the abandoned effect remains unknown; no script is replayed'}]}),
         command('refresh','Receive safe shared changes while retaining local conflicts',({options:o},c)=>owner.selected(c).research.refresh(scope(o),o.requestId===undefined?undefined:id(o.requestId)),
           {permission:Permission.Update,options:[...scoped,request]}),

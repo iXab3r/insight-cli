@@ -59,7 +59,9 @@ export interface ResearchBackend {
   dispose(): Promise<void>;
   latest?(target:string):Promise<{revision:number;snapshot:Artifact}>;
   fields?(snapshot:Artifact,changes:Pick<ScalarChange,'address'|'field'>[]):Promise<Record<string,{value:string|null;dependency:string;exists:boolean}>>;
-  recover?(publication:Publication):Promise<{state:'verified';revision:number;snapshot?:Artifact}|{state:'unknown'}>;
+  recover?(publication:Publication):Promise<{state:'verified';revision:number;snapshot?:Artifact}|{state:'refused';revision:number;snapshot:Artifact;conflict:string}|{state:'unknown'}>;
+  /** Immutable debugger metadata witness; native checkout receipts cannot reconstruct older buffers. */
+  debuggerMetadata?(snapshot:Artifact):Promise<string>;
   recoverModel?(target:string):Promise<boolean>;
   scripts?(scope:Scope,filter:string,limit:number,offset:number):Promise<ScriptPage>;
   inspect?(snapshot:Artifact,parameters:Record<string,unknown>):Promise<Record<string,unknown>>;
@@ -438,6 +440,10 @@ export class Research {
         if(observed.state==='verified')this.workspace.finishPublication(active.id,observed.revision,{session:active.session,target:active.target,
           state:'merged',sharedRevision:revision(observed.revision),applied:active.scalars.length+(active.complexChanges?.length??Number(active.complex)),pendingChanges:0},observed.snapshot);
         if(observed.state==='verified'&&backend.dropNative)await backend.dropNative(active);
+        if(observed.state==='refused')this.workspace.finishRefusedPublication(active.id,observed.revision,observed.snapshot,
+          {session:active.session,target:active.target,state:'conflict',reason:'shared_changed',applied:0,
+            pendingChanges:active.scalars.length+(active.complexChanges?.length??Number(active.complex)),
+            conflicts:[{engine:'ghidra',message:observed.conflict}],reconciled:true});
       }
     }
     for(const request of this.workspace.unresolved(selected)) {
