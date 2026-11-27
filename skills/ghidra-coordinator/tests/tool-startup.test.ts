@@ -89,6 +89,7 @@ async function exercise(mode:string,root:string){
  const uncertain=mode.startsWith('unverified');
  const cp=createRequire(import.meta.url)('node:child_process') as {spawn:typeof spawn},original=cp.spawn;
  let held:ChildProcess|undefined,kill:ChildProcess['kill']|undefined,closed:Promise<void>|undefined,armed=true,signals=0;
+ const originalGroupKill=process.kill,groupSignals:{pid:number;signal:string|number|undefined}[]=[];
  const observed:{stream:number;code?:string}[]=[];
  cp.spawn=((...args:Parameters<typeof spawn>)=>{
   const child=original(...args);
@@ -101,6 +102,13 @@ async function exercise(mode:string,root:string){
   }
   return child;
  }) as typeof spawn;
+ // POSIX one-shot cleanup signals the owned group instead of ChildProcess.kill.
+ // Refuse that route too, so the uncertainty fixture actually keeps its child alive.
+ if(uncertain&&process.platform!=='win32')process.kill=((pid,signal)=>{
+  if(signal===0)return originalGroupKill.call(process,pid,signal);
+  groupSignals.push({pid,signal});assert.ok(held?.pid);assert.equal(pid,-held.pid);
+  signals++;return false;
+ }) as typeof process.kill;
  syncBuiltinESMExports();
  try{
   let failure:CliError|undefined;
@@ -113,6 +121,8 @@ async function exercise(mode:string,root:string){
   assert.ok(held?.pid);assert.ok(observed.some(e=>e.stream===1&&e.code==='ENOTCONN'));
   const record=(await records(root))[0]!;assert.notEqual(record.outcome,'completed');assert.equal(record.state,uncertain?'unverified':'failed');
   if(uncertain){
+   assert.ok(groupSignals.every(request=>request.pid===-held!.pid!));
+   if(mode==='unverified-output'&&process.platform!=='win32')assert.ok(groupSignals.some(request=>request.signal==='SIGTERM'));
    assert.equal(held.exitCode,null);assert.equal(held.signalCode,null);assert.equal(record.endedAt,undefined);
    await assert.rejects(assertUnused(root,'fixture'),/unresolved|unverified/);
    if(!record.pid){const before=signals;await assert.rejects(terminateProcess(root,record.id,true),/unverified/);assert.equal(signals,before);}
@@ -123,9 +133,9 @@ async function exercise(mode:string,root:string){
    cp.spawn=original;syncBuiltinESMExports();await followup(c);
   }
   assert.equal(toolUseCount(root,'fixture'),0);
-  return {mode,pid:process.pid,failure:failure!.code,observed,signals,record};
+  return {mode,pid:process.pid,failure:failure!.code,observed,signals,groupSignals,record};
  }finally{
-  cp.spawn=original;syncBuiltinESMExports();
+  cp.spawn=original;process.kill=originalGroupKill;syncBuiltinESMExports();
   // Only the exact held child handle supplies cleanup authority in this fixture.
   if(held&&held.exitCode===null&&held.signalCode===null)kill!('SIGKILL');await closed;
  }
